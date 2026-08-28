@@ -513,8 +513,17 @@ function resetActiveVoice({ invalidateRequest = true } = {}) {
 /** Lazily create and play the selected Showcase narration. */
 export async function playVoice(carIndex) {
   const index = Number.isInteger(carIndex) ? carIndex : -1;
-  if (index < 0 || index >= VOICE_FILES.length || !raceStarted) {
-    return false;
+  if (index < 0 || index >= VOICE_FILES.length) return false;
+
+  // Opening Showcase IS the user gesture that starts audio, so the two race: the
+  // overlay opens synchronously while startAudio() is still resuming the context and
+  // preloading. Bailing here used to leave voiceEntries[index] unpopulated, which made
+  // isVoiceAvailable() false and DISABLED the play button until the card was reopened.
+  // startAudio() is memoized, so this awaits the in-flight attempt rather than starting
+  // a second one; with no user activation it resolves false and we bail as before.
+  if (!raceStarted) {
+    await startAudio();
+    if (!raceStarted) return false;
   }
 
   resetActiveVoice({ invalidateRequest: false });

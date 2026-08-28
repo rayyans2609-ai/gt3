@@ -22,6 +22,21 @@ body.gt3-showcase-open #tod-selector {
   z-index: 2;
 }
 
+/* Cursor parallax rides the independent `translate` property, NOT `transform`.
+   .hud-approach and #spec-panel already transition `transform` for their reveal
+   (760ms / 820ms); folding parallax into that property would restart the transition
+   every frame and leave those two panels lagging ~0.8s behind the other four.
+   `translate` composes with `transform` and is in neither transition list. */
+#hud-topleft,
+#hud-topright,
+#hud-bottomleft,
+#hud-routemap,
+#hud-approach,
+#spec-panel {
+  translate: var(--hud-parallax-x, 0px) var(--hud-parallax-y, 0px);
+  will-change: translate;
+}
+
 .hud-label {
   color: rgba(237, 233, 227, 0.56);
   font-family: var(--font-ui);
@@ -290,6 +305,18 @@ body.gt3-showcase-open #tod-selector {
 #spec-panel.is-visible {
   opacity: 1;
   transform: translate3d(0, 0, 0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #hud-topleft,
+  #hud-topright,
+  #hud-bottomleft,
+  #hud-routemap,
+  #hud-approach,
+  #spec-panel {
+    translate: none;
+    will-change: auto;
+  }
 }
 
 .spec-card {

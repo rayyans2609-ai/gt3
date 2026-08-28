@@ -157,6 +157,7 @@ async function boot() {
     const y = (e.clientY / window.innerHeight) * 2 - 1;
     carRig.setCursor(x, y);
     environment.setParallax(x, y);
+    hud.setCursor(x, y);
   }, { passive: true });
 
   // F opens Showcase Mode from anywhere in the race (SPEC §10.6). showcase.js owns its

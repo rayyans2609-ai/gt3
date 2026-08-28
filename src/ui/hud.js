@@ -14,6 +14,9 @@ const SVG_NS = 'http://www.w3.org/2000/svg';
 const MAP_SIZE = 160;
 const MAP_PADDING = 10;
 const MAP_SAMPLES = 140;
+const HUD_CURSOR_SMOOTHING = 0.002;
+const HUD_CURSOR_MAX_X = 4;
+const HUD_CURSOR_MAX_Y = 3;
 
 let initialized = false;
 let identitySlots = [];
@@ -33,6 +36,12 @@ let displayedSpeed = 0;
 let displayedApproach = 0;
 let approach = null;
 let unlockSignature = '';
+let cursorTargetX = 0;
+let cursorTargetY = 0;
+let displayedCursorX = 0;
+let displayedCursorY = 0;
+let writtenCursorX = 0;
+let writtenCursorY = 0;
 
 function makeElement(tag, className, text) {
   const element = document.createElement(tag);
@@ -245,11 +254,34 @@ export function setApproach(value) {
   }
 }
 
+/** Receive normalized cursor coordinates for the HUD's subtle fixed-overlay drift. */
+export function setCursor(x, y) {
+  cursorTargetX = Math.max(-1, Math.min(1, Number(x) || 0));
+  cursorTargetY = Math.max(-1, Math.min(1, Number(y) || 0));
+}
+
 /** Reflect current state. Called by main.js's single animation loop. */
 export function update(dt) {
   if (!initialized) return;
 
   const safeDt = Number.isFinite(dt) ? Math.max(0, Math.min(dt, 0.1)) : 0;
+  const cursorDamping = 1 - Math.pow(HUD_CURSOR_SMOOTHING, safeDt);
+  displayedCursorX += (cursorTargetX - displayedCursorX) * cursorDamping;
+  displayedCursorY += (cursorTargetY - displayedCursorY) * cursorDamping;
+
+  // The fixed HUD drifts slightly with the cursor, opposite the world, so it reads as
+  // the closest instrument layer without competing with the scene's stronger parallax.
+  // The vars are inherited, so one write on the root drives every panel; hud.css maps
+  // them onto `translate` (never `transform`, which the reveals already own).
+  if (Math.abs(displayedCursorX - writtenCursorX) > 0.001 ||
+      Math.abs(displayedCursorY - writtenCursorY) > 0.001) {
+    writtenCursorX = displayedCursorX;
+    writtenCursorY = displayedCursorY;
+    const root = document.documentElement.style;
+    root.setProperty('--hud-parallax-x', `${(displayedCursorX * HUD_CURSOR_MAX_X).toFixed(2)}px`);
+    root.setProperty('--hud-parallax-y', `${(displayedCursorY * HUD_CURSOR_MAX_Y).toFixed(2)}px`);
+  }
+
   if (state.activeCarIndex !== renderedCarIndex) setIdentity(state.activeCarIndex);
 
   const metres = Math.max(0, Math.round(Math.max(0, Math.min(1, state.progress)) * TRACK_LENGTH));

@@ -46,6 +46,9 @@ export function initTodSelector() {
   control.dataset.expanded = 'false';
   assignStyles(control, {
     position: 'relative',
+    // #hud-routemap is a later sibling inside #hud, so without a stacking context
+    // the expanded menu paints UNDERNEATH the route map and the two interleave.
+    zIndex: '5',
     width: '142px',
     marginTop: '14px',
     marginLeft: 'auto',
@@ -91,7 +94,9 @@ export function initTodSelector() {
     opacity: '0',
     transform: 'translateY(-5px)',
     border: '1px solid transparent',
-    background: 'rgba(11, 11, 12, .42)',
+    // Denser than the .glass token: this menu opens directly over the route map,
+    // and at 0.42 the map's coin markers read straight through the option labels.
+    background: 'rgba(11, 11, 12, .88)',
     backdropFilter: 'blur(18px) saturate(120%)',
     WebkitBackdropFilter: 'blur(18px) saturate(120%)',
     pointerEvents: 'none',

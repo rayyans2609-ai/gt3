@@ -45,6 +45,7 @@ let voiceBus = null;
 let preloadPromise = null;
 let preloadCompleted = 0;
 let startPromise = null;
+let gestureRetryListenersInstalled = false;
 let raceStarted = false;
 let backgroundSource = null;
 let engineStartSource = null;
@@ -59,6 +60,28 @@ let masterMuted = false;
 let activeVoice = null;
 let activeVoiceIndex = -1;
 let voiceRequestId = 0;
+
+function retryAudioOnGesture() {
+  void startAudio();
+}
+
+function installGestureRetryListeners() {
+  if (gestureRetryListenersInstalled || typeof window === 'undefined') return;
+
+  window.addEventListener('pointerdown', retryAudioOnGesture, { passive: true });
+  window.addEventListener('keydown', retryAudioOnGesture, { passive: true });
+  window.addEventListener('touchstart', retryAudioOnGesture, { passive: true });
+  gestureRetryListenersInstalled = true;
+}
+
+function removeGestureRetryListeners() {
+  if (!gestureRetryListenersInstalled || typeof window === 'undefined') return;
+
+  window.removeEventListener('pointerdown', retryAudioOnGesture);
+  window.removeEventListener('keydown', retryAudioOnGesture);
+  window.removeEventListener('touchstart', retryAudioOnGesture);
+  gestureRetryListenersInstalled = false;
+}
 
 function setInitialGain(node, value) {
   node.gain.setValueAtTime(value, context.currentTime);
@@ -318,9 +341,10 @@ function startRaceSources() {
 /** Open the autoplay gate and begin the continuous race mix. Idempotent. */
 export function startAudio() {
   if (startPromise) return startPromise;
+  installGestureRetryListeners();
   if (!ensureGraph()) return Promise.resolve(false);
 
-  startPromise = (async () => {
+  const attempt = (async () => {
     try {
       await context.resume();
       await preloadAudio();
@@ -332,6 +356,14 @@ export function startAudio() {
       return false;
     }
   })();
+  startPromise = attempt;
+  void attempt.then((started) => {
+    if (started) {
+      removeGestureRetryListeners();
+    } else if (startPromise === attempt) {
+      startPromise = null;
+    }
+  });
 
   return startPromise;
 }

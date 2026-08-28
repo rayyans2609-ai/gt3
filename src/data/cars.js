@@ -1,3 +1,5 @@
+import { CAR_IMAGES } from './carImages.js';
+
 /**
  * A single entry in the locked GT3 roster.
  *
@@ -22,7 +24,9 @@
  * @property {string} fact Compact endurance or GT3 fact
  * @property {{headline: string, paragraphs: [string, string, string]}} showcase
  *   Editorial Showcase Mode copy
- * @property {string[]} images Build-populated Wikimedia image paths
+ * @property {{src: string, width: number, height: number, title: string,
+ *   author: string, license: string, licenseUrl: string, descriptionUrl: string}[]} images
+ *   Build-populated Wikimedia image metadata
  * @property {string} wikiQuery Wikimedia Commons search query
  */
 
@@ -479,6 +483,10 @@ export const CARS = [
     wikiQuery: 'Porsche 911 GT3 R 992',
   },
 ];
+
+for (const car of CARS) {
+  car.images = CAR_IMAGES[car.id] ?? [];
+}
 
 export const CAR_BY_ID = Object.fromEntries(CARS.map((car) => [car.id, car]));
 

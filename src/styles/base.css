@@ -1,6 +1,7 @@
 @import './hud.css';
 @import './montage.css';
 @import './showcase.css';
+@import './fullscreen.css';
 @import './screens.css';
 
 :root {

@@ -242,6 +242,13 @@
   transition: opacity 1200ms var(--ease), visibility 0s linear 0s;
 }
 
+/* Suppress only the finish screen's presentation while Showcase is above it. */
+body.gt3-showcase-open #finish-screen {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 300ms var(--ease);
+}
+
 .finish-screen__panel {
   width: min(1080px, calc(100vw - 120px));
   padding: 38px 44px 30px;

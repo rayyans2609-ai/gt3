@@ -52,19 +52,28 @@
   display: grid;
   grid-template-columns: minmax(260px, 0.82fr) minmax(0, 1.55fr) minmax(300px, 1fr);
   grid-template-areas: 'identity prose engine' 'identity prose history';
-  gap: clamp(25px, 3vh, 42px) clamp(30px, 4vw, 68px);
+  gap: clamp(20px, 2.4vh, 32px) clamp(28px, 3.4vw, 56px);
   width: min(100%, 1200px);
-  max-height: min(40vh, 410px);
+  max-height: min(46vh, 414px);
   margin: 0 auto;
-  padding: clamp(25px, 3.2vh, 42px) clamp(28px, 3.6vw, 54px);
+  padding: clamp(22px, 2.7vh, 32px) clamp(26px, 3.2vw, 46px);
   overflow-y: auto;
+  overscroll-behavior: contain;
   border-top: 1px solid rgba(237, 233, 227, 0.2);
   border-bottom: 1px solid rgba(237, 233, 227, 0.1);
-  background: linear-gradient(90deg, rgba(5, 5, 6, 0.66), rgba(5, 5, 6, 0.35)), color-mix(in srgb, var(--showcase-brand) 8%, rgba(5, 5, 6, 0.62));
+  background: linear-gradient(90deg, rgba(5, 5, 6, 0.93), rgba(5, 5, 6, 0.85)), color-mix(in srgb, var(--showcase-brand) 8%, rgba(5, 5, 6, 0.9));
   box-shadow: 0 -22px 80px rgba(0, 0, 0, 0.22);
   backdrop-filter: blur(18px) saturate(108%);
   -webkit-backdrop-filter: blur(18px) saturate(108%);
   scrollbar-color: rgba(237, 233, 227, 0.3) transparent;
+  scrollbar-width: thin;
+}
+
+.showcase-card::-webkit-scrollbar { width: 5px; }
+.showcase-card::-webkit-scrollbar-track { background: transparent; }
+.showcase-card::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: rgba(237, 233, 227, 0.28);
 }
 
 .showcase-card__identity {
@@ -85,7 +94,7 @@
   text-transform: uppercase;
 }
 
-.showcase-label { margin-bottom: 12px; }
+.showcase-label { margin-bottom: 9px; }
 .showcase-label--gold { color: var(--showcase-brand); }
 
 .showcase-card__name {
@@ -100,7 +109,7 @@
 
 .showcase-card__headline {
   max-width: 30ch;
-  margin-top: 17px;
+  margin-top: 14px;
   color: rgba(237, 233, 227, 0.68);
   font-family: var(--font-ui);
   font-size: clamp(12px, 0.9vw, 14px);
@@ -119,7 +128,7 @@
   line-height: 1.62;
 }
 
-.showcase-card__paragraph + .showcase-card__paragraph { margin-top: 0.95em; }
+.showcase-card__paragraph + .showcase-card__paragraph { margin-top: 0.78em; }
 
 .showcase-card__engine,
 .showcase-card__history {
@@ -134,7 +143,7 @@
 .showcase-specs {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 13px clamp(18px, 2.4vw, 38px);
+  gap: 10px clamp(18px, 2.4vw, 34px);
 }
 
 .showcase-specs__item { min-width: 0; }
@@ -157,7 +166,7 @@
 .showcase-achievements { list-style: none; }
 
 .showcase-achievements__item {
-  padding: 8px 0 8px 14px;
+  padding: 6px 0 6px 14px;
   border-top: 1px solid rgba(237, 233, 227, 0.12);
   color: rgba(237, 233, 227, 0.68);
   font-family: var(--font-ui);
@@ -182,7 +191,7 @@
   display: flex;
   gap: 10px;
   align-items: center;
-  margin-top: 24px;
+  margin-top: 18px;
 }
 
 .showcase-voice__button {

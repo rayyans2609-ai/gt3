@@ -5,6 +5,16 @@
   inset: 0;
   color: var(--paper);
   pointer-events: none;
+  transition: opacity 300ms var(--ease);
+}
+
+/* Showcase owns the presentation while open; these remain logically active. */
+body.gt3-showcase-open #hud,
+body.gt3-showcase-open #spec-panel,
+body.gt3-showcase-open #tod-selector {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 300ms var(--ease);
 }
 
 .hud-corner {

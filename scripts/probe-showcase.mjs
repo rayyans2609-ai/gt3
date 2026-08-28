@@ -29,14 +29,29 @@ await wait(2500);
 console.log('--- MID-RACE: opening showcase ---');
 await page.keyboard.press('f');
 await wait(4000);
-console.log(JSON.stringify(await page.evaluate(()=>({
-  showcase: !!document.querySelector('#showcase-layer.is-open'),
-  mode: document.querySelector('#showcase-card')?'card':'-',
-  hudVisible: getComputedStyle(document.querySelector('#hud')).visibility,
-  hudOpacity: getComputedStyle(document.querySelector('#hud')).opacity,
-}))));
+console.log(JSON.stringify(await page.evaluate(()=>{
+  const card=document.querySelector('.showcase-card');
+  const r=card?card.getBoundingClientRect():null;
+  return {
+    showcase: !!document.querySelector('#showcase-layer.is-open'),
+    bodyClass: document.body.classList.contains('gt3-showcase-open'),
+    hudOpacity: getComputedStyle(document.querySelector('#hud')).opacity,
+    specOpacity: getComputedStyle(document.querySelector('#spec-panel')).opacity,
+    todOpacity: getComputedStyle(document.querySelector('#tod-selector')).opacity,
+    cardTop: r?Math.round(r.top):null,
+    cardBottom: r?Math.round(r.bottom):null,
+    cardFitsViewport: r? r.bottom <= window.innerHeight+1 : null,
+    cardScrolls: card? card.scrollHeight > card.clientHeight+1 : null,
+    achievementsReachable: !!document.querySelector('.showcase-achievements__item'),
+    pageScrollbar: document.documentElement.scrollHeight > window.innerHeight,
+  };
+})));
 await page.screenshot({ path:'/tmp/sc_midrace.png' });
 await page.keyboard.press('Escape');
 await wait(1500);
+console.log('AFTER ESC:', JSON.stringify(await page.evaluate(()=>({
+  bodyClass: document.body.classList.contains('gt3-showcase-open'),
+  hudOpacity: getComputedStyle(document.querySelector('#hud')).opacity,
+}))));
 console.log('errors:', errs.length? [...new Set(errs)].join('\n') : 'none');
 await browser.close();

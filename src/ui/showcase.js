@@ -330,8 +330,12 @@ export function initShowcase() {
   showcaseScene.background = new THREE.Color(0x050506);
   showcaseScene.fog = new THREE.FogExp2(0x050506, 0.012);
   showcaseCamera = new THREE.PerspectiveCamera(34, 1, 0.1, 100);
-  showcaseCamera.position.set(6.5, 3.05, -7.6);
-  showcaseCamera.lookAt(0, 0.76, 0);
+  // The card owns the bottom 46vh, so the car has to sit clear of it rather than
+  // being bisected by it. Camera and target are translated down by the same 1.32
+  // units, which is a pure translation: the view direction is unchanged, the car
+  // simply rides higher in frame.
+  showcaseCamera.position.set(6.5, 1.73, -7.6);
+  showcaseCamera.lookAt(0, -0.56, 0);
   showcaseScene.add(showcaseCamera);
 
   turntable = new THREE.Group();
@@ -368,6 +372,7 @@ export function openShowcase(carIndex) {
   lockScroll();
   set('mode', 'showcase');
   open = true;
+  document.body.classList.add('gt3-showcase-open');
   root.classList.add('is-open');
   root.setAttribute('aria-hidden', 'false');
   presentCar(car.index);
@@ -377,6 +382,9 @@ export function openShowcase(carIndex) {
 
 /** Close Showcase Mode, restoring the mode and only the scroll lock it acquired. */
 export function closeShowcase() {
+  // Remove this defensively before every return so a stale class can never hide
+  // the race HUD after Showcase has already closed.
+  document.body.classList.remove('gt3-showcase-open');
   if (!open) return false;
   open = false;
   modelRequest += 1;

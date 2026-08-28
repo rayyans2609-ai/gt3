@@ -1,0 +1,134 @@
+@import './hud.css';
+@import './montage.css';
+@import './showcase.css';
+@import './screens.css';
+
+:root {
+  --ink: #0b0b0c;
+  --ink-2: #141416;
+  --gold: #c6a96b;
+  --paper: #ede9e3;
+  --hair: rgba(237, 233, 227, 0.16);
+  --track-yellow: #e8c33a;
+  --green: #1e3a2a;
+  --ease: cubic-bezier(.22, .61, .36, 1);
+  --font-display: 'Cormorant Garamond', Georgia, serif;
+  --font-ui: 'DM Sans', system-ui, sans-serif;
+  --font-mono: 'DM Mono', ui-monospace, monospace;
+  --brand-lexus: #6f171e;
+  --brand-nissan: #8b1d27;
+  --brand-audi: #8e2026;
+  --brand-bmw: #245276;
+  --brand-mercedes: #337b78;
+  --brand-ferrari: #8f171a;
+  --brand-mclaren: #a85426;
+  --brand-aston: #174d43;
+  --brand-lamborghini: #8a6c24;
+  --brand-porsche: #805426;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  overscroll-behavior-y: none;
+}
+
+html,
+body {
+  min-height: 100%;
+  background: var(--ink);
+  color: var(--paper);
+  font-family: var(--font-ui);
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  min-width: 320px;
+}
+
+button,
+input,
+select,
+textarea {
+  color: inherit;
+  font: inherit;
+}
+
+button {
+  border: 0;
+}
+
+#scene {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  display: block;
+  width: 100vw;
+  height: 100vh;
+}
+
+#scroll-spacer {
+  height: 1200vh;
+}
+
+#overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  pointer-events: none;
+}
+
+#small-screen-note {
+  display: none;
+}
+
+.label {
+  font-family: var(--font-ui);
+  font-size: 10px;
+  font-weight: 300;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  opacity: 0.62;
+}
+
+.num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.display {
+  font-family: var(--font-display);
+  letter-spacing: -0.02em;
+}
+
+.glass {
+  background: rgba(11, 11, 12, 0.42);
+  border: 1px solid var(--hair);
+  backdrop-filter: blur(18px) saturate(120%);
+  -webkit-backdrop-filter: blur(18px) saturate(120%);
+}
+
+@media (max-width: 1100px) {
+  #scene,
+  #overlay > :not(#small-screen-note) {
+    display: none;
+  }
+
+  #small-screen-note {
+    position: fixed;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    padding: 2rem;
+    background: var(--ink);
+    color: var(--paper);
+    text-align: center;
+    pointer-events: auto;
+  }
+}

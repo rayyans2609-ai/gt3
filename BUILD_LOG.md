@@ -122,13 +122,43 @@ delegation runs through the `codex` CLI in Bash instead. Same quota, same split.
 - Reading a module via `await import('/src/x.js')` in the page gives a DIFFERENT instance than
   the app's (Vite appends `?t=<hmr>`). Append the same `?t=` or the readings are meaningless.
 
-### OPEN — next actions
-1. HUD panel cursor parallax (SPEC §11 lists "a slight shift/tilt of HUD panels"). Not
-   implemented. carRig + environment parallax ARE done. Small Terra job: hud.js + hud.css +
-   the pointermove handler in main.js (which already calls carRig.setCursor).
-2. Minor: if Showcase is opened within the first few seconds after the audio retry starts,
-   the card can show "Narration unavailable" until reopened — startNarration does not re-check
-   once audio becomes ready. Small window in practice; judged not worth added complexity.
-3. Aston Martin Vantage GT3 has NO freely licensed Wikimedia images (external limitation).
-   `is-imageless` path handles it. Do not fabricate substitutes.
-4. Final full regression: `npx vite --port 5173` then `node scripts/acceptance.mjs`.
+### SESSION 3 — 2026-08-28 late (post-compaction)
+
+| Job | Tier | What |
+|-----|------|------|
+| J | Terra | HUD panel cursor parallax (SPEC §11) — the last unimplemented spec bullet |
+| — | manager | Moved J's parallax off `transform` onto `translate` (see below) |
+| — | manager | playVoice() now awaits the in-flight startAudio() instead of bailing |
+
+- PARALLAX / TRANSFORM COLLISION: `.hud-approach` and `#spec-panel` already transition
+  `transform` (760ms / 820ms) for their reveal. Terra folded the parallax offset into
+  that same property via calc(), which restarts the transition every frame and leaves
+  those two panels lagging ~0.8s behind the other four. Parallax now rides the
+  independent `translate` property, which composes with `transform` and is in neither
+  transition list, so every existing reveal/progress animation is untouched. The vars
+  are written once on the root element (they inherit) with an idle early-out.
+  If you ever add motion to a HUD panel, check what already transitions on it first.
+- NARRATION RACE (this was worse than the old "minor" note claimed): opening Showcase
+  IS the gesture that starts audio, so playVoice() ran while the context was still
+  resuming. It bailed on !raceStarted BEFORE loadVoice(), so voiceEntries[index] stayed
+  unpopulated, isVoiceAvailable() returned false, and the play button was left DISABLED
+  for as long as the card stayed open — not merely mislabeled. playVoice() now awaits
+  the memoized startAudio() promise and re-checks.
+
+### Regression status (verified, real Chrome)
+- `node scripts/acceptance.mjs`: 10/10 unlocks in correct roster order (Lexus, Nissan,
+  Audi, BMW, Mercedes, Ferrari, McLaren, Aston, Lamborghini, Porsche), scrollY 9900,
+  finish reached, narration playing, ZERO console errors, ZERO failed requests.
+- `node scripts/probe-parallax.mjs`: all 5 panel roots translate with the cursor
+  (~6x4px total travel); #spec-panel's reveal transform stays matrix(1,0,0,1,12,10).
+- `node scripts/probe-voice-race.mjs`: A/B proven. Pre-fix "Narration unavailable" +
+  button disabled at +0.4/+1.5/+4.0s; post-fix "Narration playing" + enabled at all three.
+- `npm run build` passes.
+- SPEC §16 hard constraints re-checked against a start-line capture: translucent panels,
+  editorial type, restrained palette, no arcade chrome. Compliant.
+
+### OPEN — remaining
+1. Aston Martin Vantage GT3 has NO freely licensed Wikimedia images (external
+   limitation, not a code defect). The `is-imageless` path handles it. Do NOT
+   fabricate substitutes.
+   Everything else in the queue is closed as of 31a4050.

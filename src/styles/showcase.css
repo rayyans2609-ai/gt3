@@ -1,3 +1,257 @@
-/* Fullscreen rotating-car showcase presentation. */
+/* Fullscreen, editorial rotating-car presentation. */
 #showcase-layer {
+  --showcase-brand: var(--gold);
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  overflow: hidden;
+  visibility: hidden;
+  opacity: 0;
+  /* Transparent by design: the rotating car is rendered by the SHARED renderer into
+     #scene (z-index 0), behind this overlay. showcaseScene already sets its own
+     0x050506 background, so painting an opaque colour here would hide the car. */
+  background: transparent;
+  pointer-events: none;
+  isolation: isolate;
+  transition: opacity 420ms var(--ease), visibility 0s linear 420ms;
+  will-change: opacity;
+}
+
+#showcase-layer.is-open {
+  visibility: visible;
+  opacity: 1;
+  transition: opacity 420ms var(--ease);
+}
+
+#showcase-layer canvas {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.showcase-atmosphere {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 56% 24% at 50% 54%, color-mix(in srgb, var(--showcase-brand) 10%, transparent), transparent 72%),
+    radial-gradient(ellipse 92% 76% at 50% 40%, transparent 43%, rgba(0, 0, 0, 0.48) 100%);
+}
+
+.showcase-card {
+  position: absolute;
+  right: max(5vw, 56px);
+  bottom: clamp(24px, 4vh, 52px);
+  left: max(5vw, 56px);
+  z-index: 2;
+  display: grid;
+  grid-template-columns: minmax(260px, 0.82fr) minmax(0, 1.55fr) minmax(300px, 1fr);
+  grid-template-areas: 'identity prose engine' 'identity prose history';
+  gap: clamp(25px, 3vh, 42px) clamp(30px, 4vw, 68px);
+  width: min(100%, 1200px);
+  max-height: min(40vh, 410px);
+  margin: 0 auto;
+  padding: clamp(25px, 3.2vh, 42px) clamp(28px, 3.6vw, 54px);
+  overflow-y: auto;
+  border-top: 1px solid rgba(237, 233, 227, 0.2);
+  border-bottom: 1px solid rgba(237, 233, 227, 0.1);
+  background: linear-gradient(90deg, rgba(5, 5, 6, 0.66), rgba(5, 5, 6, 0.35)), color-mix(in srgb, var(--showcase-brand) 8%, rgba(5, 5, 6, 0.62));
+  box-shadow: 0 -22px 80px rgba(0, 0, 0, 0.22);
+  backdrop-filter: blur(18px) saturate(108%);
+  -webkit-backdrop-filter: blur(18px) saturate(108%);
+  scrollbar-color: rgba(237, 233, 227, 0.3) transparent;
+}
+
+.showcase-card__identity {
+  grid-area: identity;
+  min-width: 0;
+  padding-right: clamp(20px, 2.5vw, 42px);
+  border-right: 1px solid rgba(237, 233, 227, 0.13);
+}
+
+.showcase-label,
+.showcase-specs__label {
+  color: rgba(237, 233, 227, 0.55);
+  font-family: var(--font-ui);
+  font-size: 10px;
+  font-weight: 300;
+  letter-spacing: 0.14em;
+  line-height: 1.3;
+  text-transform: uppercase;
+}
+
+.showcase-label { margin-bottom: 12px; }
+.showcase-label--gold { color: var(--showcase-brand); }
+
+.showcase-card__name {
+  max-width: 13ch;
+  font-family: var(--font-display);
+  font-size: clamp(44px, 4.1vw, 64px);
+  font-weight: 400;
+  line-height: 0.9;
+  letter-spacing: -0.035em;
+  text-wrap: balance;
+}
+
+.showcase-card__headline {
+  max-width: 30ch;
+  margin-top: 17px;
+  color: rgba(237, 233, 227, 0.68);
+  font-family: var(--font-ui);
+  font-size: clamp(12px, 0.9vw, 14px);
+  font-weight: 300;
+  line-height: 1.48;
+}
+
+.showcase-card__prose { grid-area: prose; min-width: 0; }
+
+.showcase-card__paragraph {
+  max-width: 68ch;
+  color: rgba(237, 233, 227, 0.72);
+  font-family: var(--font-ui);
+  font-size: clamp(12px, 0.9vw, 14px);
+  font-weight: 300;
+  line-height: 1.62;
+}
+
+.showcase-card__paragraph + .showcase-card__paragraph { margin-top: 0.95em; }
+
+.showcase-card__engine,
+.showcase-card__history {
+  min-width: 0;
+  padding-left: clamp(20px, 2.5vw, 42px);
+  border-left: 1px solid rgba(237, 233, 227, 0.13);
+}
+
+.showcase-card__engine { grid-area: engine; }
+.showcase-card__history { grid-area: history; }
+
+.showcase-specs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 13px clamp(18px, 2.4vw, 38px);
+}
+
+.showcase-specs__item { min-width: 0; }
+
+.showcase-specs__label {
+  margin-bottom: 4px;
+  color: rgba(237, 233, 227, 0.4);
+  font-size: 9px;
+}
+
+.showcase-specs__value {
+  color: rgba(237, 233, 227, 0.92);
+  font-family: var(--font-mono);
+  font-size: clamp(10px, 0.76vw, 12px);
+  font-weight: 300;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.35;
+}
+
+.showcase-achievements { list-style: none; }
+
+.showcase-achievements__item {
+  padding: 8px 0 8px 14px;
+  border-top: 1px solid rgba(237, 233, 227, 0.12);
+  color: rgba(237, 233, 227, 0.68);
+  font-family: var(--font-ui);
+  font-size: clamp(11px, 0.78vw, 13px);
+  font-weight: 300;
+  line-height: 1.4;
+}
+
+.showcase-achievements__item::before {
+  display: inline-block;
+  width: 7px;
+  height: 1px;
+  margin: 0 7px 0 -14px;
+  background: color-mix(in srgb, var(--showcase-brand) 72%, var(--gold));
+  content: '';
+  vertical-align: middle;
+}
+
+.showcase-achievements__item:last-child { border-bottom: 1px solid rgba(237, 233, 227, 0.12); }
+
+.showcase-voice {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-top: 24px;
+}
+
+.showcase-voice__button {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--showcase-brand) 78%, rgba(237, 233, 227, 0.3));
+  border-radius: 50%;
+  background: rgba(5, 5, 6, 0.28);
+  cursor: pointer;
+  pointer-events: auto;
+  transition: border-color 260ms var(--ease), background-color 260ms var(--ease), transform 260ms var(--ease);
+}
+
+.showcase-voice__button:hover,
+.showcase-voice__button:focus-visible {
+  border-color: var(--paper);
+  background: color-mix(in srgb, var(--showcase-brand) 15%, rgba(5, 5, 6, 0.34));
+  transform: scale(1.06);
+}
+
+.showcase-voice__button:focus-visible { outline: 1px solid var(--gold); outline-offset: 4px; }
+.showcase-voice__button:disabled { border-color: rgba(237, 233, 227, 0.2); cursor: default; opacity: 0.48; }
+.showcase-voice__button:disabled:hover { background: rgba(5, 5, 6, 0.28); transform: none; }
+
+.showcase-voice__play {
+  width: 0;
+  height: 0;
+  margin-left: 2px;
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  border-left: 7px solid var(--paper);
+}
+
+.showcase-voice__pause {
+  display: none;
+  width: 8px;
+  height: 10px;
+  border-right: 2px solid var(--paper);
+  border-left: 2px solid var(--paper);
+}
+
+.showcase-voice__button.is-playing .showcase-voice__play { display: none; }
+.showcase-voice__button.is-playing .showcase-voice__pause { display: block; }
+
+.showcase-voice__note {
+  color: rgba(237, 233, 227, 0.42);
+  font-family: var(--font-ui);
+  font-size: 10px;
+  font-weight: 300;
+  letter-spacing: 0.04em;
+  line-height: 1.3;
+}
+
+/* Brand classes are supported when the card/layer receives its car identity. */
+.showcase-lexus { --showcase-brand: var(--brand-lexus); }
+.showcase-nissan { --showcase-brand: var(--brand-nissan); }
+.showcase-audi { --showcase-brand: var(--brand-audi); }
+.showcase-bmw { --showcase-brand: var(--brand-bmw); }
+.showcase-mercedes { --showcase-brand: var(--brand-mercedes); }
+.showcase-ferrari { --showcase-brand: var(--brand-ferrari); }
+.showcase-mclaren { --showcase-brand: var(--brand-mclaren); }
+.showcase-aston { --showcase-brand: var(--brand-aston); }
+.showcase-lamborghini { --showcase-brand: var(--brand-lamborghini); }
+.showcase-porsche { --showcase-brand: var(--brand-porsche); }
+
+@media (prefers-reduced-motion: reduce) {
+  #showcase-layer,
+  .showcase-voice__button { transition: none; }
 }

@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" role="img" aria-label="GT3">
+  <rect width="16" height="16" rx="2" fill="#0b0b0c"/>
+  <text x="1" y="10.8" fill="#c6a96b" font-family="Arial,sans-serif" font-size="7.2" font-weight="700" letter-spacing="-.3">GT3</text>
+  <path d="M2 13h12" stroke="#c6a96b" stroke-width=".8"/>
+</svg>

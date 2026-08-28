@@ -17,7 +17,7 @@ import {
   tangentAt,
 } from './trackCurve.js';
 
-const GOLD = new THREE.Color('#C6A96B');
+const GOLD = new THREE.Color('#FFDE6E');
 const PLACE_POSITION = new THREE.Vector3();
 const PLACE_TANGENT = new THREE.Vector3();
 
@@ -106,13 +106,14 @@ const BODY_FRAGMENT_SHADER = /* glsl */ `
     vec3 normal = normalize(vViewNormal);
     vec3 viewDirection = normalize(vViewPosition);
     vec3 keyDirection = normalize(vec3(-0.32, 0.76, 0.56));
-    float diffuse = 0.38 + max(dot(normal, keyDirection), 0.0) * 0.48;
+    float diffuse = 0.55 + max(dot(normal, keyDirection), 0.0) * 0.42;
     vec3 halfDirection = normalize(keyDirection + viewDirection);
     float specularPower = mix(96.0, 18.0, uRoughness);
     float specular = pow(max(dot(normal, halfDirection), 0.0), specularPower);
     vec3 reflectance = mix(vec3(0.04), uGold, uMetalness);
     vec3 color = uGold * diffuse + reflectance * specular * (1.15 - uRoughness);
-    color += uBrandColor * uEmissiveIntensity;
+    float fresnel = pow(1.0 - clamp(dot(normal, viewDirection), 0.0, 1.0), 2.5);
+    color += uBrandColor * uEmissiveIntensity * (0.35 + fresnel * 2.2);
 
     gl_FragColor = vec4(color, uOpacity);
     #include <tonemapping_fragment>

@@ -1,3 +1,298 @@
 /* Coin-collection studio montage overlay. */
 #montage-layer {
+  --montage-brand: var(--gold);
+  --montage-mix: 0;
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  overflow: hidden;
+  visibility: hidden;
+  opacity: var(--montage-mix);
+  background: transparent;
+  pointer-events: none;
+  isolation: isolate;
+  will-change: opacity;
+}
+
+#montage-layer.is-active {
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.montage-canvas {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.montage-card {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: minmax(220px, 1.05fr) minmax(510px, 2.45fr) minmax(300px, 1.45fr) 86px;
+  gap: clamp(22px, 2.25vw, 46px);
+  align-items: stretch;
+  height: min(33.333vh, 360px);
+  padding: clamp(22px, 2.6vh, 34px) clamp(26px, 3vw, 58px) clamp(25px, 2.8vh, 38px);
+  overflow: hidden;
+  border-top: 1px solid rgba(237, 233, 227, 0.19);
+  background:
+    linear-gradient(90deg, rgba(11, 11, 12, 0.18), rgba(11, 11, 12, 0.12)),
+    color-mix(in srgb, var(--montage-brand) 7%, transparent);
+  box-shadow: 0 -24px 70px rgba(0, 0, 0, 0.14);
+  backdrop-filter: blur(22px) saturate(112%);
+  -webkit-backdrop-filter: blur(22px) saturate(112%);
+  opacity: 0;
+  transform: translate3d(0, 28px, 0);
+  will-change: opacity, transform;
+}
+
+.montage-card__identity,
+.montage-card__engine,
+.montage-card__achievements {
+  min-width: 0;
+}
+
+.montage-card__identity {
+  display: flex;
+  flex-direction: column;
+  padding-right: clamp(8px, 1vw, 18px);
+}
+
+.montage-eyebrow,
+.montage-section-label,
+.montage-engine-grid__label,
+.montage-expand__label,
+.montage-skip {
+  font-family: var(--font-ui);
+  font-size: 10px;
+  font-weight: 300;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.montage-eyebrow {
+  margin-bottom: 7px;
+  color: rgba(237, 233, 227, 0.62);
+}
+
+.montage-card__name {
+  max-width: 15ch;
+  font-family: var(--font-display);
+  font-size: clamp(31px, 2.4vw, 47px);
+  font-weight: 400;
+  line-height: 0.94;
+  letter-spacing: -0.025em;
+  text-wrap: balance;
+}
+
+.montage-card__year {
+  margin-top: 12px;
+  color: rgba(237, 233, 227, 0.48);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 300;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.45;
+}
+
+.montage-card__rule {
+  display: block;
+  width: min(100%, 150px);
+  height: 1px;
+  margin-top: auto;
+  opacity: 0.95;
+}
+
+.montage-card__gallery {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 5px;
+  width: min(100%, 190px);
+  height: 48px;
+  margin-top: auto;
+}
+
+.montage-card.has-images .montage-card__rule {
+  margin-top: 14px;
+}
+
+.montage-card__image {
+  width: 100%;
+  height: 100%;
+  border: 1px solid rgba(237, 233, 227, 0.12);
+  object-fit: cover;
+  filter: saturate(0.68) contrast(1.05);
+  opacity: 0.82;
+}
+
+.montage-card__engine,
+.montage-card__achievements {
+  padding-left: clamp(18px, 1.8vw, 34px);
+  border-left: 1px solid rgba(237, 233, 227, 0.13);
+}
+
+.montage-section-label {
+  margin-bottom: clamp(13px, 1.7vh, 20px);
+  color: var(--gold);
+}
+
+.montage-card__achievements .montage-section-label {
+  color: rgba(237, 233, 227, 0.54);
+}
+
+.montage-engine-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: clamp(20px, 2.4vw, 44px);
+  row-gap: clamp(9px, 1.15vh, 14px);
+}
+
+.montage-engine-grid__item {
+  min-width: 0;
+}
+
+.montage-engine-grid__label {
+  margin-bottom: 3px;
+  color: rgba(237, 233, 227, 0.42);
+  font-size: 9px;
+}
+
+.montage-engine-grid__value {
+  overflow: hidden;
+  color: rgba(237, 233, 227, 0.96);
+  font-family: var(--font-mono);
+  font-size: clamp(11px, 0.78vw, 13px);
+  font-weight: 300;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.montage-achievement-list {
+  display: grid;
+  gap: clamp(8px, 1vh, 12px);
+  list-style: none;
+}
+
+.montage-achievement-list__item {
+  position: relative;
+  padding-left: 14px;
+  color: rgba(237, 233, 227, 0.68);
+  font-family: var(--font-ui);
+  font-size: clamp(10px, 0.7vw, 12px);
+  font-weight: 300;
+  line-height: 1.35;
+}
+
+.montage-achievement-list__item::before {
+  position: absolute;
+  top: 0.6em;
+  left: 0;
+  width: 7px;
+  height: 1px;
+  background: rgba(198, 169, 107, 0.58);
+  content: '';
+}
+
+.montage-card__actions {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+  padding-left: 16px;
+  border-left: 1px solid rgba(237, 233, 227, 0.13);
+}
+
+.montage-expand {
+  display: grid;
+  gap: 8px;
+  justify-items: center;
+  padding: 0 0 10px;
+  color: rgba(237, 233, 227, 0.72);
+  background: transparent;
+  cursor: pointer;
+}
+
+.montage-expand__mark {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border: 1px solid rgba(237, 233, 227, 0.24);
+  border-radius: 50%;
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 300;
+  line-height: 1;
+  transition: border-color 300ms var(--ease), color 300ms var(--ease), transform 300ms var(--ease);
+}
+
+.montage-expand__label {
+  font-size: 9px;
+  writing-mode: vertical-rl;
+}
+
+.montage-expand:hover .montage-expand__mark,
+.montage-expand:focus-visible .montage-expand__mark {
+  border-color: var(--gold);
+  color: var(--gold);
+  transform: rotate(90deg);
+}
+
+.montage-expand:focus-visible,
+.montage-skip:focus-visible {
+  outline: 1px solid var(--gold);
+  outline-offset: 5px;
+}
+
+.montage-skip {
+  position: absolute;
+  right: clamp(28px, 3vw, 58px);
+  bottom: 17px;
+  z-index: 4;
+  display: flex;
+  gap: 9px;
+  align-items: center;
+  padding: 5px 0;
+  color: rgba(237, 233, 227, 0.52);
+  background: transparent;
+  cursor: pointer;
+  opacity: 0;
+  transform: translate3d(0, 8px, 0);
+  will-change: opacity, transform;
+}
+
+.montage-skip__key {
+  padding: 3px 6px 2px;
+  border: 1px solid rgba(237, 233, 227, 0.28);
+  color: rgba(237, 233, 227, 0.78);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.08em;
+  line-height: 1;
+}
+
+.montage-skip__text {
+  transition: color 260ms var(--ease);
+}
+
+.montage-skip:hover .montage-skip__text,
+.montage-skip:focus-visible .montage-skip__text {
+  color: var(--paper);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .montage-expand__mark,
+  .montage-skip__text {
+    transition: none;
+  }
 }

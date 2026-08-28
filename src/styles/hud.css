@@ -1,5 +1,424 @@
-/* Persistent race HUD and compact spec panel. */
-#hud,
-#spec-panel,
-#tod-selector {
+/* Persistent race instrumentation and the transient unlock card. */
+
+#hud {
+  position: fixed;
+  inset: 0;
+  color: var(--paper);
+  pointer-events: none;
+}
+
+.hud-corner {
+  position: absolute;
+  z-index: 2;
+}
+
+.hud-label {
+  color: rgba(237, 233, 227, 0.56);
+  font-family: var(--font-ui);
+  font-size: 10px;
+  font-weight: 300;
+  letter-spacing: 0.14em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+/* Active identity -------------------------------------------------------- */
+
+#hud-topleft {
+  top: 30px;
+  left: 30px;
+}
+
+.hud-identity {
+  display: flex;
+  width: 320px;
+  min-height: 54px;
+}
+
+.hud-identity__accent {
+  flex: 0 0 1px;
+  width: 1px;
+  margin-right: 15px;
+  background: var(--gold);
+  box-shadow: 0 0 18px rgba(198, 169, 107, 0.12);
+  transition: background-color 900ms var(--ease), box-shadow 900ms var(--ease);
+}
+
+.hud-identity__copy {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+}
+
+.hud-identity__slot {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transform: translateY(5px);
+  transition: opacity 620ms var(--ease), transform 760ms var(--ease);
+}
+
+.hud-identity__slot.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.hud-identity__manufacturer {
+  margin: 1px 0 5px;
+  font-variant-caps: all-small-caps;
+}
+
+.hud-identity__name {
+  overflow: hidden;
+  color: rgba(237, 233, 227, 0.92);
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 400;
+  letter-spacing: -0.025em;
+  line-height: 1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Unlock count ----------------------------------------------------------- */
+
+#hud-topright {
+  top: 30px;
+  right: 30px;
+}
+
+.hud-unlocked {
+  width: 150px;
+  text-align: right;
+}
+
+.hud-unlocked__value {
+  margin-top: 5px;
+  color: rgba(237, 233, 227, 0.84);
+  font-family: var(--font-mono);
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 300;
+  letter-spacing: 0.04em;
+}
+
+/* Quiet telemetry -------------------------------------------------------- */
+
+#hud-bottomleft {
+  bottom: 30px;
+  left: 30px;
+}
+
+.hud-telemetry {
+  width: 276px;
+}
+
+.hud-telemetry__distance,
+.hud-telemetry__speed {
+  display: grid;
+  grid-template-columns: 80px 1fr;
+  align-items: center;
+}
+
+.hud-telemetry__distance {
+  margin-bottom: 12px;
+}
+
+.hud-telemetry__number {
+  color: rgba(237, 233, 227, 0.72);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 300;
+  letter-spacing: 0.04em;
+}
+
+.hud-speedbar {
+  position: relative;
+  display: block;
+  height: 1px;
+  overflow: hidden;
+  background: rgba(237, 233, 227, 0.18);
+}
+
+.hud-speedbar__fill {
+  position: absolute;
+  inset: 0;
+  background: var(--gold);
+  box-shadow: 0 0 8px rgba(198, 169, 107, 0.32);
+  opacity: 0.86;
+  transform: scaleX(0);
+  transform-origin: left center;
+  will-change: transform;
+}
+
+/* Real spline route map -------------------------------------------------- */
+
+#hud-routemap {
+  top: 108px;
+  right: 27px;
+}
+
+.hud-route {
+  width: 156px;
+  height: 178px;
+  opacity: 0.86;
+}
+
+.hud-route__label {
+  padding-right: 5px;
+  text-align: right;
+}
+
+.hud-route__svg {
+  display: block;
+  width: 156px;
+  height: 156px;
+  overflow: visible;
+}
+
+.hud-route__path {
+  fill: none;
+  stroke: rgba(237, 233, 227, 0.27);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1px;
+  vector-effect: non-scaling-stroke;
+}
+
+.hud-route__coin {
+  fill: transparent;
+  stroke: rgba(198, 169, 107, 0.68);
+  stroke-width: 1px;
+  vector-effect: non-scaling-stroke;
+  transition: fill 700ms var(--ease), stroke 700ms var(--ease), opacity 700ms var(--ease);
+}
+
+.hud-route__coin.is-unlocked {
+  fill: var(--gold);
+  stroke: var(--gold);
+}
+
+.hud-route__car {
+  fill: var(--gold);
+  stroke: rgba(11, 11, 12, 0.56);
+  stroke-width: 1px;
+  vector-effect: non-scaling-stroke;
+  filter: drop-shadow(0 0 3px rgba(198, 169, 107, 0.7));
+}
+
+/* Incoming coin ---------------------------------------------------------- */
+
+#hud-approach {
+  position: absolute;
+  top: 318px;
+  right: 30px;
+  z-index: 3;
+}
+
+.hud-approach {
+  width: 260px;
+  padding: 13px 14px 12px;
+  border: 1px solid var(--hair);
+  background: rgba(11, 11, 12, 0.42);
+  backdrop-filter: blur(18px) saturate(120%);
+  -webkit-backdrop-filter: blur(18px) saturate(120%);
+  opacity: 0;
+  transform: translateX(10px);
+  transition: opacity 620ms var(--ease), transform 760ms var(--ease);
+}
+
+.hud-approach.is-visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.hud-approach__name {
+  overflow: hidden;
+  margin: 5px 0 11px;
+  color: rgba(237, 233, 227, 0.88);
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 400;
+  letter-spacing: -0.015em;
+  line-height: 1.05;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hud-approach__track {
+  height: 1px;
+  overflow: hidden;
+  background: rgba(237, 233, 227, 0.15);
+}
+
+.hud-approach__fill {
+  display: block;
+  width: 100%;
+  height: 1px;
+  background: var(--gold);
+  transform: scaleX(0);
+  transform-origin: left center;
+  will-change: transform;
+}
+
+/* Transient unlock card -------------------------------------------------- */
+
+#spec-panel {
+  position: fixed;
+  right: 28px;
+  bottom: 28px;
+  z-index: 24;
+  width: 348px;
+  color: var(--paper);
+  opacity: 0;
+  pointer-events: none;
+  transform: translate3d(12px, 10px, 0);
+  transition: opacity 680ms var(--ease), transform 820ms var(--ease);
+}
+
+#spec-panel.is-visible {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
+.spec-card {
+  padding: 18px 19px 14px;
+  border: 1px solid var(--hair);
+  background: rgba(11, 11, 12, 0.42);
+  backdrop-filter: blur(18px) saturate(120%);
+  -webkit-backdrop-filter: blur(18px) saturate(120%);
+}
+
+.spec-card__eyebrow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.spec-card__sequence {
+  color: rgba(237, 233, 227, 0.48);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 300;
+}
+
+.spec-card__title {
+  overflow: hidden;
+  margin-top: 6px;
+  color: rgba(237, 233, 227, 0.94);
+  font-family: var(--font-display);
+  font-size: 25px;
+  font-weight: 400;
+  letter-spacing: -0.025em;
+  line-height: 1.08;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.spec-card__brand-rule {
+  width: 100%;
+  height: 1px;
+  margin: 11px 0 8px;
+  background: var(--spec-brand, var(--gold));
+  opacity: 0.82;
+}
+
+.spec-card__fields {
+  display: block;
+}
+
+.spec-card__row {
+  display: grid;
+  grid-template-columns: 82px minmax(0, 1fr);
+  align-items: baseline;
+  min-height: 25px;
+  border-bottom: 1px solid rgba(237, 233, 227, 0.09);
+}
+
+.spec-card__row:last-child {
+  border-bottom: 0;
+}
+
+.spec-card__label {
+  color: rgba(237, 233, 227, 0.43);
+  font-family: var(--font-ui);
+  font-size: 9px;
+  font-weight: 300;
+  letter-spacing: 0.12em;
+  line-height: 25px;
+  text-transform: uppercase;
+}
+
+.spec-card__value {
+  overflow: hidden;
+  color: rgba(237, 233, 227, 0.77);
+  font-family: var(--font-ui);
+  font-size: 10.5px;
+  font-weight: 300;
+  letter-spacing: 0.005em;
+  line-height: 25px;
+  text-align: right;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.spec-card__value--mono {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+}
+
+.spec-card__images {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+  margin-top: 10px;
+}
+
+.spec-card__images--1 {
+  grid-template-columns: 1fr;
+}
+
+.spec-card__image {
+  display: block;
+  width: 100%;
+  height: 64px;
+  border: 1px solid var(--hair);
+  object-fit: cover;
+  opacity: 0.78;
+}
+
+.spec-card__footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 11px;
+}
+
+.spec-card__expand {
+  padding: 4px 0 3px 12px;
+  border-left: 1px solid rgba(198, 169, 107, 0.62);
+  background: transparent;
+  color: rgba(237, 233, 227, 0.68);
+  cursor: pointer;
+  font-family: var(--font-ui);
+  font-size: 9px;
+  font-weight: 300;
+  letter-spacing: 0.14em;
+  line-height: 1;
+  pointer-events: auto;
+  text-transform: uppercase;
+  transition: color 420ms var(--ease), border-color 420ms var(--ease);
+}
+
+#spec-panel:not(.is-visible) .spec-card__expand {
+  pointer-events: none;
+}
+
+.spec-card__expand:hover,
+.spec-card__expand:focus-visible {
+  border-color: var(--gold);
+  color: var(--paper);
+  outline: none;
 }

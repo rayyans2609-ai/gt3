@@ -15,16 +15,16 @@
   --font-display: 'Cormorant Garamond', Georgia, serif;
   --font-ui: 'DM Sans', system-ui, sans-serif;
   --font-mono: 'DM Mono', ui-monospace, monospace;
-  --brand-lexus: #6f171e;
-  --brand-nissan: #8b1d27;
-  --brand-audi: #8e2026;
-  --brand-bmw: #245276;
-  --brand-mercedes: #337b78;
-  --brand-ferrari: #8f171a;
-  --brand-mclaren: #a85426;
-  --brand-aston: #174d43;
-  --brand-lamborghini: #8a6c24;
-  --brand-porsche: #805426;
+  --brand-lexus: #541f29;
+  --brand-nissan: #293d52;
+  --brand-audi: #3c4247;
+  --brand-bmw: #173d5c;
+  --brand-mercedes: #303437;
+  --brand-ferrari: #6d1e24;
+  --brand-mclaren: #865034;
+  --brand-aston: #173b31;
+  --brand-lamborghini: #795033;
+  --brand-porsche: #25211f;
 }
 
 *,

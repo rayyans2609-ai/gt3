@@ -215,6 +215,11 @@ function buildShoulderGeometry() {
 }
 
 function buildApronGeometry() {
+  // Heights matter here. The grass is only carved to fit the road along trackEdges, which
+  // spans t in [0,1]; the aprons sit outside that range on un-carved ground, where
+  // groundHeightAt() returns -0.03. Keeping the apron asphalt at 0 (matching the main
+  // track surface, so the seam is exact) and the shoulder at -0.01 leaves both clearly
+  // above the grass instead of z-fighting with it.
   const asphaltPositions = [];
   const asphaltNormals = [];
   const asphaltUvs = [];
@@ -244,10 +249,10 @@ function buildApronGeometry() {
     for (let i = 0; i < asphaltBrightness.length - 1; i += 1) {
       const lateral0 = ((i / (asphaltBrightness.length - 1)) * 2 - 1) * TRACK.halfWidth;
       const lateral1 = (((i + 1) / (asphaltBrightness.length - 1)) * 2 - 1) * TRACK.halfWidth;
-      const a = center.clone().addScaledVector(right, lateral0).addScaledVector(UP, -0.02);
-      const b = outerCenter.clone().addScaledVector(right, lateral0).addScaledVector(UP, -0.02);
-      const c = center.clone().addScaledVector(right, lateral1).addScaledVector(UP, -0.02);
-      const d = outerCenter.clone().addScaledVector(right, lateral1).addScaledVector(UP, -0.02);
+      const a = center.clone().addScaledVector(right, lateral0).addScaledVector(UP, 0);
+      const b = outerCenter.clone().addScaledVector(right, lateral0).addScaledVector(UP, 0);
+      const c = center.clone().addScaledVector(right, lateral1).addScaledVector(UP, 0);
+      const d = outerCenter.clone().addScaledVector(right, lateral1).addScaledVector(UP, 0);
       const brightness = asphaltBrightness[i];
       addQuad(asphaltWriter, a, b, c, d, new THREE.Color(brightness, brightness, brightness));
     }
@@ -255,10 +260,10 @@ function buildApronGeometry() {
     for (const side of [-1, 1]) {
       const innerLateral = side * TRACK.halfWidth;
       const outerLateral = side * (TRACK.halfWidth + TRACK.shoulderWidth);
-      const a = center.clone().addScaledVector(right, outerLateral).addScaledVector(UP, -0.03);
-      const b = outerCenter.clone().addScaledVector(right, outerLateral).addScaledVector(UP, -0.03);
-      const c = center.clone().addScaledVector(right, innerLateral).addScaledVector(UP, -0.03);
-      const d = outerCenter.clone().addScaledVector(right, innerLateral).addScaledVector(UP, -0.03);
+      const a = center.clone().addScaledVector(right, outerLateral).addScaledVector(UP, -0.01);
+      const b = outerCenter.clone().addScaledVector(right, outerLateral).addScaledVector(UP, -0.01);
+      const c = center.clone().addScaledVector(right, innerLateral).addScaledVector(UP, -0.01);
+      const d = outerCenter.clone().addScaledVector(right, innerLateral).addScaledVector(UP, -0.01);
       addQuad(shoulderWriter, a, b, c, d);
     }
   }

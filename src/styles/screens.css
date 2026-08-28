@@ -434,6 +434,13 @@ body.gt3-showcase-open #finish-screen {
   line-height: 1.65;
 }
 
+.finish-credits {
+  display: grid;
+  gap: 5px;
+}
+
+.finish-credits .finish-credit { margin: 0; }
+
 .finish-credit__link {
   color: inherit;
   pointer-events: auto;

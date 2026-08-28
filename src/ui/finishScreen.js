@@ -55,7 +55,7 @@ function appendModelCredit(parent, model, index, total) {
   if (url) {
     node.href = url;
     node.target = '_blank';
-    node.rel = 'noreferrer';
+    node.rel = 'noopener noreferrer';
   }
   parent.append(node);
   if (index < total - 1) parent.append(document.createTextNode(', '));
@@ -72,13 +72,26 @@ function buildCredits() {
       const license = element('a', 'finish-credit__link', group.license);
       license.href = group.licenseUrl;
       license.target = '_blank';
-      license.rel = 'noreferrer';
+      license.rel = 'noopener noreferrer';
       return license;
     })(), document.createTextNode(')'));
     if (groupIndex < CREDIT_GROUPS.length - 1) credits.append(document.createTextNode('; '));
   });
 
   credits.append(document.createTextNode('.'));
+  return credits;
+}
+
+function buildPhotoCredits() {
+  const credits = element('p', 'finish-credit');
+  credits.append(
+    document.createTextNode('Photographs — Wikimedia Commons contributors, CC BY / CC BY-SA. See '),
+  );
+  const source = element('a', 'finish-credit__link', 'public/images/CREDITS.md');
+  source.href = '/images/CREDITS.md';
+  source.target = '_blank';
+  source.rel = 'noopener noreferrer';
+  credits.append(source);
   return credits;
 }
 
@@ -154,7 +167,9 @@ function buildScreen() {
   replay.type = 'button';
   replay.setAttribute('aria-label', 'Replay the route from the start line');
   replay.addEventListener('click', replayRoute);
-  footer.append(replay, buildCredits());
+  const credits = element('div', 'finish-credits');
+  credits.append(buildCredits(), buildPhotoCredits());
+  footer.append(replay, credits);
 
   panel.append(header, recap, footer);
   root.replaceChildren(panel);

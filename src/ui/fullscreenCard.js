@@ -33,6 +33,37 @@ function imageSource(image) {
   return '';
 }
 
+function creditText(value, fallback) {
+  return typeof value === 'string' && value.trim() ? value.trim() : fallback;
+}
+
+function makeGalleryCredit(images) {
+  if (images.length === 0) return null;
+
+  const credit = element('p', 'fullcard-credit');
+  credit.append(document.createTextNode('Photographs — '));
+
+  for (const [index, { image }] of images.entries()) {
+    const author = creditText(image?.author, 'Wikimedia Commons');
+    const license = creditText(image?.license, 'Licence not specified');
+    const descriptionUrl = creditText(image?.descriptionUrl, '');
+    const authorNode = descriptionUrl
+      ? element('a', 'fullcard-credit__link', author)
+      : document.createTextNode(author);
+
+    if (descriptionUrl) {
+      authorNode.href = descriptionUrl;
+      authorNode.target = '_blank';
+      authorNode.rel = 'noopener noreferrer';
+    }
+
+    credit.append(authorNode, document.createTextNode(` (${license})`));
+    if (index < images.length - 1) credit.append(document.createTextNode(' · '));
+  }
+
+  return credit;
+}
+
 function makeDefinitionList(rows, className = 'fullcard-specs') {
   const list = element('dl', className);
   for (const [label, value] of rows) {
@@ -64,7 +95,7 @@ function makeGallery(car) {
     picture.loading = 'eager';
     gallery.append(picture);
   }
-  return gallery;
+  return { gallery, credit: makeGalleryCredit(images) };
 }
 
 function makeCloseButton(car) {
@@ -100,9 +131,9 @@ function renderCard(car) {
   );
   lead.querySelector('.fullcard-title').id = 'fullcard-title';
 
-  const gallery = makeGallery(car);
-  if (gallery) {
-    lead.append(gallery);
+  const galleryContent = makeGallery(car);
+  if (galleryContent) {
+    lead.append(galleryContent.gallery, galleryContent.credit);
     dialog.classList.add('has-images');
   } else {
     dialog.classList.add('is-imageless');

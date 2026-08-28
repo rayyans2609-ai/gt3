@@ -21,6 +21,31 @@ const DEBUG = location.hash === '#debug';
 const SUN_OFFSET = new THREE.Vector3(46, 82, 34);
 const _sunTargetPosition = new THREE.Vector3();
 
+// Intel UHD 617, 1280x800 CSS @ DPR 2: GPU cost scales nearly linearly with pixels:
+// DPR 2.00: 4.1 MPix / 40.4 ms; 1.50: 2.3 / 25.3; 1.25: 1.6 / 19.1; 1.00: 1.0 / 12.9.
+export const ADAPTIVE_RES = {
+  high: Math.min(window.devicePixelRatio || 1, 2), // at rest: full sharpness
+  low: 1.0, // in motion: smooth
+  enterLowAt: 0.02, // state.speed01 above this => motion
+  returnHighBelow: 0.008,
+  settleMs: 420, // how long motion must be absent before going sharp again
+  minSwitchMs: 250, // floor between switches; target realloc is not free
+};
+
+// The sun tracks the car, so a tight shadow volume is sufficient. Measured with GPU
+// timer queries, shadows are ~15% of frame cost (6.7 of 43 ms) and this tightening is
+// worth ~0.7 ms; the volume shrank 120->52 units while the map only halved, so texel
+// density actually rose (17 -> ~20/unit). Adjust mapSize/extent if quality needs work.
+// NOTE: an earlier wall-clock benchmark blamed shadows for 49%. That was CPU-contention
+// noise, not signal. Resolution is the real cost centre -- see ADAPTIVE_RES.
+export const SHADOW_TUNE = {
+  mapSize: 1024,
+  extent: 26,
+  near: 0.5,
+  far: 180,
+  normalBias: 0.02,
+};
+
 const atmosphere = {
   fogColor: new THREE.Color(0xb8ad94),
   fogNear: 105,
@@ -44,6 +69,10 @@ let followedSunTarget;
 let lastProjectedFov = BASE_FOV;
 let elapsedTime = 0;
 let initialized = false;
+let appliedResolution;
+let activeResolutionLevel = 'high';
+let stillTimeMs = 0;
+let timeSinceResolutionSwitchMs = Infinity;
 
 /**
  * Mutable exposure handle for timeOfDay.js. Assign to `.value` to update the
@@ -151,12 +180,25 @@ function clampSpeed(value) {
   return Math.min(1, Math.max(0, Number.isFinite(value) ? value : 0));
 }
 
+function applyResolution(dpr) {
+  if (!renderer || !composer || dpr === appliedResolution) return false;
+
+  renderer.setPixelRatio(dpr);
+  composer.setPixelRatio(dpr);
+  composer.setSize(window.innerWidth, window.innerHeight);
+  appliedResolution = dpr;
+  return true;
+}
+
 function resizeScene(width, height) {
   if (!renderer || !camera || !composer) return;
 
   const safeWidth = Math.max(1, width);
   const safeHeight = Math.max(1, height);
-  const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
+  ADAPTIVE_RES.high = Math.min(window.devicePixelRatio || 1, 2);
+  const pixelRatio = activeResolutionLevel === 'low'
+    ? ADAPTIVE_RES.low
+    : ADAPTIVE_RES.high;
 
   renderer.setPixelRatio(pixelRatio);
   renderer.setSize(safeWidth, safeHeight, false);
@@ -167,6 +209,7 @@ function resizeScene(width, height) {
 
   composer.setPixelRatio(pixelRatio);
   composer.setSize(safeWidth, safeHeight);
+  appliedResolution = pixelRatio;
 }
 
 function createLightingRig() {
@@ -177,14 +220,14 @@ function createLightingRig() {
   sun = new THREE.DirectionalLight(0xffdfb2, 2.35);
   sun.position.copy(SUN_OFFSET);
   sun.castShadow = true;
-  sun.shadow.mapSize.set(2048, 2048);
-  sun.shadow.camera.left = -60;
-  sun.shadow.camera.right = 60;
-  sun.shadow.camera.top = 60;
-  sun.shadow.camera.bottom = -60;
-  sun.shadow.camera.near = 0.5;
-  sun.shadow.camera.far = 260;
-  sun.shadow.normalBias = 0.02;
+  sun.shadow.mapSize.set(SHADOW_TUNE.mapSize, SHADOW_TUNE.mapSize);
+  sun.shadow.camera.left = -SHADOW_TUNE.extent;
+  sun.shadow.camera.right = SHADOW_TUNE.extent;
+  sun.shadow.camera.top = SHADOW_TUNE.extent;
+  sun.shadow.camera.bottom = -SHADOW_TUNE.extent;
+  sun.shadow.camera.near = SHADOW_TUNE.near;
+  sun.shadow.camera.far = SHADOW_TUNE.far;
+  sun.shadow.normalBias = SHADOW_TUNE.normalBias;
 
   rimLight = new THREE.DirectionalLight(0xd8e1e6, 0.32);
   rimLight.position.set(-32, 24, 48);
@@ -272,6 +315,30 @@ export function updateScene(dt) {
   const safeDt = Number.isFinite(dt) ? Math.max(0, dt) : 0;
   const speed = clampSpeed(state.speed01);
   elapsedTime = (elapsedTime + safeDt) % 1000;
+  timeSinceResolutionSwitchMs += safeDt * 1000;
+
+  let requestedResolution = appliedResolution ?? ADAPTIVE_RES.high;
+  if (state.mode !== 'race' || state.scrollLocked) {
+    requestedResolution = ADAPTIVE_RES.high;
+    stillTimeMs = 0;
+  } else if (speed > ADAPTIVE_RES.enterLowAt) {
+    requestedResolution = ADAPTIVE_RES.low;
+    stillTimeMs = 0;
+  } else if (speed < ADAPTIVE_RES.returnHighBelow) {
+    stillTimeMs += safeDt * 1000;
+    if (stillTimeMs >= ADAPTIVE_RES.settleMs) {
+      requestedResolution = ADAPTIVE_RES.high;
+    }
+  }
+
+  if (
+    requestedResolution !== appliedResolution
+    && timeSinceResolutionSwitchMs >= ADAPTIVE_RES.minSwitchMs
+    && applyResolution(requestedResolution)
+  ) {
+    activeResolutionLevel = requestedResolution === ADAPTIVE_RES.low ? 'low' : 'high';
+    timeSinceResolutionSwitchMs = 0;
+  }
 
   if (motionBlurPass) motionBlurPass.uniforms.uStrength.value = speed * 0.42;
   if (premiumPass) premiumPass.uniforms.uTime.value = elapsedTime;
@@ -325,8 +392,14 @@ export function initScene() {
 
   if (DEBUG) {
     scene.add(new THREE.AxesHelper(25));
-    window.__gt3 = { scene, camera, renderer };
   }
+  // TEMPORARY (perf pass): runtime handles so the profiler can A/B cost centres.
+  window.__gt3 = { scene, camera, renderer, composer,
+    passes: { motionBlur: motionBlurPass, wash: premiumPass }, resizeScene,
+    probe: () => ({ mode: state.mode, locked: state.scrollLocked, speed01: state.speed01,
+      progress: state.progress, applied: appliedResolution, level: activeResolutionLevel,
+      still: stillTimeMs, sinceSwitch: timeSinceResolutionSwitchMs,
+      canvasW: renderer.domElement.width, ratio: renderer.getPixelRatio() }) };
 
   initialized = true;
   return { renderer, scene, camera, composer, render };

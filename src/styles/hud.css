@@ -135,6 +135,11 @@ body.gt3-showcase-open #tod-selector {
 }
 
 .hud-telemetry {
+  /* NOTE: do NOT set `position` here. This class sits on #hud-bottomleft, the same
+     element as .hud-corner, and comes later in this file -- declaring position:relative
+     overrode .hud-corner's absolute and dropped the whole telemetry panel out of the
+     bottom-left corner to the top of #hud. .hud-corner is already a containing block
+     for the absolutely positioned .hud-direction child. */
   width: 276px;
 }
 
@@ -175,6 +180,71 @@ body.gt3-showcase-open #tod-selector {
   transform: scaleX(0);
   transform-origin: left center;
   will-change: transform;
+}
+
+/* Scroll direction ------------------------------------------------------- */
+
+.hud-direction {
+  position: absolute;
+  bottom: -2px;
+  left: 292px;
+  width: 54px;
+  opacity: 0.34;
+  transition: opacity 300ms var(--ease);
+}
+
+.hud-direction__modes {
+  position: relative;
+  display: grid;
+  gap: 4px;
+  margin-top: 6px;
+  padding-left: 9px;
+}
+
+.hud-direction__modes::before {
+  position: absolute;
+  top: 3px;
+  bottom: 3px;
+  left: 1px;
+  width: 1px;
+  background: var(--hair);
+  content: '';
+}
+
+.hud-direction__mode {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: rgba(237, 233, 227, 0.5);
+  opacity: 0.52;
+  transition: color 300ms var(--ease), opacity 300ms var(--ease);
+}
+
+.hud-direction__arrow {
+  color: currentcolor;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 300;
+  line-height: 1;
+}
+
+.hud-direction__mode .hud-label {
+  color: currentcolor;
+  font-size: 9px;
+}
+
+.hud-direction.is-primer {
+  opacity: 0.66;
+}
+
+.hud-direction.is-primer .hud-direction__mode {
+  opacity: 0.76;
+}
+
+.hud-direction.is-forward .hud-direction__mode--forward,
+.hud-direction.is-reverse .hud-direction__mode--reverse {
+  color: rgba(237, 233, 227, 0.84);
+  opacity: 1;
 }
 
 /* Real spline route map -------------------------------------------------- */

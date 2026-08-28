@@ -46,6 +46,7 @@ let lastProgress = 0;   // previous frame's damped progress, for velocity
 let smoothedSpeed = 0;  // eased 0..1 intensity
 let lockedScrollY = 0;  // scroll position frozen at the moment of locking
 let hasStarted = false;
+let swallowersAttached = false;
 
 const firstScrollHandlers = [];
 
@@ -102,6 +103,20 @@ function swallowKeys(e) {
   }
 }
 
+function attachSwallowers() {
+  if (swallowersAttached) return;
+  window.addEventListener('wheel', swallow, { passive: false });
+  window.addEventListener('touchmove', swallow, { passive: false });
+  swallowersAttached = true;
+}
+
+function detachSwallowers() {
+  if (!swallowersAttached) return;
+  window.removeEventListener('wheel', swallow, { passive: false });
+  window.removeEventListener('touchmove', swallow, { passive: false });
+  swallowersAttached = false;
+}
+
 // ---------------------------------------------------------------------------
 // Public API
 // ---------------------------------------------------------------------------
@@ -111,9 +126,13 @@ function swallowKeys(e) {
  * cannot be scrolled. Used by the montage, the fullscreen card and Showcase Mode.
  */
 export function lockScroll() {
-  if (state.scrollLocked) return;
+  if (state.scrollLocked) {
+    attachSwallowers();
+    return;
+  }
   lockedScrollY = window.scrollY;
   set('scrollLocked', true);
+  attachSwallowers();
 }
 
 /**
@@ -121,8 +140,12 @@ export function lockScroll() {
  * point, with no jump, because rawTarget was never allowed to drift while locked.
  */
 export function unlockScroll() {
-  if (!state.scrollLocked) return;
+  if (!state.scrollLocked) {
+    detachSwallowers();
+    return;
+  }
   set('scrollLocked', false);
+  detachSwallowers();
   window.scrollTo(0, lockedScrollY);
   rawTarget = readScroll();
   set('targetProgress', rawTarget);
@@ -137,6 +160,7 @@ export function onFirstScroll(fn) {
 /** Jump the drive back to the start line — the "Replay route" control. */
 export function resetToStart() {
   set('scrollLocked', false);
+  detachSwallowers();
   window.scrollTo(0, 0);
   rawTarget = 0;
   lastProgress = 0;
@@ -218,8 +242,6 @@ export function initScrollDrive() {
   window.scrollTo(0, 0);
 
   window.addEventListener('scroll', onScroll, { passive: true });
-  window.addEventListener('wheel', swallow, { passive: false });
-  window.addEventListener('touchmove', swallow, { passive: false });
   window.addEventListener('keydown', swallowKeys, { passive: false });
   window.addEventListener('resize', onScroll);
 

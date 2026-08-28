@@ -6,7 +6,7 @@
  * deliberately separate.
  */
 
-import { state } from '../core/state.js';
+import { state, subscribe } from '../core/state.js';
 import { CARS, getCar } from '../data/cars.js';
 import { COIN_T, TRACK_LENGTH, pointAt } from '../scene/trackCurve.js';
 
@@ -17,6 +17,7 @@ const MAP_SAMPLES = 140;
 const HUD_CURSOR_SMOOTHING = 0.002;
 const HUD_CURSOR_MAX_X = 4;
 const HUD_CURSOR_MAX_Y = 3;
+const DIRECTION_DEAD_ZONE = 0.035;
 
 let initialized = false;
 let identitySlots = [];
@@ -28,20 +29,28 @@ let speedFill = null;
 let routeCarMarker = null;
 let routeCoinMarkers = [];
 let routeProject = null;
+let routePoint = null;
+const routeProjection = { x: 0, y: 0 };
 let approachRoot = null;
 let approachName = null;
 let approachFill = null;
+let directionRoot = null;
 
 let displayedSpeed = 0;
 let displayedApproach = 0;
 let approach = null;
-let unlockSignature = '';
+let writtenDistance = -1;
+let writtenSpeed = -1;
+let writtenRouteX = NaN;
+let writtenRouteY = NaN;
+let writtenApproach = -1;
 let cursorTargetX = 0;
 let cursorTargetY = 0;
 let displayedCursorX = 0;
 let displayedCursorY = 0;
 let writtenCursorX = 0;
 let writtenCursorY = 0;
+let writtenDirection = null;
 
 function makeElement(tag, className, text) {
   const element = document.createElement(tag);
@@ -96,8 +105,38 @@ function buildTelemetry(root) {
   speedTrack.append(speedFill);
   speed.append(speedLabel, speedTrack);
 
+  const direction = makeElement('div', 'hud-direction is-primer');
+  direction.setAttribute('aria-label', 'Scroll down to drive forward. Scroll up to reverse.');
+  const directionLabel = makeElement('div', 'hud-label', 'Scroll');
+  const directionModes = makeElement('div', 'hud-direction__modes');
+  const reverse = makeElement('div', 'hud-direction__mode hud-direction__mode--reverse');
+  reverse.append(makeElement('span', 'hud-direction__arrow', '↑'), makeElement('span', 'hud-label', 'Rev'));
+  const forward = makeElement('div', 'hud-direction__mode hud-direction__mode--forward');
+  forward.append(makeElement('span', 'hud-direction__arrow', '↓'), makeElement('span', 'hud-label', 'Fwd'));
+  directionModes.append(reverse, forward);
+  direction.append(directionLabel, directionModes);
+  directionRoot = direction;
+  writtenDirection = 'primer';
+
   root.classList.add('hud-corner', 'hud-telemetry');
-  root.append(distance, speed);
+  root.append(distance, speed, direction);
+}
+
+function updateDirectionIndicator() {
+  const velocity = Number(state.velocity) || 0;
+  const direction = !state.started
+    ? 'primer'
+    : velocity > DIRECTION_DEAD_ZONE
+      ? 'forward'
+      : velocity < -DIRECTION_DEAD_ZONE
+        ? 'reverse'
+        : 'idle';
+
+  if (direction === writtenDirection) return;
+
+  directionRoot.classList.remove('is-primer', 'is-idle', 'is-forward', 'is-reverse');
+  directionRoot.classList.add(`is-${direction}`);
+  writtenDirection = direction;
 }
 
 function buildRouteMap(root) {
@@ -124,10 +163,11 @@ function buildRouteMap(root) {
   const offsetX = (MAP_SIZE - usedWidth) * 0.5;
   const offsetY = (MAP_SIZE - usedHeight) * 0.5;
 
-  routeProject = (point) => ({
-    x: offsetX + (point.x - minX) * scale,
-    y: offsetY + (maxZ - point.z) * scale,
-  });
+  routeProject = (point, target = { x: 0, y: 0 }) => {
+    target.x = offsetX + (point.x - minX) * scale;
+    target.y = offsetY + (maxZ - point.z) * scale;
+    return target;
+  };
 
   const svg = makeSvgElement('svg', {
     class: 'hud-route__svg',
@@ -154,7 +194,8 @@ function buildRouteMap(root) {
     return marker;
   });
 
-  const initial = routeProject(pointAt(state.progress));
+  routePoint = pointAt(state.progress);
+  const initial = routeProject(routePoint);
   routeCarMarker = makeSvgElement('circle', {
     class: 'hud-route__car',
     cx: initial.x.toFixed(2),
@@ -228,7 +269,7 @@ export function initHUD() {
   initialized = true;
   setIdentity(state.activeCarIndex, true);
   updateUnlocks();
-  unlockSignature = [...state.unlocked].sort((a, b) => a - b).join(',');
+  subscribe('unlocked', updateUnlocks);
   setApproach(approach);
 }
 
@@ -245,7 +286,12 @@ export function setApproach(value) {
 
   const index = Math.max(0, Math.min(CARS.length - 1, Math.trunc(Number(value.index) || 0)));
   const proximity = Math.max(0, Math.min(1, Number(value.proximity) || 0));
-  approach = { index, proximity };
+  if (approach) {
+    approach.index = index;
+    approach.proximity = proximity;
+  } else {
+    approach = { index, proximity };
+  }
 
   if (approachRoot) {
     approachName.textContent = getCar(index).displayName;
@@ -284,25 +330,41 @@ export function update(dt) {
 
   if (state.activeCarIndex !== renderedCarIndex) setIdentity(state.activeCarIndex);
 
+  // Direction only changes after a meaningful signed-velocity transition; the CSS
+  // owns the eased visual response, so this costs no DOM work on steady frames.
+  updateDirectionIndicator();
+
   const metres = Math.max(0, Math.round(Math.max(0, Math.min(1, state.progress)) * TRACK_LENGTH));
-  distanceValue.textContent = `${String(metres).padStart(4, '0')} M`;
+  if (metres !== writtenDistance) {
+    writtenDistance = metres;
+    distanceValue.textContent = `${String(metres).padStart(4, '0')} M`;
+  }
 
   const speedTarget = Math.max(0, Math.min(1, Number(state.speed01) || 0));
   displayedSpeed += (speedTarget - displayedSpeed) * (1 - Math.exp(-safeDt * 7));
-  speedFill.style.transform = `scaleX(${displayedSpeed.toFixed(4)})`;
+  const speedStep = Math.round(displayedSpeed * 200) / 200;
+  if (speedStep !== writtenSpeed) {
+    writtenSpeed = speedStep;
+    speedFill.style.transform = `scaleX(${displayedSpeed.toFixed(4)})`;
+  }
 
-  const projected = routeProject(pointAt(state.progress));
-  routeCarMarker.setAttribute('cx', projected.x.toFixed(2));
-  routeCarMarker.setAttribute('cy', projected.y.toFixed(2));
-
-  const currentUnlocked = state.unlocked instanceof Set ? state.unlocked : new Set();
-  const nextUnlockSignature = [...currentUnlocked].sort((a, b) => a - b).join(',');
-  if (nextUnlockSignature !== unlockSignature) {
-    unlockSignature = nextUnlockSignature;
-    updateUnlocks();
+  routeProject(pointAt(state.progress, routePoint), routeProjection);
+  const routeX = Math.round(routeProjection.x * 100);
+  const routeY = Math.round(routeProjection.y * 100);
+  if (routeX !== writtenRouteX) {
+    writtenRouteX = routeX;
+    routeCarMarker.setAttribute('cx', String(routeX / 100));
+  }
+  if (routeY !== writtenRouteY) {
+    writtenRouteY = routeY;
+    routeCarMarker.setAttribute('cy', String(routeY / 100));
   }
 
   const approachTarget = approach ? approach.proximity : 0;
   displayedApproach += (approachTarget - displayedApproach) * (1 - Math.exp(-safeDt * 9));
-  approachFill.style.transform = `scaleX(${displayedApproach.toFixed(4)})`;
+  const approachStep = Math.round(displayedApproach * 200) / 200;
+  if (approachStep !== writtenApproach) {
+    writtenApproach = approachStep;
+    approachFill.style.transform = `scaleX(${displayedApproach.toFixed(4)})`;
+  }
 }

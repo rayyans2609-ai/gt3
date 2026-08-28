@@ -171,6 +171,10 @@ async function boot() {
   });
 
   // ---- per-frame ---------------------------------------------------------
+  let dispatchedApproachIndex = -1;
+  let dispatchedApproachStep = -1;
+  let dispatchedAudioApproachStep = -1;
+
   registerUpdate(scrollDrive.update);
   registerUpdate(carRig.update);
   registerUpdate(coins.updateCoins);
@@ -182,8 +186,19 @@ async function boot() {
   registerUpdate((dt) => {
     // Approach cue drives both the HUD badge and the rising ping.
     const approach = coins.getApproach();
-    hud.setApproach(approach);
-    audio.setCoinApproach(approach ? approach.proximity : 0);
+    const index = approach ? approach.index : -1;
+    const proximity = approach ? approach.proximity : 0;
+    const step = Math.round(proximity * 100) / 100;
+
+    if (index !== dispatchedApproachIndex || step !== dispatchedApproachStep) {
+      dispatchedApproachIndex = index;
+      dispatchedApproachStep = step;
+      hud.setApproach(approach);
+    }
+    if (step !== dispatchedAudioApproachStep) {
+      dispatchedAudioApproachStep = step;
+      audio.setCoinApproach(proximity);
+    }
   });
   registerUpdate(hud.update);
   registerUpdate(specPanel.update);

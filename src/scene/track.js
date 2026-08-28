@@ -577,7 +577,7 @@ export function buildTrack() {
       vertexColors: true,
       flatShading: true,
     }),
-    true,
+    false,
   ));
 
   group.matrixAutoUpdate = false;

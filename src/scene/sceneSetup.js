@@ -32,20 +32,22 @@ export const ADAPTIVE_RES = {
   minSwitchMs: 250, // floor between switches; target realloc is not free
 };
 
-// The sun tracks the car, so a tight shadow volume is sufficient. Measured with GPU
-// timer queries, shadows are ~15% of frame cost (6.7 of 43 ms) and this tightening is
-// worth ~0.7 ms; the volume shrank 120->52 units while the map only halved, so texel
-// density actually rose (17 -> ~20/unit). Adjust mapSize/extent if quality needs work.
-// NOTE: an earlier wall-clock benchmark blamed shadows for 49%. That was CPU-contention
-// noise, not signal. Resolution is the real cost centre -- see ADAPTIVE_RES.
+// Shadow tuning. Measured with GPU timer queries, the shadow pass is ~15% of frame
+// cost (6.7 of 43 ms) -- NOT the bottleneck. (An earlier wall-clock benchmark blamed
+// shadows for 49%; that was CPU-contention noise on a loaded 4-core machine. Resolution
+// is the real cost centre -- see ADAPTIVE_RES.)
+// These are deliberately left at their ORIGINAL values. Tightening the volume to 26
+// units and halving the map bought only 0.73 ms (1.7%) but visibly cost the cast
+// shadows of coins and roadside objects further than 26 units ahead, which popped in
+// as the car approached. Not a trade worth making. Do not "optimise" these again
+// without an A/B screenshot at a coin.
 export const SHADOW_TUNE = {
-  mapSize: 1024,
-  extent: 26,
+  mapSize: 2048,
+  extent: 60,
   near: 0.5,
-  far: 180,
+  far: 260,
   normalBias: 0.02,
 };
-
 const atmosphere = {
   fogColor: new THREE.Color(0xb8ad94),
   fogNear: 105,

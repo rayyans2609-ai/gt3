@@ -157,7 +157,111 @@ delegation runs through the `codex` CLI in Bash instead. Same quota, same split.
 - SPEC §16 hard constraints re-checked against a start-line capture: translucent panels,
   editorial type, restrained palette, no arcade chrome. Compliant.
 
+## ITERATION 1 — PERFORMANCE PASS (2026-08-28 night)
+
+Governing brief: ITERATION1_PERF_PASS.md. Goal was scroll smoothness/controllability.
+
+### MEASUREMENT: read this before touching performance again
+The target machine is a MacBook Air class box: **Intel UHD Graphics 617**, 4 cores, 8 GB,
+2560x1600 Retina => 1280x800 CSS at devicePixelRatio 2.
+
+Three measurement traps burned real time here. Do not repeat them:
+1. **Never profile through `--enable-unsafe-swiftshader`.** acceptance.mjs and qa.mjs pass
+   it, which forces SOFTWARE rendering. Fine for functional QA, meaningless for perf.
+   Headless `'new'` uses the real GPU on this machine, so no visible window is needed.
+2. **Wall-clock frame timing is unusable on this machine.** It runs at load average 5-27
+   on 4 cores from the user's own apps (VS Code alone was 44% CPU). Repeated runs of an
+   IDENTICAL config spanned 17-85 ms. A `gl.finish()` bench does not save you -- it blocks
+   the contended CPU thread. Use **EXT_disjoint_timer_query_webgl2** (scripts/perf-gpu.mjs,
+   perf-attrib.mjs): it measures GPU execution only and is immune to CPU scheduling.
+   My first attribution said "shadows are 49% of frame cost". That was noise. It was wrong.
+3. **Instant-seeking along the route silently measures the MONTAGE, not scrolling.**
+   Jumping across coins triggers 15.6 s montages that lock scrolling and render through
+   studio.js's SEPARATE renderer. Several early "scroll" baselines were montage playback.
+   Driving to the finish is equally wrong: mode becomes 'finish' and never returns.
+   scripts/perf-ab.mjs measures inside the coin-free band before the first coin (p<0.065)
+   with a per-step bound, and tags/discards every non-race frame.
+
+### Root cause: FILL RATE, not geometry
+GPU-timer cost is almost perfectly linear in pixel count, ~9.8 ms per megapixel:
+    dpr 2.00  4.1 MPix  40.4 ms  ->  25 fps ceiling   (what was shipping)
+    dpr 1.50  2.3 MPix  25.3 ms  ->  40 fps
+    dpr 1.25  1.6 MPix  19.1 ms  ->  52 fps
+    dpr 1.00  1.0 MPix  12.9 ms  ->  77 fps
+At dpr 2 the GPU alone capped the experience at 25 fps before any CPU work, so no amount
+of geometry/shadow optimisation could have reached smooth. Shadows are only ~15% (6.7 ms);
+hiding the 270k-triangle grass saves 12.3 ms but that is also fill (it covers the screen).
+
+### Accepted
+| Job | Tier | What |
+|-----|------|------|
+| K | Terra | Adaptive render resolution (dpr 1.0 scrolling / full at rest, 420 ms settle) |
+| L | Terra | Scroll listeners: non-passive wheel/touchmove now attach ONLY while locked |
+| M | Terra | HUD per-frame DOM writes cached; approach bridge quantised |
+| N | Terra | Scroll-direction cue (SCROLL / up-REV / down-FWD) beside the telemetry |
+| — | manager | Reverted shadow tightening (see below); fixed .hud-telemetry position bug |
+
+- **Adaptive resolution** was a user-approved quality tradeoff (they chose it over a fixed
+  cap). Motion blur and speed streaking mask the softness while moving; full sharpness
+  returns at rest. Showcase/montage/fullcard force full resolution -- Showcase renders the
+  hero car through this same shared renderer and must not be soft. Render targets are
+  reallocated only on an actual level change.
+- **Non-passive wheel listeners were a real scroll-feel bug independent of frame rate.**
+  Merely REGISTERING them disables Chrome's threaded scrolling for the whole page, so every
+  wheel event had to wait on a main thread running at 7-30 fps. They only ever did anything
+  while locked, so attaching them only while locked is behaviour-preserving.
+  Verified both directions: scripts/verify-scrolllock.mjs (scrolls when free, held exactly
+  during montage, restored after).
+- **Shadow tightening was REVERTED after review.** map 2048->1024 + ortho 120->52 units
+  bought only 0.73 ms (1.7%) but an A/B screenshot showed it removed the cast shadows of
+  coins and roadside objects beyond 26 units, which popped in as the car approached. Bad
+  trade under the brief. Only the curbs change was kept (they cast onto coplanar asphalt
+  where the shadow is invisible; 25k caster triangles for nothing).
+- **.hud-telemetry regression caught in review:** the cue job added `position: relative`
+  to `.hud-telemetry`, which sits on the SAME element as `.hud-corner` and later in the
+  stylesheet -- it overrode `position: absolute` and dropped the whole telemetry panel out
+  of the bottom-left corner to the top of #hud.
+
+### Before/after (scripts/perf-ab.mjs, identical harness run against b5072d8 and HEAD)
+Frame times during real CDP wheel input, race frames only, coin-free band:
+| scenario | BEFORE p50 | AFTER p50 | BEFORE p95 | AFTER p95 |
+|----------|-----------|-----------|-----------|-----------|
+| idle          | 68 ms | 40 ms |  89 ms | 84 ms |
+| slow scroll   | 59 ms | 32 ms | 183 ms | 78 ms |
+| fast scroll   | 64 ms | 32 ms | 220 ms | 52 ms |
+Zero frames discarded in the final run. ~2x on p50, up to 4.2x on p95.
+
+### Regression status
+- scripts/acceptance.mjs: 10/10 unlocks in roster order, scrollY 9900, narration playing,
+  finish reached, ZERO console errors, ZERO failed requests.
+- scripts/verify-scrolllock.mjs: PASS in all three directions.
+- All 10 GLBs load, no `missing-model-placeholder` in the scene, no failed requests.
+- At-rest capture confirms canvas returns to 2560 (full dpr) and the scene is sharp.
+
+### Remaining performance limitations (NOT addressed, deliberate)
+1. **Montages still render at full resolution through a second renderer.** studio.js owns
+   its own WebGLRenderer, so ADAPTIVE_RES does not reach it. That is ~15.6 s x 10 of the
+   experience at the 25 fps ceiling. Biggest remaining win; left out of scope for this pass.
+2. **Idle is still ~25 fps** because at rest we deliberately render at full dpr. This is
+   the chosen tradeoff, not a defect.
+3. The 96 near-empty car sub-mesh draw calls and the 270k-triangle grass mesh were NOT
+   touched -- both are fill/geometry items that the resolution fix made non-critical.
+   perf-inventory.mjs still reports them if they become worth doing.
+4. The machine itself is saturated (load 5-27 on 4 cores) by the user's other apps. Some
+   observed choppiness is contention this codebase cannot fix.
+
+### Perf tooling (scripts/)
+- `perf-ab.mjs <label>` — THE before/after harness. DOM-only state detection, so it runs
+  unchanged against older commits. Use this for any perf claim about scroll feel.
+- `perf-gpu.mjs` / `perf-attrib.mjs` / `perf-dpr.mjs` — GPU timer queries: total cost,
+  stage attribution, and the resolution curve. Authoritative.
+- `perf-inventory.mjs` — scene breakdown by group: meshes, triangles, shadow casters.
+- `verify-scrolllock.mjs` — proves the lock/unlock listener lifecycle.
+- `window.__gt3` is now exported unconditionally (scene/camera/renderer/composer/passes/
+  probe) as the hook these scripts depend on.
+
 ### OPEN — remaining
+
 1. Aston Martin Vantage GT3 has NO freely licensed Wikimedia images (external
    limitation, not a code defect). The `is-imageless` path handles it. Do NOT
    fabricate substitutes.

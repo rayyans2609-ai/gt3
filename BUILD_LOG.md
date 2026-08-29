@@ -415,6 +415,61 @@ Scroll numbers improved rather than regressed, so the prewarm work during the ap
 did not cost the earlier gains. acceptance.mjs: 10/10 in roster order, zero console
 errors, zero failed requests.
 
+## P0 — TOTAL AUDIO SILENCE (2026-08-29)
+
+SYMPTOM: no audio anywhere -- no music, engine, coin, montage or narration.
+
+ROOT CAUSE (reproduced in the user's real Chrome, not inferred):
+`startAudio()` opened with `if (startPromise) return startPromise;`.
+Chrome does NOT settle `AudioContext.resume()` when it is called without user
+activation -- the promise stays **pending forever** rather than rejecting. The first
+call comes from the first scroll (via startScreen's onFirstScroll), and a wheel/scroll
+is NOT a user activation, so that attempt hung. Because it never settled:
+  - the `.then()` that resets `startPromise = null` on failure never ran,
+  - `startPromise` stayed memoised for the life of the page,
+  - every later gesture retry (`retryAudioOnGesture` -> `startAudio()`) hit the early
+    return, received the same dead promise, and did nothing.
+The context therefore stayed `suspended` forever and the entire site was silent.
+
+Observed state in the live page, after a scroll AND a genuine trusted click
+(navigator.userActivation.hasBeenActive === true):
+    ctx "suspended", raceStarted false, startPromiseMemoized TRUE,
+    gestureListeners true, all 6 buffers decoded, gains 1.0, no console errors
+i.e. assets and the WebAudio graph were entirely healthy. Nothing was muted, no request
+failed, and nothing was logged -- the failure was purely in the start lifecycle, which
+is why it presented as "everything is silent" with a clean console.
+
+THIS WAS LATENT, NOT A REGRESSION FROM THE PERF/MONTAGE WORK. The early return dates
+from ca6a630; `src/audio/audioManager.js` was untouched by every commit in the
+performance and montage passes (the only change since was the playVoice narration fix
+in 31a4050). Chrome grants autoplay by Media Engagement Index, which drifts per site
+over time, so the same code can appear to work and later go silent.
+
+FIX (one condition):
+    if (startPromise && context && context.state !== 'suspended') return startPromise;
+An in-flight attempt is reused only once the context is actually out of `suspended`.
+While still suspended, a gesture is precisely the event that lets `resume()` settle, so
+it must be allowed to make a fresh attempt. Concurrent attempts are safe: preloadAudio()
+memoises its own promise and startRaceSources() is guarded by `raceStarted`, so
+whichever attempt wins starts the mix exactly once. This corrects the lifecycle rather
+than papering over it with blind retries.
+
+VERIFIED:
+- Reproduced the stuck state in real Chrome: suspended + memoised + trusted click ->
+  still suspended, silent.
+- Deterministic proof of the fix in the live page: with a suspended context and the hung
+  promise memoised, two successive startAudio() calls now return DIFFERENT promises
+  (a fresh attempt per gesture); the old code returned the same dead object.
+- Real-browser flow after the fix: ctx `running`, raceStarted true, background and idle
+  sources live, gains healthy.
+- acceptance.mjs: 10/10 unlocks in roster order, narration playing through
+  showcase/finish, ZERO console errors, ZERO failed audio requests.
+
+KNOWN, PRE-EXISTING, NOT PART OF THIS FIX:
+`scripts/probe-voice-race.mjs` (open Showcase with 'f' as the session's ONLY gesture)
+reports "Narration unavailable". A/B against the pre-fix code shows it fails IDENTICALLY
+there, so it is unrelated to this change and was not introduced by it. Not chased.
+
 ### Remaining montage limitations (documented, NOT done)
 1. **~17 ms/frame of non-render cost during montage.** Every race per-frame update still
    runs while the montage covers the screen (carRig, coins, finishLine, hud, specPanel,

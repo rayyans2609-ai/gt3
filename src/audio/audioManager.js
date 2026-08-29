@@ -340,7 +340,20 @@ function startRaceSources() {
 
 /** Open the autoplay gate and begin the continuous race mix. Idempotent. */
 export function startAudio() {
-  if (startPromise) return startPromise;
+  // Chrome does NOT settle context.resume() when it is called without user activation:
+  // the promise stays pending forever rather than rejecting. The first call comes from
+  // the first scroll, and a wheel/scroll is not a user activation, so that attempt hangs
+  // indefinitely. Memoising it meant startPromise was never cleared (the .then below
+  // never ran), so every later gesture retry hit this early return, got the same dead
+  // promise back, and did nothing -- the context stayed suspended and the whole site was
+  // silent forever.
+  //
+  // So: only reuse an in-flight attempt once the context is actually out of 'suspended'.
+  // While it is still suspended a gesture is precisely the event that lets resume()
+  // settle, so it must be allowed to make a fresh attempt. Concurrent attempts are safe:
+  // preloadAudio() memoises its own promise and startRaceSources() is guarded by
+  // raceStarted, so whichever attempt wins the race starts the mix exactly once.
+  if (startPromise && context && context.state !== 'suspended') return startPromise;
   installGestureRetryListeners();
   if (!ensureGraph()) return Promise.resolve(false);
 

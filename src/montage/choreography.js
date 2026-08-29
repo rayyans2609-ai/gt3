@@ -54,72 +54,44 @@ export const SHOTS = [
     // 1 — wide 3/4 front. The establishing shot. Car turns slowly on the turntable
     // while the camera holds almost still, so the CAR is the thing that moves.
     id: 'wide-three-quarter',
-    duration: 1.15,
+    duration: 2.0,
     ease: 'drift',
-    fov: [37.338235, 36.661765],
-    from:     { x: -8.430228, y: 2.433824, z: -4.625460 },
-    to:       { x: -8.247834, y: 2.366176, z: -4.887283 },
-    lookFrom: { x: 0, y: 0.833456, z: 0 },
-    lookTo:   { x: 0, y: 0.816544, z: 0 },
-    turntable: [9.029412, 23.235294],
-    blend: 0.2,
+    fov: [37.588235, 36.411765],
+    from:     { x: -8.497634, y: 2.458824, z: -4.528699 },
+    to:       { x: -8.180428, y: 2.341176, z: -4.984044 },
+    lookFrom: { x: 0, y: 0.839706, z: 0 },
+    lookTo:   { x: 0, y: 0.810294, z: 0 },
+    turntable: [9.029412, 33.735294],
+    blend: 0.25,
   },
   {
-    // 2 — low tracking shot along the flank, front to rear. Camera skims the ground,
-    // the car stops rotating so the move reads as pure lateral travel down the body.
-    id: 'flank-tracking',
-    duration: 1.0,
-    ease: 'settle',
-    fov: [30, 30],
-    from:     { x: -4.694290, y: 0.655294, z: -0.469017 },
-    to:       { x: -4.410032, y: 0.684706, z:  1.807421 },
-    lookFrom: { x: -0.466160, y: 0.769412, z: -0.504954 },
-    lookTo:   { x: -0.327675, y: 0.810588, z:  0.604080 },
-    turntable: [23.235294, 25],
-    blend: 0.16,
-  },
-  {
-    // 3 — close detail. Rear wing and diffuser: the most distinctive, most reliably
+    // 2 — close detail. Rear wing and diffuser: the most distinctive, most reliably
     // well-modelled area on a GT3 car, and the one that says "race car" fastest.
     id: 'rear-wing-detail',
-    duration: 0.8,
+    duration: 1.8,
     ease: 'drift',
-    fov: [25.285714, 24.714286],
-    from:     { x: -1.607143, y: 1.742857, z: 4.421429 },
-    to:       { x: -1.292857, y: 1.657143, z: 4.278571 },
-    lookFrom: { x: -0.128571, y: 1.215714, z: 1.957143 },
-    lookTo:   { x: -0.071429, y: 1.164286, z: 1.842857 },
-    turntable: [25, 29],
-    roll: [-1.607143, -0.892857],
-    blend: 0.14,
+    fov: [25.642856, 24.357144],
+    from:     { x: -1.803572, y: 1.796428, z: 4.510715 },
+    to:       { x: -1.096428, y: 1.603572, z: 4.189285 },
+    lookFrom: { x: -0.164285, y: 1.247856, z: 2.028572 },
+    lookTo:   { x: -0.035715, y: 1.132143, z: 1.771428 },
+    turntable: [33.735294, 42.735294],
+    roll: [-2.053572, -0.446428],
+    blend: 0.3,
   },
   {
-    // 4 — high front three-quarter looking down over the roof and nose. Reads the
-    // silhouette and the livery from above, which is how the car is seen in the race.
-    id: 'roof-descend',
-    duration: 0.85,
-    ease: 'settle',
-    fov: [33.326923, 32.673077],
-    from:     { x: 4.909386, y: 3.926923, z: -3.935300 },
-    to:       { x: 4.663776, y: 3.273077, z: -4.383027 },
-    lookFrom: { x: 0.108993, y: 0.892788, z: -0.557719 },
-    lookTo:   { x: 0.140344, y: 0.837212, z: -0.718146 },
-    turntable: [29, 34.884615],
-    blend: 0.15,
-  },
-  {
-    // 5 — the pull-back. Camera eases out and tilts up to hand the whole car over,
+    // 3 — the pull-back. Camera eases out and tilts up to hand the whole car over,
     // then crossfades to the race view. The morph fires on this crossfade (SPEC §10.7).
     id: 'pull-back-reveal',
-    duration: 1.2,
+    duration: 2.2,
     ease: 'reveal',
-    fov: [39.058824, 44],
-    from:     { x: -0.447035, y: 3.7, z: -12.381464 },
-    to:       { x: -0.959730, y: 4.9, z: -15.338804 },
-    lookFrom: { x: 0, y: 0.961765, z: 0 },
-    lookTo:   { x: 0, y: 1.05, z: 0 },
-    turntable: [34.884615, 42.649321],
-    blend: 0.18,
+    fov: [37.000001, 46.058823],
+    from:     { x: -0.233412, y: 3.2, z: -11.149239 },
+    to:       { x: -1.173353, y: 5.4, z: -16.571029 },
+    lookFrom: { x: 0, y: 0.925, z: 0 },
+    lookTo:   { x: 0, y: 1.086765, z: 0 },
+    turntable: [42.735294, 56.970588],
+    blend: 0.3,
     // Crossfade back to the race, overlapping the tail of this shot.
     outroBlend: 0.8,
   },
@@ -142,11 +114,14 @@ export const BEATS = {
   raceFadeOut:   { at: 0.0,  duration: 0.45 }, // race view -> studio
   backdropIn:    { at: 0.08, duration: 0.55 }, // brand colour field rises
   cardIn:        { at: 0.35, duration: 0.35 }, // info card slides up, bottom third
-  cardOut:       { at: 4.05, duration: 0.35 },
+  cardOut:       { at: 5.05, duration: 0.35 },
   audioSwell:    { at: 0.0,  duration: 0.55 }, // background.mp3 -> 115%
-  audioRestore:  { at: 4.1,  duration: 0.9 },  // back to base
-  morphFire:     { at: 4.25 },                 // car swap, hidden under the crossfade
-  raceFadeIn:    { at: 4.2,  duration: 0.8 },  // studio -> race view
+  audioRestore:  { at: 5.1,  duration: 0.9 },  // back to base
+  // The morph runs 0.85s (DURATION in src/scene/morph.js). It must start WITH the
+  // outgoing crossfade and finish before the montage ends, or the tail of the car swap
+  // plays in full view of the returned race. 5.10 + 0.85 = 5.95, inside the 6.00 end.
+  morphFire:     { at: 5.10 },                 // car swap, hidden under the crossfade
+  raceFadeIn:    { at: 5.10,  duration: 0.90 },  // studio -> race view
   skipHintIn:    { at: 0.55, duration: 0.25 }, // "ESC to skip" hairline, bottom right
 };
 

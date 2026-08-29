@@ -331,6 +331,28 @@ Across a full playthrough that is roughly 400+ s of montage reduced to ~51 s.
   legible by ~0.7 s, morph fires and the race returns correctly.
 - Race scroll performance from the previous pass is untouched (no shared files changed).
 
+### Rebalance to 3 hero shots / 6.0 s (2026-08-29, follow-up)
+5.0 s across five 0.80-1.20 s shots overshot -- it read as too quick and choppy. The
+sequence is now THREE hero shots at 6.00 s total (Sol Medium, Option A: no connector
+shots, because at these durations a 0.5 s connector flickers rather than transitions):
+    wide-three-quarter  2.00 s  blend 0.25   establishing reveal
+    rear-wing-detail    1.80 s  blend 0.30   the detail/beauty beat
+    pull-back-reveal    2.20 s  blend 0.30   hero angle + hand-off into the morph
+Motion rate is again preserved EXACTLY against the original 15.6 s values --
+0.284/0.445/2.694 units/s and 12.35/5.00/6.47 deg/s -- so the longer shots restore more
+of the original camera journey rather than replaying it faster. Turntable stays
+continuous (9.029 -> 33.735 -> 42.735 -> 56.971 deg).
+
+MANAGER FIX on top of that job: it left morphFire at 5.45, and the morph runs 0.85 s
+(morph.js DURATION), so the car swap would have finished at 6.30 -- 0.30 s AFTER the race
+view returned, breaking SPEC 10.7's "hidden under the crossfade". morphFire and
+raceFadeIn now both start at 5.10 with a 0.90 s fade, so the morph completes at 5.95,
+inside the 6.00 end. Check this arithmetic whenever the montage duration changes.
+
+Measured: 6.2 s wall clock (6.00 s + harness detection lag), 18.4 fps, p50 41 ms,
+p95 107 ms, canvas 1280. acceptance.mjs: 10/10 in roster order, no console errors, no
+failed requests.
+
 ### Remaining montage limitations (documented, NOT done)
 1. **~17 ms/frame of non-render cost during montage.** Every race per-frame update still
    runs while the montage covers the screen (carRig, coins, finishLine, hud, specPanel,

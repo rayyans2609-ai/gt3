@@ -20,7 +20,16 @@ import {
 } from './choreography.js';
 
 const DEG_TO_RAD = Math.PI / 180;
-const MAX_PIXEL_RATIO = 2;
+
+export const MONTAGE_RES = {
+  // The montage is continuous cinematic motion from first frame to last -- there
+  // is no still moment where sharpness is being judged -- so it renders at a
+  // fixed reduced ratio rather than adapting. Measured: dpr2 = 66.4ms/frame
+  // (15fps ceiling), dpr1 = 27.0ms (37fps). Raise `scale` only with a fresh
+  // measurement from scripts/perf-montage.mjs.
+  scale: 1.0,
+  max: 2,
+};
 
 let initialized = false;
 let playing = false;
@@ -43,12 +52,21 @@ let layer;
 let canvas;
 let card;
 let skipControl;
+let lastBackdropOpacity;
+let lastBackdropRise;
+let lastMontageMix;
+let lastCardAmount;
+let lastSkipAmount;
+let lastCameraFov;
+let startedAt = NaN;
 
 const completionHandlers = new Set();
 const cameraPosition = new THREE.Vector3();
 const cameraLook = new THREE.Vector3();
 const outgoingPosition = new THREE.Vector3();
 const outgoingLook = new THREE.Vector3();
+const currentCameraSample = { fov: 0, roll: 0, turntable: 0 };
+const outgoingCameraSample = { fov: 0, roll: 0, turntable: 0 };
 
 function clamp01(value) {
   return Math.min(1, Math.max(0, value));
@@ -73,7 +91,7 @@ function setVectorFromRecord(target, record) {
   return target;
 }
 
-function sampleShot(shot, local, positionTarget, lookTarget) {
+function sampleShot(shot, local, positionTarget, lookTarget, sampleTarget) {
   const ease = EASES[shot.ease];
   const amount = ease ? ease(clamp01(local)) : clamp01(local);
 
@@ -88,21 +106,19 @@ function sampleShot(shot, local, positionTarget, lookTarget) {
     lerpNumber(shot.lookFrom.z, shot.lookTo.z, amount),
   );
 
-  return {
-    fov: lerpNumber(shot.fov[0], shot.fov[1], amount),
-    roll: lerpNumber(shot.roll?.[0] ?? 0, shot.roll?.[1] ?? 0, amount),
-    turntable: lerpNumber(shot.turntable[0], shot.turntable[1], amount),
-  };
+  sampleTarget.fov = lerpNumber(shot.fov[0], shot.fov[1], amount);
+  sampleTarget.roll = lerpNumber(shot.roll?.[0] ?? 0, shot.roll?.[1] ?? 0, amount);
+  sampleTarget.turntable = lerpNumber(shot.turntable[0], shot.turntable[1], amount);
+  return sampleTarget;
 }
 
-function sampleShotEnd(shot, positionTarget, lookTarget) {
+function sampleShotEnd(shot, positionTarget, lookTarget, sampleTarget) {
   setVectorFromRecord(positionTarget, shot.to);
   setVectorFromRecord(lookTarget, shot.lookTo);
-  return {
-    fov: shot.fov[1],
-    roll: shot.roll?.[1] ?? 0,
-    turntable: shot.turntable[1],
-  };
+  sampleTarget.fov = shot.fov[1];
+  sampleTarget.roll = shot.roll?.[1] ?? 0;
+  sampleTarget.turntable = shot.turntable[1];
+  return sampleTarget;
 }
 
 function createBackdrop() {
@@ -314,7 +330,11 @@ function resizeRendererToDisplaySize() {
   if (!studioRenderer || !studioCamera) return;
   const width = Math.max(1, window.innerWidth);
   const height = Math.max(1, window.innerHeight);
-  const pixelRatio = Math.min(window.devicePixelRatio || 1, MAX_PIXEL_RATIO);
+  const pixelRatio = Math.min(
+    window.devicePixelRatio || 1,
+    MONTAGE_RES.max,
+    MONTAGE_RES.scale,
+  );
   const targetWidth = Math.floor(width * pixelRatio);
   const targetHeight = Math.floor(height * pixelRatio);
 
@@ -438,7 +458,7 @@ function setBrand(carData) {
 
 function applyCamera(time) {
   const { index, shot, local } = shotAt(time);
-  const current = sampleShot(shot, local, cameraPosition, cameraLook);
+  const current = sampleShot(shot, local, cameraPosition, cameraLook, currentCameraSample);
   let fov = current.fov;
   let roll = current.roll;
   let turntableAngle = current.turntable;
@@ -447,7 +467,12 @@ function applyCamera(time) {
     const shotElapsed = local * shot.duration;
     const blendDuration = Math.max(0, shot.blend || 0);
     if (blendDuration > 0 && shotElapsed < blendDuration) {
-      const previous = sampleShotEnd(SHOTS[index - 1], outgoingPosition, outgoingLook);
+      const previous = sampleShotEnd(
+        SHOTS[index - 1],
+        outgoingPosition,
+        outgoingLook,
+        outgoingCameraSample,
+      );
       const blend = EASES.settle(clamp01(shotElapsed / blendDuration));
       cameraPosition.lerpVectors(outgoingPosition, cameraPosition, blend);
       cameraLook.lerpVectors(outgoingLook, cameraLook, blend);
@@ -458,8 +483,11 @@ function applyCamera(time) {
   }
 
   studioCamera.position.copy(cameraPosition);
-  studioCamera.fov = fov;
-  studioCamera.updateProjectionMatrix();
+  if (fov !== lastCameraFov) {
+    studioCamera.fov = fov;
+    studioCamera.updateProjectionMatrix();
+    lastCameraFov = fov;
+  }
   studioCamera.up.set(0, 1, 0);
   studioCamera.lookAt(cameraLook);
   studioCamera.rotateZ(roll * DEG_TO_RAD);
@@ -495,23 +523,39 @@ function applyTimeline(time) {
   applyCamera(time);
 
   const backdropAmount = EASES.drift(beatProgress(BEATS.backdropIn, time));
-  backdrop.material.uniforms.uRise.value = backdropAmount * 1.1;
-  backdrop.material.uniforms.uOpacity.value = backdropAmount;
+  const backdropRise = backdropAmount * 1.1;
+  if (backdropRise !== lastBackdropRise) {
+    backdrop.material.uniforms.uRise.value = backdropRise;
+    lastBackdropRise = backdropRise;
+  }
+  if (backdropAmount !== lastBackdropOpacity) {
+    backdrop.material.uniforms.uOpacity.value = backdropAmount;
+    lastBackdropOpacity = backdropAmount;
+  }
 
   let montageMix = easedBeat(BEATS.raceFadeOut, time);
   if (time >= BEATS.raceFadeIn.at) {
     montageMix *= 1 - easedBeat(BEATS.raceFadeIn, time);
   }
-  layer.style.setProperty('--montage-mix', String(montageMix));
+  if (montageMix !== lastMontageMix) {
+    layer.style.setProperty('--montage-mix', String(montageMix));
+    lastMontageMix = montageMix;
+  }
 
   let cardAmount = easedBeat(BEATS.cardIn, time);
   if (time >= BEATS.cardOut.at) cardAmount *= 1 - easedBeat(BEATS.cardOut, time);
-  card.style.opacity = String(cardAmount);
-  card.style.transform = `translate3d(0, ${(1 - cardAmount) * 28}px, 0)`;
+  if (cardAmount !== lastCardAmount) {
+    card.style.opacity = String(cardAmount);
+    card.style.transform = `translate3d(0, ${(1 - cardAmount) * 28}px, 0)`;
+    lastCardAmount = cardAmount;
+  }
 
   const skipAmount = easedBeat(BEATS.skipHintIn, time);
-  skipControl.style.opacity = String(skipAmount);
-  skipControl.style.transform = `translate3d(0, ${(1 - skipAmount) * 8}px, 0)`;
+  if (skipAmount !== lastSkipAmount) {
+    skipControl.style.opacity = String(skipAmount);
+    skipControl.style.transform = `translate3d(0, ${(1 - skipAmount) * 8}px, 0)`;
+    lastSkipAmount = skipAmount;
+  }
 
   if (time >= BEATS.audioSwell.at) startMontageAudio();
   if (time >= BEATS.audioRestore.at) restoreAudio();
@@ -542,9 +586,13 @@ function finishMontage(skipped) {
   layer.classList.remove('is-active');
   layer.setAttribute('aria-hidden', 'true');
   layer.style.setProperty('--montage-mix', '0');
+  lastMontageMix = 0;
   card.style.opacity = '0';
+  lastCardAmount = 0;
   skipControl.style.opacity = '0';
+  lastSkipAmount = 0;
   backdrop.material.uniforms.uOpacity.value = 0;
+  lastBackdropOpacity = 0;
   set('mode', 'race');
   unlockScroll();
 
@@ -590,6 +638,11 @@ export function initStudio() {
   applyCamera(0);
   initialized = true;
 
+  // Read-only profiling hook, mirroring window.__gt3 for the race renderer. The montage
+  // owns a SECOND WebGL context, so scripts/perf-montage.mjs has to reach it separately.
+  window.__gt3montage = { renderer: studioRenderer, scene: studioScene,
+    camera: studioCamera, turntable };
+
   return {
     scene: studioScene,
     camera: studioCamera,
@@ -618,6 +671,7 @@ export function playMontage(carIndex) {
 
   activeCarIndex = carIndex;
   elapsed = 0;
+  startedAt = NaN;   // set on the first update tick
   morphFired = false;
   audioStarted = false;
   audioRestored = false;
@@ -648,8 +702,17 @@ export function isMontagePlaying() {
 /** Advance the montage clock from main.js's sole RAF loop. */
 export function updateMontage(dt) {
   if (!playing) return;
-  const frameTime = Number.isFinite(dt) ? Math.max(0, dt) : 0;
-  elapsed = Math.min(MONTAGE_DURATION, elapsed + frameTime);
+  // Driven by WALL CLOCK, not accumulated dt. Clock.tick() clamps dt to 0.05s to survive
+  // tab-switches, but montage frames take 55-220ms on this hardware, so accumulating dt
+  // advanced the timeline slower than real time and stretched a 5.0s montage to 6.8s.
+  // Wall clock keeps the montage exactly MONTAGE_DURATION long at any frame rate; a
+  // dropped frame now skips ahead in the timeline instead of extending it. The beat
+  // guards in applyTimeline are all `time >= at` one-shots, so skipping cannot miss the
+  // morph or the audio restore.
+  void dt;
+  const now = performance.now();
+  if (!Number.isFinite(startedAt)) startedAt = now;
+  elapsed = Math.min(MONTAGE_DURATION, (now - startedAt) / 1000);
   applyTimeline(elapsed);
 
   if (elapsed >= MONTAGE_DURATION) finishMontage(false);

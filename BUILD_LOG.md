@@ -260,6 +260,92 @@ Zero frames discarded in the final run. ~2x on p50, up to 4.2x on p95.
 - `window.__gt3` is now exported unconditionally (scene/camera/renderer/composer/passes/
   probe) as the hook these scripts depend on.
 
+## ITERATION 1 — MONTAGE PASS (2026-08-29)
+
+Extension of the performance pass to studio.js, which the race work did not reach.
+
+### The real problem was far worse than "15.6 seconds"
+The montage timeline was advanced by accumulated `dt`, and Clock.tick() clamps dt to
+0.05s. At the montage's actual 5.9 fps (169 ms/frame) the timeline advanced ~3.4x slower
+than real time, so the nominally 15.6 s montage took **over 40 seconds of wall clock** --
+measured, not estimated (it hit the harness's 40 s cap). Ten collections meant roughly
+seven minutes of forced cinematic at 6 fps. That is what made the site impossible to
+evaluate, and it was invisible from the source alone.
+
+### Root cause of the frame rate: fill rate again, plus RectAreaLights
+GPU timer queries on the montage renderer (scripts/perf-montage.mjs), validated with the
+car confirmed present in-scene at both bench start and end:
+    full (dpr2, rect lights, shadows)   66.4 ms  ->  15 fps ceiling
+    dpr 1.0                             27.0 ms  ->  37 fps   (saves 59%)
+    RectAreaLights disabled             35.8 ms  ->  28 fps   (saves 46%)
+    shadows disabled                    61.5 ms  ->  16 fps   (saves  7%)
+    scene: 254 draw calls, 351k triangles, 227 meshes, 3 RectAreaLights
+Cost fits ~14 ms fixed + ~12.6 ms per megapixel. The montage is ~2x more expensive than
+the race scene at equal resolution despite HALF the triangles -- that gap is the three
+RectAreaLights, whose per-fragment cost is what makes the studio lighting look premium.
+They were left ALONE deliberately: they are the cinematic identity, and the user ruled
+out degrading it for frame rate.
+
+A separate split (studio render disabled mid-montage) put non-render per-frame cost at
+~17 ms and studio render at ~27 ms, independently confirming the GPU timer.
+
+### Accepted
+| Job | Tier | What |
+|-----|------|------|
+| O | Terra | MONTAGE_RES: montage renders at fixed dpr 1.0 + per-frame alloc/DOM caching |
+| P | Sol Med | Re-choreographed all 5 shots + BEATS from 15.6 s to exactly 5.00 s |
+| — | manager | Montage clock driven by wall time instead of accumulated dt |
+
+- **Fixed rather than adaptive resolution** for the montage: unlike the race there is no
+  still moment where sharpness is being judged -- it is continuous motion from first
+  frame to last -- so it renders at dpr 1.0 throughout.
+- **The re-choreography preserves motion rate, it does not speed the montage up.** Every
+  shot's camera travel, fov sweep and turntable span were shortened in proportion to its
+  new duration, so the linear travel rate is IDENTICAL before and after:
+    wide-three-quarter  3.40->1.15 s   0.28 -> 0.28 u/s   12.35 -> 12.35 deg/s
+    flank-tracking      3.40->1.00 s   2.29 -> 2.29 u/s    1.76 ->  1.76 deg/s
+    rear-wing-detail    2.80->0.80 s   0.44 -> 0.44 u/s    5.00 ->  5.00 deg/s
+    roof-descend        2.60->0.85 s   0.98 -> 0.98 u/s    6.92 ->  6.92 deg/s
+    pull-back-reveal    3.40->1.20 s   2.69 -> 2.69 u/s    6.47 ->  6.47 deg/s
+  The camera still drifts at the same speed; it simply travels a shorter arc. Blends
+  scaled to 0.14-0.20 so no shot is mostly crossfade. MONTAGE_DURATION is now DERIVED
+  from the sum of shot durations, so the two can no longer disagree.
+- **Wall-clock montage timing.** See above -- this is what actually fixed the duration.
+  Beat guards in applyTimeline are all `time >= at` one-shots, so a skipped frame cannot
+  miss the morph or the audio restore; it just advances the timeline.
+
+### Before/after (scripts/perf-montage-pacing.mjs, same script both sides)
+| | BEFORE | AFTER |
+|---|---|---|
+| wall-clock duration | >= 40 s (hit cap) | 5.1 s |
+| fps | 5.9 | 16.4 |
+| p50 frame time | 158 ms | 60 ms |
+| p95 frame time | 286 ms | 97 ms |
+| montage canvas width | 2560 | 1280 |
+Across a full playthrough that is roughly 400+ s of montage reduced to ~51 s.
+
+### Regression status
+- acceptance.mjs: 10/10 unlocks in correct roster order, scrollY 9900, narration playing,
+  finish reached, ZERO console errors, ZERO failed requests.
+- Visual check through the sequence: 5-shot structure still reads, card is up and fully
+  legible by ~0.7 s, morph fires and the race returns correctly.
+- Race scroll performance from the previous pass is untouched (no shared files changed).
+
+### Remaining montage limitations (documented, NOT done)
+1. **~17 ms/frame of non-render cost during montage.** Every race per-frame update still
+   runs while the montage covers the screen (carRig, coins, finishLine, hud, specPanel,
+   environment). Skipping them is NOT safe naively -- the race view is visible during the
+   opening and closing crossfades, and morph/timeOfDay must keep running. Needs a proper
+   "fully covered" window. This is the biggest remaining montage win.
+2. **The three RectAreaLights cost ~46% of montage GPU.** Untouched on purpose. Any
+   attempt to replace them must be judged on a screenshot, not a frame counter.
+3. **254 draw calls / 351k triangles for one car**, from unmerged GLB sub-meshes. Same
+   underlying item as the race pass's 96 near-empty draw calls; needs one-time
+   material-preserving geometry merging at load.
+4. **Cold-cache reference images may not appear within the 5 s card.** The three local
+   JPEGs (~450 KB each) can still be loading when a montage runs on a cold profile; they
+   are present in the spec panel afterwards. Preloading on coin approach would fix it.
+
 ### OPEN — remaining
 
 1. Aston Martin Vantage GT3 has NO freely licensed Wikimedia images (external

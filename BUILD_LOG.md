@@ -353,6 +353,68 @@ Measured: 6.2 s wall clock (6.00 s + harness detection lag), 18.4 fps, p50 41 ms
 p95 107 ms, canvas 1280. acceptance.mjs: 10/10 in roster order, no console errors, no
 failed requests.
 
+### Closing hero shot + Phase 2 smoothness sweep (2026-08-29)
+
+CLOSING SHOT: the pull-back ended at 16.6 units with the fov opening to 46 deg, so the
+car shrank away exactly where the sequence should pay off. Replaced with `hero-close`: a
+slow push IN on a low front three-quarter, 7.05 -> 6.52 units, fov narrowing 34.5 -> 32.8.
+The look target is deliberately BELOW the car's centre, which lifts the car above frame
+centre so it clears the info card that owns the bottom third. Travel rate 0.27 u/s stays
+in the montage's slow-drift vocabulary (shot 1 is 0.28). Duration/blend/turntable
+unchanged, so morph and crossfade timing are untouched.
+
+### THE COIN -> MONTAGE FREEZE (the big Phase 2 find)
+Collecting a coin froze the main thread for **1643 ms**, against ~46 ms race frames.
+Instrumenting playMontage() attributed it precisely:
+    montage #1: initStudio 0, cloneModel 20, cloneGeometry 40, cardAndState 28,
+                firstRender 1713 ms   (total 1802)
+    montage #2: initStudio 0, cloneModel 12, cloneGeometry 46, cardAndState  5,
+                firstRender  927 ms   (total  990)
+It is ENTIRELY the first renderMontage(): shader program creation plus texture upload
+into the montage's SEPARATE WebGL context. It does not amortise -- each car brings its
+own materials and 34 unique textures totalling 23.8 megapixels (~95 MB).
+Geometry cloning is NOT the cause (40 ms); do not "optimise" it.
+
+Fix, in two parts, both hung off the existing coin-approach signal:
+  - `prewarmMontage(index)` builds the approaching car's hidden clone and calls
+    `compileAsync` (KHR_parallel_shader_compile is available here), so program linking
+    happens off the transition. playMontage() then REUSES that clone.
+  - compileAsync does NOT upload textures, which was the larger half. A small internal
+    rAF pump drip-feeds `initTexture()` at PREWARM_TEXTURES_PER_FRAME textures per frame.
+Trigger fires at proximity >= 0.05 (proximity is 0 at the far edge of the approach zone,
+1 at the coin), i.e. as early as the signal exists. At the original 0.45 the prewarm ran
+out of time on a fast approach and the stall was still ~890 ms.
+
+TUNING NOTE -- the drip rate is a genuine tradeoff, measured:
+    1 tex/frame: normal approach 377 ms stall, 22 ms race frames; fast charge 1264 ms
+    2 tex/frame: normal approach 208 ms stall, 24 ms race frames; fast charge ~1100 ms
+    3 tex/frame: fast charge 248 ms stall BUT race frames during approach rose to 224 ms
+2 is shipped: it gives the best NORMAL-USE profile (8x better stall at no smoothness
+cost). 3 only helps an artificial hard-charge-at-the-coin case while visibly degrading
+the driving it is supposed to protect. A player who sprints at a coin still sees a stall;
+there is not enough approach time to hide 95 MB of uploads.
+
+### MONTAGE CARD IMAGES WERE A BUG, NOT A CACHE MISS
+The card's thumbnails rendered as broken placeholders. This was assumed to be cold-cache
+latency. It was not: `image.src = source` assigned the OBJECT, since car.images entries
+are `{ src, width, height, title, author, licence }`, producing
+`src="[object Object]"` and naturalWidth 0. It could never have loaded, at any duration.
+specPanel.js and fullscreenCard.js already resolved `image.src || image.url` correctly --
+only the montage card was wrong. Fixed, and the preload path was written with the same
+mistake and fixed with it. Thumbnails now load and are `complete` at montage open.
+
+### Phase 2 measured results
+| | before | after |
+|---|---|---|
+| coin -> montage stall (normal approach) | 1643 ms | 208 ms |
+| montage card thumbnails | never loaded (broken src) | loaded, cached before open |
+| scroll p50 idle / slow / fast | 40 / 32 / 32 ms | 27 / 25 / 30 ms |
+| scroll p95 fast | 52 ms | 38 ms |
+| montage | 6.5 s, 16.3 fps | 5.9 s, 18.2 fps |
+Scroll numbers improved rather than regressed, so the prewarm work during the approach
+did not cost the earlier gains. acceptance.mjs: 10/10 in roster order, zero console
+errors, zero failed requests.
+
 ### Remaining montage limitations (documented, NOT done)
 1. **~17 ms/frame of non-render cost during montage.** Every race per-frame update still
    runs while the montage covers the screen (carRig, coins, finishLine, hud, specPanel,

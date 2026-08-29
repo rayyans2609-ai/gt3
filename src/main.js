@@ -174,6 +174,7 @@ async function boot() {
   let dispatchedApproachIndex = -1;
   let dispatchedApproachStep = -1;
   let dispatchedAudioApproachStep = -1;
+  let prewarmedApproachIndex = -1;
 
   registerUpdate(scrollDrive.update);
   registerUpdate(carRig.update);
@@ -198,6 +199,14 @@ async function boot() {
     if (step !== dispatchedAudioApproachStep) {
       dispatchedAudioApproachStep = step;
       audio.setCoinApproach(proximity);
+    }
+    // Fire as early as the approach signal exists (proximity is 0 at the far edge of
+    // the approach zone, 1 at the coin). The prewarm needs wall-clock time to link
+    // programs and drip-feed 34 texture uploads; at 0.45 a fast charge at the coin left
+    // it unfinished and the transition still stalled ~890ms. Measured at 0.05: see BUILD_LOG.
+    if (index >= 0 && index !== prewarmedApproachIndex && proximity >= 0.05) {
+      prewarmedApproachIndex = index;
+      void studio.prewarmMontage(index).catch(() => {});
     }
   });
   registerUpdate(hud.update);

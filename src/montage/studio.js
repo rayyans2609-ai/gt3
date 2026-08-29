@@ -20,6 +20,19 @@ import {
 } from './choreography.js';
 
 const DEG_TO_RAD = Math.PI / 180;
+const PREWARM_TEXTURES_PER_FRAME = 2;
+const CAR_TEXTURE_PROPERTIES = [
+  'map',
+  'normalMap',
+  'roughnessMap',
+  'metalnessMap',
+  'emissiveMap',
+  'aoMap',
+  'alphaMap',
+  'clearcoatMap',
+  'clearcoatNormalMap',
+  'clearcoatRoughnessMap',
+];
 
 export const MONTAGE_RES = {
   // The montage is continuous cinematic motion from first frame to last -- there
@@ -36,6 +49,13 @@ let playing = false;
 let elapsed = 0;
 let activeCarIndex = -1;
 let studioCar = null;
+let prewarmedCar = null;
+let prewarmedCarIndex = -1;
+let prewarmPromise = null;
+let prewarmInFlightIndex = -1;
+let prewarmTextureQueue = [];
+let prewarmTexturePumpHandle = null;
+let prewarmTexturePumpCar = null;
 let morphFired = false;
 let audioStarted = false;
 let audioRestored = false;
@@ -67,6 +87,8 @@ const outgoingPosition = new THREE.Vector3();
 const outgoingLook = new THREE.Vector3();
 const currentCameraSample = { fov: 0, roll: 0, turntable: 0 };
 const outgoingCameraSample = { fov: 0, roll: 0, turntable: 0 };
+const preloadedCardImages = new Set();
+const prewarmedCarTextures = new WeakMap();
 
 function clamp01(value) {
   return Math.min(1, Math.max(0, value));
@@ -362,7 +384,10 @@ function makeCard(carData) {
     const gallery = element('div', 'montage-card__gallery');
     for (const [index, source] of images.entries()) {
       const image = element('img', 'montage-card__image');
-      image.src = source;
+      // car.images entries are objects ({ src, width, height, title, author, licence }),
+      // not URL strings. Assigning the object gave src="[object Object]", so every
+      // montage card thumbnail was a broken image.
+      image.src = typeof source === 'string' ? source : source.src;
       image.alt = `${carData.displayName} reference ${index + 1}`;
       image.loading = 'eager';
       gallery.append(image);
@@ -427,13 +452,69 @@ function cloneGeometryInstances(root) {
   });
 }
 
-function disposeStudioCar() {
-  if (!studioCar) return;
-  turntable.remove(studioCar);
+function collectCarTextures(root) {
+  const textures = new Set();
+  root.traverse((object) => {
+    if (!object.isMesh) return;
+    const materials = Array.isArray(object.material) ? object.material : [object.material];
+    for (const material of materials) {
+      if (!material) continue;
+      for (const property of CAR_TEXTURE_PROPERTIES) {
+        const texture = material[property];
+        if (texture && texture.isTexture) textures.add(texture);
+      }
+    }
+  });
+  return textures;
+}
+
+function cancelPrewarmTexturePump() {
+  if (prewarmTexturePumpHandle !== null) {
+    cancelAnimationFrame(prewarmTexturePumpHandle);
+    prewarmTexturePumpHandle = null;
+  }
+  prewarmTextureQueue = [];
+  prewarmTexturePumpCar = null;
+}
+
+function pumpPrewarmTextures() {
+  prewarmTexturePumpHandle = null;
+  if (playing || prewarmTexturePumpCar !== prewarmedCar) {
+    cancelPrewarmTexturePump();
+    return;
+  }
+
+  for (let count = 0; count < PREWARM_TEXTURES_PER_FRAME; count += 1) {
+    const texture = prewarmTextureQueue.shift();
+    if (!texture) break;
+    studioRenderer.initTexture(texture);
+  }
+
+  if (prewarmTextureQueue.length === 0) {
+    cancelPrewarmTexturePump();
+    return;
+  }
+  prewarmTexturePumpHandle = requestAnimationFrame(pumpPrewarmTextures);
+}
+
+function startPrewarmTexturePump(car) {
+  cancelPrewarmTexturePump();
+  const textures = prewarmedCarTextures.get(car) || collectCarTextures(car);
+  prewarmedCarTextures.set(car, textures);
+  prewarmTextureQueue = [...textures];
+  prewarmTexturePumpCar = car;
+  if (prewarmTextureQueue.length > 0) {
+    prewarmTexturePumpHandle = requestAnimationFrame(pumpPrewarmTextures);
+  }
+}
+
+function disposeCarClone(car) {
+  if (!car) return;
+  turntable.remove(car);
 
   const geometries = new Set();
   const materials = new Set();
-  studioCar.traverse((object) => {
+  car.traverse((object) => {
     if (!object.isMesh) return;
     if (object.geometry) geometries.add(object.geometry);
     if (Array.isArray(object.material)) {
@@ -446,7 +527,31 @@ function disposeStudioCar() {
   for (const geometry of geometries) geometry.dispose();
   // Textures are deliberately shared with the preloaded race models and must survive.
   for (const material of materials) material.dispose();
+}
+
+function disposeStudioCar() {
+  if (!studioCar) return;
+  disposeCarClone(studioCar);
   studioCar = null;
+}
+
+function disposePrewarmedCar() {
+  cancelPrewarmTexturePump();
+  if (prewarmedCar) disposeCarClone(prewarmedCar);
+  prewarmedCar = null;
+  prewarmedCarIndex = -1;
+  prewarmPromise = null;
+  prewarmInFlightIndex = -1;
+}
+
+function preloadCardImages(carIndex) {
+  for (const source of CARS[carIndex].images.slice(0, 3)) {
+    const url = typeof source === 'string' ? source : source?.src;
+    if (!url || preloadedCardImages.has(url)) continue;
+    preloadedCardImages.add(url);
+    const image = new Image();
+    image.src = url;
+  }
 }
 
 function setBrand(carData) {
@@ -651,6 +756,46 @@ export function initStudio() {
   };
 }
 
+/** Compile the approaching car in the studio context before its montage begins. */
+export async function prewarmMontage(carIndex) {
+  if (playing) return;
+  if (!Number.isInteger(carIndex) || carIndex < 0 || carIndex >= CARS.length) return;
+  if (carIndex === prewarmedCarIndex || carIndex === prewarmInFlightIndex) {
+    return prewarmPromise || undefined;
+  }
+
+  if (prewarmedCar) disposePrewarmedCar();
+
+  initStudio();
+  preloadCardImages(carIndex);
+
+  const clone = cloneCarModel(carIndex);
+  // Keep this in sync with playMontage: the montage owns private geometry instances.
+  cloneGeometryInstances(clone);
+  clone.name = `montage-${CARS[carIndex].id}`;
+  clone.visible = false;
+  turntable.add(clone);
+  prewarmedCar = clone;
+  prewarmedCarIndex = carIndex;
+  prewarmInFlightIndex = carIndex;
+
+  startPrewarmTexturePump(clone);
+
+  const compilePromise = studioRenderer.compileAsync(studioScene, studioCamera);
+  prewarmPromise = compilePromise;
+  try {
+    await compilePromise;
+  } catch (error) {
+    if (prewarmedCar === clone) disposePrewarmedCar();
+    throw error;
+  } finally {
+    if (prewarmPromise === compilePromise) {
+      prewarmPromise = null;
+      prewarmInFlightIndex = -1;
+    }
+  }
+}
+
 /** Begin the authoritative 15.6 second montage for a preloaded roster entry. */
 export function playMontage(carIndex) {
   if (playing) return false;
@@ -659,14 +804,29 @@ export function playMontage(carIndex) {
   }
 
   initStudio();
-  const clone = cloneCarModel(carIndex);
-  // cloneCarModel gives us private materials. Geometry is cloned here as well so
-  // montage cleanup can dispose it without invalidating the preloaded race model.
-  cloneGeometryInstances(clone);
+  // The montage render path takes ownership from here; leave any remaining uploads
+  // to that render instead of competing with it from a separate RAF.
+  cancelPrewarmTexturePump();
+  let clone;
+  if (prewarmedCarIndex === carIndex && prewarmedCar) {
+    clone = prewarmedCar;
+    clone.visible = true;
+    prewarmedCar = null;
+    prewarmedCarIndex = -1;
+    prewarmPromise = null;
+    prewarmInFlightIndex = -1;
+  } else {
+    // A stale prewarm cannot remain in the turntable once a different montage owns it.
+    disposePrewarmedCar();
+    clone = cloneCarModel(carIndex);
+    // cloneCarModel gives us private materials. Geometry is cloned here as well so
+    // montage cleanup can dispose it without invalidating the preloaded race model.
+    cloneGeometryInstances(clone);
+    turntable.add(clone);
+  }
 
   studioCar = clone;
   studioCar.name = `montage-${CARS[carIndex].id}`;
-  turntable.add(studioCar);
   turntable.rotation.set(0, 0, 0);
 
   activeCarIndex = carIndex;

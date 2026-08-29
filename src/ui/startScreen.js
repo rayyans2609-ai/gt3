@@ -1,7 +1,7 @@
 import { state } from '../core/state.js';
 import { onFirstScroll } from '../scroll/scrollDrive.js';
 import { preloadCars } from '../scene/cars.js';
-import { preloadAudio, startAudio } from '../audio/audioManager.js';
+import { preloadAudio } from '../audio/audioManager.js';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
 const DISMISS_DURATION = 1300;
@@ -169,8 +169,6 @@ export function initStartScreen() {
 
   onFirstScroll(() => {
     dismissStartScreen();
-    // This first user gesture is the browser autoplay gate for the whole race mix.
-    void startAudio();
   });
 
   if (state.started) dismissStartScreen();

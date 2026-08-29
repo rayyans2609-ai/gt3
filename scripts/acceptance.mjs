@@ -58,6 +58,26 @@ let s = await probe();
 console.log('START      ', JSON.stringify(s));
 await shot('01_start');
 
+// Audio is now started ONLY by the explicit Sound On control (scroll no longer unlocks
+// it), so the harness has to click it or every audio assertion below is vacuous.
+const soundOn = await page.evaluate(() => {
+  const b = [...document.querySelectorAll('button')].find((x) => /sound/i.test(x.textContent));
+  if (!b) return 'control missing';
+  const r = b.getBoundingClientRect();
+  return { x: Math.round(r.x + r.width / 2), y: Math.round(r.y + r.height / 2) };
+});
+if (typeof soundOn === 'object') {
+  await page.mouse.click(soundOn.x, soundOn.y);
+  await wait(2500);
+  const label = await page.evaluate(() => {
+    const b = [...document.querySelectorAll('button')].find((x) => /sound/i.test(x.textContent));
+    return b ? b.textContent.trim() : '?';
+  });
+  console.log(`SOUND ON    clicked -> "${label}"`);
+} else {
+  console.log('SOUND ON    FAILED:', soundOn);
+}
+
 // Kick the handoff.
 await page.mouse.wheel({ deltaY: 240 });
 await wait(2000);

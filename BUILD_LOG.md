@@ -470,6 +470,59 @@ KNOWN, PRE-EXISTING, NOT PART OF THIS FIX:
 reports "Narration unavailable". A/B against the pre-fix code shows it fails IDENTICALLY
 there, so it is unrelated to this change and was not introduced by it. Not chased.
 
+## AUDIO: EXPLICIT "SOUND ON" CONTROL (2026-08-29)
+
+Replaces scroll-as-autoplay-unlock entirely. After the P0 silence bug, the audio
+contract no longer depends on browser autoplay heuristics at all:
+  1. the site loads with audio NOT started,
+  2. a subtle "SOUND OFF" control sits in the top-right (appended into #hud-topright,
+     alongside the time-of-day selector, in the same editorial idiom),
+  3. the first trusted click calls startAudio() and starts the background + engine/idle
+     mix; on success the control flips to "SOUND ON",
+  4. every later click is only setMasterMuted(!isMuted()) -- it never re-enters
+     startAudio() and never recreates the AudioContext,
+  5. coin, montage, narration and finish audio continue through the existing system.
+
+OBSOLETE COMPLEXITY REMOVED
+- `startScreen.js` no longer calls startAudio() from onFirstScroll. It still dismisses
+  the start screen and still runs preloadAudio() for the loading readout -- decoding
+  buffers early is still wanted, it just must not try to start playback.
+- `audioManager.js` lost the entire gesture-unlock machinery, which only ever existed to
+  retry after a scroll failed to unlock: `installGestureRetryListeners`,
+  `removeGestureRetryListeners`, `retryAudioOnGesture`, `gestureRetryListenersInstalled`.
+  Keeping them would have been a second competing initialisation path.
+- `playVoice()` no longer does `if (!raceStarted) { await startAudio(); ... }`. That
+  existed because opening Showcase USED to be the gesture that started audio; it is not
+  any more, and awaiting a start that was never user-initiated would hang forever on a
+  suspended context. It is back to a plain `if (!raceStarted) return false;` -- narration
+  correctly reads as unavailable until the user turns sound on.
+- `setMasterMuted` / `isMuted` already existed and were dead code; they are now the
+  toggle. Nothing new was added to the audio graph.
+
+KEPT: the P0 defensive guard in startAudio()
+    if (startPromise && context && context.state !== 'suspended') return startPromise;
+There is now exactly ONE call site for startAudio() (the control's first-click branch),
+so this should never be load-bearing again, but it costs nothing and stops a hung
+resume() from ever wedging the start path a second time.
+
+VERIFIED IN REAL CHROME (the user's browser, not headless)
+- fresh reload, scrolled around without touching the control -> stays "SOUND OFF",
+  no audio, no errors, no stuck promise.
+- one trusted click -> label flips to "SOUND ON", aria-pressed true. The label only
+  flips when startAudio() resolves TRUE, which requires raceStarted, so this is direct
+  evidence the mix actually started.
+- second click -> "SOUND OFF" (muted); third click -> "SOUND ON". The third was an
+  UNTRUSTED programmatic .click() and still worked, proving that path only ramps master
+  gain and needs no activation.
+- acceptance.mjs (updated to click the control, since scroll no longer unlocks audio and
+  every audio assertion would otherwise be vacuous): 10/10 unlocks in roster order,
+  narration playing through showcase AND finish -- i.e. audio survives
+  race -> coin -> montage -> morph -> race -> finish -- ZERO console errors, ZERO failed
+  audio requests.
+
+NOTE: scripts/acceptance.mjs now clicks Sound On during startup. Any future audio
+assertion in a harness must do the same or it is testing nothing.
+
 ### Remaining montage limitations (documented, NOT done)
 1. **~17 ms/frame of non-render cost during montage.** Every race per-frame update still
    runs while the montage covers the screen (carRig, coins, finishLine, hud, specPanel,

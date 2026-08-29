@@ -62,6 +62,7 @@ async function boot() {
   const hud = await import('./ui/hud.js');
   const specPanel = await import('./ui/specPanel.js');
   const todSelector = await import('./ui/todSelector.js');
+  const soundControl = await import('./ui/soundControl.js');
   const showcase = await import('./ui/showcase.js');
   const fullscreenCard = await import('./ui/fullscreenCard.js');
   const startScreen = await import('./ui/startScreen.js');
@@ -87,6 +88,7 @@ async function boot() {
   fullscreenCard.initFullscreenCard();
   hud.initHUD();
   todSelector.initTodSelector();
+  soundControl.initSoundControl();
   startScreen.initStartScreen();
   finishScreen.initFinishScreen();
 

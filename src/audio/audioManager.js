@@ -45,7 +45,6 @@ let voiceBus = null;
 let preloadPromise = null;
 let preloadCompleted = 0;
 let startPromise = null;
-let gestureRetryListenersInstalled = false;
 let raceStarted = false;
 let backgroundSource = null;
 let engineStartSource = null;
@@ -60,28 +59,6 @@ let masterMuted = false;
 let activeVoice = null;
 let activeVoiceIndex = -1;
 let voiceRequestId = 0;
-
-function retryAudioOnGesture() {
-  void startAudio();
-}
-
-function installGestureRetryListeners() {
-  if (gestureRetryListenersInstalled || typeof window === 'undefined') return;
-
-  window.addEventListener('pointerdown', retryAudioOnGesture, { passive: true });
-  window.addEventListener('keydown', retryAudioOnGesture, { passive: true });
-  window.addEventListener('touchstart', retryAudioOnGesture, { passive: true });
-  gestureRetryListenersInstalled = true;
-}
-
-function removeGestureRetryListeners() {
-  if (!gestureRetryListenersInstalled || typeof window === 'undefined') return;
-
-  window.removeEventListener('pointerdown', retryAudioOnGesture);
-  window.removeEventListener('keydown', retryAudioOnGesture);
-  window.removeEventListener('touchstart', retryAudioOnGesture);
-  gestureRetryListenersInstalled = false;
-}
 
 function setInitialGain(node, value) {
   node.gain.setValueAtTime(value, context.currentTime);
@@ -340,21 +317,9 @@ function startRaceSources() {
 
 /** Open the autoplay gate and begin the continuous race mix. Idempotent. */
 export function startAudio() {
-  // Chrome does NOT settle context.resume() when it is called without user activation:
-  // the promise stays pending forever rather than rejecting. The first call comes from
-  // the first scroll, and a wheel/scroll is not a user activation, so that attempt hangs
-  // indefinitely. Memoising it meant startPromise was never cleared (the .then below
-  // never ran), so every later gesture retry hit this early return, got the same dead
-  // promise back, and did nothing -- the context stayed suspended and the whole site was
-  // silent forever.
-  //
-  // So: only reuse an in-flight attempt once the context is actually out of 'suspended'.
-  // While it is still suspended a gesture is precisely the event that lets resume()
-  // settle, so it must be allowed to make a fresh attempt. Concurrent attempts are safe:
-  // preloadAudio() memoises its own promise and startRaceSources() is guarded by
-  // raceStarted, so whichever attempt wins the race starts the mix exactly once.
+  // Retain an attempt only after the context has left suspended state. A failed trusted
+  // activation can otherwise leave resume() pending, and a later button click must retry.
   if (startPromise && context && context.state !== 'suspended') return startPromise;
-  installGestureRetryListeners();
   if (!ensureGraph()) return Promise.resolve(false);
 
   const attempt = (async () => {
@@ -371,9 +336,7 @@ export function startAudio() {
   })();
   startPromise = attempt;
   void attempt.then((started) => {
-    if (started) {
-      removeGestureRetryListeners();
-    } else if (startPromise === attempt) {
+    if (!started && startPromise === attempt) {
       startPromise = null;
     }
   });
@@ -528,16 +491,7 @@ export async function playVoice(carIndex) {
   const index = Number.isInteger(carIndex) ? carIndex : -1;
   if (index < 0 || index >= VOICE_FILES.length) return false;
 
-  // Opening Showcase IS the user gesture that starts audio, so the two race: the
-  // overlay opens synchronously while startAudio() is still resuming the context and
-  // preloading. Bailing here used to leave voiceEntries[index] unpopulated, which made
-  // isVoiceAvailable() false and DISABLED the play button until the card was reopened.
-  // startAudio() is memoized, so this awaits the in-flight attempt rather than starting
-  // a second one; with no user activation it resolves false and we bail as before.
-  if (!raceStarted) {
-    await startAudio();
-    if (!raceStarted) return false;
-  }
+  if (!raceStarted) return false;
 
   resetActiveVoice({ invalidateRequest: false });
   const requestId = ++voiceRequestId;

@@ -80,16 +80,23 @@ export const SHOTS = [
     blend: 0.3,
   },
   {
-    // 3 — the pull-back. Camera eases out and tilts up to hand the whole car over,
-    // then crossfades to the race view. The morph fires on this crossfade (SPEC §10.7).
-    id: 'pull-back-reveal',
+    // 3 — the closing hero. A slow, confident push IN on a low front three-quarter:
+    // the car GAINS presence right before the hand-off instead of shrinking away. The
+    // previous pull-back ended at 16.6 units with the fov opening to 46 deg, which left
+    // the car small and drained the payoff. Camera sits close (6.55 -> 6.05 units) and
+    // low, fov narrows slightly to intensify the push, and the look target rides below
+    // the car's centre so the body sits high in frame, clear of the info card that owns
+    // the bottom third. The morph fires on the crossfade out of this shot (SPEC §10.7).
+    id: 'hero-close',
     duration: 2.2,
-    ease: 'reveal',
-    fov: [37.000001, 46.058823],
-    from:     { x: -0.233412, y: 3.2, z: -11.149239 },
-    to:       { x: -1.173353, y: 5.4, z: -16.571029 },
-    lookFrom: { x: 0, y: 0.925, z: 0 },
-    lookTo:   { x: 0, y: 1.086765, z: 0 },
+    ease: 'drift',
+    fov: [34.5, 32.8],
+    from:     { x: -5.75, y: 1.35, z: -3.85 },
+    to:       { x: -5.30, y: 1.48, z: -3.50 },
+    // Aimed BELOW the car's centre on purpose: that lifts the whole car above frame
+    // centre so it clears the info card, which owns the bottom third of the screen.
+    lookFrom: { x: 0, y: 0.45, z: -0.10 },
+    lookTo:   { x: 0, y: 0.52, z:  0.05 },
     turntable: [42.735294, 56.970588],
     blend: 0.3,
     // Crossfade back to the race, overlapping the tail of this shot.

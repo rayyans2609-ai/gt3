@@ -524,11 +524,20 @@ NOTE: scripts/acceptance.mjs now clicks Sound On during startup. Any future audi
 assertion in a harness must do the same or it is testing nothing.
 
 ### Remaining montage limitations (documented, NOT done)
-1. **~17 ms/frame of non-render cost during montage.** Every race per-frame update still
-   runs while the montage covers the screen (carRig, coins, finishLine, hud, specPanel,
-   environment). Skipping them is NOT safe naively -- the race view is visible during the
-   opening and closing crossfades, and morph/timeOfDay must keep running. Needs a proper
-   "fully covered" window. This is the biggest remaining montage win.
+1. **INVESTIGATED AND DISPROVEN: the ~17 ms/frame "non-render cost during montage."** That
+   figure was never a measurement -- it was an arithmetic residual (pacing p50 ~44 ms minus
+   GPU-timer ~27 ms) with no surviving harness. Built and ran a real instrument instead:
+   `window.__gt3updates.profile()` timed every update function individually, and a runtime
+   gate (`raceUpdatesSuspended()`, window 0.55s-5.00s, 74% of the 6.00s montage) suspended
+   carRig / coins / timeOfDay / finishLine / hud / specPanel-adjacent / finishScreen /
+   sceneSetup -- the 8 systems invisible during the montage, since the race canvas is never
+   repainted while it plays. Measured: all 14 updates combined cost 0.51 ms/frame; the
+   gated 8 cost 0.31 ms/frame. An interleaved 10-montage A/B (gate alternated on/off inside
+   one browser session, so this machine's load average of 5-27 could not masquerade as an
+   effect) confirmed it: p50 50 ms both ways, -1% ("recovered"), within noise. The gating
+   code was correct -- verified live, gated systems dropped to 0 calls with the gate on --
+   and was reverted anyway because it recovers nothing. **This is not a montage win.** The
+   real cost is render, not update: see #2 below.
 2. **The three RectAreaLights cost ~46% of montage GPU.** Untouched on purpose. Any
    attempt to replace them must be judged on a screenshot, not a frame counter.
 3. **254 draw calls / 351k triangles for one car**, from unmerged GLB sub-meshes. Same

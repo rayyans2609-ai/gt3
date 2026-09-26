@@ -243,6 +243,8 @@ function buildGrassGeometry() {
   const positions = [];
   const colors = [];
   const indices = [];
+  const bounds = sampleTrackBounds();
+  const horizonY = bounds.min.y - 0.08;
   const sharedEdgeCount = Math.min(
     trackSurface?.trackEdges?.left?.length ?? 0,
     trackSurface?.trackEdges?.right?.length ?? 0,
@@ -291,7 +293,12 @@ function buildGrassGeometry() {
         const x = edge.x + outward.x * outwardStep;
         const z = edge.z + outward.z * outwardStep;
         const noise = terrainNoise(x, z);
-        const y = edge.y + terrainDisplacement(x, z, distanceFromAsphalt);
+        // Far skirts can cross a later, lower stretch of road; do not carry this
+        // edge's elevation hundreds of metres into the horizon.
+        const baseY = THREE.MathUtils.lerp(
+          edge.y, horizonY, THREE.MathUtils.smoothstep(outwardStep, 240, 530),
+        );
+        const y = baseY + terrainDisplacement(x, z, distanceFromAsphalt);
         positions.push(x, y, z);
 
         const colorMix = THREE.MathUtils.clamp(0.5 + noise * 0.48, 0.04, 0.96);
@@ -361,9 +368,7 @@ function buildGrassGeometry() {
 
   // A single low plane below the sculpted skirts guarantees that no camera angle
   // can expose the clear colour beyond the generated terrain.
-  const bounds = sampleTrackBounds();
   const horizonRadius = skyRadiusFor(bounds);
-  const horizonY = bounds.min.y - 0.08;
   const planeBase = positions.length / 3;
   // Extend past both the camera far plane and sky dome's projected edge. Linear fog
   // reaches full strength long before this geometry can terminate on screen.

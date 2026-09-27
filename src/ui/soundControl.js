@@ -1,108 +1,80 @@
-import { isMuted, setMasterMuted, startAudio } from '../audio/audioManager.js';
+import { setMasterMuted, startAudio } from '../audio/audioManager.js';
+import { state, set, subscribe } from '../core/state.js';
 
-const EASE = 'cubic-bezier(.22, .61, .36, 1)';
-let control = null;
+let layer;
+let speaker;
+let launcher;
+let pending = false;
 
-function assignStyles(element, styles) {
-  Object.assign(element.style, styles);
-  return element;
+const speakerIcon = `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 9h4l5-4v14l-5-4H4z"/><path class="speaker-wave" d="M16 9a4 4 0 0 1 0 6m2-9a8 8 0 0 1 0 12"/><path class="speaker-slash" d="M17 9l5 6m0-6l-5 6"/></svg>`;
+
+function render() {
+  if (!speaker) return;
+  const condition = pending ? 'starting' : !state.audioReady ? 'idle' : state.masterMuted ? 'muted' : 'on';
+  speaker.dataset.sound = condition;
+  speaker.setAttribute('aria-label', {
+    starting: 'Starting sound', idle: 'Start sound', muted: 'Unmute all sound', on: 'Mute all sound',
+  }[condition]);
+  speaker.setAttribute('aria-pressed', String(condition === 'on'));
+  speaker.disabled = pending;
+  launcher.setAttribute('aria-expanded', String(state.playerOpen));
+  launcher.setAttribute('aria-label', state.playerOpen ? 'Close music player' : 'Open music player');
+  layer.classList.toggle('is-open', state.playerOpen);
 }
 
-function buttonReset(button) {
-  return assignStyles(button, {
-    appearance: 'none',
-    WebkitAppearance: 'none',
-    border: '0',
-    borderRadius: '0',
-    background: 'transparent',
-    color: 'inherit',
-    cursor: 'pointer',
-    fontFamily: 'var(--font-ui)',
-    fontSize: '10px',
-    fontWeight: '300',
-    letterSpacing: '.14em',
-    lineHeight: '1.2',
-    textTransform: 'uppercase',
-  });
+// LEGACY PLACEMENT — remove with the legacy views (Phases 3–7).
+function placeForLegacyView() {
+  if (!layer) return;
+  let bottom = '24px';
+  if (!state.started) bottom = '142px';
+  else if (state.mode === 'montage') bottom = '76px';
+  else if (state.mode === 'finish') bottom = '24px';
+  layer.style.setProperty('--audio-bottom', bottom);
 }
 
-/** Mount the explicit, trusted-gesture audio control once. */
+/** Mount the global audio anchor above the legacy overlay stack. */
 export function initSoundControl() {
-  if (control) return control;
+  if (layer) return layer;
+  layer = document.getElementById('audio-layer');
+  if (!layer) throw new Error('Expected #audio-layer');
 
-  const host = document.getElementById('hud-topright');
-  if (!host) throw new Error('Expected an existing #hud-topright');
+  const anchor = document.createElement('div');
+  anchor.className = 'audio-anchor';
+  speaker = document.createElement('button');
+  speaker.type = 'button';
+  speaker.className = 'audio-control audio-speaker';
+  speaker.innerHTML = speakerIcon;
+  launcher = document.createElement('button');
+  launcher.type = 'button';
+  launcher.className = 'audio-control audio-launcher';
+  launcher.textContent = '+';
+  launcher.setAttribute('aria-controls', 'music-player');
+  anchor.append(speaker, launcher);
+  layer.append(anchor);
 
-  control = buttonReset(document.createElement('button'));
-  control.type = 'button';
-  control.className = 'sound-control';
-  control.setAttribute('aria-label', 'Sound');
-  assignStyles(control, {
-    position: 'relative',
-    zIndex: '5',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'flex-end',
-    gap: '8px',
-    width: '142px',
-    marginTop: '14px',
-    marginLeft: 'auto',
-    padding: '5px 1px 7px',
-    borderBottom: '1px solid var(--hair)',
-    color: 'rgba(237, 233, 227, .56)',
-    textAlign: 'right',
-    pointerEvents: 'auto',
-    transition: `color 420ms ${EASE}, opacity 420ms ${EASE}`,
-  });
-
-  const marker = document.createElement('span');
-  marker.setAttribute('aria-hidden', 'true');
-  assignStyles(marker, {
-    display: 'block',
-    width: '13px',
-    height: '1px',
-    background: 'var(--gold)',
-    opacity: '.35',
-    transform: 'scaleX(.55)',
-    transformOrigin: 'right center',
-    transition: `opacity 420ms ${EASE}, transform 520ms ${EASE}`,
-  });
-
-  const label = document.createElement('span');
-  control.append(marker, label);
-  host.append(control);
-
-  let started = false;
-  let starting = false;
-
-  function render() {
-    const muted = started && isMuted();
-    const on = started && !muted;
-    label.textContent = starting ? 'Sound…' : on ? 'Sound On' : 'Sound Off';
-    control.setAttribute('aria-pressed', String(on));
-    control.disabled = starting;
-    control.style.cursor = starting ? 'wait' : 'pointer';
-    control.style.opacity = starting ? '.5' : '1';
-    marker.style.opacity = on ? '1' : '.35';
-    marker.style.transform = on ? 'scaleX(1)' : 'scaleX(.55)';
-  }
-
-  control.addEventListener('click', async () => {
-    if (starting) return;
-    if (started) {
-      setMasterMuted(!isMuted());
-      render();
+  speaker.addEventListener('click', async () => {
+    if (pending) return;
+    if (state.audioReady) {
+      setMasterMuted(!state.masterMuted);
       return;
     }
-
-    starting = true;
+    setMasterMuted(false);
+    pending = true;
     render();
-    const ok = await startAudio();
-    starting = false;
-    if (ok) started = true;
-    render();
+    try {
+      await startAudio();
+    } finally {
+      pending = false;
+      render();
+    }
   });
-
+  launcher.addEventListener('click', () => set('playerOpen', !state.playerOpen));
+  subscribe('audioReady', render);
+  subscribe('masterMuted', render);
+  subscribe('playerOpen', render);
+  subscribe('mode', placeForLegacyView);
+  subscribe('started', placeForLegacyView);
+  placeForLegacyView();
   render();
-  return control;
+  return layer;
 }

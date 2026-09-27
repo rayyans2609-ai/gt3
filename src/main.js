@@ -75,6 +75,7 @@ async function boot() {
   const specPanel = await import('./ui/specPanel.js');
   const themeToggle = await import('./ui/themeToggle.js');
   const soundControl = await import('./ui/soundControl.js');
+  const player = await import('./ui/player.js');
   const showcase = await import('./ui/showcase.js');
   const fullscreenCard = await import('./ui/fullscreenCard.js');
   const startScreen = await import('./ui/startScreen.js');
@@ -101,6 +102,7 @@ async function boot() {
   hud.initHUD();
   themeToggle.initThemeToggle();
   soundControl.initSoundControl();
+  player.initPlayer();
   startScreen.initStartScreen();
   finishScreen.initFinishScreen();
 
@@ -227,6 +229,7 @@ async function boot() {
   registerUpdate(specPanel.update);
   registerUpdate(finishScreen.update);
   registerUpdate(audio.updateAudio);
+  registerUpdate(player.updatePlayer);
   registerUpdate(sceneSetup.updateScene);
 
   onResize((w, h) => {

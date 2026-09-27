@@ -16,6 +16,7 @@ export const state = {
   trackPosition: 0,
   playIntent: true,
   audioReady: false,
+  playerOpen: false,
   transition: null,
 };
 

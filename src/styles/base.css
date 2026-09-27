@@ -4,6 +4,7 @@
 @import './showcase.css';
 @import './fullscreen.css';
 @import './screens.css';
+@import './player.css';
 
 :root {
   --ink: #0b0b0c;

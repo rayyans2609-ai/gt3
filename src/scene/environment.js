@@ -163,13 +163,17 @@ function terrainNoise(x, z) {
 }
 
 function terrainDisplacement(x, z, distanceFromAsphalt) {
-  const shoulderFade = THREE.MathUtils.smoothstep(distanceFromAsphalt, 18, 38);
+  const detailFade = THREE.MathUtils.smoothstep(distanceFromAsphalt, 18, 38);
   // The original 48–66 m detail reads only once the mesh can sample it. A
   // longer wave gives the single continuous terrain the broad landform that
   // the former crossing skirts suggested through their overlapping slopes.
   const landform = valueNoise(x / 210 + 4.1, z / 210 - 2.7) * 19
     + valueNoise(x / 360 - 8.6, z / 360 + 13.4) * 9;
-  return (terrainNoise(x, z) * 5.2 + landform) * shoulderFade;
+  // Let hills rise over a longer run than the small surface detail. Pushing a
+  // 10–20 m landform through the narrow shoulder fade made a dark contour that
+  // followed the road exactly, even with a well-shaped mesh.
+  const landformFade = THREE.MathUtils.smoothstep(distanceFromAsphalt, 18, 110);
+  return terrainNoise(x, z) * 5.2 * detailFade + landform * landformFade;
 }
 
 const groundRoute = (() => {
@@ -346,11 +350,30 @@ function buildGrassGeometry(dressingPoints = []) {
   // allowing interior Steiner points to form short, well-shaped triangles.
   // A staggered lattice samples the 48–66 m landform wavelengths near the road;
   // its density falls off only where the production fog hides the ground.
-  function inside(point, polygon) {
-    let contains = false;
+  // Only polygon edges crossing the point's Z band can change its winding.
+  // Indexing them once avoids scanning thousands of shoulder edges for every
+  // lattice point while keeping the exact polygon test route-agnostic.
+  const polygonBand = 36;
+  function indexPolygon(polygon) {
+    const bands = new Map();
     for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
-      const a = polygon[i];
-      const b = polygon[j];
+      const a = polygon[j];
+      const b = polygon[i];
+      if (a.z === b.z) continue;
+      const first = Math.floor(Math.min(a.z, b.z) / polygonBand);
+      const last = Math.floor(Math.max(a.z, b.z) / polygonBand);
+      for (let band = first; band <= last; band++) {
+        if (!bands.has(band)) bands.set(band, []);
+        bands.get(band).push([a, b]);
+      }
+    }
+    return bands;
+  }
+  const innerBands = indexPolygon(inner);
+  const outerBands = indexPolygon(outer);
+  function inside(point, bands) {
+    let contains = false;
+    for (const [a, b] of bands.get(Math.floor(point.z / polygonBand)) || []) {
       if ((a.z > point.z) !== (b.z > point.z)
         && point.x < (b.x - a.x) * (point.z - a.z) / (b.z - a.z) + a.x) {
         contains = !contains;
@@ -401,8 +424,8 @@ function buildGrassGeometry(dressingPoints = []) {
     return false;
   };
   const addPoint = (point, seed = false) => {
-    if (inside(point, inner)) infieldPoints.push(point);
-    else if (!inside(point, outer)) exteriorPoints.push(point);
+    if (inside(point, innerBands)) infieldPoints.push(point);
+    else if (!inside(point, outerBands)) exteriorPoints.push(point);
     else return;
     if (seed) {
       const key = bucketKey(

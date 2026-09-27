@@ -10,7 +10,21 @@ GT3 is a desktop-only interactive motorsport showcase in Three.js/WebGL with a D
 
 ## Current phase
 
-**SPEC_V3 / current redesign, specification stage — not yet implemented.** `SPEC.md` (2026-09-26) defines a product direction substantially different from what currently runs: the live code is a single continuous scroll page (start screen → one race with ten visible-identity coins → finish scorecard), with a fixed camera rigidly parented to the car, five time-of-day presets, one looping background track, and Showcase hidden behind an `F` key. None of the four-page structure, the playlist/player system, the locked-car system, or the new aerial-camera doctrine exists in code yet. Treat almost everything in `SPEC.md` §4 onward as build work, not a description of the running app. `SPEC.md` §1 and its Open Issues section (§30) are the fastest way to see exactly what's reused versus replaced.
+**SPEC_V3 implementation in progress (as of 2026-09-27).**
+
+**Complete:**
+- **Phase 1:** two-state Day/Night theme, experience state machine, session persistence.
+- **Phase 2:** playlist music engine inside `audioManager.js`; global speaker and compact expandable player.
+
+**Still legacy:** the running app is otherwise the old single continuous scroll page (start screen → one race with ten visible-identity coins → finish scorecard), with a fixed camera rigidly parented to the car and Showcase behind an `F` key. A marked legacy bridge maps it onto `experience = 'tour'`.
+
+**Next, in order:**
+1. A small typography slice (Neue Haas Grotesk / Geist Mono), before Phase 4.
+2. Phase 3 Grand Tour core (aerial camera, checkpoints, sparse HUD).
+3. Phase 4 Landing, Phase 5 Hub, Phase 6 Showcase, Phase 7 finish/completion.
+4. Phase 8 scenery / lighting / performance pass. It also owns **Night route lighting** (`SPEC.md` §13a: emissive trackside fixtures, real local light, working headlights). Earlier phases must not pre-build it.
+
+`ARCHITECTURE.md` tags each module keep / evolve / new / retire / done. `SPEC.md` §1 and §30 show what's reused versus replaced.
 
 ## Canonical source hierarchy
 

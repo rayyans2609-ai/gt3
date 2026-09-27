@@ -1,6 +1,8 @@
 #audio-layer {
   --audio-right: 24px;
   --audio-bottom: 24px;
+  /* Distance from the viewport bottom to the layer bottom; caps how tall the player may grow. */
+  --audio-offset: var(--audio-bottom);
   position: fixed;
   right: var(--audio-right);
   bottom: var(--audio-bottom);
@@ -14,7 +16,8 @@
 }
 
 body.gt3-showcase-open #audio-layer {
-  bottom: clamp(460px, 55vh, 560px);
+  --audio-offset: clamp(460px, 55vh, 560px);
+  bottom: var(--audio-offset);
 }
 
 .audio-anchor,
@@ -88,7 +91,11 @@ body.gt3-showcase-open #audio-layer {
   right: 0;
   bottom: 0;
   z-index: 1;
+  display: flex;
+  flex-direction: column;
   width: 274px;
+  /* Never taller than the room above the anchor: the track list shrinks and scrolls instead. */
+  max-height: calc(100vh - var(--audio-offset) - 12px);
   padding: 17px 17px 56px;
   border-radius: 18px;
   opacity: 0;
@@ -136,7 +143,18 @@ body.gt3-showcase-open #audio-layer {
 .music-player__mute[aria-pressed='true'] { color: var(--fg-muted); opacity: .5; }
 .music-player__list-toggle { font-size: 18px; line-height: 1; }
 .music-player__list { display: grid; grid-auto-rows: 29px; max-height: 0; overflow: hidden; opacity: 0; transition: max-height 280ms var(--ease), opacity 220ms var(--ease); }
-.music-player.is-list-open .music-player__list { max-height: 195px; margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--line); opacity: 1; }
+.music-player.is-list-open .music-player__list {
+  flex: 0 1 auto;
+  min-height: 58px;
+  max-height: 195px;
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid var(--line);
+  opacity: 1;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.music-player > :not(.music-player__list) { flex: 0 0 auto; }
 .music-player__list-item { justify-content: start; width: 100%; height: 29px; padding: 0 8px; border-radius: 6px; font-size: 11px; text-align: left; }
 .music-player__list-item.is-current { color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, transparent); }
 

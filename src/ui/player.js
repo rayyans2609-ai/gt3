@@ -11,8 +11,18 @@ let musicMute;
 let listButton;
 let list;
 let dragging = false;
+let dragStartValue = null;
 let listOpen = false;
 let lastTrack = -1;
+// Last values written to the DOM. renderStatus() runs every frame while the player is open,
+// so it only touches the DOM when a displayed value actually changes.
+const shown = new Map();
+
+function show(key, value, write) {
+  if (shown.get(key) === value) return;
+  shown.set(key, value);
+  write(value);
+}
 
 const icons = {
   previous: '<path d="M5 5v14M19 5 8 12l11 7z"/>',
@@ -39,19 +49,26 @@ function time(seconds) {
 
 function renderStatus() {
   const status = getMusicStatus();
-  label.textContent = status.id;
-  total.textContent = status.duration > 0 ? time(status.duration) : '--:--';
-  seek.disabled = status.duration <= 0;
-  seek.max = String(status.duration || 0);
+  const duration = status.duration > 0 ? status.duration : 0;
+  show('label', status.id, (v) => { label.textContent = v; });
+  show('total', duration > 0 ? time(duration) : '--:--', (v) => { total.textContent = v; });
+  show('seekDisabled', duration <= 0, (v) => { seek.disabled = v; });
+  show('seekMax', String(duration), (v) => { seek.max = v; });
   if (!dragging) {
-    current.textContent = time(status.currentTime);
-    seek.value = String(Math.min(status.currentTime, status.duration || 0));
+    // The thumb moves at most a pixel or two per second, so follow the displayed second.
+    const second = Math.floor(Math.min(status.currentTime, duration || status.currentTime));
+    show('current', time(second), (v) => { current.textContent = v; });
+    show('seekValue', `${status.trackIndex}:${second}`, () => { seek.value = String(Math.min(status.currentTime, duration)); });
   }
-  playButton.setAttribute('aria-label', status.playing ? 'Pause music' : 'Play music');
-  playButton.setAttribute('aria-pressed', String(status.playing));
-  playButton.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">${icons[status.playing ? 'pause' : 'play']}</svg>`;
-  musicMute.setAttribute('aria-pressed', String(state.musicMuted));
-  musicMute.setAttribute('aria-label', state.musicMuted ? 'Unmute music' : 'Mute music');
+  show('playing', status.playing, (playing) => {
+    playButton.setAttribute('aria-label', playing ? 'Pause music' : 'Play music');
+    playButton.setAttribute('aria-pressed', String(playing));
+    playButton.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">${icons[playing ? 'pause' : 'play']}</svg>`;
+  });
+  show('musicMuted', state.musicMuted, (muted) => {
+    musicMute.setAttribute('aria-pressed', String(muted));
+    musicMute.setAttribute('aria-label', muted ? 'Unmute music' : 'Mute music');
+  });
   if (lastTrack !== status.trackIndex) {
     lastTrack = status.trackIndex;
     for (const item of list.children) {
@@ -155,8 +172,28 @@ export function initPlayer() {
     listButton.setAttribute('aria-label', listOpen ? 'Hide track list' : 'Show track list');
   });
   listButton.setAttribute('aria-expanded', 'false');
-  seek.addEventListener('input', () => { dragging = true; current.textContent = time(Number(seek.value)); });
-  seek.addEventListener('change', () => { seekMusic(Number(seek.value)); dragging = false; renderStatus(); });
+  seek.addEventListener('input', () => {
+    dragging = true;
+    show('current', time(Number(seek.value)), (v) => { current.textContent = v; });
+  });
+  seek.addEventListener('change', () => {
+    seekMusic(Number(seek.value));
+    dragging = false;
+    shown.delete('seekValue');
+    renderStatus();
+  });
+  // A drag released at its starting value fires no 'change', so clear the drag on release.
+  // A drag that moved keeps dragging until 'change' commits, so the commit is never lost.
+  seek.addEventListener('pointerdown', () => { dragStartValue = seek.value; });
+  const endDrag = () => {
+    if (dragStartValue !== null && seek.value === dragStartValue) {
+      dragging = false;
+      shown.delete('seekValue');
+    }
+    dragStartValue = null;
+  };
+  seek.addEventListener('pointerup', endDrag);
+  seek.addEventListener('pointercancel', endDrag);
   document.addEventListener('pointerdown', (event) => {
     if (state.playerOpen && !layer.contains(event.target)) set('playerOpen', false);
   });

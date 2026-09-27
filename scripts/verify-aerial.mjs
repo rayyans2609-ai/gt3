@@ -1,10 +1,11 @@
-/** Route camera survey and comparison captures. Usage: GT3_URL=http://localhost:5181 node scripts/verify-aerial.mjs [branch|baseline] */
+/** Route camera survey, focused checks, and wheel-motion verification. Usage: GT3_URL=http://localhost:5181 node scripts/verify-aerial.mjs [branch|focused|motion] */
 import puppeteer from 'puppeteer-core';
 import { mkdir, writeFile } from 'node:fs/promises';
 
 const mode = process.argv[2] || 'branch';
 const baseline = mode === 'baseline';
 const focused = mode === 'focused';
+const motion = mode === 'motion';
 const base = process.env.GT3_URL || 'http://localhost:5181';
 const root = '/tmp/gt3-aerial';
 const shots = `${root}/shots`;
@@ -24,6 +25,14 @@ await page.goto(base, { waitUntil: 'domcontentloaded', timeout: 120000 });
 await page.waitForFunction(allowLegacy => window.__gt3?.scene?.getObjectByName('track')
   && (allowLegacy || window.__gt3.aerial), { timeout: 120000 }, baseline);
 await new Promise(r => setTimeout(r, 3500));
+const integration = await page.evaluate(() => ({
+  fontsStatus: document.fonts.status,
+  fonts: Object.fromEntries(['Neue Haas Grotesk Text', 'Neue Haas Grotesk Display', 'Geist Mono']
+    .map(family => [family, document.fonts.check(`16px "${family}"`)])),
+  loaderReady: !!document.querySelector('#start-screen.is-ready'),
+  loaderProgress: document.querySelector('.start-loading__value')?.textContent,
+}));
+console.log('INTEGRATION', JSON.stringify(integration));
 await page.mouse.wheel({ deltaY: 240 });
 await new Promise(r => setTimeout(r, 900));
 
@@ -34,10 +43,11 @@ async function goTo(t, settleMs = 420, tolerance = 0.001) {
     const status = await page.evaluate(target => {
       const max = document.documentElement.scrollHeight - innerHeight;
       if (!document.querySelector('#montage-layer.is-active')) window.scrollTo(0, target * max);
-      return { progress: window.__gt3.probe().progress,
+      return { progress: window.__gt3.probe().progress, mode: window.__gt3.probe().mode,
         montage: !!document.querySelector('#montage-layer.is-active'),
         locked: window.__gt3.probe().locked };
     }, t);
+    if (status.mode === 'finish') await page.click('.finish-replay');
     if (status.montage) { await page.keyboard.press('Escape'); montages++; }
     if (!status.montage && !status.locked && Math.abs(status.progress - t) < tolerance) {
       await new Promise(r => setTimeout(r, settleMs));
@@ -46,6 +56,95 @@ async function goTo(t, settleMs = 420, tolerance = 0.001) {
     await new Promise(r => setTimeout(r, 90));
   }
   throw new Error(`Route failed to settle at ${t}: ${JSON.stringify(await page.evaluate(() => window.__gt3.probe()))}`);
+}
+
+if (motion) {
+  // This callback is registered after the app's rAF, so each sample sees its
+  // rendered camera pose rather than the previous frame's state.
+  await page.evaluate(async () => {
+    const THREE = await import('/node_modules/three/build/three.module.js');
+    const g = window.__gt3;
+    const carRig = g.scene.getObjectByName('car-rig');
+    window.__aerialMotion = { segment: null, frames: [] };
+    function record() {
+      const store = window.__aerialMotion;
+      if (store.segment) {
+        const mount = carRig.localToWorld(new THREE.Vector3(0, 1.2, 0));
+        const ndc = mount.project(g.camera);
+        store.frames.push({ segment: store.segment, time: performance.now(),
+          progress: g.probe().progress, ndcX: ndc.x, ndcY: ndc.y,
+          raceVisible: g.probe().mode === 'race' && !document.querySelector('#montage-layer.is-active'),
+          correctionActive: g.aerial.correctionActive,
+          correctionFrames: g.aerial.correctionFrames, snapCount: g.aerial.snapCount,
+          camera: g.camera.position.toArray() });
+      }
+      requestAnimationFrame(record);
+    }
+    requestAnimationFrame(record);
+  });
+
+  const passes = [];
+  for (const [label, throttle] of [['normal', 1], ['cpu-4x', 4]]) {
+    const cdp = await page.createCDPSession();
+    await cdp.send('Emulation.setCPUThrottlingRate', { rate: throttle });
+    const sequences = [
+      ['fast-forward', 0.18, Array(30).fill(30), 65],
+      ['slow-forward', 0.18, Array(20).fill(5), 120],
+      ['rapid-reversals', 0.18, Array.from({ length: 20 }, (_, i) => i % 2 ? -40 : 40), 65],
+      ['backward', 0.28, Array(30).fill(-30), 65],
+    ];
+    const reports = [];
+    for (const [name, start, deltas, pauseMs] of sequences) {
+      await goTo(start, 1800);
+      const segment = `${label}:${name}`;
+      await page.evaluate(s => { window.__aerialMotion.segment = s; }, segment);
+      let montagesSkipped = 0;
+      for (const deltaY of deltas) {
+        await page.mouse.wheel({ deltaY });
+        await new Promise(r => setTimeout(r, pauseMs));
+        if (await page.evaluate(() => !!document.querySelector('#montage-layer.is-active'))) {
+          await page.keyboard.press('Escape');
+          montagesSkipped++;
+        }
+        const position = await page.evaluate(() => window.__gt3.probe().progress);
+        if ((deltaY > 0 && position > 0.6) || (deltaY < 0 && position < 0.04)) break;
+      }
+      await new Promise(r => setTimeout(r, 400));
+      await page.evaluate(() => { window.__aerialMotion.segment = null; });
+      const allFrames = await page.evaluate(s => window.__aerialMotion.frames.filter(f => f.segment === s), segment);
+      const frames = allFrames.filter(f => f.raceVisible);
+      const pairs = allFrames.slice(1).flatMap((frame, i) => frame.raceVisible && allFrames[i].raceVisible
+        ? [{ frame, previous: allFrames[i] }] : []);
+      const moving = pairs.filter(({ frame, previous }) => Math.abs(frame.progress - previous.progress) > 1e-7);
+      const displacements = pairs.map(({ frame, previous }) =>
+        Math.hypot(...frame.camera.map((x, j) => x - previous.camera[j])));
+      const outside = frames.filter(f => Math.abs(f.ndcX) > 1 || Math.abs(f.ndcY) > 1);
+      reports.push({ name, frames: frames.length, excludedOverlayFrames: allFrames.length - frames.length,
+        movingFrames: moving.length,
+        startProgress: frames[0]?.progress, endProgress: frames.at(-1)?.progress,
+        maxAbsNdcXMoving: Math.max(0, ...moving.map(({ frame }) => Math.abs(frame.ndcX))),
+        maxAbsNdcYMoving: Math.max(0, ...moving.map(({ frame }) => Math.abs(frame.ndcY))),
+        correctionActiveFrames: frames.filter(f => f.correctionActive).length,
+        correctionActivePct: frames.length ? 100 * frames.filter(f => f.correctionActive).length / frames.length : 0,
+        correctionActiveCountDelta: pairs.reduce((n, { frame, previous }) =>
+          n + Math.max(0, frame.correctionFrames - previous.correctionFrames), 0),
+        snapCountDelta: frames.length ? frames.at(-1).snapCount - frames[0].snapCount : 0,
+        snapsDuringMotion: moving.reduce((n, { frame, previous }) =>
+          n + Math.max(0, frame.snapCount - previous.snapCount), 0),
+        maxCameraDisplacementM: Math.max(0, ...displacements),
+        outsideFrameCount: outside.length,
+        outsideFrameExamples: outside.slice(0, 3).map(f => ({ progress: f.progress, x: f.ndcX, y: f.ndcY })),
+        montagesSkipped });
+      console.log('MOTION SEGMENT', label, JSON.stringify(reports.at(-1)));
+    }
+    passes.push({ label, throttle, sequences: reports });
+    await cdp.detach();
+  }
+  const summary = { mode, integration, passes, errors };
+  await writeFile(`${root}/motion-verification.json`, JSON.stringify(summary, null, 2));
+  console.log('SUMMARY', JSON.stringify(summary));
+  await browser.close();
+  process.exit(0);
 }
 
 async function measure() {
@@ -69,7 +168,7 @@ async function measure() {
       return true;
     });
     return { t: g.probe().progress, ndcX: carNdc.x, ndcY: carNdc.y,
-      projectedLengthPct: Math.hypot(front.x - back.x, front.y - back.y) * 50,
+      projectedLengthPct: Math.hypot(front.x - back.x, (front.y - back.y) / g.camera.aspect) * 50,
       yawDeg: yaw, pitchDeg: pitch, correctionActive: !!g.aerial?.correctionActive,
       camera: eye.toArray(), quaternion: g.camera.quaternion.toArray(),
       occlusion: hits.length ? { name: hits[0].object.name || hits[0].object.parent?.name,
@@ -205,16 +304,18 @@ if (!baseline) {
   await page.evaluate(async () => (await import('/src/scroll/scrollDrive.js')).seekTo(1, { instant: true }));
   await new Promise(r => setTimeout(r, 150));
   const seamEnd = await measure();
+  const snapsBeforeReplay = await page.evaluate(() => window.__gt3.aerial.snapCount);
   await page.evaluate(async () => (await import('/src/scroll/scrollDrive.js')).resetToStart());
   await new Promise(r => setTimeout(r, 150));
   const seamStart = await measure();
   snapAndSeam = { seekSnapIncremented: afterSeek.snaps > snapBeforeSeek, seekProgress: afterSeek.progress,
+    replaySnapIncremented: (await page.evaluate(() => window.__gt3.aerial.snapCount)) > snapsBeforeReplay,
     seamPositionDiffM: Math.hypot(...seamEnd.camera.map((x, i) => x - seamStart.camera[i])),
     seamQuaternionDiff: Math.hypot(...seamEnd.quaternion.map((x, i) => x - seamStart.quaternion[i])) };
 
 }
-const summary = baseline ? { mode, errors } : focused ? { mode, reversibility, regression, snapAndSeam, safetyProbe, errors } : {
-  mode, count: samples.length, correctionSamples: samples.filter(s => s.correctionActive).length,
+const summary = baseline ? { mode, integration, errors } : focused ? { mode, integration, reversibility, regression, snapAndSeam, safetyProbe, errors } : {
+  mode, integration, count: samples.length, correctionActiveSamples: samples.filter(s => s.correctionActive).length,
   occlusions: samples.filter(s => s.occlusion).map(s => ({ t: s.t, ...s.occlusion })),
   ndcX: [Math.min(...samples.map(s => s.ndcX)), Math.max(...samples.map(s => s.ndcX))],
   ndcY: [Math.min(...samples.map(s => s.ndcY)), Math.max(...samples.map(s => s.ndcY))],

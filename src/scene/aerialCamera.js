@@ -47,6 +47,7 @@ const viewMatrix = new THREE.Matrix4();
 const UP = new THREE.Vector3(0, 1, 0);
 const ROUTE_SAMPLES = [[-2, 0.06], [-1, 0.24], [0, 0.40], [1, 0.24], [2, 0.06]];
 const previousPosition = new THREE.Vector3();
+const predictedPosition = new THREE.Vector3();
 const toCar = new THREE.Vector3();
 
 function wrappedPoint(t, out) {
@@ -81,10 +82,10 @@ function routePose(t) {
   orientation.setFromRotationMatrix(viewMatrix);
 }
 
-function safetyOffset() {
-  // Evaluate against the uncorrected rail. The car has no say in its normal pose.
+function safetyOffset(testPosition) {
+  // Test the pose about to be rendered, before this frame's last-resort correction.
   previousPosition.copy(camera.position);
-  camera.position.copy(desiredPosition);
+  camera.position.copy(testPosition);
   camera.quaternion.copy(orientation);
   camera.updateMatrixWorld();
   pointAt(state.progress, car);
@@ -96,7 +97,7 @@ function safetyOffset() {
   const dy = Math.sign(projected.y) * Math.max(0, Math.abs(projected.y) - TUNE.safeY);
   aerial.correctionActive = dx !== 0 || dy !== 0;
   if (aerial.correctionActive) aerial.correctionFrames++;
-  const depth = Math.max(1, toCar.copy(car).sub(desiredPosition).dot(forward));
+  const depth = Math.max(1, toCar.copy(car).sub(testPosition).dot(forward));
   const halfHeight = depth * Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2);
   const halfWidth = halfHeight * camera.aspect;
   wantedCorrection.copy(right).multiplyScalar(dx * halfWidth)
@@ -108,7 +109,7 @@ function safetyOffset() {
 export function snap() {
   if (!camera) return;
   routePose(state.progress);
-  safetyOffset();
+  safetyOffset(desiredPosition);
   correction.copy(wantedCorrection);
   camera.position.copy(desiredPosition).add(correction);
   camera.quaternion.copy(orientation);
@@ -128,13 +129,18 @@ export function initAerialCamera(raceCamera) {
 export function update(dt) {
   if (!camera) return;
   aerial.frames++;
-  if (lastProgress === null || Math.abs(state.progress - lastProgress) > TUNE.snapProgress) {
+  // Instant seek/replay sets progress directly; scrollbar pixel rounding can
+  // leave a tiny velocity. A damped scroll step this large has high velocity.
+  if (lastProgress === null || (Math.abs(state.progress - lastProgress) > TUNE.snapProgress
+    && Math.abs(state.velocity) < 0.1)) {
     snap();
     return;
   }
   routePose(state.progress);
-  safetyOffset();
   const alpha = 1 - Math.exp(-Math.max(0, dt) / Math.max(0.001, TUNE.dampingSeconds));
+  predictedPosition.copy(desiredPosition).add(correction);
+  predictedPosition.lerpVectors(camera.position, predictedPosition, alpha);
+  safetyOffset(predictedPosition);
   const safetyAlpha = 1 - Math.exp(-Math.max(0, dt) / Math.max(0.001, TUNE.correctionSeconds));
   correction.lerp(wantedCorrection, safetyAlpha);
   desiredPosition.add(correction);

@@ -1,8 +1,12 @@
 import { set, state, subscribe } from './state.js';
+import { EXPERIENCES } from './experience.js';
 
 const STORAGE_KEY = 'gt3.session.v1';
-const SESSION_KEYS = Object.freeze(['theme']);
-const VALID_THEMES = new Set(['day', 'night']);
+const VALID_SESSION_VALUES = Object.freeze({
+  theme: new Set(['day', 'night']),
+  experience: new Set(EXPERIENCES),
+});
+const SESSION_KEYS = Object.freeze(Object.keys(VALID_SESSION_VALUES));
 let initialized = false;
 
 function readSession() {
@@ -31,7 +35,9 @@ export function restoreSession() {
   initialized = true;
 
   const saved = readSession();
-  if (VALID_THEMES.has(saved?.theme)) set('theme', saved.theme);
+  for (const key of SESSION_KEYS) {
+    if (VALID_SESSION_VALUES[key].has(saved?.[key])) set(key, saved[key]);
+  }
 
-  subscribe('theme', writeSession);
+  for (const key of SESSION_KEYS) subscribe(key, writeSession);
 }

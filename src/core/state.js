@@ -9,6 +9,8 @@ export const state = {
   mode: 'race',
   scrollLocked: false,
   theme: 'day',
+  experience: 'landing',
+  transition: null,
 };
 
 const subscribers = new Map();

@@ -17,9 +17,10 @@
 
 import './styles/base.css';
 import * as THREE from 'three';
-import { state, set } from './core/state.js';
+import { state, set, subscribe } from './core/state.js';
 import { Clock } from './core/clock.js';
 import { restoreSession } from './core/session.js';
+import { restoreExperience, setExperience } from './core/experience.js';
 
 const clock = new Clock();
 const updates = [];
@@ -48,6 +49,14 @@ window.addEventListener('resize', () => {
 
 async function boot() {
   restoreSession();
+
+  // LEGACY BRIDGE — remove in Phases 4–7. Phase 4 replaces this with real boot
+  // resolution; today's running race is the V3 Grand Tour regardless of saved state.
+  restoreExperience('tour');
+  subscribe('mode', (mode) => {
+    if (mode === 'finish') setExperience('complete');
+    else if (mode === 'race' && state.experience === 'complete') setExperience('tour');
+  });
 
   // ---- modules -----------------------------------------------------------
   const sceneSetup = await import('./scene/sceneSetup.js');

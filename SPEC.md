@@ -218,16 +218,28 @@ One global theme state applies to **the entire site with no exceptions**: Landin
 
 ## 13a. Night route lighting (Grand Tour)
 
-Night in Grand Tour must be an **authored night-driving environment, not merely a darker Day preset.**
+This section locks the **outcome**. The lighting design and technical approach remain **open**, and are Phase 8's to design and iterate.
 
-- **Trackside/street lighting:** sparse fixtures along the route, with emissive fixtures (the lamps themselves glow) and **real local illumination** of the road and surroundings beneath them.
-- **Headlights:** functional forward headlights on the active player car that visibly light the road, curbs, checkpoint structures (§18) and nearby scenery ahead of it. They follow the active car through in-Tour car swaps (§19).
-- **Darkness between lit areas** is preserved, so Night stays atmospheric. But the road, the car's silhouette and the immediate driving environment must always remain clearly readable.
-- **Avoid:** arcade-like uniform lighting, and a flat "flashlight cone" headlight look.
-- **Transitions:** Day↔Night changes interpolate smoothly, consistent with §13. Fixture emission, local lights and headlights fade in and out with the theme transition rather than switching.
-- **Performance-safe by design** (§16 "Scenery is also performance design", §27): limit expensive local lights and shadow-casting lights, prefer emissive materials and cheap light falloff over many real lights, reuse lighting where practical (e.g. shared/pooled lights near the car, instanced fixtures), and keep scroll smoothness the top priority. Exact fixture count, light types, shadow policy and falloff are runtime tuning, decided by measurement.
+### Locked outcome
+- Night in Grand Tour must feel like an **intentionally authored, premium night-driving environment**, not a darkened Day scene.
+- The **road, the active car and the immediate driving environment stay clearly readable**, while **meaningful darkness and atmosphere are preserved**.
+- Day↔Night changes interpolate smoothly, consistent with §13.
+- It stays consistent with GT3's overall visual direction (§12–16, §23) and within the performance constraints below.
 
-**Ownership:** implemented in full in **Phase 8 (scenery / lighting / performance pass)**. Earlier phases, **including Phase 3 (Grand Tour core), must not pre-build it.** Until Phase 8, Grand Tour at Night uses the existing `src/scene/theme.js` night preset. Phase 3 may place checkpoint structures without any Night-lighting provisions.
+### Desired components (directional, not a fixed solution)
+- **Functional car headlights / forward illumination** on the active car that meaningfully light the road and nearby geometry ahead (road surface, curbs, checkpoint structures §18, near scenery). They should carry through in-Tour car swaps (§19).
+- **Street/trackside lighting** as part of the night environment.
+
+### Open to Phase 8 design and iteration
+- The exact **fixture style, density, placement, light types, illumination strategy**, and how trackside lighting relates to other environmental lighting (sky, fog, emissive architecture, ambient).
+- Whether to use **additional or alternative lighting techniques** where they produce a better result.
+- **Not locked:** uniformly spaced streetlights, any specific number of lights, or any single technical lighting implementation.
+- **Directional cautions, not rules:** avoid an arcade-like uniformly lit look and a flat "flashlight cone" headlight.
+
+### Constraints
+- **Performance-safe** (§16 "Scenery is also performance design", §27): bound the use of expensive local lights and shadow-casting lights, and reuse lighting where practical. Scroll smoothness remains the top priority, and the final approach is chosen by visual review plus measurement.
+
+**Ownership:** designed and implemented in **Phase 8 (scenery / lighting / performance pass)**. Earlier phases, **including Phase 3 (Grand Tour core), must not pre-build it.** Until Phase 8, Grand Tour at Night uses the existing `src/scene/theme.js` night preset. Phase 3 may place checkpoint structures without any Night-lighting provisions.
 
 ---
 
@@ -279,7 +291,7 @@ Hierarchy: hero car → road → curbs/edges/markings → materials/shadows → 
 
 ## Scenery is also performance design
 
-Environmental restraint is both aesthetic and computational. Do not build an expensive realistic world and reduce it until it runs — design the intended visual language to be naturally cheap: broad simple terrain, asset reuse, instancing, grouped vegetation, monolithic architecture, fewer materials, lightweight shaders, static/baked techniques where useful, limited shadow casters, low-cost atmosphere, concentrated detail near hero/road, reduced off-camera detail. If visual density conflicts with scroll smoothness, **scroll smoothness wins**. The same applies to Night route lighting (§13a): trackside fixtures and headlights are part of the Phase 8 scenery/lighting/performance pass, not separate earlier work.
+Environmental restraint is both aesthetic and computational. Do not build an expensive realistic world and reduce it until it runs — design the intended visual language to be naturally cheap: broad simple terrain, asset reuse, instancing, grouped vegetation, monolithic architecture, fewer materials, lightweight shaders, static/baked techniques where useful, limited shadow casters, low-cost atmosphere, concentrated detail near hero/road, reduced off-camera detail. If visual density conflicts with scroll smoothness, **scroll smoothness wins**. The same applies to Night route lighting (§13a): its design and implementation belong to the Phase 8 scenery/lighting/performance pass, not separate earlier work.
 
 ---
 

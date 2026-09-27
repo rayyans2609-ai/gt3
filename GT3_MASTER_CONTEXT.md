@@ -22,7 +22,7 @@ GT3 is a desktop-only interactive motorsport showcase in Three.js/WebGL with a D
 1. A small typography slice (Neue Haas Grotesk / Geist Mono), before Phase 4.
 2. Phase 3 Grand Tour core (aerial camera, checkpoints, sparse HUD).
 3. Phase 4 Landing, Phase 5 Hub, Phase 6 Showcase, Phase 7 finish/completion.
-4. Phase 8 scenery / lighting / performance pass. It also owns **Night route lighting** (`SPEC.md` §13a: emissive trackside fixtures, real local light, working headlights). Earlier phases must not pre-build it.
+4. Phase 8 scenery / lighting / performance pass. It also owns **Night route lighting** (`SPEC.md` §13a). The outcome is locked: an authored premium night-driving feel with a readable road/car and real darkness. Headlights and trackside lighting are desired, but the design and technique are open to Phase 8. Earlier phases must not pre-build it.
 
 `ARCHITECTURE.md` tags each module keep / evolve / new / retire / done. `SPEC.md` §1 and §30 show what's reused versus replaced.
 

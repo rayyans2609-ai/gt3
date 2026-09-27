@@ -42,8 +42,8 @@ text/HUD/player UI. One fixed canvas behind it, one shared `WebGLRenderer`.
     scene/
       sceneSetup.js   shared renderer, adaptive dpr, render dispatch per experience [evolve]
       theme.js        Day/Night scene presets + crossfade (from timeOfDay.js) [done, Phase 1a];
-                      Night route lighting (fixtures, local lights, headlights; SPEC §13a)
-                      extends it in Phase 8 only
+                      Night route lighting (SPEC §13a; approach open to design) is added
+                      in Phase 8 only
       timeOfDay.js    5 presets [retire → theme.js]
       trackCurve.js   circuit spline + named beats + checkpoint/finish t-values [evolve]
       track.js        asphalt ribbon, markings, curbs [keep]
@@ -252,10 +252,12 @@ history entries. Audio: the existing SFX + the 10 voice files + the 6 playlist t
 
 ## Known later dependencies and phase ownership
 - **Night route lighting (SPEC §13a) is owned by Phase 8** (scenery / lighting / performance
-  pass): sparse emissive trackside fixtures with real local illumination, functional forward
-  headlights on the active car, and smooth Day↔Night interpolation, all performance-bounded.
-  Phase 3 and other earlier phases must not pre-build it; until then Night is the
-  `theme.js` night preset.
+  pass). The outcome is locked: an authored premium night-driving feel, a readable road/car/
+  near environment with real darkness preserved, smooth Day↔Night, performance-bounded.
+  Headlights and street/trackside lighting are desired components, but fixture style, density,
+  placement, light types and technique are open to Phase 8 design; nothing is fixed to uniform
+  spacing, a light count or one implementation. Phase 3 and other earlier phases must not
+  pre-build it; until then Night is the `theme.js` night preset.
 - Playlist tracks shipped in Phase 2a (`public/audios/playlist/`). Track covers remain
   unshipped in `audios/background_playlist/audiocover_NOTaudios/` until Phase 5 (Hub player).
   `car_cover.glb` is not yet in `public/` (Showcase, Phase 6).

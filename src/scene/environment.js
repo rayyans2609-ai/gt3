@@ -7,6 +7,7 @@
  */
 
 import * as THREE from 'three';
+import poly2tri from 'poly2tri/dist/poly2tri.js';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { scene } from './sceneSetup.js';
 import * as trackSurface from './track.js';
@@ -163,7 +164,12 @@ function terrainNoise(x, z) {
 
 function terrainDisplacement(x, z, distanceFromAsphalt) {
   const shoulderFade = THREE.MathUtils.smoothstep(distanceFromAsphalt, 18, 38);
-  return terrainNoise(x, z) * 5.2 * shoulderFade;
+  // The original 48–66 m detail reads only once the mesh can sample it. A
+  // longer wave gives the single continuous terrain the broad landform that
+  // the former crossing skirts suggested through their overlapping slopes.
+  const landform = valueNoise(x / 210 + 4.1, z / 210 - 2.7) * 19
+    + valueNoise(x / 360 - 8.6, z / 360 + 13.4) * 9;
+  return (terrainNoise(x, z) * 5.2 + landform) * shoulderFade;
 }
 
 const groundRoute = (() => {
@@ -250,10 +256,58 @@ function routeProjection(x, z) {
   return { distance: Math.sqrt(closestDistanceSq), baseY: closestBaseY };
 }
 
+// The nearest section changes abruptly along an infield bisector. Blend only
+// beyond the shoulder so that two sections at different elevations form a
+// broad slope rather than a hard, straight height crease.
+const baseSampleCount = Math.ceil(TRACK_LENGTH / 25);
+const baseHeightSamples = Array.from(
+  { length: baseSampleCount },
+  (_, i) => groundRoute[Math.floor(i * (groundRoute.length - 1) / baseSampleCount)],
+);
+const baseGridCell = 150;
+const baseGrid = new Map();
+for (const point of baseHeightSamples) {
+  const ix = Math.floor(point.x / baseGridCell);
+  const iz = Math.floor(point.z / baseGridCell);
+  if (!baseGrid.has(ix)) baseGrid.set(ix, new Map());
+  const column = baseGrid.get(ix);
+  if (!column.has(iz)) column.set(iz, []);
+  column.get(iz).push(point);
+}
+
+function blendedRouteBase(x, z, nearest) {
+  const mix = THREE.MathUtils.smoothstep(nearest.distance, 15, 40);
+  if (mix === 0) return nearest.baseY;
+  let totalWeight = 0;
+  let weightedY = 0;
+  const radiusSq = 500 * 500;
+  const cellX = Math.floor(x / baseGridCell);
+  const cellZ = Math.floor(z / baseGridCell);
+  for (let ix = cellX - 4; ix <= cellX + 4; ix++) {
+    const column = baseGrid.get(ix);
+    if (!column) continue;
+    for (let iz = cellZ - 4; iz <= cellZ + 4; iz++) {
+      for (const point of column.get(iz) || []) {
+        const dx = x - point.x;
+        const dz = z - point.z;
+        const distanceSq = dx * dx + dz * dz;
+        if (distanceSq >= radiusSq) continue;
+        const taper = 1 - distanceSq / radiusSq;
+        const weight = taper * taper / (distanceSq + 120 * 120);
+        totalWeight += weight;
+        weightedY += point.y * weight;
+      }
+    }
+  }
+  if (totalWeight === 0) return nearest.baseY;
+  return THREE.MathUtils.lerp(nearest.baseY, weightedY / totalWeight, mix);
+}
+
 /** The rendered ground and every dressing placement use this same height field. */
 export function groundHeightAt(x, z) {
-  const { distance, baseY } = routeProjection(x, z);
-  return baseY + terrainDisplacement(x, z, Math.max(0, distance - TRACK.halfWidth));
+  const projection = routeProjection(x, z);
+  return blendedRouteBase(x, z, projection)
+    + terrainDisplacement(x, z, Math.max(0, projection.distance - TRACK.halfWidth));
 }
 
 // ---------------------------------------------------------------------------
@@ -271,7 +325,7 @@ function signedArea(points) {
   return area * 0.5;
 }
 
-function buildGrassGeometry() {
+function buildGrassGeometry(dressingPoints = []) {
   const left = trackSurface.trackEdges.left.slice(0, -1);
   const right = trackSurface.trackEdges.right.slice(0, -1);
   const [inner, outer] = Math.abs(signedArea(left)) < Math.abs(signedArea(right))
@@ -285,75 +339,123 @@ function buildGrassGeometry() {
     { x: bounds.min.x - margin, z: bounds.max.z + margin },
   ];
   const vertices = [];
-  let triangles = [];
+  const triangles = [];
+  const shoulderRanges = [];
 
-  function appendPolygon(contour, holes = []) {
-    const all = [...contour, ...holes.flat()];
-    const base = vertices.length;
-    for (const point of all) vertices.push({ x: point.x, z: point.z, y: point.y });
-    const faces = THREE.ShapeUtils.triangulateShape(
-      contour.map((p) => new THREE.Vector2(p.x, p.z)),
-      holes.map((hole) => hole.map((p) => new THREE.Vector2(p.x, p.z))),
-    );
-    for (const face of faces) triangles.push(face.map((i) => base + i));
-  }
-  appendPolygon(inner);
-  appendPolygon(rectangle, [outer]);
-
-  // Split shared edges together. Every step is conforming, so the adaptive mesh
-  // cannot create T-junction cracks. Fine near the shoulder; coarse under fog.
-  const targetStep = (distance) => (
-    distance < 95 ? 20 : distance < 210 ? 40 : distance < 430 ? 100 : 260
-  );
-  for (let pass = 0; pass < 3; pass++) {
-    const split = new Map();
-    const visited = new Set();
-    const edgeKey = (a, b) => a < b ? `${a},${b}` : `${b},${a}`;
-    function inspect(a, b) {
-      const key = edgeKey(a, b);
-      if (visited.has(key)) return;
-      visited.add(key);
-      const va = vertices[a];
-      const vb = vertices[b];
-      const dx = va.x - vb.x;
-      const dz = va.z - vb.z;
-      const length = Math.hypot(dx, dz);
-      if (length < 15) return;
-      const mx = (va.x + vb.x) * 0.5;
-      const mz = (va.z + vb.z) * 0.5;
-      if (length <= targetStep(routeProjection(mx, mz).distance)) return;
-      split.set(key, vertices.length);
-      vertices.push({ x: mx, z: mz, y: groundHeightAt(mx, mz) });
-    }
-    for (const [a, b, c] of triangles) {
-      inspect(a, b); inspect(b, c); inspect(c, a);
-    }
-    if (!split.size) break;
-    const next = [];
-    for (const [a, b, c] of triangles) {
-      const ab = split.get(edgeKey(a, b));
-      const bc = split.get(edgeKey(b, c));
-      const ca = split.get(edgeKey(c, a));
-      const count = Number(ab !== undefined) + Number(bc !== undefined)
-        + Number(ca !== undefined);
-      if (count === 0) next.push([a, b, c]);
-      else if (count === 3) next.push(
-        [a, ab, ca], [b, bc, ab], [c, ca, bc], [ab, bc, ca],
-      );
-      else if (count === 1) {
-        if (ab !== undefined) next.push([a, ab, c], [ab, b, c]);
-        else if (bc !== undefined) next.push([b, bc, a], [bc, c, a]);
-        else next.push([c, ca, b], [ca, a, b]);
-      } else if (ca === undefined) {
-        next.push([a, ab, c], [ab, b, bc], [ab, bc, c]);
-      } else if (ab === undefined) {
-        next.push([b, bc, a], [bc, c, ca], [bc, ca, a]);
-      } else {
-        next.push([c, ca, b], [ca, a, ab], [ca, ab, b]);
+  // Constrained Delaunay triangulation retains every shoulder vertex while
+  // allowing interior Steiner points to form short, well-shaped triangles.
+  // A staggered lattice samples the 48–66 m landform wavelengths near the road;
+  // its density falls off only where the production fog hides the ground.
+  function inside(point, polygon) {
+    let contains = false;
+    for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+      const a = polygon[i];
+      const b = polygon[j];
+      if ((a.z > point.z) !== (b.z > point.z)
+        && point.x < (b.x - a.x) * (point.z - a.z) / (b.z - a.z) + a.x) {
+        contains = !contains;
       }
     }
-    triangles = next;
+    return contains;
   }
+
+  function appendPolygon(contour, holes, points) {
+    const local = [...contour, ...holes.flat(), ...points];
+    const base = vertices.length;
+    if (!holes.length) shoulderRanges.push([base, base + contour.length]);
+    else {
+      let holeBase = base + contour.length;
+      for (const hole of holes) {
+        shoulderRanges.push([holeBase, holeBase + hole.length]);
+        holeBase += hole.length;
+      }
+    }
+    const references = local.map((p, i) => ({ x: p.x, y: p.z, index: base + i }));
+    let offset = contour.length;
+    const sweep = new poly2tri.SweepContext(references.slice(0, offset));
+    for (const hole of holes) {
+      sweep.addHole(references.slice(offset, offset + hole.length));
+      offset += hole.length;
+    }
+    sweep.addPoints(references.slice(offset));
+    sweep.triangulate();
+    for (const p of local) vertices.push({ x: p.x, z: p.z, y: p.y });
+    for (const face of sweep.getTriangles()) {
+      triangles.push(face.getPoints().map((p) => p.index));
+    }
+  }
+
+  const infieldPoints = [];
+  const exteriorPoints = [];
+  const seedBuckets = new Map();
+  const bucketSize = 16;
+  const bucketKey = (ix, iz) => `${ix},${iz}`;
+  const nearbySeed = (x, z, radius) => {
+    const ix = Math.floor(x / bucketSize);
+    const iz = Math.floor(z / bucketSize);
+    for (let dx = -1; dx <= 1; dx++) for (let dz = -1; dz <= 1; dz++) {
+      for (const seed of seedBuckets.get(bucketKey(ix + dx, iz + dz)) || []) {
+        if (Math.hypot(seed.x - x, seed.z - z) < radius) return true;
+      }
+    }
+    return false;
+  };
+  const addPoint = (point, seed = false) => {
+    if (inside(point, inner)) infieldPoints.push(point);
+    else if (!inside(point, outer)) exteriorPoints.push(point);
+    else return;
+    if (seed) {
+      const key = bucketKey(
+        Math.floor(point.x / bucketSize), Math.floor(point.z / bucketSize),
+      );
+      if (!seedBuckets.has(key)) seedBuckets.set(key, []);
+      seedBuckets.get(key).push(point);
+    }
+  };
+
+  // Existing dressing bases are exact terrain vertices. Both their placement
+  // and the vertex height still come from groundHeightAt.
+  for (const point of dressingPoints) addPoint(point, true);
+
+  // Road-following seed rows prevent gaps in the lattice beside concave bends.
+  // These are points in the same constrained triangulation, not separate strips.
+  const roadSamples = Math.ceil(TRACK_LENGTH / 8);
+  const shoulderOffset = TRACK.halfWidth + TRACK.curbWidth + TRACK.shoulderWidth;
+  for (let i = 0; i < roadSamples; i++) {
+    const t = i / roadSamples;
+    for (const side of [-1, 1]) for (const offset of [8, 16, 24, 32, 40]) {
+      const p = offsetPointAt(t, side * (shoulderOffset + offset), 0, new THREE.Vector3());
+      if (routeProjection(p.x, p.z).distance < shoulderOffset + 5) continue;
+      if (nearbySeed(p.x, p.z, 5)) continue;
+      addPoint({ x: p.x, z: p.z }, true);
+    }
+  }
+
+  const latticeStep = 18;
+  const rowStep = latticeStep * Math.sqrt(3) * 0.5;
+  const firstRow = Math.floor(rectangle[0].z / rowStep);
+  const lastRow = Math.ceil(rectangle[2].z / rowStep);
+  for (let row = firstRow; row <= lastRow; row++) {
+    const z = row * rowStep;
+    const offset = (row & 1) * latticeStep * 0.5;
+    const firstColumn = Math.floor((rectangle[0].x - offset) / latticeStep);
+    const lastColumn = Math.ceil((rectangle[1].x - offset) / latticeStep);
+    for (let column = firstColumn; column <= lastColumn; column++) {
+      const x = column * latticeStep + offset;
+      if (x <= rectangle[0].x || x >= rectangle[1].x
+        || z <= rectangle[0].z || z >= rectangle[2].z) continue;
+      const projection = routeProjection(x, z);
+      const distanceFromShoulder = projection.distance
+        - TRACK.halfWidth - TRACK.curbWidth - TRACK.shoulderWidth;
+      if (distanceFromShoulder < 7) continue;
+      if (nearbySeed(x, z, 8)) continue;
+      if (projection.distance >= 500 && ((row % 2) || (column % 2))) continue;
+      if (projection.distance >= 900 && ((row % 5) || (column % 5))) continue;
+      addPoint({ x, z });
+    }
+  }
+  appendPolygon(inner, [], infieldPoints);
+  appendPolygon(rectangle, [outer], exteriorPoints);
 
   const positions = [];
   const colors = [];
@@ -380,6 +482,7 @@ function buildGrassGeometry() {
   geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
   geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
   geometry.setIndex(indices);
+  geometry.userData.shoulderRanges = shoulderRanges;
   geometry.computeVertexNormals();
   geometry.computeBoundingSphere();
   return geometry;
@@ -725,11 +828,6 @@ export function buildEnvironment() {
     skyUniforms.uHorizon.value = scene.fog.color;
   }
 
-  const grass = new THREE.Mesh(buildGrassGeometry(), grassMaterial);
-  grass.name = 'grass-skirts-and-horizon';
-  grass.receiveShadow = true;
-  root.add(grass);
-
   const bounds = sampleTrackBounds();
   const centre = bounds.getCenter(new THREE.Vector3());
   const sky = new THREE.Mesh(
@@ -746,6 +844,20 @@ export function buildEnvironment() {
   const markers = buildMarkerInstances();
   const tireStacks = buildTireInstances(random);
   const grandstands = buildGrandstandInstances(random);
+  const dressing = [trees, markers, tireStacks, grandstands];
+  const dressingPoints = [];
+  const instanceMatrix = new THREE.Matrix4();
+  for (const mesh of dressing) for (let i = 0; i < mesh.count; i++) {
+    mesh.getMatrixAt(i, instanceMatrix);
+    dressingPoints.push({
+      x: instanceMatrix.elements[12],
+      z: instanceMatrix.elements[14],
+    });
+  }
+  const grass = new THREE.Mesh(buildGrassGeometry(dressingPoints), grassMaterial);
+  grass.name = 'grass-skirts-and-horizon';
+  grass.receiveShadow = true;
+  root.add(grass);
   // Only the effectively infinite sky receives cursor parallax. Moving a grounded
   // grandstand with this layer would lift it away from its sampled terrain height.
   root.add(backgroundLayer, trees, markers, tireStacks, grandstands);

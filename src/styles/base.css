@@ -77,8 +77,8 @@ button {
 }
 
 #scroll-spacer {
-  /* 1200vh × 4652.276m / 3472.646m; scrollDrive sets the exact live value. */
-  height: 1607.63vh;
+  /* 1200vh × 5006.820m / 3472.646m; scrollDrive sets the exact live value. */
+  height: 1730.15vh;
 }
 
 #overlay {

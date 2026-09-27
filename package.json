@@ -8,6 +8,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "poly2tri": "^1.5.0",
     "three": "^0.180.0"
   },
   "devDependencies": {

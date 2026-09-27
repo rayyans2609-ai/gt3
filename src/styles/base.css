@@ -77,7 +77,8 @@ button {
 }
 
 #scroll-spacer {
-  height: 1200vh;
+  /* 1200vh × 5006.820m / 3472.646m; scrollDrive sets the exact live value. */
+  height: 1730.15vh;
 }
 
 #overlay {

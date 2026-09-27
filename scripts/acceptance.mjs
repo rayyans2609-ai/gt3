@@ -52,7 +52,7 @@ async function scrollToProgress(p) {
   }, p);
 }
 
-await page.goto('http://localhost:5173/', { waitUntil: 'networkidle2', timeout: 120000 });
+await page.goto(`${process.env.GT3_URL || 'http://localhost:5173'}/`, { waitUntil: 'domcontentloaded', timeout: 120000 });
 await wait(11000);
 let s = await probe();
 console.log('START      ', JSON.stringify(s));

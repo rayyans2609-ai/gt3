@@ -37,24 +37,36 @@ export const TRACK = {
  *   note  — for readability only.
  */
 const ROUTE = [
-  { len: 300, turn:    0, rise:   0, note: 'start / finish straight' },
-  { len: 210, turn:   55, rise:   3, note: 'turn 1 — long right sweep' },
-  { len: 130, turn:    0, rise:   2, note: 'short chute' },
-  { len: 165, turn:  -42, rise:   2, note: 'turn 2 — left' },
-  { len: 175, turn:  -66, rise:   0, note: 'turn 3 — tightening left' },
-  { len: 150, turn:    0, rise:   5, note: 'uphill chute' },
-  { len: 205, turn:   92, rise:   3, note: 'turn 4 — the big right-hander' },
-  { len: 190, turn:    0, rise:  -2, note: 'back chute' },
-  { len: 155, turn: -112, rise:  -4, note: 'turn 5 — hairpin left' },
-  { len: 130, turn:    0, rise:  -5, note: 'downhill run' },
-  { len: 140, turn:   46, rise:  -2, note: 'turn 6 — chicane in' },
-  { len: 140, turn:  -46, rise:   0, note: 'turn 7 — chicane out' },
-  { len: 330, turn:    0, rise:   2, note: 'back straight' },
-  { len: 225, turn:   72, rise:   4, note: 'turn 8 — fast right' },
-  { len: 170, turn:    0, rise:   4, note: 'crest' },
-  { len: 185, turn:  -52, rise:  -3, note: 'turn 9 — left onto the run-in' },
-  { len: 130, turn:   34, rise:  -4, note: 'turn 10 — final kink right' },
-  { len: 340, turn:    0, rise:  -5, note: 'run to the flag' },
+  { len: 180.201644, turn:    0, rise:  0, note: 'start / finish straight' },
+  { len: 210.743101, turn:   55, rise:  3, note: 'turn 1 — long right sweep' },
+  { len: 116.039783, turn:    0, rise:  2, note: 'breathing chute' },
+  { len: 165.858568, turn:  -42, rise:  2, note: 'turn 2 — left' },
+  { len: 174.589542, turn:  -66, rise:  0, note: 'turn 3 — tightening left' },
+  { len: 133.563905, turn:    0, rise:  5, note: 'uphill chute' },
+  { len: 204.923185, turn:   92, rise:  3, note: 'turn 4 — the big right-hander' },
+  { len: 140.951158, turn:    0, rise: -2, note: 'back chute' },
+  { len: 171.630132, turn: -112, rise: -4, note: 'turn 5 — hairpin left' },
+  { len: 123.007854, turn:    0, rise: -5, note: 'downhill run' },
+  { len: 138.669112, turn:   46, rise: -2, note: 'turn 6 — chicane in' },
+  { len: 138.669112, turn:  -46, rise:  0, note: 'turn 7 — chicane out' },
+  { len: 128.007854, turn:    0, rise:  2, note: 'exit chute' },
+  { len: 148.731710, turn:   50, rise:  4, note: 'turn 8 — fast right' },
+  { len: 277.963408, turn: -160, rise:  3, note: 'turn 9 — sweeping left return' },
+  { len: 168.267666, turn:    0, rise:  4, note: 'crest' },
+  { len: 512.038611, turn:    0, rise: -2, note: 'long acceleration 1' },
+  { len:  87.706968, turn:   52, rise: -1, note: 'slowdown 1 — right in' },
+  { len:  87.706968, turn:  -52, rise: -1, note: 'slowdown 1 — left out' },
+  { len: 281.184858, turn:    0, rise: -2, note: 'long acceleration 2' },
+  { len:  94.252664, turn:  -64, rise: -1, note: 'slowdown 2 — left in' },
+  { len:  94.252664, turn:   64, rise: -1, note: 'slowdown 2 — right out' },
+  { len: 300.860478, turn:    0, rise: -1, note: 'long acceleration 3' },
+  { len: 189.756152, turn:  -40, rise: -2, note: 'closing arc 1 — broad left' },
+  { len:  70.118530, turn:    0, rise:  0, note: 'closing chute 1' },
+  { len: 267.803741, turn:  -68, rise: -2, note: 'closing arc 2 — long left' },
+  { len:  79.999484, turn:    0, rise:  0, note: 'closing chute 2' },
+  { len: 159.474647, turn:  -82, rise: -1, note: 'closing arc 3 — tightening left' },
+  { len:  55.018595, turn:   13, rise: -1, note: 'final kink right' },
+  { len: 102.016442, turn:    0, rise: -1, note: 'run to the flag' },
 ];
 
 // Points are emitted this often along each segment. Dense enough that the Catmull-Rom
@@ -87,13 +99,16 @@ function buildControlPoints() {
       pts.push(new THREE.Vector3(x, y, z));
     }
   }
+  // The final integration step returns to the origin. A closed Catmull-Rom curve
+  // owns the final span, so retaining that duplicate point would make a cusp.
+  pts.pop();
   return pts;
 }
 
 export const controlPoints = buildControlPoints();
 
-/** The centreline. Open (not closed) — it has a start line and a finish line. */
-export const curve = new THREE.CatmullRomCurve3(controlPoints, false, 'catmullrom', 0.5);
+/** One lap; t=0 and t=1 are the same point on the start/finish straight. */
+export const curve = new THREE.CatmullRomCurve3(controlPoints, true, 'catmullrom', 0.5);
 
 /** Total arc length in world units, used for the HUD distance readout. */
 export const TRACK_LENGTH = curve.getLength();
@@ -117,8 +132,8 @@ const curvatureTable = new Float32Array(CURVATURE_SAMPLES + 1);
 
   for (let i = 0; i <= CURVATURE_SAMPLES; i++) {
     const t = i / CURVATURE_SAMPLES;
-    curve.getTangentAt(Math.max(0, t - eps), a).setY(0).normalize();
-    curve.getTangentAt(Math.min(1, t + eps), b).setY(0).normalize();
+    curve.getTangentAt((t - eps + 1) % 1, a).setY(0).normalize();
+    curve.getTangentAt((t + eps) % 1, b).setY(0).normalize();
     // Signed angle between the two tangents about the world up axis.
     const dot = THREE.MathUtils.clamp(a.dot(b), -1, 1);
     const angle = Math.acos(dot);
@@ -131,9 +146,9 @@ const curvatureTable = new Float32Array(CURVATURE_SAMPLES + 1);
   // light 3-tap smooth so a single noisy sample cannot make the camera twitch.
   const raw = Float32Array.from(curvatureTable);
   for (let i = 0; i <= CURVATURE_SAMPLES; i++) {
-    const p = raw[Math.max(0, i - 1)];
+    const p = raw[(i - 1 + CURVATURE_SAMPLES) % CURVATURE_SAMPLES];
     const c = raw[i];
-    const n = raw[Math.min(CURVATURE_SAMPLES, i + 1)];
+    const n = raw[(i + 1) % CURVATURE_SAMPLES];
     curvatureTable[i] = ((p + 2 * c + n) / 4) / peak;
   }
 })();
@@ -217,4 +232,4 @@ export const COIN_TRIGGER_T = 9 / TRACK_LENGTH;
 export const COIN_APPROACH_T = 0.062;
 
 /** Where the finish gate stands. */
-export const FINISH_T = 0.988;
+export const FINISH_T = 0.994;

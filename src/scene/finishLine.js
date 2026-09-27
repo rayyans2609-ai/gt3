@@ -64,8 +64,8 @@ function buildPaintedStrip(root) {
   for (let row = 0; row < STRIP_ROWS; row += 1) {
     const fromDistance = -halfLength + (row / STRIP_ROWS) * STRIP_LENGTH;
     const toDistance = -halfLength + ((row + 1) / STRIP_ROWS) * STRIP_LENGTH;
-    const t0 = THREE.MathUtils.clamp(FINISH_T + fromDistance / TRACK_LENGTH, 0, 1);
-    const t1 = THREE.MathUtils.clamp(FINISH_T + toDistance / TRACK_LENGTH, 0, 1);
+    const t0 = (FINISH_T + fromDistance / TRACK_LENGTH + 1) % 1;
+    const t1 = (FINISH_T + toDistance / TRACK_LENGTH + 1) % 1;
 
     for (let column = 0; column < STRIP_COLUMNS; column += 1) {
       const x0 = -TRACK.halfWidth + (column / STRIP_COLUMNS) * TRACK.halfWidth * 2;

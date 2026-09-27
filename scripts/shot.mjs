@@ -25,7 +25,7 @@ const logs = [];
 page.on('console', (m) => logs.push(`[${m.type()}] ${m.text()}`));
 page.on('pageerror', (e) => logs.push(`[pageerror] ${e.message}`));
 
-await page.goto('http://localhost:5173/', { waitUntil: 'networkidle2', timeout: 60000 });
+await page.goto(`${process.env.GT3_URL || 'http://localhost:5173'}/`, { waitUntil: 'domcontentloaded', timeout: 60000 });
 await new Promise((r) => setTimeout(r, 9000));
 
 for (const p of stops) {

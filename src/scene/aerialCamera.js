@@ -10,7 +10,9 @@ export const TUNE = {
   pitchDeg: 52,
   distance: 54,
   routeSpreadM: 45,
-  lookAheadM: 12,
+  // A fixed +t look-ahead helps forward travel but pushes the car to the frame edge in
+  // reverse (measured: 59% correction-active frames backward at 12 m, 0% at 0 m).
+  lookAheadM: 0,
   lateralOffsetM: 0,
   trackingGain: 1,
   dampingSeconds: 0.18,
@@ -47,7 +49,7 @@ const viewMatrix = new THREE.Matrix4();
 const UP = new THREE.Vector3(0, 1, 0);
 const ROUTE_SAMPLES = [[-2, 0.06], [-1, 0.24], [0, 0.40], [1, 0.24], [2, 0.06]];
 const previousPosition = new THREE.Vector3();
-const predictedPosition = new THREE.Vector3();
+const basePosition = new THREE.Vector3();
 const toCar = new THREE.Vector3();
 
 function wrappedPoint(t, out) {
@@ -109,9 +111,10 @@ function safetyOffset(testPosition) {
 export function snap() {
   if (!camera) return;
   routePose(state.progress);
-  safetyOffset(desiredPosition);
+  basePosition.copy(desiredPosition);
+  safetyOffset(basePosition);
   correction.copy(wantedCorrection);
-  camera.position.copy(desiredPosition).add(correction);
+  camera.position.copy(basePosition).add(correction);
   camera.quaternion.copy(orientation);
   camera.updateMatrixWorld();
   lastProgress = state.progress;
@@ -137,14 +140,13 @@ export function update(dt) {
     return;
   }
   routePose(state.progress);
-  const alpha = 1 - Math.exp(-Math.max(0, dt) / Math.max(0.001, TUNE.dampingSeconds));
-  predictedPosition.copy(desiredPosition).add(correction);
-  predictedPosition.lerpVectors(camera.position, predictedPosition, alpha);
-  safetyOffset(predictedPosition);
+  const alpha = TUNE.dampingSeconds <= 0 ? 1
+    : 1 - Math.exp(-Math.max(0, dt) / TUNE.dampingSeconds);
+  basePosition.lerp(desiredPosition, alpha);
+  safetyOffset(basePosition);
   const safetyAlpha = 1 - Math.exp(-Math.max(0, dt) / Math.max(0.001, TUNE.correctionSeconds));
   correction.lerp(wantedCorrection, safetyAlpha);
-  desiredPosition.add(correction);
-  camera.position.lerp(desiredPosition, alpha);
+  camera.position.copy(basePosition).add(correction);
   camera.quaternion.copy(orientation);
   camera.updateMatrixWorld();
   lastProgress = state.progress;

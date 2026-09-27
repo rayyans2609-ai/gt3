@@ -1,11 +1,12 @@
-/** Route camera survey, focused checks, and wheel-motion verification. Usage: GT3_URL=http://localhost:5181 node scripts/verify-aerial.mjs [branch|focused|motion] */
+/** Route camera survey, focused checks, and wheel-motion verification. Usage: GT3_URL=http://localhost:5181 node scripts/verify-aerial.mjs [branch|focused|motion|matrix] */
 import puppeteer from 'puppeteer-core';
 import { mkdir, writeFile } from 'node:fs/promises';
 
 const mode = process.argv[2] || 'branch';
 const baseline = mode === 'baseline';
 const focused = mode === 'focused';
-const motion = mode === 'motion';
+const matrix = mode === 'matrix';
+const motion = mode === 'motion' || matrix;
 const base = process.env.GT3_URL || 'http://localhost:5181';
 const root = '/tmp/gt3-aerial';
 const shots = `${root}/shots`;
@@ -59,6 +60,11 @@ async function goTo(t, settleMs = 420, tolerance = 0.001) {
 }
 
 if (motion) {
+  const percentile = (values, fraction) => {
+    if (!values.length) return 0;
+    const sorted = [...values].sort((a, b) => a - b);
+    return sorted[Math.ceil(fraction * sorted.length) - 1];
+  };
   // This callback is registered after the app's rAF, so each sample sees its
   // rendered camera pose rather than the previous frame's state.
   await page.evaluate(async () => {
@@ -84,19 +90,26 @@ if (motion) {
   });
 
   const passes = [];
+  const tunings = matrix ? [0.18, 0.08, 0.04, 0].flatMap(dampingSeconds =>
+    [12, 0].map(lookAheadM => ({ dampingSeconds, lookAheadM }))) : [null];
+  for (const tuning of tunings) {
+  if (tuning) await page.evaluate(value => Object.assign(window.__gt3.aerial.TUNE, value), tuning);
   for (const [label, throttle] of [['normal', 1], ['cpu-4x', 4]]) {
     const cdp = await page.createCDPSession();
     await cdp.send('Emulation.setCPUThrottlingRate', { rate: throttle });
-    const sequences = [
+    const sequences = (matrix ? [
+      ['fast-forward', 0.18, Array(30).fill(30), 65],
+      ['backward', 0.28, Array(30).fill(-30), 65],
+    ] : [
       ['fast-forward', 0.18, Array(30).fill(30), 65],
       ['slow-forward', 0.18, Array(20).fill(5), 120],
       ['rapid-reversals', 0.18, Array.from({ length: 20 }, (_, i) => i % 2 ? -40 : 40), 65],
       ['backward', 0.28, Array(30).fill(-30), 65],
-    ];
+    ]);
     const reports = [];
     for (const [name, start, deltas, pauseMs] of sequences) {
       await goTo(start, 1800);
-      const segment = `${label}:${name}`;
+      const segment = `${tuning?.dampingSeconds ?? 'final'}:${tuning?.lookAheadM ?? 'final'}:${label}:${name}`;
       await page.evaluate(s => { window.__aerialMotion.segment = s; }, segment);
       let montagesSkipped = 0;
       for (const deltaY of deltas) {
@@ -118,12 +131,21 @@ if (motion) {
       const moving = pairs.filter(({ frame, previous }) => Math.abs(frame.progress - previous.progress) > 1e-7);
       const displacements = pairs.map(({ frame, previous }) =>
         Math.hypot(...frame.camera.map((x, j) => x - previous.camera[j])));
+      const velocities = pairs.map(({ frame, previous }) => {
+        const seconds = Math.max(0.001, (frame.time - previous.time) / 1000);
+        return frame.camera.map((x, j) => (x - previous.camera[j]) / seconds);
+      });
+      const velocityChanges = velocities.slice(1).map((velocity, i) =>
+        Math.hypot(...velocity.map((x, j) => x - velocities[i][j])));
       const outside = frames.filter(f => Math.abs(f.ndcX) > 1 || Math.abs(f.ndcY) > 1);
+      const movingFrames = moving.map(({ frame }) => frame);
       reports.push({ name, frames: frames.length, excludedOverlayFrames: allFrames.length - frames.length,
         movingFrames: moving.length,
         startProgress: frames[0]?.progress, endProgress: frames.at(-1)?.progress,
         maxAbsNdcXMoving: Math.max(0, ...moving.map(({ frame }) => Math.abs(frame.ndcX))),
         maxAbsNdcYMoving: Math.max(0, ...moving.map(({ frame }) => Math.abs(frame.ndcY))),
+        correctionActiveMovingPct: movingFrames.length
+          ? 100 * movingFrames.filter(f => f.correctionActive).length / movingFrames.length : 0,
         correctionActiveFrames: frames.filter(f => f.correctionActive).length,
         correctionActivePct: frames.length ? 100 * frames.filter(f => f.correctionActive).length / frames.length : 0,
         correctionActiveCountDelta: pairs.reduce((n, { frame, previous }) =>
@@ -132,16 +154,19 @@ if (motion) {
         snapsDuringMotion: moving.reduce((n, { frame, previous }) =>
           n + Math.max(0, frame.snapCount - previous.snapCount), 0),
         maxCameraDisplacementM: Math.max(0, ...displacements),
+        maxVelocityChangeMps: Math.max(0, ...velocityChanges),
+        p95VelocityChangeMps: percentile(velocityChanges, 0.95),
         outsideFrameCount: outside.length,
         outsideFrameExamples: outside.slice(0, 3).map(f => ({ progress: f.progress, x: f.ndcX, y: f.ndcY })),
         montagesSkipped });
       console.log('MOTION SEGMENT', label, JSON.stringify(reports.at(-1)));
     }
-    passes.push({ label, throttle, sequences: reports });
+    passes.push({ tuning, label, throttle, sequences: reports });
     await cdp.detach();
   }
+  }
   const summary = { mode, integration, passes, errors };
-  await writeFile(`${root}/motion-verification.json`, JSON.stringify(summary, null, 2));
+  await writeFile(`${root}/${mode}-verification.json`, JSON.stringify(summary, null, 2));
   console.log('SUMMARY', JSON.stringify(summary));
   await browser.close();
   process.exit(0);

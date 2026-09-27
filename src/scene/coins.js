@@ -263,7 +263,7 @@ function makeEmblemTexture(car) {
   const mark = manufacturerMark(car.manufacturer);
   const tracking = 18;
   context.clearRect(0, 0, canvas.width, canvas.height);
-  context.font = '500 72px "DM Sans", sans-serif';
+  context.font = '500 72px "Neue Haas Grotesk Text", sans-serif';
   context.textBaseline = 'middle';
   context.fillStyle = brandCssValue(car.brandColor);
 

@@ -181,6 +181,15 @@ Three measurement traps burned real time here. Do not repeat them:
    Driving to the finish is equally wrong: mode becomes 'finish' and never returns.
    scripts/perf-ab.mjs measures inside the coin-free band before the first coin (p<0.065)
    with a per-step bound, and tags/discards every non-race frame.
+4. **Never wait for `networkidle` in GT3 browser probes** (added 2026-09-27, Phase 1a).
+   The six-file audio preload in `audioManager.js` can leave its `/audios/*.mp3` requests
+   open indefinitely in headless Chrome (headless also logs an AudioContext device error),
+   so `networkidle2` never fires and the probe times out on a healthy app. Headless boot
+   itself took 30-60 s on both `main` and the branch, and longer when a probe ran several
+   browser contexts back to back, which briefly looked like a boot regression. Instead,
+   navigate with `domcontentloaded`, then wait on explicit app state (`window.__gt3`
+   present, the `[gt3] ready` log line, or `__gt3.probe().mode`) with a generous timeout.
+   Before calling a slow boot a regression, run the same probe against `main`.
 
 ### Root cause: FILL RATE, not geometry
 GPU-timer cost is almost perfectly linear in pixel count, ~9.8 ms per megapixel:

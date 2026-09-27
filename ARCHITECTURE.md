@@ -144,7 +144,17 @@ Theme / audio
 - `playerOpen`     expanded-player UI state; reset to false on every major transition (SPEC §25)
 - `audioReady`     true once the single AudioContext exists
 
-Retired keys: `mode`, `started`, `timeOfDay`.
+Retired keys: `timeOfDay` (Phase 1a). `mode` and `started` are **transitional**: they stay
+as legacy in-race keys until their last consumers go. That is Phase 3 for montage-in-race,
+coins and the fullscreen card; Phases 4–5 for the start screen; Phase 6 for the F-key
+Showcase; and Phase 7 for the finish screen. Until then, a marked legacy bridge in `main.js`
+maps the running race onto `experience`.
+
+Keys land with the phase that owns their truth, so no key has two sources of truth.
+`masterMuted`/`audioReady` land in Phase 2, because the mute flag lives in
+`audioManager.js` today. Session persistence of `progress`/`activeCarIndex`/`unlocked`, and
+`unlocked` starting as {0}, land in Phase 3, because `coins.js` tracks collection
+separately and the legacy replay clears `unlocked`.
 
 Rules [keep]:
 - Modules NEVER read `window.scrollY` directly except scrollDrive.js.

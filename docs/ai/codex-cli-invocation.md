@@ -2,7 +2,7 @@
 
 Execution-specific layer only. Role/escalation/reasoning-*policy* doctrine lives in [`docs/ai/model-routing.md`](./model-routing.md) — do not duplicate it here.
 
-**Status:** re-verified 2026-09-26 against a locally installed `codex-cli 0.157.1` (npm, macOS x86_64). Re-verify against `codex doctor` / `codex --version` / `~/.codex/models_cache.json` at the start of a new working session rather than trusting this file indefinitely — see "This file drifts" below.
+**Status:** re-verified 2026-09-26 against a locally installed `codex-cli 0.157.1` (npm, macOS x86_64). Re-verify against `codex doctor` / `codex --version` / `~/.codex/models_cache.json` at the start of a new working session rather than trusting this file indefinitely — see "This file drifts" below. `scripts/codex-route.sh` itself was verified end-to-end by a live routed job on 2026-09-27 (see "Live-run verification").
 
 ## Required invocation path: `scripts/codex-route.sh`
 
@@ -64,7 +64,16 @@ The user's global machine-wide default was **not modified** by this work, per in
 
 ## What could not be verified
 
-A live no-op invocation (`scripts/codex-route.sh -m gpt-6-luna -r low "Reply with exactly: ROUTING_OK"`, and earlier a bare `codex exec` equivalent) was attempted and blocked both times by Claude Code's own auto-mode permission classifier on `--dangerously-bypass-approvals-and-sandbox` ("Create Unsafe Agents"). No attempt was made to work around this. Confirm the run header still echoes `model:`/`reasoning effort:` correctly, and confirm which value actually wins for a *bare* invocation with no `-c model_reasoning_effort`, the first time this environment allows a live run to go through.
+Only one item remains: which reasoning-effort value wins for a *bare* `codex exec` with no `-c model_reasoning_effort`. Routed jobs never depend on it, because the wrapper always passes `-r`. (Earlier live attempts on 2026-09-26 were blocked by Claude Code's auto-mode classifier on `--dangerously-bypass-approvals-and-sandbox`; that block did not recur on 2026-09-27. See below.)
+
+## Live-run verification (2026-09-27)
+
+`scripts/codex-route.sh` is **verified end-to-end.** The Phase 1a job (`scripts/codex-route.sh -m gpt-5.6-terra -r medium @<brief>`) ran to completion, exit 0, and produced the committed work. The run header echoed exactly what the wrapper passed: `model: gpt-5.6-terra`, `reasoning effort: medium`, `approval: never`, `sandbox: danger-full-access`, `workdir: <the directory it was launched from>`.
+
+Operating notes from that run:
+
+- **Codex works unsandboxed in its launch directory.** Launch routed jobs from a dedicated worktree on the job's branch, never from the user's main checkout, so its commits and branch changes cannot touch the working copy. A symlinked `node_modules` is fine; list it in `.git/info/exclude`, because `.gitignore`'s `node_modules/` pattern only matches directories.
+- **Codex's own verification can be incomplete.** In its execution window it could not finish `npm run build` or get past the headless loading screen, and it reported that honestly. The manager re-ran the build and browser checks. Treat worker-reported verification gaps as manager work, per `model-routing.md` §6 "Implementation ≠ acceptance".
 
 The `codex-executor` MCP server continues to fail with `CONNECTION_CLOSED` as of 2026-09-26 — routed jobs go through the `codex` CLI via Bash (or `scripts/codex-route.sh`), which draws on the same quota as the MCP path would.
 

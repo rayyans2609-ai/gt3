@@ -1,89 +1,231 @@
-# GT3: A Grand Tour — Architecture (authoritative; read before any task)
+# GT3 — Architecture (reconciled to SPEC_V3, 2026-09-27)
+
+`SPEC.md` (SPEC_V3) is product truth; this file is the technical map that serves it. Where
+they disagree, `SPEC.md` wins and this file is wrong. Module status tags:
+**[keep]** exists and stays · **[evolve]** exists, changes behavior · **[new]** V3 build work ·
+**[retire]** removed once its replacement lands.
 
 Desktop-only single-page WebGL experience. Vite + Three.js (ESM, no framework).
-Scroll drives a GT3 car along a spline track under a 45° pulled-back camera.
-DOM overlay handles ALL text/HUD. Canvas is fixed behind it.
+Four experiences — Landing, Grand Tour Hub, Showcase, Grand Tour (+ completion state) — are
+internal application states of ONE page, not URL routes (SPEC §25). DOM overlay handles ALL
+text/HUD/player UI. One fixed canvas behind it, one shared `WebGLRenderer`.
 
 ## Directory layout
 ```
-/                     project root (this dir)
-  index.html          Vite entry, DOM overlay markup lives here
+/                     project root
+  index.html          Vite entry, DOM overlay markup
   vite.config.js
   package.json
-  models/             SOURCE glb files (270MB, do not ship, do not modify)
-  audios/             SOURCE mp3 files (ship via copy to public/audios)
-  public/
-    models/           COMPRESSED glb output (shipped)
-    audios/           copied mp3 (shipped)
-    images/<carId>/   Wikimedia images (shipped)
-  scripts/            build-time node scripts (compression, image fetch)
+  models/             SOURCE glb files (do not ship, do not modify)
+                      incl. car_cover_model (glb data, no extension — SPEC §30.3)
+  audios/             SOURCE audio (sfx, voices/, background_playlist/ + audiocover_NOTaudios/)
+  font/               Neue Haas Grotesk (-Trial files, GITIGNORED — local only, SPEC §30.5)
+  reference _images/  design references (literal space in name), never shipped
+  public/             shipped assets (tracked)
+    models/           compressed car glbs [keep]; car_cover.glb [new]
+    audios/           sfx + voices [keep]; background.mp3 [retire]
+    audios/playlist/  track_1..6.mp3 + covers, ALIASED filenames [new] (SPEC §6)
+    fonts/            Neue Haas Grotesk web copies [new] — see Open items
+    images/<carId>/   manufacturer imagery / badges [keep]
+  scripts/            build-time + puppeteer probe/perf/QA scripts [keep]
   src/
-    main.js           bootstrap, module wiring, single RAF loop
+    main.js           bootstrap, module wiring, single RAF loop [evolve]
     core/
-      state.js        central mutable store + pub/sub
-      clock.js        delta time
+      state.js        central store + pub/sub [keep pattern, evolve keys]
+      clock.js        delta time [keep]
+      session.js      sessionStorage persist/restore of whitelisted keys [new]
+      experience.js   experience state machine + transition driver [new]
     scroll/
-      scrollDrive.js  OWNED BY MANAGER — do not edit unless briefed
+      scrollDrive.js  sole owner of document scroll; per-experience mapping [evolve]
     scene/
-      sceneSetup.js   renderer, scene, camera, composer/postfx
-      track.js        spline + asphalt ribbon + yellow markings + red/white curbs
-      environment.js  grass, sky, trees, grandstands, tire stacks, markers
-      timeOfDay.js    5 lighting presets + smooth crossfade
-      carRig.js       rig group (car mount + camera child), lean/roll/bob
-      cars.js         GLTF preload of 10 cars, normalize scale/center
-      coins.js        10 coins, spin/bob, approach cue, pixel dissolve
-      morph.js        cross-fade car swap w/ emissive pulse + particles
-      finishLine.js   checkered gate at t=1
+      sceneSetup.js   shared renderer, adaptive dpr, render dispatch per experience [evolve]
+      theme.js        Day/Night scene presets + crossfade (from timeOfDay.js) [new]
+      timeOfDay.js    5 presets [retire → theme.js]
+      trackCurve.js   circuit spline + named beats + checkpoint/finish t-values [evolve]
+      track.js        asphalt ribbon, markings, curbs [keep]
+      environment.js  terrain/grass/vegetation masses/architecture [evolve]
+      carRig.js       car mount, lean/roll/bob — camera NO LONGER a child [evolve]
+      aerialCamera.js world-space aerial rail camera for Grand Tour (SPEC §15) [new]
+      cars.js         GLTF preload of 10 cars + verified orientation table [keep]
+      coverModel.js   loads car_cover.glb for locked cars [new]
+      checkpoints.js  sector/checkpoint gates, crossing detection [new]
+      coins.js        visible-identity coins [retire → checkpoints.js]
+      morph.js        in-tour car swap, forward + reverse [evolve]
+      finishSequence.js route-end hero transition + completion hero car [new]
+      finishLine.js   checkered gate at FINISH_T [evolve or fold into finishSequence]
+      landingStage.js Landing field scene: floating Lexus, cursor response, push-in [new]
     montage/
-      studio.js       shared studio scene (one only), per-car backdrop color
-      choreography.js 5-shot camera timeline
+      studio.js       montage studio (own renderer — sanctioned exception, see below) [keep]
+      choreography.js 5-shot camera timeline [keep]
     ui/
-      startScreen.js hud.js specPanel.js fullscreenCard.js showcase.js
-      todSelector.js finishScreen.js
+      landing.js      GT3 wordmark, sound-on affordance [new; replaces startScreen.js]
+      hub.js          START RACE, Cars, Day/Night, integrated player slot [new]
+      showcase.js     Showcase scene + DOM (already uses shared renderer) [evolve]
+      selector.js     bottom ten-car selector, ?/badge states [new]
+      unlockFlow.js   manual unlock: flag wipe → montage → reveal → narration [new]
+      hud.js          Grand Tour HUD: circuit map TR, car name TL, edge controls [evolve]
+      player.js       global music player: compact anchor / expanded / Hub variant [new]
+      soundControl.js persistent speaker (master mute) + `+` launcher [evolve]
+      themeToggle.js  Day/Night control [new; replaces todSelector.js]
+      completion.js   GRAND TOUR COMPLETE + return control [new; replaces finishScreen.js]
+      startScreen.js todSelector.js finishScreen.js specPanel.js fullscreenCard.js [retire]
     audio/
-      audioManager.js Web Audio API graph
+      audioManager.js one AudioContext: master/music/sfx/voice buses [evolve]
+      playlist.js     six-track sequence, seek, auto-advance, ended→next [new]
     data/
-      cars.js         roster data (10 cars, locked order)
+      cars.js         roster data (10 cars, locked order) + narration copy [keep]
+      carImages.js    [keep]
+      playlist.js     track_1..6 alias → file/cover table [new]
     styles/
-      base.css hud.css montage.css showcase.css screens.css
+      tokens.css      design tokens, Day/Night via :root[data-theme] [new]
+      base.css + per-experience sheets [evolve; montage.css keep]
   BUILD_LOG.md
 ```
 
+## Rendering model
+- **One shared `WebGLRenderer`** (`sceneSetup.js`). Each experience owns a scene+camera and a
+  `render()`; `sceneSetup` dispatches to the active one (Showcase already works this way).
+  Only the active experience's scene is rendered; Grand Tour's circuit is not rendered
+  behind Landing/Hub/Showcase.
+- **Sanctioned exception:** `montage/studio.js` keeps its own renderer, used ONLY inside the
+  Showcase manual-unlock flow (SPEC §11), never in Grand Tour. No other second renderer —
+  in particular the finish hero sequence reuses the Grand Tour scene/camera (SPEC §21, §27).
+- **Adaptive resolution** [keep]: lower dpr while scrolling, full dpr at rest (~420 ms
+  settle). Landing push-in and Grand Tour use it; Showcase, montage and the completion hero
+  render at full quality.
+- **Landing→Hub** is a field scene (themed background + Lexus); the Hub itself is mostly DOM
+  over the resolved theme field. The Landing Lexus is a clone from `cars.js`, not a second load.
+
+## Experiences and scroll ownership
+`scrollDrive.js` remains the **only** reader of `window.scrollY` and uses native document
+scroll with passive listeners (threaded scrolling preserved). It remaps the spacer per
+experience:
+
+| experience | scroll role | mechanism |
+|---|---|---|
+| `landing` → `hub` | drives `landingT` 0..1, reversible | spacer = landing length; `landingT=1` at spacer end = Hub at rest, so further downward scroll has nowhere to go (SPEC §5) |
+| `hub` | upward scroll reverses to Landing only | same spacer, sitting at its end; START RACE / Cars are clicks |
+| `showcase` | none | `overflow:hidden` on the document — no non-passive listeners |
+| `tour` | drives route `progress`, reversible | spacer = route length, restored from session route position |
+| `complete` | backward scroll cancels/reverses completion (SPEC §26) | tail of the tour mapping |
+
+Click-driven transitions (Hub↔Showcase, Hub→Tour, Tour→Hub) are timed, run by
+`core/experience.js`, and hold `scrollLocked` for their duration only. Non-passive
+wheel/touchmove swallowing is attached **only** while `scrollLocked` is true (existing rule).
+
 ## Central state (src/core/state.js)
-Single exported object `state` + `subscribe(key, fn)` / `set(key, value)`.
-Keys:
-- `progress`      0..1 damped render progress along spline (written by scrollDrive)
-- `targetProgress`0..1 raw scroll target
-- `velocity`      signed scroll velocity, normalized ~-1..1
-- `speed01`       0..1 abs speed intensity for FOV/blur
-- `started`       bool, true after first scroll (start screen dismissed)
-- `activeCarIndex` 0..9, current car in the rig (starts at 0 = Lexus)
-- `unlocked`      Set<number> of collected coin indices
-- `mode`          'race' | 'montage' | 'showcase' | 'fullcard' | 'finish'
-- `scrollLocked`  bool — when true scrollDrive ignores input and holds progress
-- `timeOfDay`     'dawn'|'morning'|'afternoon'|'dusk'|'night' (default 'afternoon')
+Single exported object `state` + `subscribe(key, fn)` / `set(key, value)` — pattern unchanged.
+Keys (★ = persisted to sessionStorage by `session.js`, SPEC §24):
 
-Rule: modules NEVER read `window.scrollY` directly except scrollDrive.js.
-Rule: only ONE requestAnimationFrame loop, in main.js. Modules export `update(dt, state)`.
+Navigation
+- `experience` ★  'landing'|'hub'|'showcase'|'tour'|'complete' (replaces `mode`)
+- `transition`     null | { from, to } while a click-driven transition runs
+- `landingT`       0..1 scroll-driven Landing→Hub progress
+- `scrollLocked`   bool — scrollDrive ignores input and holds position [keep]
 
-## Locked car roster (order is fixed, index = coin index)
+Grand Tour (route state — follows scroll bidirectionally, SPEC §26)
+- `progress` ★    0..1 damped render progress along spline [keep]
+- `targetProgress` 0..1 raw scroll target [keep]
+- `velocity`, `speed01` [keep]
+- `activeCarIndex` 0..9 car currently skinning the player car — ROUTE state [keep]
+- `finishT`        0..1 completion hero-sequence progress [new]
+
+Discovery (monotonic within a session, SPEC §26)
+- `unlocked` ★    Set<number> of discovered car indices; only ever grows. Written by
+                   checkpoint crossing (silent) and manual unlock. [keep name, new semantics]
+- `showcaseCarIndex` ★ selected car in Showcase [new]
+
+Theme / audio
+- `theme` ★        'day'|'night' (replaces `timeOfDay`)
+- `masterMuted` ★  speaker: silences music + sfx + voice
+- `musicMuted` ★   music-only mute; master unmute restores music only if this is false
+- `trackIndex` ★, `trackPosition` ★, `playIntent` ★  playlist state; restored playback
+                   still waits for a genuine user gesture (SPEC §10, §24)
+- `playerOpen`     expanded-player UI state; reset to false on every major transition (SPEC §25)
+- `audioReady`     true once the single AudioContext exists
+
+Retired keys: `mode`, `started`, `timeOfDay`.
+
+Rules [keep]:
+- Modules NEVER read `window.scrollY` directly except scrollDrive.js.
+- Only ONE requestAnimationFrame loop, in main.js. Modules export `update(dt, state)`.
+- Theme is read ONLY from `state.theme`; no component hardcodes a theme (SPEC §13). A theme
+  change mid-transition is applied next frame, never queued (SPEC §25).
+- Grand Tour never calls montage, narration, Showcase, cards or modals (SPEC §2, §14, §18).
+
+## Session persistence (src/core/session.js)
+`sessionStorage` — survives refresh, a new tab/session starts fresh (SPEC §24–25). Writes the
+★ keys, throttled; restores on boot before first render. No history API, no URL routing.
+Audio restore sets UI state only; playback resumes on the next user gesture.
+
+## Audio graph (src/audio/)
+One AudioContext, created only from an explicit user gesture — never scroll [keep, SPEC §10].
+```
+music (HTMLAudioElement → MediaElementSource) → musicGain ─┐
+sfx buffers ────────────────────────────────→ sfxGain ────┼→ masterGain → destination
+voice buffers ──────────────────────────────→ voiceBus ───┘
+```
+- Music uses one streaming `<audio>` element (native duration/seek/ended) instead of decoding
+  six full tracks. Order track_1→…→track_6→track_1, auto-advance on `ended`.
+- `masterMuted` → masterGain; `musicMuted` → musicGain. No SFX-only mute.
+- Real artist/title names never reach the UI; shipped playlist files use `track_N` aliases.
+- SFX set: existing files only (`coin_approach.mp3` reused as checkpoint approach cue; others
+  kept as currently wired). Voices: exactly the 10 `voice_XX` files, played ONLY in Showcase.
+
+## Grand Tour systems
+- **Camera** (`aerialCamera.js`): world-space, NOT parented to the rig. Pitch ~45–60° down,
+  fixed world orientation (does not yaw with the car), damped translation along a rail that
+  follows the car, controlled screen-space drift with a safety-framing correction. Tunables:
+  FOV, elevation, pitch, lateral offset, look target, damping, tracking gain, safety margin.
+- **Checkpoints** (`checkpoints.js`): restrained gates at `CHECKPOINT_T[]` in `trackCurve.js`,
+  no brand colour/emblem/silhouette. Forward crossing → `activeCarIndex` swap and (if new) add
+  to `unlocked`; backward crossing → reverse swap only. Spacing ~30–50% longer than the coin
+  spacing (SPEC §14).
+- **Swap** (`morph.js`): short, non-blocking, runs in both directions, no scroll lock.
+- **HUD** (`hud.js`): circuit map (top-right, derived from `trackCurve`), car name (top-left),
+  edge row with theme toggle, speaker/`+`, back-to-Hub. Nothing else.
+- **Finish** (`finishSequence.js`): driven by `finishT` past the last checkpoint; progressively
+  hides environment groups, eases camera to a hero framing, resolves to the theme field, then
+  `experience='complete'`. Reversible by the same mechanism (SPEC §26).
+
+## Showcase systems
+- Scene: themed field, hero car, pointer-drag orbit (yaw free, pitch clamped), no free camera.
+- Locked car → `coverModel.js` shroud, `?` label, unlock action. Unlocked → real model, badge,
+  narration via `voiceBus`, optional expandable specs.
+- Manual unlock (`unlockFlow.js`): flag wipe → existing montage → swap behind wipe → reveal →
+  narration → inspectable; adds to `unlocked`.
+
+## Locked car roster (order is fixed) [keep]
 0 lexus_rcf_gt3 · 1 nissan_gtr_gt3 · 2 audi_r8_gt3 · 3 bmw_m6_gt3 · 4 mercedes_amg_gt3
 5 ferrari_488_gt3 · 6 mclaren_720s_gt3 · 7 aston_vantage_gt3 · 8 lamborghini_huracan_gt3
 9 porsche_911_gt3r
+Lexus (0) is the Landing hero car and the Grand Tour starting car.
 
-## Design system (non-negotiable)
-- Fonts: Cormorant Garamond (display/car names), DM Sans (UI labels), DM Mono (numbers). Google Fonts.
-- Palette tokens (CSS vars in base.css):
-  --ink:#0B0B0C  --ink-2:#141416  --gold:#C6A96B (FIA/champagne gold, UI accent)
-  --paper:#EDE9E3 (off-white HUD text)  --hair:rgba(237,233,227,.16)
-  --track-yellow:#E8C33A (asphalt markings ONLY, never UI)
-  --green:#1E3A2A (grass base)
-- HUD: 1px hairlines, backdrop-filter blur, fill opacity <=0.18. No thick frames,
-  no scanlines, no gloss, no neon, no solid panels over the track.
-- Motion: slow, eased (cubic-bezier(.22,.61,.36,1)), nothing snaps.
-- All-caps labels: DM Sans 300, letter-spacing .14em, font-size 10-11px.
-- Numbers: DM Mono, font-variant-numeric: tabular-nums.
+## Design system (SPEC §12–13, §23)
+- Fonts: Neue Haas Grotesk (primary; from local `font/`, never fetched), Geist Mono (timing /
+  identifiers / data only; may load from Google Fonts), selective oblique for short emphasis.
+  Cormorant Garamond / DM Sans / DM Mono are retired.
+- Tokens in `styles/tokens.css`, switched by `:root[data-theme="day"|"night"]`, interpolated:
+  Day = white/pale field, dark type/icons; Night = deep navy field, near-black/navy
+  architecture, refined motorsport-yellow accents. Exact values are runtime tuning.
+  The old gold/ink/paper palette is retired.
+- Controls: compact pills, clean buttons, moderate rounding, subtle surfaces, refined shadows;
+  shared hover/active/focus and one shared easing family. No glassmorphism overload, neon,
+  heavy blur, fake telemetry.
+- Motion: slow, eased (cubic-bezier(.22,.61,.36,1) remains the default), nothing snaps.
 
 ## Hard constraints
-No mobile/responsive breakpoints. No physics engine. No opponents/traffic.
-No hard model swaps. No arcade chrome. Exactly the 6 SFX + 10 voice files, no others.
+No mobile/responsive breakpoints. No physics engine. No opponents/traffic/AI. No backend,
+accounts, currency, achievements or extra modes. No hard model swaps in Grand Tour. No arcade
+chrome. No new renderers beyond the sanctioned montage exception. No URL routes / synthetic
+history entries. Audio: the existing SFX + the 10 voice files + the 6 playlist tracks, no others.
+
+## Open items (architecture-level)
+1. **Checkpoint count.** The current 10 coin positions include Lexus (index 0), which is
+   already the starting car. Working assumption: Lexus is discovered from the start and there
+   are 9 checkpoints (cars 1–9). Needs user confirmation.
+2. **Font shipping.** `font/` is gitignored, so a fresh clone cannot build the typography.
+   Licensing (`-Trial`) is unresolved (SPEC §30.5). Fonts must be copied to a served path
+   locally without committing them until licensing is settled.
+3. **Finish driver.** Whether `finishT` is driven by a scroll tail or a timed sequence that
+   backward scroll cancels is decided in that phase. Both satisfy SPEC §21/§26.

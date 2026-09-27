@@ -1,6 +1,5 @@
 /** GPU frame cost at settled route points, including coin/montage handoffs. */
 import puppeteer from 'puppeteer-core';
-import { TRACK_LENGTH } from '../src/scene/trackCurve.js';
 
 const LABEL = process.argv[2] || 'current';
 const STOPS = (process.argv[3] || '0.5').split(',').map(Number);
@@ -23,6 +22,9 @@ await page.waitForFunction(() => {
   const name = document.querySelector('.hud-identity__name');
   return name?.textContent.trim() && window.__gt3?.renderer;
 }, { timeout: 120000 });
+const TRACK_LENGTH = await page.evaluate(async () => (
+  await import('/src/scene/trackCurve.js')
+).TRACK_LENGTH);
 await new Promise((r) => setTimeout(r, 5000));
 
 for (const at of STOPS) {

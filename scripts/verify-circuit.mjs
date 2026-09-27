@@ -5,6 +5,13 @@ import { TRACK_LENGTH, pointAt, tangentAt, curvatureAt } from '../src/scene/trac
 import { trackEdges } from '../src/scene/track.js';
 
 const base = process.env.GT3_URL || 'http://localhost:5173';
+const routeSource = fs.readFileSync(new URL('../src/scene/trackCurve.js', import.meta.url), 'utf8');
+const routeSegments = [...routeSource.matchAll(
+  /\{ len:\s*([\d.]+), turn:\s*(-?\d+), rise:\s*(-?\d+), note: '([^']+)' \}/g,
+)].map((match) => ({
+  length: Number(match[1]), turn: Number(match[2]), rise: Number(match[3]), name: match[4],
+  radius: Number(match[2]) ? Number(match[1]) / (Math.abs(Number(match[2])) * Math.PI / 180) : null,
+}));
 const step = 5;
 const separateSectionsAfterMetres = 250;
 // main @ 66ba94c, sampled at 1 m and excluding the open end derivatives.
@@ -38,15 +45,46 @@ for (let i = 0; i < count; i++) {
   low = Math.min(low, points[i].y); high = Math.max(high, points[i].y);
 
 }
+const authoredLength = routeSegments.reduce((sum, segment) => sum + segment.length, 0);
+const segmentCurvature = new Float64Array(routeSegments.length);
+let activeSegment = 0;
+let segmentEnd = routeSegments[0].length;
 for (let i = 0, n = Math.ceil(TRACK_LENGTH); i < n; i++) {
   const t = i / n;
+  const authoredMetres = t * authoredLength;
+  while (authoredMetres >= segmentEnd && activeSegment < routeSegments.length - 1) {
+    activeSegment++;
+    segmentEnd += routeSegments[activeSegment].length;
+  }
   const a = tangentAt((t - 2 / TRACK_LENGTH + 1) % 1).setY(0).normalize();
   const b = tangentAt((t + 2 / TRACK_LENGTH) % 1).setY(0).normalize();
-  peak = Math.max(peak, a.angleTo(b) / 4);
+  const localCurvature = a.angleTo(b) / 4;
+  peak = Math.max(peak, localCurvature);
+  segmentCurvature[activeSegment] = Math.max(segmentCurvature[activeSegment], localCurvature);
 }
+routeSegments.forEach((segment, index) => {
+  segment.sampledMinimumRadius = segment.turn && segmentCurvature[index]
+    ? 1 / segmentCurvature[index] : null;
+});
 const seam = pointAt(0).distanceTo(pointAt(1));
 const tangentGap = tangentAt(0).angleTo(tangentAt(1)) * 180 / Math.PI;
 const curvatureGap = Math.abs(curvatureAt(0) - curvatureAt(1));
+const edgeStride = Math.max(1, Math.round(5 / (TRACK_LENGTH / (trackEdges.left.length - 1))));
+const edgeRings = [trackEdges.left, trackEdges.right].map((edge) => (
+  Array.from({ length: Math.ceil((edge.length - 1) / edgeStride) },
+    (_, i) => edge[Math.min(i * edgeStride, edge.length - 2)])
+));
+let shoulderCrossings = 0;
+for (let ringIndex = 0; ringIndex < edgeRings.length; ringIndex++) {
+  const ring = edgeRings[ringIndex];
+  for (let i = 0; i < ring.length; i++) {
+    const a = ring[i], b = ring[(i + 1) % ring.length];
+    for (let j = i + 2; j < ring.length; j++) {
+      if (i === 0 && j === ring.length - 1) continue;
+      if (intersects(a, b, ring[j], ring[(j + 1) % ring.length])) shoulderCrossings++;
+    }
+  }
+}
 const xs = points.map((p) => p.x), zs = points.map((p) => p.z);
 const minX = Math.min(...xs), maxX = Math.max(...xs);
 const minZ = Math.min(...zs), maxZ = Math.max(...zs);
@@ -56,10 +94,12 @@ fs.writeFileSync('/tmp/gt3-route-after.svg', `<svg xmlns="http://www.w3.org/2000
 console.log('GEOMETRY', JSON.stringify({ length: TRACK_LENGTH, closureGap: seam, seamTangentDegrees: tangentGap,
   seamCurvatureDifference: curvatureGap, nonAdjacentMinimum: minimum,
   minimumArcExclusionMetres: separateSectionsAfterMetres, closestPair, crossings,
-  elevationRange: [low, high], peakPhysicalCurvature: peak, oldPeakPhysicalCurvature }));
+  shoulderCrossings, edgeStride,
+  elevationRange: [low, high], peakPhysicalCurvature: peak, oldPeakPhysicalCurvature,
+  routeSegments }));
 
 const browser = await puppeteer.launch({ executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
-  headless: 'new', args: ['--no-sandbox', '--no-first-run', '--user-data-dir=/tmp/gt3-circuit-verify',
+  headless: 'new', protocolTimeout: 300000, args: ['--no-sandbox', '--no-first-run', '--user-data-dir=/tmp/gt3-circuit-verify',
     '--window-size=1280,800', '--enable-gpu', '--use-gl=angle', '--use-angle=metal'],
   defaultViewport: { width: 1280, height: 800 } });
 const page = await browser.newPage();
@@ -89,11 +129,12 @@ const checks = await page.evaluate(async ({ route, bounds, shoulderSamples }) =>
   const ray = new THREE.Raycaster();
   const down = new THREE.Vector3(0, -1, 0);
   const grid = { rays: 0, multiple: 0, none: 0, maximum: 0, emptyPositions: [] };
-  const stepX = (bounds.maxX - bounds.minX + 100) / 12;
-  const stepZ = (bounds.maxZ - bounds.minZ + 100) / 12;
-  for (let ix = 0; ix < 12; ix++) for (let iz = 0; iz < 12; iz++) {
-    const x = bounds.minX - 50 + (ix + 0.37) * stepX;
-    const z = bounds.minZ - 50 + (iz + 0.61) * stepZ;
+  const gridSide = 60;
+  const stepX = (bounds.maxX - bounds.minX + 600) / gridSide;
+  const stepZ = (bounds.maxZ - bounds.minZ + 600) / gridSide;
+  for (let ix = 0; ix < gridSide; ix++) for (let iz = 0; iz < gridSide; iz++) {
+    const x = bounds.minX - 300 + (ix + 0.37) * stepX;
+    const z = bounds.minZ - 300 + (iz + 0.61) * stepZ;
     ray.set(new THREE.Vector3(x, 1000, z), down);
     const n = ray.intersectObject(grass, false).length;
     grid.rays++; grid.maximum = Math.max(grid.maximum, n);
@@ -119,17 +160,30 @@ const checks = await page.evaluate(async ({ route, bounds, shoulderSamples }) =>
   const scale = new THREE.Vector3();
   const quaternion = new THREE.Quaternion();
   const clearance = { instances: 0, violations: [], minimumMargin: Infinity };
+  const dressingHeight = { samples: 0, missing: 0, maximumError: 0, overHalfMetre: 0, worst: [] };
   for (const mesh of dressing) for (let i = 0; i < mesh.count; i++) {
     mesh.getMatrixAt(i, matrix); matrix.decompose(position, quaternion, scale);
     const margin = nearest(position.x, position.z) - (7 + 22 + footprints[mesh.name] * scale.x);
     clearance.instances++; clearance.minimumMargin = Math.min(clearance.minimumMargin, margin);
     if (margin < -0.1) clearance.violations.push({ mesh: mesh.name, i, margin });
+    ray.set(new THREE.Vector3(position.x, 1000, position.z), down);
+    ray.far = Infinity;
+    const ground = ray.intersectObject(grass, false)[0];
+    if (!ground) { dressingHeight.missing++; continue; }
+    const error = position.y - ground.point.y;
+    dressingHeight.samples++;
+    dressingHeight.maximumError = Math.max(dressingHeight.maximumError, Math.abs(error));
+    if (Math.abs(error) > 0.5) {
+      dressingHeight.overHalfMetre++;
+      if (dressingHeight.worst.length < 12) dressingHeight.worst.push({ mesh: mesh.name, i, error });
+    }
   }
   const occlusion = { rays: 0, terrainHits: [], dressingHits: 0 };
-  for (let i = 0; i < 20; i++) {
-    const p = route[Math.floor(i * route.length / 20)];
+  for (let i = 0; i < 50; i++) {
+    const p = route[Math.floor(i * route.length / 50)];
     const target = new THREE.Vector3(p[0], p[1] + 2.5, p[2]);
-    for (const pitch of [45, 60]) for (const length of [65, 115]) for (const yaw of [0, 90, 180, 270]) {
+    for (const pitch of [45, 55, 60]) for (const length of [50, 80, 120])
+      for (const yaw of [0, 45, 90, 135, 180, 225, 270, 315]) {
       const a = yaw * Math.PI / 180, b = pitch * Math.PI / 180;
       const camera = target.clone().add(new THREE.Vector3(
         Math.cos(a) * Math.cos(b) * length, Math.sin(b) * length,
@@ -138,7 +192,7 @@ const checks = await page.evaluate(async ({ route, bounds, shoulderSamples }) =>
       ray.set(camera, direction); ray.far = length - 3;
       const hits = ray.intersectObject(grass, false);
       occlusion.rays++;
-      if (hits.length) occlusion.terrainHits.push({ t: i / 20, pitch, length, yaw, distance: hits[0].distance });
+      if (hits.length) occlusion.terrainHits.push({ t: i / 50, pitch, length, yaw, distance: hits[0].distance });
       if (ray.intersectObjects(dressing, false).length) occlusion.dressingHits++;
     }
   }
@@ -154,9 +208,60 @@ const checks = await page.evaluate(async ({ route, bounds, shoulderSamples }) =>
     heightAgreement.samples++;
   }
   const grassTriangles = grass.geometry.index.count / 3;
-  return { grid, occlusion, clearance, heightAgreement, grassTriangles,
+  const index = grass.geometry.index.array;
+  const positionAttribute = grass.geometry.getAttribute('position');
+  const angleValues = [];
+  const aspectValues = [];
+  const edgeValues = [];
+  const qualityBands = [100, 250, 300, 400].map((limit) => ({ limit, count: 0, under20: 0, aspectOver5: 0 }));
+  const worstTriangles = [];
+  let boundaryRow = 0;
+  const shoulderIndex = (i) => grass.geometry.userData.shoulderRanges
+    .some(([start, end]) => i >= start && i < end);
+  for (let face = 0; face < index.length; face += 3) {
+    const ids = [index[face], index[face + 1], index[face + 2]];
+    const x = ids.map((id) => positionAttribute.getX(id));
+    const z = ids.map((id) => positionAttribute.getZ(id));
+    const cx = (x[0] + x[1] + x[2]) / 3;
+    const cz = (z[0] + z[1] + z[2]) / 3;
+    const distanceToRoad = nearest(cx, cz);
+    if (distanceToRoad > 400) continue;
+    if (ids.some(shoulderIndex)) { boundaryRow++; continue; }
+    const edges = [0, 1, 2].map((i) => Math.hypot(x[i] - x[(i + 1) % 3], z[i] - z[(i + 1) % 3]));
+    const [a, b, c] = edges;
+    const angles = [
+      Math.acos(Math.max(-1, Math.min(1, (b*b + c*c - a*a) / (2*b*c)))),
+      Math.acos(Math.max(-1, Math.min(1, (c*c + a*a - b*b) / (2*c*a)))),
+      Math.acos(Math.max(-1, Math.min(1, (a*a + b*b - c*c) / (2*a*b)))),
+    ];
+    const angle = Math.min(...angles) * 180 / Math.PI;
+    const aspect = Math.max(...edges) / Math.min(...edges);
+    angleValues.push(angle);
+    aspectValues.push(aspect);
+    edgeValues.push(Math.max(...edges));
+    const band = qualityBands.find((item) => distanceToRoad < item.limit);
+    band.count++;
+    if (angle < 20) band.under20++;
+    if (aspect > 5) band.aspectOver5++;
+    if (angle < 20 && worstTriangles.length < 30) {
+      worstTriangles.push({ cx, cz, distanceToRoad, edges, angle, ids });
+    }
+  }
+  const summary = (values) => {
+    values.sort((a, b) => a - b);
+    const at = (fraction) => values[Math.floor((values.length - 1) * fraction)] ?? null;
+    return { count: values.length, min: at(0), p01: at(0.01), p05: at(0.05),
+      median: at(0.5), p95: at(0.95), p99: at(0.99), max: at(1) };
+  };
+  const quality = { boundaryRow, minAngleDegrees: summary(angleValues),
+    aspectRatio: summary(aspectValues), maxEdgeMetres: summary(edgeValues),
+    angleUnder20: angleValues.filter((value) => value < 20).length,
+    aspectOver5: aspectValues.filter((value) => value > 5).length,
+    qualityBands, worstTriangles };
+  return { grid, occlusion, dressingHeight, clearance, heightAgreement, grassTriangles, quality,
     dressingCounts: dressing.map((m) => [m.name, m.count]) };
-}, { route, shoulderSamples, bounds: { minX, maxX, minZ, maxZ } });
+}, { route, shoulderSamples,
+  bounds: { minX, maxX, minZ, maxZ } });
 console.log('TERRAIN', JSON.stringify(checks));
 console.log('CONSOLE_ERRORS', JSON.stringify(errors));
 await browser.close();

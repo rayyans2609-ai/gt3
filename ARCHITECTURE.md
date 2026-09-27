@@ -199,7 +199,7 @@ voice <audio> → MediaElementSource ──────────────�
 ## Grand Tour systems
 - **Camera** (`aerialCamera.js`): world-space, NOT parented to the rig. Pitch ~45–60° down,
   fixed world orientation (does not yaw with the car), damped translation along a rail that
-  follows the car, controlled screen-space drift with a safety-framing correction. Tunables:
+  follows the route, with the car framed within it, controlled screen-space drift with a safety-framing correction. Tunables:
   FOV, elevation, pitch, lateral offset, look target, damping, tracking gain, safety margin.
 - **Checkpoints** (`checkpoints.js`): 9 restrained gates at `CHECKPOINT_T[]` in `trackCurve.js`,
   one per car 1–9 (Lexus is discovered from the start and has no checkpoint);

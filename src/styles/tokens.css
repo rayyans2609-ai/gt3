@@ -7,7 +7,7 @@
   --field: #f7f6f2;
   --fg: #121517;
   --fg-muted: #5d6465;
-  --hair: rgba(18, 21, 23, 0.18);
+  --line: rgba(18, 21, 23, 0.18);
   --surface: rgba(255, 255, 255, 0.72);
   --accent: #65521d;
 }
@@ -16,7 +16,7 @@
   --field: #0c1930;
   --fg: #edf0ea;
   --fg-muted: #aeb8c5;
-  --hair: rgba(237, 240, 234, 0.18);
+  --line: rgba(237, 240, 234, 0.18);
   --surface: rgba(19, 36, 62, 0.78);
   --accent: #d8b94f;
 }

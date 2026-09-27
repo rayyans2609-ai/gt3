@@ -16,6 +16,9 @@
  */
 
 import { state, set } from '../core/state.js';
+import { TRACK_LENGTH } from '../scene/trackCurve.js';
+
+const REFERENCE_LENGTH = 3472.646166835742;
 
 // ---------------------------------------------------------------------------
 // Tuning. These numbers are the feel of the whole experience — change carefully.
@@ -27,7 +30,7 @@ const TUNE = {
 
   // Progress-per-second that counts as "flat out". A full route is 1.0 of progress,
   // so 0.09 means roughly eleven seconds of sustained hard scrolling end to end.
-  velocityFullScale: 0.09,
+  velocityFullScale: 0.09 * REFERENCE_LENGTH / TRACK_LENGTH,
 
   // Rise/fall smoothing for speed01. Speed builds a little faster than it decays so
   // acceleration reads instantly but the scene settles gracefully when you stop.
@@ -38,7 +41,7 @@ const TUNE = {
   idleEpsilon: 0.00004,
 
   // Total scroll spacer height in viewport heights. Must match #scroll-spacer in CSS.
-  spacerVh: 1200,
+  spacerVh: 1200 * TRACK_LENGTH / REFERENCE_LENGTH,
 };
 
 let rawTarget = 0;      // undamped progress straight from the scrollbar

@@ -19,7 +19,6 @@ import {
 const TARGET_SAMPLE_STEP = 1.1;
 const TRACK_SEGMENT_COUNT = Math.ceil(TRACK_LENGTH / TARGET_SAMPLE_STEP);
 const SAMPLE_STEP = TRACK_LENGTH / TRACK_SEGMENT_COUNT;
-const APRON_LENGTH = 80;
 const UP = new THREE.Vector3(0, 1, 0);
 
 export const TRACK_SAMPLE_COUNT = TRACK_SEGMENT_COUNT + 1;
@@ -212,73 +211,6 @@ function buildShoulderGeometry() {
   const geometry = setCommonAttributes(new THREE.BufferGeometry(), positions, normals, uvs);
   geometry.setIndex(indices);
   return geometry;
-}
-
-function buildApronGeometry() {
-  // Heights matter here. The grass is only carved to fit the road along trackEdges, which
-  // spans t in [0,1]; the aprons sit outside that range on un-carved ground, where
-  // groundHeightAt() returns -0.03. Keeping the apron asphalt at 0 (matching the main
-  // track surface, so the seam is exact) and the shoulder at -0.01 leaves both clearly
-  // above the grass instead of z-fighting with it.
-  const asphaltPositions = [];
-  const asphaltNormals = [];
-  const asphaltUvs = [];
-  const asphaltColors = [];
-  const shoulderPositions = [];
-  const shoulderNormals = [];
-  const shoulderUvs = [];
-  const asphaltWriter = createTriangleWriter(
-    asphaltPositions, asphaltNormals, asphaltUvs, asphaltColors,
-  );
-  const shoulderWriter = createTriangleWriter(
-    shoulderPositions, shoulderNormals, shoulderUvs,
-  );
-  const asphaltBrightness = [0.82, 0.94, 1, 0.94, 0.82];
-
-  function addQuad(writer, a, b, c, d, color = null) {
-    writer(a, b, c, UP, color, [[0, 0], [0, 1], [1, 0]]);
-    writer(c, b, d, UP, color, [[1, 0], [0, 1], [1, 1]]);
-  }
-
-  function addApron(t, direction) {
-    const center = pointAt(t, new THREE.Vector3());
-    const tangent = tangentAt(t, new THREE.Vector3()).setY(0).normalize();
-    const right = offsetPointAt(t, 1, 0, new THREE.Vector3()).sub(center).normalize();
-    const outerCenter = center.clone().addScaledVector(tangent, direction * APRON_LENGTH);
-
-    for (let i = 0; i < asphaltBrightness.length - 1; i += 1) {
-      const lateral0 = ((i / (asphaltBrightness.length - 1)) * 2 - 1) * TRACK.halfWidth;
-      const lateral1 = (((i + 1) / (asphaltBrightness.length - 1)) * 2 - 1) * TRACK.halfWidth;
-      const a = center.clone().addScaledVector(right, lateral0).addScaledVector(UP, 0);
-      const b = outerCenter.clone().addScaledVector(right, lateral0).addScaledVector(UP, 0);
-      const c = center.clone().addScaledVector(right, lateral1).addScaledVector(UP, 0);
-      const d = outerCenter.clone().addScaledVector(right, lateral1).addScaledVector(UP, 0);
-      const brightness = asphaltBrightness[i];
-      addQuad(asphaltWriter, a, b, c, d, new THREE.Color(brightness, brightness, brightness));
-    }
-
-    for (const side of [-1, 1]) {
-      const innerLateral = side * TRACK.halfWidth;
-      const outerLateral = side * (TRACK.halfWidth + TRACK.shoulderWidth);
-      const a = center.clone().addScaledVector(right, outerLateral).addScaledVector(UP, -0.01);
-      const b = outerCenter.clone().addScaledVector(right, outerLateral).addScaledVector(UP, -0.01);
-      const c = center.clone().addScaledVector(right, innerLateral).addScaledVector(UP, -0.01);
-      const d = outerCenter.clone().addScaledVector(right, innerLateral).addScaledVector(UP, -0.01);
-      addQuad(shoulderWriter, a, b, c, d);
-    }
-  }
-
-  addApron(0, -1);
-  addApron(1, 1);
-
-  return {
-    asphalt: setCommonAttributes(
-      new THREE.BufferGeometry(), asphaltPositions, asphaltNormals, asphaltUvs, asphaltColors,
-    ),
-    shoulders: setCommonAttributes(
-      new THREE.BufferGeometry(), shoulderPositions, shoulderNormals, shoulderUvs,
-    ),
-  };
 }
 
 function createTriangleWriter(positions, normals, uvs, colors = null) {
@@ -526,7 +458,6 @@ export function buildTrack() {
     roughness: 0.96,
     metalness: 0,
   });
-  const apronGeometry = buildApronGeometry();
 
   group.add(makeStaticMesh(
     'track-asphalt',
@@ -537,18 +468,6 @@ export function buildTrack() {
   group.add(makeStaticMesh(
     'track-shoulders',
     buildShoulderGeometry(),
-    shoulderMaterial,
-  ));
-
-  group.add(makeStaticMesh(
-    'track-apron-asphalt',
-    apronGeometry.asphalt,
-    asphaltMaterial,
-  ));
-
-  group.add(makeStaticMesh(
-    'track-apron-shoulders',
-    apronGeometry.shoulders,
     shoulderMaterial,
   ));
 

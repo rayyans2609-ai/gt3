@@ -37,24 +37,26 @@ export const TRACK = {
  *   note  — for readability only.
  */
 const ROUTE = [
-  { len: 300, turn:    0, rise:   0, note: 'start / finish straight' },
+  { len: 150, turn:    0, rise:   0, note: 'start / finish straight' },
   { len: 210, turn:   55, rise:   3, note: 'turn 1 — long right sweep' },
-  { len: 130, turn:    0, rise:   2, note: 'short chute' },
+  { len:  65, turn:    0, rise:   2, note: 'short chute' },
   { len: 165, turn:  -42, rise:   2, note: 'turn 2 — left' },
   { len: 175, turn:  -66, rise:   0, note: 'turn 3 — tightening left' },
-  { len: 150, turn:    0, rise:   5, note: 'uphill chute' },
+  { len:  75, turn:    0, rise:   5, note: 'uphill chute' },
   { len: 205, turn:   92, rise:   3, note: 'turn 4 — the big right-hander' },
-  { len: 190, turn:    0, rise:  -2, note: 'back chute' },
-  { len: 155, turn: -112, rise:  -4, note: 'turn 5 — hairpin left' },
-  { len: 130, turn:    0, rise:  -5, note: 'downhill run' },
+  { len:  95, turn:    0, rise:  -2, note: 'back chute' },
+  { len: 172, turn: -112, rise:  -4, note: 'turn 5 — hairpin left' },
+  { len:  65, turn:    0, rise:  -5, note: 'downhill run' },
   { len: 140, turn:   46, rise:  -2, note: 'turn 6 — chicane in' },
   { len: 140, turn:  -46, rise:   0, note: 'turn 7 — chicane out' },
-  { len: 330, turn:    0, rise:   2, note: 'back straight' },
-  { len: 225, turn:   72, rise:   4, note: 'turn 8 — fast right' },
+  { len:  80, turn:    0, rise:   2, note: 'short exit chute' },
+  { len: 150, turn:   50, rise:   4, note: 'turn 8 — fast right' },
+  { len: 280, turn: -160, rise:   3, note: 'turn 9 — sweeping left return' },
   { len: 170, turn:    0, rise:   4, note: 'crest' },
-  { len: 185, turn:  -52, rise:  -3, note: 'turn 9 — left onto the run-in' },
-  { len: 130, turn:   34, rise:  -4, note: 'turn 10 — final kink right' },
-  { len: 340, turn:    0, rise:  -5, note: 'run to the flag' },
+  { len: 1405.282, turn:    0, rise:  -8, note: 'back straight' },
+  { len: 767.018, turn: -190, rise:  -5, note: 'turn 10 — left onto the run-in' },
+  { len:  40, turn:   13, rise:  -1, note: 'final kink right' },
+  { len: 100, turn:    0, rise:  -1, note: 'run to the flag' },
 ];
 
 // Points are emitted this often along each segment. Dense enough that the Catmull-Rom
@@ -87,13 +89,16 @@ function buildControlPoints() {
       pts.push(new THREE.Vector3(x, y, z));
     }
   }
+  // The final integration step returns to the origin. A closed Catmull-Rom curve
+  // owns the final span, so retaining that duplicate point would make a cusp.
+  pts.pop();
   return pts;
 }
 
 export const controlPoints = buildControlPoints();
 
-/** The centreline. Open (not closed) — it has a start line and a finish line. */
-export const curve = new THREE.CatmullRomCurve3(controlPoints, false, 'catmullrom', 0.5);
+/** One lap; t=0 and t=1 are the same point on the start/finish straight. */
+export const curve = new THREE.CatmullRomCurve3(controlPoints, true, 'catmullrom', 0.5);
 
 /** Total arc length in world units, used for the HUD distance readout. */
 export const TRACK_LENGTH = curve.getLength();
@@ -117,8 +122,8 @@ const curvatureTable = new Float32Array(CURVATURE_SAMPLES + 1);
 
   for (let i = 0; i <= CURVATURE_SAMPLES; i++) {
     const t = i / CURVATURE_SAMPLES;
-    curve.getTangentAt(Math.max(0, t - eps), a).setY(0).normalize();
-    curve.getTangentAt(Math.min(1, t + eps), b).setY(0).normalize();
+    curve.getTangentAt((t - eps + 1) % 1, a).setY(0).normalize();
+    curve.getTangentAt((t + eps) % 1, b).setY(0).normalize();
     // Signed angle between the two tangents about the world up axis.
     const dot = THREE.MathUtils.clamp(a.dot(b), -1, 1);
     const angle = Math.acos(dot);
@@ -131,9 +136,9 @@ const curvatureTable = new Float32Array(CURVATURE_SAMPLES + 1);
   // light 3-tap smooth so a single noisy sample cannot make the camera twitch.
   const raw = Float32Array.from(curvatureTable);
   for (let i = 0; i <= CURVATURE_SAMPLES; i++) {
-    const p = raw[Math.max(0, i - 1)];
+    const p = raw[(i - 1 + CURVATURE_SAMPLES) % CURVATURE_SAMPLES];
     const c = raw[i];
-    const n = raw[Math.min(CURVATURE_SAMPLES, i + 1)];
+    const n = raw[(i + 1) % CURVATURE_SAMPLES];
     curvatureTable[i] = ((p + 2 * c + n) / 4) / peak;
   }
 })();
@@ -217,4 +222,4 @@ export const COIN_TRIGGER_T = 9 / TRACK_LENGTH;
 export const COIN_APPROACH_T = 0.062;
 
 /** Where the finish gate stands. */
-export const FINISH_T = 0.988;
+export const FINISH_T = 0.994;

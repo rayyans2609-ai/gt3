@@ -181,215 +181,205 @@ const groundRoute = (() => {
   });
 })();
 
-/**
- * Height of the displaced grass at an arbitrary world-space XZ coordinate.
- * The closest route segment supplies both the local track elevation and distance
- * from asphalt; terrainNoise remains the single source of rolling displacement.
- */
-export function groundHeightAt(x, z) {
-  let closestDistanceSq = Infinity;
-  let closestBaseY = groundRoute[0]?.y ?? -0.03;
-
-  for (let i = 0; i < groundRoute.length - 1; i++) {
+// A static bounding-volume tree over the sampled route. Height and clearance
+// queries use exact segment projections; the tree only removes distant work.
+function buildRouteTree(indices) {
+  const bounds = { minX: Infinity, maxX: -Infinity, minZ: Infinity, maxZ: -Infinity };
+  for (const i of indices) {
     const a = groundRoute[i];
     const b = groundRoute[i + 1];
-    const dx = b.x - a.x;
-    const dz = b.z - a.z;
-    const lengthSq = dx * dx + dz * dz;
-    const along = lengthSq > 1e-8
-      ? THREE.MathUtils.clamp(((x - a.x) * dx + (z - a.z) * dz) / lengthSq, 0, 1)
-      : 0;
-    const nearestX = a.x + dx * along;
-    const nearestZ = a.z + dz * along;
-    const offsetX = x - nearestX;
-    const offsetZ = z - nearestZ;
-    const distanceSq = offsetX * offsetX + offsetZ * offsetZ;
+    bounds.minX = Math.min(bounds.minX, a.x, b.x);
+    bounds.maxX = Math.max(bounds.maxX, a.x, b.x);
+    bounds.minZ = Math.min(bounds.minZ, a.z, b.z);
+    bounds.maxZ = Math.max(bounds.maxZ, a.z, b.z);
+  }
+  if (indices.length <= 10) return { ...bounds, indices };
+  const axis = bounds.maxX - bounds.minX > bounds.maxZ - bounds.minZ ? 'x' : 'z';
+  indices.sort((a, b) => (
+    groundRoute[a][axis] + groundRoute[a + 1][axis]
+    - groundRoute[b][axis] - groundRoute[b + 1][axis]
+  ));
+  const middle = indices.length >> 1;
+  return {
+    ...bounds,
+    left: buildRouteTree(indices.slice(0, middle)),
+    right: buildRouteTree(indices.slice(middle)),
+  };
+}
+const routeTree = buildRouteTree(Array.from({ length: groundRoute.length - 1 }, (_, i) => i));
 
-    if (distanceSq < closestDistanceSq) {
-      closestDistanceSq = distanceSq;
-      closestBaseY = THREE.MathUtils.lerp(a.y, b.y, along);
+function routeProjection(x, z) {
+  let closestDistanceSq = Infinity;
+  let closestBaseY = groundRoute[0]?.y ?? -0.03;
+  function boxDistanceSq(node) {
+    const dx = Math.max(node.minX - x, 0, x - node.maxX);
+    const dz = Math.max(node.minZ - z, 0, z - node.maxZ);
+    return dx * dx + dz * dz;
+  }
+  function visit(node) {
+    if (boxDistanceSq(node) >= closestDistanceSq) return;
+    if (node.indices) {
+      for (const i of node.indices) {
+        const a = groundRoute[i];
+        const b = groundRoute[i + 1];
+        const dx = b.x - a.x;
+        const dz = b.z - a.z;
+        const lengthSq = dx * dx + dz * dz;
+        const along = lengthSq > 1e-8
+          ? THREE.MathUtils.clamp(((x - a.x) * dx + (z - a.z) * dz) / lengthSq, 0, 1)
+          : 0;
+        const offsetX = x - a.x - dx * along;
+        const offsetZ = z - a.z - dz * along;
+        const distanceSq = offsetX * offsetX + offsetZ * offsetZ;
+        if (distanceSq < closestDistanceSq) {
+          closestDistanceSq = distanceSq;
+          closestBaseY = THREE.MathUtils.lerp(a.y, b.y, along);
+        }
+      }
+      return;
+    }
+    const leftDistance = boxDistanceSq(node.left);
+    const rightDistance = boxDistanceSq(node.right);
+    if (leftDistance < rightDistance) {
+      visit(node.left); visit(node.right);
+    } else {
+      visit(node.right); visit(node.left);
     }
   }
+  visit(routeTree);
+  return { distance: Math.sqrt(closestDistanceSq), baseY: closestBaseY };
+}
 
-  const distanceFromAsphalt = Math.max(
-    0,
-    Math.sqrt(closestDistanceSq) - TRACK.halfWidth,
-  );
-  return closestBaseY + terrainDisplacement(x, z, distanceFromAsphalt);
+/** The rendered ground and every dressing placement use this same height field. */
+export function groundHeightAt(x, z) {
+  const { distance, baseY } = routeProjection(x, z);
+  return baseY + terrainDisplacement(x, z, Math.max(0, distance - TRACK.halfWidth));
 }
 
 // ---------------------------------------------------------------------------
-// Grass geometry
+// One triangulated ground: a grass infield and an exterior with a road-shaped
+// hole, combined into one mesh. There are no crossing skirts or lower plane.
 // ---------------------------------------------------------------------------
 
-function interpolatedTrackEdge(side, t, out) {
-  const edges = trackSurface?.trackEdges;
-  const samples = edges?.[side];
-  if (Array.isArray(samples) && samples.length > 1) {
-    const sample = THREE.MathUtils.clamp(t, 0, 1) * (samples.length - 1);
-    const a = Math.floor(sample);
-    const b = Math.min(samples.length - 1, a + 1);
-    return out.copy(samples[a]).lerp(samples[b], sample - a);
+function signedArea(points) {
+  let area = 0;
+  for (let i = 0; i < points.length; i++) {
+    const a = points[i];
+    const b = points[(i + 1) % points.length];
+    area += a.x * b.z - b.x * a.z;
   }
-
-  // Namespace import intentionally tolerates track.js temporarily omitting the
-  // concurrent trackEdges export.
-  const outerShoulder = TRACK.halfWidth + TRACK.curbWidth + TRACK.shoulderWidth;
-  const lateral = side === 'left' ? -outerShoulder : outerShoulder;
-  return offsetPointAt(t, lateral, -0.03, out);
+  return area * 0.5;
 }
 
 function buildGrassGeometry() {
+  const left = trackSurface.trackEdges.left.slice(0, -1);
+  const right = trackSurface.trackEdges.right.slice(0, -1);
+  const [inner, outer] = Math.abs(signedArea(left)) < Math.abs(signedArea(right))
+    ? [left, right] : [right, left];
+  const bounds = sampleTrackBounds();
+  const margin = Math.max(1000, scene?.fog?.far ? scene.fog.far + 250 : 1000);
+  const rectangle = [
+    { x: bounds.min.x - margin, z: bounds.min.z - margin },
+    { x: bounds.max.x + margin, z: bounds.min.z - margin },
+    { x: bounds.max.x + margin, z: bounds.max.z + margin },
+    { x: bounds.min.x - margin, z: bounds.max.z + margin },
+  ];
+  const vertices = [];
+  let triangles = [];
+
+  function appendPolygon(contour, holes = []) {
+    const all = [...contour, ...holes.flat()];
+    const base = vertices.length;
+    for (const point of all) vertices.push({ x: point.x, z: point.z, y: point.y });
+    const faces = THREE.ShapeUtils.triangulateShape(
+      contour.map((p) => new THREE.Vector2(p.x, p.z)),
+      holes.map((hole) => hole.map((p) => new THREE.Vector2(p.x, p.z))),
+    );
+    for (const face of faces) triangles.push(face.map((i) => base + i));
+  }
+  appendPolygon(inner);
+  appendPolygon(rectangle, [outer]);
+
+  // Split shared edges together. Every step is conforming, so the adaptive mesh
+  // cannot create T-junction cracks. Fine near the shoulder; coarse under fog.
+  const targetStep = (distance) => (
+    distance < 95 ? 20 : distance < 210 ? 40 : distance < 430 ? 100 : 260
+  );
+  for (let pass = 0; pass < 3; pass++) {
+    const split = new Map();
+    const visited = new Set();
+    const edgeKey = (a, b) => a < b ? `${a},${b}` : `${b},${a}`;
+    function inspect(a, b) {
+      const key = edgeKey(a, b);
+      if (visited.has(key)) return;
+      visited.add(key);
+      const va = vertices[a];
+      const vb = vertices[b];
+      const dx = va.x - vb.x;
+      const dz = va.z - vb.z;
+      const length = Math.hypot(dx, dz);
+      if (length < 15) return;
+      const mx = (va.x + vb.x) * 0.5;
+      const mz = (va.z + vb.z) * 0.5;
+      if (length <= targetStep(routeProjection(mx, mz).distance)) return;
+      split.set(key, vertices.length);
+      vertices.push({ x: mx, z: mz, y: groundHeightAt(mx, mz) });
+    }
+    for (const [a, b, c] of triangles) {
+      inspect(a, b); inspect(b, c); inspect(c, a);
+    }
+    if (!split.size) break;
+    const next = [];
+    for (const [a, b, c] of triangles) {
+      const ab = split.get(edgeKey(a, b));
+      const bc = split.get(edgeKey(b, c));
+      const ca = split.get(edgeKey(c, a));
+      const count = Number(ab !== undefined) + Number(bc !== undefined)
+        + Number(ca !== undefined);
+      if (count === 0) next.push([a, b, c]);
+      else if (count === 3) next.push(
+        [a, ab, ca], [b, bc, ab], [c, ca, bc], [ab, bc, ca],
+      );
+      else if (count === 1) {
+        if (ab !== undefined) next.push([a, ab, c], [ab, b, c]);
+        else if (bc !== undefined) next.push([b, bc, a], [bc, c, a]);
+        else next.push([c, ca, b], [ca, a, b]);
+      } else if (ca === undefined) {
+        next.push([a, ab, c], [ab, b, bc], [ab, bc, c]);
+      } else if (ab === undefined) {
+        next.push([b, bc, a], [bc, c, ca], [bc, ca, a]);
+      } else {
+        next.push([c, ca, b], [ca, a, ab], [ca, ab, b]);
+      }
+    }
+    triangles = next;
+  }
+
   const positions = [];
   const colors = [];
   const indices = [];
-  const bounds = sampleTrackBounds();
-  const horizonY = bounds.min.y - 0.08;
-  const sharedEdgeCount = Math.min(
-    trackSurface?.trackEdges?.left?.length ?? 0,
-    trackSurface?.trackEdges?.right?.length ?? 0,
-  );
-  // Matching track.js's ring count makes the shared shoulder/grass seam exact.
-  const alongSegments = sharedEdgeCount > 1
-    ? sharedEdgeCount - 1
-    : Math.max(700, Math.ceil(TRACK_LENGTH / 2));
-  // Stay fine enough to resolve the 48-66 m terrain wavelengths in the visible
-  // field, then widen only once linear fog has substantially hidden the surface.
-  const outwardSteps = [
-    0, 10, 22, 36, 52, 70, 90, 112, 136, 162, 190,
-    220, 254, 290, 330, 374, 422, 474, 530, 590, 654, 722,
-  ];
-  const rows = outwardSteps.length;
-  const centre = new THREE.Vector3();
-  const edge = new THREE.Vector3();
-  const outward = new THREE.Vector3();
   const grassColor = new THREE.Color();
-
-  for (const side of ['left', 'right']) {
-    const baseVertex = positions.length / 3;
-
-    for (let i = 0; i <= alongSegments; i++) {
-      const t = i / alongSegments;
-      pointAt(t, centre);
-      interpolatedTrackEdge(side, t, edge);
-      outward.subVectors(edge, centre).setY(0);
-      let shoulderEdgeDistance = outward.length() - TRACK.halfWidth;
-
-      // A malformed/empty concurrent edge array should never poison the ground.
-      if (outward.lengthSq() < 1e-6) {
-        tangentAt(t, outward).cross(UP);
-        if (side === 'left') outward.negate();
-      }
-      outward.normalize();
-      shoulderEdgeDistance = Math.max(
-        0,
-        Number.isFinite(shoulderEdgeDistance)
-          ? shoulderEdgeDistance
-          : TRACK.curbWidth + TRACK.shoulderWidth,
-      );
-
-      for (const outwardStep of outwardSteps) {
-        const distanceFromAsphalt = shoulderEdgeDistance + outwardStep;
-        const x = edge.x + outward.x * outwardStep;
-        const z = edge.z + outward.z * outwardStep;
-        const noise = terrainNoise(x, z);
-        // Far skirts can cross a later, lower stretch of road; do not carry this
-        // edge's elevation hundreds of metres into the horizon.
-        const baseY = THREE.MathUtils.lerp(
-          edge.y, horizonY, THREE.MathUtils.smoothstep(outwardStep, 240, 530),
-        );
-        const y = baseY + terrainDisplacement(x, z, distanceFromAsphalt);
-        positions.push(x, y, z);
-
-        const colorMix = THREE.MathUtils.clamp(0.5 + noise * 0.48, 0.04, 0.96);
-        grassColor.copy(GRASS_BASE).lerp(GRASS_LIGHT, colorMix);
-        colors.push(grassColor.r, grassColor.g, grassColor.b);
-      }
-    }
-
-    for (let i = 0; i < alongSegments; i++) {
-      for (let row = 0; row < rows - 1; row++) {
-        const a = baseVertex + i * rows + row;
-        const b = a + rows;
-        if (side === 'left') {
-          indices.push(a, a + 1, b, b, a + 1, b + 1);
-        } else {
-          indices.push(a, b, a + 1, b, b + 1, a + 1);
-        }
-      }
-    }
+  for (const vertex of vertices) {
+    const y = vertex.y ?? groundHeightAt(vertex.x, vertex.z);
+    positions.push(vertex.x, y, vertex.z);
+    const noise = terrainNoise(vertex.x, vertex.z);
+    const mix = THREE.MathUtils.clamp(0.5 + noise * 0.48, 0.04, 0.96);
+    grassColor.copy(GRASS_BASE).lerp(GRASS_LIGHT, mix);
+    colors.push(grassColor.r, grassColor.g, grassColor.b);
   }
-
-  // Continue the displaced surface beyond both open ends of the route. Without
-  // these caps, the final skirt ring reveals the lower horizon plane as a straight
-  // geometric step when the camera reaches the run to the flag.
-  const capAlongSteps = [0, 12, 28, 48, 72, 100, 132, 168, 208, 252, 300, 352, 408, 468, 532, 600, 672, 748];
-  const capAcrossSteps = [];
-  for (let lateral = -748; lateral <= 748; lateral += 22) capAcrossSteps.push(lateral);
-  if (capAcrossSteps.at(-1) !== 748) capAcrossSteps.push(748);
-  const capTangent = new THREE.Vector3();
-  const capRight = new THREE.Vector3();
-  const capCentre = new THREE.Vector3();
-  const capOffset = new THREE.Vector3();
-
-  for (const t of [0, 1]) {
-    const baseVertex = positions.length / 3;
-    pointAt(t, capCentre);
-    tangentAt(t, capTangent).setY(0).normalize();
-    if (t === 0) capTangent.negate();
-    offsetPointAt(t, 1, 0, capOffset);
-    capRight.subVectors(capOffset, capCentre).setY(0).normalize();
-
-    for (const along of capAlongSteps) {
-      for (const lateral of capAcrossSteps) {
-        const x = capCentre.x + capTangent.x * along + capRight.x * lateral;
-        const z = capCentre.z + capTangent.z * along + capRight.z * lateral;
-        const noise = terrainNoise(x, z);
-        positions.push(x, groundHeightAt(x, z), z);
-        const colorMix = THREE.MathUtils.clamp(0.5 + noise * 0.48, 0.04, 0.96);
-        grassColor.copy(GRASS_BASE).lerp(GRASS_LIGHT, colorMix);
-        colors.push(grassColor.r, grassColor.g, grassColor.b);
-      }
-    }
-
-    const columns = capAcrossSteps.length;
-    const upwardWinding = capTangent.clone().cross(capRight).dot(UP) > 0;
-    for (let row = 0; row < capAlongSteps.length - 1; row++) {
-      for (let column = 0; column < columns - 1; column++) {
-        const a = baseVertex + row * columns + column;
-        const b = a + columns;
-        const c = a + 1;
-        const d = b + 1;
-        if (upwardWinding) indices.push(a, b, c, b, d, c);
-        else indices.push(a, c, b, b, c, d);
-      }
-    }
+  for (const [a, b, c] of triangles) {
+    const va = vertices[a];
+    const vb = vertices[b];
+    const vc = vertices[c];
+    const up = (vb.z - va.z) * (vc.x - va.x)
+      - (vb.x - va.x) * (vc.z - va.z);
+    if (up >= 0) indices.push(a, b, c);
+    else indices.push(a, c, b);
   }
-
-  // A single low plane below the sculpted skirts guarantees that no camera angle
-  // can expose the clear colour beyond the generated terrain.
-  const horizonRadius = skyRadiusFor(bounds);
-  const planeBase = positions.length / 3;
-  // Extend past both the camera far plane and sky dome's projected edge. Linear fog
-  // reaches full strength long before this geometry can terminate on screen.
-  const planeHalfSize = horizonRadius * 1.35;
-  const cx = (bounds.min.x + bounds.max.x) * 0.5;
-  const cz = (bounds.min.z + bounds.max.z) * 0.5;
-  positions.push(
-    cx - planeHalfSize, horizonY, cz - planeHalfSize,
-    cx + planeHalfSize, horizonY, cz - planeHalfSize,
-    cx + planeHalfSize, horizonY, cz + planeHalfSize,
-    cx - planeHalfSize, horizonY, cz + planeHalfSize,
-  );
-  for (let i = 0; i < 4; i++) colors.push(GRASS_BASE.r, GRASS_BASE.g, GRASS_BASE.b);
-  indices.push(planeBase, planeBase + 2, planeBase + 1, planeBase, planeBase + 3, planeBase + 2);
-
   const geometry = new THREE.BufferGeometry();
   geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
   geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
   geometry.setIndex(indices);
-  // Positions are fully displaced before this call so the directional sun models
-  // the hills instead of lighting the grass as an undeformed plane.
   geometry.computeVertexNormals();
   geometry.computeBoundingSphere();
   return geometry;
@@ -449,8 +439,15 @@ function finishInstances(mesh) {
   return mesh;
 }
 
-function groundPositionAt(t, lateral, out = new THREE.Vector3()) {
-  offsetPointAt(t, lateral, 0, out);
+function groundPositionAt(t, lateral, out = new THREE.Vector3(), footprint = 0) {
+  // A point can sit beside one section and on top of another. Walk outward
+  // until the entire instance clears the nearest section of the complete loop.
+  const sign = Math.sign(lateral) || 1;
+  for (let attempt = 0; attempt < 80; attempt++) {
+    offsetPointAt(t, lateral + sign * attempt * 8, 0, out);
+    if (routeProjection(out.x, out.z).distance
+      >= TRACK.halfWidth + ASPHALT_CLEARANCE + footprint) break;
+  }
   out.y = groundHeightAt(out.x, out.z);
   return out;
 }
@@ -501,8 +498,8 @@ function buildTreeInstances(random) {
     const side = random() < 0.5 ? -1 : 1;
     const distanceFromEdge = 30 + random() * 150;
     const lateral = side * (TRACK.halfWidth + distanceFromEdge);
-    groundPositionAt(t, lateral, position);
     const uniformScale = 0.8 + random() * 0.8;
+    groundPositionAt(t, lateral, position, 4.5 * uniformScale);
     scale.setScalar(uniformScale);
     quaternion.setFromAxisAngle(UP, random() * Math.PI * 2);
     matrix.compose(position, quaternion, scale);
@@ -532,7 +529,7 @@ function buildMarkerInstances() {
     flatShading: true,
     vertexColors: true,
   });
-  const count = Math.floor(TRACK_LENGTH / 140);
+  const count = 24;
   const mesh = new THREE.InstancedMesh(geometry, material, count);
   mesh.name = 'distance-markers';
   const matrix = new THREE.Matrix4();
@@ -541,7 +538,7 @@ function buildMarkerInstances() {
   const scale = new THREE.Vector3(1, 1, 1);
 
   for (let i = 0; i < count; i++) {
-    const t = Math.min(0.985, ((i + 0.7) * 140) / TRACK_LENGTH);
+    const t = Math.min(0.985, (i + 0.7) / count);
     const bend = curvatureAt(t);
     const side = Math.abs(bend) > 0.08 ? Math.sign(bend) : (i % 2 ? -1 : 1);
     // The nominal post is twelve metres beyond the run-off zone. The final centre
@@ -550,7 +547,7 @@ function buildMarkerInstances() {
       ASPHALT_CLEARANCE + 1.1,
       TRACK.curbWidth + TRACK.shoulderWidth + 12,
     );
-    groundPositionAt(t, side * (TRACK.halfWidth + distanceFromEdge), position);
+    groundPositionAt(t, side * (TRACK.halfWidth + distanceFromEdge), position, 1.5);
     quaternion.setFromAxisAngle(UP, yawForTangent(t));
     matrix.compose(position, quaternion, scale);
     mesh.setMatrixAt(i, matrix);
@@ -600,8 +597,12 @@ function buildTireInstances(random) {
   });
   const placements = [];
 
-  for (const corner of sharpCornerPeaks()) {
-    const stackCount = 3 + Math.floor(random() * 3);
+  const corners = sharpCornerPeaks()
+    .sort((a, b) => b.strength - a.strength)
+    .slice(0, 3)
+    .sort((a, b) => a.t - b.t);
+  for (const [cornerIndex, corner] of corners.entries()) {
+    const stackCount = [4, 5, 4][cornerIndex];
     const outside = Math.sign(corner.curvature) || 1;
     for (let stack = 0; stack < stackCount; stack++) {
       const centred = stack - (stackCount - 1) * 0.5;
@@ -624,7 +625,7 @@ function buildTireInstances(random) {
   const scale = new THREE.Vector3();
 
   placements.forEach((placement, index) => {
-    groundPositionAt(placement.t, placement.lateral, position);
+    groundPositionAt(placement.t, placement.lateral, position, 1.5 * placement.scale);
     quaternion.setFromAxisAngle(UP, placement.yaw);
     scale.setScalar(placement.scale);
     matrix.compose(position, quaternion, scale);
@@ -695,9 +696,9 @@ function buildGrandstandInstances(random) {
 
   locations.forEach(({ t, side }, index) => {
     const distanceFromEdge = 110 + random() * 50;
-    groundPositionAt(t, side * (TRACK.halfWidth + distanceFromEdge), position);
-    quaternion.setFromAxisAngle(UP, yawForTangent(t));
     const size = 0.9 + random() * 0.16;
+    groundPositionAt(t, side * (TRACK.halfWidth + distanceFromEdge), position, 23 * size);
+    quaternion.setFromAxisAngle(UP, yawForTangent(t));
     scale.set(size, size, size);
     matrix.compose(position, quaternion, scale);
     mesh.setMatrixAt(index, matrix);

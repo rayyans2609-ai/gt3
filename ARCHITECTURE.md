@@ -47,7 +47,9 @@ text/HUD/player UI. One fixed canvas behind it, one shared `WebGLRenderer`.
       timeOfDay.js    5 presets [retire → theme.js]
       trackCurve.js   circuit spline + named beats + checkpoint/finish t-values [evolve]
       track.js        asphalt ribbon, markings, curbs [keep]
-      environment.js  terrain/grass/vegetation masses/architecture [evolve]
+      environment.js  terrain + scenery [evolve]: terrain structure (relief, single layer,
+                      route-agnostic) in Phase 3; white/off-white environment language,
+                      architecture and objects in Phase 8 (SPEC §16)
       carRig.js       car mount, lean/roll/bob — camera NO LONGER a child [evolve]
       aerialCamera.js world-space aerial rail camera for Grand Tour (SPEC §15) [new]
       cars.js         GLTF preload of 10 cars + verified orientation table [keep]
@@ -258,6 +260,12 @@ history entries. Audio: the existing SFX + the 10 voice files + the 6 playlist t
   placement, light types and technique are open to Phase 8 design; nothing is fixed to uniform
   spacing, a light count or one implementation. Phase 3 and other earlier phases must not
   pre-build it; until then Night is the `theme.js` night preset.
+- **Environment art direction (SPEC §16–17) is executed in Phase 8**: white/off-white
+  sculptural terrain, material tuning, selective architecture/objects, vegetation strategy,
+  shadow art direction. Phase 3 terrain work is structural only: meaningful relief, clean
+  shading (no sliver-triangle creases), one layer, route-agnostic, performance-safe. It must
+  not bake green-grass assumptions into terrain geometry or data, so Phase 8 can re-material
+  it without rebuilding it. Night uses the same pale environment revealed by light (§13a).
 - Playlist tracks shipped in Phase 2a (`public/audios/playlist/`). Track covers remain
   unshipped in `audios/background_playlist/audiocover_NOTaudios/` until Phase 5 (Hub player).
   `car_cover.glb` is not yet in `public/` (Showcase, Phase 6).

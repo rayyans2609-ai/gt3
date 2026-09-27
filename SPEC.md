@@ -38,6 +38,7 @@ Nearly everything in §4 onward is new product surface or a deliberate architect
 - Fixed camera-child-of-rig chase framing → stable-world-space high aerial camera (§15).
 - 5-state time-of-day (`dawn/morning/afternoon/dusk/night`) → 2-state Day/Night (§13).
 - Visible-identity coins (`src/scene/coins.js`) → in-world sector/checkpoint thresholds (§18), with locked-identity cars (§11).
+- Green naturalistic grass/tree surroundings (`src/scene/environment.js`) → a predominantly white/off-white sculptural architectural landscape around a realistic circuit (§16–17). Executed in the Phase 8 scenery pass; earlier phases only keep terrain structure compatible with it.
 - Single continuous scroll page with start-screen overlay → four distinct experiences (§2, detailed per page in §4–5, §11, §14) with agent-designed transitions (§25–26).
 - Single `background.mp3` loop → six-track playlist system (§6–10). The music engine was implemented in Phase 2a (2026-09-27) inside `src/audio/audioManager.js`; the player UI follows in Phase 2b.
 - `F`-key hidden Showcase overlay → dedicated Showcase page, discoverable from the Hub.
@@ -222,6 +223,7 @@ This section locks the **outcome**. The lighting design and technical approach r
 
 ### Locked outcome
 - Night in Grand Tour must feel like an **intentionally authored, premium night-driving environment**, not a darkened Day scene.
+- Night uses the **same pale physical environment as Day** (§16), not a separate dark terrain material. The principle is **darkness first, pale material revealed by light**: the landscape largely falls into darkness and cool low exposure, and light selectively reveals its form (headlight throw, pools of illumination, reflected light, readable slopes and berms, strong local lit/unlit contrast). Not a bright white landscape under a navy sky. How this is achieved stays open to Phase 8.
 - The **road, the active car and the immediate driving environment stay clearly readable**, while **meaningful darkness and atmosphere are preserved**.
 - Day↔Night changes interpolate smoothly, consistent with §13.
 - It stays consistent with GT3's overall visual direction (§12–16, §23) and within the performance constraints below.
@@ -277,27 +279,45 @@ High-elevation oblique drone/skyscraper camera, approximate pitch **45–60° do
 
 Canonical folder (actual on-disk name — see Open Issues §30.1): `reference _images/scenery/`. All five images opened and inspected.
 
+All repo reference images (`scenery/`, `camera_angles/`, `showcase_ref.jpeg`) remain **general directional references, never literal blueprints**: consult them for scale, negative space, architectural restraint, terrain composition, sculptural form, premium presentation, motorsport visual language, how sparse environments still feel finished, and how circuit and environment read from elevated viewpoints. The architectural/OMA-like references inform the environmental language; the GT / Driveclub / Le Mans / racing references continue to inform motorsport credibility, track presentation and polish. Reproduce none one-to-one; the result must feel original to GT3. The per-image notes below narrow each one.
+
 - `sceneref_1` = Porsche Leipzig — flat open grassland, factory buildings and a distinctive tower in the distance, track calmly integrated into the land. **Take:** composition, readable road structure, calm open terrain, architecture/land/road balance. **Do not take:** the literal facility, branding, architecture, barrier styling.
 - `sceneref_2` = Toyota Technical Center — an architectural masterplan render: winding test roads through dense forested hills, restrained low white buildings, a pond. **Take:** engineered landscape logic, purpose-built automotive character, road embedded naturally into land. **Do not take:** the literal campus, dense realistic forest, parking/facility detail, Toyota identity.
-- `sceneref_3` = OMA architectural model — white foam-board massing study with abstracted green cube "trees," a red pedestrian accent path, and translucent tower forms. **Take:** abstraction, massing, hierarchy, primary-vs-secondary form discipline (this is where the "grouped vegetation masses, not individually heroic trees" doctrine in Grand Tour scenery below comes from). **Do not take:** the foam-board appearance, all-white miniature treatment, literal architecture, miniature-model feeling.
+- `sceneref_3` = OMA architectural model — white foam-board massing study with abstracted green cube "trees," a red pedestrian accent path, and translucent tower forms. **Take:** the white/off-white sculptural material language, abstraction, massing, hierarchy, primary-vs-secondary form discipline, terrain-as-object — a strong directional reference for the Grand Tour environment language below, alongside the other scenery and motorsport references, not a blueprint. **Do not take:** the literal foam-board texture, green cube "trees", literal architecture, or a tabletop-miniature sense of scale — GT3 is that language brought to life at full scale.
 - `sceneref_4` = Gran Turismo Sport — an **indoor showroom** scene (glass-roofed hall, stone walls, wood floor, a single red heritage Ferrari). **Take only:** finish quality, material restraint, lighting discipline, proportional refinement. **Do not take:** the showroom, its indoor spatial logic, or its exact static presentation — this reference is explicitly indoor and must not leak an interior-showroom feeling into an outdoor circuit.
 - `sceneref_5` = Driveclub — a dramatic snowy mountain pass with photoreal rock/snow/pine and strong foreground/mid/background depth. **Take:** scale, atmosphere, foreground/mid/background depth, distant-world presence, atmospheric falloff. **Do not take:** dense photoreal vegetation, roadside clutter, exact realism level.
 
-## Grand Tour scenery
+## Grand Tour environment — art direction
 
-Target: **a premium full-scale automotive world built with the clarity of an architectural prototype** — not dense racing-game scenery, photoreal clutter, unfinished greybox, literal scale model, cyberpunk, or sci-fi.
+*Current preferred direction (2026-09-27). The design language below is intended; exact material execution, architecture placement and final scenery composition remain open to visual iteration.*
 
-Hierarchy: hero car → road → curbs/edges/markings → materials/shadows → terrain → essential architecture → vegetation masses → decorative detail. Terrain: broad sculpted forms. Grass: broad controlled terrain treatment, not dense hero-level grass. Vegetation: grouped masses/silhouettes, not individually heroic trees everywhere. Architecture: monolithic, restrained, engineered — paddock volumes, retaining walls, bridges, simple grandstands, towers, barriers, sparse fencing, occasional landmark forms. Every object should define the circuit, frame composition, establish scale, create depth, or reinforce automotive-world identity.
+Target: **a realistic motorsport circuit presented inside a stylized architectural landscape** — a premium architectural motorsport maquette brought to life at full scale, closer to an OMA-style site model, competition maquette or exhibition landscape than a conventional green racing-game environment. The contrast is *realistic circuit + stylized architectural landscape*, never *stylized circuit + stylized environment* (circuit realism: §17). Not dense racing-game scenery, photoreal clutter, unfinished greybox, a tabletop miniature, cyberpunk, or sci-fi.
+
+**Material language.** The surroundings are predominantly **white / warm-white / off-white** — a physical sculpted site, not a painted white game level. Never flat blank `#fff`: keep tonal variation, relief, depth, shadow, selective darker materials, occasional restrained secondary materials, and clear hierarchy. This is a broader environmental design language, not "grass recoloured white".
+
+**Terrain is a primary visual object.** Broad landforms, berms, cuts, slopes and elevation changes stay clearly legible through lighting and shadow.
+
+**Where visual interest comes from:** landform, track geometry, elevation, light and shadow, negative space, selective architecture, barriers / gantries / track infrastructure, and sparse but meaningful objects — not trees, grass, props or random decoration. The surroundings feel sculptural, architectural, sparse but intentional, premium, and highly composed from the aerial camera (§15). Restraint must read as deliberate, never as sterile or unfinished.
+
+**Day:** pale sculptural terrain; dark asphalt as the primary graphic ribbon; strong, clean shadow definition; clear relief; precise curbs and track infrastructure; sparse architecture; generous negative space; premium editorial / official-motorsport presentation. The environment must compose well enough that the high aerial camera produces an interesting image even when little occupies the frame.
+
+**Night:** the same pale environment, revealed by light out of genuine darkness (§13a).
+
+Hierarchy: hero car → road → curbs/edges/markings/runoff → terrain form, light and shadow → track infrastructure (barriers, gantries) → selective architecture → sparse environmental objects. Architecture: monolithic, restrained, engineered — paddock volumes, retaining walls, bridges, simple grandstands, towers, sparse fencing, occasional landmark forms. Vegetation, if any, is sparse and abstracted, never a default green fill. Every object should define the circuit, frame composition, establish scale, create depth, or reinforce automotive-world identity.
+
+**Ownership.** Final material tuning, architecture/object composition, vegetation strategy, shadow art direction and all lighting belong to the **Phase 8** scenery/lighting pass. Earlier phases only keep the terrain structurally ready: meaningful relief, clean shading, and no geometry or material assumption that the ground is green grass.
 
 ## Scenery is also performance design
 
-Environmental restraint is both aesthetic and computational. Do not build an expensive realistic world and reduce it until it runs — design the intended visual language to be naturally cheap: broad simple terrain, asset reuse, instancing, grouped vegetation, monolithic architecture, fewer materials, lightweight shaders, static/baked techniques where useful, limited shadow casters, low-cost atmosphere, concentrated detail near hero/road, reduced off-camera detail. If visual density conflicts with scroll smoothness, **scroll smoothness wins**. The same applies to Night route lighting (§13a): its design and implementation belong to the Phase 8 scenery/lighting/performance pass, not separate earlier work.
+Environmental restraint is both aesthetic and computational. Do not build an expensive realistic world and reduce it until it runs — design the intended visual language to be naturally cheap: broad simple terrain, asset reuse, instancing, sparse objects, monolithic architecture, fewer materials, lightweight shaders, static/baked techniques where useful, limited shadow casters, low-cost atmosphere, concentrated detail near hero/road, reduced off-camera detail. If visual density conflicts with scroll smoothness, **scroll smoothness wins**. The same applies to Night route lighting (§13a): its design and implementation belong to the Phase 8 scenery/lighting/performance pass, not separate earlier work.
 
 ---
 
 # 17. Circuit
 
 An original closed-loop circuit, broadly inspired by Spa-Francorchamps and Circuit de la Sarthe without copying either — long sweeping sections, tighter technical sections, recognizable corner forms, varied rhythm, distinctive silhouette. Must work both in the Grand Tour aerial composition and as the small HUD map. Exact geometry is runtime/implementation work; the current spline (`src/scene/trackCurve.js`) already encodes named corner beats (chicane, back straight, hairpin, esses) that may be extended/reused rather than discarded.
+
+**Track realism.** The circuit must feel like a plausible real GT/endurance circuit that could physically exist, even though its surroundings are stylized (§16). Do not abstract the road into something toy-like, futuristic, graphic-only or architectural. Preserve believable circuit width, corner radii, braking zones, long-straight rhythm, technical-sector rhythm, elevation, curbing, runoff logic, barriers/safety logic where appropriate, and trackside proportions. Real endurance circuits such as Circuit de la Sarthe may inform rhythm, scale and plausibility; copy none literally. The road feels real; the world presenting it feels curated and architectural. These are plausibility qualities, not a chosen layout: exact straight lengths, chicane and corner placement, and sector rhythm remain open and are settled through implementation and visual review.
 
 ---
 

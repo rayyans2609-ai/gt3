@@ -6,7 +6,7 @@ This file is a **context router**, not a second specification. It orients a futu
 
 ## GT3 in one paragraph
 
-GT3 is a desktop-only interactive motorsport showcase in Three.js/WebGL with a DOM overlay, organized around four experiences — Landing, Grand Tour Hub, Showcase, Grand Tour — that balance editorial luxury, restrained software UI, and selective game-like progression. One locked ten-car roster, one player/hero car (Lexus RC F GT3), scroll-driven route progression through an original circuit, in-world checkpoint discovery instead of collectibles, locked/mystery-car identities revealed through Grand Tour or manual unlock, a six-track background playlist, and a two-state Day/Night theme applied globally. It is not a racing game, not a dealership configurator, not a SaaS dashboard.
+GT3 is a desktop-only interactive motorsport showcase in Three.js/WebGL with a DOM overlay, organized around four experiences — Landing, Grand Tour Hub, Showcase, Grand Tour — that balance editorial luxury, restrained software UI, and selective game-like progression. One locked ten-car roster, one player/hero car (Lexus RC F GT3), scroll-driven route progression through an original, realistic circuit set in a predominantly white/off-white sculptural architectural landscape (an architectural maquette brought to life, not green racing-game scenery), in-world checkpoint discovery instead of collectibles, locked/mystery-car identities revealed through Grand Tour or manual unlock, a six-track background playlist, and a two-state Day/Night theme applied globally. It is not a racing game, not a dealership configurator, not a SaaS dashboard.
 
 ## Current phase
 
@@ -22,7 +22,7 @@ GT3 is a desktop-only interactive motorsport showcase in Three.js/WebGL with a D
 1. A small typography slice (Neue Haas Grotesk / Geist Mono), before Phase 4.
 2. Phase 3 Grand Tour core (aerial camera, checkpoints, sparse HUD).
 3. Phase 4 Landing, Phase 5 Hub, Phase 6 Showcase, Phase 7 finish/completion.
-4. Phase 8 scenery / lighting / performance pass. It also owns **Night route lighting** (`SPEC.md` §13a). The outcome is locked: an authored premium night-driving feel with a readable road/car and real darkness. Headlights and trackside lighting are desired, but the design and technique are open to Phase 8. Earlier phases must not pre-build it.
+4. Phase 8 scenery / lighting / performance pass. It also owns **Night route lighting** (`SPEC.md` §13a). The outcome is locked: an authored premium night-driving feel with a readable road/car and real darkness. Headlights and trackside lighting are desired, but the design and technique are open to Phase 8. Earlier phases must not pre-build it. Phase 8 also executes the **environment art direction** (`SPEC.md` §16; circuit realism in §17): realistic circuit, white/off-white sculptural terrain, sparse selective architecture, and at Night the same pale world revealed by light out of darkness. Earlier phases only keep terrain structurally ready for it, with real relief, clean shading and no green-grass assumptions.
 
 `ARCHITECTURE.md` tags each module keep / evolve / new / retire / done. `SPEC.md` §1 and §30 show what's reused versus replaced.
 
@@ -46,7 +46,7 @@ When sources disagree, in order:
 - `ARCHITECTURE.md` — V3-reconciled technical map (see above)
 - `BUILD_LOG.md` — performance/implementation evidence log
 - `docs/archive/SPEC_V1.md`, `docs/archive/SPEC_V2.md` — historical specs
-- `reference _images/camera_angles/`, `reference _images/scenery/`, `reference _images/showcase_ref.jpeg` — **note the literal space** in `reference _images` (not `reference_images`)
+- `reference _images/camera_angles/`, `reference _images/scenery/`, `reference _images/showcase_ref.jpeg` — **note the literal space** in `reference _images` (not `reference_images`). General directional references, not implementation targets (`SPEC.md` §16).
 - `models/car_cover_model` — locked-showcase asset; valid `.glb` data but the filename itself carries no extension
 - `public/audios/playlist/track_1.mp3 … track_6.mp3` — the six playlist tracks, moved and renamed from `audios/background_playlist/` in Phase 2a. The music engine lives inside `src/audio/audioManager.js`, and the alias table is `src/data/playlist.js`.
 - `audios/background_playlist/audiocover_NOTaudios/` — the six track covers, unshipped and deferred to Phase 5 (Hub cover-art player)

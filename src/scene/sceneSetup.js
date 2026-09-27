@@ -77,7 +77,7 @@ let stillTimeMs = 0;
 let timeSinceResolutionSwitchMs = Infinity;
 
 /**
- * Mutable exposure handle for timeOfDay.js. Assign to `.value` to update the
+ * Mutable exposure handle for theme.js. Assign to `.value` to update the
  * renderer immediately, including before initScene() has run.
  */
 export const toneMappingExposure = {

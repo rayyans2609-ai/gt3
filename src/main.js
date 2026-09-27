@@ -19,6 +19,7 @@ import './styles/base.css';
 import * as THREE from 'three';
 import { state, set } from './core/state.js';
 import { Clock } from './core/clock.js';
+import { restoreSession } from './core/session.js';
 
 const clock = new Clock();
 const updates = [];
@@ -46,6 +47,8 @@ window.addEventListener('resize', () => {
 });
 
 async function boot() {
+  restoreSession();
+
   // ---- modules -----------------------------------------------------------
   const sceneSetup = await import('./scene/sceneSetup.js');
   const scrollDrive = await import('./scroll/scrollDrive.js');
@@ -55,13 +58,13 @@ async function boot() {
   const cars = await import('./scene/cars.js');
   const coins = await import('./scene/coins.js');
   const morph = await import('./scene/morph.js');
-  const timeOfDay = await import('./scene/timeOfDay.js');
+  const theme = await import('./scene/theme.js');
   const finishLine = await import('./scene/finishLine.js');
   const studio = await import('./montage/studio.js');
   const audio = await import('./audio/audioManager.js');
   const hud = await import('./ui/hud.js');
   const specPanel = await import('./ui/specPanel.js');
-  const todSelector = await import('./ui/todSelector.js');
+  const themeToggle = await import('./ui/themeToggle.js');
   const soundControl = await import('./ui/soundControl.js');
   const showcase = await import('./ui/showcase.js');
   const fullscreenCard = await import('./ui/fullscreenCard.js');
@@ -82,12 +85,12 @@ async function boot() {
   sceneSetup.attachSunTarget(rig);
 
   morph.initMorph();
-  timeOfDay.initTimeOfDay();
+  theme.initTheme();
   studio.initStudio();
   showcase.initShowcase();
   fullscreenCard.initFullscreenCard();
   hud.initHUD();
-  todSelector.initTodSelector();
+  themeToggle.initThemeToggle();
   soundControl.initSoundControl();
   startScreen.initStartScreen();
   finishScreen.initFinishScreen();
@@ -182,7 +185,7 @@ async function boot() {
   registerUpdate(carRig.update);
   registerUpdate(coins.updateCoins);
   registerUpdate(morph.updateMorph);
-  registerUpdate(timeOfDay.update);
+  registerUpdate(theme.update);
   registerUpdate(finishLine.update);
   registerUpdate(studio.updateMontage);
   registerUpdate(showcase.updateShowcase);

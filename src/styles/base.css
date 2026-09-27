@@ -1,3 +1,4 @@
+@import './tokens.css';
 @import './hud.css';
 @import './montage.css';
 @import './showcase.css';
@@ -9,7 +10,6 @@
   --ink-2: #141416;
   --gold: #c6a96b;
   --paper: #ede9e3;
-  --hair: rgba(237, 233, 227, 0.16);
   --track-yellow: #e8c33a;
   --green: #1e3a2a;
   --ease: cubic-bezier(.22, .61, .36, 1);
@@ -43,8 +43,8 @@ html {
 html,
 body {
   min-height: 100%;
-  background: var(--ink);
-  color: var(--paper);
+  background: var(--field, var(--ink));
+  color: var(--fg, var(--paper));
   font-family: var(--font-ui);
   -webkit-font-smoothing: antialiased;
 }

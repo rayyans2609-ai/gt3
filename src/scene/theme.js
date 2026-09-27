@@ -1,5 +1,5 @@
 /**
- * Five complete lighting states and the long crossfade between them.
+ * Day and Night scene lighting states with the existing long crossfade.
  *
  * Colour strings enter Three.js through its sRGB colour-management path and are
  * stored as linear values. Color.lerpColors therefore blends emitted light in
@@ -25,31 +25,9 @@ const SUN_DISTANCE = 104;
  * remain owned by track.js and environment.js.
  */
 export const PRESETS = Object.freeze({
-  dawn: Object.freeze({
-    sun: Object.freeze({ color: '#FFD3A1', intensity: 2.05, direction: Object.freeze([-0.78, 0.23, -0.58]) }),
-    hemisphere: Object.freeze({ sky: '#AAB9CA', ground: '#806B55', intensity: 1.02 }),
-    ambient: Object.freeze({ color: '#FFE5CC', intensity: 0.44 }),
-    rim: Object.freeze({ color: '#C9D7E8', intensity: 0.46 }),
-    fog: Object.freeze({ color: '#C9A88C', near: 108, far: 565 }),
-    sky: Object.freeze({ horizon: '#D9AC88', zenith: '#71839B', sunColor: '#FFD09B', sunIntensity: 0.66 }),
-    exposure: 1.18,
-    grassTint: Object.freeze({ color: '#F1DFC5', amount: 0.09 }),
-  }),
 
-  morning: Object.freeze({
-    sun: Object.freeze({ color: '#FFE3BC', intensity: 2.82, direction: Object.freeze([-0.62, 0.53, -0.57]) }),
-    hemisphere: Object.freeze({ sky: '#C3D4DF', ground: '#768065', intensity: 1.24 }),
-    ambient: Object.freeze({ color: '#FFF0DC', intensity: 0.52 }),
-    rim: Object.freeze({ color: '#D9E6EE', intensity: 0.36 }),
-    fog: Object.freeze({ color: '#C6C3B2', near: 132, far: 625 }),
-    sky: Object.freeze({ horizon: '#D9CEB2', zenith: '#7E9CAF', sunColor: '#FFE4B8', sunIntensity: 0.48 }),
-    exposure: 1.28,
-    grassTint: Object.freeze({ color: '#E0EED2', amount: 0.08 }),
-  }),
 
-  // The default is intentionally confident daylight. These levels are above the
-  // sceneSetup fallback so charcoal asphalt and the grass vertex colours stay clear.
-  afternoon: Object.freeze({
+  day: Object.freeze({
     sun: Object.freeze({ color: '#FFF0D0', intensity: 3.45, direction: Object.freeze([-0.35, 0.87, -0.35]) }),
     hemisphere: Object.freeze({ sky: '#CDDFEA', ground: '#7E8969', intensity: 1.48 }),
     ambient: Object.freeze({ color: '#FFF4E2', intensity: 0.64 }),
@@ -60,16 +38,6 @@ export const PRESETS = Object.freeze({
     grassTint: Object.freeze({ color: '#DDF0D4', amount: 0.07 }),
   }),
 
-  dusk: Object.freeze({
-    sun: Object.freeze({ color: '#FFB17E', intensity: 1.78, direction: Object.freeze([0.79, 0.20, -0.58]) }),
-    hemisphere: Object.freeze({ sky: '#8F94AC', ground: '#6F554A', intensity: 0.94 }),
-    ambient: Object.freeze({ color: '#E8C4B7', intensity: 0.42 }),
-    rim: Object.freeze({ color: '#AEBEDA', intensity: 0.55 }),
-    fog: Object.freeze({ color: '#A98278', near: 102, far: 540 }),
-    sky: Object.freeze({ horizon: '#C9816D', zenith: '#555E7D', sunColor: '#FFAA73', sunIntensity: 0.72 }),
-    exposure: 1.20,
-    grassTint: Object.freeze({ color: '#E8CCBD', amount: 0.10 }),
-  }),
 
   // Night remains deliberately legible: a cool moon key, generous sky fill and
   // restrained exposure keep the route, curbs and collectibles navigable.
@@ -110,7 +78,7 @@ function makeFrame(preset) {
   };
 }
 
-function copyFrame(source, target = makeFrame(PRESETS.afternoon)) {
+function copyFrame(source, target = makeFrame(PRESETS.day)) {
   target.sunColor.copy(source.sunColor);
   target.sunIntensity = source.sunIntensity;
   target.sunDirection.copy(source.sunDirection);
@@ -179,7 +147,7 @@ function transitionEase(x) {
   return sample(t, 0.61, 1);
 }
 
-let current = makeFrame(PRESETS.afternoon);
+let current = makeFrame(PRESETS.day);
 let transitionFrom = copyFrame(current);
 let transitionTo = copyFrame(current);
 let transitionElapsed = TRANSITION_SECONDS;
@@ -246,14 +214,14 @@ function beginTransition(key, instant = false) {
 }
 
 /** Set central state and begin (or immediately apply) the corresponding lighting. */
-export function applyTimeOfDay(key, { instant = false } = {}) {
+export function applyTheme(key, { instant = false } = {}) {
   if (!Object.hasOwn(PRESETS, key)) {
-    throw new RangeError(`Unknown time-of-day preset: ${key}`);
+    throw new RangeError(`Unknown theme preset: ${key}`);
   }
 
-  if (state.timeOfDay !== key) {
+  if (state.theme !== key) {
     instantOverride = Boolean(instant);
-    set('timeOfDay', key);
+    set('theme', key);
     instantOverride = null;
   } else {
     beginTransition(key, Boolean(instant));
@@ -261,21 +229,23 @@ export function applyTimeOfDay(key, { instant = false } = {}) {
 }
 
 /** Subscribe once and establish the default without an initial dark-to-light sweep. */
-export function initTimeOfDay() {
+export function initTheme() {
   if (initialized) return;
   initialized = true;
 
-  const initialKey = Object.hasOwn(PRESETS, state.timeOfDay)
-    ? state.timeOfDay
-    : 'afternoon';
+  const initialKey = Object.hasOwn(PRESETS, state.theme)
+    ? state.theme
+    : 'day';
   current = makeFrame(PRESETS[initialKey]);
   transitionFrom = copyFrame(current);
   transitionTo = copyFrame(current);
   transitionElapsed = TRANSITION_SECONDS;
+  document.documentElement.dataset.theme = initialKey;
   writeFrame(current);
 
-  unsubscribe = subscribe('timeOfDay', (key) => {
+  unsubscribe = subscribe('theme', (key) => {
     if (!Object.hasOwn(PRESETS, key)) return;
+    document.documentElement.dataset.theme = key;
     beginTransition(key, instantOverride === true);
   });
 }

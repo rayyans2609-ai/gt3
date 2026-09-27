@@ -11,10 +11,44 @@
 /* Showcase owns the presentation while open; these remain logically active. */
 body.gt3-showcase-open #hud,
 body.gt3-showcase-open #spec-panel,
-body.gt3-showcase-open #tod-selector {
+body.gt3-showcase-open .theme-toggle {
   opacity: 0;
   pointer-events: none;
   transition: opacity 300ms var(--ease);
+}
+
+.theme-toggle {
+  width: 96px;
+  margin-top: 14px;
+  margin-left: auto;
+  padding: 7px 10px;
+  border: 1px solid var(--hair);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--fg);
+  cursor: pointer;
+  font-family: var(--font-ui);
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 0.14em;
+  line-height: 1.2;
+  pointer-events: auto;
+  text-align: center;
+  transition: background-color 420ms var(--ease), border-color 420ms var(--ease), color 420ms var(--ease), transform 180ms var(--ease);
+}
+
+.theme-toggle:hover {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--surface) 80%, var(--accent));
+}
+
+.theme-toggle:active {
+  transform: translateY(1px);
+}
+
+.theme-toggle:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
 }
 
 .hud-corner {

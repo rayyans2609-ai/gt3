@@ -8,7 +8,7 @@ export const state = {
   unlocked: new Set(),
   mode: 'race',
   scrollLocked: false,
-  timeOfDay: 'afternoon',
+  theme: 'day',
 };
 
 const subscribers = new Map();

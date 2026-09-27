@@ -39,7 +39,7 @@ Nearly everything in §4 onward is new product surface or a deliberate architect
 - 5-state time-of-day (`dawn/morning/afternoon/dusk/night`) → 2-state Day/Night (§13).
 - Visible-identity coins (`src/scene/coins.js`) → in-world sector/checkpoint thresholds (§18), with locked-identity cars (§11).
 - Single continuous scroll page with start-screen overlay → four distinct experiences (§2, detailed per page in §4–5, §11, §14) with agent-designed transitions (§25–26).
-- Single `background.mp3` loop → six-track playlist system (§6–10), which does not exist in code today.
+- Single `background.mp3` loop → six-track playlist system (§6–10). The music engine was implemented in Phase 2a (2026-09-27) inside `src/audio/audioManager.js`; the player UI follows in Phase 2b.
 - `F`-key hidden Showcase overlay → dedicated Showcase page, discoverable from the Hub.
 - Cormorant/DM Sans/DM Mono/gold palette (pre-V3 `ARCHITECTURE.md`) → Neue Haas Grotesk / Geist Mono / Day-Night palette (§12–13).
 

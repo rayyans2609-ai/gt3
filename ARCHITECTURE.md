@@ -228,6 +228,11 @@ start (Showcase never shows it locked).
 - Fonts: Neue Haas Grotesk (primary; from local `font/`, never fetched), Geist Mono (timing /
   identifiers / data only; may load from Google Fonts), selective oblique for short emphasis.
   Cormorant Garamond / DM Sans / DM Mono are retired.
+  **Scheduled:** the migration runs as a small dedicated typography slice **after Phase 2b
+  and before Phase 4**, so the first major new V3 screen (Landing) is built on the new
+  families. Until then the code keeps the legacy `--font-ui` / `--font-mono` / `--font-display`
+  variables, and new UI must use those variables, not literal font names, so it picks up the
+  migration automatically.
 - Tokens in `styles/tokens.css`, switched by `:root[data-theme="day"|"night"]`, interpolated:
   Day = white/pale field, dark type/icons; Night = deep navy field, near-black/navy
   architecture, refined motorsport-yellow accents. Exact values are runtime tuning.

@@ -78,6 +78,11 @@ function ensureGraph() {
 
   try {
     context = new AudioContextClass();
+    // audioReady means usable: drop it whenever the context stops running (device loss,
+    // OS interruption, suspend). Only a successful startAudio() sets it true again.
+    context.addEventListener('statechange', () => {
+      if (context.state !== 'running') set('audioReady', false);
+    });
     masterGain = context.createGain();
     musicBus = context.createGain();
     sfxBus = context.createGain();
@@ -383,9 +388,10 @@ function ensureMusicElement() {
 
 /** Open the autoplay gate and begin the continuous race mix. Idempotent. */
 export function startAudio() {
-  // Retain an attempt only after the context has left suspended state. A failed trusted
-  // activation can otherwise leave resume() pending, and a later button click must retry.
-  if (startPromise && context && context.state !== 'suspended') return startPromise;
+  // Reuse an attempt only while audio is actually usable. A failed trusted activation can
+  // leave resume() pending, and a context can stop running after a successful start; in
+  // both cases the next explicit control must retry.
+  if (startPromise && context?.state === 'running' && state.audioReady) return startPromise;
   if (!ensureGraph()) return Promise.resolve(false);
 
   const attempt = (async () => {

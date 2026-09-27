@@ -100,11 +100,11 @@ The Hub player treatment (§9) is visually more substantial here than anywhere e
 
 # 6. Global playlist — source and integrity check
 
-Canonical folder: `audios/background_playlist/`.
+Shipped location: `public/audios/playlist/track_1.mp3 … track_6.mp3`. The six source tracks were moved and renamed there in Phase 2a (2026-09-27): git renames, byte-identical by MD5, with no duplicate copies. The original folder `audios/background_playlist/` now holds only the six covers, in `audiocover_NOTaudios/`, which stay there until the Hub player needs them in Phase 5.
 
-**Verified current state:** 6 audio files, all carrying explicit `(name this track_X)` markers, and 6 cover images (in a subfolder — see Open Issues §30.2). This matches the brief's expected state.
+**Verified state at spec time:** 6 audio files, all carrying explicit `(name this track_X)` markers, and 6 cover images (in a subfolder — see Open Issues §30.2). This matches the brief's expected state. The table below records the original source filenames for provenance only.
 
-| GT3 alias | Source filename | Cover file |
+| GT3 alias | Original source filename (pre-move) | Cover file |
 |---|---|---|
 | `track_1` | `Cult Member - one(name this track_1).mp3` | `track_1.png` |
 | `track_2` | `Vegyn - The Path Less Traveled(name this track_2).mp3` | `track_2.jpeg` |
@@ -115,7 +115,7 @@ Canonical folder: `audios/background_playlist/`.
 
 All six `(name this track_X)` markers are present, unique, and cover `track_1`–`track_6` exactly once — **the explicit-marker mapping is authoritative and valid**; the fallback numeric/alphabetical rule in the brief is not needed. Playback sequence: `track_1 → track_2 → track_3 → track_4 → track_5 → track_6 → track_1`, looping indefinitely while music is active, auto-advancing on track end.
 
-Real artist/title names must never appear in the GT3 UI — only `track_1…track_6`. Only the six audio files count as tracks; cover images are never treated as playlist entries. This entire playlist/player system is **net-new**: no code in `src/audio/audioManager.js` currently references `background_playlist/`, a track list, or per-track covers (§1b).
+Real artist/title names must never appear in the GT3 UI — only `track_1…track_6`. Only the six audio files count as tracks; cover images are never treated as playlist entries. The playlist/player system is **net-new** (§1b). The music engine was implemented in Phase 2a **inside `src/audio/audioManager.js`**, with the alias table in `src/data/playlist.js`. The player/speaker UI is Phase 2b, and per-track covers are Phase 5.
 
 ---
 
@@ -407,9 +407,9 @@ A fresh implementation agent should be able to determine, from this file alone: 
 # 30. Open Issues / Repo Mismatches
 
 1. **`reference_images/` is actually `reference _images/`** (with a literal space) at the repo root. All paths in this spec use the real on-disk name. `camera_angles/`, `scenery/`, and `showcase_ref.jpeg` are all present and were opened successfully.
-2. **Playlist cover images are not directly inside `audios/background_playlist/`** as assumed by the source brief — they live one level deeper, in `audios/background_playlist/audiocover_NOTaudios/`. All six covers are present and correctly named by GT3 alias (`track_1.png`, `track_2.jpeg` … `track_6.jpeg`); the mapping itself is not ambiguous, only the folder depth differs from expectation.
+2. **Playlist cover images are not directly inside `audios/background_playlist/`** as assumed by the source brief — they live one level deeper, in `audios/background_playlist/audiocover_NOTaudios/`. All six covers are present and correctly named by GT3 alias (`track_1.png`, `track_2.jpeg` … `track_6.jpeg`); the mapping itself is not ambiguous, only the folder depth differs from expectation. *Update (Phase 2a, 2026-09-27):* the six tracks have moved to `public/audios/playlist/` (§6). The covers intentionally remain at this path, unshipped, until Phase 5 (Hub cover-art player).
 3. **`models/car_cover_model` has no file extension** in its literal filename, though `file` confirms it is a valid glTF-Binary (.glb) blob (874 KB). Present but differently named — reference it by its literal name, or add an explicit `.glb` extension during the build step.
-4. **`audios/background.mp3`** (the current single background loop referenced by `src/audio/audioManager.js`'s `RACE_FILES.background`) is deleted from the working tree (uncommitted, per `git status`). This is consistent with retiring the single-track system in favor of the playlist (§6) — the audio manager code has not yet been updated to match.
+4. **`audios/background.mp3`** (the current single background loop referenced by `src/audio/audioManager.js`'s `RACE_FILES.background`) is deleted from the working tree (uncommitted, per `git status`). This is consistent with retiring the single-track system in favor of the playlist (§6). **RESOLVED (Phase 2a, 2026-09-27):** the shipped copy `public/audios/background.mp3`, byte-identical to `track_1`, was deleted, and `RACE_FILES.background` was removed from `audioManager.js`.
 5. **Font licensing status is unresolved.** Every weight file under `font/` (all four Neue Haas Grotesk families) is named with a `-Trial` suffix (e.g. `NeueHaasGrotDisp-65Medium-Trial.otf`). Use this asset per §12, but confirm licensing/weight-completeness before shipping — do not assume "Trial" naming is cosmetic.
 6. **McLaren → Aston Martin green road-overlay issue — REPRODUCED · IMPLEMENTED · VERIFIED TECHNICALLY · USER VISUAL ACCEPTANCE PENDING (2026-09-27).** *Reproduced:* headless Chrome captures with real GPU rendering (puppeteer-core, ANGLE/Metal, non-sandboxed) showed the defect. From roughly t≈0.645 to the Aston checkpoint, the race view was almost entirely covered by green terrain, with the road and car hidden. **Cause:** in `src/scene/environment.js` (`buildGrassGeometry`), each track edge's far grass "skirt" kept that edge's elevation hundreds of metres outward. The skirt from an earlier, higher route section (t≈0.428) therefore passed above the lower McLaren→Aston straight, between the camera and the road. A raycast hit grass ~5.5 m from the camera versus road at ~29.9 m, and hiding only the grass mesh restored the view. *Implemented:* far skirt vertices now ease toward the existing horizon elevation between 240 and 530 units from the track edge. Near-track grass is unchanged, and the camera, coin and montage code were not touched. *Verified technically:* `npm run build` passes, and post-fix browser captures at t≈0.63, 0.645, 0.66, 0.673 and 0.70 (past Aston's checkpoint) no longer show the occlusion. Only those route points were checked; distant grass elsewhere on the route was not re-captured. *User visual acceptance:* still pending. Do not treat this item as closed until the user has visually accepted it in the running experience.
 7. **`ARCHITECTURE.md` — RESOLVED (2026-09-27).** Reconciled to this spec: two-state theme, checkpoints instead of coins, Neue Haas Grotesk / Geist Mono design system, world-space aerial camera, four-experience state machine. Modules are tagged keep / evolve / new / retire.

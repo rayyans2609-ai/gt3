@@ -34,7 +34,8 @@ When sources disagree, in order:
 - `docs/archive/SPEC_V1.md`, `docs/archive/SPEC_V2.md` — historical specs
 - `reference _images/camera_angles/`, `reference _images/scenery/`, `reference _images/showcase_ref.jpeg` — **note the literal space** in `reference _images` (not `reference_images`)
 - `models/car_cover_model` — locked-showcase asset; valid `.glb` data but the filename itself carries no extension
-- `audios/background_playlist/` — six aliased tracks; covers are one level deeper, in `audios/background_playlist/audiocover_NOTaudios/`
+- `public/audios/playlist/track_1.mp3 … track_6.mp3` — the six playlist tracks, moved and renamed from `audios/background_playlist/` in Phase 2a. The music engine lives inside `src/audio/audioManager.js`, and the alias table is `src/data/playlist.js`.
+- `audios/background_playlist/audiocover_NOTaudios/` — the six track covers, unshipped and deferred to Phase 5 (Hub cover-art player)
 - `font/` — four Neue Haas Grotesk families, all weight files suffixed `-Trial` (licensing status unconfirmed, see `SPEC.md` §30.5)
 - `src/data/cars.js` — the locked ten-car roster and order (also mirrored in `SPEC.md` §1a)
 - `docs/ai/model-routing.md`, `docs/ai/codex-cli-invocation.md` — canonical AI model-routing/delegation rules (roles, escalation, verified Codex slugs/invocation); route Codex jobs through `scripts/codex-route.sh`, which refuses to run without an explicit model and reasoning effort

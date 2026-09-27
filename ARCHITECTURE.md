@@ -18,14 +18,16 @@ text/HUD/player UI. One fixed canvas behind it, one shared `WebGLRenderer`.
   package.json
   models/             SOURCE glb files (do not ship, do not modify)
                       incl. car_cover_model (glb data, no extension — SPEC §30.3)
-  audios/             SOURCE audio (sfx, voices/, background_playlist/ + audiocover_NOTaudios/)
+  audios/             SOURCE audio (sfx, voices/); background_playlist/audiocover_NOTaudios/
+                      holds the six track covers (unshipped, deferred to Phase 5)
   font/               Neue Haas Grotesk — local project asset (gitignored), referenced
                       directly from CSS and bundled by Vite; not fetched, not committed
   reference _images/  design references (literal space in name), never shipped
   public/             shipped assets (tracked)
     models/           compressed car glbs [keep]; car_cover.glb [new]
-    audios/           sfx + voices [keep]; background.mp3 [retire]
-    audios/playlist/  track_1..6.mp3 + covers, ALIASED filenames [new] (SPEC §6)
+    audios/           sfx + voices [keep]; background.mp3 [retired, Phase 2a]
+    audios/playlist/  track_1..6.mp3, ALIASED filenames (moved from audios/background_playlist/
+                      in Phase 2a, git renames, byte-identical) [done]; covers join in Phase 5
     images/<carId>/   manufacturer imagery / badges [keep]
   scripts/            build-time + puppeteer probe/perf/QA scripts [keep]
   src/
@@ -70,12 +72,13 @@ text/HUD/player UI. One fixed canvas behind it, one shared `WebGLRenderer`.
       completion.js   GRAND TOUR COMPLETE + return control [new; replaces finishScreen.js]
       startScreen.js todSelector.js finishScreen.js specPanel.js fullscreenCard.js [retire]
     audio/
-      audioManager.js one AudioContext: master/music/sfx/voice buses [evolve]
-      playlist.js     six-track sequence, seek, auto-advance, ended→next [new]
+      audioManager.js one AudioContext: master/music/sfx/engine/voice buses, AND the playlist
+                      music engine (sequence, seek, auto-advance, mutes, restore) — kept here
+                      because it needs the private context/buses [evolved, Phase 2a]
     data/
       cars.js         roster data (10 cars, locked order) + narration copy [keep]
       carImages.js    [keep]
-      playlist.js     track_1..6 alias → file/cover table [new]
+      playlist.js     track_1..6 alias → shipped file [done, Phase 2a]; cover field in Phase 5
     styles/
       tokens.css      design tokens, Day/Night via :root[data-theme] [new]
       base.css + per-experience sheets [evolve; montage.css keep]
@@ -171,13 +174,20 @@ Audio restore sets UI state only; playback resumes on the next user gesture.
 ## Audio graph (src/audio/)
 One AudioContext, created only from an explicit user gesture — never scroll [keep, SPEC §10].
 ```
-music (HTMLAudioElement → MediaElementSource) → musicGain ─┐
-sfx buffers ────────────────────────────────→ sfxGain ────┼→ masterGain → destination
-voice buffers ──────────────────────────────→ voiceBus ───┘
+music <audio> → MediaElementSource → musicMuteGain → musicBus ─┐
+sfx buffers ──────────────────────────────────────→ sfxBus ────┤
+engine start/idle ────────────────────────────────→ engineBus ─┼→ masterGain → destination
+voice <audio> → MediaElementSource ───────────────→ voiceBus ──┘
 ```
+- Implemented in `audioManager.js` (Phase 2a): no separate `audio/playlist.js`.
 - Music uses one streaming `<audio>` element (native duration/seek/ended) instead of decoding
-  six full tracks. Order track_1→…→track_6→track_1, auto-advance on `ended`.
-- `masterMuted` → masterGain; `musicMuted` → musicGain. No SFX-only mute.
+  six full tracks. It is created only on the first successful audio start. Order
+  track_1→…→track_6→track_1, auto-advance on `ended`.
+- `masterMuted` → masterGain; `musicMuted` → musicMuteGain. Montage and narration ducking stay
+  on musicBus. No SFX-only mute.
+- `audioReady` is true only after a successful `startAudio()` with the context `running`, and
+  drops to false whenever the context stops running. Explicit controls retry through
+  `startAudio()` / `playMusic()`.
 - Real artist/title names never reach the UI; shipped playlist files use `track_N` aliases.
 - SFX set: existing files only (`coin_approach.mp3` reused as checkpoint approach cue; others
   kept as currently wired). Voices: exactly the 10 `voice_XX` files, played ONLY in Showcase.
@@ -234,8 +244,9 @@ chrome. No new renderers beyond the sanctioned montage exception. No URL routes 
 history entries. Audio: the existing SFX + the 10 voice files + the 6 playlist tracks, no others.
 
 ## Known later dependencies (not blockers for Phase 1)
-- Playlist tracks/covers and `car_cover.glb` are not yet copied into `public/` (needed by the
-  audio/player and Showcase phases).
+- Playlist tracks shipped in Phase 2a (`public/audios/playlist/`). Track covers remain
+  unshipped in `audios/background_playlist/audiocover_NOTaudios/` until Phase 5 (Hub player).
+  `car_cover.glb` is not yet in `public/` (Showcase, Phase 6).
 - McLaren → Aston grass-occlusion fix awaits user visual sign-off (SPEC §30.6).
 - Neue Haas Grotesk `-Trial` licensing (SPEC §30.5) is a local-asset concern, not a build or
   deployment blocker for this project.

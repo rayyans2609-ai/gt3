@@ -122,7 +122,7 @@ export const BEATS = {
   backdropIn:    { at: 0.08, duration: 0.55 }, // brand colour field rises
   cardIn:        { at: 0.35, duration: 0.35 }, // info card slides up, bottom third
   cardOut:       { at: 5.05, duration: 0.35 },
-  audioSwell:    { at: 0.0,  duration: 0.55 }, // background.mp3 -> 115%
+  audioSwell:    { at: 0.0,  duration: 0.55 }, // music bus -> 115% (MUSIC_MONTAGE_GAIN)
   audioRestore:  { at: 5.1,  duration: 0.9 },  // back to base
   // The morph runs 0.85s (DURATION in src/scene/morph.js). It must start WITH the
   // outgoing crossfade and finish before the montage ends, or the tail of the car swap

@@ -9,7 +9,7 @@ Priority when sources disagree:
 1. Current explicit user instruction
 2. This `SPEC.md`
 3. Current repository/runtime reality (what actually exists — see §1 and the Open Issues section for where it differs from this file)
-4. `ARCHITECTURE.md` (stale in places — flagged in `GT3_MASTER_CONTEXT.md`)
+4. `ARCHITECTURE.md` (technical map, reconciled to this spec 2026-09-27)
 5. `BUILD_LOG.md` (evidence/history — measured findings only, not product doctrine)
 6. `docs/archive/SPEC_V1.md`, `docs/archive/SPEC_V2.md` (historical product direction, superseded)
 
@@ -41,7 +41,7 @@ Nearly everything in §4 onward is new product surface or a deliberate architect
 - Single continuous scroll page with start-screen overlay → four distinct experiences (§2, detailed per page in §4–5, §11, §14) with agent-designed transitions (§25–26).
 - Single `background.mp3` loop → six-track playlist system (§6–10), which does not exist in code today.
 - `F`-key hidden Showcase overlay → dedicated Showcase page, discoverable from the Hub.
-- Cormorant/DM Sans/DM Mono/gold palette (`ARCHITECTURE.md`) → Neue Haas Grotesk / Geist Mono / Day-Night palette (§12–13).
+- Cormorant/DM Sans/DM Mono/gold palette (pre-V3 `ARCHITECTURE.md`) → Neue Haas Grotesk / Geist Mono / Day-Night palette (§12–13).
 
 ---
 
@@ -278,7 +278,7 @@ An original closed-loop circuit, broadly inspired by Spa-Francorchamps and Circu
 
 # 18. Progression — checkpoints, not coins
 
-No coins (replaces `src/scene/coins.js`'s visible branded emblem discs entirely, §1b). Use restrained in-world **sector/checkpoint thresholds**: a subtle translucent gate/structure, conceptually related to motorsport timing/sector infrastructure, architectural, world-integrated, restrained — not a collectible, glowing power-up, arcade portal, sci-fi gate, or fantasy object. Approach may reuse the existing proximity/incoming SFX (`coin_approach.mp3`). Crossing triggers the next car. Exact geometry, material, opacity, animation, and visibility distance are implementation-level.
+No coins (replaces `src/scene/coins.js`'s visible branded emblem discs entirely, §1b). Use restrained in-world **sector/checkpoint thresholds**: a subtle translucent gate/structure, conceptually related to motorsport timing/sector infrastructure, architectural, world-integrated, restrained — not a collectible, glowing power-up, arcade portal, sci-fi gate, or fantasy object. Approach may reuse the existing proximity/incoming SFX (`coin_approach.mp3`). Crossing triggers the next car. Lexus (roster index 0) is discovered from session start as the Landing/starting car, so there are **9 discovery checkpoints**, one each for cars 1–9. Exact geometry, material, opacity, animation, and visibility distance are implementation-level.
 
 Crossing a checkpoint is **silent**: it reveals/unlocks the associated car in session discovery state (§26) and performs the normal lightweight in-Grand-Tour car swap (§19) — nothing else. No narration, no reveal ceremony, no prompt, no Showcase transition. The newly discovered car simply becomes selectable the next time the user enters Showcase (§11). The montage/identity-reveal/narration sequence only ever plays through manual unlock (§11) — Grand Tour stays uninterrupted (§2).
 
@@ -412,4 +412,4 @@ A fresh implementation agent should be able to determine, from this file alone: 
 4. **`audios/background.mp3`** (the current single background loop referenced by `src/audio/audioManager.js`'s `RACE_FILES.background`) is deleted from the working tree (uncommitted, per `git status`). This is consistent with retiring the single-track system in favor of the playlist (§6) — the audio manager code has not yet been updated to match.
 5. **Font licensing status is unresolved.** Every weight file under `font/` (all four Neue Haas Grotesk families) is named with a `-Trial` suffix (e.g. `NeueHaasGrotDisp-65Medium-Trial.otf`). Use this asset per §12, but confirm licensing/weight-completeness before shipping — do not assume "Trial" naming is cosmetic.
 6. **McLaren → Aston Martin green road-overlay issue — REPRODUCED · IMPLEMENTED · VERIFIED TECHNICALLY · USER VISUAL ACCEPTANCE PENDING (2026-09-27).** *Reproduced:* headless Chrome captures with real GPU rendering (puppeteer-core, ANGLE/Metal, non-sandboxed) showed the defect. From roughly t≈0.645 to the Aston checkpoint, the race view was almost entirely covered by green terrain, with the road and car hidden. **Cause:** in `src/scene/environment.js` (`buildGrassGeometry`), each track edge's far grass "skirt" kept that edge's elevation hundreds of metres outward. The skirt from an earlier, higher route section (t≈0.428) therefore passed above the lower McLaren→Aston straight, between the camera and the road. A raycast hit grass ~5.5 m from the camera versus road at ~29.9 m, and hiding only the grass mesh restored the view. *Implemented:* far skirt vertices now ease toward the existing horizon elevation between 240 and 530 units from the track edge. Near-track grass is unchanged, and the camera, coin and montage code were not touched. *Verified technically:* `npm run build` passes, and post-fix browser captures at t≈0.63, 0.645, 0.66, 0.673 and 0.70 (past Aston's checkpoint) no longer show the occlusion. Only those route points were checked; distant grass elsewhere on the route was not re-captured. *User visual acceptance:* still pending. Do not treat this item as closed until the user has visually accepted it in the running experience.
-7. **`ARCHITECTURE.md` is materially stale** against this spec (five-state time-of-day, coin mechanic, Cormorant Garamond/DM Sans/DM Mono/gold-accent design system, camera-child-of-rig doctrine). Not rewritten in this pass per the source brief's scope limit — flagged here and in `GT3_MASTER_CONTEXT.md` as follow-up work.
+7. **`ARCHITECTURE.md` — RESOLVED (2026-09-27).** Reconciled to this spec: two-state theme, checkpoints instead of coins, Neue Haas Grotesk / Geist Mono design system, world-space aerial camera, four-experience state machine. Modules are tagged keep / evolve / new / retire.

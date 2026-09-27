@@ -19,13 +19,13 @@ text/HUD/player UI. One fixed canvas behind it, one shared `WebGLRenderer`.
   models/             SOURCE glb files (do not ship, do not modify)
                       incl. car_cover_model (glb data, no extension — SPEC §30.3)
   audios/             SOURCE audio (sfx, voices/, background_playlist/ + audiocover_NOTaudios/)
-  font/               Neue Haas Grotesk (-Trial files, GITIGNORED — local only, SPEC §30.5)
+  font/               Neue Haas Grotesk — local project asset (gitignored), referenced
+                      directly from CSS and bundled by Vite; not fetched, not committed
   reference _images/  design references (literal space in name), never shipped
   public/             shipped assets (tracked)
     models/           compressed car glbs [keep]; car_cover.glb [new]
     audios/           sfx + voices [keep]; background.mp3 [retire]
     audios/playlist/  track_1..6.mp3 + covers, ALIASED filenames [new] (SPEC §6)
-    fonts/            Neue Haas Grotesk web copies [new] — see Open items
     images/<carId>/   manufacturer imagery / badges [keep]
   scripts/            build-time + puppeteer probe/perf/QA scripts [keep]
   src/
@@ -128,11 +128,11 @@ Grand Tour (route state — follows scroll bidirectionally, SPEC §26)
 - `targetProgress` 0..1 raw scroll target [keep]
 - `velocity`, `speed01` [keep]
 - `activeCarIndex` 0..9 car currently skinning the player car — ROUTE state [keep]
-- `finishT`        0..1 completion hero-sequence progress [new]
 
 Discovery (monotonic within a session, SPEC §26)
-- `unlocked` ★    Set<number> of discovered car indices; only ever grows. Written by
-                   checkpoint crossing (silent) and manual unlock. [keep name, new semantics]
+- `unlocked` ★    Set<number> of discovered car indices; only ever grows. Starts as {0}
+                   (Lexus). Written by checkpoint crossing (silent) and manual unlock.
+                   [keep name, new semantics]
 - `showcaseCarIndex` ★ selected car in Showcase [new]
 
 Theme / audio
@@ -177,16 +177,18 @@ voice buffers ──────────────────────
   fixed world orientation (does not yaw with the car), damped translation along a rail that
   follows the car, controlled screen-space drift with a safety-framing correction. Tunables:
   FOV, elevation, pitch, lateral offset, look target, damping, tracking gain, safety margin.
-- **Checkpoints** (`checkpoints.js`): restrained gates at `CHECKPOINT_T[]` in `trackCurve.js`,
+- **Checkpoints** (`checkpoints.js`): 9 restrained gates at `CHECKPOINT_T[]` in `trackCurve.js`,
+  one per car 1–9 (Lexus is discovered from the start and has no checkpoint);
   no brand colour/emblem/silhouette. Forward crossing → `activeCarIndex` swap and (if new) add
   to `unlocked`; backward crossing → reverse swap only. Spacing ~30–50% longer than the coin
   spacing (SPEC §14).
 - **Swap** (`morph.js`): short, non-blocking, runs in both directions, no scroll lock.
 - **HUD** (`hud.js`): circuit map (top-right, derived from `trackCurve`), car name (top-left),
   edge row with theme toggle, speaker/`+`, back-to-Hub. Nothing else.
-- **Finish** (`finishSequence.js`): driven by `finishT` past the last checkpoint; progressively
+- **Finish** (`finishSequence.js`): begins at route end; progressively
   hides environment groups, eases camera to a hero framing, resolves to the theme field, then
-  `experience='complete'`. Reversible by the same mechanism (SPEC §26).
+  `experience='complete'`. Backward scroll reverses it (SPEC §26). Whether its progress is
+  scroll-linked or timed is internal to `finishSequence.js` — not an architecture decision.
 
 ## Showcase systems
 - Scene: themed field, hero car, pointer-drag orbit (yaw free, pitch clamped), no free camera.
@@ -199,7 +201,8 @@ voice buffers ──────────────────────
 0 lexus_rcf_gt3 · 1 nissan_gtr_gt3 · 2 audi_r8_gt3 · 3 bmw_m6_gt3 · 4 mercedes_amg_gt3
 5 ferrari_488_gt3 · 6 mclaren_720s_gt3 · 7 aston_vantage_gt3 · 8 lamborghini_huracan_gt3
 9 porsche_911_gt3r
-Lexus (0) is the Landing hero car and the Grand Tour starting car.
+Lexus (0) is the Landing hero car, the Grand Tour starting car, and discovered from session
+start (Showcase never shows it locked).
 
 ## Design system (SPEC §12–13, §23)
 - Fonts: Neue Haas Grotesk (primary; from local `font/`, never fetched), Geist Mono (timing /
@@ -220,12 +223,9 @@ accounts, currency, achievements or extra modes. No hard model swaps in Grand To
 chrome. No new renderers beyond the sanctioned montage exception. No URL routes / synthetic
 history entries. Audio: the existing SFX + the 10 voice files + the 6 playlist tracks, no others.
 
-## Open items (architecture-level)
-1. **Checkpoint count.** The current 10 coin positions include Lexus (index 0), which is
-   already the starting car. Working assumption: Lexus is discovered from the start and there
-   are 9 checkpoints (cars 1–9). Needs user confirmation.
-2. **Font shipping.** `font/` is gitignored, so a fresh clone cannot build the typography.
-   Licensing (`-Trial`) is unresolved (SPEC §30.5). Fonts must be copied to a served path
-   locally without committing them until licensing is settled.
-3. **Finish driver.** Whether `finishT` is driven by a scroll tail or a timed sequence that
-   backward scroll cancels is decided in that phase. Both satisfy SPEC §21/§26.
+## Known later dependencies (not blockers for Phase 1)
+- Playlist tracks/covers and `car_cover.glb` are not yet copied into `public/` (needed by the
+  audio/player and Showcase phases).
+- McLaren → Aston grass-occlusion fix awaits user visual sign-off (SPEC §30.6).
+- Neue Haas Grotesk `-Trial` licensing (SPEC §30.5) is a local-asset concern, not a build or
+  deployment blocker for this project.

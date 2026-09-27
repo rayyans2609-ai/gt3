@@ -19,7 +19,7 @@ When sources disagree, in order:
 1. **Current explicit user instruction** in the conversation — overrides everything below.
 2. **`SPEC.md`** — current product/experience truth: what GT3 should be.
 3. **Repository/runtime reality** — current technical truth: what actually exists. A gap between this and `SPEC.md` is implementation work, not a contradiction to silently resolve by rewriting `SPEC.md`.
-4. **`ARCHITECTURE.md`** — architectural map, **materially stale** (five-state time-of-day, coin mechanic, Cormorant/DM Sans/DM Mono/gold palette, camera-child-of-rig doctrine all contradict `SPEC.md`). Useful for file/module layout only; verify everything else against current code before trusting it. Needs a full rewrite as follow-up work — not done in the SPEC.md pass.
+4. **`ARCHITECTURE.md`** — technical map, reconciled to SPEC_V3 (2026-09-27). Each module is tagged keep / evolve / new / retire, so it describes both current code and the V3 target; tags marked new/evolve are build work, not running code. `SPEC.md` still wins on any disagreement.
 5. **`BUILD_LOG.md`** — evidence and history: measured performance findings, accepted/rejected fixes, known runtime traps. Authoritative for *what was measured*, never for *what the product should be*.
 6. **`docs/archive/SPEC_V1.md`, `docs/archive/SPEC_V2.md`** — historical product direction only. `SPEC_V1.md` = the first historical direction: restrained luxury with a fixed chase camera and visible-identity coins. `SPEC_V2.md` = the second historical direction: a bold/colorful "Hot-Wheels" reversal with a homepage/collection hub. The root `SPEC.md` = the current third direction, effectively `SPEC_V3` (the filename stays `SPEC.md`, which remains canonical). Do not treat either archive as a partial current authority.
 7. **Decipher / GT3 Meta Archive** and branch chat history — deep historical context, retrieved only when genuinely needed.
@@ -29,7 +29,7 @@ When sources disagree, in order:
 (Verified against the actual filesystem — note two names differ from what documentation elsewhere assumes.)
 
 - `SPEC.md` — canonical product spec
-- `ARCHITECTURE.md` — stale architecture map (see above)
+- `ARCHITECTURE.md` — V3-reconciled technical map (see above)
 - `BUILD_LOG.md` — performance/implementation evidence log
 - `docs/archive/SPEC_V1.md`, `docs/archive/SPEC_V2.md` — historical specs
 - `reference _images/camera_angles/`, `reference _images/scenery/`, `reference _images/showcase_ref.jpeg` — **note the literal space** in `reference _images` (not `reference_images`)

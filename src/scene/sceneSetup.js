@@ -2,7 +2,7 @@
  * Renderer, race camera, atmosphere, lighting and restrained speed feedback.
  *
  * This module owns the race camera's projection, but deliberately does not position
- * it. carRig.js attaches and frames it. main.js owns the only animation loop and
+ * it. aerialCamera.js owns its world-space pose. main.js owns the only animation loop and
  * calls updateScene() and render().
  */
 
@@ -11,10 +11,9 @@ import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 import { state } from '../core/state.js';
+import { TUNE as aerialTuning } from './aerialCamera.js';
 import { onResize } from '../main.js';
 
-const BASE_FOV = 52;
-const FOV_RANGE = 7;
 const FOV_DAMPING = 0.06;
 const FOV_PROJECTION_EPSILON = 0.01;
 const DEBUG = location.hash === '#debug';
@@ -68,7 +67,7 @@ export let rimLight;
 let motionBlurPass;
 let premiumPass;
 let followedSunTarget;
-let lastProjectedFov = BASE_FOV;
+let lastProjectedFov = aerialTuning.fov;
 let elapsedTime = 0;
 let initialized = false;
 let appliedResolution;
@@ -299,7 +298,7 @@ export function updateCameraFov(dt) {
   if (!camera) return;
 
   const safeDt = Number.isFinite(dt) ? Math.max(0, dt) : 0;
-  const targetFov = BASE_FOV + clampSpeed(state.speed01) * FOV_RANGE;
+  const targetFov = aerialTuning.fov + clampSpeed(state.speed01) * aerialTuning.speedFovRange;
   const damping = 1 - Math.pow(1 - FOV_DAMPING, safeDt * 60);
 
   camera.fov += (targetFov - camera.fov) * damping;
@@ -383,8 +382,8 @@ export function initScene() {
     atmosphere.fogFar,
   );
 
-  // Position and rotation intentionally remain at THREE's defaults. carRig owns both.
-  camera = new THREE.PerspectiveCamera(BASE_FOV, 1, 0.5, 3000);
+  // aerialCamera.js places this independent world-space camera.
+  camera = new THREE.PerspectiveCamera(aerialTuning.fov, 1, 0.5, 3000);
   lastProjectedFov = camera.fov;
 
   createLightingRig();

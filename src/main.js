@@ -7,11 +7,11 @@
  *
  * Update order is load-bearing:
  *   1. scrollDrive  — establishes state.progress for this frame
- *   2. carRig       — moves the rig to that progress, so the camera is correct
- *   3. world        — coins, time-of-day, finish gate react to the rig's new position
- *   4. morph        — body swap, must run after the rig has been placed
- *   5. ui           — reads final state
- *   6. sceneSetup   — camera FOV + post uniforms, which read the settled speed
+ *   2. carRig       — places and orients the car on the route
+ *   3. aerialCamera — follows the route in world space
+ *   4. world/morph  — coins, car swap, theme and finish updates
+ *   5. ui/audio     — reads final state
+ *   6. sceneSetup   — projection and post uniforms read settled speed
  *   7. render       — whichever view owns the screen right now
  */
 
@@ -64,6 +64,7 @@ async function boot() {
   const track = await import('./scene/track.js');
   const environment = await import('./scene/environment.js');
   const carRig = await import('./scene/carRig.js');
+  const aerialCamera = await import('./scene/aerialCamera.js');
   const cars = await import('./scene/cars.js');
   const coins = await import('./scene/coins.js');
   const morph = await import('./scene/morph.js');
@@ -90,9 +91,10 @@ async function boot() {
   scene.add(finishLine.buildFinishLine());
   scene.add(coins.buildCoins());
 
-  const rig = carRig.initCarRig(camera);
+  const rig = carRig.initCarRig();
   scene.add(rig);
   sceneSetup.attachSunTarget(rig);
+  aerialCamera.initAerialCamera(camera);
 
   morph.initMorph();
   theme.initTheme();
@@ -167,11 +169,10 @@ async function boot() {
 
   scrollDrive.initScrollDrive();
 
-  // Cursor parallax (SPEC §11) — a few degrees, nothing more.
+  // Environment and HUD parallax remain independent of the race camera.
   window.addEventListener('pointermove', (e) => {
     const x = (e.clientX / window.innerWidth) * 2 - 1;
     const y = (e.clientY / window.innerHeight) * 2 - 1;
-    carRig.setCursor(x, y);
     environment.setParallax(x, y);
     hud.setCursor(x, y);
   }, { passive: true });
@@ -194,6 +195,7 @@ async function boot() {
 
   registerUpdate(scrollDrive.update);
   registerUpdate(carRig.update);
+  registerUpdate(aerialCamera.update);
   registerUpdate(coins.updateCoins);
   registerUpdate(morph.updateMorph);
   registerUpdate(theme.update);

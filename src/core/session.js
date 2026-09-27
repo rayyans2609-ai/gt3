@@ -5,6 +5,11 @@ const STORAGE_KEY = 'gt3.session.v1';
 const VALID_SESSION_VALUES = Object.freeze({
   theme: new Set(['day', 'night']),
   experience: new Set(EXPERIENCES),
+  masterMuted: { has: (value) => typeof value === 'boolean' },
+  musicMuted: { has: (value) => typeof value === 'boolean' },
+  trackIndex: { has: (value) => Number.isInteger(value) && value >= 0 && value < 6 },
+  trackPosition: { has: (value) => Number.isFinite(value) && value >= 0 },
+  playIntent: { has: (value) => typeof value === 'boolean' },
 });
 const SESSION_KEYS = Object.freeze(Object.keys(VALID_SESSION_VALUES));
 let initialized = false;

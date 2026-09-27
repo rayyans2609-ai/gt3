@@ -10,6 +10,12 @@ export const state = {
   scrollLocked: false,
   theme: 'day',
   experience: 'landing',
+  masterMuted: false,
+  musicMuted: false,
+  trackIndex: 0,
+  trackPosition: 0,
+  playIntent: true,
+  audioReady: false,
   transition: null,
 };
 

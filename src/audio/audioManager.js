@@ -1,4 +1,5 @@
-import { state } from '../core/state.js';
+import { set, state, subscribe } from '../core/state.js';
+import { playlist } from '../data/playlist.js';
 
 const AUDIO_ROOT = '/audios/';
 const MUSIC_BASE_GAIN = 0.42;
@@ -7,7 +8,6 @@ const MUSIC_VOICE_GAIN = MUSIC_BASE_GAIN * 0.35;
 const IDLE_GAIN = 0.15;
 
 const RACE_FILES = Object.freeze({
-  background: 'background.mp3',
   coin: 'coin.mp3',
   coinApproach: 'coin_approach.mp3',
   engineStart: 'engine_start.mp3',
@@ -38,6 +38,10 @@ let context = null;
 let contextUnavailable = false;
 let masterGain = null;
 let musicBus = null;
+let musicMuteGain = null;
+let musicElement = null;
+let musicRequestId = 0;
+let lastPositionWriteAt = -Infinity;
 let sfxBus = null;
 let engineBus = null;
 let voiceBus = null;
@@ -46,7 +50,6 @@ let preloadPromise = null;
 let preloadCompleted = 0;
 let startPromise = null;
 let raceStarted = false;
-let backgroundSource = null;
 let engineStartSource = null;
 let idleSource = null;
 let coinApproachSource = null;
@@ -55,7 +58,6 @@ let coinProximity = 0;
 let idlePlaybackRate = 1;
 
 let montageActive = false;
-let masterMuted = false;
 let activeVoice = null;
 let activeVoiceIndex = -1;
 let voiceRequestId = 0;
@@ -82,7 +84,7 @@ function ensureGraph() {
     engineBus = context.createGain();
     voiceBus = context.createGain();
 
-    setInitialGain(masterGain, masterMuted ? 0 : 1);
+    setInitialGain(masterGain, state.masterMuted ? 0 : 1);
     setInitialGain(musicBus, MUSIC_BASE_GAIN);
     setInitialGain(sfxBus, 1);
     setInitialGain(engineBus, 1);
@@ -160,7 +162,7 @@ async function loadRaceBuffer(key, file) {
   }
 }
 
-/** Fetch and decode the six race assets. Every asset settles independently. */
+/** Fetch and decode the five race assets. Every asset settles independently. */
 export function preloadAudio(onProgress) {
   if (typeof onProgress === 'function') preloadListeners.add(onProgress);
 
@@ -270,14 +272,6 @@ function startRaceSources() {
   raceStarted = true;
   const now = context.currentTime;
 
-  if (raceBuffers.background) {
-    try {
-      backgroundSource = makeLoop(raceBuffers.background, musicBus);
-    } catch (error) {
-      console.debug('[audio] The background loop could not start.', error);
-    }
-  }
-
   if (raceBuffers.engineStart) {
     try {
       const startGain = context.createGain();
@@ -315,6 +309,78 @@ function startRaceSources() {
   startCoinApproachLoop();
 }
 
+function musicDuration() {
+  const duration = musicElement?.duration;
+  return Number.isFinite(duration) && duration >= 0 ? duration : null;
+}
+
+function clampMusicTime(seconds) {
+  const requested = Number.isFinite(seconds) ? Math.max(0, seconds) : 0;
+  const duration = musicDuration();
+  return duration === null ? requested : Math.min(requested, duration);
+}
+
+function saveMusicPosition() {
+  if (!musicElement) return;
+  set('trackPosition', clampMusicTime(musicElement.currentTime));
+}
+
+function tryPlayMusic() {
+  if (!state.audioReady || !state.playIntent || !musicElement) return;
+  try {
+    const result = musicElement.play();
+    void Promise.resolve(result).catch((error) => {
+      if (error?.name !== 'AbortError') console.debug('[audio] Music could not play.', error);
+    });
+  } catch (error) {
+    console.debug('[audio] Music could not play.', error);
+  }
+}
+
+function loadSelectedTrack() {
+  if (!musicElement) return;
+  const requestId = ++musicRequestId;
+  musicElement.pause();
+  musicElement.src = playlist[state.trackIndex].src;
+  musicElement.load();
+
+  const restorePosition = () => {
+    if (requestId !== musicRequestId) return;
+    const clamped = clampMusicTime(state.trackPosition);
+    try {
+      musicElement.currentTime = clamped;
+      set('trackPosition', clamped);
+    } catch {
+      // A failed media load may not allow seeking.
+    }
+  };
+  musicElement.addEventListener('loadedmetadata', restorePosition, { once: true });
+  // play() starts the media request; metadata then applies the saved, clamped position.
+  tryPlayMusic();
+}
+
+function ensureMusicElement() {
+  if (musicElement) return;
+  musicMuteGain = context.createGain();
+  setInitialGain(musicMuteGain, state.musicMuted ? 0 : 1);
+  musicMuteGain.connect(musicBus);
+  const element = new Audio();
+  element.preload = 'auto';
+  context.createMediaElementSource(element).connect(musicMuteGain);
+  musicElement = element;
+  musicElement.addEventListener('timeupdate', () => {
+    if (musicElement.paused || musicElement.readyState < HTMLMediaElement.HAVE_METADATA) return;
+    const now = performance.now();
+    if (now - lastPositionWriteAt < 1000) return;
+    lastPositionWriteAt = now;
+    saveMusicPosition();
+  });
+  musicElement.addEventListener('ended', () => {
+    if (state.playIntent) nextTrack();
+  });
+  loadSelectedTrack();
+}
+
 /** Open the autoplay gate and begin the continuous race mix. Idempotent. */
 export function startAudio() {
   // Retain an attempt only after the context has left suspended state. A failed trusted
@@ -327,7 +393,12 @@ export function startAudio() {
       await context.resume();
       await preloadAudio();
       if (context.state !== 'running') return false;
+      ensureMusicElement();
+      targetGain(masterGain, state.masterMuted ? 0 : 1, 0.02);
+      targetGain(musicMuteGain, state.musicMuted ? 0 : 1, 0.02);
       startRaceSources();
+      set('audioReady', true);
+      tryPlayMusic();
       return true;
     } catch (error) {
       console.debug('[audio] Audio could not be started; continuing silently.', error);
@@ -572,13 +643,88 @@ export function onVoiceEnded(fn) {
 }
 
 export function setMasterMuted(muted) {
-  masterMuted = Boolean(muted);
-  if (!ensureGraph()) return;
-  targetGain(masterGain, masterMuted ? 0 : 1, 0.02);
+  set('masterMuted', Boolean(muted));
 }
 
 export function isMuted() {
-  return masterMuted;
+  return state.masterMuted;
+}
+
+export function setMusicMuted(muted) {
+  set('musicMuted', Boolean(muted));
+}
+
+export function playMusic() {
+  set('playIntent', true);
+  if (!state.audioReady) return startAudio();
+  tryPlayMusic();
+  return Promise.resolve(true);
+}
+
+export function pauseMusic() {
+  set('playIntent', false);
+  if (musicElement) {
+    musicElement.pause();
+    saveMusicPosition();
+  }
+}
+
+function changeTrack(index) {
+  set('trackIndex', index);
+  set('trackPosition', 0);
+  lastPositionWriteAt = -Infinity;
+  loadSelectedTrack();
+}
+
+export function nextTrack() {
+  changeTrack((state.trackIndex + 1) % playlist.length);
+}
+
+export function previousTrack() {
+  changeTrack((state.trackIndex + playlist.length - 1) % playlist.length);
+}
+
+export function selectTrack(index) {
+  if (!Number.isInteger(index) || index < 0 || index >= playlist.length) return;
+  set('playIntent', true);
+  changeTrack(index);
+  if (!state.audioReady) void startAudio();
+}
+
+export function seekMusic(seconds) {
+  const position = clampMusicTime(seconds);
+  if (musicElement) {
+    try {
+      musicElement.currentTime = position;
+    } catch {
+      // The requested position will be restored when metadata is available.
+    }
+  }
+  set('trackPosition', position);
+  lastPositionWriteAt = performance.now();
+}
+
+export function getMusicStatus() {
+  return {
+    trackIndex: state.trackIndex,
+    id: playlist[state.trackIndex].id,
+    currentTime: musicElement ? musicElement.currentTime : state.trackPosition,
+    duration: musicDuration() ?? 0,
+    playing: Boolean(state.audioReady && musicElement && !musicElement.paused && !musicElement.ended),
+  };
+}
+
+subscribe('masterMuted', (muted) => targetGain(masterGain, muted ? 0 : 1, 0.02));
+subscribe('musicMuted', (muted) => targetGain(musicMuteGain, muted ? 0 : 1, 0.02));
+
+if (typeof window !== 'undefined') {
+  window.__gt3audio = Object.freeze({
+    gains: () => ({
+      master: masterGain?.gain.value ?? null,
+      music: musicBus?.gain.value ?? null,
+      musicMute: musicMuteGain?.gain.value ?? null,
+    }),
+  });
 }
 
 /** Called from the app's existing RAF. Performs no per-frame allocation. */

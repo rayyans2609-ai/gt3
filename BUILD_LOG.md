@@ -643,3 +643,37 @@ after the Phase 3 HUD cleanup: neither module was imported by the live app and t
 DOM roots were absent. The separate Showcase and montage modules remain for later
 phases; no Phase 4 work was started. Historical measurements above remain valid for the
 versions they measured, but the deleted scripts are no longer runnable at this head.
+
+## Phase 3 reopened for re-evaluation — 2026-09-28 (session end)
+
+The user's real-browser walkthrough of `phase3-integration` (`61ce7b1`) did not accept the
+Phase 3 result as-is. **This branch's next work is a Phase 3 Grand Tour re-evaluation and
+finalization pass, not Phase 4, and not continued acceptance of the current result.** Do not
+resume from the "awaiting visual sign-off" framing above without first reconstructing the
+user's critique in the next session and classifying each point by phase ownership.
+
+- **3b aerial camera** — technically implemented and automated-verified (see above), but
+  **not product-accepted** after the user's live review. Framing/motion feel need
+  re-evaluation against real, direct use, not only against the automated harness's numbers.
+- **3c checkpoints/progression** — technically implemented and automated-verified, but the
+  user observed **checkpoint/model-swap hitching on first pass** during live use. This was
+  not caught by the automated frame-pacing measurements recorded above (which showed 0 frames
+  ≥250 ms); treat that as a gap in what the harness measures, not proof the hitch isn't real.
+  Needs direct re-investigation in the live app, not just re-running the existing harness.
+- **3d sparse HUD** — the code is implemented and merged into this branch (`a603268`,
+  `41f2a62`; DOM/aria-hidden/F-key behavior automated-verified, see above), but it was **not
+  part of what the user actually walked through and judged** in this review pass. Confirm this
+  explicitly with the user before assuming either "already reviewed" or "needs rebuilding."
+- **Scroll/driving feel** — reopened. `src/scroll/scrollDrive.js` was deliberately untouched
+  through all of Phase 3b/3c/3d, but the user found the current input mapping **not
+  sufficiently bounded or predictable** in actual use. This is new scope for the next session,
+  not a regression introduced by Phase 3 — investigate `scrollDrive.js`'s current tuning
+  against the user's specific complaint before changing anything.
+
+`SPEC.md` is deliberately **not** rewritten yet. The next session reconstructs the user's
+critique in full, classifies every point by which phase owns it, and updates canonical
+`SPEC.md` before any implementation resumes. `docs/ai/run-status-2026-09-28.md`'s "technically
+complete" framing is superseded by this section for product-acceptance purposes; its
+verification numbers remain accurate technical evidence, just not sufficient for acceptance.
+
+Branch `phase3-integration` (`61ce7b1`) is not merged to `main` (`62024bb`, untouched).

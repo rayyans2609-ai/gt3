@@ -72,3 +72,41 @@ On this 8 GB i5-8210Y: at most 1–2 active top-level tasks including sub-agents
 is mostly waiting. Serialize when in doubt. If memory pressure, swap, load or system CPU climbs,
 drop to one heavy task immediately. Browser pre-flight uses several signals (no other heavy job,
 paging/swap deltas ~0, system CPU low / idle CPU substantial), not load average alone.
+
+## FINAL correction 2026-09-28 ~12:30 (supersedes earlier "3c PASS" summaries)
+
+A partial `verify-checkpoints.mjs` run against final HEAD `036d4d4` (killed mid-run before its
+output was checked; recovered from `/tmp/gt3-3c/verification.json`, timestamp 11:17) gives the
+real picture, corrected from the manager's earlier mis-summary:
+
+**PASS:** startup; route metadata; forward sweep (40 stops); backward sweep (39 stops, discovery
+never shrinks); **real-wheel gate reversals — genuinely PASSED this time** (gate 0.255: 6
+crossings, indices [2,3]; gate 0.68: 8 crossings, indices [6,7]) — the `036d4d4` harness fix
+(giving each burst its own time budget) is confirmed working; reload restores all 10 discoveries;
+Replay preserves all 10 discoveries; Day/Night gate captures (6 images); zero console errors.
+
+**FAIL (unclassified — harness vs app not yet determined):**
+- "instant seeks": seeking far forward (t=0.91) left `morphing: true` with two car models
+  attached (`car-mclaren`, `car-porsche`) instead of settled — either the harness didn't wait
+  long enough for the morph to finish after an instant (non-animated) seek, or morph retargeting
+  has a real edge case on a large instant jump. NOT reproduced/isolated. Needs a dedicated,
+  patient re-check (wait on `isMorphing()===false` with a generous timeout) before calling it
+  app or harness.
+- "frame and swap diagnostics": `Waiting failed: 30000ms exceeded` — could be host CPU
+  starvation (this session's dominant condition) rather than an app defect. NOT isolated.
+
+**NEVER VERIFIED (not blocked-this-instant — genuinely never directly checked across two
+attempts):** first-swap vs later-swap particle attachment. The dedicated particle script
+(`particles.mjs`) was written into the brief but never executed — the run failed at the swap
+diagnostics step first, and the fully-corrected final rerun never got past the host CPU gate at
+all (8/8 retries failed, ~50 min, system CPU 70-80%/idle 6-22% with zero GT3 load — this is
+CPU/kernel saturation, not memory/swap pressure; swap usage decreased over that run).
+
+**3d HUD:** never browser-verified (host-blocked before any Vite/Chrome launch in the pass that
+targeted it). Implementation reviewed only statically.
+
+**Aerial regression on final HEAD `036d4d4`:** never re-run (last successful `motion` run was
+against `ce61556`, before 3c/3d landed).
+
+Earlier "3c PASS" / "3b+3c technically complete" language in this doc and in chat overstated
+confidence — treat this section as authoritative over anything above it.

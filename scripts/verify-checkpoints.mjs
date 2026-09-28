@@ -83,6 +83,14 @@ try {
     await page.waitForFunction(target => Math.abs(window.__gt3.probe().progress - target) < 0.00025,
       { timeout: 30000 }, progress);
     await wait(settle);
+    // `settle` covers ordinary camera/UI easing, but a jump that crosses checkpoints can
+    // start a morph (nominal duration 0.85s) whose WALL-CLOCK completion depends on frame
+    // delivery, not just its own timer -- under host CPU pressure it can outlast `settle`.
+    // Wait on the real completion signal instead of assuming a fixed delay is enough; if a
+    // morph is genuinely stuck this just times out and falls through to read()/check(),
+    // which still asserts !morphing and fails correctly.
+    await page.waitForFunction(async () => !(await import('/src/scene/morph.js')).isMorphing(),
+      { timeout: 15000, polling: 100 }).catch(() => {});
     return read();
   }
 

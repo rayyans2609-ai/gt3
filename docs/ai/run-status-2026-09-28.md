@@ -50,3 +50,18 @@ interrupted by Codex usage limit — finished by Opus from its WIP); GPT-5.6 Ter
    sweep configurations (A current 40°/52°/54 m … F 55°/45°/44 m).
 2. Gate appearance and swap feel (after captures exist).
 3. Approval to merge Phase 3 work to `main` after verification.
+
+## Update 2026-09-28 ~09:50 (continuation run)
+- Doctrine: `733317d` (model-routing.md §9 hierarchical delegation; Master Context pointer).
+- Astra (manager-assigned): harness browser-cleanup fix `804a36c`; 3b review retained A-current
+  (40/52/54, preferred) and C-wider (50/47/46); no default change; no camera-motion defect.
+  Captures: ~/Desktop/gt3-review-2026-09-28/3b-astra/.
+- Host root cause (manager, from vm_stat): memory exhaustion → swap thrash on an 8 GB
+  i5-8210Y (≈67 MB free pages, 162 M cumulative swapouts, idle CPUs, load 100–800). Contributors:
+  VS Code, multiple Claude app/daemon processes, FileProvider, plus GT3 Vite + headless Chrome
+  + concurrent Codex CLIs. Rule for this host: one locally-heavy GT3 job at a time; browser jobs
+  only at 1-min load < 8; no parallel Codex jobs while a browser runs.
+- 3c browser run (Luna): route-state sweeps fwd 40 / bwd 39 PASS, no interruptions PASS;
+  oscillation + aerial settle FAILED on harness design → Terra `bfe5e30` (harness only).
+  Re-run pending (load).
+- 3d: Terra implementing on `phase3d-hud` (from `804a36c`), build-only; Luna browser brief to follow.

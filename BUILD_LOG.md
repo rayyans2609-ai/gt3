@@ -562,3 +562,54 @@ assertion in a harness must do the same or it is testing nothing.
    limitation, not a code defect). The `is-imageless` path handles it. Do NOT
    fabricate substitutes.
    Everything else in the queue is closed as of 31a4050.
+
+---
+
+## Phase 3b / typography / 3c — autonomous run 2026-09-28 (branch `phase3-integration`)
+
+Status: **not merged to main.** Phase 3b camera awaits the user's visual review; 3c browser
+verification is still open (see below). Branches: `worktree-phase3b-aerial-camera` (3b +
+typography, `ce61556`), `typography-slice` (`bd08be1`), `phase3c-checkpoints` (`80926d4`),
+`phase3-integration` (3b + 3c + harness fix, `aaff775`+).
+
+### 3b route-led aerial camera (`src/scene/aerialCamera.js`)
+- Framing target = weighted mean of 5 wrapped route samples around progress (spread 45 m),
+  never the car transform. One fixed world yaw (75°) and pitch (52°); FOV 40, distance 54 m;
+  speed-linked FOV disabled (range 0). Uncorrected damped base pose (0.18 s) + a separate,
+  capped (12 m), decaying last-resort correction when the car leaves NDC 0.76 × 0.72.
+  Snap only when progress jumps > 0.008 with |velocity| < 0.1 (instant seek / replay).
+- carRig.js no longer owns the camera: boom, camera lean/slide and cursor tilt removed.
+- Measured (settled, 205 samples): yaw/pitch constant; car NDC within ±0.30 x / ±0.42 y;
+  projected car length 4.8–7.4 % of frame width (aspect-correct); clearance 40.6–44.9 m;
+  0 correction-active samples; forward/backward settle difference ≤ 42 µm; loop seam 0.
+- Measured (motion, real wheel input, normal + 4× CPU throttle, 8 sequences): 0
+  correction-active frames, 0 snaps in motion, 0 out-of-frame frames, max |NDC| 0.42/0.51.
+- Finding worth keeping: a fixed +t look-ahead (12 m) — not damping — made reverse travel
+  push the car to the frame edge (59 % correction-active backward frames at 12 m vs 0 % at
+  0 m). The first safety design (testing a pose that already included the correction) formed
+  a limit cycle; testing the uncorrected base pose fixed it.
+- A 6-config FOV/pitch/distance sweep showed only modest differences: the empty flat terrain
+  limits perceived depth more than camera parameters (Phase 8 dependency). Framing choice is
+  a pending user decision.
+- GPU median at t=0.02: 32.7 ms branch vs 30.8 ms baseline (different pixels; not attributed).
+
+### Typography slice
+Local `@font-face` (`src/styles/fonts.css`): Neue Haas Grotesk Display (100–900) and Text
+(400/500/700), Geist Mono (variable). Tokens switched in `base.css`; Google Fonts links
+removed. 22 font files bundled; all three families load. Worktrees need a real `font/`
+copy (a symlink outside the root is refused by Vite's fs guard) — no config change needed.
+
+### 3c checkpoints / route + discovery state
+9 instanced neutral gates at CHECKPOINT_T (451–4306 m; 676 m gap skips the technical
+section). Route car = number of gates ≤ progress (both directions); morph retargets without
+queueing or scroll lock; `unlocked` is monotonic, starts with Lexus, persisted in session
+(sorted valid indices); replay preserves discoveries; route position NOT persisted (Phase 4).
+coins.js deleted; no chime/spec panel/montage on crossing; approach sound follows the next
+gate. Verified: build; direct forward/reverse state sweep; session serialization.
+**Open:** `scripts/verify-checkpoints.mjs` browser assertions, frame pacing and captures did
+not run — the host was at load average ~550–620 and Chrome would not answer DevTools.
+
+### Known limits
+- Host overload 05:00–06:30 (load ~600, builds 100× slower) blocked browser verification.
+- Legacy HUD approach card idled (would reveal identity); HUD redesign is Phase 3d.
+- Replay-snap check in verify-aerial is a test artifact (t=1 and t=0 are the same pose).

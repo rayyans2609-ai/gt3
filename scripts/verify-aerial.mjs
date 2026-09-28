@@ -299,15 +299,14 @@ if (!baseline) {
   const frameStep = resumeIndex > 0 ? Math.hypot(...frames[resumeIndex].camera.map((x, i) => x - frames[resumeIndex - 1].camera[i])) : null;
   const frameProgressStep = resumeIndex > 0 ? frames[resumeIndex].progress - frames[resumeIndex - 1].progress : null;
   const afterCoin = await goTo(0.075, 1000);
+  // Phase 3d removed the in-Tour F-key Showcase (SPEC §20): F must neither lock scroll nor
+  // open a Showcase layer, and the camera must be undisturbed.
+  const beforeFPose = await measure();
   await page.keyboard.press('f');
-  await new Promise(r => setTimeout(r, 650));
-  const showcaseOpened = await page.evaluate(() => window.__gt3.probe().locked);
-  await new Promise(r => setTimeout(r, 1000));
-  const showcasePose = await measure();
-  await page.keyboard.press('Escape');
-  await new Promise(r => setTimeout(r, 800));
-  const showcaseClosed = await page.evaluate(() => !window.__gt3.probe().locked);
-  const resumedPose = await measure();
+  await new Promise(r => setTimeout(r, 1650));
+  const fKeyOpenedShowcase = await page.evaluate(() => window.__gt3.probe().locked
+    || !!document.querySelector('#showcase-layer'));
+  const afterFPose = await measure();
   const themeBefore = await page.evaluate(() => document.documentElement.dataset.theme);
   await page.click('.theme-toggle');
   await new Promise(r => setTimeout(r, 250));
@@ -317,8 +316,8 @@ if (!baseline) {
   const themeAfterTwo = await page.evaluate(() => document.documentElement.dataset.theme);
   regression = { montagePlayed, montageCount, afterCoinProgress: afterCoin.progress,
     montageResumeFrameStepM: frameStep, montageResumeFrameProgressStep: frameProgressStep,
-    showcaseOpened, showcaseClosed,
-    showcaseResumeDiffM: Math.hypot(...showcasePose.camera.map((x, i) => x - resumedPose.camera[i])),
+    fKeyOpenedShowcase,
+    fKeyPoseDiffM: Math.hypot(...beforeFPose.camera.map((x, i) => x - afterFPose.camera[i])),
     themeBefore, themeAfterOne, themeAfterTwo,
     themeToggleWorked: themeBefore !== themeAfterOne && themeBefore === themeAfterTwo };
 

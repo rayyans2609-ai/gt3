@@ -180,3 +180,39 @@ DOM+F-key+name-update, route marker) are all directly evidenced. Frame-pacing/sw
 performance and a fresh full camera motion sweep against this exact head remain unmeasured
 (not suspected broken -- simply not re-run). Human visual acceptance (3b framing, gate/HUD
 appearance) remains entirely outstanding, as always.
+
+## Non-visual gap-closing pass 2026-09-28 ~14:30 (commit f6e55d9)
+
+Closed the three remaining non-visual gaps Astra flagged, in order:
+
+1. **Frame-pacing/swap-timing diagnostic re-run.** Static inspection found no fixable harness
+   defect (the morph-start wait is already condition-based, `isMorphing()===true` with a 30s
+   timeout, not a fixed delay). Ran an isolated extraction of just this phase (not the full 3c
+   suite) 4 times against a healthy host (pre-flight passing every time: idle 62-73%, sys
+   19-25%, pageouts/swapouts flat): 2 clean passes with good numbers (idle p50=16.7ms/
+   p95=33.4ms, swap p50=16.8ms/p95=50.1ms, 0 frames >=250ms in either window; morphs completed
+   correctly both times), 2 failures at different steps despite identical code and a
+   pre-flight-healthy host. A targeted follow-up probe of the simplest failing operation
+   (`seekTo(0.2, {instant:false})`) converged cleanly in ~2.5s with fully normal
+   progress/speed01 behavior when it succeeded. **Classified as environmental (intermittent
+   host/CDP-level latency not captured by CPU/memory sampling), not an app or harness logic
+   defect** -- consistent with earlier session-wide evidence of the same pattern affecting even
+   trivial Bash commands. No harness or app code changed as a result (none was proven
+   necessary). Scratch diagnostic script was not committed (deleted after use).
+2. **Full aerial-camera sweep on `38c86fd`.** `scripts/verify-aerial.mjs branch` (205 settled
+   samples) and `motion` (8 real-wheel sequences, normal + 4x CPU throttle) both ran clean:
+   0 correction-active samples/frames, 0 snaps, 0 out-of-frame, yaw/pitch constant at 75/52,
+   reversibility diffs at micron scale, seam diff 0, F-key confirmed inert with **0** camera
+   pose diff (tighter than the earlier isolated 0.00135 measurement), montage correctly never
+   plays (coins retired), Day/Night toggle works, zero errors. No regression from 3c/3d
+   integration -- confirms the camera code (already known byte-identical) also behaves
+   identically end-to-end with the rest of Phase 3 now integrated.
+3. **HUD identity-slot a11y fix.** `src/ui/hud.js`: inactive cross-fade slot now gets
+   `aria-hidden="true"`, active gets `"false"`, synced through the existing swap logic. No
+   visual/timing change. Verified: `node --check` clean; a targeted DOM check confirms exactly
+   one visible slot at all times, correct aria-hidden on both slots before and after a real
+   checkpoint-driven identity change (Lexus -> Nissan), zero console errors. Commit `f6e55d9`.
+
+**Phase 3 non-visual/technical acceptance is now complete.** Only human visual review remains:
+3b framing (A vs C, hero scale, motion feel), gate appearance, HUD appearance in Day/Night.
+Branch head: `f6e55d9`. `main` untouched at `62024bb`.

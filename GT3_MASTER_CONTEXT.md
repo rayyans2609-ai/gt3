@@ -53,6 +53,7 @@ When sources disagree, in order:
 - `font/` — four Neue Haas Grotesk families, all weight files suffixed `-Trial` (licensing status unconfirmed, see `SPEC.md` §30.5)
 - `src/data/cars.js` — the locked ten-car roster and order (also mirrored in `SPEC.md` §1a)
 - `docs/ai/model-routing.md`, `docs/ai/codex-cli-invocation.md` — canonical AI model-routing/delegation rules (roles, escalation, verified Codex slugs/invocation); route Codex jobs through `scripts/codex-route.sh`, which refuses to run without an explicit model and reasoning effort
+- `docs/ai/autonomous-mode.md` — **GT3 Autonomous Mode**, the protocol for unattended multi-hour runs (invocation, host protection, recovery/stop rules, handoff). Invoked only when the user says so ("Enter GT3 Autonomous Mode", "Run this autonomously", …); never assumed. Posture: safe, but get a lot done; human-only judgments are queued, not blockers. Current revisable default, not permanent doctrine. Its host-resource rules (1 heavy local job at a time, pre-flight thresholds, kill by owned PID only) apply to all heavy GT3 work on this 8 GB Mac.
 
 ## Core product structure
 

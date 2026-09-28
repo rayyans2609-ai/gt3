@@ -7,4 +7,6 @@ AI model-routing and Codex-delegation rules are canonical at:
 - `docs/ai/model-routing.md` — roles, escalation, reasoning-effort policy
 - `docs/ai/codex-cli-invocation.md` — verified slugs, invocation syntax, config-default trap
 
+Unattended multi-hour runs ("Enter GT3 Autonomous Mode" / "Run this autonomously") and all heavy-local-job host limits: `docs/ai/autonomous-mode.md`.
+
 Route Codex jobs through `scripts/codex-route.sh`, not a bare `codex exec` call — it refuses to run without an explicit model and reasoning effort.

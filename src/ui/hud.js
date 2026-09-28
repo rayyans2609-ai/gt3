@@ -8,7 +8,7 @@
 
 import { state, subscribe } from '../core/state.js';
 import { CARS, getCar } from '../data/cars.js';
-import { COIN_T, TRACK_LENGTH, pointAt } from '../scene/trackCurve.js';
+import { CHECKPOINT_T, TRACK_LENGTH, pointAt } from '../scene/trackCurve.js';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
 const MAP_SIZE = 160;
@@ -173,7 +173,7 @@ function buildRouteMap(root) {
     class: 'hud-route__svg',
     viewBox: `0 0 ${MAP_SIZE} ${MAP_SIZE}`,
     role: 'img',
-    'aria-label': 'Circuit route and collectible positions',
+    'aria-label': 'Circuit route and checkpoint positions',
   });
   const pathData = points.map((point, index) => {
     const projected = routeProject(point);
@@ -181,7 +181,7 @@ function buildRouteMap(root) {
   }).join(' ');
   svg.append(makeSvgElement('path', { class: 'hud-route__path', d: pathData }));
 
-  routeCoinMarkers = COIN_T.map((t, index) => {
+  routeCoinMarkers = CHECKPOINT_T.map((t, index) => {
     const projected = routeProject(pointAt(t));
     const marker = makeSvgElement('circle', {
       class: 'hud-route__coin',
@@ -243,7 +243,7 @@ function updateUnlocks() {
   const unlocked = state.unlocked instanceof Set ? state.unlocked : new Set();
   unlockedValue.textContent = `${String(unlocked.size).padStart(2, '0')} / ${String(CARS.length).padStart(2, '0')}`;
   for (let i = 0; i < routeCoinMarkers.length; i++) {
-    routeCoinMarkers[i].classList.toggle('is-unlocked', unlocked.has(i));
+    routeCoinMarkers[i].classList.toggle('is-unlocked', unlocked.has(i + 1));
   }
 }
 

@@ -44,6 +44,7 @@ let particleVel = null;
 let particleLife = 0;
 let completeHandlers = [];
 let pendingIndex = -1;
+let renderedIndex = 0;
 
 const _color = new THREE.Color();
 
@@ -160,6 +161,7 @@ export function initMorph() {
   particles = buildParticles();
   particleVel = new Float32Array(PARTICLE_COUNT * 3);
   carMount.add(particles);
+  renderedIndex = state.activeCarIndex;
 }
 
 export function isMorphing() {
@@ -173,13 +175,13 @@ export function onMorphComplete(fn) {
 
 /**
  * Morph the player's car into car `index`.
- * Safe to call while a morph is running — the running one is completed instantly first,
- * so a fast scroller collecting two coins in quick succession cannot strand a half-faded
- * body on the track.
+ * An in-flight swap is cancelled to its currently dominant visible body before
+ * retargeting. Intermediate targets are never queued or published to route state.
  */
 export function morphTo(index) {
-  if (index === state.activeCarIndex && !active) return;
-  if (active) finish();
+  if (active && index === pendingIndex) return;
+  if (active) cancel();
+  if (index === renderedIndex) return;
 
   const next = getCarModel(index);
   if (!next) {
@@ -218,14 +220,48 @@ function finish() {
   particles.material.opacity = 0;
   active = false;
   outgoing = null;
+  incoming = null;
   outgoingMats = [];
   incomingMats = [];
 
   if (pendingIndex >= 0) {
-    set('activeCarIndex', pendingIndex);
-    for (const fn of completeHandlers) fn(pendingIndex);
+    const completedIndex = pendingIndex;
     pendingIndex = -1;
+    renderedIndex = completedIndex;
+    for (const fn of completeHandlers) fn(completedIndex);
   }
+}
+
+function cancel() {
+  const crossT = smooth((clock - PHASE.chargeEnd) / (PHASE.crossEnd - PHASE.chargeEnd));
+  const keepIncoming = crossT >= 0.5;
+  restore(outgoingMats);
+  restore(incomingMats);
+  const retained = keepIncoming ? incoming : outgoing;
+  if (retained) {
+    setCarModel(retained);
+    setWheels(findWheels(retained));
+  }
+  carMount.add(particles);
+  particles.material.opacity = 0;
+  if (keepIncoming) renderedIndex = pendingIndex;
+  active = false;
+  outgoing = null;
+  incoming = null;
+  outgoingMats = [];
+  incomingMats = [];
+  pendingIndex = -1;
+}
+
+/** Replay resets the route model immediately without changing discovery state. */
+export function resetMorph(index = 0) {
+  if (active) cancel();
+  const model = getCarModel(index);
+  if (!model) return;
+  setCarModel(model);
+  setWheels(findWheels(model));
+  carMount.add(particles);
+  renderedIndex = index;
 }
 
 // Smoothstep, so the cross-fade eases in and out instead of ramping linearly through

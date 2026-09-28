@@ -5,7 +5,7 @@ export const state = {
   speed01: 0,
   started: false,
   activeCarIndex: 0,
-  unlocked: new Set(),
+  unlocked: new Set([0]),
   mode: 'race',
   scrollLocked: false,
   theme: 'day',

@@ -9,7 +9,7 @@
  *   1. scrollDrive  — establishes state.progress for this frame
  *   2. carRig       — places and orients the car on the route
  *   3. aerialCamera — follows the route in world space
- *   4. world/morph  — coins, car swap, theme and finish updates
+ *   4. world/morph  — checkpoints, car swap, theme and finish updates
  *   5. ui/audio     — reads final state
  *   6. sceneSetup   — projection and post uniforms read settled speed
  *   7. render       — whichever view owns the screen right now
@@ -66,7 +66,7 @@ async function boot() {
   const carRig = await import('./scene/carRig.js');
   const aerialCamera = await import('./scene/aerialCamera.js');
   const cars = await import('./scene/cars.js');
-  const coins = await import('./scene/coins.js');
+  const checkpoints = await import('./scene/checkpoints.js');
   const morph = await import('./scene/morph.js');
   const theme = await import('./scene/theme.js');
   const finishLine = await import('./scene/finishLine.js');
@@ -89,7 +89,7 @@ async function boot() {
   const env = environment.buildEnvironment();
   scene.add(env);
   scene.add(finishLine.buildFinishLine());
-  scene.add(coins.buildCoins());
+  scene.add(checkpoints.buildCheckpoints());
 
   const rig = carRig.initCarRig();
   scene.add(rig);
@@ -133,21 +133,7 @@ async function boot() {
 
   // ---- wiring ------------------------------------------------------------
 
-  // Coin collected -> chime, spec panel, montage. The montage owns the morph: it fires
-  // the swap on shot 5's crossfade so the car is already the new one when the race
-  // returns (SPEC §10.7). Collecting therefore does NOT morph directly.
-  coins.onCoinCollected((index) => {
-    audio.playCoin();
-    audio.setCoinApproach(0);
-
-    const unlocked = new Set(state.unlocked);
-    unlocked.add(index);
-    set('unlocked', unlocked);
-
-    specPanel.showSpecPanel(index);
-    studio.playMontage(index);
-  });
-
+  // The studio remains initialized for a later manual Showcase unlock flow.
   studio.setMorphHandler((index) => morph.morphTo(index));
   studio.onMontageComplete(() => set('mode', 'race'));
 
@@ -155,16 +141,10 @@ async function boot() {
   specPanel.setExpandHandler((index) => fullscreenCard.openFullscreenCard(index));
   studio.setExpandHandler((index) => fullscreenCard.openFullscreenCard(index));
 
-  // Replay: the screens own their own reset; coins and the car body are ours.
+  // Replay resets route position and model, preserving session discoveries.
   finishScreen.setReplayHandler(() => {
-    coins.resetAllCoins();
-    const first = cars.getCarModel(0);
-    if (first) {
-      carRig.setCarModel(first);
-      carRig.setWheels(cars.findWheels(first));
-    }
+    morph.resetMorph(0);
     set('activeCarIndex', 0);
-    set('unlocked', new Set());
   });
 
   scrollDrive.initScrollDrive();
@@ -191,12 +171,12 @@ async function boot() {
   let dispatchedApproachIndex = -1;
   let dispatchedApproachStep = -1;
   let dispatchedAudioApproachStep = -1;
-  let prewarmedApproachIndex = -1;
 
   registerUpdate(scrollDrive.update);
   registerUpdate(carRig.update);
   registerUpdate(aerialCamera.update);
-  registerUpdate(coins.updateCoins);
+  registerUpdate(checkpoints.updateCheckpoints);
+  registerUpdate(() => morph.morphTo(state.activeCarIndex));
   registerUpdate(morph.updateMorph);
   registerUpdate(theme.update);
   registerUpdate(finishLine.update);
@@ -204,7 +184,7 @@ async function boot() {
   registerUpdate(showcase.updateShowcase);
   registerUpdate((dt) => {
     // Approach cue drives both the HUD badge and the rising ping.
-    const approach = coins.getApproach();
+    const approach = checkpoints.getApproach();
     const index = approach ? approach.index : -1;
     const proximity = approach ? approach.proximity : 0;
     const step = Math.round(proximity * 100) / 100;
@@ -212,19 +192,13 @@ async function boot() {
     if (index !== dispatchedApproachIndex || step !== dispatchedApproachStep) {
       dispatchedApproachIndex = index;
       dispatchedApproachStep = step;
-      hud.setApproach(approach);
+      // The legacy incoming card exposes a car identity before discovery.
+      // Phase 3d owns its replacement; keep it idle in the Tour.
+      hud.setApproach(null);
     }
     if (step !== dispatchedAudioApproachStep) {
       dispatchedAudioApproachStep = step;
       audio.setCoinApproach(proximity);
-    }
-    // Fire as early as the approach signal exists (proximity is 0 at the far edge of
-    // the approach zone, 1 at the coin). The prewarm needs wall-clock time to link
-    // programs and drip-feed 34 texture uploads; at 0.45 a fast charge at the coin left
-    // it unfinished and the transition still stalled ~890ms. Measured at 0.05: see BUILD_LOG.
-    if (index >= 0 && index !== prewarmedApproachIndex && proximity >= 0.05) {
-      prewarmedApproachIndex = index;
-      void studio.prewarmMontage(index).catch(() => {});
     }
   });
   registerUpdate(hud.update);

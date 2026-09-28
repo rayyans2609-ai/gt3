@@ -2,7 +2,7 @@
  * trackCurve.js — the route. (SPEC §4, §6)
  *
  * OWNED BY THE MANAGER. This is the geometric contract every other scene module
- * builds against: the asphalt ribbon, the curbs, the coins, the environment
+ * builds against: the asphalt ribbon, the curbs, the checkpoints, the environment
  * dressing, the car rig and the finish gate all read from here.
  *
  * The route is not authored as raw XYZ points — hand-placed points make it far too
@@ -11,7 +11,7 @@
  * length, a turn angle and an elevation change. Heading is integrated along the
  * sequence to produce the control points, which guarantees C1-smooth transitions and
  * makes the route trivially tunable — change a turn from 55 to 70 degrees and
- * everything downstream (curbs, coins, dressing) follows.
+ * everything downstream (curbs, checkpoints, dressing) follows.
  *
  * World convention: Y is up. The route starts at the origin heading -Z.
  * One world unit ~= one metre. A GT3 car is ~4.6 units long.
@@ -202,34 +202,24 @@ export function distanceToT(distance) {
 }
 
 // ---------------------------------------------------------------------------
-// Coin placement (SPEC §8) — ten coins, one per car, index-matched to src/data/cars.js
+// Checkpoint thresholds (SPEC §18) — cars 1–9, index-matched to the roster.
 // ---------------------------------------------------------------------------
-// Deliberately paced rather than evenly divided: the first comes early enough to
-// teach the mechanic before the user doubts it, the middle ones sit on the exits of
-// corners where the car is already the focus, and the last lands with enough run-out
-// left that its montage does not collide with the finish line.
-
-export const COIN_T = [
-  0.070, // 1  Lexus     — early, on the opening straight, teaches the mechanic
-  0.155, // 2  Nissan    — exit of turn 1
-  0.245, // 3  Audi      — through the left-hand esses
-  0.330, // 4  BMW       — on the uphill chute
-  0.415, // 5  Mercedes  — exit of the big right-hander
-  0.505, // 6  Ferrari   — out of the hairpin, the halfway beat
-  0.590, // 7  McLaren   — between the chicane apexes
-  0.680, // 8  Aston     — down the back straight
-  0.775, // 9  Lamborghini — over the crest
-  0.870, // 10 Porsche   — the final kink, with room to breathe before the flag
+// Positions favour straight or corner-exit road. Third-to-fourth spacing is a
+// deliberate long run across the technical sequence rather than a gate in a bend.
+export const CHECKPOINT_T = [
+  0.090, // Nissan      — breathing chute after turn 1
+  0.180, // Audi        — uphill chute after the tightening left
+  0.255, // BMW         — back chute after the big right
+  0.390, // Mercedes    — exit chute after the chicane
+  0.495, // Ferrari     — crest into long acceleration 1
+  0.585, // McLaren     — long acceleration 1
+  0.680, // Aston       — long acceleration 2 after slowdown 1
+  0.775, // Lamborghini — long acceleration 3 after slowdown 2
+  0.860, // Porsche     — closing chute after broad left
 ];
 
-/** Height of a coin's centre above the asphalt. Large and unmistakable at 45°. */
-export const COIN_HEIGHT = 4.2;
-
-/** How close in t the rig must get before a coin fires. ~9 world units of travel. */
-export const COIN_TRIGGER_T = 9 / TRACK_LENGTH;
-
-/** How far out the approach cue begins — 15% of the gap to the coin (SPEC §14). */
-export const COIN_APPROACH_T = 0.062;
+/** Last 140 m of approach carries the restrained proximity sound. */
+export const CHECKPOINT_APPROACH_T = 140 / TRACK_LENGTH;
 
 /** Where the finish gate stands. */
 export const FINISH_T = 0.994;

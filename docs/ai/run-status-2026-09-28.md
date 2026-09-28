@@ -65,3 +65,10 @@ interrupted by Codex usage limit — finished by Opus from its WIP); GPT-5.6 Ter
   oscillation + aerial settle FAILED on harness design → Terra `bfe5e30` (harness only).
   Re-run pending (load).
 - 3d: Terra implementing on `phase3d-hud` (from `804a36c`), build-only; Luna browser brief to follow.
+
+## Host concurrency cap (user rule, 2026-09-28)
+On this 8 GB i5-8210Y: at most 1–2 active top-level tasks including sub-agents; one heavy task
+(browser, build, Codex/Sol/Terra, memory-intensive) at a time; two only if both are light or one
+is mostly waiting. Serialize when in doubt. If memory pressure, swap, load or system CPU climbs,
+drop to one heavy task immediately. Browser pre-flight uses several signals (no other heavy job,
+paging/swap deltas ~0, system CPU low / idle CPU substantial), not load average alone.

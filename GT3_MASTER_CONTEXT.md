@@ -15,12 +15,12 @@ GT3 is a desktop-only interactive motorsport showcase in Three.js/WebGL with a D
 **Complete:**
 - **Phase 1:** two-state Day/Night theme, experience state machine, session persistence.
 - **Phase 2:** playlist music engine inside `audioManager.js`; global speaker and compact expandable player.
-- **Phase 3:** closed-loop circuit, route-led world-space aerial camera, nine silent checkpoints with reversible car swaps and session discoveries, sparse Grand Tour HUD, and the dedicated typography slice. Technical verification is complete on `phase3-integration`; human visual review and the merge gate remain open.
+- **Phase 3 (first build):** closed-loop circuit, route-led world-space aerial camera, nine silent checkpoints with reversible car swaps and session discoveries, sparse Grand Tour HUD, and the dedicated typography slice. It is technically verified on `phase3-integration`, but the user's live review (2026-09-28) **did not accept it**. Phase 3 is reopened for a Grand Tour re-evaluation and finalization pass, covering the camera and world/road/car scale, hero-car path, bounded scroll pace, first-crossing swap hitch, gate response, HUD and audio/theme controls. See `SPEC.md` §1 and §30.9.
 
 **Still legacy:** the running app boots through the old start screen directly into Grand Tour and retains the old finish screen. Landing, Hub, the dedicated Showcase and completion hero flow are not implemented. A marked bridge maps the running race onto `experience = 'tour'`; `F` no longer opens Showcase during Grand Tour. The separate montage and old Showcase code remain for later manual-unlock/Showcase work, but are not part of Tour progression.
 
 **Next, in order:**
-1. Human visual review of Phase 3 camera framing/motion, gates and HUD; then an explicit acceptance gate before merging. Technical cleanup on this branch does not itself grant visual acceptance.
+1. Phase 3 finalization, with explicit user review gates: the SPEC classification; the camera + road/path candidates; the scroll-pace candidates; and the final integrated result. Phase 3 closes only on the user's explicit approval. Do not start Phase 4 or merge to `main` without it.
 2. Phase 4 Landing, Phase 5 Hub, Phase 6 Showcase, Phase 7 finish/completion.
 3. Phase 8 scenery / lighting / performance pass. It also owns **Night route lighting** (`SPEC.md` §13a). The outcome is locked: an authored premium night-driving feel with a readable road/car and real darkness. Headlights and trackside lighting are desired, but the design and technique are open to Phase 8. Earlier phases must not pre-build it. Phase 8 also executes the **environment art direction** (`SPEC.md` §16; circuit realism in §17): realistic circuit, white/off-white sculptural terrain, sparse selective architecture, and at Night the same pale world revealed by light out of darkness. Earlier phases only keep terrain structurally ready for it, with real relief, clean shading and no green-grass assumptions.
 

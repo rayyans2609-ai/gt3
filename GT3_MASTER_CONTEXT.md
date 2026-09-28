@@ -81,6 +81,7 @@ Landing (introduction/desire) → Grand Tour Hub (control surface) → Showcase 
 - Preserve useful project state at milestones; correct misleading historical claims rather than let them stand.
 - Do not ask the user to decide routine, reversible engineering details resolvable from existing context — ask only when a decision changes product intent, subjective experience, scope, or architecture.
 - Derive reusable AI-development systems (SOPs, routing rules, templates) from evidence accumulated doing real GT3 work, not from premature theory.
+- Model routing is hierarchical: managers own upward escalation and cross-model reassignment; capable workers may delegate bounded lower-complexity work downward. Routine screenshots, harness runs, browser capture, log extraction and basic verification should default to Luna where reliable. The active manager may invoke stronger specialist models such as Astra when warranted; this is manager-directed escalation, not subordinate self-promotion. Full doctrine lives in `docs/ai/model-routing.md`.
 - Stop when the defined goal is achieved, acceptance passes, or remaining gains are marginal — more work is always possible; that isn't a reason to keep going.
 
 ---

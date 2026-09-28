@@ -121,8 +121,51 @@ TASK
 ├─ Claude-side execution or valuable alt. perspective?→ Claude Sonnet
 ├─ Project-wide planning/decomposition/architecture/
 │  synthesis/integration/acceptance?                  → Claude Opus
-└─ Orchestration itself failing, or problem is
-   inherently tightly-coupled end-to-end?             → GPT-6 Astra
+└─ Orchestration failing, tightly-coupled end-to-end
+   problem, or manager-directed specialist review
+   (sanity check / diagnosis / synthesis, see §9)?   → GPT-6 Astra
 ```
 
 **Governing rule:** use the least expensive combination of models, reasoning, context, and coordination with a high probability of an accepted result; escalate intelligence only when doing so is likely to cost less than continued retries, decomposition, context consumption, rework, or manager intervention.
+
+## 9. Delegation hierarchy (learned from the 2026-09-28 autonomous Phase 3 run)
+
+**Hierarchical sub-agent delegation.** Agents may spawn subordinates only for bounded delegated
+work, and only downward: Astra may delegate as appropriate; Opus may use Sol/Terra/Sonnet/Luna
+where the harness supports it; Sol → Terra/Sonnet/Luna; Terra → Sonnet/Luna; Sonnet → Luna;
+Luna does not delegate or escalate itself. **A worker never solves an escalation need by
+spawning a stronger model.** If a worker finds the task needs more capability it (1) checkpoints
+its evidence, (2) reports the need upward, (3) lets the manager decide whether to reassign or
+escalate. The manager owns upward escalation, cross-provider reassignment, major task ownership,
+model-credit failover and architecture-level rerouting; workers own bounded downward delegation.
+This is not a rigid capability ranking — its purpose is to stop subordinates from independently
+restructuring the orchestration tree.
+
+**The manager can invoke stronger specialists.** Manager is an orchestration role, not a claim
+to be the strongest model. An Opus manager may directly assign Astra to orchestration sanity
+checks, broad cross-system diagnosis, conflicting evidence, difficult plan review, failed
+decomposition loops, high-consequence integration review, end-to-end recovery and pre-close
+checks — without first waiting to fail. This is manager-directed escalation, not a worker
+spawning upward. Opus still defines Astra's objective, supplies the repo state/evidence,
+decides how the findings change the plan (integrating or rejecting them), and keeps run
+ownership unless it explicitly transfers it. Astra may delegate bounded work downward while on
+its assigned task.
+
+**Delegation economics.** Spawn a subordinate only when its task is clearly bounded, lower in
+complexity than the parent's, independently verifiable, unlikely to create edit conflicts, and
+the delegation saves meaningful context, time or cost. Availability alone is not a reason.
+
+**Clerical, browser and basic verification work defaults to Luna** where it is reliable:
+screenshot and Day/Night capture sets, viewport and route-position sweeps, rerunning known
+harnesses and build/test commands, console-error checks, DOM presence/absence checks, simple
+branch/commit checks, log and number extraction, checklist screenshot comparison, before/after
+comparisons, known-invariant verification, repetitive tuning sweeps, performance sampling. The
+parent defines the experiment, exact inputs, pass/fail criteria and the evidence to return;
+Luna executes and returns structured evidence. High-tier agents design and judge verification
+and run it themselves only when the method is uncertain, results need nontrivial
+interpretation, the test is unreliable and must be redesigned, failures need difficult
+debugging, or the reasoning is architecture-sensitive.
+
+**Upward escalation path.** Luna failure → report to its parent. Sonnet/Terra capability
+shortfall → report to the manager. Sol needing broader architecture/management reasoning →
+report to the manager for Opus/Astra routing. No subordinate silently promotes itself.

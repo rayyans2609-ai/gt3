@@ -249,7 +249,8 @@ if (!baseline) {
       positionDiffM: Math.hypot(...fromBelow.camera.map((x, i) => x - fromAbove.camera[i])),
       quaternionDiff: Math.hypot(...fromBelow.quaternion.map((x, i) => x - fromAbove.quaternion[i])) });
   }
-  await page.evaluate(async () => (await import('/src/scene/coins.js')).resetAllCoins());
+  // Phase 3c retired Tour coins; crossing a checkpoint must no longer start a montage,
+  // so montagePlayed is expected to stay false here.
   await goTo(0.05, 500);
   await page.evaluate(() => { const max = document.documentElement.scrollHeight - innerHeight; window.scrollTo(0, max * 0.075); });
   const coinStart = Date.now();

@@ -15,6 +15,7 @@ const browser = await puppeteer.launch({
   ],
   defaultViewport: { width: 1600, height: 900 },
 });
+async function run() {
 const page = await browser.newPage();
 const errors = [];
 page.on('pageerror', (e) => errors.push(e.message));
@@ -52,4 +53,10 @@ for (const at of stops) {
   console.log('shot', path, 'actual', actual, 'montage', montage);
 }
 console.log('errors', JSON.stringify(errors));
-await browser.close();
+}
+
+try {
+  await run();
+} finally {
+  await browser.close();
+}

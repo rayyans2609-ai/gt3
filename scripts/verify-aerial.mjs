@@ -18,6 +18,7 @@ const browser = await puppeteer.launch({
     '--enable-gpu', '--use-gl=angle', '--use-angle=metal', '--window-size=1600,900'],
   defaultViewport: { width: 1600, height: 900 },
 });
+async function run() {
 const page = await browser.newPage();
 const errors = [];
 page.on('pageerror', e => errors.push(e.message));
@@ -168,8 +169,7 @@ if (motion) {
   const summary = { mode, integration, passes, errors };
   await writeFile(`${root}/${mode}-verification.json`, JSON.stringify(summary, null, 2));
   console.log('SUMMARY', JSON.stringify(summary));
-  await browser.close();
-  process.exit(0);
+  return;
 }
 
 async function measure() {
@@ -353,4 +353,10 @@ const summary = baseline ? { mode, integration, errors } : focused ? { mode, int
 };
 await writeFile(`${root}/${mode}-verification.json`, JSON.stringify({ summary, samples }, null, 2));
 console.log('SUMMARY', JSON.stringify(summary));
-await browser.close();
+}
+
+try {
+  await run();
+} finally {
+  await browser.close();
+}

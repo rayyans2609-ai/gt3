@@ -147,3 +147,36 @@ appearance remain human-review-only, as they always were.**
 
 Phase 3 is now technically complete and runtime-verified. `main` untouched at `62024bb`.
 Branch head: `c28cd41`.
+
+## Astra independent review + gap closure 2026-09-28 ~13:55
+
+Astra's confirmatory pass completed (its earlier attempt had hit a Codex usage limit; retried
+after reset). Verdict: no blocking code defect, but pushed back correctly on "every item
+resolved" being too broad, and asked for one narrow closeable gap: direct evidence the HUD
+route marker's own DOM coordinates move (not just `state.progress`), and that the *visible*
+identity slot (not just mutated text anywhere in the DOM) matches `activeCarIndex`.
+
+Closed with a targeted two-point check: marker `transform` went from `translate(86.48 47.33)`
+at t=0.05 (Lexus, index 0) to `translate(45.74 128.88)` at t=0.5 (Ferrari, index 5) -- both
+finite, ~91 units apart. Visible slot text matched the expected car's `displayName` exactly at
+both points. Zero console errors. Gap closed with direct evidence.
+
+Astra also noted, correctly, two things the earlier report should not have implied:
+- Particle-attachment sampling does not substitute for the earlier-failed frame-pacing/swap
+  timing diagnostic (that was never re-run against this head; it is a separate, still-open
+  performance measurement, not currently believed to indicate a defect but not proven clean).
+- The camera's 6-point settled sample is a integration smoke check, not a full motion-regression
+  sweep; the *earlier* full sweep (against unchanged camera code) remains the actual regression
+  evidence, not this pass on its own.
+
+New minor finding (non-blocking, inherited, NOT fixed in this pass -- out of scope for this
+acceptance check): inactive HUD identity slots are hidden via CSS opacity only, not
+`aria-hidden`, so stale car names remain exposed to assistive technology. Flagged for a future
+small a11y pass, not acted on here.
+
+**Corrected final framing:** Phase 3 implementation is complete; the specific runtime items
+this session set out to resolve (instant-seek-far, first/later-swap particles, 3d HUD
+DOM+F-key+name-update, route marker) are all directly evidenced. Frame-pacing/swap-timing
+performance and a fresh full camera motion sweep against this exact head remain unmeasured
+(not suspected broken -- simply not re-run). Human visual acceptance (3b framing, gate/HUD
+appearance) remains entirely outstanding, as always.

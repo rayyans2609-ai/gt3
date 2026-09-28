@@ -121,8 +121,6 @@ function renderRecap() {
 function replayRoute() {
   if (!runFinished) return;
 
-  if (state.unlocked instanceof Set) state.unlocked.clear();
-  set('unlocked', new Set());
   set('activeCarIndex', 0);
   set('mode', 'race');
   resetToStart();

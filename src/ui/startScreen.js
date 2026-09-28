@@ -89,7 +89,7 @@ function buildScreen() {
   const explanation = element(
     'p',
     'start-screen__explanation',
-    'Collect each coin to unlock a new GT3 machine and transform the car beneath you.',
+    'Cross each checkpoint to discover a new GT3 machine as the route unfolds.',
   );
 
   const loading = element('div', 'start-loading');

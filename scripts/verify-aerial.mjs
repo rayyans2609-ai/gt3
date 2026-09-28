@@ -40,20 +40,37 @@ await new Promise(r => setTimeout(r, 900));
 
 async function goTo(t, settleMs = 420, tolerance = 0.001) {
   const start = Date.now();
+  let lastProgress = null;
+  let lastMovementAt = start;
   let montages = 0;
-  while (Date.now() - start < 30000) {
+  while (Date.now() - start < 90000) {
     const status = await page.evaluate(target => {
       const max = document.documentElement.scrollHeight - innerHeight;
       if (!document.querySelector('#montage-layer.is-active')) window.scrollTo(0, target * max);
       return { progress: window.__gt3.probe().progress, mode: window.__gt3.probe().mode,
         montage: !!document.querySelector('#montage-layer.is-active'),
-        locked: window.__gt3.probe().locked };
+        locked: window.__gt3.probe().locked, speed01: window.__gt3.probe().speed01 };
     }, t);
     if (status.mode === 'finish') await page.click('.finish-replay');
     if (status.montage) { await page.keyboard.press('Escape'); montages++; }
-    if (!status.montage && !status.locked && Math.abs(status.progress - t) < tolerance) {
+    const distance = Math.abs(status.progress - t);
+    if (!status.montage && !status.locked && (distance < tolerance
+      || (status.speed01 < 0.01 && distance < 0.004))) {
       await new Promise(r => setTimeout(r, settleMs));
       return { progress: status.progress, montages };
+    }
+    if (lastProgress === null || Math.abs(status.progress - lastProgress) > 0.00002) {
+      lastProgress = status.progress;
+      lastMovementAt = Date.now();
+    } else if (!status.montage && !status.locked && Date.now() - lastMovementAt > 1000) {
+      // Re-issue a direct scroll target after a genuine stall. The normal loop
+      // also targets the route each pass, but this makes recovery explicit when
+      // a busy host has dropped scroll work for a sustained interval.
+      await page.evaluate(target => {
+        const max = document.documentElement.scrollHeight - innerHeight;
+        window.scrollTo(0, target * max);
+      }, t);
+      lastMovementAt = Date.now();
     }
     await new Promise(r => setTimeout(r, 90));
   }

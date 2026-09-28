@@ -22,18 +22,41 @@ page.on('console', message => { if (message.type() === 'error') errors.push(mess
 page.on('response', response => { if (response.status() >= 400) errors.push(`HTTP ${response.status()} ${response.url()}`); });
 const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
 const assert = (condition, message) => { if (!condition) throw new Error(message); };
+const phases = [];
+const recordPhase = async (name, work) => {
+  try {
+    const value = await work();
+    phases.push({ name, status: 'PASS' });
+    console.log(`PASS ${name}`);
+    return value;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    phases.push({ name, status: 'FAIL', message });
+    console.error(`FAIL ${name}: ${message}`);
+    return undefined;
+  }
+};
+const report = { renderer: softwareGL ? 'SwiftShader fallback' : 'ANGLE/Metal', phases, errors };
 
 try {
-  await page.goto(base, { waitUntil: 'domcontentloaded', timeout: 120000 });
-  await page.waitForFunction(() => window.__gt3?.scene?.getObjectByName('car-rig')
-    && document.querySelector('#start-screen.is-ready'), { timeout: 120000 });
-  await page.mouse.wheel({ deltaY: 240 });
-  await wait(1600);
-
-  const thresholds = await page.evaluate(async () =>
-    (await import('/src/scene/trackCurve.js')).CHECKPOINT_T);
-  const carIds = await page.evaluate(async () =>
-    (await import('/src/data/cars.js')).CARS.map(car => car.id));
+  const ready = await recordPhase('startup', async () => {
+    await page.goto(base, { waitUntil: 'domcontentloaded', timeout: 120000 });
+    await page.waitForFunction(() => window.__gt3?.scene?.getObjectByName('car-rig')
+      && document.querySelector('#start-screen.is-ready'), { timeout: 120000 });
+    await page.mouse.wheel({ deltaY: 240 });
+    await wait(1600);
+    return true;
+  });
+  if (ready) {
+  const route = await recordPhase('route metadata', async () => {
+    const thresholds = await page.evaluate(async () =>
+      (await import('/src/scene/trackCurve.js')).CHECKPOINT_T);
+    const carIds = await page.evaluate(async () =>
+      (await import('/src/data/cars.js')).CARS.map(car => car.id));
+    return { thresholds, carIds };
+  });
+  if (route) {
+  const { thresholds, carIds } = route;
   const expected = progress => thresholds.filter(t => t <= progress).length;
 
   async function read() {
@@ -75,82 +98,108 @@ try {
   }
 
   const forward = [];
-  let forwardUnlocked = 1;
+  const backward = [];
   const stops = [...new Set([0, ...Array.from({ length: 20 }, (_, i) => (i + 1) * 0.049),
     ...thresholds.flatMap(t => [t - 0.003, t + 0.003]), 1])].sort((a, b) => a - b);
-  for (const t of stops) {
-    const snapshot = await seek(t, { instant: t === 1 });
-    check(snapshot, `forward ${t}`, t === 1);
-    assert(snapshot.unlocked.includes(0), `forward ${t}: Lexus missing from discoveries`);
-    assert(snapshot.unlocked.length >= forwardUnlocked, `forward ${t}: discovery shrank`);
-    for (let index = 1; index <= expected(snapshot.progress); index++) {
-      assert(snapshot.unlocked.includes(index), `forward ${t}: car ${index} was not discovered`);
+  await recordPhase('forward and backward discovery sweeps', async () => {
+    let forwardUnlocked = 1;
+    for (const t of stops) {
+      const snapshot = await seek(t, { instant: t === 1 });
+      check(snapshot, `forward ${t}`, t === 1);
+      assert(snapshot.unlocked.includes(0), `forward ${t}: Lexus missing from discoveries`);
+      assert(snapshot.unlocked.length >= forwardUnlocked, `forward ${t}: discovery shrank`);
+      for (let index = 1; index <= expected(snapshot.progress); index++) {
+        assert(snapshot.unlocked.includes(index), `forward ${t}: car ${index} was not discovered`);
+      }
+      forwardUnlocked = snapshot.unlocked.length;
+      forward.push(snapshot);
     }
-    forwardUnlocked = snapshot.unlocked.length;
-    forward.push(snapshot);
-  }
-  console.log(`forward sweep: ${forward.length} stops`);
-  await page.evaluate(async () => (await import('/src/ui/finishScreen.js')).hideFinishScreen());
-  const backward = [];
-  let priorUnlocked = forward.at(-1).unlocked.length;
-  for (const t of stops.slice(0, -1).reverse()) {
-    const snapshot = await seek(t);
-    check(snapshot, `backward ${t}`);
-    assert(snapshot.unlocked.length >= priorUnlocked, `discovery shrank at ${t}`);
-    priorUnlocked = snapshot.unlocked.length;
-    backward.push(snapshot);
-  }
-  console.log(`backward sweep: ${backward.length} stops`);
+    console.log(`forward sweep: ${forward.length} stops`);
+    await page.evaluate(async () => (await import('/src/ui/finishScreen.js')).hideFinishScreen());
+    let priorUnlocked = forward.at(-1).unlocked.length;
+    for (const t of stops.slice(0, -1).reverse()) {
+      const snapshot = await seek(t);
+      check(snapshot, `backward ${t}`);
+      assert(snapshot.unlocked.length >= priorUnlocked, `discovery shrank at ${t}`);
+      priorUnlocked = snapshot.unlocked.length;
+      backward.push(snapshot);
+    }
+    console.log(`backward sweep: ${backward.length} stops`);
+  });
 
-  // Real wheel reversals near two adjacent gates, with a scrollbar target set
-  // once per side. Wheel deltas then perform the oscillation for ten seconds.
   const oscillation = [];
-  for (const gate of [thresholds[2], thresholds[6]]) {
-    await seek(gate - 0.0005, { instant: true, settle: 100 });
-    const end = Date.now() + 5100;
-    let direction = 1;
-    const seen = new Set();
-    while (Date.now() < end) {
-      await page.mouse.wheel({ deltaY: direction * 110 });
-      direction *= -1;
-      await wait(105);
-      const snapshot = await read();
-      seen.add(snapshot.active);
-      assert(!snapshot.locked && !snapshot.montage && !snapshot.spec && !snapshot.showcase,
-        `wheel crossing ${gate}: interruption`);
+  await recordPhase('real-wheel gate reversals', async () => {
+    for (const gate of [thresholds[2], thresholds[6]]) {
+      const below = expected(gate - 0.003);
+      const above = expected(gate + 0.003);
+      await seek(gate - 0.003, { instant: true, settle: 450 });
+      const end = Date.now() + 9000;
+      const seen = new Set();
+      let crossings = 0;
+      async function driveUntil(deltaY, target) {
+        const burstEnd = Math.min(end, Date.now() + 1800);
+        while (Date.now() < burstEnd) {
+          await page.mouse.wheel({ deltaY });
+          await wait(110);
+          const snapshot = await read();
+          seen.add(snapshot.active);
+          assert(!snapshot.locked && !snapshot.montage && !snapshot.spec && !snapshot.showcase,
+            `wheel crossing ${gate}: interruption`);
+          if (snapshot.active === target) return true;
+        }
+        return false;
+      }
+      while (Date.now() < end) {
+        assert(await driveUntil(150, above), `wheel input did not cross forward over gate ${gate}`);
+        crossings++;
+        assert(await driveUntil(-150, below), `wheel input did not cross backward over gate ${gate}`);
+        crossings++;
+      }
+      const settled = await seek(gate - 0.003, { settle: 1050 });
+      check(settled, `oscillation ${gate}`);
+      assert(seen.has(below) && seen.has(above),
+        `wheel input did not cross both sides of gate ${gate}: ${[...seen]}`);
+      oscillation.push({ gate, crossings, observedIndices: [...seen].sort((a, b) => a - b), settled });
     }
-    const settled = await seek(gate + 0.003);
-    check(settled, `oscillation ${gate}`);
-    assert(seen.has(expected(gate - 0.003)) && seen.has(expected(gate + 0.003)),
-      `wheel input did not cross both sides of gate ${gate}: ${[...seen]}`);
-    oscillation.push({ gate, observedIndices: [...seen].sort((a, b) => a - b), settled });
-  }
-  console.log('wheel oscillation complete');
+    console.log('wheel oscillation complete');
+  });
 
-  const far = await seek(0.91, { instant: true });
-  check(far, 'instant forward');
-  const back = await seek(0.04, { instant: true });
-  check(back, 'instant backward');
+  let far;
+  let back;
+  await recordPhase('instant seeks', async () => {
+    far = await seek(0.91, { instant: true });
+    check(far, 'instant forward');
+    back = await seek(0.04, { instant: true });
+    check(back, 'instant backward');
+  });
 
   // A fresh page in the same browser tab must restore discovery while route
   // position remains intentionally outside this phase's persistence scope.
-  await page.reload({ waitUntil: 'domcontentloaded', timeout: 120000 });
-  await page.waitForFunction(() => window.__gt3?.scene?.getObjectByName('car-rig')
-    && document.querySelector('#start-screen.is-ready'), { timeout: 120000 });
-  const restored = await read();
-  assert(JSON.stringify(restored.unlocked) === JSON.stringify(far.unlocked),
-    `session discovery did not restore: ${restored.unlocked}`);
+  let restored;
+  await recordPhase('reload and discovery restoration', async () => {
+    assert(far, 'instant forward seek did not produce a restoration baseline');
+    await page.reload({ waitUntil: 'domcontentloaded', timeout: 120000 });
+    await page.waitForFunction(() => window.__gt3?.scene?.getObjectByName('car-rig')
+      && document.querySelector('#start-screen.is-ready'), { timeout: 120000 });
+    restored = await read();
+    assert(JSON.stringify(restored.unlocked) === JSON.stringify(far.unlocked),
+      `session discovery did not restore: ${restored.unlocked}`);
+  });
 
   // Replay is a separate reset path from reversing through the route. It must
   // return the visible car to Lexus without clearing discoveries.
-  await page.mouse.wheel({ deltaY: 240 });
-  await seek(1, { instant: true });
-  await page.click('.finish-replay');
-  await wait(250);
-  const replayed = await read();
-  check(replayed, 'replay');
-  assert(JSON.stringify(replayed.unlocked) === JSON.stringify(restored.unlocked),
-    'replay cleared discoveries');
+  let replayed;
+  await recordPhase('replay preserves discoveries', async () => {
+    assert(restored, 'reload did not produce a replay baseline');
+    await page.mouse.wheel({ deltaY: 240 });
+    await seek(1, { instant: true });
+    await page.click('.finish-replay');
+    await wait(250);
+    replayed = await read();
+    check(replayed, 'replay');
+    assert(JSON.stringify(replayed.unlocked) === JSON.stringify(restored.unlocked),
+      'replay cleared discoveries');
+  });
 
   async function frames(duration) {
     return page.evaluate(ms => new Promise(resolve => {
@@ -173,9 +222,12 @@ try {
       p95: ordered[Math.floor(ordered.length * 0.95)] ?? null,
       longFrames: { count: longFrames.length, ms: longFrames } };
   }
+  let idle;
+  let swap;
+  await recordPhase('frame and swap diagnostics', async () => {
   await page.mouse.wheel({ deltaY: 240 });
   await seek(0.2);
-  const idle = stats(await frames(1600));
+  idle = stats(await frames(1600));
 
   // Settle on one side of a single gate. Capturing the diagnostic image happens in
   // a separate swap so screenshot encoding cannot contaminate the frame-time sample.
@@ -203,14 +255,17 @@ try {
   await page.evaluate(async t => (await import('/src/scroll/scrollDrive.js')).seekTo(t, { instant: true }),
     swapEnd);
   await page.waitForFunction(async () => (await import('/src/scene/morph.js')).isMorphing(), { timeout: 30000 });
-  const swap = stats(await swapPromise);
+  swap = stats(await swapPromise);
   await page.waitForFunction(async () => !(await import('/src/scene/morph.js')).isMorphing(), { timeout: 30000 });
   const measuredSwap = await read();
   assert(measuredSwap.active === expectedSwapIndex && measuredSwap.model.length === 1
     && measuredSwap.model[0] === `car-${carIds[expectedSwapIndex]}`,
   `measured swap did not complete at car ${expectedSwapIndex}: ${JSON.stringify(measuredSwap)}`);
 
+  });
+
   const captures = [];
+  await recordPhase('day and night captures', async () => {
   for (const theme of ['day', 'night']) {
     await page.evaluate(async name => (await import('/src/scene/theme.js')).applyTheme(name, { instant: true }), theme);
     for (const index of [0, 4, 8]) {
@@ -220,16 +275,23 @@ try {
       captures.push(path);
     }
   }
+  });
 
-  assert(errors.length === 0, `browser errors: ${errors.join(' | ')}`);
-  const report = { renderer: softwareGL ? 'SwiftShader fallback' : 'ANGLE/Metal',
-    routeLengthM: await page.evaluate(async () =>
-    (await import('/src/scene/trackCurve.js')).TRACK_LENGTH),
-    thresholds, forwardStops: forward.length, backwardStops: backward.length,
+  await recordPhase('console errors', async () => {
+    assert(errors.length === 0, `browser errors: ${errors.join(' | ')}`);
+  });
+  report.routeLengthM = await page.evaluate(async () =>
+    (await import('/src/scene/trackCurve.js')).TRACK_LENGTH);
+  Object.assign(report, { thresholds, forwardStops: forward.length, backwardStops: backward.length,
     forwardFinal: forward.at(-1), backwardFinal: backward.at(-1),
-    replayed, oscillation, instantSeek: { far, back }, restored, frameMs: { idle, swap }, captures, errors };
+    replayed, oscillation, instantSeek: { far, back }, restored, frameMs: { idle, swap }, captures });
+  }
+  }
+} finally {
+  report.errors = errors;
+  report.failed = phases.filter(phase => phase.status === 'FAIL').length;
   await writeFile(`${root}/verification.json`, JSON.stringify(report, null, 2));
   console.log(JSON.stringify(report, null, 2));
-} finally {
   await browser.close();
+  if (report.failed) process.exitCode = 1;
 }

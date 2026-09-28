@@ -22,17 +22,7 @@ function render() {
   layer.classList.toggle('is-open', state.playerOpen);
 }
 
-// LEGACY PLACEMENT — remove with the legacy views (Phases 3–7).
-function placeForLegacyView() {
-  if (!layer) return;
-  let bottom = '24px';
-  if (!state.started) bottom = '142px';
-  else if (state.mode === 'montage') bottom = '76px';
-  else if (state.mode === 'finish') bottom = '24px';
-  layer.style.setProperty('--audio-bottom', bottom);
-}
-
-/** Mount the global audio anchor above the legacy overlay stack. */
+/** Mount the global audio anchor in the Grand Tour edge row. */
 export function initSoundControl() {
   if (layer) return layer;
   layer = document.getElementById('audio-layer');
@@ -72,9 +62,6 @@ export function initSoundControl() {
   subscribe('audioReady', render);
   subscribe('masterMuted', render);
   subscribe('playerOpen', render);
-  subscribe('mode', placeForLegacyView);
-  subscribe('started', placeForLegacyView);
-  placeForLegacyView();
   render();
   return layer;
 }

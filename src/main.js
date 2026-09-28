@@ -73,12 +73,9 @@ async function boot() {
   const studio = await import('./montage/studio.js');
   const audio = await import('./audio/audioManager.js');
   const hud = await import('./ui/hud.js');
-  const specPanel = await import('./ui/specPanel.js');
   const themeToggle = await import('./ui/themeToggle.js');
   const soundControl = await import('./ui/soundControl.js');
   const player = await import('./ui/player.js');
-  const showcase = await import('./ui/showcase.js');
-  const fullscreenCard = await import('./ui/fullscreenCard.js');
   const startScreen = await import('./ui/startScreen.js');
   const finishScreen = await import('./ui/finishScreen.js');
 
@@ -99,8 +96,6 @@ async function boot() {
   morph.initMorph();
   theme.initTheme();
   studio.initStudio();
-  showcase.initShowcase();
-  fullscreenCard.initFullscreenCard();
   hud.initHUD();
   themeToggle.initThemeToggle();
   soundControl.initSoundControl();
@@ -137,10 +132,6 @@ async function boot() {
   studio.setMorphHandler((index) => morph.morphTo(index));
   studio.onMontageComplete(() => set('mode', 'race'));
 
-  // Both expand controls open the same fullscreen card.
-  specPanel.setExpandHandler((index) => fullscreenCard.openFullscreenCard(index));
-  studio.setExpandHandler((index) => fullscreenCard.openFullscreenCard(index));
-
   // Replay resets route position and model, preserving session discoveries.
   finishScreen.setReplayHandler(() => {
     morph.resetMorph(0);
@@ -149,23 +140,12 @@ async function boot() {
 
   scrollDrive.initScrollDrive();
 
-  // Environment and HUD parallax remain independent of the race camera.
+  // Environment parallax remains independent of the race camera.
   window.addEventListener('pointermove', (e) => {
     const x = (e.clientX / window.innerWidth) * 2 - 1;
     const y = (e.clientY / window.innerHeight) * 2 - 1;
     environment.setParallax(x, y);
-    hud.setCursor(x, y);
   }, { passive: true });
-
-  // F opens Showcase Mode from anywhere in the race (SPEC §10.6). showcase.js owns its
-  // own Escape/F-to-close handling; this is only the way in.
-  window.addEventListener('keydown', (e) => {
-    if (e.key !== 'f' && e.key !== 'F') return;
-    if (e.metaKey || e.ctrlKey || e.altKey) return;
-    if (showcase.isShowcaseOpen()) return;
-    if (fullscreenCard.isFullscreenCardOpen()) return;
-    showcase.openShowcase(state.activeCarIndex);
-  });
 
   // ---- per-frame ---------------------------------------------------------
   let dispatchedApproachIndex = -1;
@@ -181,9 +161,8 @@ async function boot() {
   registerUpdate(theme.update);
   registerUpdate(finishLine.update);
   registerUpdate(studio.updateMontage);
-  registerUpdate(showcase.updateShowcase);
   registerUpdate((dt) => {
-    // Approach cue drives both the HUD badge and the rising ping.
+    // Checkpoint proximity drives only the existing, identity-free audio cue.
     const approach = checkpoints.getApproach();
     const index = approach ? approach.index : -1;
     const proximity = approach ? approach.proximity : 0;
@@ -192,9 +171,6 @@ async function boot() {
     if (index !== dispatchedApproachIndex || step !== dispatchedApproachStep) {
       dispatchedApproachIndex = index;
       dispatchedApproachStep = step;
-      // The legacy incoming card exposes a car identity before discovery.
-      // Phase 3d owns its replacement; keep it idle in the Tour.
-      hud.setApproach(null);
     }
     if (step !== dispatchedAudioApproachStep) {
       dispatchedAudioApproachStep = step;
@@ -202,7 +178,6 @@ async function boot() {
     }
   });
   registerUpdate(hud.update);
-  registerUpdate(specPanel.update);
   registerUpdate(finishScreen.update);
   registerUpdate(audio.updateAudio);
   registerUpdate(player.updatePlayer);
@@ -216,10 +191,8 @@ async function boot() {
     const dt = clock.tick();
     for (const update of updates) update(dt, state);
 
-    // One of three views owns the screen. Showcase sits on top of everything; the
-    // montage sits on top of the race; otherwise the race renders.
-    if (showcase.isShowcaseOpen()) showcase.renderShowcase();
-    else if (studio.isMontagePlaying()) studio.renderMontage();
+    // The legacy montage remains available for a later manual-unlock flow.
+    if (studio.isMontagePlaying()) studio.renderMontage();
     else sceneSetup.render(dt);
 
     requestAnimationFrame(frame);

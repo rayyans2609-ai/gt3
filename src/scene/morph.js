@@ -220,13 +220,15 @@ function finish() {
   particles.material.opacity = 0;
   active = false;
   outgoing = null;
+  incoming = null;
   outgoingMats = [];
   incomingMats = [];
 
   if (pendingIndex >= 0) {
-    renderedIndex = pendingIndex;
-    for (const fn of completeHandlers) fn(pendingIndex);
+    const completedIndex = pendingIndex;
     pendingIndex = -1;
+    renderedIndex = completedIndex;
+    for (const fn of completeHandlers) fn(completedIndex);
   }
 }
 

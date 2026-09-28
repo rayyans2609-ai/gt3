@@ -10,19 +10,19 @@ GT3 is a desktop-only interactive motorsport showcase in Three.js/WebGL with a D
 
 ## Current phase
 
-**SPEC_V3 implementation in progress (as of 2026-09-27).**
+**SPEC_V3 implementation in progress (Phase 3 integration branch, 2026-09-28).**
 
 **Complete:**
 - **Phase 1:** two-state Day/Night theme, experience state machine, session persistence.
 - **Phase 2:** playlist music engine inside `audioManager.js`; global speaker and compact expandable player.
+- **Phase 3:** closed-loop circuit, route-led world-space aerial camera, nine silent checkpoints with reversible car swaps and session discoveries, sparse Grand Tour HUD, and the dedicated typography slice. Technical verification is complete on `phase3-integration`; human visual review and the merge gate remain open.
 
-**Still legacy:** the running app is otherwise the old single continuous scroll page (start screen → one race with ten visible-identity coins → finish scorecard), with a fixed camera rigidly parented to the car and Showcase behind an `F` key. A marked legacy bridge maps it onto `experience = 'tour'`.
+**Still legacy:** the running app boots through the old start screen directly into Grand Tour and retains the old finish screen. Landing, Hub, the dedicated Showcase and completion hero flow are not implemented. A marked bridge maps the running race onto `experience = 'tour'`; `F` no longer opens Showcase during Grand Tour. The separate montage and old Showcase code remain for later manual-unlock/Showcase work, but are not part of Tour progression.
 
 **Next, in order:**
-1. A small typography slice (Neue Haas Grotesk / Geist Mono), before Phase 4.
-2. Phase 3 Grand Tour core (aerial camera, checkpoints, sparse HUD).
-3. Phase 4 Landing, Phase 5 Hub, Phase 6 Showcase, Phase 7 finish/completion.
-4. Phase 8 scenery / lighting / performance pass. It also owns **Night route lighting** (`SPEC.md` §13a). The outcome is locked: an authored premium night-driving feel with a readable road/car and real darkness. Headlights and trackside lighting are desired, but the design and technique are open to Phase 8. Earlier phases must not pre-build it. Phase 8 also executes the **environment art direction** (`SPEC.md` §16; circuit realism in §17): realistic circuit, white/off-white sculptural terrain, sparse selective architecture, and at Night the same pale world revealed by light out of darkness. Earlier phases only keep terrain structurally ready for it, with real relief, clean shading and no green-grass assumptions.
+1. Human visual review of Phase 3 camera framing/motion, gates and HUD; then an explicit acceptance gate before merging. Technical cleanup on this branch does not itself grant visual acceptance.
+2. Phase 4 Landing, Phase 5 Hub, Phase 6 Showcase, Phase 7 finish/completion.
+3. Phase 8 scenery / lighting / performance pass. It also owns **Night route lighting** (`SPEC.md` §13a). The outcome is locked: an authored premium night-driving feel with a readable road/car and real darkness. Headlights and trackside lighting are desired, but the design and technique are open to Phase 8. Earlier phases must not pre-build it. Phase 8 also executes the **environment art direction** (`SPEC.md` §16; circuit realism in §17): realistic circuit, white/off-white sculptural terrain, sparse selective architecture, and at Night the same pale world revealed by light out of darkness. Earlier phases only keep terrain structurally ready for it, with real relief, clean shading and no green-grass assumptions.
 
 `ARCHITECTURE.md` tags each module keep / evolve / new / retire / done. `SPEC.md` §1 and §30 show what's reused versus replaced.
 
@@ -50,7 +50,7 @@ When sources disagree, in order:
 - `models/car_cover_model` — locked-showcase asset; valid `.glb` data but the filename itself carries no extension
 - `public/audios/playlist/track_1.mp3 … track_6.mp3` — the six playlist tracks, moved and renamed from `audios/background_playlist/` in Phase 2a. The music engine lives inside `src/audio/audioManager.js`, and the alias table is `src/data/playlist.js`.
 - `audios/background_playlist/audiocover_NOTaudios/` — the six track covers, unshipped and deferred to Phase 5 (Hub cover-art player)
-- `font/` — four Neue Haas Grotesk families, all weight files suffixed `-Trial` (licensing status unconfirmed, see `SPEC.md` §30.5)
+- `font/` — four Neue Haas Grotesk families, all weight files suffixed `-Trial` (licensing status unconfirmed, see `SPEC.md` §30.5); the Phase 3 typography slice bundles the locally available Display/Text weights and Geist Mono
 - `src/data/cars.js` — the locked ten-car roster and order (also mirrored in `SPEC.md` §1a)
 - `docs/ai/model-routing.md`, `docs/ai/codex-cli-invocation.md` — canonical AI model-routing/delegation rules (roles, escalation, verified Codex slugs/invocation); route Codex jobs through `scripts/codex-route.sh`, which refuses to run without an explicit model and reasoning effort
 
@@ -64,7 +64,7 @@ Landing (introduction/desire) → Grand Tour Hub (control surface) → Showcase 
 - Verified per-model orientation table for car facing (`src/scene/cars.js`) — don't replace with geometry heuristics.
 - Explicit-user-gesture WebAudio lifecycle (`src/audio/audioManager.js`) — scroll must never initialize audio; this was broken and fixed once already.
 - Fill rate, not geometry, was the measured bottleneck for scroll performance; adaptive render resolution while scrolling (full quality at rest) is an accepted tradeoff. Full detail and the rest of the verified performance lessons are in `SPEC.md` §27 — that's the copy to trust, not `BUILD_LOG.md` read cold.
-- A second/duplicate WebGLRenderer (the montage's `studio.js`) was the single largest measured cost in the current build. Don't introduce another one for new cinematic sequences (e.g. the completion transition) — reuse shared scene/camera infrastructure.
+- A second/duplicate WebGLRenderer (the montage's `studio.js`) was the single largest measured cost in the pre-Phase-3 Tour. The montage no longer runs in Grand Tour; don't introduce another renderer for new cinematic sequences (e.g. the completion transition) — reuse shared scene/camera infrastructure.
 
 ## Historical sources
 

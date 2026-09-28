@@ -1,5 +1,12 @@
 # BUILD LOG — GT3: A Grand Tour
 
+This is an append-only implementation and measurement history. The early status table,
+legacy CLI examples, coin/montage QA commands, and pre-Phase-3 runtime descriptions below
+describe their dates, not the current application or current delegation route. For current
+product truth use `SPEC.md`; for current implementation status use `GT3_MASTER_CONTEXT.md`
+and the latest entries here. Current Codex jobs use `scripts/codex-route.sh` with explicit
+model and reasoning effort (`docs/ai/codex-cli-invocation.md`).
+
 Manager: Claude Opus 5. Executor: Codex CLI (gpt-5.6-sol) via `codex exec`.
 NOTE: `codex-executor` MCP server failed to connect (CONNECTION_CLOSED);
 delegation runs through the `codex` CLI in Bash instead. Same quota, same split.
@@ -613,3 +620,26 @@ not run — the host was at load average ~550–620 and Chrome would not answer 
 - Host overload 05:00–06:30 (load ~600, builds 100× slower) blocked browser verification.
 - Legacy HUD approach card idled (would reveal identity); HUD redesign is Phase 3d.
 - Replay-snap check in verify-aerial is a test artifact (t=1 and t=0 are the same pose).
+
+## Phase 3 integration cleanup — 2026-09-28
+
+Phase 3's technical acceptance and remaining human visual review are recorded in
+`docs/ai/run-status-2026-09-28.md` (latest sections supersede its early handoff). The
+branch has not been merged to `main`.
+
+The current Tour uses the closed-loop circuit, aerial rail camera, nine silent checkpoint
+gates, reversible route-car swaps, monotonic session discovery and the sparse HUD. The old
+in-Tour coin/montage/Showcase behavior is retired. `2fabd47` repaired progress reads in
+`shot-circuit.mjs` and `perf-gpu.mjs`. This cleanup then removed browser scripts whose
+assertions only applied to the retired Tour behavior (legacy acceptance/QA, coin montage
+performance, in-Tour Showcase, old HUD parallax and montage scroll-lock probes). The
+Phase 3 verifiers (`verify-aerial.mjs`, `verify-checkpoints.mjs`, `verify-circuit.mjs`) and
+current circuit/performance tools remain. `perf-ab.mjs` now names its checkpoint-free
+band correctly. The old camera-comparison experiment was removed because its legacy
+camera override conflicted with the active aerial camera's per-frame update.
+
+`src/ui/specPanel.js`, `src/ui/fullscreenCard.js` and their unused CSS were orphaned
+after the Phase 3 HUD cleanup: neither module was imported by the live app and their
+DOM roots were absent. The separate Showcase and montage modules remain for later
+phases; no Phase 4 work was started. Historical measurements above remain valid for the
+versions they measured, but the deleted scripts are no longer runnable at this head.

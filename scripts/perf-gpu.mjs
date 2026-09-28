@@ -31,8 +31,7 @@ for (const at of STOPS) {
   }, at);
   await page.waitForFunction((target) => {
     const progress = window.__gt3?.probe().progress;
-    const montage = !!document.querySelector('#montage-layer.is-active');
-    return !montage && Number.isFinite(progress) && Math.abs(progress - target) < 0.001;
+    return Number.isFinite(progress) && Math.abs(progress - target) < 0.001;
   }, { timeout: 180000 }, at);
   await new Promise((r) => setTimeout(r, 2400));
 

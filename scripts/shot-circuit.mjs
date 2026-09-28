@@ -1,4 +1,4 @@
-/** Capture settled camera frames across the loop, skipping the legacy montage layer. */
+/** Capture settled camera frames across the current Grand Tour loop. */
 // Usage: GT3_URL=http://localhost:5174 node scripts/shot-circuit.mjs
 import puppeteer from 'puppeteer-core';
 
@@ -32,23 +32,18 @@ for (const at of stops) {
     window.scrollTo(0, target * max);
   }, at);
   let actual = 0;
-  let montage = false;
   for (let i = 0; i < 200; i++) {
     await new Promise((resolve) => setTimeout(resolve, 200));
-    ({ actual, montage } = await page.evaluate(() => ({
-      actual: window.__gt3.probe().progress,
-      montage: !!document.querySelector('#montage-layer.is-active'),
-    })));
-    if (montage) { await page.keyboard.press('Escape'); continue; }
+    actual = await page.evaluate(() => window.__gt3.probe().progress);
     if (Math.abs(actual - at) < 0.001) break;
   }
-  if (montage || Math.abs(actual - at) >= 0.001) {
-    throw new Error(`Route did not settle at ${at}: actual ${actual}, montage ${montage}`);
+  if (Math.abs(actual - at) >= 0.001) {
+    throw new Error(`Route did not settle at ${at}: actual ${actual}`);
   }
   await new Promise((resolve) => setTimeout(resolve, 500));
-  const path = `/tmp/gt3-legacy-${String(at).replace('.', 'p')}.png`;
+  const path = `/tmp/gt3-circuit-${String(at).replace('.', 'p')}.png`;
   await page.screenshot({ path });
-  console.log('shot', path, 'actual', actual, 'montage', montage);
+  console.log('shot', path, 'actual', actual);
 }
 console.log('errors', JSON.stringify(errors));
 }

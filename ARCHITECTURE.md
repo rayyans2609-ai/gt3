@@ -3,7 +3,16 @@
 `SPEC.md` (SPEC_V3) is product truth; this file is the technical map that serves it. Where
 they disagree, `SPEC.md` wins and this file is wrong. Module status tags:
 **[keep]** exists and stays · **[evolve]** exists, changes behavior · **[new]** V3 build work ·
-**[retire]** removed once its replacement lands.
+**[retire]** removed once its replacement lands. The tags below describe the V3 target;
+the current implementation checkpoint is stated here to avoid treating future modules as live.
+
+**Current on `phase3-integration` (2026-09-28):** Phases 1–3 and the typography slice
+are implemented. The live flow is still legacy start screen → Grand Tour → legacy finish;
+Landing, Hub, dedicated Showcase and completion hero are later work. The Tour has a
+closed-loop circuit, route-led world-space aerial camera, nine silent checkpoints,
+bidirectional route car swaps, monotonic session discoveries and a sparse map/name HUD.
+The Tour has no coin collection, in-Tour montage or `F`-key Showcase. Phase 3 technical
+verification is complete; camera/gate/HUD visual acceptance and merge remain open.
 
 Desktop-only single-page WebGL experience. Vite + Three.js (ESM, no framework).
 Four experiences — Landing, Grand Tour Hub, Showcase, Grand Tour (+ completion state) — are
@@ -29,7 +38,8 @@ text/HUD/player UI. One fixed canvas behind it, one shared `WebGLRenderer`.
     audios/playlist/  track_1..6.mp3, ALIASED filenames (moved from audios/background_playlist/
                       in Phase 2a, git renames, byte-identical) [done]; covers join in Phase 5
     images/<carId>/   manufacturer imagery / badges [keep]
-  scripts/            build-time + puppeteer probe/perf/QA scripts [keep]
+  scripts/            build-time + current Phase 3 browser/perf harnesses [keep];
+                      retired coin/montage/F-key Tour harnesses removed
   src/
     main.js           bootstrap, module wiring, single RAF loop [evolve]
     core/
@@ -51,12 +61,12 @@ text/HUD/player UI. One fixed canvas behind it, one shared `WebGLRenderer`.
                       route-agnostic) in Phase 3; white/off-white environment language,
                       architecture and objects in Phase 8 (SPEC §16)
       carRig.js       car mount, lean/roll/bob — camera NO LONGER a child [evolve]
-      aerialCamera.js world-space aerial rail camera for Grand Tour (SPEC §15) [new]
+      aerialCamera.js world-space aerial rail camera for Grand Tour (SPEC §15) [done, Phase 3b]
       cars.js         GLTF preload of 10 cars + verified orientation table [keep]
       coverModel.js   loads car_cover.glb for locked cars [new]
-      checkpoints.js  sector/checkpoint gates, crossing detection [new]
-      coins.js        visible-identity coins [retire → checkpoints.js]
-      morph.js        in-tour car swap, forward + reverse [evolve]
+      checkpoints.js  sector/checkpoint gates, crossing detection [done, Phase 3c]
+      coins.js        visible-identity coins [retired, Phase 3c]
+      morph.js        in-tour car swap, forward + reverse [done, Phase 3c]
       finishSequence.js route-end hero transition + completion hero car [new]
       finishLine.js   checkered gate at FINISH_T [evolve or fold into finishSequence]
       landingStage.js Landing field scene: floating Lexus, cursor response, push-in [new]
@@ -69,12 +79,14 @@ text/HUD/player UI. One fixed canvas behind it, one shared `WebGLRenderer`.
       showcase.js     Showcase scene + DOM (already uses shared renderer) [evolve]
       selector.js     bottom ten-car selector, ?/badge states [new]
       unlockFlow.js   manual unlock: flag wipe → montage → reveal → narration [new]
-      hud.js          Grand Tour HUD: circuit map TR, car name TL, edge controls [evolve]
+      hud.js          sparse Grand Tour HUD: circuit map TR, car name TL [done, Phase 3d];
+                      back-to-Hub control waits for Phase 5
       player.js       global music player: compact anchor / expanded / Hub variant [new]
       soundControl.js persistent speaker (master mute) + `+` launcher [evolve]
       themeToggle.js  Day/Night control [new; replaces todSelector.js]
       completion.js   GRAND TOUR COMPLETE + return control [new; replaces finishScreen.js]
-      startScreen.js todSelector.js finishScreen.js specPanel.js fullscreenCard.js [retire]
+      startScreen.js finishScreen.js [retire in later phases]; specPanel.js and
+                      fullscreenCard.js [retired, Phase 3 cleanup]; todSelector.js [retired]
     audio/
       audioManager.js one AudioContext: master/music/sfx/engine/voice buses, AND the playlist
                       music engine (sequence, seek, auto-advance, mutes, restore) — kept here
@@ -84,7 +96,7 @@ text/HUD/player UI. One fixed canvas behind it, one shared `WebGLRenderer`.
       carImages.js    [keep]
       playlist.js     track_1..6 alias → shipped file [done, Phase 2a]; cover field in Phase 5
     styles/
-      tokens.css      design tokens, Day/Night via :root[data-theme] [new]
+      tokens.css      design tokens, Day/Night via :root[data-theme] [done, Phase 1]
       base.css + per-experience sheets [evolve; montage.css keep]
   BUILD_LOG.md
 ```
@@ -151,11 +163,12 @@ Theme / audio
 - `playerOpen`     expanded-player UI state; reset to false on every major transition (SPEC §25)
 - `audioReady`     true once the single AudioContext exists
 
-Retired keys: `timeOfDay` (Phase 1a). `mode` and `started` are **transitional**: they stay
-as legacy in-race keys until their last consumers go. That is Phase 3 for montage-in-race,
-coins and the fullscreen card; Phases 4–5 for the start screen; Phase 6 for the F-key
-Showcase; and Phase 7 for the finish screen. Until then, a marked legacy bridge in `main.js`
-maps the running race onto `experience`.
+Retired keys: `timeOfDay` (Phase 1a). `mode` and `started` are **transitional** legacy
+keys still used by the start/finish flow; a marked bridge in `main.js` maps the running
+race onto `experience='tour'`. Phase 3 removed Tour coins, in-Tour montage and the
+`F`-key Showcase. The start screen and finish screen remain until their later phases.
+`unlocked` now starts with Lexus, grows monotonically and persists for the session;
+route position still resets on refresh until the later navigation work lands.
 
 Keys land with the phase that owns their truth, so no key has two sources of truth.
 `masterMuted`/`audioReady` land in Phase 2, because the mute flag lives in
@@ -208,8 +221,8 @@ voice <audio> → MediaElementSource ──────────────�
   spacing (SPEC §14).
 - **Swap** (`morph.js`): short, non-blocking, runs in both directions, no scroll lock.
 - **HUD** (`hud.js`): circuit map (top-right, derived from `trackCurve`), car name (top-left),
-  edge row with theme toggle, speaker/`+`, back-to-Hub. Nothing else.
-- **Finish** (`finishSequence.js`): begins at route end; progressively
+  theme toggle and speaker/`+`. Back-to-Hub waits for the Hub. Nothing else.
+- **Finish target, Phase 7** (`finishSequence.js`): begins at route end; progressively
   hides environment groups, eases camera to a hero framing, resolves to the theme field, then
   `experience='complete'`. Backward scroll reverses it (SPEC §26). Whether its progress is
   scroll-linked or timed is internal to `finishSequence.js` — not an architecture decision.
@@ -230,13 +243,10 @@ start (Showcase never shows it locked).
 
 ## Design system (SPEC §12–13, §23)
 - Fonts: Neue Haas Grotesk (primary; from local `font/`, never fetched), Geist Mono (timing /
-  identifiers / data only; may load from Google Fonts), selective oblique for short emphasis.
-  Cormorant Garamond / DM Sans / DM Mono are retired.
-  **Scheduled:** the migration runs as a small dedicated typography slice **after Phase 2b
-  and before Phase 4**, so the first major new V3 screen (Landing) is built on the new
-  families. Until then the code keeps the legacy `--font-ui` / `--font-mono` / `--font-display`
-  variables, and new UI must use those variables, not literal font names, so it picks up the
-  migration automatically.
+  identifiers / data only), selective oblique for short emphasis. The dedicated typography
+  slice is complete: local font assets are bundled via `fonts.css`, and
+  `--font-ui` / `--font-mono` / `--font-display` point to the new families. Cormorant
+  Garamond / DM Sans / DM Mono are retired.
 - Tokens in `styles/tokens.css`, switched by `:root[data-theme="day"|"night"]`, interpolated:
   Day = white/pale field, dark type/icons; Night = deep navy field, near-black/navy
   architecture, refined motorsport-yellow accents. Exact values are runtime tuning.

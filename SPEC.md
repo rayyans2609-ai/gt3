@@ -19,15 +19,15 @@ This is a **third product direction**, not a merge of the first two. V1 was rest
 
 ## 1. Current repository reality vs. this spec (read before implementing)
 
-The current runtime (`src/`) is a **single continuous scroll page**: a start screen ("GT3: A Grand Tour" / "Scroll to Race") leads directly into one scroll-driven race with ten visible-identity coins, a fixed 45°-chase camera rigidly parented to the car, five time-of-day presets, a single looping `background.mp3`, and an `F`-key Showcase overlay. There is no Landing/Hub/Showcase/Grand Tour page separation, no locked/mystery-car system, no playlist, and no checkpoint-gate mechanic.
+The current runtime on `phase3-integration` (2026-09-28) still boots through the legacy start screen directly into Grand Tour and ends at the legacy finish screen. Phase 1–2 foundations are present: Day/Night state, session state, six-track playlist, and global audio controls. Phase 3 is implemented and technically verified: a closed-loop circuit, route-led world-space aerial camera, nine identity-neutral checkpoint gates, silent discoveries and reversible car swaps, sparse HUD with circuit map, and the typography slice. The old coin progression and in-Tour `F`-key Showcase are retired. Human visual review of the camera, gates and HUD remains open; this branch has not been merged to `main`.
 
-Nearly everything in §4 onward is new product surface or a deliberate architectural replacement, not a tweak. Where this spec differs from current code, **that difference is implementation work**, not a documentation error. Do not silently rewrite this spec to match what already exists. Reusable current assets and systems are called out explicitly in §1a.
+Landing, Hub, dedicated Showcase, manual unlock, and the completion hero transition are still future product work. The old Showcase and montage modules remain in the repository for that work but are not reachable inside Grand Tour. Where this spec differs from current code, **that difference is implementation work**, not a documentation error. Do not silently rewrite this spec to match what already exists. Reusable current assets and systems are called out explicitly in §1a.
 
 ### 1a. What to preserve from current code
 
 - The 10 locked GT3 GLB models and their **exact roster order** (`src/data/cars.js`): Lexus, Nissan, Audi, BMW, Mercedes, Ferrari, McLaren, Aston, Lamborghini, Porsche. Lexus is both the player/hero car (Landing) and roster index 0.
 - The verified per-model orientation table in `src/scene/cars.js` (do not re-derive orientation from geometry heuristics).
-- The montage/studio system (`src/montage/`) — reused, unmodified in spirit, for manual unlock only (§11).
+- The montage/studio system (`src/montage/`) — retained for future manual unlock only (§11); no longer called by Grand Tour checkpoints.
 - The narration audio (`audios/voices/voice_01…10`) and per-car copy already authored in `src/data/cars.js`.
 - The explicit-gesture WebAudio lifecycle in `src/audio/audioManager.js` (no scroll-based init).
 - The accepted performance findings in `BUILD_LOG.md` (§27 below) — adaptive resolution while scrolling, non-passive-listener cost, fill-rate-first attribution.
@@ -35,14 +35,14 @@ Nearly everything in §4 onward is new product surface or a deliberate architect
 
 ### 1b. What is explicitly replaced
 
-- Fixed camera-child-of-rig chase framing → stable-world-space high aerial camera (§15).
-- 5-state time-of-day (`dawn/morning/afternoon/dusk/night`) → 2-state Day/Night (§13).
-- Visible-identity coins (`src/scene/coins.js`) → in-world sector/checkpoint thresholds (§18), with locked-identity cars (§11).
+- Fixed camera-child-of-rig chase framing → stable-world-space high aerial camera (§15); implemented in Phase 3, pending visual review.
+- 5-state time-of-day (`dawn/morning/afternoon/dusk/night`) → 2-state Day/Night (§13); implemented in Phase 1.
+- Visible-identity coins (`src/scene/coins.js`) → in-world sector/checkpoint thresholds (§18); implemented in Phase 3. Locked-identity Showcase presentation remains Phase 6.
 - Green naturalistic grass/tree surroundings (`src/scene/environment.js`) → a predominantly white/off-white sculptural architectural landscape around a realistic circuit (§16–17). Executed in the Phase 8 scenery pass; earlier phases only keep terrain structure compatible with it.
 - Single continuous scroll page with start-screen overlay → four distinct experiences (§2, detailed per page in §4–5, §11, §14) with agent-designed transitions (§25–26).
-- Single `background.mp3` loop → six-track playlist system (§6–10). The music engine was implemented in Phase 2a (2026-09-27) inside `src/audio/audioManager.js`; the player UI follows in Phase 2b.
-- `F`-key hidden Showcase overlay → dedicated Showcase page, discoverable from the Hub.
-- Cormorant/DM Sans/DM Mono/gold palette (pre-V3 `ARCHITECTURE.md`) → Neue Haas Grotesk / Geist Mono / Day-Night palette (§12–13).
+- Single `background.mp3` loop → six-track playlist system (§6–10); engine and compact player implemented in Phase 2, Hub presentation still Phase 5.
+- `F`-key hidden Showcase overlay → dedicated Showcase page, discoverable from the Hub. The `F` key is inert in Grand Tour; the new page remains Phase 6.
+- Cormorant/DM Sans/DM Mono/gold palette (pre-V3 architecture) → Neue Haas Grotesk / Geist Mono / Day-Night palette (§12–13). Fonts and theme foundations are implemented; remaining experience-specific visual work follows in later phases.
 
 ---
 
@@ -253,7 +253,7 @@ Do not interrupt Grand Tour with narration, Showcase, montage, info card, modal,
 
 ## Scroll interaction quality
 
-Scroll quality is the primary user-facing performance metric — not average FPS alone. Test wheel and trackpad, forward and backward, slow and fast, sustained scrolling, and repeated direction changes. Target fluid, predictable, responsive, controllable; avoid sudden jumps, over-sensitive mapping, uncontrolled inertia, choppy damping, unreliable reversing. Provide a subtle first-use/contextual cue for forward/backward direction (current code already has one — `src/scroll/scrollDrive.js` / the HUD telemetry cue in `BUILD_LOG.md` job N — evolve it, don't rebuild from scratch) without turning it into permanent HUD clutter. Preserve the accepted reversible-scroll behavior where technically compatible.
+Scroll quality is the primary user-facing performance metric — not average FPS alone. Test wheel and trackpad, forward and backward, slow and fast, sustained scrolling, and repeated direction changes. Target fluid, predictable, responsive, controllable; avoid sudden jumps, over-sensitive mapping, uncontrolled inertia, choppy damping, unreliable reversing. Provide a subtle first-use/contextual cue for forward/backward direction without turning it into permanent HUD clutter. The old HUD telemetry cue described in `BUILD_LOG.md` job N was retired with the Phase 3d sparse HUD; its historical implementation is not a current UI requirement. Preserve the accepted reversible-scroll behavior where technically compatible.
 
 ---
 
@@ -271,7 +271,7 @@ Canonical folder (actual on-disk name — see Open Issues §30.1): `reference _i
 
 High-elevation oblique drone/skyscraper camera, approximate pitch **45–60° downward**. Roof + side of car visible, road readable, substantial environment context, true 3D depth, hero vehicle clear. Player car target: **~20–30% larger on-screen** than vehicles in `camreference_1`, at comparable frame width — achieved without destroying the high-altitude character.
 
-**Camera behavior — a major architectural change from current code.** The current camera (`src/scene/carRig.js`) is a child of the car rig, permanently fixed in screen position while the world moves. The new doctrine is the opposite: the camera maintains **stable world-space orientation** and does **not** rotate with the car; the car turns beneath/within the frame. Camera translation behaves like a controlled aerial rail — no free orbit, no swinging around every corner, no constant dual-axis recentering, no pinning the car to one screen coordinate, no conventional chase-camera behavior. Allow controlled screen-space drift; use only enough framing correction to keep the car safely visible. Motion should feel stable, smooth, subtly inertial, premium, cinematic rather than reactive. Runtime-tune FOV, elevation, pitch, lateral offset, look target, damping, tracking gain, and safety framing.
+**Camera behavior — implemented in Phase 3, pending visual review.** The pre-Phase-3 camera (`src/scene/carRig.js`) was a child of the car rig, permanently fixed in screen position while the world moved. The current aerial camera maintains **stable world-space orientation** and does **not** rotate with the car; the car turns beneath/within the frame. Camera translation behaves like a controlled aerial rail — no free orbit, no swinging around every corner, no constant dual-axis recentering, no pinning the car to one screen coordinate, no conventional chase-camera behavior. Allow controlled screen-space drift; use only enough framing correction to keep the car safely visible. Motion should feel stable, smooth, subtly inertial, premium, cinematic rather than reactive. Runtime-tune FOV, elevation, pitch, lateral offset, look target, damping, tracking gain, and safety framing.
 
 **Route-led tracking.** The aerial rail is the circuit itself: camera tracking is route-led, not car-led. The camera primarily follows the path and flow of the track route, and does not continuously solve its position from the car's exact position, heading, or every lateral movement. The car moves naturally within that pre-composed route framing; correction toward the car is the exception, applied only when needed to preserve visibility or composition, never the default source of camera motion. Rule of thumb: **track the route of the track; frame the car within it — do not track the car and let the track follow.** This reinforces the stable, cinematic behavior above and keeps the implementation from drifting toward a conventional chase/follow camera.
 

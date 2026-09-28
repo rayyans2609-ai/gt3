@@ -189,6 +189,10 @@ export function morphTo(index) {
     return;
   }
 
+  // Preloading replaces the car mount's children, which also removes this mask.
+  // Ensure the first route swap has the same particle layer as later swaps.
+  if (particles?.parent !== carMount) carMount.add(particles);
+
   outgoing = carMount.children.find((c) => c !== particles) || null;
   incoming = next;
   pendingIndex = index;

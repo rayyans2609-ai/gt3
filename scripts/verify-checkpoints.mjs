@@ -167,21 +167,48 @@ try {
     }), duration);
   }
   function stats(samples) {
-    const ordered = samples.filter(ms => ms > 0 && ms < 250).sort((a, b) => a - b);
+    const ordered = samples.filter(ms => ms > 0).sort((a, b) => a - b);
+    const longFrames = ordered.filter(ms => ms >= 250);
     return { frames: ordered.length, p50: ordered[Math.floor(ordered.length * 0.5)] ?? null,
-      p95: ordered[Math.floor(ordered.length * 0.95)] ?? null };
+      p95: ordered[Math.floor(ordered.length * 0.95)] ?? null,
+      longFrames: { count: longFrames.length, ms: longFrames } };
   }
   await page.mouse.wheel({ deltaY: 240 });
   await seek(0.2);
   const idle = stats(await frames(1600));
-  await seek(thresholds[1] - 0.005, { instant: true, settle: 150 });
-  const swapPromise = frames(1200);
-  await page.evaluate(async t => (await import('/src/scroll/scrollDrive.js')).seekTo(t, { instant: true }),
-    thresholds[1] + 0.004);
+
+  // Settle on one side of a single gate. Capturing the diagnostic image happens in
+  // a separate swap so screenshot encoding cannot contaminate the frame-time sample.
+  const swapStart = thresholds[1] - 0.005;
+  const swapEnd = thresholds[1] + 0.004;
+  const beforeSwap = await seek(swapStart, { instant: true, settle: 1050 });
+  const expectedSwapIndex = expected(swapEnd);
+  assert(beforeSwap.active !== expectedSwapIndex,
+    `swap setup did not straddle one gate: ${beforeSwap.active} -> ${expectedSwapIndex}`);
+  await page.evaluate(async t => (await import('/src/scroll/scrollDrive.js')).seekTo(t, { instant: true }), swapEnd);
+  await page.waitForFunction(async () => (await import('/src/scene/morph.js')).isMorphing(), { timeout: 30000 });
   await wait(300);
   await page.screenshot({ path: `${root}/mid-swap-day.png` });
+  await page.waitForFunction(async () => !(await import('/src/scene/morph.js')).isMorphing(), { timeout: 30000 });
+  const capturedSwap = await read();
+  assert(capturedSwap.active === expectedSwapIndex && capturedSwap.model.length === 1
+    && capturedSwap.model[0] === `car-${carIds[expectedSwapIndex]}`,
+  `captured swap did not complete at car ${expectedSwapIndex}: ${JSON.stringify(capturedSwap)}`);
+
+  // Return to the settled start, then measure one uninterrupted crossing of this
+  // exact gate. Unlike the old Audi -> Nissan -> Audi sequence, this cannot cancel
+  // the swap before its midpoint.
+  await seek(swapStart, { instant: true, settle: 1050 });
+  const swapPromise = frames(1200);
+  await page.evaluate(async t => (await import('/src/scroll/scrollDrive.js')).seekTo(t, { instant: true }),
+    swapEnd);
+  await page.waitForFunction(async () => (await import('/src/scene/morph.js')).isMorphing(), { timeout: 30000 });
   const swap = stats(await swapPromise);
-  assert(!(await read()).morphing, 'swap never settled');
+  await page.waitForFunction(async () => !(await import('/src/scene/morph.js')).isMorphing(), { timeout: 30000 });
+  const measuredSwap = await read();
+  assert(measuredSwap.active === expectedSwapIndex && measuredSwap.model.length === 1
+    && measuredSwap.model[0] === `car-${carIds[expectedSwapIndex]}`,
+  `measured swap did not complete at car ${expectedSwapIndex}: ${JSON.stringify(measuredSwap)}`);
 
   const captures = [];
   for (const theme of ['day', 'night']) {

@@ -136,8 +136,11 @@ try {
       const end = Date.now() + 9000;
       const seen = new Set();
       let crossings = 0;
+      // Each burst owns its full budget; capping it by the phase deadline let the final
+      // backward burst start with almost no time left and fail spuriously.
+      const burstMs = 2500;
       async function driveUntil(deltaY, target) {
-        const burstEnd = Math.min(end, Date.now() + 1800);
+        const burstEnd = Date.now() + burstMs;
         while (Date.now() < burstEnd) {
           await page.mouse.wheel({ deltaY });
           await wait(110);
@@ -149,12 +152,14 @@ try {
         }
         return false;
       }
-      while (Date.now() < end) {
+      // Start a forward+backward pair only when both bursts' full budgets still fit.
+      do {
         assert(await driveUntil(150, above), `wheel input did not cross forward over gate ${gate}`);
         crossings++;
         assert(await driveUntil(-150, below), `wheel input did not cross backward over gate ${gate}`);
         crossings++;
-      }
+      } while (end - Date.now() > 2 * burstMs);
+      assert(crossings >= 2, `wheel oscillation at gate ${gate} made only ${crossings} crossings`);
       const settled = await seek(gate - 0.003, { settle: 1050 });
       check(settled, `oscillation ${gate}`);
       assert(seen.has(below) && seen.has(above),

@@ -110,3 +110,40 @@ against `ce61556`, before 3c/3d landed).
 
 Earlier "3c PASS" / "3b+3c technically complete" language in this doc and in chat overstated
 confidence — treat this section as authoritative over anything above it.
+
+## Phase 3 acceptance sequence completed 2026-09-28 ~13:23 (supersedes the "FINAL correction" section above)
+
+Host recovered (idle 60-93%, sys 4-23%, pageouts/swapouts flat). One combined browser session
+(`/tmp/gt3-final2/results.json`) resolved every previously-open item with direct runtime evidence:
+
+1. **instant-seek-far: PASS.** Root cause was the harness (`seek()`'s fixed 1050ms settle vs
+   morph's 850ms nominal duration -- thin margin that this session's chronic host CPU
+   starvation could exceed), not the app. Fixed narrowly in `c28cd41`: `seek()` now waits on
+   `isMorphing()===false` instead of a blind delay. Confirmed: instant seek to t=0.91 settles
+   cleanly (single model `car-porsche`, `morphing:false`).
+2. **First-swap particles: PASS.** Fresh context, genuinely-first swap: 19/94 sampled frames
+   showed particles attached to `car-mount`, opacity to 0.85, correct final car.
+3. **Later-swap particles: PASS.** Fresh context past gate 1: 18/95 frames, same pattern,
+   confirming the earlier particle-reattachment fix holds on subsequent swaps too.
+4. **3d HUD: PASS.** All 11 DOM presence/absence checks matched the KEEP/REMOVE list exactly;
+   zero console errors; car name updates across a crossing. One apparent F-key failure was
+   isolated with a follow-up micro-script and traced to the combined script's own insufficient
+   settle time before its baseline, not a real regression -- re-measured in isolation:
+   `locked` never true, no `#showcase-layer`, camera delta 0.00135 world units (car is 4.6
+   units long) after pressing F.
+5. **Camera regression (light/technical): no regression signal.** 6 settled route points,
+   FOV constant, no stuck morphs, no errors. `aerialCamera.js` remains byte-identical to the
+   3b head, so this only needed to rule out side effects from 3c/3d -- it did.
+
+Codex/Astra hit a usage-limit mid-run for its independent confirmatory pass (resets ~1:42 PM);
+the manager (Sonnet 5, acting in the manager role) completed the final synthesis directly from
+the concrete evidence above rather than block the stopping point on a quota reset.
+
+**Remaining, honestly:** route marker's own SVG x/y coordinates were not directly sampled
+(only `state.progress` advancing + map-SVG presence confirmed); gate Day/Night captures are
+from an earlier session, not re-captured against this exact head. Neither is believed to
+indicate a defect. **3b framing (A vs C), hero scale, motion feel, and gate/HUD visual
+appearance remain human-review-only, as they always were.**
+
+Phase 3 is now technically complete and runtime-verified. `main` untouched at `62024bb`.
+Branch head: `c28cd41`.

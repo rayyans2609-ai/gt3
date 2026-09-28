@@ -4,8 +4,8 @@ let control = null;
 
 export function initThemeToggle() {
   if (control) return control;
-  const host = document.getElementById('hud-topright');
-  if (!host) throw new Error('Expected an existing #hud-topright');
+  const host = document.getElementById('hud-bottomright');
+  if (!host) throw new Error('Expected an existing #hud-bottomright');
 
   control = document.createElement('button');
   control.type = 'button';

@@ -24,10 +24,12 @@ Worktrees need a real `font/` copy (gitignored) and a `node_modules` symlink; bo
   browser-verified.
 
 ## Next exact actions (when the host is healthy)
-1. Fix `scripts/verify-checkpoints.mjs` swap-timing test (line ~175): it can cancel the swap it
+0. DONE `76b9309` (Terra, 07:50): items 1 and 2 below are fixed; syntax-checked only — the host
+   load rose again (~248) before build/browser runs. Start at item 3.
+1. (done) Fix `scripts/verify-checkpoints.mjs` swap-timing test (line ~175): it can cancel the swap it
    measures (Audi→Nissan→Audi before midpoint). Settle fully, assert a swap occurs, exclude
    screenshots from timing, report ≥250 ms stalls instead of filtering them. (Terra/Luna.)
-2. Morph: reattach the particle object when a morph starts — preload's `setCarModel()` removes
+2. (done) Morph: reattach the particle object when a morph starts — preload's `setCarModel()` removes
    it, so the first swap lacks its particle mask. Small, pre-existing. (Terra.)
 3. On `phase3-integration`: run `verify-checkpoints.mjs`, `verify-aerial.mjs branch|motion|
    focused`, captures of gates (Day/Night) and a mid-swap frame.

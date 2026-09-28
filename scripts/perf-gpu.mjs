@@ -1,4 +1,4 @@
-/** GPU frame cost at settled route points, including coin/montage handoffs. */
+/** GPU frame cost at settled route points. */
 import puppeteer from 'puppeteer-core';
 
 const LABEL = process.argv[2] || 'current';
@@ -22,9 +22,6 @@ await page.waitForFunction(() => {
   const name = document.querySelector('.hud-identity__name');
   return name?.textContent.trim() && window.__gt3?.renderer;
 }, { timeout: 120000 });
-const TRACK_LENGTH = await page.evaluate(async () => (
-  await import('/src/scene/trackCurve.js')
-).TRACK_LENGTH);
 await new Promise((r) => setTimeout(r, 5000));
 
 for (const at of STOPS) {
@@ -32,12 +29,11 @@ for (const at of STOPS) {
     const max = document.documentElement.scrollHeight - window.innerHeight;
     window.scrollTo({ top: max * target, behavior: 'instant' });
   }, at);
-  await page.waitForFunction((target, length) => {
-    const text = document.querySelector('.hud-telemetry__number')?.textContent || '';
-    const metres = Number(text.replace(/[^0-9]/g, ''));
+  await page.waitForFunction((target) => {
+    const progress = window.__gt3?.probe().progress;
     const montage = !!document.querySelector('#montage-layer.is-active');
-    return !montage && Number.isFinite(metres) && Math.abs(metres / length - target) < 0.001;
-  }, { timeout: 180000 }, at, TRACK_LENGTH);
+    return !montage && Number.isFinite(progress) && Math.abs(progress - target) < 0.001;
+  }, { timeout: 180000 }, at);
   await new Promise((r) => setTimeout(r, 2400));
 
   const result = await page.evaluate(async (samples) => {
@@ -81,11 +77,11 @@ for (const at of STOPS) {
       }
     });
     const sun = g.scene.children.find((c) => c.isDirectionalLight && c.castShadow);
-    const actualMetres = Number((document.querySelector('.hud-telemetry__number')?.textContent || '').replace(/[^0-9]/g, ''));
+    const actualProgress = g.probe().progress;
     g.passes.motionBlur.enabled = motionEnabled;
     g.passes.wash.enabled = washEnabled;
     g.composer.render = render;
-    return { times, disjoint, actualMetres, calls: info.render.calls,
+    return { times, disjoint, actualProgress, calls: info.render.calls,
       triangles: info.render.triangles, casters, casterTris,
       shadowMap: sun?.shadow.mapSize.x ?? 0 };
   }, SAMPLES);
@@ -93,7 +89,7 @@ for (const at of STOPS) {
   const sorted = result.times.sort((a, b) => a - b);
   const q = (p) => sorted[Math.min(sorted.length - 1, Math.floor(sorted.length * p))];
   console.log(JSON.stringify({ label: LABEL, requestedProgress: at,
-    actualProgress: result.actualMetres / TRACK_LENGTH, medianGpuMs: q(0.5),
+    actualProgress: result.actualProgress, medianGpuMs: q(0.5),
     p25GpuMs: q(0.25), p90GpuMs: q(0.9), samples: sorted.length,
     disjoint: result.disjoint, drawCalls: result.calls, triangles: result.triangles,
     shadowCasters: result.casters, shadowCasterTriangles: result.casterTris,

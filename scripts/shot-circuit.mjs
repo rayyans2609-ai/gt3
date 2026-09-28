@@ -1,7 +1,6 @@
-/** Capture settled legacy camera frames across the loop, skipping coin montages. */
+/** Capture settled camera frames across the loop, skipping the legacy montage layer. */
 // Usage: GT3_URL=http://localhost:5174 node scripts/shot-circuit.mjs
 import puppeteer from 'puppeteer-core';
-import { TRACK_LENGTH } from '../src/scene/trackCurve.js';
 
 const base = process.env.GT3_URL || 'http://localhost:5173';
 const stops = [0, 0.2, 0.4, 0.6, 0.8, 0.99];
@@ -36,11 +35,10 @@ for (const at of stops) {
   let montage = false;
   for (let i = 0; i < 200; i++) {
     await new Promise((resolve) => setTimeout(resolve, 200));
-    ({ actual, montage } = await page.evaluate((length) => ({
-      actual: Number((document.querySelector('.hud-telemetry__number')?.textContent || '')
-        .replace(/[^0-9]/g, '')) / length,
+    ({ actual, montage } = await page.evaluate(() => ({
+      actual: window.__gt3.probe().progress,
       montage: !!document.querySelector('#montage-layer.is-active'),
-    }), TRACK_LENGTH));
+    })));
     if (montage) { await page.keyboard.press('Escape'); continue; }
     if (Math.abs(actual - at) < 0.001) break;
   }

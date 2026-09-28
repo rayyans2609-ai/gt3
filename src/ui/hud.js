@@ -49,6 +49,9 @@ function buildIdentity(root) {
   const copy = element('div', 'hud-identity__copy');
   for (let i = 0; i < 2; i++) {
     const slot = element('div', `hud-identity__slot${i === 0 ? ' is-visible' : ''}`);
+    // The inactive slot is only hidden via opacity (the cross-fade needs both slots
+    // painted at once), so assistive tech needs aria-hidden kept in sync separately.
+    slot.setAttribute('aria-hidden', i === 0 ? 'false' : 'true');
     const name = element('div', 'hud-identity__name');
     slot.append(name);
     copy.append(slot);
@@ -118,7 +121,9 @@ function setIdentity(index, immediate = false) {
   identitySlots[nextIndex].name.textContent = car.displayName;
   if (!immediate) {
     identitySlots[visibleIdentitySlot].slot.classList.remove('is-visible');
+    identitySlots[visibleIdentitySlot].slot.setAttribute('aria-hidden', 'true');
     identitySlots[nextIndex].slot.classList.add('is-visible');
+    identitySlots[nextIndex].slot.setAttribute('aria-hidden', 'false');
     visibleIdentitySlot = nextIndex;
   }
   renderedCarIndex = car.index;

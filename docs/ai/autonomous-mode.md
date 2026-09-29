@@ -157,8 +157,9 @@ Cheapest sufficient evidence first: static/syntax → targeted deterministic che
 **Operational decisions stay inside the run.** Quota limits, worker failures, retry and reroute choices, checkpointing, and temporary tool or host limits are **not escalated to the user**.
 
 - **Routine recovery** (the list above) is the manager's call.
-- **Consequential operational choices** go to an independent reviewer, under the same independence rule as brief verification (§2): Sol `xhigh`, or the strongest available Claude-side reviewer when Codex is unavailable. Examples: rerouting work onto scarcer Claude quota, taking over or discarding a cut-off worker's partial output, proceeding versus waiting out a limit. The reviewer picks the safest course consistent with the objective and the resource policy (§5–6).
-- The manager proceeds, then records the decision in the ledger and the handoff, marked **overridable by the user**.
+- **Consequential operational choices** go to an independent reviewer, under the same independence rule as brief verification (§2): Sol `xhigh`, or the strongest available Claude-side reviewer when Codex is unavailable. Examples: rerouting work onto scarcer Claude quota, taking over or discarding a cut-off worker's partial output, proceeding versus waiting out a limit. The reviewer **recommends** the safest course consistent with the objective and the resource policy (§5–6). The manager decides and records any deviation from that recommendation.
+- The manager proceeds, then records the decision in the ledger and the handoff, marked **overridable by the user**. Record reviewer substitutions made because of quota (e.g. a Claude reviewer standing in for Sol) the same way.
+- **Host protection (§6) is not an operational convenience.** Evidence filters may be tuned, but relaxing pre-flight or degradation thresholds is a protected-resource decision for the user.
 - **Stop for the user only** when a decision changes product intent, subjective experience, feature scope, a major architecture/product tradeoff, a protected resource constraint, or an existing human-review gate.
 - Astra escalation is unchanged (§2–3).
 

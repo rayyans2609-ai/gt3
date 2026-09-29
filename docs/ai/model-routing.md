@@ -130,7 +130,7 @@ Before routing, identify the dominant bottleneck: mechanical execution, straight
 
 **Fast path.** For obvious tasks: classify → execute → verify → finish. No planning document, delegation graph, critique round, manager ceremony, or multi-model discussion when it adds no value.
 
-**Human judgment.** Escalate to the user — never to a bigger model — when a decision materially changes product intent, visual direction, subjective feel, feature scope, meaningful UX behavior, or a major architecture tradeoff with product consequences. Don't ask the user to decide routine, reversible engineering details.
+**Human judgment.** Escalate to the user — never to a bigger model — when a decision materially changes product intent, visual direction, subjective feel, feature scope, meaningful UX behavior, or a major architecture tradeoff with product consequences. Don't ask the user to decide routine, reversible engineering details. In Autonomous Mode, operational interruptions (quota, worker failure, reroute, checkpoint, tool/host limits) are also decided inside the run and reported as overridable (`autonomous-mode.md` §9).
 
 ## 7. Routing learns from GT3
 

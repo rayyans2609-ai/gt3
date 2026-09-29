@@ -154,6 +154,14 @@ Cheapest sufficient evidence first: static/syntax → targeted deterministic che
 
 **Recover without asking:** retry a transient deterministic command (after classifying the failure); fix a proven harness bug; restart an owned Vite/Puppeteer/browser process; reroute a worker; heavy → light fallback; checkpoint at a model/tool limit; wait/retry a temporarily unavailable tool; Astra evidence review; correct stale claims. No blind retries (`model-routing.md` §6).
 
+**Operational decisions stay inside the run.** Quota limits, worker failures, retry and reroute choices, checkpointing, and temporary tool or host limits are **not escalated to the user**.
+
+- **Routine recovery** (the list above) is the manager's call.
+- **Consequential operational choices** go to an independent reviewer, under the same independence rule as brief verification (§2): Sol `xhigh`, or the strongest available Claude-side reviewer when Codex is unavailable. Examples: rerouting work onto scarcer Claude quota, taking over or discarding a cut-off worker's partial output, proceeding versus waiting out a limit. The reviewer picks the safest course consistent with the objective and the resource policy (§5–6).
+- The manager proceeds, then records the decision in the ledger and the handoff, marked **overridable by the user**.
+- **Stop for the user only** when a decision changes product intent, subjective experience, feature scope, a major architecture/product tradeoff, a protected resource constraint, or an existing human-review gate.
+- Astra escalation is unchanged (§2–3).
+
 **Stop and checkpoint — do not expand — when:** scope would materially change; product or major architecture is ambiguous; a destructive action is required; `main` or shared history needs an unauthorized change; evidence is irreconcilable; recovery has stopped yielding progress; the next phase is outside scope; all remaining work needs human judgment.
 
 **Stop discipline:** objective achieved; all machine-verifiable work complete; only genuine human judgment remains; or remaining work is blocked and useful fallback exhausted. Do not invent a next phase, unrelated cleanup, extra features, broad refactors, speculative architecture, or unnecessary tests.

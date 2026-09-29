@@ -244,6 +244,50 @@ print('tokens used\\n0',flush=True)
     tick(run)
     record("user-question blocked", run, load(run / "manager.json")["holder"] == "opus")
 
+    place, run, job, repo = setup("packet-required")
+    (run / "continuity.md").unlink()
+    blocked(job)
+    tick(run)
+    assert load(run / "manager.json")["mode"] == "opus-primary"
+    (run / "continuity.md").write_text("  \n")
+    blocked(job)
+    tick(run)
+    record("missing and empty packet refuse failover", run,
+           load(run / "manager.json")["mode"] == "opus-primary" and
+           "TAKEOVER REFUSED" in (run / "events.log").read_text())
+
+    place, run, job, repo = setup("bold-effort")
+    (run / "continuity.md").write_text("# Real packet\n- **Takeover effort:** xhigh.\n")
+    takeover(run, job)
+    record("bold takeover effort xhigh", run, load(run / "turn.json")["effort"] == "xhigh")
+
+    place, run, job, repo = setup("deadline")
+    cfg = load(run / "watch-config.json")
+    cfg["deadline"] = "2000-01-01T00:00:00+00:00"
+    save(run / "watch-config.json", cfg)
+    blocked(job)
+    tick(run)
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("deadline_watcher", HERE / "continuity_watch.py")
+    deadline_watcher = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(deadline_watcher)
+    resume_refused = deadline_watcher.launch_turn(run, load(run / "manager.json"), "event", session="probe-session") is False
+    record("expired deadline refuses failover and event resume", run,
+           load(run / "manager.json")["mode"] == "opus-primary" and resume_refused and
+           not (run / "turn.json").exists())
+
+    place, run, job, repo = setup("dry-run")
+    (run / "continuity.md").write_text("# Packet\n**Takeover effort:** xhigh\n")
+    blocked(job)
+    preview = command([WATCH, "--run-dir", run, "tick", "--dry-run"])
+    assembled = json.loads(preview.stdout)
+    record("dry-run trigger and command", run,
+           assembled["wouldFailover"] is True and
+           assembled["trigger"] == "limit-text timeline" and
+           assembled["command"][0] == str(HERE.parent / "codex-route.sh") and
+           assembled["command"][3] == "-r" and assembled["command"][4] == "xhigh" and
+           load(run / "manager.json")["mode"] == "opus-primary")
+
     place, run, job, repo = setup("ack-crash")
     takeover(run, job)
     (run / "stub-no-ack").touch()
@@ -296,6 +340,7 @@ print('tokens used\\n0',flush=True)
     os.utime(job / "timeline.jsonl", (old, old))
     config = load(run / "watch-config.json")
     config["staleSeconds"] = .1
+    config["enableStalenessAdvisory"] = True
     save(run / "watch-config.json", config)
     tick(run)
     record("hung worker progress", run, load(run / "workers.json")[0]["staleReported"] is True and

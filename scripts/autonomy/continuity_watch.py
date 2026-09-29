@@ -9,6 +9,7 @@ import json
 import os
 from pathlib import Path
 import re
+import shlex
 import subprocess
 import sys
 import time
@@ -204,14 +205,21 @@ def session_from_log(path):
     return matches[-1] if matches else None
 
 
-def launch_turn(root, state, prompt, session=None, effort=None):
-    status = read(root / "turn.json", {})
-    if alive(status):
-        return False
-    effort = effort or status.get("effort") or "high"
-    call_id = uuid.uuid4().hex
-    path = root / "calls" / (call_id + ".log")
-    path.parent.mkdir(exist_ok=True)
+def before_deadline(cfg):
+    deadline = cfg.get("deadline")
+    return not deadline or dt.datetime.fromisoformat(deadline.replace("Z", "+00:00")).timestamp() > time.time()
+
+
+def packet_effort(root):
+    packet = root / "continuity.md"
+    if not packet.exists() or not packet.read_text().strip():
+        return None
+    match = re.search(r"^\s*(?:[-*]\s*)?(?:\*\*)?Takeover effort:(?:\*\*)?\s*(high|xhigh)\b",
+                      packet.read_text(), re.I | re.M)
+    return match.group(1).lower() if match else "high"
+
+
+def turn_command(prompt, session=None, effort="high"):
     command = [str(ROUTE)]
     if session:
         command.append("resume")
@@ -219,11 +227,27 @@ def launch_turn(root, state, prompt, session=None, effort=None):
     if session:
         command.append(session)
     command.append(prompt)
+    return command
+
+
+def launch_turn(root, state, prompt, session=None, effort=None):
+    cfg = read(root / "watch-config.json", {})
+    if not before_deadline(cfg):
+        log(root, "DEADLINE reached; manager launch refused")
+        return False
+    status = read(root / "turn.json", {})
+    if alive(status):
+        return False
+    effort = effort or status.get("effort") or "high"
+    call_id = uuid.uuid4().hex
+    path = root / "calls" / (call_id + ".log")
+    path.parent.mkdir(exist_ok=True)
+    command = turn_command(prompt, session, effort)
     environment = os.environ.copy()
     environment.update(creds(state))
     environment.update(GT3_RUN_DIR=str(root), GT3_MANAGER_LAUNCH="1")
     with path.open("w") as output:
-        child = subprocess.Popen(command, cwd=str(read(root / "watch-config.json", {}).get("worktree", HERE.parent.parent)),
+        child = subprocess.Popen(command, cwd=str(cfg.get("worktree", HERE.parent.parent)),
                                  env=environment, stdin=subprocess.DEVNULL, stdout=output,
                                  stderr=subprocess.STDOUT, start_new_session=True)
     write(root / "turn.json", {"pid": child.pid, "birth": birth(child.pid), "log": str(path),
@@ -309,6 +333,32 @@ def advisory(root, cfg):
     return answer == "manager-dead"
 
 
+def dry_run_tick(root):
+    """Inspect a scratch run and assemble takeover without transfer or launch."""
+    cfg = read(root / "watch-config.json", {})
+    state = read(root / "manager.json", {})
+    entries = timeline(root, Path(cfg["jobDir"]))
+    trigger = any(entry.get("state") == "blocked" and
+                  LIMIT.search(str(entry.get("detail", ""))) and
+                  (not entry.get("at") or entry["at"] >= state.get("since", ""))
+                  for entry in entries)
+    effort = packet_effort(root)
+    allowed = state.get("mode") == "opus-primary" and trigger and effort is not None and before_deadline(cfg)
+    prompt = (HERE / "sol-takeover.md").read_text() + "\nPacket: " + str(root / "continuity.md")
+    command = turn_command(prompt, effort=effort or "high") if allowed else None
+    result = {"trigger": "limit-text timeline" if trigger else None, "wouldFailover": allowed,
+              "reason": None if allowed else ("packet missing or empty" if effort is None else
+                                             "deadline reached" if not before_deadline(cfg) else "no current limit"),
+              "cwd": cfg.get("worktree"), "command": command,
+              "environment": {"GT3_RUN_DIR": str(root), "GT3_MANAGER_LAUNCH": "1",
+                              "GT3_MANAGER_ID": "<assigned-by-failover>",
+                              "GT3_MANAGER_GEN": str(state.get("generation", 0) + 1)}}
+    result["shellCommand"] = ("cd " + shlex.quote(str(result["cwd"])) + " && " +
+                              " ".join(k + "=" + shlex.quote(v) for k, v in result["environment"].items()) +
+                              " " + shlex.join(command)) if command else None
+    print(json.dumps(result, indent=2))
+
+
 def tick(root):
     with locked(root):
         cfg = read(root / "watch-config.json", {})
@@ -339,7 +389,7 @@ def tick(root):
             opus = read(root / "opus-process.json", {})
             if not trigger and opus and not alive(opus):
                 trigger = "configured Opus PID exited"
-            if not trigger and current.get("state") == "working":
+            if not trigger and cfg.get("enableStalenessAdvisory", False) and current.get("state") == "working":
                 packet = root / "continuity.md"
                 marks = [p.stat().st_mtime for p in (job / "timeline.jsonl", packet,
                          *[Path(v) for v in cfg.get("transcripts", [])]) if p.exists()]
@@ -352,27 +402,34 @@ def tick(root):
                         if advisory(root, cfg):
                             trigger = "Luna manager-dead advisory after ambiguous staleness"
             if trigger:
-                new_id = "sol-" + uuid.uuid4().hex
-                result = ctl(root, "failover", "--expect-gen", state["generation"],
-                             "--expect-id", state["managerId"], "--sol-id", new_id)
-                log(root, "failover " + trigger + " result=" + str(result.returncode) + " " + result.stderr.strip())
-                if result.returncode == 0:
-                    state = read(root / "manager.json", state)
+                if packet_effort(root) is None:
+                    log(root, "TAKEOVER REFUSED: real continuity packet missing or empty; Opus retains ownership")
+                elif not before_deadline(cfg):
+                    log(root, "TAKEOVER REFUSED: packet deadline reached; Opus retains ownership")
+                else:
+                    new_id = "sol-" + uuid.uuid4().hex
+                    result = ctl(root, "failover", "--expect-gen", state["generation"],
+                                 "--expect-id", state["managerId"], "--sol-id", new_id)
+                    log(root, "failover " + trigger + " result=" + str(result.returncode) + " " + result.stderr.strip())
+                    if result.returncode == 0:
+                        state = read(root / "manager.json", state)
         previous_turn = read(root / "turn.json", {})
         if state["mode"] == "sol-starting" and previous_turn.get("limitRejected") and previous_turn.get("processed"):
             codex_record = read(root / "quota.json", {"routes": {}})["routes"].get("codex:gpt-6-sol", {})
             reset = (codex_record.get("lastCliRejection") or {}).get("resetAt") or codex_record.get("resetAt")
-            deadline = cfg.get("deadline")
             if reset and dt.datetime.fromisoformat(reset).timestamp() <= time.time() and \
                     time.time() >= previous_turn.get("nextRetryEpoch", 0) and \
-                    (not deadline or dt.datetime.fromisoformat(deadline).timestamp() > time.time()):
+                    before_deadline(cfg):
                 write(root / "turn.json", {})
                 log(root, "Codex reset eligible; retrying takeover")
         if state["mode"] == "sol-starting" and not read(root / "turn.json", {}):
             packet = root / "continuity.md"
-            effort = "xhigh" if re.search(r"Takeover effort:\s*xhigh", packet.read_text() if packet.exists() else "", re.I) else "high"
-            prompt = (HERE / "sol-takeover.md").read_text() + "\nPacket: " + str(packet)
-            launch_turn(root, state, prompt, effort=effort)
+            effort = packet_effort(root)
+            if effort is None:
+                log(root, "TAKEOVER LAUNCH REFUSED: real continuity packet missing or empty")
+            else:
+                prompt = (HERE / "sol-takeover.md").read_text() + "\nPacket: " + str(packet)
+                launch_turn(root, state, prompt, effort=effort)
         if state["mode"] in ("sol-continuity", "handback-requested"):
             session = read(root / "sol-session.json", {}).get("sessionId")
             if session and route_eligible(root, "codex:gpt-6-sol") and not alive(read(root / "turn.json", {})):
@@ -469,7 +526,8 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--run-dir", default=os.environ.get("GT3_RUN_DIR"), required=False)
     sub = parser.add_subparsers(dest="mode", required=True)
-    sub.add_parser("tick")
+    tick_parser = sub.add_parser("tick")
+    tick_parser.add_argument("--dry-run", action="store_true")
     loop = sub.add_parser("loop")
     loop.add_argument("--interval", type=float, default=120)
     ack = sub.add_parser("ack")
@@ -494,7 +552,7 @@ def main():
         parser.error("--run-dir or GT3_RUN_DIR required")
     root = Path(args.run_dir).resolve()
     if args.mode == "tick":
-        tick(root)
+        dry_run_tick(root) if args.dry_run else tick(root)
     elif args.mode == "loop":
         while True:
             tick(root)

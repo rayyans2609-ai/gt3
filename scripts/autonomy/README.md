@@ -107,8 +107,9 @@ Run local stubs with `python3 scripts/autonomy/test_controller.py`.
 `continuity-watch.sh` wraps the Python watcher. A run must already be initialized
 by the CONT-1 controller. Copy `continuity.md` into the run directory, fill it
 with current facts, and write `watch-config.json` with `jobDir`, `worktree`,
-`deadline` (ISO timestamp), optional `transcripts`, `staleSeconds` (default
-1800), and `workerStaleSeconds` (default 1800). The packet's `Takeover effort:`
+`deadline` (ISO timestamp), optional `transcripts`, `enableStalenessAdvisory`
+(default false), `staleSeconds` (1800 when enabled), and `workerStaleSeconds`
+(default 1800). The packet's `Takeover effort:`
 field is `high` or `xhigh`. No priming is used. The run's sole ownership writer
 remains `controller.sh`; never edit `manager.json` directly.
 
@@ -128,7 +129,11 @@ followed by a user-question `blocked`; user questions alone do not. A current
 limit-text `state.json`, a configured dead Opus PID, or ambiguous staleness plus
 a Luna `manager-dead` advisory are the other triggers. A stale worker does not
 count as manager progress; monitor log chatter does not count. Luna does not
-transfer ownership itself.
+transfer ownership itself. Ambiguous staleness requires the explicit
+`enableStalenessAdvisory` opt-in. The real `continuity.md` must contain text
+before failover; the deadline gates failover and every manager turn. Use
+`tick --dry-run` against a scratch run to inspect the limit trigger and exact
+takeover route command without transferring ownership or launching a model.
 
 `worker-launch` requires a stable task ID, bounded permissions, brief, model,
 effort and command. It records launch intent before a controller-admitted

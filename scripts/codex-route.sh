@@ -16,7 +16,8 @@
 set -euo pipefail
 
 usage() {
-  echo "Usage: $0 -m <model> -r <reasoning-effort> <prompt|@brief-file>" >&2
+  echo "Usage: $0 [-m model] [-r effort] <prompt|@brief-file>" >&2
+  echo "       $0 resume -m <model> -r <effort> <session-id> <prompt|@brief-file>" >&2
   echo "  models seen supported as of docs/ai/codex-cli-invocation.md:" >&2
   echo "    gpt-6-astra gpt-6-sol gpt-6-luna gpt-5.6-sol gpt-5.6-terra gpt-5.6-luna" >&2
   echo "  reasoning-effort: low | medium | high | xhigh | max | ultra" >&2
@@ -25,6 +26,11 @@ usage() {
 
 model=""
 effort=""
+mode="new"
+if [[ ${1:-} == resume ]]; then
+  mode="resume"
+  shift
+fi
 
 while getopts ":m:r:" opt; do
   case "$opt" in
@@ -64,6 +70,13 @@ if [[ $# -lt 1 || -z "${1:-}" ]]; then
   usage
 fi
 
+session=""
+if [[ "$mode" == resume ]]; then
+  [[ $# -ge 2 && "$1" =~ ^[0-9a-fA-F-]{36}$ ]] || usage
+  session="$1"
+  shift
+fi
+
 prompt="$1"
 if [[ "$prompt" == @* ]]; then
   brief_path="${prompt:1}"
@@ -74,11 +87,20 @@ if [[ "$prompt" == @* ]]; then
   prompt="$(cat "$brief_path")"
 fi
 
+codex_args=(exec)
+if [[ "$mode" == resume ]]; then codex_args+=(resume); fi
+codex_args+=(--dangerously-bypass-approvals-and-sandbox --skip-git-repo-check
+  -m "$model" -c "model_reasoning_effort=\"$effort\"")
+if [[ "$mode" == resume ]]; then codex_args+=("$session"); fi
+codex_args+=("$prompt")
+
 if [[ ${GT3_RUN_DIR+x} ]]; then
+  if [[ ${GT3_MANAGER_LAUNCH:-} == 1 ]]; then
+    exec "$(dirname "$0")/autonomy/controller.sh" launch-manager -- \
+      codex "${codex_args[@]}" < /dev/null
+  fi
   exec "$(dirname "$0")/autonomy/controller.sh" run dispatch -- \
-    codex exec --dangerously-bypass-approvals-and-sandbox --skip-git-repo-check \
-    -m "$model" -c "model_reasoning_effort=\"$effort\"" "$prompt" < /dev/null
+    codex "${codex_args[@]}" < /dev/null
 fi
 
-exec codex exec --dangerously-bypass-approvals-and-sandbox --skip-git-repo-check \
-  -m "$model" -c "model_reasoning_effort=\"$effort\"" "$prompt" < /dev/null
+exec codex "${codex_args[@]}" < /dev/null

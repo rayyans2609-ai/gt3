@@ -323,7 +323,7 @@ def main():
                 raise Refused("run requires a command after --")
             manager_launch = args.command == "launch-manager"
             if manager_launch:
-                if state["holder"] != "sol" or state["mode"] not in ("sol-starting", "sol-continuity"):
+                if state["holder"] != "sol" or state["mode"] not in ("sol-starting", "sol-continuity", "handback-requested"):
                     raise Refused("manager launch requires Sol ownership")
                 if state["activeTurn"] and same_process(state["activeTurn"]):
                     raise Refused("a manager turn is already alive")

@@ -159,6 +159,13 @@ Never overlap heavy workloads merely for speed. Before each spawn ask: does it a
 - **Responsiveness:** stop immediately if it collapses.
 - **Pageouts:** record them, but they are not a stop signal on their own (page-cache flushes occur in normal browser runs).
 
+**GT3 headed-browser runs (user decision 2026-09-29, provisional; calibrate from evidence):** on this 8 GB host, even the baseline GT3 page swaps at renderer creation on a clean host (+101k–174k pages per 30-s sample, measured three times). So during GT3 browser verification, swapouts are a **recorded, budgeted** signal rather than an instant stop:
+- stop on a single-sample burst of more than about **250k pages**, or on swapouts rising on **3 consecutive** samples;
+- memory pressure leaving normal still stops **immediately**;
+- responsiveness collapse and the CPU rules are unchanged.
+
+Timings that overlap meaningful swap are labelled **memory-affected**, never clean.
+
 A stopped run is **incomplete**, never a product failure. Timings overlapping swapouts are *memory-affected*, not clean app evidence. On a stop: stop spawning, checkpoint, drop to one task, clean owned stale processes, recover, re-run pre-flight. Never escalate by launching stronger models in parallel under pressure.
 
 **Extended overload.** Stop heavy work; continue useful light/static work; preserve state and evidence; reassess periodically; don't hammer the machine; when light work is exhausted, wait. No fake memory fixes, cache purges or daemon manipulation.

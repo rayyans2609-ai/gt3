@@ -124,6 +124,8 @@ Before routing, identify the dominant bottleneck: mechanical execution, straight
 
 **Risk-based review.** Don't automatically spend another expensive model reviewing every change. Independent review earns its cost when blast radius is large, architecture changes, security/reliability matters, behavior resists deterministic testing, worker uncertainty is high, the subsystem has a regression history, or the change spans multiple critical systems. Small deterministic changes can be accepted from tests + inspection alone.
 
+**Independent brief verification (Autonomous Mode).** Non-trivial implementation briefs get a read-only GPT-6 Sol `xhigh` check before execution. In-flight briefs are reviewed at once, with corrections carried into their acceptance and dependent tasks. The rule, its scope and the Astra escalation threshold live in `autonomous-mode.md` §2; this is the one standing exception to the "use sparingly" guidance below.
+
 **Cross-model review — use sparingly.** Diversity beats raw escalation only sometimes: Sol implementation → Sonnet critique, Opus plan → Sol investigation, Sonnet investigation → Opus synthesis — only where a different reasoning perspective adds real value. Don't turn every task into a committee.
 
 **Fast path.** For obvious tasks: classify → execute → verify → finish. No planning document, delegation graph, critique round, manager ceremony, or multi-model discussion when it adds no value.

@@ -43,7 +43,14 @@ Opus is primary manager while available. It owns: objective, done criteria, deco
 
 - Stay managerially separate from execution. If Claude-side Sol-level work is needed, use a bounded Opus worker instance (`model-routing.md` §8), not the manager itself.
 - Clerical/mechanical work goes to Luna, not Opus or Sol. Delegate to save manager attention, not for ceremony; small tasks go classify → execute → verify → finish.
-- **Brief review (light, not bureaucratic).** Before dispatching a meaningful brief, check: objective, scope, context, file/system ownership, exclusions, expected evidence, acceptance condition, and fit with the resource budget (§6).
+- **Brief self-check (light, not bureaucratic).** Before dispatching a meaningful brief, the author checks: objective, scope, context, file/system ownership, exclusions, expected evidence, acceptance condition, and fit with the resource budget (§6).
+- **Independent brief verification (non-trivial implementation work).** Before execution, where practical, every written brief for non-trivial implementation, debugging or verification-design work gets an independent sanity check from **GPT-6 Sol `xhigh`**, read-only. It is not required for trivial, clerical or purely deterministic work.
+  - **What it checks:** missing requirements, unsupported assumptions that should be measured, contradictions with `SPEC.md` / architecture / repo state / phase ownership, scope creep into other phases, missing dependencies and regression risks, cross-task interactions, weak or misleading verification, subjective acceptance leaking to agents, and needless complexity or decomposition errors.
+  - **What it returns:** `PASS`, or `PATCH BRIEF` with the exact material changes. The author patches the brief before dispatch and applies the same fix to every dependent brief, so the gap is not inherited.
+  - **Briefs already running:** review them immediately; don't restart them just for the review. Carry material corrections into the active task if a safe channel exists. Otherwise make them required checks in that task's acceptance review or follow-up, and in all dependent tasks. Record each correction in the ledger (§11).
+  - **Keep the roles distinct:** brief author, independent reviewer, implementation worker, and acceptance reviewer. No model silently "independently" verifies its own brief. When Sol authors (e.g. Sol-manager mode, §4), use Astra `medium`/`high` or an available Claude worker. If no alternative is practical, use a fresh Sol session and record the reduced independence.
+  - **Escalation:** only to Astra, only for a genuinely serious cross-system, architectural, contradictory or decomposition-level problem, with the repo state, evidence, assumptions and exact question. Routine patches never escalate.
+  - **Heaviness:** the reviewer is light work (§6): read-only, no builds, browsers or dev servers.
 - Worker completion is not acceptance; the manager reviews diff and evidence (`model-routing.md` §6).
 
 ## 3. Astra — the absent-user supervisory layer
@@ -181,6 +188,8 @@ Quota / tool events:…
 Host / process events + cleanup: …
 Watchdog interventions: …
 Material Astra findings: …
+Brief verifications: <brief → PASS | PATCH (what changed, propagated to …)>
+
 Process lessons / improvement candidates: …
 Thinking-level findings: <experiment runs only, §13>
 Unresolved risks:   …

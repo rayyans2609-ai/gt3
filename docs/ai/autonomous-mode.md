@@ -153,7 +153,13 @@ Never overlap heavy workloads merely for speed. Before each spawn ask: does it a
 
 **Host monitor during heavy work.** The watchdog (§7) is too slow to catch thrashing. While a heavy workload runs, a deterministic shell loop owned by the run samples pressure, Pageouts/Swapouts and CPU every ~1–2 min to the ledger and applies the degradation rule below. It is not a model.
 
-**Degradation.** If pressure leaves normal, Pageouts/Swapouts rise, idle < 15 % or system CPU > 65 % for two consecutive samples, or responsiveness collapses: stop spawning, checkpoint, drop to one task, clean owned stale processes, recover, re-run pre-flight. Never escalate by launching stronger models in parallel under pressure.
+**Degradation (during a heavy run; revised 2026-09-29 by independent review from browser-workload evidence).** Sample every **30 s**.
+- **Memory:** stop on the **first** sample showing pressure above normal or **any new swapouts**.
+- **CPU:** give browser launch and asset decode a **45 s CPU-only grace window**. After it, stop if idle < 15 % or system CPU > 65 % on **two consecutive** samples.
+- **Responsiveness:** stop immediately if it collapses.
+- **Pageouts:** record them, but they are not a stop signal on their own (page-cache flushes occur in normal browser runs).
+
+A stopped run is **incomplete**, never a product failure. Timings overlapping swapouts are *memory-affected*, not clean app evidence. On a stop: stop spawning, checkpoint, drop to one task, clean owned stale processes, recover, re-run pre-flight. Never escalate by launching stronger models in parallel under pressure.
 
 **Extended overload.** Stop heavy work; continue useful light/static work; preserve state and evidence; reassess periodically; don't hammer the machine; when light work is exhausted, wait. No fake memory fixes, cache purges or daemon manipulation.
 

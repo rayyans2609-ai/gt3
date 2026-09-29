@@ -74,5 +74,11 @@ if [[ "$prompt" == @* ]]; then
   prompt="$(cat "$brief_path")"
 fi
 
+if [[ ${GT3_RUN_DIR+x} ]]; then
+  exec "$(dirname "$0")/autonomy/controller.sh" run dispatch -- \
+    codex exec --dangerously-bypass-approvals-and-sandbox --skip-git-repo-check \
+    -m "$model" -c "model_reasoning_effort=\"$effort\"" "$prompt" < /dev/null
+fi
+
 exec codex exec --dangerously-bypass-approvals-and-sandbox --skip-git-repo-check \
   -m "$model" -c "model_reasoning_effort=\"$effort\"" "$prompt" < /dev/null

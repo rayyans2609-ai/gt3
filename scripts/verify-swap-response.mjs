@@ -105,6 +105,13 @@ async function variant(name, query) {
     assert(s.model.length === 1 && s.model[0] === carName(ids, index), `${label}: mount ${s.model}`);
     assert(s.fadeMaterials === 0, `${label}: ${s.fadeMaterials} fade materials left assigned`);
   };
+  const checkResourceDelta = (before, after, label) => {
+    const delta = Object.fromEntries(['programs', 'textures', 'geometries']
+      .map(key => [key, after[key] - before[key]]));
+    assert(Object.values(delta).every(value => value === 0),
+      `${label}: crossing changed resources ${JSON.stringify(delta)}`);
+    return delta;
+  };
 
   // Record input and state in-page, so the ready boundary is exact rather than a CDP round-trip later.
   await page.evaluateOnNewDocument(() => {
@@ -191,34 +198,41 @@ async function variant(name, query) {
 
       await record(`${theme}: reversal before the swap completes`, async () => {
         await seek(gates[k] - 0.003); checkSettled(await settle(), ids, k, 'setup');
+        const resourcesBefore = await read();
         const mid = await crossThen(gates[k] + 0.003, 120, gates[k] - 0.003);
         assert(mid.morphing && mid.mount.length === 2, `not mid-swap: ${JSON.stringify(mid)}`);
         const end = await settle();
         checkSettled(end, ids, k, 'reversed early');
-        return { atReverse: mid, end: { active: end.active, model: end.model } };
+        return { atReverse: mid, end: { active: end.active, model: end.model },
+          resourceDelta: checkResourceDelta(resourcesBefore, end, 'reversed early') };
       });
 
       await record(`${theme}: reversal after the swap midpoint`, async () => {
         await seek(gates[k] - 0.003); await settle();
+        const resourcesBefore = await read();
         const mid = await crossThen(gates[k] + 0.003, 380, gates[k] - 0.003);
         assert(mid.morphing && mid.mount.length === 2, `not mid-swap: ${JSON.stringify(mid)}`);
         const end = await settle();
         checkSettled(end, ids, k, 'reversed late');
-        return { atReverse: mid, end: { active: end.active, model: end.model } };
+        return { atReverse: mid, end: { active: end.active, model: end.model },
+          resourceDelta: checkResourceDelta(resourcesBefore, end, 'reversed late') };
       });
 
       await record(`${theme}: retarget across two gates before completion`, async () => {
         await seek(gates[k] - 0.003); await settle();
+        const resourcesBefore = await read();
         const mid = await crossThen(gates[k] + 0.003, 120, gates[k + 1] + 0.003);
         assert(mid.morphing && mid.mount.length === 2, `not mid-swap: ${JSON.stringify(mid)}`);
         const end = await settle();
         checkSettled(end, ids, k + 2, 'retarget');
         assert(end.unlocked.includes(k + 1) && end.unlocked.includes(k + 2), 'retarget skipped a discovery');
-        return { atRetarget: mid, end: { active: end.active, model: end.model, unlocked: end.unlocked } };
+        return { atRetarget: mid, end: { active: end.active, model: end.model, unlocked: end.unlocked },
+          resourceDelta: checkResourceDelta(resourcesBefore, end, 'retarget') };
       });
 
       await record(`${theme}: gate response lifecycle`, async () => {
         await seek(gates[k] - 0.003); await settle();
+        const resourcesBefore = await read();
         const mid = await crossThen(gates[k] + 0.003, 60, gates[k] + 0.003);
         const during = { gateResponseVisible: mid.gateVisible };
         await wait(900);
@@ -230,8 +244,9 @@ async function variant(name, query) {
           assert(during.gateResponseVisible === true, 'sweep not visible during the crossing');
           assert(after.gateResponseVisible === false, 'sweep still visible 0.9 s after the crossing');
         }
-        await settle();
-        return { during: during.gateResponseVisible, after: after.gateResponseVisible };
+        const end = await settle();
+        return { during: during.gateResponseVisible, after: after.gateResponseVisible,
+          resourceDelta: checkResourceDelta(resourcesBefore, end, 'gate response') };
       });
 
       const afterTheme = await read();
@@ -254,10 +269,12 @@ async function variant(name, query) {
         `replay changed discoveries: ${beforeReplay.unlocked} -> ${s.unlocked}`);
       // Re-cross gate 1 after replay: a fresh morph must still work.
       await seek(gates[0] - 0.003); await settle();
+      const resourcesBefore = await read();
       await seek(gates[0] + 0.003);
       const again = await settle();
       checkSettled(again, ids, 1, 'post-replay crossing');
-      return { unlocked: s.unlocked };
+      return { unlocked: s.unlocked,
+        resourceDelta: checkResourceDelta(resourcesBefore, again, 'post-replay crossing') };
     });
 
     await record('mid-crossing stills', async () => {

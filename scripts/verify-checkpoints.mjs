@@ -250,11 +250,16 @@ try {
   const expectedSwapIndex = expected(swapEnd);
   assert(beforeSwap.active !== expectedSwapIndex,
     `swap setup did not straddle one gate: ${beforeSwap.active} -> ${expectedSwapIndex}`);
+  await page.evaluate(async () => {
+    const { onMorphComplete } = await import('/src/scene/morph.js');
+    window.__cpMorphCompletions = [];
+    onMorphComplete(index => window.__cpMorphCompletions.push(index));
+  });
   await page.evaluate(async t => (await import('/src/scroll/scrollDrive.js')).seekTo(t, { instant: true }), swapEnd);
-  await page.waitForFunction(async () => (await import('/src/scene/morph.js')).isMorphing(), { timeout: 30000 });
   await wait(300);
-  await page.screenshot({ path: `${root}/mid-swap-day.png` });
-  await page.waitForFunction(async () => !(await import('/src/scene/morph.js')).isMorphing(), { timeout: 30000 });
+  await page.screenshot({ path: `${root}/swap-day.png` });
+  await page.waitForFunction(index => window.__cpMorphCompletions.includes(index),
+    { timeout: 30000 }, expectedSwapIndex);
   const capturedSwap = await read();
   assert(capturedSwap.active === expectedSwapIndex && capturedSwap.model.length === 1
     && capturedSwap.model[0] === `car-${carIds[expectedSwapIndex]}`,
@@ -265,11 +270,14 @@ try {
   // the swap before its midpoint.
   await seek(swapStart, { instant: true, settle: 1050 });
   const swapPromise = frames(1200);
+  const completedBefore = await page.evaluate(() => window.__cpMorphCompletions.length);
   await page.evaluate(async t => (await import('/src/scroll/scrollDrive.js')).seekTo(t, { instant: true }),
     swapEnd);
-  await page.waitForFunction(async () => (await import('/src/scene/morph.js')).isMorphing(), { timeout: 30000 });
   swap = stats(await swapPromise);
-  await page.waitForFunction(async () => !(await import('/src/scene/morph.js')).isMorphing(), { timeout: 30000 });
+  await page.waitForFunction(({ count, index }) =>
+    window.__cpMorphCompletions.length > count &&
+    window.__cpMorphCompletions.at(-1) === index,
+  { timeout: 30000 }, { count: completedBefore, index: expectedSwapIndex });
   const measuredSwap = await read();
   assert(measuredSwap.active === expectedSwapIndex && measuredSwap.model.length === 1
     && measuredSwap.model[0] === `car-${carIds[expectedSwapIndex]}`,

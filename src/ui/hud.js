@@ -31,6 +31,7 @@ let writtenRouteY = NaN;
 let directionRoot;
 let directionTimer = 0;
 let cueUsed = false;
+let identityMeasureId = 0;
 
 function element(tag, className, text) {
   const node = document.createElement(tag);
@@ -116,6 +117,9 @@ function buildDirectionCue(root) {
 }
 
 function setIdentity(index, immediate = false) {
+  const start = `gt3:hudIdentity:start:${++identityMeasureId}`;
+  const end = `gt3:hudIdentity:end:${identityMeasureId}`;
+  performance.mark(start);
   const car = getCar(index);
   const nextIndex = immediate ? visibleIdentitySlot : 1 - visibleIdentitySlot;
   identitySlots[nextIndex].name.textContent = car.displayName;
@@ -127,6 +131,10 @@ function setIdentity(index, immediate = false) {
     visibleIdentitySlot = nextIndex;
   }
   renderedCarIndex = car.index;
+  performance.mark(end);
+  performance.measure('gt3:hudIdentity', start, end);
+  performance.clearMarks(start);
+  performance.clearMarks(end);
 }
 
 function updateDirectionCue(dt) {

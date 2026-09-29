@@ -7,7 +7,7 @@
  * before close; any increase marks that context `hostContaminated` (host paging/swapping).
  */
 import puppeteer from 'puppeteer-core';
-import { spawn, spawnSync } from 'node:child_process';
+import { spawn, spawnSync, execFile } from 'node:child_process';
 import { mkdir, mkdtemp, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -53,11 +53,13 @@ function hostVerdict(samples) {
     contaminated: last.pageouts !== first.pageouts || last.swapouts !== first.swapouts, steps };
 }
 
-function frameStats(frames) {
+function frameStats(frames, trackLength = null) {
   const gaps = frames.map(f => f.dt).filter(Number.isFinite);
   if (!gaps.length) return null;
   return { frames: gaps.length, p50: percentile(gaps, .5), p90: percentile(gaps, .9), p99: percentile(gaps, .99),
     max: +Math.max(...gaps).toFixed(2),
+    maxProgressJumpM: trackLength == null ? null
+      : +Math.max(...frames.map(f => Math.abs(f.dp || 0) * trackLength)).toFixed(2),
     counts: Object.fromEntries([33, 50, 100].map(n => [`gt${n}`, gaps.filter(v => v > n).length])) };
 }
 
@@ -125,6 +127,11 @@ function summarizeWindow(name, frames, entries, center, trackLength, expectedCha
     p99: percentile(gaps, .99), max: +Math.max(...gaps).toFixed(2),
     counts: Object.fromEntries([20, 33, 50, 100, 250].map(n => [`gt${n}`, gaps.filter(v => v > n).length])),
     progressSpanM: +((last.progress - first.progress) * trackLength).toFixed(1),
+    glCalls: Object.fromEntries(Object.keys(last.gl || {}).map(key =>
+      [key, last.gl[key] - (first.gl?.[key] || 0)])),
+    measures: relevant.filter(e => e.type === 'measure')
+      .map(e => ({ name: e.name, offsetMs: +(e.startTime - center).toFixed(1),
+        durationMs: +e.duration.toFixed(2) })),
     programsDelta: last.programs - first.programs, texturesDelta: last.textures - first.textures,
     geometriesDelta: last.geometries - first.geometries, levels, longest, loaf: relevant.filter(e => e.type === 'long-animation-frame'),
     longtasks: relevant.filter(e => e.type === 'longtask'),
@@ -135,8 +142,21 @@ function summarizeWindow(name, frames, entries, center, trackLength, expectedCha
 
 async function installDiagnostics(page) {
   await page.evaluateOnNewDocument(() => {
+    const glMethods = ['createProgram', 'compileShader', 'linkProgram', 'createTexture',
+      'texImage2D', 'texSubImage2D', 'compressedTexImage2D', 'texStorage2D',
+      'createBuffer', 'bufferData', 'bufferSubData'];
+    const glCalls = Object.fromEntries(glMethods.map(name => [name, 0]));
+    window.__gt3GLCalls = glCalls;
+    for (const proto of [WebGLRenderingContext.prototype, WebGL2RenderingContext.prototype]) {
+      for (const name of glMethods) {
+        if (!Object.hasOwn(proto, name) || typeof proto[name] !== 'function') continue;
+        const original = proto[name];
+        proto[name] = function (...args) { glCalls[name]++; return original.apply(this, args); };
+      }
+    }
     const diag = { frames: [], entries: [], running: false, supported: [], started: false,
-      startupFrames: [], readyAt: null, dismissedAt: null, modelsAt: null, programSnapshots: [] };
+      startupFrames: [], readyAt: null, dismissedAt: null, hiddenAt: null,
+      modelsAt: null, programSnapshots: [] };
     window.__swapDiag = diag;
     let startupPrevious = null;
     const startupTick = t => {
@@ -147,16 +167,20 @@ async function installDiagnostics(page) {
         diag.modelsAt = t;
       if (screen?.classList.contains('is-ready') && diag.readyAt == null) diag.readyAt = t;
       if (screen?.classList.contains('is-leaving') && diag.dismissedAt == null) diag.dismissedAt = t;
-      diag.startupFrames.push({ t, dt: startupPrevious == null ? null : t - startupPrevious });
+      if (screen?.hidden && diag.dismissedAt != null && diag.hiddenAt == null) diag.hiddenAt = t;
+      const progress = window.__gt3?.probe?.().progress ?? 0;
+      const previousProgress = diag.startupFrames.at(-1)?.progress ?? progress;
+      diag.startupFrames.push({ t, dt: startupPrevious == null ? null : t - startupPrevious,
+        progress, dp: progress - previousProgress });
       startupPrevious = t;
-      if (diag.dismissedAt == null || t < diag.dismissedAt + 5000) requestAnimationFrame(startupTick);
+      if (diag.hiddenAt == null || t < diag.hiddenAt + 30000) requestAnimationFrame(startupTick);
     };
     requestAnimationFrame(startupTick);
-    for (const type of ['long-animation-frame', 'longtask']) {
+    for (const type of ['long-animation-frame', 'longtask', 'measure']) {
       try {
         const observer = new PerformanceObserver(list => {
           for (const e of list.getEntries()) {
-            diag.entries.push({ type, startTime: e.startTime, duration: e.duration,
+            diag.entries.push({ type, name: e.name, startTime: e.startTime, duration: e.duration,
               blockingDuration: e.blockingDuration ?? null,
               // LoAF phase split: script before renderStart, rAF+render, style/layout, then commit/paint.
               renderStart: e.renderStart ?? null, styleAndLayoutStart: e.styleAndLayoutStart ?? null,
@@ -198,6 +222,7 @@ async function installDiagnostics(page) {
             level: probe.level, applied: probe.applied, active: state.activeCarIndex,
             morph: isMorphing(), programs: info.programs?.length ?? 0,
             textures: info.memory.textures, geometries: info.memory.geometries,
+            gl: { ...glCalls },
             heap: performance.memory?.usedJSHeapSize ?? null };
           diag.frames.push(frame);
           previous = frame;
@@ -315,9 +340,19 @@ async function runOne(index, warmed) {
     args: ['--no-sandbox', '--no-first-run', '--enable-gpu', '--use-gl=angle', '--use-angle=metal',
       `--user-data-dir=${profile}`, '--window-size=1600,900'],
     defaultViewport: { width: 1600, height: 900 } });
-  const run = { index, warmed, sound: index === 2 && !warmed, profile,
-    wheelDeltaY: 2, wheelIntervalMs: 33, phases: {}, errors: [], vm: [vmStat('launched')] };
+  const run = { index, warmed, sound: (index === 2 || index === 4) && !warmed, profile,
+    wheelDeltaY: 2, wheelIntervalMs: 33, phases: {}, errors: [],
+    vm: [vmStat('launched')], hostSamples: [] };
   result.runs.push(run);
+  const hostTimer = setInterval(() => {
+    const requestedAt = Date.now();
+    execFile('vm_stat', { encoding: 'utf8' }, (error, output) => {
+      if (error) return;
+      const read = name => Number(output.match(new RegExp(`${name}:\\s+(\\d+)`))?.[1]);
+      run.hostSamples.push({ atMs: requestedAt, pageouts: read('Pageouts'),
+        swapouts: read('Swapouts') });
+    });
+  }, 1000);
   try {
     const page = await browser.newPage();
     page.on('pageerror', e => run.errors.push(`pageerror: ${e.message}`));
@@ -328,6 +363,13 @@ async function runOne(index, warmed) {
     run.gpuRssAtDomMB = gpuRssMB(browser);
     await page.waitForFunction(() => window.__gt3?.scene?.getObjectByName('car-rig')
       && document.querySelector('#start-screen.is-ready'), { timeout: 120000 });
+    run.readiness = await page.evaluate(() => window.__gt3?.readiness
+      ? { status: window.__gt3.readiness.status,
+        model: window.__gt3.readiness.model, audio: window.__gt3.readiness.audio,
+        gpu: window.__gt3.readiness.gpu, reasons: [...window.__gt3.readiness.reasons] }
+      : null);
+    assert(!run.readiness || run.readiness.status === 'ready',
+      `Performance run entered degraded readiness: ${JSON.stringify(run.readiness)}`);
     run.rendererAtReady = await page.evaluate(() => {
       const info = window.__gt3.renderer.info;
       return { programs: info.programs?.length ?? 0,
@@ -344,6 +386,20 @@ async function runOne(index, warmed) {
     run.modelsMs = boot.modelsAt;
     run.readyMs = boot.readyAt;
     run.warmupFrames = frameStats(boot.frames.filter(f => f.t > boot.modelsAt && f.t <= boot.readyAt));
+    run.warmupSteps = await page.evaluate(() => window.__gt3?.readiness?.warmupSteps ?? null);
+    if (run.warmupSteps?.length) {
+      run.warmupStepSummary = Object.fromEntries(
+        [...new Set(run.warmupSteps.map(step => step.phase))].map(phase => {
+          const steps = run.warmupSteps.filter(step => step.phase === phase);
+          return [phase, { draws: steps.length,
+            setupMs: +steps.reduce((sum, step) => sum + step.setupMs, 0).toFixed(1),
+            renderMs: +steps.reduce((sum, step) => sum + step.renderMs, 0).toFixed(1),
+            maxMs: +Math.max(...steps.map(step => step.totalMs)).toFixed(1) }];
+        }),
+      );
+      run.warmupOutsideStepMs = +(boot.readyAt - boot.modelsAt -
+        run.warmupSteps.reduce((sum, step) => sum + step.totalMs, 0)).toFixed(1);
+    }
     run.warmupLongest = boot.frames.filter(f => f.t > boot.modelsAt && f.t <= boot.readyAt)
       .sort((a, b) => b.dt - a.dt).slice(0, 8).map(f => ({ offsetMs: +(f.t - boot.modelsAt).toFixed(0), dtMs: +f.dt.toFixed(1) }));
     if (startupOnly) return;
@@ -351,12 +407,18 @@ async function runOne(index, warmed) {
     await pause(1700);
     if (run.sound) {
       await page.click('.audio-speaker');
-      await page.waitForFunction(() => document.querySelector('.audio-speaker')?.dataset.sound === 'on',
+      await page.waitForFunction(async () => document.querySelector('.audio-speaker')?.dataset.sound === 'on'
+        && (await import('/src/core/state.js')).state.audioReady,
         { timeout: 20000 });
+      run.soundConfirmed = await page.evaluate(async () => ({
+        audioReady: (await import('/src/core/state.js')).state.audioReady,
+        gains: window.__gt3audio?.gains(),
+      }));
     }
     const metadata = await page.evaluate(async () => {
       const route = await import('/src/scene/trackCurve.js');
       return { length: route.TRACK_LENGTH, gates: route.CHECKPOINT_T,
+        timeOrigin: performance.timeOrigin,
         webgl: window.__gt3.renderer.getContext().getParameter(0x1F01),
         chrome: navigator.userAgent };
     });
@@ -404,6 +466,9 @@ async function runOne(index, warmed) {
     run.phases.laterCold = await drive(page, gates[4] + 80 / length, +1, length);
     run.vm.push(vmStat('afterLaterCold'));
     console.log(`RUN ${index} later cold crossed: ${run.phases.laterCold.events} wheel events`);
+    run.phases.laterReverse = await drive(page, gates[4] - 80 / length, -1, length);
+    run.phases.laterWarm = await drive(page, gates[4] + 80 / length, +1, length);
+    run.vm.push(vmStat('afterLaterWarm'));
     run.phases.control = await drive(page, gates[4] + 200 / length, +1, length);
     await pause(1800);
     run.vm.push(vmStat('afterControl'));
@@ -411,10 +476,17 @@ async function runOne(index, warmed) {
       entries: window.__swapDiag.entries, supported: window.__swapDiag.supported,
       startupFrames: window.__swapDiag.startupFrames, modelsAt: window.__swapDiag.modelsAt,
       readyAt: window.__swapDiag.readyAt, dismissedAt: window.__swapDiag.dismissedAt,
+      hiddenAt: window.__swapDiag.hiddenAt,
       programSnapshots: window.__swapDiag.programSnapshots }));
     run.dismissedMs = data.dismissedAt;
+    run.hiddenMs = data.hiddenAt;
     run.programSnapshots = data.programSnapshots;
-    run.postDismissFrames = frameStats(data.startupFrames.filter(f => f.t > data.dismissedAt && f.t <= data.dismissedAt + 5000));
+    run.fadeFrames = frameStats(data.startupFrames.filter(f =>
+      f.t > data.dismissedAt && f.t <= data.hiddenAt), length);
+    run.postDismissFrames = frameStats(data.startupFrames.filter(f =>
+      f.t > data.hiddenAt && f.t <= data.hiddenAt + 5000), length);
+    run.first30sFrames = frameStats(data.startupFrames.filter(f =>
+      f.t > data.hiddenAt && f.t <= data.hiddenAt + 30000), length);
     run.observerSupport = data.supported;
     run.frameCount = data.frames.length;
     run.soundState = await snapshot(page);
@@ -431,15 +503,34 @@ async function runOne(index, warmed) {
     const controlProgress = gates[4] + 140 / length;
     const controlFrame = data.frames.find(f => f.progress >= controlProgress && f.t > (crossing(4, 5) || 0) + 1500);
     const centers = { cold: crossing(0, 1, 0), reverse: crossing(1, 0), warm: crossing(0, 1, 1),
-      laterCold: crossing(4, 5), control: controlFrame?.t };
+      laterCold: crossing(4, 5, 0), laterReverse: crossing(5, 4, 0),
+      laterWarm: crossing(4, 5, 1), control: controlFrame?.t };
     run.windows = Object.fromEntries(Object.entries(centers).map(([name, center]) =>
       [name, summarizeWindow(name, data.frames, data.entries, center, length, name !== 'control')]));
+    for (const window of Object.values(run.windows)) {
+      if (!Number.isFinite(window.centerMs)) continue;
+      const start = metadata.timeOrigin + window.centerMs - 1500;
+      const end = metadata.timeOrigin + window.centerMs + 1500;
+      window.hostSamples = run.hostSamples.filter(sample => sample.atMs >= start && sample.atMs <= end);
+    }
     await writeFile(join(outputDir, `frames-${index}${warmed ? '-prewarm' : ''}.json`),
       JSON.stringify({ metadata, frames: data.frames, entries: data.entries,
         startupFrames: data.startupFrames, programSnapshots: data.programSnapshots }) + '\n');
     console.log(`RUN ${index}${warmed ? ' prewarm' : ''}: ` + Object.entries(run.windows)
       .map(([name, w]) => `${name}=${w.max ?? 'missing'}ms`).join(' '));
+    // Finish the route by real wheel input for the memory/whole-context result.
+    // 0.9942 passes the physical finish gate while staying below the legacy
+    // finish-screen threshold (0.995), so it keeps the Tour renderer active.
+    run.phases.fullLap = await drive(page, 0.9942, +1, length);
+    run.vm.push(vmStat('lapEnd'));
+    run.rendererAtLapEnd = await page.evaluate(() => {
+      const info = window.__gt3.renderer.info;
+      return { programs: info.programs?.length ?? 0,
+        textures: info.memory.textures, geometries: info.memory.geometries };
+    });
+    run.gpuRssAtLapEndMB = gpuRssMB(browser);
   } finally {
+    clearInterval(hostTimer);
     run.vm.push(vmStat('beforeClose'));
     run.host = hostVerdict(run.vm);
     await browser.close();
@@ -451,16 +542,17 @@ function makeSummary() {
     `Date: ${result.startedAt}. URL: ${base}. Chrome: ${headless ? 'headless' : 'headed'} ANGLE/Metal, 1600×900.`,
     '', '| Run | Scenario | Frames | p50 | p90 | p99 | Max | >20 | >33 | >50 | >100 | >250 | Programs Δ | Textures Δ | Geometries Δ | Level changes |',
     '|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|'];
-  for (const run of result.runs) for (const name of ['cold', 'reverse', 'warm', 'laterCold', 'control']) {
+  for (const run of result.runs) for (const name of ['cold', 'reverse', 'warm', 'laterCold', 'laterReverse', 'laterWarm', 'control']) {
     const w = run.windows?.[name];
     if (!w || w.error) { lines.push(`| ${run.index}${run.warmed ? ' prewarm' : ''} | ${name} | ${w?.error || 'not run'} |`); continue; }
     lines.push(`| ${run.index}${run.warmed ? ' prewarm' : ''}${run.sound ? ' sound' : ''}${run.host?.contaminated ? ' HOST-CONTAMINATED' : ''} | ${name} | ${w.frameCount} | ${w.p50} | ${w.p90} | ${w.p99} | ${w.max} | ${w.counts.gt20} | ${w.counts.gt33} | ${w.counts.gt50} | ${w.counts.gt100} | ${w.counts.gt250} | ${w.programsDelta} | ${w.texturesDelta} | ${w.geometriesDelta} | ${w.levels.length} |`);
   }
   for (const run of result.runs) {
     lines.push('', `Run ${run.index}: ready ${run.readyMs?.toFixed?.(0)} ms (first car mounted ${run.modelsMs?.toFixed?.(0)} ms); `
-      + `warm-up frames ${JSON.stringify(run.warmupFrames)}; first 5 s after dismissal ${JSON.stringify(run.postDismissFrames)}; `
+      + `warm-up frames ${JSON.stringify(run.warmupFrames)}; fade ${JSON.stringify(run.fadeFrames)}; `
+      + `first 5 s fully hidden ${JSON.stringify(run.postDismissFrames)}; first 30 s ${JSON.stringify(run.first30sFrames)}; `
       + `renderer at ready ${JSON.stringify(run.rendererAtReady)}, at end ${JSON.stringify(run.rendererAtEnd)}; `
-      + `GPU RSS MB dom/ready/end ${run.gpuRssAtDomMB}/${run.gpuRssAtReadyMB}/${run.gpuRssAtEndMB}; `
+      + `GPU RSS MB dom/ready/lap/end ${run.gpuRssAtDomMB}/${run.gpuRssAtReadyMB}/${run.gpuRssAtLapEndMB}/${run.gpuRssAtEndMB}; `
       + `host ${JSON.stringify(run.host)}`);
   }
   lines.push('', 'Each window spans ±1.5 s around the observed active-car change; the control is centered 140 m after gate 5.',

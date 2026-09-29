@@ -5,6 +5,19 @@ import { getCarModel, findWheels } from './cars.js';
 
 const DURATION = 0.56;
 const materialCache = new WeakMap();
+let measureId = 0;
+
+function beginMeasure(name) {
+  const start = `gt3:${name}:start:${++measureId}`;
+  const end = `gt3:${name}:end:${measureId}`;
+  performance.mark(start);
+  return () => {
+    performance.mark(end);
+    performance.measure(`gt3:${name}`, start, end);
+    performance.clearMarks(start);
+    performance.clearMarks(end);
+  };
+}
 
 let active = false;
 let clock = 0;
@@ -22,6 +35,7 @@ function materialsFor(model) {
   if (!model) return null;
   const cached = materialCache.get(model);
   if (cached) return cached;
+  const finishMeasure = beginMeasure('materialsFor:first');
   const fades = new Map();
   const assignments = [];
   const fadeOne = (normal) => {
@@ -42,6 +56,7 @@ function materialsFor(model) {
   });
   const result = { assignments, fades: [...fades.values()] };
   materialCache.set(model, result);
+  finishMeasure();
   return result;
 }
 
@@ -87,29 +102,34 @@ export function onMorphComplete(fn) {
 
 /** Cancel an in-flight swap to its dominant body before retargeting. */
 export function morphTo(index) {
-  if (active && index === pendingIndex) return;
-  if (active) cancel();
-  if (index === renderedIndex) return;
+  if ((active && index === pendingIndex) || (!active && index === renderedIndex)) return;
+  const finishMeasure = beginMeasure('morphTo');
+  try {
+    if (active) cancel();
+    if (index === renderedIndex) return;
 
-  const next = getCarModel(index);
-  if (!next) {
-    console.warn(`[morph] no model for index ${index}`);
-    return;
-  }
+    const next = getCarModel(index);
+    if (!next) {
+      console.warn(`[morph] no model for index ${index}`);
+      return;
+    }
 
-  outgoing = carMount.children[0] || null;
-  incoming = next;
-  pendingIndex = index;
-  activate(outgoing);
-  activate(incoming);
-  applyFade(outgoing, 1);
-  applyFade(incoming, 0);
-  carMount.add(incoming);
-  clock = 0;
-  active = true;
+    outgoing = carMount.children[0] || null;
+    incoming = next;
+    pendingIndex = index;
+    activate(outgoing);
+    activate(incoming);
+    applyFade(outgoing, 1);
+    applyFade(incoming, 0);
+    carMount.add(incoming);
+    clock = 0;
+    active = true;
+  } finally { finishMeasure(); }
 }
 
 function finish() {
+  const finishMeasure = beginMeasure('morphFinish');
+  try {
   restore(outgoing);
   restore(incoming);
   setCarModel(incoming);
@@ -125,6 +145,7 @@ function finish() {
     renderedIndex = completedIndex;
     for (const fn of completeHandlers) fn(completedIndex);
   }
+  } finally { finishMeasure(); }
 }
 
 function cancel() {

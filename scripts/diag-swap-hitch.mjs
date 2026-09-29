@@ -1,7 +1,10 @@
-/** First-pass checkpoint hitch diagnostic. Run: node scripts/diag-swap-hitch.mjs
+/** Checkpoint hitch diagnostic. Run: node scripts/diag-swap-hitch.mjs
  * Env: GT3_URL (external Vite URL), GT3_HEADLESS=1, GT3_CONTEXTS=3,
- * GT3_PREWARM=1 (adds one extra warmed context), GT3_OUT (results directory).
+ * GT3_PREWARM=1 (optional old-style comparison), GT3_OUT (results directory),
+ * GT3_LABEL (free-form build label recorded in results, e.g. `w4` or `baseline-602c462`).
  * The harness changes no product source and uses real wheel input for every gate.
+ * Each context records vm_stat Pageouts/Swapouts at launch, at every phase boundary and
+ * before close; any increase marks that context `hostContaminated` (host paging/swapping).
  */
 import puppeteer from 'puppeteer-core';
 import { spawn, spawnSync } from 'node:child_process';
@@ -11,17 +14,52 @@ import { join } from 'node:path';
 
 const base = process.env.GT3_URL || 'http://127.0.0.1:5191';
 const outputDir = process.env.GT3_OUT || '/Users/rayyansheikh/.claude/jobs/60022478/tmp/w1';
-const workRoot = '/tmp/gt3-w1';
+const workRoot = process.env.GT3_WORK || '/tmp/gt3-w1';
 const contexts = Math.max(1, Number(process.env.GT3_CONTEXTS || 3));
 const headless = process.env.GT3_HEADLESS === '1';
-const doPrewarm = process.env.GT3_PREWARM !== '0';
+const doPrewarm = process.env.GT3_PREWARM === '1';
+const startupOnly = process.env.GT3_STARTUP_ONLY === '1';
+const firstGateOnly = process.env.GT3_FIRST_GATE_ONLY === '1';
 const chrome = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 const preflight = '/Users/rayyansheikh/.claude/jobs/60022478/tmp/preflight.sh';
 const pause = ms => new Promise(resolve => setTimeout(resolve, ms));
 const assert = (ok, message) => { if (!ok) throw new Error(message); };
 const result = { startedAt: new Date().toISOString(), base, headless, contextsRequested: contexts,
-  prewarmRequested: doPrewarm, runs: [], host: [], errors: [] };
+  label: process.env.GT3_LABEL || null, prewarmRequested: doPrewarm, runs: [], host: [], errors: [] };
 let server;
+
+function gpuRssMB(browser) {
+  const parent = browser.process()?.pid;
+  if (!parent) return null;
+  const ps = spawnSync('ps', ['-axo', 'pid=,ppid=,rss=,command='], { encoding: 'utf8' });
+  const child = (ps.stdout || '').split('\n').map(line => line.trim())
+    .find(line => new RegExp(`^\\d+\\s+${parent}\\s+`).test(line) && line.includes('--type=gpu-process'));
+  const kb = child && Number(child.match(/^\d+\s+\d+\s+(\d+)/)?.[1]);
+  return Number.isFinite(kb) && kb > 0 ? +(kb / 1024).toFixed(1) : null;
+}
+
+function vmStat(tag) {
+  const out = spawnSync('vm_stat', { encoding: 'utf8' }).stdout || '';
+  const read = name => Number(out.match(new RegExp(`${name}:\\s+(\\d+)`))?.[1]);
+  return { tag, at: new Date().toISOString(), pageouts: read('Pageouts'), swapouts: read('Swapouts') };
+}
+
+function hostVerdict(samples) {
+  const first = samples[0], last = samples.at(-1);
+  const steps = samples.slice(1).map((s, i) => ({ from: samples[i].tag, to: s.tag,
+    pageouts: s.pageouts - samples[i].pageouts, swapouts: s.swapouts - samples[i].swapouts }))
+    .filter(step => step.pageouts || step.swapouts);
+  return { pageoutsDelta: last.pageouts - first.pageouts, swapoutsDelta: last.swapouts - first.swapouts,
+    contaminated: last.pageouts !== first.pageouts || last.swapouts !== first.swapouts, steps };
+}
+
+function frameStats(frames) {
+  const gaps = frames.map(f => f.dt).filter(Number.isFinite);
+  if (!gaps.length) return null;
+  return { frames: gaps.length, p50: percentile(gaps, .5), p90: percentile(gaps, .9), p99: percentile(gaps, .99),
+    max: +Math.max(...gaps).toFixed(2),
+    counts: Object.fromEntries([33, 50, 100].map(n => [`gt${n}`, gaps.filter(v => v > n).length])) };
+}
 
 async function save() {
   await mkdir(outputDir, { recursive: true });
@@ -76,6 +114,9 @@ function summarizeWindow(name, frames, entries, center, trackLength, expectedCha
   const relevant = entries.filter(overlap).map(e => ({
     type: e.type, offsetMs: +(e.startTime - center).toFixed(1), durationMs: +e.duration.toFixed(2),
     blockingDurationMs: e.blockingDuration, scripts: e.scripts,
+    phasesMs: e.renderStart ? { beforeRender: +(e.renderStart - e.startTime).toFixed(1),
+      renderToStyle: +((e.styleAndLayoutStart || e.renderStart) - e.renderStart).toFixed(1),
+      styleLayoutAndAfter: +(e.startTime + e.duration - (e.styleAndLayoutStart || e.renderStart)).toFixed(1) } : null,
   }));
   return { name, centerMs: +center.toFixed(1), expectedChange,
     coverageOffsetsMs: [+(first.t - first.dt - center).toFixed(1), +(last.t - center).toFixed(1)],
@@ -94,14 +135,31 @@ function summarizeWindow(name, frames, entries, center, trackLength, expectedCha
 
 async function installDiagnostics(page) {
   await page.evaluateOnNewDocument(() => {
-    const diag = { frames: [], entries: [], running: false, supported: [], started: false };
+    const diag = { frames: [], entries: [], running: false, supported: [], started: false,
+      startupFrames: [], readyAt: null, dismissedAt: null, modelsAt: null, programSnapshots: [] };
     window.__swapDiag = diag;
+    let startupPrevious = null;
+    const startupTick = t => {
+      const screen = document.querySelector('#start-screen');
+      // The first car is mounted just before GPU warm-up begins (and, on older builds,
+      // at the moment models finish loading). Frames from here to ready are the warm-up.
+      if (diag.modelsAt == null && window.__gt3?.scene?.getObjectByName('car-mount')?.children.length)
+        diag.modelsAt = t;
+      if (screen?.classList.contains('is-ready') && diag.readyAt == null) diag.readyAt = t;
+      if (screen?.classList.contains('is-leaving') && diag.dismissedAt == null) diag.dismissedAt = t;
+      diag.startupFrames.push({ t, dt: startupPrevious == null ? null : t - startupPrevious });
+      startupPrevious = t;
+      if (diag.dismissedAt == null || t < diag.dismissedAt + 5000) requestAnimationFrame(startupTick);
+    };
+    requestAnimationFrame(startupTick);
     for (const type of ['long-animation-frame', 'longtask']) {
       try {
         const observer = new PerformanceObserver(list => {
           for (const e of list.getEntries()) {
             diag.entries.push({ type, startTime: e.startTime, duration: e.duration,
               blockingDuration: e.blockingDuration ?? null,
+              // LoAF phase split: script before renderStart, rAF+render, style/layout, then commit/paint.
+              renderStart: e.renderStart ?? null, styleAndLayoutStart: e.styleAndLayoutStart ?? null,
               scripts: type === 'long-animation-frame' ? [...(e.scripts || [])].map(s => ({
                 sourceURL: s.sourceURL, sourceFunctionName: s.sourceFunctionName,
                 invoker: s.invoker, duration: s.duration, executionStart: s.executionStart,
@@ -120,12 +178,21 @@ async function installDiagnostics(page) {
       diag.started = true;
       diag.running = true;
       let previous = null;
+      let previousProgramCount = -1;
       const tick = t => {
         if (!diag.running) return;
         const gt3 = window.__gt3;
         if (gt3?.renderer) {
           const probe = gt3.probe();
           const info = gt3.renderer.info;
+          const programs = info.programs || [];
+          if (programs.length !== previousProgramCount) {
+            diag.programSnapshots.push({ t, count: programs.length,
+              added: programs.slice(Math.max(0, previousProgramCount)).map(p => ({
+                id: p.id, name: p.name, cacheKey: p.cacheKey,
+              })) });
+            previousProgramCount = programs.length;
+          }
           const frame = { t, dt: previous ? t - previous.t : null,
             progress: probe.progress, dp: previous ? probe.progress - previous.progress : 0,
             level: probe.level, applied: probe.applied, active: state.activeCarIndex,
@@ -249,7 +316,7 @@ async function runOne(index, warmed) {
       `--user-data-dir=${profile}`, '--window-size=1600,900'],
     defaultViewport: { width: 1600, height: 900 } });
   const run = { index, warmed, sound: index === 2 && !warmed, profile,
-    wheelDeltaY: 2, wheelIntervalMs: 33, phases: {}, errors: [] };
+    wheelDeltaY: 2, wheelIntervalMs: 33, phases: {}, errors: [], vm: [vmStat('launched')] };
   result.runs.push(run);
   try {
     const page = await browser.newPage();
@@ -258,8 +325,28 @@ async function runOne(index, warmed) {
     page.on('response', e => { if (e.status() >= 400) run.errors.push(`HTTP ${e.status()} ${e.url()}`); });
     await installDiagnostics(page);
     await page.goto(base, { waitUntil: 'domcontentloaded', timeout: 120000 });
+    run.gpuRssAtDomMB = gpuRssMB(browser);
     await page.waitForFunction(() => window.__gt3?.scene?.getObjectByName('car-rig')
       && document.querySelector('#start-screen.is-ready'), { timeout: 120000 });
+    run.rendererAtReady = await page.evaluate(() => {
+      const info = window.__gt3.renderer.info;
+      return { programs: info.programs?.length ?? 0,
+        textures: info.memory.textures, geometries: info.memory.geometries };
+    });
+    run.programsAtReady = await page.evaluate(() => window.__gt3.renderer.info.programs?.map(p => ({
+      id: p.id, name: p.name, cacheKey: p.cacheKey,
+    })) || []);
+    run.gpuRssAtReadyMB = gpuRssMB(browser);
+    run.vm.push(vmStat('ready'));
+    // A2: every frame from first mounted car (warm-up start on W4 builds) to ready.
+    const boot = await page.evaluate(() => ({ frames: window.__swapDiag.startupFrames,
+      modelsAt: window.__swapDiag.modelsAt, readyAt: window.__swapDiag.readyAt }));
+    run.modelsMs = boot.modelsAt;
+    run.readyMs = boot.readyAt;
+    run.warmupFrames = frameStats(boot.frames.filter(f => f.t > boot.modelsAt && f.t <= boot.readyAt));
+    run.warmupLongest = boot.frames.filter(f => f.t > boot.modelsAt && f.t <= boot.readyAt)
+      .sort((a, b) => b.dt - a.dt).slice(0, 8).map(f => ({ offsetMs: +(f.t - boot.modelsAt).toFixed(0), dtMs: +f.dt.toFixed(1) }));
+    if (startupOnly) return;
     await page.mouse.wheel({ deltaY: 2 }); // real first gesture dismisses start screen
     await pause(1700);
     if (run.sound) {
@@ -285,23 +372,58 @@ async function runOne(index, warmed) {
     const start = await snapshot(page);
     run.start = start;
     console.log(`RUN ${index}${warmed ? ' prewarm' : ''} start: progress=${start.progress.toFixed(5)}, scroll=${start.scrollY}/${start.maxScroll}`);
+    run.vm.push(vmStat('beforeCold'));
     run.phases.cold = await drive(page, after1, +1, length);
+    run.vm.push(vmStat('afterCold'));
     console.log(`RUN ${index} cold crossed: ${run.phases.cold.events} wheel events`);
+    if (firstGateOnly) {
+      await pause(1800);
+      const data = await page.evaluate(() => ({ frames: window.__swapDiag.frames,
+        entries: window.__swapDiag.entries,
+        programSnapshots: window.__swapDiag.programSnapshots }));
+      const i = data.frames.findIndex((frame, n) => n && frame.active !== data.frames[n - 1].active);
+      const center = data.frames[i]?.t;
+      run.windows = { cold: summarizeWindow('cold', data.frames, data.entries, center, length) };
+      run.programSnapshots = data.programSnapshots;
+      run.rendererAtEnd = await page.evaluate(() => {
+        const info = window.__gt3.renderer.info;
+        return { programs: info.programs?.length ?? 0,
+          textures: info.memory.textures, geometries: info.memory.geometries };
+      });
+      return;
+    }
     run.phases.reverse = await drive(page, below1, -1, length);
+    run.vm.push(vmStat('afterReverse'));
     console.log(`RUN ${index} reverse crossed: ${run.phases.reverse.events} wheel events`);
     run.phases.warm = await drive(page, after1, +1, length);
+    run.vm.push(vmStat('afterWarm'));
     console.log(`RUN ${index} warm crossed: ${run.phases.warm.events} wheel events`);
     await pause(1800);
     run.phases.beforeLater = await seek(page, gates[4] - 275 / length);
+    run.vm.push(vmStat('beforeLaterCold'));
     run.phases.laterCold = await drive(page, gates[4] + 80 / length, +1, length);
+    run.vm.push(vmStat('afterLaterCold'));
     console.log(`RUN ${index} later cold crossed: ${run.phases.laterCold.events} wheel events`);
     run.phases.control = await drive(page, gates[4] + 200 / length, +1, length);
     await pause(1800);
+    run.vm.push(vmStat('afterControl'));
     const data = await page.evaluate(() => ({ frames: window.__swapDiag.frames,
-      entries: window.__swapDiag.entries, supported: window.__swapDiag.supported }));
+      entries: window.__swapDiag.entries, supported: window.__swapDiag.supported,
+      startupFrames: window.__swapDiag.startupFrames, modelsAt: window.__swapDiag.modelsAt,
+      readyAt: window.__swapDiag.readyAt, dismissedAt: window.__swapDiag.dismissedAt,
+      programSnapshots: window.__swapDiag.programSnapshots }));
+    run.dismissedMs = data.dismissedAt;
+    run.programSnapshots = data.programSnapshots;
+    run.postDismissFrames = frameStats(data.startupFrames.filter(f => f.t > data.dismissedAt && f.t <= data.dismissedAt + 5000));
     run.observerSupport = data.supported;
     run.frameCount = data.frames.length;
     run.soundState = await snapshot(page);
+    run.rendererAtEnd = await page.evaluate(() => {
+      const info = window.__gt3.renderer.info;
+      return { programs: info.programs?.length ?? 0,
+        textures: info.memory.textures, geometries: info.memory.geometries };
+    });
+    run.gpuRssAtEndMB = gpuRssMB(browser);
     const changes = data.frames.filter((f, i) => i && f.active !== data.frames[i - 1].active)
       .map(f => ({ t: f.t, from: data.frames[data.frames.indexOf(f) - 1].active, to: f.active, progress: f.progress }));
     run.changes = changes;
@@ -313,23 +435,33 @@ async function runOne(index, warmed) {
     run.windows = Object.fromEntries(Object.entries(centers).map(([name, center]) =>
       [name, summarizeWindow(name, data.frames, data.entries, center, length, name !== 'control')]));
     await writeFile(join(outputDir, `frames-${index}${warmed ? '-prewarm' : ''}.json`),
-      JSON.stringify({ metadata, frames: data.frames, entries: data.entries }) + '\n');
+      JSON.stringify({ metadata, frames: data.frames, entries: data.entries,
+        startupFrames: data.startupFrames, programSnapshots: data.programSnapshots }) + '\n');
     console.log(`RUN ${index}${warmed ? ' prewarm' : ''}: ` + Object.entries(run.windows)
       .map(([name, w]) => `${name}=${w.max ?? 'missing'}ms`).join(' '));
   } finally {
+    run.vm.push(vmStat('beforeClose'));
+    run.host = hostVerdict(run.vm);
     await browser.close();
   }
 }
 
 function makeSummary() {
-  const lines = ['# W1 swap hitch measurement', '',
+  const lines = ['# Swap hitch measurement', '',
     `Date: ${result.startedAt}. URL: ${base}. Chrome: ${headless ? 'headless' : 'headed'} ANGLE/Metal, 1600×900.`,
-    '', '| Run | Scenario | Frames | p50 | p90 | p99 | Max | >20 | >33 | >50 | >100 | >250 | Programs Δ | Textures Δ | Level changes |',
-    '|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|'];
+    '', '| Run | Scenario | Frames | p50 | p90 | p99 | Max | >20 | >33 | >50 | >100 | >250 | Programs Δ | Textures Δ | Geometries Δ | Level changes |',
+    '|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|'];
   for (const run of result.runs) for (const name of ['cold', 'reverse', 'warm', 'laterCold', 'control']) {
     const w = run.windows?.[name];
     if (!w || w.error) { lines.push(`| ${run.index}${run.warmed ? ' prewarm' : ''} | ${name} | ${w?.error || 'not run'} |`); continue; }
-    lines.push(`| ${run.index}${run.warmed ? ' prewarm' : ''}${run.sound ? ' sound' : ''} | ${name} | ${w.frameCount} | ${w.p50} | ${w.p90} | ${w.p99} | ${w.max} | ${w.counts.gt20} | ${w.counts.gt33} | ${w.counts.gt50} | ${w.counts.gt100} | ${w.counts.gt250} | ${w.programsDelta} | ${w.texturesDelta} | ${w.levels.length} |`);
+    lines.push(`| ${run.index}${run.warmed ? ' prewarm' : ''}${run.sound ? ' sound' : ''}${run.host?.contaminated ? ' HOST-CONTAMINATED' : ''} | ${name} | ${w.frameCount} | ${w.p50} | ${w.p90} | ${w.p99} | ${w.max} | ${w.counts.gt20} | ${w.counts.gt33} | ${w.counts.gt50} | ${w.counts.gt100} | ${w.counts.gt250} | ${w.programsDelta} | ${w.texturesDelta} | ${w.geometriesDelta} | ${w.levels.length} |`);
+  }
+  for (const run of result.runs) {
+    lines.push('', `Run ${run.index}: ready ${run.readyMs?.toFixed?.(0)} ms (first car mounted ${run.modelsMs?.toFixed?.(0)} ms); `
+      + `warm-up frames ${JSON.stringify(run.warmupFrames)}; first 5 s after dismissal ${JSON.stringify(run.postDismissFrames)}; `
+      + `renderer at ready ${JSON.stringify(run.rendererAtReady)}, at end ${JSON.stringify(run.rendererAtEnd)}; `
+      + `GPU RSS MB dom/ready/end ${run.gpuRssAtDomMB}/${run.gpuRssAtReadyMB}/${run.gpuRssAtEndMB}; `
+      + `host ${JSON.stringify(run.host)}`);
   }
   lines.push('', 'Each window spans ±1.5 s around the observed active-car change; the control is centered 140 m after gate 5.',
     'Frame time is the interval between consecutive requestAnimationFrame callbacks. `progressJumpM` in results.json is the route progress change over that interval.',
@@ -352,9 +484,11 @@ try {
     console.log(`Vite PID ${server.pid}`);
   }
   await waitForServer();
-  for (let i = 1; i <= contexts; i++) {
-    try { await runOne(i, false); } catch (e) { result.errors.push(`Run ${i}: ${e.stack || e}`); console.error(e); }
-    await save();
+  if (process.env.GT3_ONLY_PREWARM !== '1') {
+    for (let i = 1; i <= contexts; i++) {
+      try { await runOne(i, false); } catch (e) { result.errors.push(`Run ${i}: ${e.stack || e}`); console.error(e); }
+      await save();
+    }
   }
   if (doPrewarm) {
     try { await runOne(contexts + 1, true); }

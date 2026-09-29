@@ -24,6 +24,12 @@ codex exec --dangerously-bypass-approvals-and-sandbox --skip-git-repo-check \
 
 which remains the verified-correct raw syntax on 0.157.1 if you ever need to bypass the wrapper for a one-off interactive case — but the wrapper is the canonical path for routed jobs.
 
+### Resume and fencing (2026-09-29)
+
+- **Resume:** `scripts/codex-route.sh resume -m <model> -r <effort> <session-id> <prompt|@brief>` resumes a persisted Codex session (sessions persist on disk) with an explicit model and effort, both still mandatory. The session ID comes from the CLI's `session id:` header (strip ANSI codes first). A stored session ID reserves no quota and costs nothing while idle.
+- **Fencing:** when `GT3_RUN_DIR` is set, the route asks the continuity controller (`scripts/autonomy/controller.sh`) to admit the dispatch, and **fails closed** without matching `GT3_MANAGER_ID`/`GT3_MANAGER_GEN`. For a Sol manager turn, add `GT3_MANAGER_LAUNCH=1`. Call the route directly; do not wrap it in `ctl run dispatch`, which strips credentials. See `autonomous-mode.md` §4 and `scripts/autonomy/README.md`.
+- **Limits:** usage limits surface only as error text (`You've hit your usage limit … try again at <time>`). No machine-readable remaining usage is exposed. `codex login status` shows only "Logged in using ChatGPT".
+
 ## Verified current model slugs
 
 From `~/.codex/models_cache.json` (Codex's own catalog, fetched 2026-09-25 as of last check — this file is refreshed by Codex itself, so re-check its `fetched_at` before trusting slugs long after this doc's date):

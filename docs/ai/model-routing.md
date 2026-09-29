@@ -92,9 +92,10 @@ Inside Autonomous Mode, prefer these levels instead of the normal table above. T
 | **Luna** | `high` for lighter mechanical work; usually `xhigh`/`max`. `max` is fine for dense clerical/browser/harness/evidence work where omissions cause rework |
 | **Terra** | `medium`/`high`/`xhigh` for normal bounded engineering; `max` only when Terra must coordinate many Luna agents or has unusually broad execution scope |
 | **Sol** | `medium`/`high` routine serious engineering; `xhigh` difficult implementation/debug/integration; `max`/`ultra` when coordinating many sub-agents, acting as continuity manager (§8), or doing higher-level integration/decision work |
-| **Astra** | `high` default for substantive supervisory reviews; `medium` for light milestone checks; `xhigh` only for unusually hard contradictions, recovery, or high-consequence architectural judgment |
+| **Astra** | event-triggered escalations only (`autonomous-mode.md` §3): `high` default; `xhigh` only for unusually hard contradictions, recovery, or high-consequence architectural judgment |
+| **Luna** (watchdog) | `low` for task-watchdog interpretation (`autonomous-mode.md` §7); deterministic sampling does the rest |
 | **Opus** | `high` default as primary manager; `xhigh` when parallelism, context or coordination load rises; `max` only for genuinely intricate, high-stakes multi-constraint problems |
-| **Sonnet** | `low` progress/process/health checks; `medium` watchdog needing code/log/evidence interpretation; `high`/`xhigh` for demanding coding/debug/review |
+| **Sonnet** | `high`/`xhigh` for demanding Claude-side coding/debug/review, or as a stand-in reviewer when Codex is unavailable (not the watchdog) |
 
 `ultra` is only valid where the verified Codex catalog lists it (`gpt-6-sol`, `gpt-6-astra`, `gpt-5.6-sol`; see `codex-cli-invocation.md`) — for Terra use `max`. `scripts/codex-route.sh` accepts `ultra` for any model, so the catalog, not the script, is the check.
 
@@ -141,7 +142,7 @@ This table is a strong prior, not permanent truth (see Status above). Where prac
 Who may hand work to whom. This governs *who spawns*; §2–§3 govern *which model fits*. Not a capability ranking.
 
 - **The primary manager (Opus) may invoke any appropriate worker, including Astra.** That is *manager-directed specialist escalation*, not a subordinate promoting itself.
-- **Ordinary delegation goes downward only:** Astra (when invoked for a §3 trigger) → any lower worker; Sol → Terra / Sonnet / Luna; Terra → Sonnet / Luna; Sonnet → Luna; Luna delegates to no one.
+- **Ordinary delegation goes downward only** (the acting manager, Opus or a Sol continuity manager, is exempt): Astra (when invoked for a §3 trigger) → bounded Sol / Terra / Luna investigations; Sol worker → Terra / Sonnet / Luna; Terra → Sonnet / Luna; Sonnet → Luna; Luna delegates to no one.
 - **Ordinary workers never escalate upward.** A worker that hits work above its lane, or a model/tool limit, checkpoints and reports to the manager (done, evidence, what blocks it). The manager decides reassignment or escalation per §6.
 - **Opus worker instances are workers, not the manager.** When Claude-side Sol-level execution is needed, prefer a bounded Opus worker/subagent so the primary manager's context stays separate from implementation. A worker instance has bounded scope, no manager authority, and reports upward like any worker.
 - **Astra's supervisory exception (Autonomous Mode).** Astra supervises the manager rather than working for it. Even so, it may run bounded review/investigation through Opus worker instances, Sonnet, Sol, Terra or Luna, which report to Astra. These workers are **read-only by default**: no tracked-file edits, commits, or heavy local jobs unless the manager schedules them. That way they never compete with the manager's owned work or its host budget. They count toward that budget, follow process-safety rules, and take no manager authority. Neither Astra nor they become the primary manager.
@@ -149,7 +150,12 @@ Who may hand work to whom. This governs *who spawns*; §2–§3 govern *which mo
 
 ### Manager continuity (Opus → Sol)
 
-The primary manager is Opus while available. If Opus nears quota/tool exhaustion (not context pressure, which compaction handles) and meaningful in-scope work remains, **Sol may become temporary continuity manager** on the Codex side, at `high`/`xhigh` minimum, or `max`/`ultra` per §4 when the coordination load is heavy. This is failover, not normal architecture: Sol holds temporary management authority for the run; Opus regains it on return; Astra supervises more closely meanwhile. The procedure (continuation packet, Astra cadence, handback) is in `autonomous-mode.md` §4.
+The primary manager is Opus while available. When Opus dies (session limit, no advance warning) or hands off, **Sol `high`/`xhigh` fully inherits the manager role** through the armed controller and watcher (`autonomous-mode.md` §4). As manager, Sol is exempt from downward-only delegation:
+- it launches separate Sol workers, Terra and Luna;
+- a separate Sol `xhigh` reviewer checks its briefs;
+- it escalates to Astra only for §3 events.
+
+Astra may run bounded Sol/Terra/Luna investigations and never takes ownership. Opus retakes authority only through `request-handback`, at Sol's clean checkpoint.
 
 ## 9. Compact routing tree
 

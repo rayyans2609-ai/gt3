@@ -37,6 +37,17 @@ Invoked mid-task, infer objective and boundaries from the conversation and repo 
 
 The manager writes a run plan to the ledger (§11): objective, done-criteria, ordered work items, verification plan, exclusions. If done-criteria cannot be stated, the objective is not bounded enough — ask.
 
+**Defaults the prompt never needs to restate:**
+- Opus is primary manager.
+- For any substantial unattended run, **arm continuity at the start** (§4): the controller at `opus-primary`, the continuation packet written, the watcher started with its cursor at the timeline's end, and `quota.json` seeded. Opus then keeps the packet current.
+- Sol `high`/`xhigh` is the failover manager.
+- A separate Sol `xhigh` session reviews non-trivial briefs (§2).
+- Luna plus deterministic sampling is the watchdog (§7).
+- Astra is event-only (§3).
+- Manager failover, quota routing and host scheduling are operational and never user decisions.
+
+The readiness bar is **10–12 hours unattended with near-maximum useful work**. Autonomy work beyond that bar is deferred unless real runs show it would otherwise waste hours.
+
 ## 2. Manager
 
 Opus is primary manager while available. It owns: objective, done criteria, decomposition, task ownership, worker/model routing, worker briefs, escalation/reassignment, integration, evidence reconciliation, scope, git/repo safety, host/resource decisions, quota continuity, stop/continue, and the final handoff.
@@ -48,7 +59,7 @@ Opus is primary manager while available. It owns: objective, done criteria, deco
   - **What it checks:** missing requirements, unsupported assumptions that should be measured, contradictions with `SPEC.md` / architecture / repo state / phase ownership, scope creep into other phases, missing dependencies and regression risks, cross-task interactions, weak or misleading verification, subjective acceptance leaking to agents, and needless complexity or decomposition errors.
   - **What it returns:** `PASS`, or `PATCH BRIEF` with the exact material changes. The author patches the brief before dispatch and applies the same fix to every dependent brief, so the gap is not inherited.
   - **Briefs already running:** review them immediately; don't restart them just for the review. Carry material corrections into the active task if a safe channel exists. Otherwise make them required checks in that task's acceptance review or follow-up, and in all dependent tasks. Record each correction in the ledger (§11).
-  - **Keep the roles distinct:** brief author, independent reviewer, implementation worker, and acceptance reviewer. No model silently "independently" verifies its own brief. When Sol authors (e.g. Sol-manager mode, §4), use Astra `medium`/`high` or an available Claude worker. If no alternative is practical, use a fresh Sol session and record the reduced independence.
+  - **Keep the roles distinct:** brief author, independent reviewer, implementation worker, and acceptance reviewer. No model silently "independently" verifies its own brief. When Sol is the manager (§4), the reviewer is still a **separate** Sol `xhigh` session, never the manager's own session. That gives procedural independence, but same-model errors can correlate, so record it.
   - **Escalation:** only to Astra, only for a genuinely serious cross-system, architectural, contradictory or decomposition-level problem, with the repo state, evidence, assumptions and exact question. Routine patches never escalate.
   - **Heaviness:** the reviewer is light work (§6): read-only, no builds, browsers or dev servers.
 - Worker completion is not acceptance; the manager reviews diff and evidence (`model-routing.md` §6).
@@ -57,12 +68,15 @@ Opus is primary manager while available. It owns: objective, done criteria, deco
 
 While the user is away, Astra is the closest thing to them: independent senior review, direction/scope sanity, evidence challenge, recovery/routing challenge, final acceptance sanity. Opus remains manager; Astra advises, and may investigate. **The manager decides.** Overriding a material Astra finding is allowed, but the finding and the reason go in the ledger and the handoff. Sol-manager mode is stricter (§4).
 
-**Cadence — when enough changed to justify it, not by clock:**
-- after meaningful milestones
-- roughly hourly during substantive ongoing work (skip if one healthy long task is running and nothing material changed)
-- when evidence conflicts; after repeated recovery/failure; on suspected scope drift
-- before a consequential change of approach; when the manager's interpretation is uncertain
-- near final acceptance/handoff
+**Event-triggered only, never by clock.** Astra is a token-expensive senior co-manager and escalation layer. Invoke it only for a concrete unresolved judgment problem:
+- conflicting evidence;
+- a suspect decomposition;
+- repeated competent failure;
+- scope or product-boundary risk;
+- a consequential integration or architecture decision beyond the manager's confidence;
+- a serious issue escalated by the Sol `xhigh` brief reviewer.
+
+There is no periodic cadence, no mandatory milestone review, and no automatic final sweep. Astra is not the brief reviewer, not the watchdog and not a worker. It never takes run ownership or substitutes for human acceptance.
 
 Never for clerical, browser or repetitive work. Distinct from the watchdog (§7): the watchdog checks *health*; Astra checks *judgment*.
 
@@ -74,31 +88,45 @@ Never for clerical, browser or repetitive work. Distinct from the watchdog (§7)
 
 **Astra unavailable** (Codex exhausted or down): defer reviews and log the gap. Don't substitute a Claude worker as "Astra" by default, because Claude is scarcer. If the final sweeps can't run within the horizon, the handoff says they were not run.
 
-**Final sweeps** (when the objective is otherwise complete and usage allows; do not redo clerical evidence):
+**Optional final sweeps** (only when a concrete judgment problem remains at handoff and usage allows; do not redo clerical evidence):
 1. **Work sweep** — material changes, evidence, integration, unresolved claims, omissions/contradictions.
 2. **Human-verification sweep** — inspect every NEEDS HUMAN VERIFICATION item; drop bogus or redundant ones and anything automation already established; keep only genuine subjective judgment.
 
 ## 4. Manager continuity: Opus → Sol
 
-If Opus nears quota/tool exhaustion (a usage warning, rate-limit notice, or known reset window) while meaningful in-scope work remains **and Codex is available**, Sol (`high`/`xhigh`; higher per `model-routing.md` §4 under heavy coordination load) may become **temporary continuity manager**. Failover, not normal architecture. Context pressure alone is not a trigger; compaction handles it.
+[CORE] **Failover must not depend on Opus.** Claude gives **no advance warning**. Session limits are visible only after the fact: `quotaLimits.status: "rejected"` in the transcript, and `state: "blocked"` with "hit your session limit · resets <time>" in the job's `timeline.jsonl`/`state.json`. Background processes survive the block. So every substantial unattended run **arms continuity at the start**. The mechanism is `scripts/autonomy/` (see its `README.md` and `ARMED.md`):
+- **Controller** (`controller.sh`): the sole writer of `RUN_DIR/manager.json`. It uses a kernel `fcntl` lock and a generation counter; modes are `opus-primary → sol-starting → sol-continuity → handback-requested → opus-primary`. Credentials (`GT3_MANAGER_ID`/`GT3_MANAGER_GEN`) fail closed. It admits every routed mutation: dispatch through `codex-route.sh`, guarded repository commands, process control, and `ctl write`. Only `failover` and `handback` transfer authority. Exactly one manager can admit actions. The guarantee is **cooperative** for paths that bypass the controller (raw shell writes, direct CLI calls), so managers route every mutation through it.
+- **Watcher** (`continuity-watch.sh`): detached, deterministic, zero model tokens while idle. It fails over on a new limit-text `blocked` timeline entry, read through a durable inode and byte cursor so historical entries never trigger. User-question `blocked` never triggers. A staleness-based trigger exists but stays **opt-in**: a quiet Opus waiting on workers looks like a dead one. It checks that a non-empty packet exists **before** transferring ownership, and it enforces the run deadline.
+- **Takeover:** the watcher launches a fresh Sol manager from `sol-takeover.md` plus the packet. It runs at `high`, or `xhigh` for integration, recovery or conflicting-evidence work. It runs in the run's worktree and uses the fenced route. A stored session ID reserves no quota; priming is optional and not the default.
 
-**One manager at a time.** The ledger's manager-mode field (§11) is the lock: `opus`, `sol-starting`, `sol`, or `handback-requested`, plus the holder's PID. Nobody dispatches work while the field names someone else. Write it atomically (temp file + `mv`). Only the holder changes it, except that a returning Opus may set `handback-requested`. A lock whose holder PID is dead (identity re-checked, §6) is stale. The next manager reconciles owned processes against the ledger before reclaiming it.
+[CORE] **The Sol manager fully inherits the manager role**: plan, briefs, routing, dispatch, integration, operational decisions, verification states, stop/continue and handback.
+- **Delegation:** it stays separate from bulk execution and is exempt from downward-only delegation. It launches separate Sol workers for serious engineering, Terra for bounded implementation, and Luna for mechanical, browser and status work, plus a separate Sol `xhigh` reviewer. It escalates to Astra only as §3 allows.
+- **Workers and events:** workers carry task IDs and bounded permissions, never manager credentials. Events (worker exits and completions) are queued, delivered at least once and handled idempotently. Sol ends each turn after dispatching; the watcher resumes it on the next event, including during `handback-requested`.
+- **Takeover procedure:** Sol reads the packet, then verifies branch, HEAD, working tree, processes and pending actions. **Live repo and runtime truth beats the packet.** Healthy running workers are inherited, never killed or restarted. Completed reviews are not re-run, and human gates are unchanged.
 
-**Continuation packet — keep it current, don't write it at the end.** Opus may be cut off without warning, so the ledger always holds: objective, done criteria, branch/head, working tree, commits, active/completed tasks with owners/models, evidence, verified/unverified/blocked/human-review states, owned PIDs and host state, quota/reset state, latest Astra findings, risks, exclusions, exact next action. If Opus is cut off before handing over, no failover happens and the ledger is the handoff.
+[CORE] **Continuation packet** (`RUN_DIR/continuity.md`, template in `scripts/autonomy/continuity.md`): the active manager keeps it current at meaningful transitions: dispatches, completions, brief and review changes, commits, plan changes, gates. Never write it only at the end. It holds:
+- objective;
+- deadline;
+- worktree and branch boundaries and permissions;
+- HEAD and tree state;
+- task sequence and **exact next action**;
+- workers;
+- briefs and review status;
+- implemented, verified and human-review states;
+- gaps;
+- host and quota facts;
+- user-owned decisions.
 
-**Entering Sol-manager mode.** Opus first quiesces its own workers: each finishes or checkpoints, and anything left running is listed as transferred. Opus then sets `sol-starting`. It launches Sol with the packet as its brief via `scripts/codex-route.sh` from the run's worktree, detached so it survives the Claude session ending. The brief includes the absolute run deadline, and Sol stops at it. Sol acknowledges by setting `sol` with its own PID. If no acknowledgement arrives within a few minutes, Opus reverts to `opus` (if still able) or the run simply stops. Sol first secures Claude-side state (in-flight work checkpointed, owned processes reconciled against the ledger), then continues bounded work. Its worker pool is Codex-side (Terra, Luna, Astra); Claude workers are assumed unavailable. The Sol-manager process itself is one of the ≤ 2 top-level tasks (§6), so at most one heavy worker runs beneath it.
+[CORE] **Handback.** A returning Opus calls `ctl request-handback`; it cannot seize ownership. At its next clean checkpoint, Sol stops creating broad work, finishes or checkpoints bounded work, refreshes the packet, calls `ctl checkpoint`, then `ctl handback` once pending actions clear. Opus reviews the run-over and continues. There is no automatic post-reset Opus wake; the user's next message, or a bounded waker if one is ever verified, brings Opus back. Sol continues safely without it.
 
-**Sol-manager authority.** Temporary. Scope and safety rules are unchanged; Sol may not widen scope, touch `main`, push unless the invocation allows it, or start work outside the run plan. Astra becomes a near-co-manager. Invoke it on entry, after major implementation/integration batches, about every 30–45 min of substantive work when enough changed, before major rerouting or scope-sensitive decisions, and before handback. No Astra on unchanged waits or clerical work. **If Sol and Astra disagree on a scope-sensitive or consequential decision, take the conservative option** (checkpoint, or record it as blocked) and leave it for Opus or the user.
-
-**Handback.** A returning Opus reads the ledger before doing anything. If the field is `sol`, it sets `handback-requested` and dispatches nothing. Sol checks the field at each task boundary. It stops creating new work, checkpoints or finishes current bounded work quickly, writes a run-over to the ledger (work done, evidence, commits, current tasks, host/process state, quota events, Astra findings, unresolved items, next action), sets the field to `opus`, and exits. Opus reviews the run-over, confirms Sol and its workers have exited or been explicitly transferred, and retakes authority. If Sol died instead, the lock is stale (above). If Opus never returns within the run, Sol writes the final handoff (§12) and records the failover.
-
-If Codex is also unavailable, there is no continuity manager: checkpoint, update the packet, stop cleanly (§5).
+If Codex is also unavailable, the watcher records it, waits until the route's `resetAt` (which means eligible to retry, not confirmed capacity) and retries within the deadline. It never guesses.
 
 ## 5. Quota and usage limits
 
 Quota exhaustion is an expected autonomous state, not an implementation failure. Track whatever usage/reset information is exposed, enough to avoid dying mid-task; do not invent unavailable data or spend quota polling it.
 
-- **Approaching a limit:** checkpoint, preserve evidence, prepare reassignment context.
+- **Quota state** lives in `RUN_DIR/quota.json`, per route (`claude:opus`, `codex:gpt-6-sol`, …). Record only what was observed or reported, with `source` and `observedAt`; unknown stays unknown. User snapshots are recorded as `source: user`. When a user report and a CLI observation disagree, keep both: the observed CLI rejection governs dispatch, and the cause stays `UNKNOWN` until distinguished. Managers read it at meaningful checkpoints. Never poll models for quota.
+- **Approaching a limit** (only if a real signal is exposed): hand off proactively through the controller. Otherwise rely on the armed failover (§4).
 - **Exhausted:** no retry loops, no identical re-briefs. Mark the route **TEMPORARILY UNAVAILABLE / BLOCKED (not FAIL)** until reset or evidence of recovery. Reroute if a capable alternative exists.
 - **All heavy workers unavailable:** useful light work (§9), else wait or stop cleanly. Waiting is valid when the reset is known and within the horizon.
 - **Manager exhaustion:** §4.
@@ -133,7 +161,16 @@ Never overlap heavy workloads merely for speed. Before each spawn ask: does it a
 
 ## 7. Watchdog
 
-Every active task, manager work included, gets a watchdog (except the host monitor and the watchdog itself; no recursion). It judges progress. Host safety is the monitor's job (§6). **Sonnet low/medium is the routine watchdog worker** — `low` for progress/process/health checks, `medium` when code/log/evidence interpretation is needed. The manager receives the result instead of polling. Where a deterministic check answers the question (PID alive, log still growing, output file advancing), use it and skip the model. When Claude is unavailable (Sol-manager mode, §4), the watchdog falls to Luna `high` or the Sol manager's own checks.
+Every active task, manager work included, gets a watchdog (except the host monitor and the watchdog itself; no recursion). It judges progress. Host safety is the monitor's job (§6). [CORE] **Deterministic sampling plus Luna interpretation.** A shell sampler (e.g. `taskwatch.sh`) checks the task every few minutes:
+- process alive;
+- log growth and latest stage headings;
+- changed and newest files and commits;
+- error, quota and tool-block text;
+- host-monitor state.
+
+It writes a status file the manager can read at any time ("where is the task, and is it healthy?"). **Luna** (`low`) interprets it only when the evidence changed (at most every ~20 min) or on an anomaly (stale log, error or quota text, process gone). It returns stage, activity (coding, testing, simulating, blocked, waiting or finished), health, and whether intervention is needed. The deterministic lines are authoritative; Luna's line is an interpretation. The manager is notified only when the task finishes or dies, or when intervention is needed.
+
+The manager-health watcher (§4) is separate and never uses Luna for live failover.
 
 **Adaptive timing** (tune to expected duration; not a kill timer): < 30 min task → ~15–20 min if progress isn't already clear; 30–90 min → ~30 min; > 90 min → ~45–60 min unless risk or host state justifies earlier.
 

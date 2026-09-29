@@ -15,6 +15,7 @@ let progressValue = null;
 let progressLabel = null;
 let modelProgress = 0;
 let audioProgress = 0;
+let gpuProgress = 0;
 let modelTotal = 10;
 let audioTotal = 6;
 
@@ -57,9 +58,7 @@ function makeIdentityMark() {
 }
 
 function combinedProgress() {
-  const models = Math.round(modelProgress * modelTotal);
-  const audio = Math.round(audioProgress * audioTotal);
-  return (models + audio) / Math.max(1, modelTotal + audioTotal);
+  return modelProgress * 0.65 + audioProgress * 0.15 + gpuProgress * 0.20;
 }
 
 function renderProgress() {
@@ -74,7 +73,14 @@ function renderProgress() {
   if (progress >= 1) {
     root.classList.add('is-ready');
     progressLabel.textContent = 'Route ready';
+    if (state.started) dismissStartScreen();
   }
+}
+
+/** GPU draws are part of readiness, after downloads and decoding. */
+export function setGpuProgress(fraction) {
+  gpuProgress = Math.min(1, Math.max(0, fraction));
+  renderProgress();
 }
 
 function buildScreen() {
@@ -97,7 +103,7 @@ function buildScreen() {
   progressLabel = element('span', 'start-loading__label', 'Preparing the grid');
   progressValue = element('span', 'start-loading__value', '00%');
   progressValue.setAttribute('role', 'progressbar');
-  progressValue.setAttribute('aria-label', 'Car model and audio loading progress');
+  progressValue.setAttribute('aria-label', 'Car model, audio, and graphics preparation progress');
   progressValue.setAttribute('aria-valuemin', '0');
   progressValue.setAttribute('aria-valuemax', '100');
   progressValue.setAttribute('aria-valuenow', '0');
@@ -143,10 +149,9 @@ function beginPreload() {
 /** Fade the introduction away once. The live canvas is never replaced. */
 export function dismissStartScreen() {
   if (dismissed) return;
-  dismissed = true;
-
   if (!root) root = document.getElementById('start-screen');
-  if (!root) return;
+  if (!root?.classList.contains('is-ready')) return;
+  dismissed = true;
 
   root.classList.add('is-leaving');
   root.setAttribute('aria-hidden', 'true');

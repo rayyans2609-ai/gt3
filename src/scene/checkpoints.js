@@ -6,6 +6,7 @@ import {
   CHECKPOINT_T, CHECKPOINT_APPROACH_T, TRACK,
   offsetPointAt, tangentAt,
 } from './trackCurve.js';
+import { createGateResponse } from './gateResponse.js';
 
 const postGeometry = new THREE.BoxGeometry(0.24, 7.6, 0.34);
 const beamGeometry = new THREE.BoxGeometry(18.9, 0.24, 0.55);
@@ -24,6 +25,7 @@ const tangent = new THREE.Vector3();
 const instance = new THREE.Object3D();
 const approach = { index: -1, proximity: 0 };
 let routeIndex = 0;
+let response = null;
 
 export function indexAt(progress) {
   let index = 0;
@@ -67,6 +69,8 @@ export function buildCheckpoints() {
   posts.instanceMatrix.needsUpdate = true;
   beams.instanceMatrix.needsUpdate = true;
   root.add(posts, beams);
+  response = createGateResponse(posts, beams);
+  root.add(response.group);
   routeIndex = indexAt(state.progress);
   return root;
 }
@@ -84,8 +88,17 @@ export function updateCheckpoints() {
     }
     if (discovered) set('unlocked', discovered);
   }
+  if (nextIndex !== routeIndex) response?.trigger(Math.max(nextIndex, routeIndex) - 1);
   routeIndex = nextIndex;
   if (state.activeCarIndex !== nextIndex) set('activeCarIndex', nextIndex);
+}
+
+export function updateGateResponse(dt) {
+  response?.update(dt);
+}
+
+export function warmCheckpointResponse() {
+  return response?.warm() ?? (() => {});
 }
 
 export function getApproach() {

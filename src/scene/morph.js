@@ -1,166 +1,79 @@
-/**
- * morph.js — the car transformation. (SPEC §9)
- *
- * OWNED BY THE MANAGER (cross-fade timing).
- *
- * The rule the whole effect is built around: the rig's position, orientation and forward
- * speed never change during a morph. The car stays anchored and keeps driving. Only the
- * BODY is swapped, under a mask.
- *
- * The mask is three overlapping things, none of which is enough on its own:
- *   - an opacity cross-fade between the outgoing and incoming model,
- *   - an emissive energy pulse that peaks exactly at the 50% crossover, which is the
- *     moment the cross-fade looks worst and therefore the moment to overwhelm the eye,
- *   - a short outward particle burst that starts a beat BEFORE the swap, so the eye is
- *     already tracking scattering pixels when the bodies trade places.
- *
- * Timing (total 0.85s, inside the spec's 0.6-1.0s window):
- *   0.00 - 0.18  charge:   old car's emissive rises, particles spawn and push out
- *   0.18 - 0.62  cross:    opacity trades over, emissive peaks at 0.40 then falls
- *   0.62 - 0.85  settle:   new car's emissive drains to zero, particles fade out
- *
- * Everything is driven off a single normalised clock so the phases cannot drift apart.
- */
-
-import * as THREE from 'three';
-import { state, set } from '../core/state.js';
+/** A short body-only cross-fade. The route rig never changes during a swap. */
+import { state } from '../core/state.js';
 import { carMount, setCarModel, setWheels } from './carRig.js';
 import { getCarModel, findWheels } from './cars.js';
-import { CARS } from '../data/cars.js';
 
-const DURATION = 0.85;
-const PHASE = { chargeEnd: 0.18 / DURATION, crossEnd: 0.62 / DURATION };
-const PEAK_AT = 0.40 / DURATION;   // where the emissive pulse crests
-const PARTICLE_COUNT = 140;
+const DURATION = 0.56;
+const materialCache = new WeakMap();
 
 let active = false;
 let clock = 0;
 let outgoing = null;
 let incoming = null;
-let outgoingMats = [];
-let incomingMats = [];
-let particles = null;
-let particleVel = null;
-let particleLife = 0;
-let completeHandlers = [];
 let pendingIndex = -1;
 let renderedIndex = 0;
+const completeHandlers = [];
 
-const _color = new THREE.Color();
-
-// ---------------------------------------------------------------------------
-// Material handling
-// ---------------------------------------------------------------------------
-// Fading a GLTF car means touching every material it owns. cars.js already clones
-// materials per car, so mutating them here cannot leak into another car — but the
-// ORIGINAL values still have to be restored, or a car that has been morphed twice
-// slowly drifts brighter each time.
-
-function collectMaterials(root) {
-  const out = [];
-  root.traverse((o) => {
-    if (!o.isMesh || !o.material) return;
-    const mats = Array.isArray(o.material) ? o.material : [o.material];
-    for (const m of mats) {
-      out.push({
-        mat: m,
-        opacity: m.opacity,
-        transparent: m.transparent,
-        depthWrite: m.depthWrite,
-        emissive: m.emissive ? m.emissive.clone() : null,
-        emissiveIntensity: m.emissiveIntensity ?? 1,
-      });
+// Each car owns a second set of materials for the transparent state. They share
+// the source textures, while their shader programs stay resident after warm-up.
+// Repeatedly changing a single material between opaque and transparent releases
+// the old program and recreates it at the next gate.
+function materialsFor(model) {
+  if (!model) return null;
+  const cached = materialCache.get(model);
+  if (cached) return cached;
+  const fades = new Map();
+  const assignments = [];
+  const fadeOne = (normal) => {
+    if (!fades.has(normal)) {
+      const fade = normal.clone();
+      fade.transparent = true;
+      fade.depthWrite = false;
+      fade.forceSinglePass = true;
+      fades.set(normal, fade);
     }
+    return fades.get(normal);
+  };
+  model.traverse((object) => {
+    if (!object.isMesh || !object.material) return;
+    const normal = object.material;
+    const fade = Array.isArray(normal) ? normal.map(fadeOne) : fadeOne(normal);
+    assignments.push({ object, normal, fade });
   });
-  return out;
+  const result = { assignments, fades: [...fades.values()] };
+  materialCache.set(model, result);
+  return result;
 }
 
-function restore(entries) {
-  for (const e of entries) {
-    e.mat.opacity = e.opacity;
-    e.mat.transparent = e.transparent;
-    e.mat.depthWrite = e.depthWrite;
-    if (e.emissive && e.mat.emissive) e.mat.emissive.copy(e.emissive);
-    if (e.mat.emissiveIntensity !== undefined) e.mat.emissiveIntensity = e.emissiveIntensity;
-    e.mat.needsUpdate = true;
+function activate(model) {
+  if (!model) return;
+  for (const { object, fade } of materialsFor(model).assignments) object.material = fade;
+}
+
+function restore(model) {
+  if (!model) return;
+  for (const { object, normal } of materialsFor(model).assignments) object.material = normal;
+}
+
+function applyFade(model, opacity) {
+  if (!model) return;
+  for (const mat of materialsFor(model).fades) {
+    mat.opacity = opacity;
+    mat.depthWrite = opacity > 0.985;
   }
 }
 
-function applyFade(entries, opacity, glow, glowColor) {
-  for (const e of entries) {
-    e.mat.transparent = true;
-    e.mat.opacity = opacity;
-    // Writing depth while translucent makes the far side of the body punch holes in
-    // the near side during the cross-fade. Disable it only while actually fading.
-    e.mat.depthWrite = opacity > 0.985;
-    if (e.mat.emissive) {
-      e.mat.emissive.copy(e.emissive ?? _color.setRGB(0, 0, 0)).lerp(glowColor, glow);
-      e.mat.emissiveIntensity = (e.emissiveIntensity ?? 1) + glow * 2.4;
-    }
-  }
+/** Draw this exact material state during the real GPU warm-up. */
+export function beginWarmFade(model) {
+  activate(model);
+  applyFade(model, 0.5);
 }
 
-// ---------------------------------------------------------------------------
-// Particles — blocky, axis-aligned points, matching the coin's pixel language
-// ---------------------------------------------------------------------------
-
-function buildParticles() {
-  const geo = new THREE.BufferGeometry();
-  const pos = new Float32Array(PARTICLE_COUNT * 3);
-  const col = new Float32Array(PARTICLE_COUNT * 3);
-  geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-  geo.setAttribute('color', new THREE.BufferAttribute(col, 3));
-
-  const mat = new THREE.PointsMaterial({
-    size: 0.13,
-    vertexColors: true,
-    transparent: true,
-    opacity: 0,
-    depthWrite: false,
-    blending: THREE.AdditiveBlending,
-    sizeAttenuation: true,
-  });
-
-  const points = new THREE.Points(geo, mat);
-  points.frustumCulled = false;
-  points.name = 'morph-particles';
-  return points;
+export function endWarmFade(model) {
+  restore(model);
 }
-
-function seedParticles(brandColor) {
-  const pos = particles.geometry.attributes.position.array;
-  const col = particles.geometry.attributes.color.array;
-  const gold = _color.set(0xc6a96b);
-  const brand = new THREE.Color(brandColor);
-
-  for (let i = 0; i < PARTICLE_COUNT; i++) {
-    const i3 = i * 3;
-    // Spawn inside the car's volume rather than on a sphere, so the burst reads as the
-    // body itself coming apart instead of an explosion happening near it.
-    pos[i3 + 0] = (Math.random() - 0.5) * 2.0;
-    pos[i3 + 1] = 0.25 + Math.random() * 1.15;
-    pos[i3 + 2] = (Math.random() - 0.5) * 4.4;
-
-    const c = Math.random() < 0.55 ? gold : brand;
-    col[i3 + 0] = c.r; col[i3 + 1] = c.g; col[i3 + 2] = c.b;
-
-    const i3v = i * 3;
-    particleVel[i3v + 0] = pos[i3 + 0] * 1.5 + (Math.random() - 0.5) * 1.1;
-    particleVel[i3v + 1] = 0.7 + Math.random() * 1.9;
-    particleVel[i3v + 2] = pos[i3 + 2] * 0.5 + (Math.random() - 0.5) * 1.1;
-  }
-  particles.geometry.attributes.position.needsUpdate = true;
-  particles.geometry.attributes.color.needsUpdate = true;
-}
-
-// ---------------------------------------------------------------------------
-// Public API
-// ---------------------------------------------------------------------------
 
 export function initMorph() {
-  particles = buildParticles();
-  particleVel = new Float32Array(PARTICLE_COUNT * 3);
-  carMount.add(particles);
   renderedIndex = state.activeCarIndex;
 }
 
@@ -168,16 +81,11 @@ export function isMorphing() {
   return active;
 }
 
-/** Register a callback fired when a morph completes, with the new car index. */
 export function onMorphComplete(fn) {
   completeHandlers.push(fn);
 }
 
-/**
- * Morph the player's car into car `index`.
- * An in-flight swap is cancelled to its currently dominant visible body before
- * retargeting. Intermediate targets are never queued or published to route state.
- */
+/** Cancel an in-flight swap to its dominant body before retargeting. */
 export function morphTo(index) {
   if (active && index === pendingIndex) return;
   if (active) cancel();
@@ -189,44 +97,27 @@ export function morphTo(index) {
     return;
   }
 
-  // Preloading replaces the car mount's children, which also removes this mask.
-  // Ensure the first route swap has the same particle layer as later swaps.
-  if (particles?.parent !== carMount) carMount.add(particles);
-
-  outgoing = carMount.children.find((c) => c !== particles) || null;
+  outgoing = carMount.children[0] || null;
   incoming = next;
   pendingIndex = index;
-
-  outgoingMats = outgoing ? collectMaterials(outgoing) : [];
-  incomingMats = collectMaterials(incoming);
-
-  // The incoming car is added immediately at zero opacity. Adding it later would cost a
-  // shader compile mid-morph and produce a visible hitch exactly at the crossover.
-  applyFade(incomingMats, 0, 0, _color.set(0x000000));
+  activate(outgoing);
+  activate(incoming);
+  applyFade(outgoing, 1);
+  applyFade(incoming, 0);
   carMount.add(incoming);
-
-  seedParticles(CARS[index]?.brandColor ?? '#c6a96b');
-  particleLife = 0;
   clock = 0;
   active = true;
 }
 
 function finish() {
-  if (outgoing) {
-    restore(outgoingMats);
-    carMount.remove(outgoing);
-  }
-  restore(incomingMats);
+  restore(outgoing);
+  restore(incoming);
   setCarModel(incoming);
-  carMount.add(particles);
   setWheels(findWheels(incoming));
 
-  particles.material.opacity = 0;
   active = false;
   outgoing = null;
   incoming = null;
-  outgoingMats = [];
-  incomingMats = [];
 
   if (pendingIndex >= 0) {
     const completedIndex = pendingIndex;
@@ -237,39 +128,31 @@ function finish() {
 }
 
 function cancel() {
-  const crossT = smooth((clock - PHASE.chargeEnd) / (PHASE.crossEnd - PHASE.chargeEnd));
-  const keepIncoming = crossT >= 0.5;
-  restore(outgoingMats);
-  restore(incomingMats);
+  const keepIncoming = smooth(clock) >= 0.5;
+  restore(outgoing);
+  restore(incoming);
   const retained = keepIncoming ? incoming : outgoing;
   if (retained) {
     setCarModel(retained);
     setWheels(findWheels(retained));
   }
-  carMount.add(particles);
-  particles.material.opacity = 0;
   if (keepIncoming) renderedIndex = pendingIndex;
   active = false;
   outgoing = null;
   incoming = null;
-  outgoingMats = [];
-  incomingMats = [];
   pendingIndex = -1;
 }
 
-/** Replay resets the route model immediately without changing discovery state. */
+/** Replay resets the route model without changing discovery state. */
 export function resetMorph(index = 0) {
   if (active) cancel();
   const model = getCarModel(index);
   if (!model) return;
   setCarModel(model);
   setWheels(findWheels(model));
-  carMount.add(particles);
   renderedIndex = index;
 }
 
-// Smoothstep, so the cross-fade eases in and out instead of ramping linearly through
-// the ugly 50/50 point.
 function smooth(t) {
   const x = Math.min(1, Math.max(0, t));
   return x * x * (3 - 2 * x);
@@ -277,40 +160,9 @@ function smooth(t) {
 
 export function updateMorph(dt) {
   if (!active) return;
-
-  clock += dt / DURATION;
-  const t = Math.min(1, clock);
-
-  // Emissive pulse: rises to the crossover, falls after it. Remap t so that PEAK_AT
-  // lands at 0.5, then take a half-sine — a soft crest rather than a spike, which reads
-  // as energy building rather than a camera flash.
-  const pulseT = t <= PEAK_AT
-    ? (t / PEAK_AT) * 0.5
-    : 0.5 + ((t - PEAK_AT) / (1 - PEAK_AT)) * 0.5;
-  const glow = Math.sin(Math.PI * pulseT);
-
-  const brand = _color.set(CARS[pendingIndex]?.brandColor ?? '#c6a96b');
-  const glowColor = brand.clone().lerp(new THREE.Color(0xffe9c0), 0.55);
-
-  // Cross-fade only across the middle phase; the charge and settle phases hold at the
-  // ends so the swap itself is buried in the busiest part of the effect.
-  const crossT = smooth((t - PHASE.chargeEnd) / (PHASE.crossEnd - PHASE.chargeEnd));
-
-  if (outgoingMats.length) applyFade(outgoingMats, 1 - crossT, glow, glowColor);
-  applyFade(incomingMats, crossT, glow, glowColor);
-
-  // Particles: push out with a little gravity, fade over the whole morph.
-  particleLife += dt;
-  const pos = particles.geometry.attributes.position.array;
-  for (let i = 0; i < PARTICLE_COUNT; i++) {
-    const i3 = i * 3;
-    particleVel[i3 + 1] -= 3.1 * dt;
-    pos[i3 + 0] += particleVel[i3 + 0] * dt;
-    pos[i3 + 1] += particleVel[i3 + 1] * dt;
-    pos[i3 + 2] += particleVel[i3 + 2] * dt;
-  }
-  particles.geometry.attributes.position.needsUpdate = true;
-  particles.material.opacity = Math.sin(Math.PI * t) * 0.85;
-
-  if (t >= 1) finish();
+  clock = Math.min(1, clock + dt / DURATION);
+  const cross = smooth(clock);
+  applyFade(outgoing, 1 - cross);
+  applyFade(incoming, cross);
+  if (clock >= 1) finish();
 }

@@ -66,6 +66,7 @@ async function boot() {
   const carRig = await import('./scene/carRig.js');
   const aerialCamera = await import('./scene/aerialCamera.js');
   const cars = await import('./scene/cars.js');
+  const carWarmup = await import('./scene/carWarmup.js');
   const checkpoints = await import('./scene/checkpoints.js');
   const morph = await import('./scene/morph.js');
   const theme = await import('./scene/theme.js');
@@ -107,10 +108,19 @@ async function boot() {
   // Models and audio load in parallel; the start screen shows one combined bar.
   let modelFraction = 0;
   let audioFraction = 0;
+  let gpuFraction = 0;
+  let modelsLoaded = false;
+  let audioLoaded = false;
+  let gpuReady = false;
+  let gpuWarmup = null;
   const reportProgress = () => {
-    // Models dominate the byte count, so they dominate the bar.
-    const combined = modelFraction * 0.8 + audioFraction * 0.2;
+    const combined = modelFraction * 0.65 + audioFraction * 0.15 + gpuFraction * 0.20;
     window.dispatchEvent(new CustomEvent('gt3:preload', { detail: { fraction: combined } }));
+  };
+  const releaseDrive = () => {
+    if (!modelsLoaded || !audioLoaded || !gpuReady) return;
+    scrollDrive.unlockScroll();
+    console.info(`[gt3] ready — three r${THREE.REVISION}`);
   };
 
   cars.preloadCars((_l, _t, fraction) => { modelFraction = fraction; reportProgress(); })
@@ -120,10 +130,25 @@ async function boot() {
         carRig.setCarModel(first);
         carRig.setWheels(cars.findWheels(first));
       }
+      modelsLoaded = true;
+      gpuWarmup = carWarmup.createCarWarmup((fraction) => {
+        gpuFraction = fraction;
+        startScreen.setGpuProgress(fraction);
+        reportProgress();
+      });
     })
-    .catch((e) => console.error('[gt3] car preload failed', e));
+    .catch((e) => {
+      // Keep the previous failure behaviour: never strand the visitor behind the start screen.
+      console.error('[gt3] car preload failed', e);
+      modelsLoaded = true;
+      gpuReady = true;
+      gpuFraction = 1;
+      startScreen.setGpuProgress(1);
+      releaseDrive();
+    });
 
   audio.preloadAudio((_l, _t, fraction) => { audioFraction = fraction; reportProgress(); })
+    .then(() => { audioLoaded = true; releaseDrive(); })
     .catch((e) => console.warn('[gt3] audio preload issue', e));
 
   // ---- wiring ------------------------------------------------------------
@@ -139,6 +164,7 @@ async function boot() {
   });
 
   scrollDrive.initScrollDrive();
+  scrollDrive.lockScroll();
 
   // Environment parallax remains independent of the race camera.
   window.addEventListener('pointermove', (e) => {
@@ -156,6 +182,7 @@ async function boot() {
   registerUpdate(carRig.update);
   registerUpdate(aerialCamera.update);
   registerUpdate(checkpoints.updateCheckpoints);
+  registerUpdate(checkpoints.updateGateResponse);
   registerUpdate(() => morph.morphTo(state.activeCarIndex));
   registerUpdate(morph.updateMorph);
   registerUpdate(theme.update);
@@ -192,13 +219,17 @@ async function boot() {
     for (const update of updates) update(dt, state);
 
     // The legacy montage remains available for a later manual-unlock flow.
-    if (studio.isMontagePlaying()) studio.renderMontage();
+    if (gpuWarmup && !gpuWarmup.done) {
+      if (gpuWarmup.step()) {
+        gpuReady = true;
+        releaseDrive();
+      }
+    } else if (studio.isMontagePlaying()) studio.renderMontage();
     else sceneSetup.render(dt);
 
     requestAnimationFrame(frame);
   }
 
-  console.info(`[gt3] ready — three r${THREE.REVISION}`);
   requestAnimationFrame(frame);
 }
 

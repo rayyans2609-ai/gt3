@@ -32,6 +32,7 @@ export function createGateResponse(posts, beams) {
 
   let gate = -1;
   let elapsed = DURATION;
+  let triggerMeasureId = 0;
 
   function place(mesh, source, index, x, y) {
     source.getMatrixAt(index, base);
@@ -59,19 +60,42 @@ export function createGateResponse(posts, beams) {
 
   function trigger(index) {
     if (quiet || index < 0 || index >= beams.count) return;
+    const start = `gt3:gateTrigger:start:${++triggerMeasureId}`;
+    const end = `gt3:gateTrigger:end:${triggerMeasureId}`;
+    performance.mark(start);
     gate = index;
     elapsed = 0;
     group.visible = true;
     update(0);
+    performance.mark(end);
+    performance.measure('gt3:gateTrigger', start, end);
+    performance.clearMarks(start);
+    performance.clearMarks(end);
   }
 
   // An actual draw during preload also warms this material and geometry. The
   // resulting pixels are covered by the start screen; restore visibility after it.
   function warm() {
     if (quiet) return () => {};
+    const previous = { visible: group.visible, gate, elapsed,
+      opacity: material.opacity, color: material.color.clone(),
+      matrices: [beamBand, ...postBands].map(mesh => mesh.matrix.clone()) };
     trigger(0);
     material.opacity = 0.001;
-    return () => { group.visible = false; gate = -1; elapsed = DURATION; };
+    let restored = false;
+    return () => {
+      if (restored) return;
+      restored = true;
+      group.visible = previous.visible;
+      gate = previous.gate;
+      elapsed = previous.elapsed;
+      material.opacity = previous.opacity;
+      material.color.copy(previous.color);
+      for (const [index, mesh] of [beamBand, ...postBands].entries()) {
+        mesh.matrix.copy(previous.matrices[index]);
+        mesh.matrixWorldNeedsUpdate = true;
+      }
+    };
   }
 
   return { group, trigger, update, warm };

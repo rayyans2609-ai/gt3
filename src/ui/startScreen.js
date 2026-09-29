@@ -1,7 +1,5 @@
 import { state } from '../core/state.js';
 import { onFirstScroll } from '../scroll/scrollDrive.js';
-import { preloadCars } from '../scene/cars.js';
-import { preloadAudio } from '../audio/audioManager.js';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
 const DISMISS_DURATION = 1300;
@@ -13,11 +11,8 @@ let root = null;
 let progressFill = null;
 let progressValue = null;
 let progressLabel = null;
-let modelProgress = 0;
-let audioProgress = 0;
-let gpuProgress = 0;
-let modelTotal = 10;
-let audioTotal = 6;
+let progress = 0;
+let readiness = 'loading';
 
 function element(tag, className, text) {
   const node = document.createElement(tag);
@@ -57,29 +52,26 @@ function makeIdentityMark() {
   return svg;
 }
 
-function combinedProgress() {
-  return modelProgress * 0.65 + audioProgress * 0.15 + gpuProgress * 0.20;
-}
-
 function renderProgress() {
   if (!progressFill || !progressValue || !progressLabel) return;
 
-  const progress = Math.min(1, Math.max(0, combinedProgress()));
   const percent = Math.round(progress * 100);
   progressFill.style.transform = `scaleX(${progress.toFixed(4)})`;
   progressValue.textContent = `${String(percent).padStart(2, '0')}%`;
   progressValue.setAttribute('aria-valuenow', String(percent));
 
-  if (progress >= 1) {
-    root.classList.add('is-ready');
-    progressLabel.textContent = 'Route ready';
-    if (state.started) dismissStartScreen();
-  }
+  root.dataset.readiness = readiness;
+  root.classList.toggle('is-ready', readiness === 'ready' || readiness === 'degraded');
+  progressLabel.textContent = readiness === 'failed' ? 'Route unavailable'
+    : readiness === 'degraded' ? 'Route ready · reduced assets'
+      : readiness === 'ready' ? 'Route ready' : 'Preparing the grid';
+  if (root.classList.contains('is-ready') && state.started) dismissStartScreen();
 }
 
-/** GPU draws are part of readiness, after downloads and decoding. */
-export function setGpuProgress(fraction) {
-  gpuProgress = Math.min(1, Math.max(0, fraction));
+/** Main owns the one readiness decision used by this screen and the scroll lock. */
+export function setLoadState(next) {
+  progress = Math.min(1, Math.max(0, Number(next.progress) || 0));
+  readiness = next.status;
   renderProgress();
 }
 
@@ -126,26 +118,6 @@ function buildScreen() {
   root.replaceChildren(panel, prompt);
 }
 
-function beginPreload() {
-  const models = preloadCars((loaded, total, fraction) => {
-    modelTotal = Math.max(1, Number(total) || 10);
-    modelProgress = Number.isFinite(fraction) ? fraction : loaded / modelTotal;
-    renderProgress();
-  });
-
-  const audio = preloadAudio((fraction, loaded, total) => {
-    audioTotal = Math.max(1, Number(total) || 6);
-    audioProgress = Number.isFinite(fraction) ? fraction : loaded / audioTotal;
-    renderProgress();
-  });
-
-  void Promise.allSettled([models, audio]).then(() => {
-    modelProgress = 1;
-    audioProgress = 1;
-    renderProgress();
-  });
-}
-
 /** Fade the introduction away once. The live canvas is never replaced. */
 export function dismissStartScreen() {
   if (dismissed) return;
@@ -161,7 +133,7 @@ export function dismissStartScreen() {
   }, DISMISS_DURATION);
 }
 
-/** Populate the existing start-screen root and begin shared asset preloading. */
+/** Populate the existing start-screen root. Main owns asset preloading. */
 export function initStartScreen() {
   if (initialized) return;
 
@@ -170,7 +142,7 @@ export function initStartScreen() {
 
   initialized = true;
   buildScreen();
-  beginPreload();
+  renderProgress();
 
   onFirstScroll(() => {
     dismissStartScreen();

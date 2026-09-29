@@ -1,39 +1,37 @@
-/** Draw the loaded cars through the Tour renderer before scroll is released.
- * One small mesh batch is drawn per animation frame, under the start screen.
- * This exercises real color and shadow passes, including geometry/texture uploads.
- */
+/** Exercise car render states through the Tour renderer before drive unlock. */
 import * as THREE from 'three';
 import { CARS } from '../data/cars.js';
 import { getCarModel } from './cars.js';
 import { carMount, rig } from './carRig.js';
 import { render, scene } from './sceneSetup.js';
-import { beginWarmFade, endWarmFade } from './morph.js';
+import { beginWarmFade } from './morph.js';
 import { warmCheckpointResponse } from './checkpoints.js';
 
 const MESHES_PER_FRAME = 12;
 
-export function createCarWarmup(onProgress) {
-  const originalChildren = [...carMount.children];
+export function createCarWarmup(onProgress, onStep, { throwAtDraw = -1 } = {}) {
+  const starter = carMount.children[0];
+  if (!starter) throw new Error('[warmup] No visible starter car');
+  const originalFog = scene.fog;
   const cars = CARS.map((_, index) => {
     const model = getCarModel(index);
     const meshes = [];
+    const snapshot = [];
     model.traverse((object) => {
-      if (object.isMesh && object.visible) meshes.push({
-        object, visible: object.visible, frustumCulled: object.frustumCulled,
-      });
+      if (!object.isMesh) return;
+      snapshot.push({ object, visible: object.visible,
+        frustumCulled: object.frustumCulled, material: object.material });
+      if (object.visible) meshes.push(object);
     });
-    return { model, meshes };
+    return { model, meshes, snapshot };
   });
-  // The moving car later introduces a mapped, double-sided shadow variant that
-  // a stationary solo draw can miss. Exercise both shadow sides through the same
-  // composer path, using a texture already resident from the real models.
   let mappedTexture = null;
   for (const car of cars) {
-    car.model.traverse((object) => {
-      if (mappedTexture || !object.isMesh) return;
-      const materials = Array.isArray(object.material) ? object.material : [object.material];
+    for (const { material } of car.snapshot) {
+      const materials = Array.isArray(material) ? material : [material];
       mappedTexture = materials.find(mat => mat?.map)?.map ?? null;
-    });
+      if (mappedTexture) break;
+    }
     if (mappedTexture) break;
   }
   const probeGeometry = new THREE.BoxGeometry(0.1, 0.1, 0.1);
@@ -50,110 +48,149 @@ export function createCarWarmup(onProgress) {
   });
   const draws = cars.reduce((sum, car) =>
     sum + Math.max(1, Math.ceil(car.meshes.length / MESHES_PER_FRAME)) * 2,
-    1 + shadowProbes.length + cars.length - 1);
+    2 + shadowProbes.length + cars.length - 1);
   let completed = 0;
   let carIndex = 0;
   let offset = 0;
   let fading = false;
   let pairIndex = 0;
   let shadowProbeIndex = 0;
+  let gatePrepared = false;
   let done = false;
+  let restored = false;
+  let gateRestore = null;
+  let drawNumber = 0;
 
-  for (const car of cars) for (const { object } of car.meshes) {
-    object.visible = false;
-    object.frustumCulled = false;
+  for (const car of cars) for (const entry of car.snapshot) {
+    entry.object.visible = false;
+    entry.object.frustumCulled = false;
   }
 
-  function restoreMount() {
-    for (const child of [...carMount.children]) carMount.remove(child);
-    for (const child of originalChildren) carMount.add(child);
+  function mount(...models) {
+    carMount.clear();
+    carMount.add(...models);
   }
 
-  function finish() {
-    restoreMount();
-    for (const probe of shadowProbes) rig.remove(probe);
-    for (const car of cars) for (const entry of car.meshes) {
-      entry.object.visible = entry.visible;
-      entry.object.frustumCulled = entry.frustumCulled;
+  function abort() {
+    if (done) return;
+    done = true; // no later step may mutate the scene after this point
+    const failures = [];
+    const restore = action => { try { action(); } catch (error) { failures.push(error); } };
+    if (gateRestore) {
+      restore(gateRestore);
+      gateRestore = null;
     }
-    done = true;
-    onProgress?.(1);
+    restore(() => { scene.fog = originalFog; });
+    for (const probe of shadowProbes) {
+      restore(() => rig.remove(probe));
+    }
+    // Keep the probe materials' program references resident. Disposing them here
+    // would undo the shadow-side compilation before a real crossing uses it.
+    restore(() => probeGeometry.dispose());
+    for (const car of cars) for (const entry of car.snapshot) {
+      restore(() => {
+        entry.object.material = entry.material;
+        entry.object.visible = entry.visible;
+        entry.object.frustumCulled = entry.frustumCulled;
+      });
+    }
+    restore(() => mount(starter));
+    if (failures.length) throw new AggregateError(failures, 'Warm-up scene restore failed');
+    restored = true;
+  }
+
+  function draw(phase, setup) {
+    const started = performance.now();
+    setup?.();
+    if (++drawNumber === throwAtDraw) throw new Error('Injected mid-warm-up draw failure');
+    const renderAt = performance.now();
+    render(0);
+    const rendered = performance.now();
+    onStep?.({ phase, startedAt: started, endedAt: rendered,
+      setupMs: renderAt - started,
+      renderMs: rendered - renderAt, totalMs: rendered - started });
+  }
+
+  function advance() {
+    completed++;
+    onProgress?.(completed / draws);
   }
 
   function step() {
     if (done) return true;
-    if (carIndex >= cars.length) {
-      if (pairIndex < cars.length - 1) {
-        const first = cars[pairIndex];
-        const second = cars[pairIndex + 1];
-        for (const { object, visible } of [...first.meshes, ...second.meshes]) object.visible = visible;
-        beginWarmFade(first.model);
-        beginWarmFade(second.model);
-        for (const child of [...carMount.children]) carMount.remove(child);
-        carMount.add(first.model, second.model);
-        render(0);
-        restoreMount();
-        endWarmFade(first.model);
-        endWarmFade(second.model);
-        for (const { object } of [...first.meshes, ...second.meshes]) object.visible = false;
-        pairIndex++;
-        completed++;
-        onProgress?.(completed / draws);
+    try {
+      if (carIndex >= cars.length) {
+        if (gatePrepared) {
+          abort();
+          draw('full-scene-control');
+          advance();
+          return true;
+        }
+        if (pairIndex < cars.length - 1) {
+          const first = cars[pairIndex];
+          const second = cars[pairIndex + 1];
+          draw('fade-pair', () => {
+            for (const object of [...first.meshes, ...second.meshes]) object.visible = true;
+            beginWarmFade(first.model);
+            beginWarmFade(second.model);
+            mount(first.model, second.model);
+          });
+          for (const object of [...first.meshes, ...second.meshes]) object.visible = false;
+          pairIndex++;
+          advance();
+          return false;
+        }
+        if (shadowProbeIndex < shadowProbes.length) {
+          const probe = shadowProbes[shadowProbeIndex++];
+          probe.visible = true;
+          scene.fog = null;
+          try { draw('shadow'); } finally { scene.fog = originalFog; probe.visible = false; }
+          advance();
+          return false;
+        }
+        gateRestore = warmCheckpointResponse();
+        draw('gate-response');
+        gateRestore();
+        gateRestore = null;
+        advance();
+        gatePrepared = true;
         return false;
       }
-      if (shadowProbeIndex < shadowProbes.length) {
-        const probe = shadowProbes[shadowProbeIndex++];
-        probe.visible = true;
-        // Shadow-map draws have no scene fog. Render this depth material once
-        // under the same program key so its mapped side variants remain cached.
-        const fog = scene.fog;
-        scene.fog = null;
-        try { render(0); } finally { scene.fog = fog; probe.visible = false; }
-        completed++;
-        onProgress?.(completed / draws);
-        return false;
-      }
-      const restoreGate = warmCheckpointResponse();
-      render(0);
-      restoreGate();
-      completed++;
-      finish();
-      return true;
-    }
 
-    const { model, meshes } = cars[carIndex];
-    const batch = meshes.slice(offset, offset + MESHES_PER_FRAME);
-    // GLTF meshes can contain other meshes. A selected child must have each
-    // mesh ancestor visible or the renderer silently skips its fade variant.
-    const enabled = new Set();
-    for (const { object } of batch) {
-      for (let ancestor = object; ancestor && ancestor !== model; ancestor = ancestor.parent) {
-        if (ancestor.isMesh) enabled.add(ancestor);
+      const { model, meshes } = cars[carIndex];
+      const batch = meshes.slice(offset, offset + MESHES_PER_FRAME);
+      const enabled = new Set();
+      for (const object of batch) {
+        for (let ancestor = object; ancestor && ancestor !== model; ancestor = ancestor.parent) {
+          if (ancestor.isMesh) enabled.add(ancestor);
+        }
       }
-    }
-    for (const object of enabled) object.visible = true;
-    for (const child of [...carMount.children]) carMount.remove(child);
-    carMount.add(model);
-    render(0);
-    restoreMount();
-    for (const object of enabled) object.visible = false;
-
-    completed++;
-    onProgress?.(completed / draws);
-    offset += MESHES_PER_FRAME;
-    if (offset >= meshes.length) {
-      offset = 0;
-      if (!fading) {
-        beginWarmFade(model);
-        fading = true;
-      } else {
-        endWarmFade(model);
-        fading = false;
-        carIndex++;
+      draw(fading ? 'fade-solo' : 'normal-solo', () => {
+        for (const object of enabled) object.visible = true;
+        mount(model);
+      });
+      for (const object of enabled) object.visible = false;
+      advance();
+      offset += MESHES_PER_FRAME;
+      if (offset >= meshes.length) {
+        offset = 0;
+        if (!fading) {
+          beginWarmFade(model);
+          fading = true;
+        } else {
+          fading = false;
+          carIndex++;
+        }
       }
+      return false;
+    } catch (error) {
+      try { abort(); }
+      catch (restoreError) { throw new AggregateError([error, restoreError],
+        'Warm-up step and scene restore failed'); }
+      throw error;
     }
-    return false;
   }
 
-  return { step, get done() { return done; } };
+  return { step, abort, get done() { return done; }, get restored() { return restored; },
+    get progress() { return completed / draws; } };
 }

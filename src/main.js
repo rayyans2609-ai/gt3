@@ -103,53 +103,171 @@ async function boot() {
   player.initPlayer();
   startScreen.initStartScreen();
   finishScreen.initFinishScreen();
+  scrollDrive.initScrollDrive();
+  scrollDrive.lockScroll();
 
   // ---- preload -----------------------------------------------------------
-  // Models and audio load in parallel; the start screen shows one combined bar.
-  let modelFraction = 0;
-  let audioFraction = 0;
-  let gpuFraction = 0;
-  let modelsLoaded = false;
-  let audioLoaded = false;
-  let gpuReady = false;
+  // One readiness decision owns both the start screen and scroll unlock.
+  const faults = import.meta.env.DEV ? (window.__gt3TestFaults || {}) : {};
+  const readiness = { status: 'loading', model: 'pending', audio: 'pending',
+    gpu: 'pending', progress: 0, reasons: [], warmupSteps: [], readyAt: null };
+  window.__gt3.readiness = readiness;
+  const fractions = { model: 0, audio: 0, gpu: 0 };
+  const timeouts = { model: null, audio: null, gpu: null };
+  const limits = { model: faults.modelTimeoutMs || 20000,
+    audio: faults.audioTimeoutMs || 15000,
+    gpu: faults.warmupTimeoutMs || 40000 };
   let gpuWarmup = null;
-  const reportProgress = () => {
-    const combined = modelFraction * 0.65 + audioFraction * 0.15 + gpuFraction * 0.20;
-    window.dispatchEvent(new CustomEvent('gt3:preload', { detail: { fraction: combined } }));
-  };
-  const releaseDrive = () => {
-    if (!modelsLoaded || !audioLoaded || !gpuReady) return;
+
+  function reportProgress() {
+    readiness.progress = readiness.status === 'loading'
+      ? fractions.model * 0.65 + fractions.audio * 0.15 + fractions.gpu * 0.20 : 1;
+    startScreen.setLoadState(readiness);
+    window.dispatchEvent(new CustomEvent('gt3:preload',
+      { detail: { fraction: readiness.progress, status: readiness.status } }));
+  }
+  function visibleStarter() {
+    const mount = rig.getObjectByName('car-mount');
+    if (mount?.children.length !== 1 || !mount.children[0].visible) return false;
+    let visible = false;
+    mount.children[0].traverse(object => { if (object.isMesh && object.visible) visible = true; });
+    return visible;
+  }
+  function releaseDrive() {
+    if (readiness.status !== 'loading' ||
+        ['model', 'audio', 'gpu'].some(phase => readiness[phase] === 'pending')) return;
+    if (!visibleStarter()) {
+      readiness.status = 'failed';
+      readiness.reasons.push('starter-car-not-visible');
+      console.error('[gt3] Cannot release drive without a visible starter car');
+      reportProgress();
+      return;
+    }
+    readiness.status = ['model', 'audio', 'gpu'].every(phase => readiness[phase] === 'ready')
+      ? 'ready' : 'degraded';
+    readiness.readyAt = performance.now();
     scrollDrive.unlockScroll();
-    console.info(`[gt3] ready — three r${THREE.REVISION}`);
-  };
-
-  cars.preloadCars((_l, _t, fraction) => { modelFraction = fraction; reportProgress(); })
-    .then(() => {
+    reportProgress();
+    console.info(`[gt3] ${readiness.status} — three r${THREE.REVISION}`,
+      readiness.reasons);
+  }
+  function settle(phase, result, reason) {
+    if (readiness[phase] !== 'pending') return;
+    clearTimeout(timeouts[phase]);
+    readiness[phase] = result;
+    fractions[phase] = 1;
+    if (reason) readiness.reasons.push(reason);
+    reportProgress();
+    releaseDrive();
+  }
+  function bound(phase, ms, onTimeout) {
+    timeouts[phase] = window.setTimeout(() => {
+      if (readiness[phase] === 'pending') onTimeout();
+    }, ms);
+  }
+  function failLoading(reason, error) {
+    if (readiness.status !== 'loading') return;
+    for (const timer of Object.values(timeouts)) clearTimeout(timer);
+    readiness.status = 'failed';
+    readiness.reasons.push(reason);
+    console.error('[gt3] Route unavailable:', reason, error);
+    reportProgress();
+  }
+  function stopWarmup(reason) {
+    if (readiness.gpu !== 'pending') return;
+    try {
+      gpuWarmup?.abort();
+      if (gpuWarmup && !gpuWarmup.restored)
+        throw new Error('Warm-up did not restore the scene');
+    } catch (error) {
+      gpuWarmup = null;
+      failLoading('gpu-restore-error', error);
+      return;
+    }
+    gpuWarmup = null;
+    try { sceneSetup.render(0); }
+    catch (error) { failLoading('gpu-fallback-render-error', error); return; }
+    console.warn('[gt3] GPU warm-up degraded; later crossings may be cold:', reason);
+    settle('gpu', 'degraded', reason);
+  }
+  function startWarmup() {
+    try {
+      gpuWarmup = carWarmup.createCarWarmup(
+        fraction => { fractions.gpu = fraction; reportProgress(); },
+        entry => readiness.warmupSteps.push(entry),
+        { throwAtDraw: faults.warmThrowAtStep },
+      );
+      bound('gpu', limits.gpu, () => stopWarmup('gpu-timeout'));
+    } catch (error) {
+      console.error('[gt3] GPU warm-up setup failed', error);
+      failLoading('gpu-setup-error', error);
+    }
+  }
+  function mountStarter() {
+    try {
       const first = cars.getCarModel(state.activeCarIndex);
-      if (first) {
-        carRig.setCarModel(first);
-        carRig.setWheels(cars.findWheels(first));
-      }
-      modelsLoaded = true;
-      gpuWarmup = carWarmup.createCarWarmup((fraction) => {
-        gpuFraction = fraction;
-        startScreen.setGpuProgress(fraction);
-        reportProgress();
-      });
-    })
-    .catch((e) => {
-      // Keep the previous failure behaviour: never strand the visitor behind the start screen.
-      console.error('[gt3] car preload failed', e);
-      modelsLoaded = true;
-      gpuReady = true;
-      gpuFraction = 1;
-      startScreen.setGpuProgress(1);
-      releaseDrive();
-    });
+      if (!first) throw new Error('Missing starter car');
+      carRig.setCarModel(first);
+      carRig.setWheels(cars.findWheels(first));
+      return first;
+    } catch (error) {
+      console.error('[gt3] Starter car unavailable', error);
+      return null;
+    }
+  }
+  function modelsFailed(error, reason) {
+    if (readiness.model !== 'pending') return;
+    console.error('[gt3] car preload failed', error);
+    try {
+      cars.recoverCars(error);
+      if (!mountStarter()) throw new Error('Fallback starter car unavailable');
+    } catch (fallbackError) {
+      failLoading('model-fallback-error', fallbackError);
+      return;
+    }
+    settle('model', 'degraded', reason);
+    startWarmup();
+  }
 
-  audio.preloadAudio((_l, _t, fraction) => { audioFraction = fraction; reportProgress(); })
-    .then(() => { audioLoaded = true; releaseDrive(); })
-    .catch((e) => console.warn('[gt3] audio preload issue', e));
+  bound('model', limits.model, () => modelsFailed(new Error('Model preload timeout'), 'model-timeout'));
+  bound('audio', limits.audio, () => {
+    console.warn('[gt3] audio preload timeout');
+    settle('audio', 'degraded', 'audio-timeout');
+  });
+  const modelPromise = faults.modelHang ? new Promise(() => {}) : faults.modelReject
+    ? Promise.reject(new Error('Injected model preload rejection'))
+    : cars.preloadCars((_l, _t, fraction) => {
+      if (readiness.model !== 'pending') return;
+      fractions.model = fraction;
+      reportProgress();
+    });
+  modelPromise.then(() => {
+    if (readiness.model !== 'pending') return;
+    const first = mountStarter();
+    if (!first) return modelsFailed(new Error('Missing starter car'), 'model-unusable');
+    const placeholder = Array.from({ length: 10 },
+      (_, index) => cars.getCarModel(index)).some(model => model.userData.loadError);
+    settle('model', placeholder ? 'degraded' : 'ready',
+      placeholder ? 'model-placeholder' : null);
+    startWarmup();
+  }).catch(error => modelsFailed(error, 'model-rejection'));
+
+  const audioPromise = faults.audioHang ? new Promise(() => {}) : faults.audioReject
+    ? Promise.reject(new Error('Injected audio preload rejection'))
+    : audio.preloadAudio((_fraction, loaded, total) => {
+      if (readiness.audio !== 'pending') return;
+      fractions.audio = loaded / Math.max(1, total);
+      reportProgress();
+    });
+  audioPromise.then(buffers => {
+    const missing = Object.values(buffers).some(buffer => !buffer) ||
+      Object.keys(buffers).length < 5;
+    settle('audio', missing ? 'degraded' : 'ready', missing ? 'audio-file-unavailable' : null);
+  }).catch(error => {
+    console.warn('[gt3] audio preload rejected', error);
+    settle('audio', 'degraded', 'audio-rejection');
+  });
+  reportProgress();
 
   // ---- wiring ------------------------------------------------------------
 
@@ -163,8 +281,6 @@ async function boot() {
     set('activeCarIndex', 0);
   });
 
-  scrollDrive.initScrollDrive();
-  scrollDrive.lockScroll();
 
   // Environment parallax remains independent of the race camera.
   window.addEventListener('pointermove', (e) => {
@@ -219,15 +335,22 @@ async function boot() {
     for (const update of updates) update(dt, state);
 
     // The legacy montage remains available for a later manual-unlock flow.
-    if (gpuWarmup && !gpuWarmup.done) {
-      if (gpuWarmup.step()) {
-        gpuReady = true;
-        releaseDrive();
-      }
-    } else if (studio.isMontagePlaying()) studio.renderMontage();
-    else sceneSetup.render(dt);
-
-    requestAnimationFrame(frame);
+    try {
+      if (gpuWarmup && !gpuWarmup.done && readiness.gpu === 'pending') {
+        if (!faults.warmHang && gpuWarmup.step()) {
+          gpuWarmup = null;
+          settle('gpu', 'ready');
+        }
+      } else if (studio.isMontagePlaying()) studio.renderMontage();
+      else sceneSetup.render(dt);
+    } catch (error) {
+      if (readiness.gpu === 'pending' && gpuWarmup) {
+        console.error('[gt3] GPU warm-up failed', error);
+        stopWarmup('gpu-step-error');
+      } else console.error('[gt3] render failed', error);
+    } finally {
+      requestAnimationFrame(frame);
+    }
   }
 
   requestAnimationFrame(frame);

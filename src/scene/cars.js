@@ -292,7 +292,10 @@ async function beginPreload() {
   // It does not emit Meshopt or KTX2/Basis data, so those decoders are not needed.
 
   try {
-    loadedCars = await Promise.all(CARS.map((car) => loadOne(loader, car)));
+    const models = await Promise.all(CARS.map((car) => loadOne(loader, car)));
+    // A timed-out preload may already have installed a stable placeholder roster.
+    // Do not replace it behind a running warm-up or an active drive.
+    loadedCars ??= models;
     return loadedCars;
   } finally {
     dracoLoader.dispose();
@@ -350,6 +353,15 @@ export function getCarModel(index) {
   return loadedCars[index];
 }
 
+/** Recovery for a rejected or timed-out roster preload. The drive keeps ten models. */
+export function recoverCars(error) {
+  if (!loadedCars) {
+    loadedCars = CARS.map(car => createPlaceholder(car, error));
+    console.error('[cars] Preload did not finish; using placeholder roster.', error);
+  }
+  return loadedCars;
+}
+
 export function cloneCarModel(index) {
   const source = getCarModel(index);
   let hasSkinnedMesh = false;
@@ -377,3 +389,6 @@ export function findWheels(carGroup) {
 // Importing this module starts the shared preload, while preloadCars(callback)
 // lets UI code subscribe to the same in-flight operation for progress reporting.
 export const carsReady = preloadCars();
+// The bootstrap attaches recovery after its other module imports complete. Keep
+// an early rejection from surfacing as an unhandled promise in that interval.
+void carsReady.catch(() => {});

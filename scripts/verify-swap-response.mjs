@@ -141,13 +141,17 @@ async function variant(name, query) {
       let events = 0;
       let keys = 0;
       const warmStart = await read();
-      while (!(await page.evaluate(() => !!document.querySelector('#start-screen.is-ready')))) {
+      // Stop well before ready so an input queued during the last warm frame
+      // cannot stand in for the fresh post-ready gesture this check promises.
+      while ((await page.evaluate(() => window.__gt3?.readiness?.progress ?? 0)) < 0.9) {
         await page.mouse.wheel({ deltaY: 120 });
         events++;
         if (events % 5 === 0) { await page.keyboard.press('PageDown'); keys++; }
         await wait(40);
         if (events > 2000) throw new Error('warm-up did not finish');
       }
+      await page.waitForFunction(() => !!document.querySelector('#start-screen.is-ready'),
+        { timeout: 120000 });
       await page.waitForFunction(() => window.__a1.atReady, { timeout: 10000 });
       const log = await page.evaluate(() => window.__a1);
       const atReady = log.atReady;
@@ -161,18 +165,10 @@ async function variant(name, query) {
       assert(!atReady.locked, 'scroll still locked at ready');
       assert(scrollsBeforeReady.length === 0 || scrollsBeforeReady.every(s => s.y <= 1),
         `page scrolled before ready: ${JSON.stringify(scrollsBeforeReady.slice(0, 5))}`);
-      // Input sent right before ready may be handled just after it; let that settle, then
-      // return to the start line so the "first gesture" check starts from a clean state.
-      await wait(1500);
+      await wait(700);
       const queued = await read();
-      const firstAfter = log.wheels.find(t => t >= log.readyAt);
-      if (queued.started) {
-        return { wheelEventsSent: events, pageDownSent: keys, wheelEventsHandledDuringWarmup: handledBeforeReady,
-          warmupMs: +(log.readyAt - log.warmAt).toFixed(0), atReady,
-          note: 'a wheel sent just before ready was handled after ready and started the Tour (the first post-ready gesture)',
-          firstWheelAfterReadyMs: firstAfter == null ? null : +(firstAfter - log.readyAt).toFixed(1),
-          after: { started: queued.started, progress: queued.progress, screen: queued.screen } };
-      }
+      assert(!queued.started && queued.progress === 0,
+        `queued pre-ready input started the Tour: ${JSON.stringify(queued)}`);
       await page.mouse.wheel({ deltaY: 120 });
       await wait(900);
       const after = await read();

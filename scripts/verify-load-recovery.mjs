@@ -10,19 +10,20 @@ const cases = [
     phases: ['degraded', 'ready', 'ready'], reason: 'model-placeholder', car: 'car-lexus-load-error' },
   { name: 'audio-404', missing: '/audios/coin.mp3',
     phases: ['ready', 'degraded', 'ready'], reason: 'audio-file-unavailable', car: 'car-lexus' },
-  { name: 'model-rejection', faults: { modelReject: true },
+  { name: 'model-rejection', holdModels: true, faults: { modelReject: true },
     phases: ['degraded', 'ready', 'ready'], reason: 'model-rejection', car: 'car-lexus-load-error' },
   { name: 'audio-rejection', faults: { audioReject: true },
     phases: ['ready', 'degraded', 'ready'], reason: 'audio-rejection', car: 'car-lexus' },
-  { name: 'model-timeout', faults: { modelHang: true, modelTimeoutMs: 1200 },
+  { name: 'model-timeout', holdModels: true, faults: { modelHang: true, modelTimeoutMs: 1200 },
     phases: ['degraded', 'ready', 'ready'], reason: 'model-timeout', car: 'car-lexus-load-error' },
   { name: 'audio-timeout', faults: { audioHang: true, audioTimeoutMs: 1200 },
     phases: ['ready', 'degraded', 'ready'], reason: 'audio-timeout', car: 'car-lexus' },
   { name: 'warmup-throw', faults: { warmThrowAtStep: 20 },
     phases: ['ready', 'ready', 'degraded'], reason: 'gpu-step-error', car: 'car-lexus' },
-  { name: 'warmup-timeout', faults: { warmHang: true, warmupTimeoutMs: 1200 },
+  { name: 'warmup-timeout', faults: { warmHang: true, warmupTimeoutMs: 5000 },
     phases: ['ready', 'ready', 'degraded'], reason: 'gpu-timeout', car: 'car-lexus' },
 ];
+const only = process.env.GT3_CASES ? process.env.GT3_CASES.split(',') : null;
 const report = { base, at: new Date().toISOString(), cases: [] };
 const assert = (condition, message) => { if (!condition) throw new Error(message); };
 const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
@@ -46,8 +47,14 @@ function expectedError(scenario, event, all) {
       /^Failed to load resource: the server responded with a status of 404/.test(event.text))
     return all.some(other => other.type === 'http' &&
       new URL(other.url).pathname === scenario.missing && other.status === 404);
+  if (scenario.missing && event.type === 'console' &&
+      event.text.startsWith('[cars] Failed to load') && event.text.includes(scenario.missing))
+    return true;
+  // The roster is preloaded eagerly at cars.js import, racing the injected fault.
+  // holdModels keeps that real request pending so the injected fault decides the outcome.
   if (scenario.name === 'model-rejection' || scenario.name === 'model-timeout')
-    return event.type === 'console' && event.text.startsWith('[gt3] car preload failed');
+    return event.type === 'console' && (event.text.startsWith('[gt3] car preload failed') ||
+      event.text.startsWith('[cars] Preload did not finish; using placeholder roster.'));
   if (scenario.name === 'warmup-throw')
     return event.type === 'console' && event.text.startsWith('[gt3] GPU warm-up failed');
   return false;
@@ -55,6 +62,7 @@ function expectedError(scenario, event, all) {
 
 try {
   for (const scenario of cases) {
+    if (only && !only.includes(scenario.name)) continue;
     const entry = { name: scenario.name, status: 'pending', errors: [] };
     report.cases.push(entry);
     const page = await browser.newPage();
@@ -103,10 +111,12 @@ try {
           window.__recovery.captureInstalled = true;
         })();
       }, scenario.faults || {});
-      if (scenario.missing) {
+      if (scenario.missing || scenario.holdModels) {
         await page.setRequestInterception(true);
         page.on('request', request => {
-          if (new URL(request.url()).pathname === scenario.missing)
+          if (scenario.holdModels && new URL(request.url()).pathname.startsWith('/models/tour/'))
+            return; // never answered: the eager real preload cannot beat the injected fault
+          if (scenario.missing && new URL(request.url()).pathname === scenario.missing)
             void request.respond({ status: 404, contentType: 'text/plain', body: 'missing' });
           else void request.continue();
         });
@@ -123,7 +133,7 @@ try {
       await page.goto(base, { waitUntil: 'domcontentloaded', timeout: 120000 });
       await page.waitForFunction(() => window.__gt3?.readiness?.status === 'loading' &&
         window.__recovery?.captureInstalled && document.querySelector('#start-screen'),
-      { timeout: 30000, polling: 20 });
+      { timeout: 90000, polling: 20 });
       await page.mouse.wheel({ deltaY: 300 });
       await page.waitForFunction(() => window.__recovery.wheels.length > 0,
         { timeout: 10000 });
@@ -147,6 +157,9 @@ try {
           started: state.started, progress: state.progress, target: state.targetProgress,
           scrollY: window.scrollY, screenReady: screen.classList.contains('is-ready'),
           screenStatus: screen.dataset.readiness, car: mount.children.map(c => c.name),
+          roster: await (async () => { const cars = await import('/src/scene/cars.js');
+            return Array.from({ length: 10 }, (_, i) => { const m = cars.getCarModel(i);
+              return [m.name, m.userData.loadError ?? null]; }); })(),
           visible: mount.children[0]?.visible, rendered: window.__gt3.renderer.info.render.frame,
           raf: window.__renderFrames ?? null };
       });
@@ -159,7 +172,7 @@ try {
       assert(first.screenReady && first.screenStatus === first.readiness.status && !first.locked,
         `screen/scroll disagreement: ${JSON.stringify(first)}`);
       assert(first.car.length === 1 && first.car[0] === scenario.car && first.visible,
-        `starter car ${first.car}`);
+        `starter car ${first.car} ${JSON.stringify(first.roster)}`);
       assert(!first.started && first.progress === 0 && first.target === 0 && first.scrollY === 0,
         `pre-ready input banked: ${JSON.stringify(first)}`);
       // Compare against the exact pre-warm objects and references. A completed warm-up

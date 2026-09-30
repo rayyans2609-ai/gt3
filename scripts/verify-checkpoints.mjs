@@ -81,7 +81,16 @@ try {
       seekTo(progress, { instant });
     }, { progress, instant });
     await page.waitForFunction(target => Math.abs(window.__gt3.probe().progress - target) < 0.00025,
-      { timeout: 30000 }, progress);
+      { timeout: 30000 }, progress).catch(async error => {
+      const detail = await page.evaluate(async () => {
+        const { state } = await import('/src/core/state.js');
+        return { probe: window.__gt3.probe(), started: state.started, locked: state.scrollLocked,
+          mode: state.mode, target: state.targetProgress,
+          screen: document.querySelector('#start-screen')?.className,
+          finish: document.querySelector('#finish-screen')?.className };
+      });
+      throw new Error(`seek(${progress}, instant=${instant}) progress wait: ${error.message}; ` +
+        JSON.stringify(detail)); });
     await wait(settle);
     // `settle` covers ordinary camera/UI easing, but a jump that crosses checkpoints can
     // start a morph (nominal duration 0.85s) whose WALL-CLOCK completion depends on frame
@@ -239,6 +248,15 @@ try {
   let swap;
   await recordPhase('frame and swap diagnostics', async () => {
   await page.mouse.wheel({ deltaY: 240 });
+  // The wheel is applied as native scrolling after mouse.wheel() resolves and would
+  // override a seek issued too early (progress lands at the wheel's 0.2163, never 0.2).
+  // Let the wheel scroll and the drive settle, then seek.
+  for (let stable = 0, last = null; stable < 3;) {
+    await wait(400);
+    const y = await page.evaluate(() => window.scrollY);
+    stable = y === last ? stable + 1 : 0;
+    last = y;
+  }
   await seek(0.2);
   idle = stats(await frames(1600));
 
@@ -259,7 +277,9 @@ try {
   await wait(300);
   await page.screenshot({ path: `${root}/swap-day.png` });
   await page.waitForFunction(index => window.__cpMorphCompletions.includes(index),
-    { timeout: 30000 }, expectedSwapIndex);
+    { timeout: 30000 }, expectedSwapIndex).catch(async error => {
+    throw new Error(`captured-swap completion wait (expected ${expectedSwapIndex}): ${error.message}; ` +
+      JSON.stringify({ completions: await page.evaluate(() => window.__cpMorphCompletions), state: await read() })); });
   const capturedSwap = await read();
   assert(capturedSwap.active === expectedSwapIndex && capturedSwap.model.length === 1
     && capturedSwap.model[0] === `car-${carIds[expectedSwapIndex]}`,
@@ -277,7 +297,10 @@ try {
   await page.waitForFunction(({ count, index }) =>
     window.__cpMorphCompletions.length > count &&
     window.__cpMorphCompletions.at(-1) === index,
-  { timeout: 30000 }, { count: completedBefore, index: expectedSwapIndex });
+  { timeout: 30000 }, { count: completedBefore, index: expectedSwapIndex }).catch(async error => {
+    throw new Error(`measured-swap completion wait (expected ${expectedSwapIndex}, before=${completedBefore}): ` +
+      `${error.message}; ` + JSON.stringify({ completions: await page.evaluate(() => window.__cpMorphCompletions),
+        state: await read() })); });
   const measuredSwap = await read();
   assert(measuredSwap.active === expectedSwapIndex && measuredSwap.model.length === 1
     && measuredSwap.model[0] === `car-${carIds[expectedSwapIndex]}`,

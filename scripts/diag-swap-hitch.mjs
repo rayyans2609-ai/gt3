@@ -114,7 +114,7 @@ function summarizeWindow(name, frames, entries, center, trackLength, expectedCha
   }));
   const overlap = e => e.startTime <= center + 1500 && e.startTime + e.duration >= center - 1500;
   const relevant = entries.filter(overlap).map(e => ({
-    type: e.type, offsetMs: +(e.startTime - center).toFixed(1), durationMs: +e.duration.toFixed(2),
+    type: e.type, name: e.name, offsetMs: +(e.startTime - center).toFixed(1), durationMs: +e.duration.toFixed(2),
     blockingDurationMs: e.blockingDuration, scripts: e.scripts,
     phasesMs: e.renderStart ? { beforeRender: +(e.renderStart - e.startTime).toFixed(1),
       renderToStyle: +((e.styleAndLayoutStart || e.renderStart) - e.renderStart).toFixed(1),
@@ -130,8 +130,7 @@ function summarizeWindow(name, frames, entries, center, trackLength, expectedCha
     glCalls: Object.fromEntries(Object.keys(last.gl || {}).map(key =>
       [key, last.gl[key] - (first.gl?.[key] || 0)])),
     measures: relevant.filter(e => e.type === 'measure')
-      .map(e => ({ name: e.name, offsetMs: +(e.startTime - center).toFixed(1),
-        durationMs: +e.duration.toFixed(2) })),
+      .map(e => ({ name: e.name, offsetMs: e.offsetMs, durationMs: e.durationMs })),
     programsDelta: last.programs - first.programs, texturesDelta: last.textures - first.textures,
     geometriesDelta: last.geometries - first.geometries, levels, longest, loaf: relevant.filter(e => e.type === 'long-animation-frame'),
     longtasks: relevant.filter(e => e.type === 'longtask'),

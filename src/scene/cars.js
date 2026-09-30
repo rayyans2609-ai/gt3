@@ -28,7 +28,6 @@ const _instanceMatrix = new THREE.Matrix4();
 const _vertexMatrix = new THREE.Matrix4();
 
 let loadedCars = null;
-let tourCars = null;
 let completedCount = 0;
 let preloadPromise = null;
 const progressListeners = new Set();
@@ -260,59 +259,14 @@ function createPlaceholder(car, error) {
   return group;
 }
 
+// The roster is loaded from the offline Tour-resolution set (textures <= 512 px,
+// built by `node scripts/compress-models.mjs --tour`). Tour, morph, montage and
+// Showcase all clone from this single roster; the full-resolution originals in
+// /models/*.glb are not loaded at runtime.
+const TOUR_MODEL_BASE = '/models/tour/';
+
 function modelUrl(modelFile) {
-  return modelFile.startsWith('/') ? modelFile : `/models/${modelFile}`;
-}
-
-// Tour models have private materials and private, smaller copies of textures
-// above this limit. Showcase and montage continue to clone the loaded originals.
-// The source GLBs currently top out at 1024 px; 512 is the first useful cap.
-const TOUR_TEXTURE_MAX = 512;
-
-async function makeTourModels(originals) {
-  const resized = new Map();
-  const tours = [];
-  for (const original of originals) {
-    const tour = cloneSkeleton(original);
-    cloneMaterialInstances(tour);
-    const seenMaterials = new Set();
-    const pending = [];
-    tour.traverse((object) => {
-      if (!object.isMesh) return;
-      for (const material of Array.isArray(object.material) ? object.material : [object.material]) {
-        if (!material || seenMaterials.has(material)) continue;
-        seenMaterials.add(material);
-        for (const key of Object.keys(material)) {
-          const texture = material[key];
-          if (!texture?.isTexture || !texture.image) continue;
-          const width = texture.image.width;
-          const height = texture.image.height;
-          if (!width || !height || Math.max(width, height) <= TOUR_TEXTURE_MAX) continue;
-          if (!resized.has(texture)) {
-            const scale = TOUR_TEXTURE_MAX / Math.max(width, height);
-            resized.set(texture, createImageBitmap(texture.image, {
-              resizeWidth: Math.max(1, Math.round(width * scale)),
-              resizeHeight: Math.max(1, Math.round(height * scale)),
-              resizeQuality: 'high',
-              colorSpaceConversion: 'none',
-              premultiplyAlpha: 'none',
-            }).then(image => {
-              const copy = texture.clone();
-              // Texture.clone shares Source by default. Replace it before assigning
-              // the resized image or the Showcase original would be mutated.
-              copy.source = new THREE.Source(image);
-              copy.needsUpdate = true;
-              return copy;
-            }));
-          }
-          pending.push(resized.get(texture).then(copy => { material[key] = copy; }));
-        }
-      }
-    });
-    await Promise.all(pending);
-    tours.push(tour);
-  }
-  return tours;
+  return modelFile.startsWith('/') ? modelFile : `${TOUR_MODEL_BASE}${modelFile}`;
 }
 
 async function loadOne(loader, car) {
@@ -347,13 +301,7 @@ async function beginPreload() {
     const models = await Promise.all(CARS.map((car) => loadOne(loader, car)));
     // A timed-out preload may already have installed a stable placeholder roster.
     // Do not replace it behind a running warm-up or an active drive.
-    if (!loadedCars) {
-      const tours = await makeTourModels(models);
-      if (!loadedCars) {
-        loadedCars = models;
-        tourCars = tours;
-      }
-    }
+    loadedCars ??= models;
     return loadedCars;
   } finally {
     dracoLoader.dispose();
@@ -405,17 +353,16 @@ function assertIndex(index) {
 
 export function getCarModel(index) {
   assertIndex(index);
-  if (!tourCars) {
+  if (!loadedCars) {
     throw new Error('[cars] Models are not ready. Await carsReady before calling getCarModel().');
   }
-  return tourCars[index];
+  return loadedCars[index];
 }
 
 /** Recovery for a rejected or timed-out roster preload. The drive keeps ten models. */
 export function recoverCars(error) {
   if (!loadedCars) {
     loadedCars = CARS.map(car => createPlaceholder(car, error));
-    tourCars = loadedCars;
     console.error('[cars] Preload did not finish; using placeholder roster.', error);
   }
   return loadedCars;

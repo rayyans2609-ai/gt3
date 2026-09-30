@@ -6,7 +6,7 @@ const base = process.env.GT3_URL || 'http://127.0.0.1:5191';
 const out = process.env.GT3_OUT || '/tmp/gt3-load-recovery';
 const cases = [
   { name: 'healthy', phases: ['ready', 'ready', 'ready'], reason: null, car: 'car-lexus' },
-  { name: 'glb-404', missing: '/models/lexus_rcf_gt3.glb',
+  { name: 'glb-404', missing: '/models/tour/lexus_rcf_gt3.glb',
     phases: ['degraded', 'ready', 'ready'], reason: 'model-placeholder', car: 'car-lexus-load-error' },
   { name: 'audio-404', missing: '/audios/coin.mp3',
     phases: ['ready', 'degraded', 'ready'], reason: 'audio-file-unavailable', car: 'car-lexus' },

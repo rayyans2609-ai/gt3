@@ -26,10 +26,14 @@ const cams = (process.env.GT3_CAMS || 'leg1').split(',').filter(Boolean);
 const captureDir = process.env.GT3_CAPTURE_DIR
   || '/Users/rayyansheikh/Desktop/gt3-review-2026-10-04/w2';
 const capture = process.env.GT3_NO_CAPTURE !== '1';
+// 10-frame chicane sequences are recorded for these comps only (disk budget).
+const seqComps = (process.env.GT3_SEQ_COMPS || 'base,b').split(',');
 const softwareGL = process.env.GT3_SOFTWARE_GL === '1';
 const root = '/tmp/gt3-w2';
 await mkdir(root, { recursive: true });
 if (capture) await mkdir(captureDir, { recursive: true });
+const t00 = Date.now();
+const phase = name => console.error(`[${((Date.now() - t00) / 1000).toFixed(0)}s] ${name}`);
 const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
 const percentile = (values, f) => values.length
   ? [...values].sort((a, b) => a - b)[Math.ceil(f * values.length) - 1] : null;
@@ -50,11 +54,14 @@ async function runCandidate(browser, comp, cam) {
   if (cam !== 'leg1') reviewUrl.searchParams.set('cam', cam);
   reviewUrl.searchParams.set('gate', 'quiet');
   const url = reviewUrl.href;
+  const loadStart = Date.now();
   await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 120000 });
   await page.waitForFunction(() => window.__gt3?.readiness?.status
     && window.__gt3.readiness.status !== 'loading', { timeout: 180000 });
+  const readyMs = Date.now() - loadStart;
   const readiness = await page.evaluate(() => ({ status: window.__gt3.readiness.status,
     reasons: window.__gt3.readiness.reasons, comp: window.__gt3.comp }));
+  readiness.readyMs = readyMs;
   await page.mouse.wheel({ deltaY: 240 });
   await wait(1200);
 
@@ -111,6 +118,31 @@ async function runCandidate(browser, comp, cam) {
         if (!hits.length && ray.ray.direction.y < 0) exposed++;
       }
     }
+    // Hero nose-to-tail screen length (% of frame width), as the node diagnostic defines it.
+    const fwdLen = new THREE.Vector3(0, 0, -1).applyQuaternion(rig.quaternion).setY(0).normalize();
+    const half = 2.3 * mount.scale.x;
+    const nose = rig.position.clone().addScaledVector(fwdLen, half).project(cam);
+    const tail = rig.position.clone().addScaledVector(fwdLen, -half).project(cam);
+    const carLengthPctOfFrame = 100 * Math.hypot((nose.x - tail.x) / 2, (nose.y - tail.y) / 2 / cam.aspect);
+    // Shadow-box and fog joins on the same grid: ground hits outside the cast-shadow
+    // box (light space), farthest border hit vs fog, and sky fraction.
+    const sun = g.scene.children.find(o => o.isDirectionalLight && o.castShadow);
+    const sc = sun?.shadow.camera;
+    if (sc) sc.updateMatrixWorld();
+    const lp = new THREE.Vector3();
+    let groundHits = 0, outsideShadow = 0, roadOutsideShadow = 0, sky = 0, borderMaxDist = 0;
+    const fog = g.scene.fog;
+    for (let iy = 0; iy < 27; iy++) for (let ix = 0; ix < 48; ix++) {
+      ray.setFromCamera({ x: (ix + 0.5) / 24 - 1, y: (iy + 0.5) / 13.5 - 1 }, cam);
+      const hit = ray.intersectObjects(all, true).find(h => h.object.isMesh && h.object.visible);
+      if (!hit) { sky++; continue; }
+      if (ix === 0 || iy === 0 || ix === 47 || iy === 26) borderMaxDist = Math.max(borderMaxDist, hit.distance);
+      if (!sc) continue;
+      groundHits++;
+      lp.copy(hit.point).applyMatrix4(sc.matrixWorldInverse);
+      const out = Math.abs(lp.x) > sc.right || Math.abs(lp.y) > sc.top;
+      if (out) { outsideShadow++; if (hit.object === asphalt) roadOutsideShadow++; }
+    }
     // All-ten footprint clearance at this t with the rig's real pose.
     const centre = curve.pointAt(t, new THREE.Vector3());
     const left = curve.offsetPointAt(t, 1, 0, new THREE.Vector3()).sub(centre).setY(0).normalize();
@@ -132,7 +164,11 @@ async function runCandidate(browser, comp, cam) {
       pitchDeg: THREE.MathUtils.radToDeg(Math.asin(-dir.y)),
       camera: cam.position.toArray(), quaternion: cam.quaternion.toArray(),
       carNdc: { minX, maxX, minY, maxY }, carWidthPctOfFrame: (maxX - minX) * 50,
-      roadCoverage: road / cells, exposedEdgeRays: exposed,
+      roadCoverage: road / cells, exposedEdgeRays: exposed, carLengthPctOfFrame,
+      shadowBoxM: sc ? sc.right : null, outsideShadowFrac: groundHits ? outsideShadow / groundHits : null,
+      roadOutsideShadowCells: roadOutsideShadow, skyFrac: sky / cells,
+      borderMaxHitM: borderMaxDist, fogNear: fog?.near, fogFar: fog?.far,
+      cameraFar: cam.far, cameraHeightM: cam.position.y,
       lateralM: lateral, worstFootprintExtentM: extent,
       roadEdgeGapM: curve.TRACK.halfWidth - extent,
       maxOffsetRoadEdgeGapM: curve.TRACK.halfWidth - maxOffsetExtent,
@@ -144,10 +180,11 @@ async function runCandidate(browser, comp, cam) {
   }, rosterBounds);
 
   const out = { comp, cam, url, readiness, points: [], gates: [], reversibility: [], motion: [], errors };
+  phase(`${key} loaded readyMs=${readyMs}`);
   for (const [label, t] of POINTS) {
-    await goTo(t);
+    await goTo(t); phase(`${key} point ${label}`);
     out.points.push({ label, ...(await measure()) });
-    if (capture && ['hairpin-apex', 'chicane-mid'].includes(label)) {
+    if (capture) {
       await page.screenshot({ path: `${captureDir}/${key}_${label}_day.png` });
     }
   }
@@ -155,12 +192,20 @@ async function runCandidate(browser, comp, cam) {
     const m = await import('/src/scene/trackCurve.js');
     return { thresholds: m.CHECKPOINT_T, finish: m.FINISH_T };
   });
-  for (const t of [...thresholds, finish]) {
+  // Gate clearances are camera-independent geometry: sample 4 gates + finish (all with GT3_ALL_GATES=1).
+  const gateTs = process.env.GT3_ALL_GATES === '1' ? [...thresholds, finish]
+    : [thresholds[0], thresholds[3], thresholds[6], thresholds[8], finish];
+  phase(`${key} gates`);
+  for (const t of gateTs) {
     await goTo(t, 450);
     const m = await measure();
+    if (capture && t === thresholds[0]) {
+      await page.screenshot({ path: `${captureDir}/${key}_checkpoint1_day.png` });
+    }
     out.gates.push({ t, roadEdgeGapM: m.roadEdgeGapM, gatePostGapM: m.gatePostGapM,
       finishPostGapM: m.finishPostGapM, carNdc: m.carNdc, exposedEdgeRays: m.exposedEdgeRays });
   }
+  phase(`${key} reversibility`);
   // Reversibility: deterministic rail pose (sector) and settled pose from both sides.
   for (const t of [0.283, 0.352]) {
     const rail = await page.evaluate(async t => {
@@ -175,6 +220,7 @@ async function runCandidate(browser, comp, cam) {
       settledPositionDiffM: Math.hypot(...below.camera.map((x, i) => x - above.camera[i])),
       settledQuaternionDiff: Math.hypot(...below.quaternion.map((x, i) => x - above.quaternion[i])) });
   }
+  phase(`${key} motion`);
   // Motion through the hairpin and chicane, forward and back, real wheel input.
   await page.evaluate(() => {
     const g = window.__gt3;
@@ -186,7 +232,7 @@ async function runCandidate(browser, comp, cam) {
         const ndc = rig.position.clone().project(g.camera);
         const carDir = rig.position.clone().set(0, 0, -1).applyQuaternion(rig.quaternion);
         const camDir = g.camera.getWorldDirection(carDir.clone());
-        window.__w2.frames.push({ segment: window.__w2.segment, dt: now - last,
+        window.__w2.frames.push({ segment: window.__w2.segment, dt: now - last, now,
           progress: g.probe().progress, camera: g.camera.position.toArray(),
           car: rig.position.toArray(), ndcX: ndc.x, ndcY: ndc.y,
           carYaw: Math.atan2(carDir.x, -carDir.z), cameraYaw: Math.atan2(camDir.x, -camDir.z),
@@ -232,7 +278,37 @@ async function runCandidate(browser, comp, cam) {
           cameraHeadingSweepDeg, carHeadingSweepDeg }];
       }));
     const dts = frames.slice(1).map(f => f.dt);
-    out.motion.push({ name, corners, frames: frames.length,
+    // Real-input smoothness from frame timestamps (indicative at ~30 fps and dominated by
+    // the scroll law's own jitter), so the camera is always reported next to the CAR
+    // measured the same way: the camera/car ratio isolates what the camera adds.
+    // Reversals = frames where the camera path doubles back while the input is monotonic.
+    const derive = key => {
+      const vel = [];
+      for (let i = 1; i < frames.length; i++) {
+        const h = Math.max(1, frames[i].now - frames[i - 1].now) / 1000;
+        vel.push({ h, v: [0, 1, 2].map(k => (frames[i][key][k] - frames[i - 1][key][k]) / h) });
+      }
+      const acc = [], jerk = [];
+      for (let i = 1; i < vel.length; i++) {
+        const h = (vel[i].h + vel[i - 1].h) / 2;
+        acc.push({ h, a: [0, 1, 2].map(k => (vel[i].v[k] - vel[i - 1].v[k]) / h) });
+      }
+      for (let i = 1; i < acc.length; i++) {
+        jerk.push(Math.hypot(...[0, 1, 2].map(k => (acc[i].a[k] - acc[i - 1].a[k]) / ((acc[i].h + acc[i - 1].h) / 2))));
+      }
+      let reversals = 0;
+      for (let i = 1; i < frames.length - 1; i++) {
+        const d0 = [0, 1, 2].map(k => frames[i][key][k] - frames[i - 1][key][k]);
+        const d1 = [0, 1, 2].map(k => frames[i + 1][key][k] - frames[i][key][k]);
+        const m0 = Math.hypot(...d0), m1 = Math.hypot(...d1);
+        if (m0 > 0.05 && m1 > 0.05 && (d0[0] * d1[0] + d0[1] * d1[1] + d0[2] * d1[2]) / (m0 * m1) < -0.2) reversals++;
+      }
+      const speeds = vel.map(x => Math.hypot(...x.v)), accs = acc.map(x => Math.hypot(...x.a));
+      return { peakSpeedMs: Math.max(0, ...speeds), p99AccMs2: percentile(accs, 0.99),
+        p99JerkMs3: percentile(jerk, 0.99), reversals };
+    };
+    const smooth = { camera: derive('camera'), car: derive('car') };
+    out.motion.push({ name, corners, frames: frames.length, smooth,
       cameraToCarTranslation: carTravel ? camTravel / carTravel : null,
       correctionActivePct: frames.length ? 100 * frames.filter(f => f.correction).length / frames.length : 0,
       ndcX: [Math.min(...frames.map(f => f.ndcX)), Math.max(...frames.map(f => f.ndcX))],
@@ -240,6 +316,7 @@ async function runCandidate(browser, comp, cam) {
       snapsDuringMotion: frames.length ? frames.at(-1).snaps - frames[0].snaps : 0,
       maxProgressJump, frameMsP50: percentile(dts, 0.5), frameMsP95: percentile(dts, 0.95) });
   }
+  phase(`${key} seam`);
   // Seam: end of lap vs replayed start (both snap paths).
   const seam = await page.evaluate(async () => {
     const drive = await import('/src/scroll/scrollDrive.js');
@@ -253,18 +330,55 @@ async function runCandidate(browser, comp, cam) {
     return Math.hypot(...end.map((x, i) => x - start[i]));
   });
   out.seamPositionDiffM = seam;
+  phase(`${key} captures`);
   if (capture) {
     // Chicane frame sequence (~3 s) and one Night still at the hairpin apex.
-    await goTo(0.325, 1200);
-    for (let i = 0; i < 30; i++) {
-      await page.mouse.wheel({ deltaY: 12 });
-      await page.screenshot({ path: `${captureDir}/${key}_chicane-seq-${String(i).padStart(2, '0')}_day.png` });
-      await wait(70);
+    if (seqComps.includes(comp)) {
+      await goTo(0.325, 1200);
+      for (let i = 0; i < 10; i++) {
+        await page.mouse.wheel({ deltaY: 36 });
+        await page.screenshot({ path: `${captureDir}/${key}_chicane-seq-${String(i).padStart(2, '0')}_day.jpg`,
+          type: 'jpeg', quality: 82 });
+        await wait(70);
+      }
     }
     await page.evaluate(async () => (await import('/src/scene/theme.js')).applyTheme('night', { instant: true }));
     await goTo(0.283, 900);
     await page.screenshot({ path: `${captureDir}/${key}_hairpin-apex_night.png` });
   }
+  // Resize: rail solve cost (pure rebuild per aspect) and the real frame-time spike while
+  // the viewport changes aspect (the camera rebuilds its rail on the next update).
+  out.resize = await page.evaluate(async () => {
+    const rail = {};
+    try {
+      const comp = window.__gt3.comp;
+      const solve = comp.camera === 'corridor'
+        ? (await import('/src/scene/compositionRail.js')).buildCompositionRail
+        : comp.camera === 'sector' ? (await import('/src/scene/aerialCamera.js')).buildSectorRail : null;
+      if (solve) for (const [k, a] of [['16:9', 16 / 9], ['4:3', 4 / 3], ['21:9', 21 / 9], ['9:16', 9 / 16]]) {
+        const t0 = performance.now(); solve(a); rail[k] = +(performance.now() - t0).toFixed(1);
+      }
+    } catch (e) { rail.error = String(e); }
+    return rail;
+  });
+  await goTo(0.283, 600);
+  out.resizeFrames = [];
+  for (const [name, w, h] of [['to-4:3', 1280, 960], ['to-16:9', 1600, 900]]) {
+    await page.evaluate(s => { window.__w2.frames.length = 0; window.__w2.segment = s; }, name);
+    await page.setViewport({ width: w, height: h });
+    await wait(2500);
+    const r = await page.evaluate(() => {
+      const f = window.__w2.frames; window.__w2.segment = null;
+      return { dts: f.map(x => x.dt), aspect: window.__gt3.camera.aspect, rail: window.__gt3.aerial.rail
+        ? { aspect: window.__gt3.aerial.rail.aspect, unavailableHolds: window.__gt3.aerial.rail.unavailableHolds } : null };
+    });
+    out.resizeFrames.push({ name, frames: r.dts.length, maxFrameMs: Math.max(0, ...r.dts),
+      p50FrameMs: percentile(r.dts, 0.5), aspect: r.aspect, rail: r.rail });
+    if (name === 'to-4:3' && capture && comp === 'b') {
+      await page.screenshot({ path: `${captureDir}/${key}_hairpin-apex-4x3_day.jpg`, type: 'jpeg', quality: 82 });
+    }
+  }
+  phase(`${key} done`);
   await page.close();
   return out;
 }
@@ -289,6 +403,13 @@ try {
       pitchSpreadDeg: Math.max(...pitches) - Math.min(...pitches),
       roadCoverage: result.points.map(p => +p.roadCoverage.toFixed(3)),
       carWidthPctOfFrame: result.points.map(p => +p.carWidthPctOfFrame.toFixed(2)),
+      carLengthPctOfFrame: result.points.map(p => +p.carLengthPctOfFrame.toFixed(2)),
+      outsideShadowFrac: result.points.map(p => p.outsideShadowFrac == null ? null : +p.outsideShadowFrac.toFixed(3)),
+      roadOutsideShadowCells: result.points.map(p => p.roadOutsideShadowCells),
+      skyFrac: result.points.map(p => +p.skyFrac.toFixed(3)),
+      borderMaxHitM: result.points.map(p => Math.round(p.borderMaxHitM)),
+      fog: [result.points[0].fogNear, result.points[0].fogFar, result.points[0].cameraFar],
+      resize: result.resize, resizeFrames: result.resizeFrames, readyMs: result.readiness.readyMs,
       minRoadEdgeGapM: Math.min(...result.points.map(p => p.roadEdgeGapM), ...result.gates.map(g => g.roadEdgeGapM)),
       minGatePostGapM: Math.min(...result.gates.map(g => g.gatePostGapM)),
       exposedEdgeRays: [...result.points, ...result.gates].reduce((n, p) => n + p.exposedEdgeRays, 0),

@@ -39,6 +39,20 @@ function timed(name, fn) {
   }
 }
 
+/**
+ * Let the browser paint and run queued tasks (network, DRACO worker results). rAF runs before the
+ * frame's paint, so continue from a task queued inside it; the timeout covers hidden tabs where
+ * rAF never fires.
+ */
+function yieldToBrowser() {
+  return new Promise((resolve) => {
+    let done = false;
+    const finish = () => { if (!done) { done = true; resolve(); } };
+    requestAnimationFrame(() => setTimeout(finish, 0));
+    setTimeout(finish, 150);
+  });
+}
+
 const clock = new Clock();
 const updates = [];
 const resizeHandlers = new Set();
@@ -99,14 +113,83 @@ async function boot() {
   const startScreen = await import('./ui/startScreen.js');
   const finishScreen = await import('./ui/finishScreen.js');
 
-  // ---- scene -------------------------------------------------------------
   perfMark('imports:end');
   perfMeasure('imports', 'boot:start', 'imports:end');
-  const { scene, camera } = timed('init-scene', () => sceneSetup.initScene());
 
+  // ---- early start: readiness, loading UI, audio and model preload --------
+  // These need no scene, so they start before the heavy synchronous builds below. Network and
+  // DRACO-worker callbacks then run in the yields between builders instead of queueing behind
+  // one multi-second task, and the start screen paints with live progress.
+  // One readiness decision owns both the start screen and scroll unlock.
+  const faults = import.meta.env.DEV ? (window.__gt3TestFaults || {}) : {};
+  const readiness = { status: 'loading', model: 'pending', audio: 'pending',
+    gpu: 'pending', progress: 0, reasons: [], warmupSteps: [], readyAt: null };
+  const fractions = { model: 0, audio: 0, gpu: 0 };
+  const timeouts = { model: null, audio: null, gpu: null };
+  const limits = { model: faults.modelTimeoutMs || 20000,
+    audio: faults.audioTimeoutMs || 15000,
+    gpu: faults.warmupTimeoutMs || 40000 };
+  let gpuWarmup = null;
+
+  timed('init-start-screen', () => startScreen.initStartScreen());
+  // Lock before the first yield: input can now be processed between builders, and the drive
+  // must already swallow it (the whole boot used to be one task, so nothing could interleave).
+  timed('init-scroll-drive', () => {
+    scrollDrive.initScrollDrive();
+    scrollDrive.lockScroll();
+  });
+
+  perfMark('preload:start');
+  // Audio settles on its own: settle() only reaches releaseDrive(), which refuses while the
+  // model and gpu phases are pending, and those cannot settle before the scene exists (the
+  // model handlers are attached after the scene is built, below).
+  bound('audio', limits.audio, () => {
+    console.warn('[gt3] audio preload timeout');
+    settle('audio', 'degraded', 'audio-timeout');
+  });
+  const audioPromise = faults.audioHang ? new Promise(() => {}) : faults.audioReject
+    ? Promise.reject(new Error('Injected audio preload rejection'))
+    : audio.preloadAudio((_fraction, loaded, total) => {
+      if (readiness.audio !== 'pending') return;
+      fractions.audio = loaded / Math.max(1, total);
+      reportProgress();
+    });
+  audioPromise.then(buffers => {
+    const missing = Object.values(buffers).some(buffer => !buffer) ||
+      Object.keys(buffers).length < 5;
+    settle('audio', missing ? 'degraded' : 'ready', missing ? 'audio-file-unavailable' : null);
+  }).catch(error => {
+    console.warn('[gt3] audio preload rejected', error);
+    settle('audio', 'degraded', 'audio-rejection');
+  });
+  // cars.js already began its roster fetch at import; subscribe for progress now. The resolved
+  // promise is only consumed once the scene exists (mountStarter needs the rig).
+  const modelPromise = faults.modelHang ? new Promise(() => {}) : faults.modelReject
+    ? Promise.reject(new Error('Injected model preload rejection'))
+    : cars.preloadCars((_l, _t, fraction) => {
+      if (readiness.model !== 'pending') return;
+      fractions.model = fraction;
+      reportProgress();
+    });
+  void modelPromise.catch(() => {}); // handled below; no unhandled-rejection during the build
+  reportProgress();
+
+  // ---- scene (staged: yield so the start screen paints and callbacks run) --
+  await yieldToBrowser();
+  perfMark('start-screen:painted');
+  const { scene, camera } = timed('init-scene', () => sceneSetup.initScene());
+  // initScene creates window.__gt3; these handles were previously attached after the full build.
+  window.__gt3.readiness = readiness;
+  window.__gt3.scrollMode = scrollDrive.scrollMode;
+  await yieldToBrowser();
   scene.add(timed('build-track', () => track.buildTrack()));
+  await yieldToBrowser();
   const env = timed('build-environment', () => environment.buildEnvironment());
   scene.add(env);
+  await yieldToBrowser();
+
+  // Everything from here to the first frame is one synchronous section, so a harness that
+  // sees the car rig in the scene also sees the rest of the graph.
   scene.add(timed('build-finish-line', () => finishLine.buildFinishLine()));
   scene.add(timed('build-checkpoints', () => checkpoints.buildCheckpoints()));
 
@@ -122,32 +205,16 @@ async function boot() {
     soundControl.initSoundControl();
     player.initPlayer();
   });
-  timed('init-start-screen', () => startScreen.initStartScreen());
   timed('init-sound-cue-finish-screen', () => {
     soundCue.initSoundCue();
     startScreen.onDismissComplete(soundCue.showSoundCue);
     finishScreen.initFinishScreen();
   });
-  timed('init-scroll-drive', () => {
-    scrollDrive.initScrollDrive();
-    scrollDrive.lockScroll();
-  });
   perfMark('scene-build:end');
   perfMeasure('scene-build', 'imports:end', 'scene-build:end');
 
-  // ---- preload -----------------------------------------------------------
-  // One readiness decision owns both the start screen and scroll unlock.
-  const faults = import.meta.env.DEV ? (window.__gt3TestFaults || {}) : {};
-  const readiness = { status: 'loading', model: 'pending', audio: 'pending',
-    gpu: 'pending', progress: 0, reasons: [], warmupSteps: [], readyAt: null };
-  window.__gt3.readiness = readiness;
-  const fractions = { model: 0, audio: 0, gpu: 0 };
-  const timeouts = { model: null, audio: null, gpu: null };
-  const limits = { model: faults.modelTimeoutMs || 20000,
-    audio: faults.audioTimeoutMs || 15000,
-    gpu: faults.warmupTimeoutMs || 40000 };
-  let gpuWarmup = null;
-
+  // ---- readiness wiring (needs the scene) ---------------------------------
+  // The model phase and GPU warm-up begin only here: warm-up needs models AND scene.
   function reportProgress() {
     readiness.progress = readiness.status === 'loading'
       ? fractions.model * 0.65 + fractions.audio * 0.15 + fractions.gpu * 0.20 : 1;
@@ -274,19 +341,7 @@ async function boot() {
     startWarmup();
   }
 
-  perfMark('preload:start');
   bound('model', limits.model, () => modelsFailed(new Error('Model preload timeout'), 'model-timeout'));
-  bound('audio', limits.audio, () => {
-    console.warn('[gt3] audio preload timeout');
-    settle('audio', 'degraded', 'audio-timeout');
-  });
-  const modelPromise = faults.modelHang ? new Promise(() => {}) : faults.modelReject
-    ? Promise.reject(new Error('Injected model preload rejection'))
-    : cars.preloadCars((_l, _t, fraction) => {
-      if (readiness.model !== 'pending') return;
-      fractions.model = fraction;
-      reportProgress();
-    });
   modelPromise.then(() => {
     if (readiness.model !== 'pending') return;
     const first = mountStarter();
@@ -297,23 +352,6 @@ async function boot() {
       placeholder ? 'model-placeholder' : null);
     startWarmup();
   }).catch(error => modelsFailed(error, 'model-rejection'));
-
-  const audioPromise = faults.audioHang ? new Promise(() => {}) : faults.audioReject
-    ? Promise.reject(new Error('Injected audio preload rejection'))
-    : audio.preloadAudio((_fraction, loaded, total) => {
-      if (readiness.audio !== 'pending') return;
-      fractions.audio = loaded / Math.max(1, total);
-      reportProgress();
-    });
-  audioPromise.then(buffers => {
-    const missing = Object.values(buffers).some(buffer => !buffer) ||
-      Object.keys(buffers).length < 5;
-    settle('audio', missing ? 'degraded' : 'ready', missing ? 'audio-file-unavailable' : null);
-  }).catch(error => {
-    console.warn('[gt3] audio preload rejected', error);
-    settle('audio', 'degraded', 'audio-rejection');
-  });
-  reportProgress();
 
   // ---- wiring ------------------------------------------------------------
 

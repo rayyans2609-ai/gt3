@@ -1,3 +1,11 @@
+:root {
+  /* Shared with #hud-bottomright (see hud.css): the edge row parks the Day/Night
+     control one gap beyond this width when the player is open. JS refreshes
+     --player-w from the player's real offsetWidth, so the two can't drift. */
+  --player-w: 274px;
+  --edge-gap: 12px;
+}
+
 #audio-layer {
   --audio-right: 24px;
   --audio-bottom: 24px;
@@ -76,7 +84,12 @@ body.gt3-showcase-open #audio-layer {
 }
 
 .audio-speaker { width: 42px; height: 34px; }
-.audio-launcher { width: 30px; height: 30px; font-size: 18px; font-weight: 300; line-height: 1; }
+.audio-launcher { position: relative; width: 30px; height: 30px; overflow: hidden; font-size: 18px; font-weight: 300; line-height: 1; }
+/* Two real glyph states cross-fade/rotate inside one short transition. */
+.audio-launcher .glyph { position: absolute; inset: 0; display: grid; place-items: center; transition: opacity 180ms var(--ease), transform 180ms var(--ease); }
+.audio-launcher .glyph-close { opacity: 0; transform: rotate(-90deg) scale(.5); }
+#audio-layer.is-open .audio-launcher .glyph-plus { opacity: 0; transform: rotate(90deg) scale(.5); }
+#audio-layer.is-open .audio-launcher .glyph-close { opacity: 1; transform: none; }
 .audio-speaker[data-sound='on'] { color: var(--accent); }
 .audio-speaker[data-sound='muted'] { color: var(--fg-muted); }
 .audio-speaker[data-sound='idle'] { color: var(--fg-muted); }
@@ -93,7 +106,7 @@ body.gt3-showcase-open #audio-layer {
   z-index: 1;
   display: flex;
   flex-direction: column;
-  width: 274px;
+  width: var(--player-w, 274px);
   /* Never taller than the room above the anchor: the track list shrinks and scrolls instead. */
   max-height: calc(100vh - var(--audio-offset) - 12px);
   padding: 17px 17px 56px;
@@ -159,5 +172,5 @@ body.gt3-showcase-open #audio-layer {
 .music-player__list-item.is-current { color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, transparent); }
 
 @media (prefers-reduced-motion: reduce) {
-  #audio-layer, .audio-control, .audio-anchor, .music-player, .music-player__list { transition-duration: 0ms; }
+  #audio-layer, .audio-control, .audio-anchor, .music-player, .music-player__list, .audio-launcher .glyph { transition-duration: 0ms; }
 }

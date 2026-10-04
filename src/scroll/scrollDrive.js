@@ -17,6 +17,7 @@
 
 import { state, set } from '../core/state.js';
 import { TRACK_LENGTH } from '../scene/trackCurve.js';
+import { createBoundedModel } from './boundedPace.js';
 
 const REFERENCE_LENGTH = 3472.646166835742;
 
@@ -43,6 +44,39 @@ const TUNE = {
   // Total scroll spacer height in viewport heights. Must match #scroll-spacer in CSS.
   spacerVh: 1200 * TRACK_LENGTH / REFERENCE_LENGTH,
 };
+
+// ---------------------------------------------------------------------------
+// ?scroll= pace candidates (SPEC §14 "Bounded pace"). Independent URL parameter: this module
+// reads only `scroll`, never `comp`/`cam`/`gate`, and no other module reads it. No param (or an
+// unknown value) = the default law below, unchanged.
+//   ?scroll=cap   capped glide: bounded lead, hard speed ceiling, bounded acceleration
+//   ?scroll=pace  input intensity sets pace through a compressive curve into a narrow band
+//
+// Alignment contract for the candidates (the default mode is untouched):
+//   - The page scrollbar is only an INPUT DEVICE. Each frame update() reads window.scrollY and
+//     feeds the delta since `lastY` to the model. Every programmatic scrollTo this module makes
+//     (re-sync, seekTo, unlock, reset) is followed by `lastY = window.scrollY`, so our own
+//     re-syncs can never be read back as input; the 'scroll' event is not an input path here.
+//   - Wheel, trackpad, keyboard (arrows/PageUp/PageDown/Home/End) and scrollbar drag all arrive as
+//     scrollY deltas and are bounded identically; none is converted to anything else.
+//   - The page position can run ahead of the car (excess input is discarded, not banked). When
+//     input is idle (>= RESYNC_IDLE_S) the page is re-synced to the car's target (position+credit);
+//     if the page is pinned against an end while the car is not, the re-sync happens sooner
+//     (STRANDED_IDLE_S) so the user can always keep scrolling in both directions. A re-sync never
+//     happens during active input/momentum, nor while a classic scrollbar thumb is held.
+// ---------------------------------------------------------------------------
+function readScrollMode() {
+  try {
+    const v = new URLSearchParams(globalThis.location?.search || '').get('scroll');
+    return v === 'cap' || v === 'pace' ? v : 'default';
+  } catch { return 'default'; }
+}
+export const scrollMode = readScrollMode();
+const bounded = scrollMode === 'default' ? null : createBoundedModel(scrollMode, TRACK_LENGTH);
+const RESYNC_IDLE_S = 0.14;
+const STRANDED_IDLE_S = 0.05;
+let lastY = 0;               // page scrollY already accounted for (candidates only)
+let thumbHeld = false;       // classic-scrollbar drag in progress (candidates only)
 
 let rawTarget = 0;      // undamped progress straight from the scrollbar
 let lastProgress = 0;   // previous frame's damped progress, for velocity
@@ -76,16 +110,37 @@ function onScroll() {
     return;
   }
 
+  if (bounded) {
+    // Candidates: input is polled per frame in update(); the event only dismisses the start screen.
+    if (!hasStarted && (window.scrollY || 0) > 0) startDrive();
+    return;
+  }
+
   rawTarget = readScroll();
   set('targetProgress', rawTarget);
 
-  if (!hasStarted && rawTarget > 0) {
-    hasStarted = true;
-    set('started', true);
-    for (const fn of firstScrollHandlers) fn();
-    firstScrollHandlers.length = 0;
-  }
+  if (!hasStarted && rawTarget > 0) startDrive();
 }
+
+function startDrive() {
+  hasStarted = true;
+  set('started', true);
+  for (const fn of firstScrollHandlers) fn();
+  firstScrollHandlers.length = 0;
+}
+
+/** Candidates: place the page at route progress `t` and mark that scroll position as accounted for. */
+function syncPageTo(t) {
+  const y = Math.min(1, Math.max(0, t)) * maxScroll();
+  if (Math.abs((window.scrollY || 0) - y) > 0.5) window.scrollTo(0, y);
+  lastY = window.scrollY || 0;
+}
+
+function pointerDown(e) {
+  const root = document.documentElement;
+  if (e.clientX >= root.clientWidth || e.clientY >= root.clientHeight) thumbHeld = true;
+}
+function pointerUp() { thumbHeld = false; }
 
 // While locked we swallow the input events themselves, so the page never even
 // begins to move. passive:false is required for preventDefault to be honoured.
@@ -149,6 +204,14 @@ export function unlockScroll() {
   }
   set('scrollLocked', false);
   detachSwallowers();
+  if (bounded) {
+    // Nothing received while locked is banked: the page goes to the car, the model starts at rest.
+    bounded.reset(state.progress * TRACK_LENGTH);
+    syncPageTo(state.progress);
+    rawTarget = state.progress;
+    set('targetProgress', state.progress);
+    return;
+  }
   window.scrollTo(0, lockedScrollY);
   rawTarget = readScroll();
   set('targetProgress', rawTarget);
@@ -169,6 +232,7 @@ export function resetToStart() {
   lastProgress = 0;
   smoothedSpeed = 0;
   lockedScrollY = 0;
+  if (bounded) { bounded.reset(0); lastY = window.scrollY || 0; }
   set('targetProgress', 0);
   set('progress', 0);
   set('velocity', 0);
@@ -184,6 +248,12 @@ export function seekTo(t, { instant = false } = {}) {
   window.scrollTo(0, clamped * maxScroll());
   rawTarget = clamped;
   set('targetProgress', clamped);
+  if (bounded) {
+    lastY = window.scrollY || 0;
+    // Instant: no banked credit, no glide, no speed. Otherwise a speed-limited glide to `t`.
+    if (instant) bounded.reset(clamped * TRACK_LENGTH);
+    else bounded.seek(clamped * TRACK_LENGTH);
+  }
   if (instant) {
     lastProgress = clamped;
     set('progress', clamped);
@@ -201,6 +271,7 @@ export function seekTo(t, { instant = false } = {}) {
  * Writes state.progress, state.velocity and state.speed01.
  */
 export function update(dt) {
+  if (bounded) return updateBounded(dt);
   // Frame-rate independent damping. The naive `t += (target - t) * k` is tied to
   // frame rate; this gives the same feel at 60, 120 and 144 Hz.
   const k = 1 - Math.pow(1 - TUNE.damping, dt * 60);
@@ -231,9 +302,58 @@ export function update(dt) {
   set('speed01', smoothedSpeed);
 }
 
+function updateBounded(dt) {
+  const locked = state.scrollLocked;
+  if (locked) {
+    // Frozen: anything the page did while locked is discarded, the model sits at rest on the car.
+    lastY = window.scrollY || 0;
+    bounded.reset(state.progress * TRACK_LENGTH);
+  } else {
+    const y = window.scrollY || 0;
+    const dy = y - lastY;
+    lastY = y;
+    if (dy !== 0) bounded.addInput(dy, TRACK_LENGTH / maxScroll());
+  }
+  bounded.step(dt);
+
+  const p = Math.min(1, Math.max(0, bounded.p / TRACK_LENGTH));
+  const targetP = Math.min(1, Math.max(0, bounded.targetMeters() / TRACK_LENGTH));
+  rawTarget = targetP;
+  set('targetProgress', targetP);
+
+  if (!locked && !thumbHeld) {
+    const max = maxScroll();
+    const y = window.scrollY || 0;
+    const wantY = targetP * max;
+    const stranded = (y <= 1 && wantY > 1) || (y >= max - 1 && wantY < max - 1);
+    if (Math.abs(y - wantY) > 1 && bounded.idle >= (stranded ? STRANDED_IDLE_S : RESYNC_IDLE_S)) {
+      window.scrollTo(0, wantY);
+      lastY = window.scrollY || 0;
+    }
+  }
+
+  const dp = p - lastProgress;
+  const velocity = Math.max(-1.6, Math.min(1.6, dt > 0 ? dp / dt / TUNE.velocityFullScale : 0));
+  const targetSpeed = Math.min(1, Math.abs(velocity));
+  const sk = targetSpeed > smoothedSpeed ? TUNE.speedAttack : TUNE.speedRelease;
+  smoothedSpeed += (targetSpeed - smoothedSpeed) * (1 - Math.pow(1 - sk, dt * 60));
+  if (smoothedSpeed < 0.0015) smoothedSpeed = 0;
+
+  lastProgress = p;
+  set('progress', p);
+  set('velocity', velocity);
+  set('speed01', smoothedSpeed);
+}
+
 // ---------------------------------------------------------------------------
 // Init
 // ---------------------------------------------------------------------------
+
+function onResize() {
+  // Page height changed: re-place the page on the car so px<->metre mapping stays aligned.
+  if (bounded && !state.scrollLocked) syncPageTo(state.progress);
+  onScroll();
+}
 
 export function initScrollDrive() {
   const spacer = document.getElementById('scroll-spacer');
@@ -246,7 +366,16 @@ export function initScrollDrive() {
 
   window.addEventListener('scroll', onScroll, { passive: true });
   window.addEventListener('keydown', swallowKeys, { passive: false });
-  window.addEventListener('resize', onScroll);
+  window.addEventListener('resize', onResize);
+  if (bounded) {
+    // Passive listeners only (SPEC §27): used to tell a held scrollbar thumb from a stray idle.
+    window.addEventListener('pointerdown', pointerDown, { passive: true });
+    window.addEventListener('pointerup', pointerUp, { passive: true });
+    window.addEventListener('pointercancel', pointerUp, { passive: true });
+    window.addEventListener('blur', pointerUp, { passive: true });
+    lastY = window.scrollY || 0;
+  }
+  if (window.__gt3) window.__gt3.scrollMode = scrollMode;
 
   onScroll();
   return { update };

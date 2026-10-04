@@ -2,6 +2,16 @@
  * Env: GT3_URL (external Vite URL), GT3_HEADLESS=1, GT3_CONTEXTS=3,
  * GT3_PREWARM=1 (optional old-style comparison), GT3_OUT (results directory),
  * GT3_LABEL (free-form build label recorded in results, e.g. `w4` or `baseline-602c462`).
+ * Scroll-pace modes (W3): GT3_SCROLL=cap|pace appends `scroll=<mode>` to the page URL (default: no param =
+ * today's law); GT3_QUERY="comp=b&gate=quiet" appends further independent parameters verbatim.
+ * GT3_WHEEL_DELTA (px per wheel event, default 2 = the legacy calibration), GT3_WHEEL_BURST (events per
+ * 33 ms tick, default 4). The bounded modes ignore sub-intensity input (pace floor / lead bound), so a 2 px
+ * trickle crosses a gate far slower than the legacy default measured; for cap/pace use e.g.
+ * GT3_WHEEL_DELTA=10 (about 1200 px/s, "gentle") or 30 ("normal", ~3600 px/s). Every crossing window records
+ * `routeSpeedMs`, the measured route speed (progress displacement x TRACK_LENGTH / time, +-0.5 s around the
+ * crossing), so windows can be compared at measured speed rather than at nominal input. Input always goes
+ * through real CDP wheel events. In cap/pace modes the drive loop keeps feeding input until the car's TARGET
+ * (not its position) passes the goal, because the bounded lead never exceeds ~55 m.
  * The harness changes no product source and uses real wheel input for every gate.
  * Each context records vm_stat Pageouts/Swapouts at launch, at every phase boundary and
  * before close; any increase marks that context `hostContaminated` (host paging/swapping).
@@ -13,6 +23,14 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
 const base = process.env.GT3_URL || 'http://127.0.0.1:5191';
+const scrollMode = process.env.GT3_SCROLL || 'default';
+if (!['default', 'cap', 'pace'].includes(scrollMode)) throw new Error(`GT3_SCROLL must be default|cap|pace, got ${scrollMode}`);
+const pageParams = [scrollMode === 'default' ? '' : `scroll=${scrollMode}`, (process.env.GT3_QUERY || '').replace(/^[?&]/, '')]
+  .filter(Boolean).join('&');
+const pageUrl = pageParams ? `${base.replace(/\/$/, '')}/?${pageParams}` : base;
+const wheelDeltaAbs = Number(process.env.GT3_WHEEL_DELTA || 2);
+const wheelBurst = Math.max(1, Number(process.env.GT3_WHEEL_BURST || 4));
+if (!(wheelDeltaAbs > 0)) throw new Error('GT3_WHEEL_DELTA must be > 0');
 const outputDir = process.env.GT3_OUT || '/Users/rayyansheikh/.claude/jobs/60022478/tmp/w1';
 const workRoot = process.env.GT3_WORK || '/tmp/gt3-w1';
 const contexts = Math.max(1, Number(process.env.GT3_CONTEXTS || 3));
@@ -24,7 +42,8 @@ const chrome = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 const preflight = process.env.GT3_PREFLIGHT || '/Users/rayyansheikh/.claude/jobs/60022478/tmp/preflight.sh';
 const pause = ms => new Promise(resolve => setTimeout(resolve, ms));
 const assert = (ok, message) => { if (!ok) throw new Error(message); };
-const result = { startedAt: new Date().toISOString(), base, headless, contextsRequested: contexts,
+const result = { startedAt: new Date().toISOString(), base, pageUrl, scrollMode, wheelDeltaY: wheelDeltaAbs,
+  wheelBurst, headless, contextsRequested: contexts,
   label: process.env.GT3_LABEL || null, prewarmRequested: doPrewarm, runs: [], host: [], errors: [] };
 let server;
 
@@ -120,7 +139,10 @@ function summarizeWindow(name, frames, entries, center, trackLength, expectedCha
       renderToStyle: +((e.styleAndLayoutStart || e.renderStart) - e.renderStart).toFixed(1),
       styleLayoutAndAfter: +(e.startTime + e.duration - (e.styleAndLayoutStart || e.renderStart)).toFixed(1) } : null,
   }));
-  return { name, centerMs: +center.toFixed(1), expectedChange,
+  const near = sample.filter(f => f.t >= center - 500 && f.t <= center + 500);
+  const routeSpeedMs = near.length > 1 && near.at(-1).t > near[0].t
+    ? +(Math.abs(near.at(-1).progress - near[0].progress) * trackLength / ((near.at(-1).t - near[0].t) / 1000)).toFixed(1) : null;
+  return { name, centerMs: +center.toFixed(1), expectedChange, routeSpeedMs,
     coverageOffsetsMs: [+(first.t - first.dt - center).toFixed(1), +(last.t - center).toFixed(1)],
     completeWindow: first.t - first.dt <= center - 1500 && last.t >= center + 1500,
     frameCount: sample.length, p50: percentile(gaps, .5), p90: percentile(gaps, .9),
@@ -311,15 +333,18 @@ async function drive(page, goalProgress, direction, length, maxMs = 180000) {
   const started = Date.now();
   let events = 0;
   // On headed Chrome/macOS, CDP wheel deltaY=120 moved ~40 m per event in a
-  // calibration pass. A 2-unit wheel step produces ~0.7 m and avoids jumping gates.
-  const deltaY = direction * 2;
+  // calibration pass. The legacy 2-unit wheel step produces ~0.7 m and avoids jumping gates in default mode.
+  const deltaY = direction * wheelDeltaAbs;
+  const bounded = scrollMode !== 'default';
   while (Date.now() - started < maxMs) {
     const s = await snapshot(page);
     assert(!s.locked, `Scroll locked during drive: ${JSON.stringify(s)}`);
     if (direction * (s.progress - goalProgress) >= 0) return { events, elapsedMs: Date.now() - started, end: s };
     const targetLeadM = direction * (s.target - s.progress) * length;
-    if (direction * (s.target - goalProgress) < 0 && targetLeadM < 12) {
-      for (let i = 0; i < 4; i++) {
+    // default: legacy gate (feed only while the target lead is < 12 m). cap/pace: lead is bounded by the model,
+    // so feed continuously until the target reaches the goal (steady input also keeps the pace estimate honest).
+    if (direction * (s.target - goalProgress) < 0 && (bounded || targetLeadM < 12)) {
+      for (let i = 0; i < wheelBurst; i++) {
         await page.mouse.wheel({ deltaY });
         events++;
         await pause(33);
@@ -340,7 +365,7 @@ async function runOne(index, warmed) {
       `--user-data-dir=${profile}`, '--window-size=1600,900'],
     defaultViewport: { width: 1600, height: 900 } });
   const run = { index, warmed, sound: (index === 2 || index === 4) && !warmed, profile,
-    wheelDeltaY: 2, wheelIntervalMs: 33, phases: {}, errors: [],
+    wheelDeltaY: wheelDeltaAbs, wheelBurst, wheelIntervalMs: 33, scrollMode, pageUrl, phases: {}, errors: [],
     vm: [vmStat('launched')], hostSamples: [] };
   result.runs.push(run);
   const hostTimer = setInterval(() => {
@@ -358,7 +383,7 @@ async function runOne(index, warmed) {
     page.on('console', e => { if (e.type() === 'error') run.errors.push(`console: ${e.text()}`); });
     page.on('response', e => { if (e.status() >= 400) run.errors.push(`HTTP ${e.status()} ${e.url()}`); });
     await installDiagnostics(page);
-    await page.goto(base, { waitUntil: 'domcontentloaded', timeout: 120000 });
+    await page.goto(pageUrl, { waitUntil: 'domcontentloaded', timeout: 120000 });
     run.gpuRssAtDomMB = gpuRssMB(browser);
     await page.waitForFunction(() => window.__gt3?.scene?.getObjectByName('car-rig')
       && document.querySelector('#start-screen.is-ready'), { timeout: 120000 });
@@ -538,7 +563,7 @@ async function runOne(index, warmed) {
 
 function makeSummary() {
   const lines = ['# Swap hitch measurement', '',
-    `Date: ${result.startedAt}. URL: ${base}. Chrome: ${headless ? 'headless' : 'headed'} ANGLE/Metal, 1600×900.`,
+    `Date: ${result.startedAt}. URL: ${pageUrl} (scroll mode: ${scrollMode}, wheel ${wheelDeltaAbs} px x ${wheelBurst}/33 ms). Chrome: ${headless ? 'headless' : 'headed'} ANGLE/Metal, 1600×900.`,
     '', '| Run | Scenario | Frames | p50 | p90 | p99 | Max | >20 | >33 | >50 | >100 | >250 | Programs Δ | Textures Δ | Geometries Δ | Level changes |',
     '|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|'];
   for (const run of result.runs) for (const name of ['cold', 'reverse', 'warm', 'laterCold', 'laterReverse', 'laterWarm', 'control']) {

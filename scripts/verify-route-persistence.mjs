@@ -195,6 +195,9 @@ try {
     await waitReady(page);
     await page.mouse.wheel({ deltaY: 300 });
     await wait(450);
+    // The bounded pace law keeps gliding after the input stops; snapshot only once the car is at rest,
+    // otherwise the saved value legitimately trails the position persisted a moment later.
+    await waitForRest(page);
     const saved = await snapshot(page);
     assert(saved.progress > 0 && saved.progress < 0.995,
       `pace route did not remain in a restorable range: ${saved.progress}`);

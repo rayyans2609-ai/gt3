@@ -18,7 +18,7 @@ set -euo pipefail
 usage() {
   echo "Usage: $0 -m <model> -r <reasoning-effort> <prompt|@brief-file>" >&2
   echo "  models seen supported as of docs/ai/codex-cli-invocation.md:" >&2
-  echo "    gpt-6-astra gpt-6-sol gpt-6-luna gpt-5.6-sol gpt-5.6-terra gpt-5.6-luna" >&2
+  echo "    gpt-6.1-sol gpt-6-astra gpt-6-luna gpt-5.6-terra gpt-6-sol gpt-5.6-sol gpt-5.6-luna" >&2
   echo "  reasoning-effort: low | medium | high | xhigh | max | ultra" >&2
   exit 2
 }
@@ -36,7 +36,7 @@ done
 shift $((OPTIND - 1))
 
 case "$model" in
-  gpt-6-astra|gpt-6-sol|gpt-6-luna|gpt-5.6-sol|gpt-5.6-terra|gpt-5.6-luna) ;;
+  gpt-6.1-sol|gpt-6-astra|gpt-6-sol|gpt-6-luna|gpt-5.6-sol|gpt-5.6-terra|gpt-5.6-luna) ;;
   "")
     echo "codex-route: -m <model> is required (no default is ever assumed)" >&2
     usage

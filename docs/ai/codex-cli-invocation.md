@@ -1,8 +1,8 @@
 # GT3 — Codex CLI Invocation (canonical)
 
-Execution-specific layer only. Role/escalation/reasoning-*policy* doctrine lives in [`docs/ai/model-routing.md`](./model-routing.md) — do not duplicate it here.
+Execution-specific layer only. Role/escalation/reasoning-*policy* doctrine lives in [`docs/ai/model-routing.md`](./model-routing.md) — do not duplicate it here. OpenCode free-route execution (Muse, DeepSeek, Bunny) is in [`docs/ai/opencode-invocation.md`](./opencode-invocation.md).
 
-**Status:** re-verified 2026-09-26 against a locally installed `codex-cli 0.157.1` (npm, macOS x86_64). Re-verify against `codex doctor` / `codex --version` / `~/.codex/models_cache.json` at the start of a new working session rather than trusting this file indefinitely — see "This file drifts" below. `scripts/codex-route.sh` itself was verified end-to-end by a live routed job on 2026-09-27 (see "Live-run verification").
+**Status:** model catalog re-verified 2026-10-04 against a locally installed `codex-cli 0.160.0` (catalog `fetched_at` 2026-10-04); config/wrapper behavior below was verified on `0.157.1` (2026-09-26/27). Re-verify against `codex doctor` / `codex --version` / `~/.codex/models_cache.json` at the start of a new working session rather than trusting this file indefinitely — see "This file drifts" below. `scripts/codex-route.sh` itself was verified end-to-end by a live routed job on 2026-09-27 (see "Live-run verification").
 
 ## Required invocation path: `scripts/codex-route.sh`
 
@@ -22,28 +22,29 @@ codex exec --dangerously-bypass-approvals-and-sandbox --skip-git-repo-check \
   -m <model> -c model_reasoning_effort="<effort>" "<prompt>" < /dev/null
 ```
 
-which remains the verified-correct raw syntax on 0.157.1 if you ever need to bypass the wrapper for a one-off interactive case — but the wrapper is the canonical path for routed jobs.
+which was the verified-correct raw syntax on 0.157.1 if you ever need to bypass the wrapper for a one-off interactive case — but the wrapper is the canonical path for routed jobs.
 
 ## Verified current model slugs
 
-From `~/.codex/models_cache.json` (Codex's own catalog, fetched 2026-09-25 as of last check — this file is refreshed by Codex itself, so re-check its `fetched_at` before trusting slugs long after this doc's date):
+From `~/.codex/models_cache.json` (Codex's own catalog, `fetched_at` 2026-10-04, client 0.160.0 — this file is refreshed by Codex itself, so re-check its `fetched_at` before trusting slugs long after this doc's date):
 
-| Slug | Catalog description | `supported_in_api` / `visibility` |
-|---|---|---|
-| `gpt-6-astra` | Frontier intelligence for the most demanding work | true / list |
-| `gpt-6-sol` | Workhorse model for coding and everyday work | true / list |
-| `gpt-6-luna` | Fast and affordable model for easier tasks | true / list |
-| `gpt-5.6-sol` | *Older* coding model for complex work | true / list |
-| `gpt-5.6-terra` | *Older* balanced model for straightforward work | true / list |
-| `gpt-5.6-luna` | *Older* fast and efficient model | true / list |
+| Slug | Catalog description | `supported_in_api` / `visibility` | Routing role (`model-routing.md` §3) |
+|---|---|---|---|
+| `gpt-6.1-sol` | Latest workhorse model for coding and everyday work | true / list | **GPT-6.1 Sol** — serious engineering |
+| `gpt-6-astra` | Frontier intelligence for the most demanding work | true / list | GPT-6 Astra — last-resort takeover |
+| `gpt-6-luna` | Fast and affordable model for easier tasks | true / list | GPT-6 Luna — mechanical economy |
+| `gpt-5.6-terra` | Older balanced model for straightforward work | true / list | GPT-5.6 Terra — native bounded fallback |
+| `gpt-6-sol` | Previous generation workhorse model | true / list | none (superseded by `gpt-6.1-sol`) |
+| `gpt-5.6-sol` | Older generation workhorse model | true / list | none |
+| `gpt-5.6-luna` | Older fast and efficient model | true / list | none |
 
-GPT-6 is the current generation; the GPT-5.6 models are explicitly labeled "Older" in Codex's own catalog but are fully supported (no retirement notice) — `gpt-5.6-terra` stays in active routing per `model-routing.md` §3 specifically because GPT-6 has no Terra-equivalent tier. (`gpt-5.5` also still exists but is scheduled to retire 2026-10-14 and auto-upgrade to `gpt-5.6-sol`; it isn't part of the routing tier set regardless.)
+Use `gpt-6.1-sol` for Sol; `gpt-6-sol` is the previous generation and is no longer the Sol route. `gpt-5.6-terra` stays in active routing as the reliable native bounded fallback/shortcut; the default bounded lane is now the free Muse route (`opencode-invocation.md`). (`gpt-5.5`, listed as "Legacy coding model", and hidden internal entries such as `gpt-reserve` and `codex-auto-review` are not part of the routing set.)
 
 ## Verified reasoning-effort values
 
-All six routing-tree models accept: `low`, `medium`, `high`, `xhigh`, `max`. `gpt-6-sol`, `gpt-6-astra`, and `gpt-5.6-sol` additionally accept `ultra` ("maximum reasoning with automatic task delegation") — not part of current routing policy, available if a deliberate reason arises.
+All routing-set models accept: `low`, `medium`, `high`, `xhigh`, `max`. `gpt-6.1-sol`, `gpt-6-astra`, `gpt-5.6-terra`, `gpt-6-sol` and `gpt-5.6-sol` additionally accept `ultra` ("maximum reasoning with automatic task delegation"); the Luna models do not.
 
-Per-model catalog defaults (what the model would use if nothing else specified an effort — see the caveat immediately below): `gpt-6-luna`/`gpt-5.6-luna`/`gpt-5.6-terra`/`gpt-6-sol` default to `medium`; `gpt-6-astra` and `gpt-5.6-sol` default to `low`.
+Per-model catalog defaults (what the model would use if nothing else specified an effort — see the caveat immediately below): `gpt-6.1-sol`, `gpt-6-astra` and `gpt-5.6-sol` default to `low`; `gpt-6-luna`, `gpt-5.6-terra`, `gpt-6-sol` and `gpt-5.6-luna` default to `medium`. Note that the current Sol defaults to `low`, unlike `gpt-6-sol`, so an omitted effort would silently under-reason serious work.
 
 **Caveat — do not rely on the above table.** `~/.codex/config.toml` can set a top-level `model_reasoning_effort` that acts as the effective default for *any* invocation that omits `-c model_reasoning_effort=`, regardless of which model catalog default would otherwise apply. Which one actually wins for a bare (no `-c`) invocation was not conclusively verified in this environment (a live test invocation was blocked — see "What could not be verified"). **This ambiguity is exactly why `scripts/codex-route.sh` makes `-r` mandatory: it makes the question irrelevant, because reasoning effort is never left to default resolution on a routed job.**
 
@@ -75,7 +76,7 @@ Operating notes from that run:
 - **Codex works unsandboxed in its launch directory.** Launch routed jobs from a dedicated worktree on the job's branch, never from the user's main checkout, so its commits and branch changes cannot touch the working copy. A symlinked `node_modules` is fine; list it in `.git/info/exclude`, because `.gitignore`'s `node_modules/` pattern only matches directories.
 - **Codex's own verification can be incomplete.** In its execution window it could not finish `npm run build` or get past the headless loading screen, and it reported that honestly. The manager re-ran the build and browser checks. Treat worker-reported verification gaps as manager work, per `model-routing.md` §6 "Implementation ≠ acceptance".
 
-The `codex-executor` MCP server continues to fail with `CONNECTION_CLOSED` as of 2026-09-26 — routed jobs go through the `codex` CLI via Bash (or `scripts/codex-route.sh`), which draws on the same quota as the MCP path would.
+The `codex-executor` MCP server continues to fail with `CONNECTION_CLOSED` (as of 2026-09-26; still failing 2026-10-04) — routed jobs go through the `codex` CLI via Bash (or `scripts/codex-route.sh`), which draws on the same quota as the MCP path would.
 
 ## This file drifts
 

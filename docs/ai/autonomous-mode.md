@@ -4,6 +4,7 @@ Protocol for leaving GT3 unattended for hours on a **bounded objective**. It own
 
 - Model roles, thinking levels, delegation direction, manager failover architecture → [`model-routing.md`](./model-routing.md)
 - Codex slugs and syntax → [`codex-cli-invocation.md`](./codex-cli-invocation.md) (route through `scripts/codex-route.sh`)
+- OpenCode free-route IDs and syntax → [`opencode-invocation.md`](./opencode-invocation.md) (route through `scripts/opencode-route.sh`)
 - Product truth → `SPEC.md`. Measured history → `BUILD_LOG.md`.
 
 **Posture: be safe, but get a dangerous amount done.** Maximize useful work inside explicit scope and safety limits. Do everything that can be safely finished without the user. When a genuine user-only judgment appears, mark it **NEEDS HUMAN VERIFICATION**, preserve the artifact, and keep going on independent work. Stop only when remaining meaningful work actually depends on the user. Never invent phases, features, refactors or cleanup to stay busy.
@@ -46,9 +47,9 @@ Opus is primary manager while available. It owns: objective, done criteria, deco
 - **Brief review (light, not bureaucratic).** Before dispatching a meaningful brief, check: objective, scope, context, file/system ownership, exclusions, expected evidence, acceptance condition, and fit with the resource budget (§6).
 - Worker completion is not acceptance; the manager reviews diff and evidence (`model-routing.md` §6).
 
-## 3. Astra — the absent-user supervisory layer
+## 3. Independent review — the absent-user check
 
-While the user is away, Astra is the closest thing to them: independent senior review, direction/scope sanity, evidence challenge, recovery/routing challenge, final acceptance sanity. Opus remains manager; Astra advises, and may investigate. **The manager decides.** Overriding a material Astra finding is allowed, but the finding and the reason go in the ledger and the handoff. Sol-manager mode is stricter (§4).
+While the user is away, independent review stands in for them: direction/scope sanity, evidence challenge, recovery/routing challenge, final acceptance sanity. **Sonnet** is the reviewer (`high`/`xhigh`, `model-routing.md` §4), run in a context separate from the manager and used only when a second model perspective is actually useful. Opus remains manager and acceptance owner; the reviewer advises and may investigate. **The manager decides.** Overriding a material review finding is allowed, but the finding and the reason go in the ledger and the handoff. Sol-manager mode is stricter (§4).
 
 **Cadence — when enough changed to justify it, not by clock:**
 - after meaningful milestones
@@ -57,15 +58,17 @@ While the user is away, Astra is the closest thing to them: independent senior r
 - before a consequential change of approach; when the manager's interpretation is uncertain
 - near final acceptance/handoff
 
-Never for clerical, browser or repetitive work. Distinct from the watchdog (§7): the watchdog checks *health*; Astra checks *judgment*.
+Never for clerical, browser or repetitive work. Distinct from the watchdog (§7): the watchdog checks *health*; the reviewer checks *judgment*.
+
+**Astra has no standing role in Autonomous Mode.** No periodic, milestone or final-sweep Astra reviews. Astra is invoked only when the last-resort takeover criteria in `model-routing.md` §3 are actually met: normal Opus + Sol handling has demonstrably become unreliable because the problem is globally interwoven and decomposition/coordination itself is failing. It then temporarily takes over management of that problem and hands back to Opus.
 
 **Context to give (compact):** objective/done criteria, manager mode, branch/head, relevant constraints, work since last review, evidence, unresolved issues, failures/recovery, host/tool and quota state if relevant, proposed next action.
 
-**Questions Astra tests:** Are we solving the requested problem? Does evidence support the claimed state? Is scope drifting or work unnecessary? Are app/harness/host/tool/quota failures classified correctly? Is prior evidence still valid? Is routing sensible? Over-testing or under-verifying? Continue, correct, wait, escalate, or stop?
+**Questions the reviewer tests:** Are we solving the requested problem? Does evidence support the claimed state? Is scope drifting or work unnecessary? Are app/harness/host/tool/quota failures classified correctly? Is prior evidence still valid? Is routing sensible? Over-testing or under-verifying? Continue, correct, wait, escalate, or stop?
 
-**Astra's workers.** Astra may use bounded review/investigation workers (authority rules: `model-routing.md` §8). The manager schedules any heavy local job they need under §6, like any other heavy job.
+**Reviewer's workers.** The reviewer may use read-only evidence workers such as Bunny or Luna (authority rules: `model-routing.md` §8). The manager schedules any heavy local job they need under §6, like any other heavy job.
 
-**Astra unavailable** (Codex exhausted or down): defer reviews and log the gap. Don't substitute a Claude worker as "Astra" by default, because Claude is scarcer. If the final sweeps can't run within the horizon, the handoff says they were not run.
+**Reviewer unavailable** (Claude exhausted or down): defer reviews and log the gap. Don't substitute Astra. If the final sweeps can't run within the horizon, the handoff says they were not run.
 
 **Final sweeps** (when the objective is otherwise complete and usage allows; do not redo clerical evidence):
 1. **Work sweep** — material changes, evidence, integration, unresolved claims, omissions/contradictions.
@@ -77,13 +80,13 @@ If Opus nears quota/tool exhaustion (a usage warning, rate-limit notice, or know
 
 **One manager at a time.** The ledger's manager-mode field (§11) is the lock: `opus`, `sol-starting`, `sol`, or `handback-requested`, plus the holder's PID. Nobody dispatches work while the field names someone else. Write it atomically (temp file + `mv`). Only the holder changes it, except that a returning Opus may set `handback-requested`. A lock whose holder PID is dead (identity re-checked, §6) is stale. The next manager reconciles owned processes against the ledger before reclaiming it.
 
-**Continuation packet — keep it current, don't write it at the end.** Opus may be cut off without warning, so the ledger always holds: objective, done criteria, branch/head, working tree, commits, active/completed tasks with owners/models, evidence, verified/unverified/blocked/human-review states, owned PIDs and host state, quota/reset state, latest Astra findings, risks, exclusions, exact next action. If Opus is cut off before handing over, no failover happens and the ledger is the handoff.
+**Continuation packet — keep it current, don't write it at the end.** Opus may be cut off without warning, so the ledger always holds: objective, done criteria, branch/head, working tree, commits, active/completed tasks with owners/models, evidence, verified/unverified/blocked/human-review states, owned PIDs and host state, quota/reset state, latest review findings, risks, exclusions, exact next action. If Opus is cut off before handing over, no failover happens and the ledger is the handoff.
 
-**Entering Sol-manager mode.** Opus first quiesces its own workers: each finishes or checkpoints, and anything left running is listed as transferred. Opus then sets `sol-starting`. It launches Sol with the packet as its brief via `scripts/codex-route.sh` from the run's worktree, detached so it survives the Claude session ending. The brief includes the absolute run deadline, and Sol stops at it. Sol acknowledges by setting `sol` with its own PID. If no acknowledgement arrives within a few minutes, Opus reverts to `opus` (if still able) or the run simply stops. Sol first secures Claude-side state (in-flight work checkpointed, owned processes reconciled against the ledger), then continues bounded work. Its worker pool is Codex-side (Terra, Luna, Astra); Claude workers are assumed unavailable. The Sol-manager process itself is one of the ≤ 2 top-level tasks (§6), so at most one heavy worker runs beneath it.
+**Entering Sol-manager mode.** Opus first quiesces its own workers: each finishes or checkpoints, and anything left running is listed as transferred. Opus then sets `sol-starting`. It launches Sol with the packet as its brief via `scripts/codex-route.sh` from the run's worktree, detached so it survives the Claude session ending. The brief includes the absolute run deadline, and Sol stops at it. Sol acknowledges by setting `sol` with its own PID. If no acknowledgement arrives within a few minutes, Opus reverts to `opus` (if still able) or the run simply stops. Sol first secures Claude-side state (in-flight work checkpointed, owned processes reconciled against the ledger), then continues bounded work. Its worker pool is Codex-side (Terra, Luna) plus the free OpenCode workers (Muse, DeepSeek, Bunny); Claude workers are assumed unavailable. Astra joins only under the `model-routing.md` §3 takeover criteria. The Sol-manager process itself is one of the ≤ 2 top-level tasks (§6), so at most one heavy worker runs beneath it.
 
-**Sol-manager authority.** Temporary. Scope and safety rules are unchanged; Sol may not widen scope, touch `main`, push unless the invocation allows it, or start work outside the run plan. Astra becomes a near-co-manager. Invoke it on entry, after major implementation/integration batches, about every 30–45 min of substantive work when enough changed, before major rerouting or scope-sensitive decisions, and before handback. No Astra on unchanged waits or clerical work. **If Sol and Astra disagree on a scope-sensitive or consequential decision, take the conservative option** (checkpoint, or record it as blocked) and leave it for Opus or the user.
+**Sol-manager authority.** Temporary. Scope and safety rules are unchanged; Sol may not widen scope, touch `main`, push unless the invocation allows it, or start work outside the run plan. Sonnet review (§3) is unavailable with Claude, so it is deferred and the gap logged; Sol may use Bunny for first-pass diff/evidence review. **On any scope-sensitive or consequential decision, take the conservative option** (checkpoint, or record it as blocked) and leave it for Opus or the user.
 
-**Handback.** A returning Opus reads the ledger before doing anything. If the field is `sol`, it sets `handback-requested` and dispatches nothing. Sol checks the field at each task boundary. It stops creating new work, checkpoints or finishes current bounded work quickly, writes a run-over to the ledger (work done, evidence, commits, current tasks, host/process state, quota events, Astra findings, unresolved items, next action), sets the field to `opus`, and exits. Opus reviews the run-over, confirms Sol and its workers have exited or been explicitly transferred, and retakes authority. If Sol died instead, the lock is stale (above). If Opus never returns within the run, Sol writes the final handoff (§12) and records the failover.
+**Handback.** A returning Opus reads the ledger before doing anything. If the field is `sol`, it sets `handback-requested` and dispatches nothing. Sol checks the field at each task boundary. It stops creating new work, checkpoints or finishes current bounded work quickly, writes a run-over to the ledger (work done, evidence, commits, current tasks, host/process state, quota events, review findings, unresolved items, next action), sets the field to `opus`, and exits. Opus reviews the run-over, confirms Sol and its workers have exited or been explicitly transferred, and retakes authority. If Sol died instead, the lock is stale (above). If Opus never returns within the run, Sol writes the final handoff (§12) and records the failover.
 
 If Codex is also unavailable, there is no continuity manager: checkpoint, update the packet, stop cleanly (§5).
 
@@ -98,7 +101,7 @@ Quota exhaustion is an expected autonomous state, not an implementation failure.
 
 **Codex exhausted, Claude available** (Claude is scarcer — conserve it):
 - **Reset < 30 min away:** prefer waiting, light/static work, review/planning, handoff prep over spending Claude on implementation Codex can resume shortly.
-- **Otherwise: Claude-only conservation mode.** Opus stays manager. Sol-level work runs in bounded Opus worker instances; Sonnet takes new Terra-level work and helps wrap lower-level work in flight. Do not spend Sonnet on brand-new trivial Luna-level tasks just to stay busy — batch or defer clerical work. Do less total work than with Codex; prioritize critical-path completion, verification continuity and state preservation; skip optional work.
+- **Otherwise: Claude-only conservation mode.** Opus stays manager. Sol-level work runs in bounded Opus worker instances. New bounded work stays on the free OpenCode workers (Muse, else DeepSeek; `model-routing.md` §3) while their routes are healthy, and otherwise goes to Sonnet. Sonnet also helps wrap lower-level work in flight. Do not spend Sonnet on brand-new trivial Luna-level tasks just to stay busy — batch or defer clerical work. Do less total work than with Codex; prioritize critical-path completion, verification continuity and state preservation; skip optional work.
 
 The handoff reports each affected route and its reset time if known.
 
@@ -109,7 +112,7 @@ Local CPU/RAM/browser/build capacity is scarce. Goal: stable throughput, not par
 **Concurrency.** Count across the whole agent tree, not per level:
 - **At most one heavy workload anywhere at a time.** Heavy = a build, a dev server + browser verification (one workload together), a capture sweep, a timing run, or a worker implementing with local processes.
 - **At most 2 active top-level tasks**, only if both are light or one is mostly waiting. A waiting manager process, including a Sol manager, counts as a light top-level task.
-- **Light work** (read-only review, log reading, remote-inference reasoning such as Astra or watchdog checks) may run beside the heavy workload only while the host stays within the degradation thresholds.
+- **Light work** (read-only review, log reading, remote-inference reasoning such as independent review or watchdog checks) may run beside the heavy workload only while the host stays within the degradation thresholds.
 - **The deterministic host monitor** (below) never counts as a task and needs no watchdog of its own.
 
 Never overlap heavy workloads merely for speed. Before each spawn ask: does it add a heavy local process, and can it wait? Routine browser/capture/basic verification → Luna.
@@ -126,7 +129,7 @@ Never overlap heavy workloads merely for speed. Before each spawn ask: does it a
 
 ## 7. Watchdog
 
-Every active task, manager work included, gets a watchdog (except the host monitor and the watchdog itself; no recursion). It judges progress. Host safety is the monitor's job (§6). **Sonnet low/medium is the routine watchdog worker** — `low` for progress/process/health checks, `medium` when code/log/evidence interpretation is needed. The manager receives the result instead of polling. Where a deterministic check answers the question (PID alive, log still growing, output file advancing), use it and skip the model. When Claude is unavailable (Sol-manager mode, §4), the watchdog falls to Luna `high` or the Sol manager's own checks.
+Every active task, manager work included, gets a watchdog (except the host monitor and the watchdog itself; no recursion). It judges progress. Host safety is the monitor's job (§6). **Luna is the routine watchdog worker** for lightweight progress/process/health checks, at a higher level when code/log/evidence interpretation is needed (`model-routing.md` §4). The manager receives the result instead of polling. Where a deterministic check answers the question (PID alive, log still growing, output file advancing), use it and skip the model. When Codex is unavailable, the watchdog falls to deterministic checks or a Sonnet `low`/`medium` check.
 
 **Adaptive timing** (tune to expected duration; not a kill timer): < 30 min task → ~15–20 min if progress isn't already clear; 30–90 min → ~30 min; > 90 min → ~45–60 min unless risk or host state justifies earlier.
 
@@ -141,31 +144,31 @@ Cheapest sufficient evidence first: static/syntax → targeted deterministic che
 - **Classify before touching product code:** app / harness / host-tool / model-quota / environment. Never change product code to work around a broken harness.
 - Working behavior is a regression boundary; evidence before modification.
 
-**Human-verification queue.** Do everything machine-verifiable without the user. For each genuine subjective judgment: record the item, preserve the exact artifact/state (capture path, commit, URL/state), mark NEEDS HUMAN VERIFICATION, continue independent work. Agents may gather and prune evidence; they never record human acceptance. The run stops for human review only when remaining meaningful work depends on it. Astra's human-verification sweep (§3) prunes the queue.
+**Human-verification queue.** Do everything machine-verifiable without the user. For each genuine subjective judgment: record the item, preserve the exact artifact/state (capture path, commit, URL/state), mark NEEDS HUMAN VERIFICATION, continue independent work. Agents may gather and prune evidence; they never record human acceptance. The run stops for human review only when remaining meaningful work depends on it. The final human-verification sweep (§3) prunes the queue.
 
 ## 9. Recovery, stop conditions, light work
 
-**Recover without asking:** retry a transient deterministic command (after classifying the failure); fix a proven harness bug; restart an owned Vite/Puppeteer/browser process; reroute a worker; heavy → light fallback; checkpoint at a model/tool limit; wait/retry a temporarily unavailable tool; Astra evidence review; correct stale claims. No blind retries (`model-routing.md` §6).
+**Recover without asking:** retry a transient deterministic command (after classifying the failure); fix a proven harness bug; restart an owned Vite/Puppeteer/browser process; reroute a worker; heavy → light fallback; checkpoint at a model/tool limit; wait/retry a temporarily unavailable tool; independent evidence review (§3); correct stale claims. No blind retries (`model-routing.md` §6).
 
 **Stop and checkpoint — do not expand — when:** scope would materially change; product or major architecture is ambiguous; a destructive action is required; `main` or shared history needs an unauthorized change; evidence is irreconcilable; recovery has stopped yielding progress; the next phase is outside scope; all remaining work needs human judgment.
 
 **Stop discipline:** objective achieved; all machine-verifiable work complete; only genuine human judgment remains; or remaining work is blocked and useful fallback exhausted. Do not invent a next phase, unrelated cleanup, extra features, broad refactors, speculative architecture, or unnecessary tests.
 
-**Light-work fallback** (when heavy work is blocked): static inspection, evidence reconciliation, diff review, verification-script prep, docs/implementation consistency, stale-claim review, handoff prep, next-step planning, worker briefs with manager review, Opus/Astra read-only reasoning. No speculative cleanup. When useful light work is exhausted, wait cleanly.
+**Light-work fallback** (when heavy work is blocked): static inspection, evidence reconciliation, diff review, verification-script prep, docs/implementation consistency, stale-claim review, handoff prep, next-step planning, worker briefs with manager review, Opus/reviewer read-only reasoning. No speculative cleanup. When useful light work is exhausted, wait cleanly.
 
 ## 10. Git safety
 
-Work on the specified branch/worktree. Commit coherent, reviewable checkpoints (if allowed); push only if allowed; `main` untouched unless explicitly permitted; no amend/rebase/shared-history rewrite without authorization. Codex jobs launch from a dedicated worktree, never the user's main checkout. `SPEC.md` changes only for genuine product/runtime truth.
+Work on the specified branch/worktree. Commit coherent, reviewable checkpoints (if allowed); push only if allowed; `main` untouched unless explicitly permitted; no amend/rebase/shared-history rewrite without authorization. Codex and OpenCode jobs launch from a dedicated worktree, never the user's main checkout. `SPEC.md` changes only for genuine product/runtime truth.
 
 **Before stopping confirm:** branch/head, working tree, commits, `main` state, owned runtime cleanup, evidence preserved.
 
 ## 11. Run ledger
 
-One compact file in the job temp dir (`$CLAUDE_JOB_DIR/tmp`) or another git-excluded path — never tracked docs mid-run. It doubles as the continuation packet and the manager lock (§4), so keep it current at every task boundary. Contents: objective/done criteria, manager-mode field + holder PID (§4), branch/head, active tasks (owner/model, state, last evidence), owned PIDs, host state, quota/reset constraints, last watchdog, last Astra review/findings, commits, human-verification queue, next action.
+One compact file in the job temp dir (`$CLAUDE_JOB_DIR/tmp`) or another git-excluded path — never tracked docs mid-run. It doubles as the continuation packet and the manager lock (§4), so keep it current at every task boundary. Contents: objective/done criteria, manager-mode field + holder PID (§4), branch/head, active tasks (owner/model, state, last evidence), owned PIDs, host state, quota/reset constraints, last watchdog, last independent review/findings, commits, human-verification queue, next action.
 
 ## 12. Final handoff
 
-Run the two Astra sweeps first when available and worth the usage. Then report, keeping each category separate (implemented ≠ verified ≠ accepted):
+Run the two final review sweeps (§3) first when available and worth the usage. Then report, keeping each category separate (implemented ≠ verified ≠ accepted):
 
 ```
 Autonomous Mode handoff
@@ -180,7 +183,7 @@ Changes / commits:  <hash — subject>
 Quota / tool events:…
 Host / process events + cleanup: …
 Watchdog interventions: …
-Material Astra findings: …
+Material review findings: …
 Process lessons / improvement candidates: …
 Thinking-level findings: <experiment runs only, §13>
 Unresolved risks:   …

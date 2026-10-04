@@ -11,9 +11,16 @@ const VALID_SESSION_VALUES = Object.freeze({
   trackIndex: { has: (value) => Number.isInteger(value) && value >= 0 && value < 6 },
   trackPosition: { has: (value) => Number.isFinite(value) && value >= 0 },
   playIntent: { has: (value) => typeof value === 'boolean' },
+  routeProgress: { has: (value) => Number.isFinite(value) && value >= 0 && value <= 1 },
 });
-const SESSION_KEYS = Object.freeze(Object.keys(VALID_SESSION_VALUES));
+const STATE_SESSION_KEYS = Object.freeze(Object.keys(VALID_SESSION_VALUES)
+  .filter((key) => key !== 'routeProgress'));
+const ROUTE_WRITE_INTERVAL_MS = 350;
 let initialized = false;
+let restoredRouteProgress = null;
+let routeProgress = 0;
+let routeWriteTimer = 0;
+let routePersistenceStarted = false;
 
 function readSession() {
   try {
@@ -28,7 +35,8 @@ function readSession() {
 
 function writeSession() {
   try {
-    const value = Object.fromEntries(SESSION_KEYS.map((key) => [key, state[key]]));
+    const value = Object.fromEntries(STATE_SESSION_KEYS.map((key) => [key, state[key]]));
+    value.routeProgress = routeProgress;
     value.unlocked = [...state.unlocked].filter((index) =>
       Number.isInteger(index) && index >= 0 && index < CARS.length).sort((a, b) => a - b);
     window.sessionStorage.setItem(STORAGE_KEY, JSON.stringify(value));
@@ -43,8 +51,12 @@ export function restoreSession() {
   initialized = true;
 
   const saved = readSession();
-  for (const key of SESSION_KEYS) {
+  for (const key of STATE_SESSION_KEYS) {
     if (VALID_SESSION_VALUES[key].has(saved?.[key])) set(key, saved[key]);
+  }
+  if (VALID_SESSION_VALUES.routeProgress.has(saved?.routeProgress)) {
+    restoredRouteProgress = saved.routeProgress;
+    routeProgress = saved.routeProgress;
   }
   const unlocked = new Set([0]);
   if (Array.isArray(saved?.unlocked)) {
@@ -54,6 +66,40 @@ export function restoreSession() {
   }
   set('unlocked', unlocked);
 
-  for (const key of SESSION_KEYS) subscribe(key, writeSession);
+  for (const key of STATE_SESSION_KEYS) subscribe(key, writeSession);
   subscribe('unlocked', writeSession);
+}
+
+/** The valid route position captured during this tab session, if any. */
+export function getRestoredRouteProgress() {
+  return restoredRouteProgress;
+}
+
+/** Persist an accepted route position without writing on every animation frame. */
+export function persistRouteProgress(progress, { flush = false } = {}) {
+  if (!VALID_SESSION_VALUES.routeProgress.has(progress)) return;
+  routeProgress = progress;
+  if (flush) {
+    if (routeWriteTimer) window.clearTimeout(routeWriteTimer);
+    routeWriteTimer = 0;
+    writeSession();
+    return;
+  }
+  if (routeWriteTimer) return;
+  routeWriteTimer = window.setTimeout(() => {
+    routeWriteTimer = 0;
+    writeSession();
+  }, ROUTE_WRITE_INTERVAL_MS);
+}
+
+/** Begin observing the live drive only after any saved position has been restored. */
+export function startRoutePersistence() {
+  if (routePersistenceStarted) return;
+  routePersistenceStarted = true;
+  const flush = () => persistRouteProgress(state.progress, { flush: true });
+  subscribe('progress', (progress) => persistRouteProgress(progress));
+  window.addEventListener('pagehide', flush);
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') flush();
+  });
 }

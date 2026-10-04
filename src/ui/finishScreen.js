@@ -179,6 +179,11 @@ function maybeFinish(progress = state.progress) {
   showFinishScreen();
 }
 
+/** Whether a restored route position belongs to the completed-route state. */
+export function isFinishProgress(progress) {
+  return Number.isFinite(progress) && progress >= FINISH_THRESHOLD;
+}
+
 /** Supply integration-owned coin and model resets without coupling this screen to them. */
 export function setReplayHandler(fn) {
   if (fn !== null && fn !== undefined && typeof fn !== 'function') {
@@ -222,6 +227,21 @@ export function showFinishScreen() {
     finishSoundPlayed = true;
     playFinish();
   }
+}
+
+/** Reconstruct the completed-route UI after refresh without replaying finish audio. */
+export function restoreFinishScreen() {
+  if (!initialized) initFinishScreen();
+  if (visible || runFinished) return;
+
+  visible = true;
+  runFinished = true;
+  renderRecap();
+  lockScroll();
+  set('mode', 'finish');
+  root.hidden = false;
+  root.setAttribute('aria-hidden', 'false');
+  root.classList.add('is-visible');
 }
 
 /** Hide the scorecard. Replay uses resetToStart(), which has already released scroll. */

@@ -19,7 +19,7 @@ import './styles/base.css';
 import * as THREE from 'three';
 import { state, set, subscribe } from './core/state.js';
 import { Clock } from './core/clock.js';
-import { restoreSession } from './core/session.js';
+import { getRestoredRouteProgress, restoreSession, startRoutePersistence } from './core/session.js';
 import { restoreExperience, setExperience } from './core/experience.js';
 
 const clock = new Clock();
@@ -149,7 +149,19 @@ async function boot() {
     readiness.status = ['model', 'audio', 'gpu'].every(phase => readiness[phase] === 'ready')
       ? 'ready' : 'degraded';
     readiness.readyAt = performance.now();
+    const savedRouteProgress = getRestoredRouteProgress();
+    const restoreFinish = savedRouteProgress !== null && finishScreen.isFinishProgress(savedRouteProgress);
+    if (restoreFinish) set('mode', 'finish');
+    if (savedRouteProgress !== null) {
+      // Restore while locked so this programmatic scroll cannot consume the first real gesture.
+      scrollDrive.seekTo(savedRouteProgress, { instant: true });
+      const routeIndex = checkpoints.restoreAtProgress(savedRouteProgress);
+      morph.resetMorph(routeIndex);
+      aerialCamera.snap();
+    }
     scrollDrive.unlockScroll();
+    if (restoreFinish) finishScreen.restoreFinishScreen();
+    startRoutePersistence();
     reportProgress();
     console.info(`[gt3] ${readiness.status} — three r${THREE.REVISION}`,
       readiness.reasons);

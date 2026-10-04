@@ -93,6 +93,13 @@ export function updateCheckpoints() {
   if (state.activeCarIndex !== nextIndex) set('activeCarIndex', nextIndex);
 }
 
+/** Set route-derived state at boot without replaying discovery or gate effects. */
+export function restoreAtProgress(progress) {
+  routeIndex = indexAt(progress);
+  if (state.activeCarIndex !== routeIndex) set('activeCarIndex', routeIndex);
+  return routeIndex;
+}
+
 export function updateGateResponse(dt) {
   response?.update(dt);
 }

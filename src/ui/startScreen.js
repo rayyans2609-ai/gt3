@@ -13,6 +13,8 @@ let progressValue = null;
 let progressLabel = null;
 let progress = 0;
 let readiness = 'loading';
+let dismissComplete = false;
+const dismissCompleteHandlers = [];
 
 function element(tag, className, text) {
   const node = document.createElement(tag);
@@ -118,6 +120,16 @@ function buildScreen() {
   root.replaceChildren(panel, prompt);
 }
 
+/**
+ * Run `fn` once, when the start screen has actually finished leaving (the moment
+ * `root.hidden` is set) -- not at dismissal start and not on a fixed delay. Late
+ * registrations after completion run immediately.
+ */
+export function onDismissComplete(fn) {
+  if (dismissComplete) fn();
+  else dismissCompleteHandlers.push(fn);
+}
+
 /** Fade the introduction away once. The live canvas is never replaced. */
 export function dismissStartScreen() {
   if (dismissed) return;
@@ -130,6 +142,8 @@ export function dismissStartScreen() {
   window.clearTimeout(dismissTimer);
   dismissTimer = window.setTimeout(() => {
     if (root) root.hidden = true;
+    dismissComplete = true;
+    for (const fn of dismissCompleteHandlers.splice(0)) fn();
   }, DISMISS_DURATION);
 }
 

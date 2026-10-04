@@ -12,7 +12,8 @@ import { getCar } from '../data/cars.js';
 import { CHECKPOINT_T, pointAt } from '../scene/trackCurve.js';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
-const MAP_SIZE = 148;
+// Keep in step with .hud-route in hud.css (170 px, ~15 % over the original 148).
+const MAP_SIZE = 170;
 const MAP_PADDING = 9;
 const MAP_SAMPLES = 160;
 const DIRECTION_DEAD_ZONE = 0.035;
@@ -20,7 +21,9 @@ const CUE_HIDE_DELAY = 1400;
 
 let initialized = false;
 let identitySlots = [];
+let infoSlots = [];
 let visibleIdentitySlot = 0;
+let visibleInfoSlot = 0;
 let renderedCarIndex = -1;
 let routeProject;
 let routePoint;
@@ -60,6 +63,32 @@ function buildIdentity(root) {
   }
   root.classList.add('hud-identity');
   root.append(copy);
+}
+
+/**
+ * Bottom-left car info: the editorial headline plus one factual line built only
+ * from existing roster data. "(BoP-dependent)" compresses to "· BoP", which keeps
+ * the qualifier; nothing is invented or rounded.
+ */
+function specLine(car) {
+  const power = car.engine.power;
+  const bop = /\s*\(BoP-dependent\)/.test(power);
+  const figure = power.replace(/\s*\(BoP-dependent\)/, '');
+  return `${car.engine.configuration} · ${figure}${bop ? ' · BoP' : ''}`;
+}
+
+function buildInfo(root) {
+  const block = element('div', 'hud-info');
+  for (let i = 0; i < 2; i++) {
+    const slot = element('div', `hud-info__slot${i === 0 ? ' is-visible' : ''}`);
+    slot.setAttribute('aria-hidden', i === 0 ? 'false' : 'true');
+    const headline = element('div', 'hud-info__headline');
+    const spec = element('div', 'hud-info__spec');
+    slot.append(headline, spec);
+    block.append(slot);
+    infoSlots.push({ slot, headline, spec });
+  }
+  root.append(block);
 }
 
 function buildRouteMap(root) {
@@ -123,6 +152,18 @@ function setIdentity(index, immediate = false) {
   const car = getCar(index);
   const nextIndex = immediate ? visibleIdentitySlot : 1 - visibleIdentitySlot;
   identitySlots[nextIndex].name.textContent = car.displayName;
+  // Car info swaps in the same pass as the name (never waits on morph completion,
+  // which does not fire on cancellation), so retargets/reversals stay in step.
+  const nextInfo = immediate ? visibleInfoSlot : 1 - visibleInfoSlot;
+  infoSlots[nextInfo].headline.textContent = car.showcase.headline;
+  infoSlots[nextInfo].spec.textContent = specLine(car);
+  if (!immediate) {
+    infoSlots[visibleInfoSlot].slot.classList.remove('is-visible');
+    infoSlots[visibleInfoSlot].slot.setAttribute('aria-hidden', 'true');
+    infoSlots[nextInfo].slot.classList.add('is-visible');
+    infoSlots[nextInfo].slot.setAttribute('aria-hidden', 'false');
+    visibleInfoSlot = nextInfo;
+  }
   if (!immediate) {
     identitySlots[visibleIdentitySlot].slot.classList.remove('is-visible');
     identitySlots[visibleIdentitySlot].slot.setAttribute('aria-hidden', 'true');
@@ -161,6 +202,7 @@ export function initHUD() {
   buildIdentity(topLeft);
   buildRouteMap(topRight);
   buildDirectionCue(bottomLeft);
+  buildInfo(bottomLeft);
   routePoint = { x: 0, y: 0 };
   initialized = true;
   setIdentity(state.activeCarIndex, true);

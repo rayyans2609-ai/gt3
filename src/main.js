@@ -77,6 +77,7 @@ async function boot() {
   const themeToggle = await import('./ui/themeToggle.js');
   const soundControl = await import('./ui/soundControl.js');
   const player = await import('./ui/player.js');
+  const soundCue = await import('./ui/soundCue.js');
   const startScreen = await import('./ui/startScreen.js');
   const finishScreen = await import('./ui/finishScreen.js');
 
@@ -102,6 +103,8 @@ async function boot() {
   soundControl.initSoundControl();
   player.initPlayer();
   startScreen.initStartScreen();
+  soundCue.initSoundCue();
+  startScreen.onDismissComplete(soundCue.showSoundCue);
   finishScreen.initFinishScreen();
   scrollDrive.initScrollDrive();
   scrollDrive.lockScroll();

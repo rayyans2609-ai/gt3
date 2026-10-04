@@ -21,7 +21,7 @@ const doPrewarm = process.env.GT3_PREWARM === '1';
 const startupOnly = process.env.GT3_STARTUP_ONLY === '1';
 const firstGateOnly = process.env.GT3_FIRST_GATE_ONLY === '1';
 const chrome = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
-const preflight = '/Users/rayyansheikh/.claude/jobs/60022478/tmp/preflight.sh';
+const preflight = process.env.GT3_PREFLIGHT || '/Users/rayyansheikh/.claude/jobs/60022478/tmp/preflight.sh';
 const pause = ms => new Promise(resolve => setTimeout(resolve, ms));
 const assert = (ok, message) => { if (!ok) throw new Error(message); };
 const result = { startedAt: new Date().toISOString(), base, headless, contextsRequested: contexts,

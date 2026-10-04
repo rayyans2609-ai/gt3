@@ -1,7 +1,8 @@
 /**
  * W2 composition-candidate verification (real-GPU headless Chrome; host rules apply:
  * run the preflight first, one browser at a time, external Vite only).
- *   GT3_URL=http://127.0.0.1:5192 GT3_COMPS=base,a,b,c node scripts/verify-composition.mjs
+ *   GT3_URL=http://127.0.0.1:5192 GT3_COMPS=base,a,b,c GT3_CAMS=leg1 node scripts/verify-composition.mjs
+ * Independent camera matrix: GT3_COMPS=a,b,c GT3_CAMS=glide,hold,wide
  * Env: GT3_CAPTURE_DIR (review stills/sequence; default ~/Desktop/gt3-review-2026-10-04/w2),
  *      GT3_NO_CAPTURE=1, GT3_SOFTWARE_GL=1.
  * Per candidate: yaw/pitch constancy, snaps, seam, deterministic + settled reversibility,
@@ -12,9 +13,16 @@
  */
 import puppeteer from 'puppeteer-core';
 import { mkdir, writeFile } from 'node:fs/promises';
+import { CARS } from '../src/data/cars.js';
+import { glbFootprint } from './lib/glb-footprint.mjs';
+
+const modelDir = process.env.GT3_MODELS || new URL('../public/models/tour/', import.meta.url).pathname;
+const rosterBounds = await Promise.all(CARS.map(async car =>
+  ({ id: car.id, ...(await glbFootprint(modelDir + car.modelFile)) })));
 
 const base = (process.env.GT3_URL || 'http://127.0.0.1:5192').replace(/\/$/, '');
 const comps = (process.env.GT3_COMPS || 'base,a,b,c').split(',').filter(Boolean);
+const cams = (process.env.GT3_CAMS || 'leg1').split(',').filter(Boolean);
 const captureDir = process.env.GT3_CAPTURE_DIR
   || '/Users/rayyansheikh/Desktop/gt3-review-2026-10-04/w2';
 const capture = process.env.GT3_NO_CAPTURE !== '1';
@@ -31,12 +39,17 @@ const POINTS = [['start-straight', 0.02], ['hairpin-entry', 0.265], ['hairpin-ap
   ['hairpin-exit', 0.300], ['chicane-in', 0.335], ['chicane-mid', 0.352],
   ['chicane-out', 0.370], ['turn9', 0.465]];
 
-async function runCandidate(browser, comp) {
+async function runCandidate(browser, comp, cam) {
+  const key = cam === 'leg1' ? comp : `${comp}-${cam}`;
   const page = await browser.newPage();
   const errors = [];
   page.on('pageerror', e => errors.push(e.message));
   page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
-  const url = comp === 'base' ? `${base}/?gate=quiet` : `${base}/?comp=${comp}&gate=quiet`;
+  const reviewUrl = new URL(`${base}/`);
+  if (comp !== 'base') reviewUrl.searchParams.set('comp', comp);
+  if (cam !== 'leg1') reviewUrl.searchParams.set('cam', cam);
+  reviewUrl.searchParams.set('gate', 'quiet');
+  const url = reviewUrl.href;
   await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 120000 });
   await page.waitForFunction(() => window.__gt3?.readiness?.status
     && window.__gt3.readiness.status !== 'loading', { timeout: 180000 });
@@ -65,10 +78,9 @@ async function runCandidate(browser, comp) {
   }
 
   // Everything measured in-page from the rendered pose.
-  const measure = () => page.evaluate(async () => {
+  const measure = () => page.evaluate(async rosterBounds => {
     const THREE = await import('/node_modules/three/build/three.module.js');
     const curve = await import('/src/scene/trackCurve.js');
-    const cars = await import('/src/scene/cars.js');
     const g = window.__gt3;
     const t = g.probe().progress;
     const cam = g.camera;
@@ -103,19 +115,19 @@ async function runCandidate(browser, comp) {
     const centre = curve.pointAt(t, new THREE.Vector3());
     const left = curve.offsetPointAt(t, 1, 0, new THREE.Vector3()).sub(centre).setY(0).normalize();
     const scale = mount.scale.x;
-    const footprints = [];
-    for (let i = 0; i < 10; i++) {
-      const model = cars.getCarModel(i);
-      const size = new THREE.Box3().setFromObject(model, true).getSize(new THREE.Vector3());
-      // Model may be mounted (world scale applied) — normalise by its own world scale.
-      const s = model.parent ? model.getWorldScale(new THREE.Vector3()).x / model.scale.x : 1;
-      footprints.push({ w: size.x / s * scale, l: size.z / s * scale });
-    }
+    // Accessor bounds in canonical model space. Dividing a world AABB by scale
+    // cannot recover width/length after the mounted rig has turned.
+    const footprints = rosterBounds.map(f => ({
+      w: (f.width + 2 * f.height * Math.sin(THREE.MathUtils.degToRad(3.4))) * scale,
+      l: f.length * scale,
+    }));
     const fwd = new THREE.Vector3(0, 0, -1).applyQuaternion(rig.quaternion).setY(0).normalize();
     const lateral = rig.position.clone().sub(centre).setY(0).dot(left);
     const cosYaw = Math.abs(fwd.dot(new THREE.Vector3(-left.z, 0, left.x)));
     const sinYaw = Math.sqrt(Math.max(0, 1 - cosYaw * cosYaw));
-    const extent = Math.max(...footprints.map(f => Math.abs(lateral) + f.w / 2 * cosYaw + f.l / 2 * sinYaw));
+    const footprintHalf = Math.max(...footprints.map(f => f.w / 2 * cosYaw + f.l / 2 * sinYaw));
+    const extent = Math.abs(lateral) + footprintHalf;
+    const maxOffsetExtent = g.comp.racingLineM + footprintHalf;
     return { t, yawDeg: THREE.MathUtils.radToDeg(Math.atan2(dir.x, -dir.z)),
       pitchDeg: THREE.MathUtils.radToDeg(Math.asin(-dir.y)),
       camera: cam.position.toArray(), quaternion: cam.quaternion.toArray(),
@@ -123,18 +135,20 @@ async function runCandidate(browser, comp) {
       roadCoverage: road / cells, exposedEdgeRays: exposed,
       lateralM: lateral, worstFootprintExtentM: extent,
       roadEdgeGapM: curve.TRACK.halfWidth - extent,
+      maxOffsetRoadEdgeGapM: curve.TRACK.halfWidth - maxOffsetExtent,
       gatePostGapM: curve.TRACK.halfWidth + curve.TRACK.curbWidth + 1 - 0.17 - extent,
       finishPostGapM: curve.TRACK.halfWidth + curve.TRACK.curbWidth + 0.72 - 0.17 - extent,
       correctionActive: !!g.aerial.correctionActive, snapCount: g.aerial.snapCount,
-      hero: scale, shadowScale: g.scene.getObjectByName('contact-shadow')?.scale.x };
-  });
+      hero: scale, shadowScale: g.scene.getObjectByName('contact-shadow')?.scale.x,
+      railHolds: g.aerial.rail?.holds, unavailableHolds: g.aerial.rail?.unavailableHolds };
+  }, rosterBounds);
 
-  const out = { comp, url, readiness, points: [], gates: [], reversibility: [], motion: [], errors };
+  const out = { comp, cam, url, readiness, points: [], gates: [], reversibility: [], motion: [], errors };
   for (const [label, t] of POINTS) {
     await goTo(t);
     out.points.push({ label, ...(await measure()) });
     if (capture && ['hairpin-apex', 'chicane-mid'].includes(label)) {
-      await page.screenshot({ path: `${captureDir}/${comp}_${label}_day.png` });
+      await page.screenshot({ path: `${captureDir}/${key}_${label}_day.png` });
     }
   }
   const { thresholds, finish } = await page.evaluate(async () => {
@@ -170,9 +184,12 @@ async function runCandidate(browser, comp) {
       if (window.__w2.segment) {
         const rig = g.scene.getObjectByName('car-rig');
         const ndc = rig.position.clone().project(g.camera);
+        const carDir = rig.position.clone().set(0, 0, -1).applyQuaternion(rig.quaternion);
+        const camDir = g.camera.getWorldDirection(carDir.clone());
         window.__w2.frames.push({ segment: window.__w2.segment, dt: now - last,
           progress: g.probe().progress, camera: g.camera.position.toArray(),
           car: rig.position.toArray(), ndcX: ndc.x, ndcY: ndc.y,
+          carYaw: Math.atan2(carDir.x, -carDir.z), cameraYaw: Math.atan2(camDir.x, -camDir.z),
           correction: !!g.aerial.correctionActive, snaps: g.aerial.snapCount });
       }
       last = now;
@@ -199,8 +216,23 @@ async function runCandidate(browser, comp) {
       carTravel += dist(frames[i].car, frames[i - 1].car);
       maxProgressJump = Math.max(maxProgressJump, Math.abs(frames[i].progress - frames[i - 1].progress));
     }
+    const corners = Object.fromEntries([['hairpin', 0.263, 0.302], ['chicane', 0.328, 0.376]]
+      .map(([corner, from, to]) => {
+        const selected = frames.filter(f => f.progress >= from && f.progress <= to);
+        let carPathM = 0, cameraPathM = 0, carHeadingSweepDeg = 0, cameraHeadingSweepDeg = 0;
+        const sweep = (a, b) => Math.abs(Math.atan2(Math.sin(a-b), Math.cos(a-b))) * 180 / Math.PI;
+        for (let i = 1; i < selected.length; i++) {
+          cameraPathM += dist(selected[i].camera, selected[i-1].camera);
+          carPathM += dist(selected[i].car, selected[i-1].car);
+          carHeadingSweepDeg += sweep(selected[i].carYaw, selected[i-1].carYaw);
+          cameraHeadingSweepDeg += sweep(selected[i].cameraYaw, selected[i-1].cameraYaw);
+        }
+        return [corner, { frames: selected.length, cameraPathM, carPathM,
+          cameraToCarPathLength: carPathM ? cameraPathM / carPathM : null,
+          cameraHeadingSweepDeg, carHeadingSweepDeg }];
+      }));
     const dts = frames.slice(1).map(f => f.dt);
-    out.motion.push({ name, frames: frames.length,
+    out.motion.push({ name, corners, frames: frames.length,
       cameraToCarTranslation: carTravel ? camTravel / carTravel : null,
       correctionActivePct: frames.length ? 100 * frames.filter(f => f.correction).length / frames.length : 0,
       ndcX: [Math.min(...frames.map(f => f.ndcX)), Math.max(...frames.map(f => f.ndcX))],
@@ -226,12 +258,12 @@ async function runCandidate(browser, comp) {
     await goTo(0.325, 1200);
     for (let i = 0; i < 30; i++) {
       await page.mouse.wheel({ deltaY: 12 });
-      await page.screenshot({ path: `${captureDir}/${comp}_chicane-seq-${String(i).padStart(2, '0')}_day.png` });
+      await page.screenshot({ path: `${captureDir}/${key}_chicane-seq-${String(i).padStart(2, '0')}_day.png` });
       await wait(70);
     }
     await page.evaluate(async () => (await import('/src/scene/theme.js')).applyTheme('night', { instant: true }));
     await goTo(0.283, 900);
-    await page.screenshot({ path: `${captureDir}/${comp}_hairpin-apex_night.png` });
+    await page.screenshot({ path: `${captureDir}/${key}_hairpin-apex_night.png` });
   }
   await page.close();
   return out;
@@ -248,11 +280,11 @@ const browser = await puppeteer.launch({
 });
 const results = [];
 try {
-  for (const comp of comps) {
-    const result = await runCandidate(browser, comp);
+  for (const comp of comps) for (const cam of cams) {
+    const result = await runCandidate(browser, comp, cam);
     results.push(result);
     const yaws = result.points.map(p => p.yawDeg), pitches = result.points.map(p => p.pitchDeg);
-    console.log('CANDIDATE', comp, JSON.stringify({ readiness: result.readiness.status,
+    console.log('CANDIDATE', comp, cam, JSON.stringify({ readiness: result.readiness.status,
       yawSpreadDeg: Math.max(...yaws) - Math.min(...yaws),
       pitchSpreadDeg: Math.max(...pitches) - Math.min(...pitches),
       roadCoverage: result.points.map(p => +p.roadCoverage.toFixed(3)),

@@ -33,7 +33,19 @@ const CANDIDATES = {
   c: { ...SECTOR_CAMERA, hero: 1.8, halfWidth: 6, racingLine: 0.75 },
 };
 
-const OVERRIDES = { dist: ['distance', 30, 320], pitch: ['pitchDeg', 30, 80],
+// Independent leg-2 camera range. Omitted/invalid ?cam= preserves leg-1 exactly.
+// Broad framing is necessary to observe a whole corner from one position; road,
+// path and hero scale remain owned by ?comp=. All are review candidates.
+const CAMERAS = {
+  glide: { camera: 'corridor', distance: 240, fov: 40, pitchDeg: 52,
+    railSigmaM: 300, railZone: { x: 0.74, y: 0.72 }, anchorCorners: false },
+  hold: { camera: 'corridor', distance: 320, fov: 40, pitchDeg: 52,
+    railSigmaM: 300, railZone: { x: 0.76, y: 0.74 }, anchorCorners: true },
+  wide: { camera: 'corridor', distance: 440, fov: 48, pitchDeg: 52,
+    railSigmaM: 350, railZone: { x: 0.76, y: 0.74 }, anchorCorners: true },
+};
+
+const OVERRIDES = { dist: ['distance', 30, 520], pitch: ['pitchDeg', 30, 80],
   fov: ['fov', 20, 60], hero: ['hero', 0.5, 3], hw: ['halfWidth', 3.5, 9] };
 
 function resolve() {
@@ -42,6 +54,9 @@ function resolve() {
   const requested = (params.get('comp') || 'base').toLowerCase();
   const name = Object.hasOwn(CANDIDATES, requested) ? requested : 'base';
   const values = { ...CANDIDATES[name] };
+  const requestedCamera = (params.get('cam') || '').toLowerCase();
+  const cameraVariant = Object.hasOwn(CAMERAS, requestedCamera) ? requestedCamera : 'leg1';
+  if (cameraVariant !== 'leg1') Object.assign(values, CAMERAS[cameraVariant]);
   const overrides = {};
   // Numeric overrides are dev-only live-tuning aids, validated and clamped.
   const dev = typeof import.meta !== 'undefined' && import.meta.env?.DEV;
@@ -60,7 +75,8 @@ function resolve() {
   // Fog keeps today's fog-to-subject relationship as the camera pulls back.
   values.fogScale = values.camera === 'legacy' ? 1 : values.distance / CANDIDATES.base.distance;
   values.shadowScale = values.camera === 'legacy' ? 1 : Math.min(2, values.fogScale);
-  return Object.freeze({ name, isDefault: name === 'base' && !Object.keys(overrides).length,
+  return Object.freeze({ name, cameraVariant,
+    isDefault: name === 'base' && cameraVariant === 'leg1' && !Object.keys(overrides).length,
     ...values, overrides: Object.freeze(overrides) });
 }
 

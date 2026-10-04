@@ -4,6 +4,7 @@ import { state } from '../core/state.js';
 import { curve, TRACK_LENGTH, pointAt } from './trackCurve.js';
 import { COMP } from './composition.js';
 import { pathPointAt } from './racingLine.js';
+import { buildCompositionRail } from './compositionRail.js';
 
 // `base` (legacy model) keeps today's values exactly; W2 review candidates and dev
 // overrides supply fov / yaw / pitch / distance from composition.js.
@@ -115,6 +116,7 @@ function safetyOffset(testPosition) {
 
 export function snap() {
   if (!camera) return;
+  if (CORRIDOR) { corridorUpdate(true); return; }
   if (SECTOR) { sectorSnap(); return; }
   routePose(state.progress);
   basePosition.copy(desiredPosition);
@@ -137,6 +139,7 @@ export function initAerialCamera(raceCamera) {
 
 export function update(dt) {
   if (!camera) return;
+  if (CORRIDOR) { aerial.frames++; corridorUpdate(false); return; }
   if (SECTOR) { sectorUpdate(dt); return; }
   aerial.frames++;
   // Instant seek/replay sets progress directly; scrollbar pixel rounding can
@@ -165,6 +168,35 @@ export function update(dt) {
 // same pose in either direction and across the seam. The live layer is last resort.
 // ---------------------------------------------------------------------------
 const SECTOR = COMP.camera === 'sector';
+const CORRIDOR = COMP.camera === 'corridor';
+let compositionRail;
+
+function corridorPose(t) {
+  if (!compositionRail || Math.abs(compositionRail.aspect - camera.aspect) > 1e-3) {
+    compositionRail = buildCompositionRail(camera.aspect);
+    aerial.rail = { zone: COMP.railZone, aspect: camera.aspect,
+      clampActiveFraction: compositionRail.activeFraction, holds: compositionRail.holds,
+      unavailableHolds: compositionRail.unavailableHolds };
+  }
+  sectorBasis();
+  compositionRail.at(t, routeTarget);
+  desiredPosition.copy(routeTarget).addScaledVector(forward, -TUNE.distance);
+  viewMatrix.lookAt(desiredPosition, routeTarget, UP);
+  orientation.setFromRotationMatrix(viewMatrix);
+}
+
+function corridorUpdate(explicitSnap) {
+  const instantSeek = lastProgress === null || (Math.abs(state.progress - lastProgress) > TUNE.snapProgress
+    && Math.abs(state.velocity) < 0.1);
+  corridorPose(state.progress);
+  camera.position.copy(desiredPosition);
+  camera.quaternion.copy(orientation);
+  camera.updateMatrixWorld();
+  aerial.correctionActive = false;
+  aerial.hardCorrection = false;
+  if (explicitSnap || instantSeek) aerial.snapCount++;
+  lastProgress = state.progress;
+}
 const RAIL_N = 2048;
 const rail = { x: new Float64Array(RAIL_N + 1), y: new Float64Array(RAIL_N + 1),
   z: new Float64Array(RAIL_N + 1), aspect: 0, activeFraction: 0 };
@@ -373,7 +405,9 @@ function sectorUpdate(dt) {
 /** Pure helpers for harnesses: the deterministic rail pose at any t (no state). */
 export function railPoseAt(t) {
   if (!camera) return null;
-  sectorPose(t);
+  if (CORRIDOR) corridorPose(t);
+  else if (SECTOR) sectorPose(t);
+  else routePose(t);
   return { position: desiredPosition.toArray(), target: routeTarget.toArray(),
     quaternion: orientation.toArray() };
 }

@@ -22,6 +22,23 @@ import { Clock } from './core/clock.js';
 import { getRestoredRouteProgress, restoreSession, startRoutePersistence } from './core/session.js';
 import { restoreExperience, setExperience } from './core/experience.js';
 
+// Boot instrumentation: User Timing entries prefixed `gt3:` (read with
+// performance.getEntriesByType('mark'|'measure')). Costs microseconds; kept on purpose.
+function perfMark(name) {
+  try { performance.mark(`gt3:${name}`); } catch { /* User Timing unavailable */ }
+}
+function perfMeasure(name, from, to) {
+  try { performance.measure(`gt3:${name}`, `gt3:${from}`, `gt3:${to}`); } catch { /* ignore */ }
+}
+/** Run a synchronous boot step and record `gt3:<name>` (marks <name>:start / <name>:end). */
+function timed(name, fn) {
+  perfMark(`${name}:start`);
+  try { return fn(); } finally {
+    perfMark(`${name}:end`);
+    perfMeasure(name, `${name}:start`, `${name}:end`);
+  }
+}
+
 const clock = new Clock();
 const updates = [];
 const resizeHandlers = new Set();
@@ -48,6 +65,7 @@ window.addEventListener('resize', () => {
 });
 
 async function boot() {
+  perfMark('boot:start');
   restoreSession();
 
   // LEGACY BRIDGE — remove in Phases 4–7. Phase 4 replaces this with real boot
@@ -82,32 +100,41 @@ async function boot() {
   const finishScreen = await import('./ui/finishScreen.js');
 
   // ---- scene -------------------------------------------------------------
-  const { scene, camera } = sceneSetup.initScene();
+  perfMark('imports:end');
+  perfMeasure('imports', 'boot:start', 'imports:end');
+  const { scene, camera } = timed('init-scene', () => sceneSetup.initScene());
 
-  scene.add(track.buildTrack());
-  const env = environment.buildEnvironment();
+  scene.add(timed('build-track', () => track.buildTrack()));
+  const env = timed('build-environment', () => environment.buildEnvironment());
   scene.add(env);
-  scene.add(finishLine.buildFinishLine());
-  scene.add(checkpoints.buildCheckpoints());
+  scene.add(timed('build-finish-line', () => finishLine.buildFinishLine()));
+  scene.add(timed('build-checkpoints', () => checkpoints.buildCheckpoints()));
 
-  const rig = carRig.initCarRig();
+  const rig = timed('init-car-rig', () => carRig.initCarRig());
   scene.add(rig);
   sceneSetup.attachSunTarget(rig);
-  aerialCamera.initAerialCamera(camera);
+  timed('init-aerial-camera', () => aerialCamera.initAerialCamera(camera));
 
-  morph.initMorph();
-  theme.initTheme();
-  studio.initStudio();
-  hud.initHUD();
-  themeToggle.initThemeToggle();
-  soundControl.initSoundControl();
-  player.initPlayer();
-  startScreen.initStartScreen();
-  soundCue.initSoundCue();
-  startScreen.onDismissComplete(soundCue.showSoundCue);
-  finishScreen.initFinishScreen();
-  scrollDrive.initScrollDrive();
-  scrollDrive.lockScroll();
+  timed('init-morph-theme', () => { morph.initMorph(); theme.initTheme(); });
+  timed('init-studio', () => studio.initStudio());
+  timed('init-hud', () => hud.initHUD());
+  timed('init-ui-controls', () => {
+    themeToggle.initThemeToggle();
+    soundControl.initSoundControl();
+    player.initPlayer();
+  });
+  timed('init-start-screen', () => startScreen.initStartScreen());
+  timed('init-sound-cue-finish-screen', () => {
+    soundCue.initSoundCue();
+    startScreen.onDismissComplete(soundCue.showSoundCue);
+    finishScreen.initFinishScreen();
+  });
+  timed('init-scroll-drive', () => {
+    scrollDrive.initScrollDrive();
+    scrollDrive.lockScroll();
+  });
+  perfMark('scene-build:end');
+  perfMeasure('scene-build', 'imports:end', 'scene-build:end');
 
   // ---- preload -----------------------------------------------------------
   // One readiness decision owns both the start screen and scroll unlock.
@@ -149,6 +176,7 @@ async function boot() {
     readiness.status = ['model', 'audio', 'gpu'].every(phase => readiness[phase] === 'ready')
       ? 'ready' : 'degraded';
     readiness.readyAt = performance.now();
+    perfMark(`ready:${readiness.status}`);
     const savedRouteProgress = getRestoredRouteProgress();
     const restoreFinish = savedRouteProgress !== null && finishScreen.isFinishProgress(savedRouteProgress);
     if (restoreFinish) set('mode', 'finish');
@@ -171,6 +199,8 @@ async function boot() {
     clearTimeout(timeouts[phase]);
     readiness[phase] = result;
     fractions[phase] = 1;
+    perfMark(`${phase}:${result}`);
+    if (phase === 'gpu') perfMeasure('warmup', 'warmup:start', `gpu:${result}`);
     if (reason) readiness.reasons.push(reason);
     reportProgress();
     releaseDrive();
@@ -212,6 +242,7 @@ async function boot() {
         entry => readiness.warmupSteps.push(entry),
         { throwAtDraw: faults.warmThrowAtStep },
       );
+      perfMark('warmup:start');
       bound('gpu', limits.gpu, () => stopWarmup('gpu-timeout'));
     } catch (error) {
       console.error('[gt3] GPU warm-up setup failed', error);
@@ -244,6 +275,7 @@ async function boot() {
     startWarmup();
   }
 
+  perfMark('preload:start');
   bound('model', limits.model, () => modelsFailed(new Error('Model preload timeout'), 'model-timeout'));
   bound('audio', limits.audio, () => {
     console.warn('[gt3] audio preload timeout');

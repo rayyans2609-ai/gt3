@@ -219,8 +219,8 @@ async function wheelUntilActive(page, target, direction, { step = 360, timeout =
   throw new Error(`wheel ${direction > 0 ? 'down' : 'up'} never reached car ${target}`);
 }
 
-async function seek(page, t) {
-  await read(page, async t2 => { (await import('/src/scroll/scrollDrive.js')).seekTo(t2, { instant: false }); }, t);
+async function seek(page, t, instant = false) {
+  await read(page, async (t2, inst) => { (await import('/src/scroll/scrollDrive.js')).seekTo(t2, { instant: inst }); }, t, instant);
 }
 
 function endScenario(kind = 'healthy') {
@@ -391,10 +391,22 @@ try {
       await wait(500);
       for (let i = 0; i < 10; i++) {
         const lo = i === 0 ? 0 : T[i - 1];
-        const hi = i < T.length ? T[i] : 1;
-        await seek(page, i === 0 ? 0.002 : (lo + hi) / 2);
-        await page.waitForFunction(async idx => (await import('/src/core/state.js')).state.activeCarIndex === idx,
-          { timeout: 30000, polling: 100 }, i);
+        // The last car's span ends at the finish line (progress >= 0.995 opens the finish screen
+        // and locks scroll), so keep its probe point clear of the threshold; return to car 0
+        // instantly rather than gliding back across the whole circuit.
+        const hi = i < T.length ? T[i] : 0.99;
+        await seek(page, i === 0 ? 0.002 : (lo + hi) / 2, i === 0);
+        try {
+          await page.waitForFunction(async idx => (await import('/src/core/state.js')).state.activeCarIndex === idx,
+            { timeout: 30000, polling: 100 }, i);
+        } catch (error) {
+          const snap = await read(page, async () => { const { state } = await import('/src/core/state.js');
+            return { active: state.activeCarIndex, progress: state.progress, target: state.targetProgress,
+              scrollY: window.scrollY, locked: state.scrollLocked, started: state.started, mode: state.mode,
+              finish: document.querySelector('#finish-screen')?.className,
+              T: (await import('/src/scene/trackCurve.js')).CHECKPOINT_T }; });
+          throw new Error(`car ${i} @${width}: activeCarIndex never reached ${i} (${JSON.stringify(snap)}, seek t=${i === 0 ? 0.002 : (lo + hi) / 2})`);
+        }
         await idle(page);
         const h = await hudState(page);
         checkHud(h, `car ${i} @${width}`);

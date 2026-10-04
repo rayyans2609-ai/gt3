@@ -126,7 +126,9 @@ try {
       assert((closed.closeOpacity ?? 1) < 0.1, `closed close opacity=${closed.closeOpacity}`);
       await page.click('.audio-launcher');
       await page.waitForFunction(() => document.querySelector('#audio-layer')?.classList.contains('is-open'), { timeout: 5000 });
-      await wait(450);
+      // CSS transitions only advance with painted frames; poll for the settled glyph instead of a fixed sleep.
+      await page.waitForFunction(() => Number.parseFloat(getComputedStyle(
+        document.querySelector('.audio-launcher .glyph-close')).opacity) > 0.9, { timeout: 4000, polling: 50 }).catch(() => {});
       const open = await rects();
       assert(open.expanded === 'true', `open aria-expanded=${open.expanded}`);
       assert(open.label === 'Close music player', `open aria-label=${open.label}`);

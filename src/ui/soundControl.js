@@ -37,7 +37,8 @@ export function initSoundControl() {
   launcher = document.createElement('button');
   launcher.type = 'button';
   launcher.className = 'audio-control audio-launcher';
-  launcher.textContent = '+';
+  launcher.innerHTML = '<span class="glyph glyph-plus" aria-hidden="true">+</span>' +
+    '<span class="glyph glyph-close" aria-hidden="true">×</span>';
   launcher.setAttribute('aria-controls', 'music-player');
   anchor.append(speaker, launcher);
   layer.append(anchor);

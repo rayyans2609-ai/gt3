@@ -677,3 +677,35 @@ complete" framing is superseded by this section for product-acceptance purposes;
 verification numbers remain accurate technical evidence, just not sufficient for acceptance.
 
 Branch `phase3-integration` (`61ce7b1`) is not merged to `main` (`62024bb`, untouched).
+
+## Phase 3 finalization status — 2026-09-29/30 sprint + 2026-10-04 run
+
+Not merged to `main`. Phase 3 stays open until the user's live review (SPEC §30.9).
+
+**Done and verified (2026-09-29/30):**
+- First-crossing swap hitch (SPEC §19): all ten cars are warmed through the real render path before the Tour unlocks (`1864cbe`). Preload/warm-up failures recover instead of stranding the start screen (`c81fcfd`).
+- The roster loads 512-px-texture GLBs from `public/models/tour/` (`058aa70`, `d03a42e`). Static texture memory went 817 → 288 MiB, and swap from renderer creation to all-cars-ready is about 40 % of the full-resolution build's.
+- Verified at `cfd777f`: build PASS, `verify-load-recovery` 9/9, `verify-checkpoints` 10/10, `verify-swap-response` 22/22, zero GL allocations or uploads at crossings.
+- Gate traversal response: a default sweep and a `?gate=quiet` variant. Both await user review.
+
+**Known regressions, still unmeasured after W4c:**
+- Time-to-ready went from 9–12 s (`602c462`) to 28–32 s at W4, measured headed. In those runs the models resolved at 6–9 s and the warm-up took 268 frames, with a p99 frame of 630–850 ms.
+- A 100–216 ms frame right after the start screen dismisses.
+- Higher memory use during warm-up.
+- The user has **not** accepted a ~30 s startup (2026-10-04). Measure first, then fix anything that needs no tradeoff.
+- Static hypotheses, not yet measured:
+  - Warm-up runs in series after all ten models decode.
+  - Warm-up renders one fixed batch per frame, and synchronous program link or texture upload dominates its tail.
+  - The DRACO decoder is fetched from gstatic at runtime.
+- Harness: `scripts/measure-startup.mjs` (`378d883`), not yet run end to end.
+
+**2026-10-04 run:**
+- `main` (the routing revision, Autonomous Mode and OpenCode tooling) was merged into this branch (`2fe0940`).
+- The startup measurement (W4b-verify-B) was **blocked by the host**: the data volume was 100 % full (263 MiB free), swap was at 4.2/4.8 GB, and hostmon stopped twice on swap bursts while only an idle Vite server belonged to GT3. **Free disk space before any further browser work.**
+- W2 composition candidates (camera, road width, hero-car scale, racing line, chevron removal, gate-beam fix) were implemented statically as patches against `2fe0940`. They are not yet applied or run in a browser.
+- W2's pure-node checks found a design gap. Through the hairpin and chicane, the camera moves 0.85–0.95 as far as the car (current camera 0.92–0.98), because at 140 m / FOV 32 the safe zone (about ±25 m) is smaller than the hairpin. SPEC §15's "the camera barely moves" is not yet met. This goes to Sol for a minimum-motion rail.
+- SPEC §30.6 (grass covering the road): the skirt geometry it describes no longer exists. `environment.js` builds one triangulated ground with "no crossing skirts or lower plane" since 3a. Runtime confirmation is pending in the final regression (`verify-circuit` occlusion sweep).
+- User decisions (2026-10-04):
+  - Route-position restore across refresh (§24–25) is Phase 3.
+  - Showcase and the montage must load full-resolution models; the Tour keeps its 512-px roster.
+  - No Phase 4 until the user approves Phase 3.

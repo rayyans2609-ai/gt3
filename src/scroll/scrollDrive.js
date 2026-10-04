@@ -16,6 +16,7 @@
  */
 
 import { state, set } from '../core/state.js';
+import { persistRouteProgress } from '../core/session.js';
 import { TRACK_LENGTH } from '../scene/trackCurve.js';
 import { createBoundedModel } from './boundedPace.js';
 
@@ -84,6 +85,7 @@ let smoothedSpeed = 0;  // eased 0..1 intensity
 let lockedScrollY = 0;  // scroll position frozen at the moment of locking
 let hasStarted = false;
 let swallowersAttached = false;
+let suppressProgrammaticStartUntil = 0;
 
 const firstScrollHandlers = [];
 
@@ -112,14 +114,17 @@ function onScroll() {
 
   if (bounded) {
     // Candidates: input is polled per frame in update(); the event only dismisses the start screen.
-    if (!hasStarted && (window.scrollY || 0) > 0) startDrive();
+    if (!hasStarted && (window.scrollY || 0) > 0
+      && performance.now() >= suppressProgrammaticStartUntil) startDrive();
     return;
   }
 
   rawTarget = readScroll();
   set('targetProgress', rawTarget);
 
-  if (!hasStarted && rawTarget > 0) startDrive();
+  if (!hasStarted && rawTarget > 0 && performance.now() >= suppressProgrammaticStartUntil) {
+    startDrive();
+  }
 }
 
 function startDrive() {
@@ -237,6 +242,7 @@ export function resetToStart() {
   set('progress', 0);
   set('velocity', 0);
   set('speed01', 0);
+  persistRouteProgress(0, { flush: true });
 }
 
 /**
@@ -246,6 +252,12 @@ export function resetToStart() {
 export function seekTo(t, { instant = false } = {}) {
   const clamped = Math.min(1, Math.max(0, t));
   window.scrollTo(0, clamped * maxScroll());
+  if (state.scrollLocked) {
+    lockedScrollY = window.scrollY || 0;
+    // A restore runs while locked, but its queued scroll event can arrive just after unlock.
+    // Keep that programmatic move from dismissing the start screen without a real gesture.
+    suppressProgrammaticStartUntil = performance.now() + 100;
+  }
   rawTarget = clamped;
   set('targetProgress', clamped);
   if (bounded) {

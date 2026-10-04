@@ -378,50 +378,7 @@ function buildMarkingGeometry() {
     addTrackQuad(distance0, distance1, accentLateral, width0, width1);
   }
 
-  function addStroke(aDistance, aLateral, bDistance, bLateral, thickness) {
-    const along = bDistance - aDistance;
-    const across = bLateral - aLateral;
-    const length = Math.hypot(along, across);
-    const alongInset = (-across / length) * thickness * 0.5;
-    const lateralInset = (along / length) * thickness * 0.5;
-    const a = pointAtDistance(aDistance + alongInset, aLateral + lateralInset);
-    const b = pointAtDistance(bDistance + alongInset, bLateral + lateralInset);
-    const c = pointAtDistance(aDistance - alongInset, aLateral - lateralInset);
-    const d = pointAtDistance(bDistance - alongInset, bLateral - lateralInset);
-    addSurfaceQuad(a, b, c, d, normalAtDistance((aDistance + bDistance) * 0.5));
-  }
-
-  function addChevron(distance, lateral) {
-    const rear = distance - 0.55;
-    const nose = distance + 0.55;
-    addStroke(rear, lateral - 1.3, nose, lateral, 0.3);
-    addStroke(rear, lateral + 1.3, nose, lateral, 0.3);
-  }
-
-  // Hysteresis prevents a lumpy corner peak from being mistaken for two entries.
-  let entryArmed = true;
-  let previousMagnitude = Math.abs(sampleCurvatures[0]);
-  let lastEntryDistance = -Infinity;
-  for (let i = 1; i < TRACK_SAMPLE_COUNT; i += 1) {
-    const magnitude = Math.abs(sampleCurvatures[i]);
-    if (magnitude < 0.3) entryArmed = true;
-
-    const entryDistance = i * SAMPLE_STEP;
-    if (
-      entryArmed
-      && previousMagnitude <= 0.45
-      && magnitude > 0.45
-      && entryDistance - lastEntryDistance > 35
-    ) {
-      const inside = Math.sign(sampleCurvatures[i]) * 3.6;
-      for (let arrow = 0; arrow < 5; arrow += 1) {
-        addChevron(entryDistance - 4 + arrow * 4.2, inside);
-      }
-      lastEntryDistance = entryDistance;
-      entryArmed = false;
-    }
-    previousMagnitude = magnitude;
-  }
+  // Legacy turn-direction chevrons were removed (SPEC §18: no legacy racing cues).
 
   return setCommonAttributes(new THREE.BufferGeometry(), positions, normals, uvs);
 }

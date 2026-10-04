@@ -12,6 +12,7 @@ import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 import { state } from '../core/state.js';
 import { TUNE as aerialTuning } from './aerialCamera.js';
+import { COMP } from './composition.js';
 import { onResize } from '../main.js';
 
 const FOV_DAMPING = 0.06;
@@ -40,9 +41,11 @@ export const ADAPTIVE_RES = {
 // shadows of coins and roadside objects further than 26 units ahead, which popped in
 // as the car approached. Not a trade worth making. Do not "optimise" these again
 // without an A/B screenshot at a coin.
+// W2: a wider candidate camera scales the box (not the map) so the shadow edge stays
+// out of frame; base keeps 60.
 export const SHADOW_TUNE = {
   mapSize: 2048,
-  extent: 60,
+  extent: 60 * COMP.shadowScale,
   near: 0.5,
   far: 260,
   normalBias: 0.02,
@@ -260,8 +263,10 @@ export function setAtmosphere({ fogColor, fogNear, fogFar, background } = {}) {
   if (!scene) return;
 
   scene.fog.color.copy(atmosphere.fogColor);
-  scene.fog.near = atmosphere.fogNear;
-  scene.fog.far = atmosphere.fogFar;
+  // W2: fog distances scale with the candidate camera distance (1 for base) so the
+  // wider view keeps today's fog-to-subject relationship. Terrain margin is unchanged.
+  scene.fog.near = atmosphere.fogNear * COMP.fogScale;
+  scene.fog.far = atmosphere.fogFar * COMP.fogScale;
 
   if (scene.background?.isColor) scene.background.copy(atmosphere.background);
   else scene.background = atmosphere.background.clone();

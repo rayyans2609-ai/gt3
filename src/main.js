@@ -21,6 +21,9 @@ import { state, set, subscribe } from './core/state.js';
 import { Clock } from './core/clock.js';
 import { restoreSession } from './core/session.js';
 import { restoreExperience, setExperience } from './core/experience.js';
+// W2 review scaffolding: resolves ?comp= (pure, no scene imports) before any scene
+// module builds geometry. trackCurve.js also imports it, so order cannot regress.
+import { COMP } from './scene/composition.js';
 
 const clock = new Clock();
 const updates = [];
@@ -82,6 +85,18 @@ async function boot() {
 
   // ---- scene -------------------------------------------------------------
   const { scene, camera } = sceneSetup.initScene();
+  window.__gt3.comp = COMP;
+  if (!COMP.isDefault) {
+    // TEMPORARY (W2 review): tiny label naming the active composition candidate.
+    const label = document.createElement('div');
+    label.className = 'dev-comp-label';
+    label.textContent = `comp ${COMP.name}${Object.keys(COMP.overrides).length
+      ? ` ${Object.entries(COMP.overrides).map(([k, v]) => `${k}=${v}`).join(' ')}` : ''}`;
+    label.style.cssText = 'position:fixed;left:50%;bottom:6px;transform:translateX(-50%);'
+      + 'font:10px/1 ui-monospace,monospace;opacity:.55;pointer-events:none;z-index:9999;'
+      + 'color:#888;letter-spacing:.04em';
+    document.body.appendChild(label);
+  }
 
   scene.add(track.buildTrack());
   const env = environment.buildEnvironment();

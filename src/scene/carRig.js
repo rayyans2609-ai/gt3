@@ -2,7 +2,12 @@
 
 import * as THREE from 'three';
 import { state } from '../core/state.js';
-import { pointAt, tangentAt, curvatureAt } from './trackCurve.js';
+import { COMP } from './composition.js';
+import { pathPointAt, pathTangentAt, pathCurvatureAt } from './racingLine.js';
+
+// W2 hero scale: uniform, about the mount origin, which is the models' ground plane
+// (cars.js normaliseScene grounds every car at y=0), so tyres stay seated.
+const HERO = COMP.hero;
 
 const TUNE = {
   // Body roll: the car leans INTO the turn, like weight transfer. Degrees at full lock.
@@ -90,6 +95,7 @@ function buildContactShadow() {
 /** Build the independent car hierarchy and return its route-bound root. */
 export function initCarRig() {
   rig.add(carMount);
+  carMount.scale.setScalar(HERO);
   shadowMesh = buildContactShadow();
   rig.add(shadowMesh);
   return rig;
@@ -115,9 +121,10 @@ export function setWheels(meshes) {
 export function update(dt) {
   const t = state.progress;
 
-  // --- travel: position and orientation on the spline -----------------------
-  pointAt(t, _pos);
-  tangentAt(t, _tan);
+  // --- travel: position and orientation on the driven path ------------------
+  // Centreline unless a racing line is active; heading follows the path's own tangent.
+  pathPointAt(t, _pos);
+  pathTangentAt(t, _tan);
   rig.position.copy(_pos);
 
   // Matrix4.lookAt sets +Z to (eye - target). Aiming it at a point AHEAD therefore
@@ -127,7 +134,7 @@ export function update(dt) {
   rig.quaternion.setFromRotationMatrix(_m);
 
   // --- corner signals ------------------------------------------------------
-  const curvature = curvatureAt(t);
+  const curvature = pathCurvatureAt(t);
   const speed = state.speed01;
   const moving = Math.min(1, speed / TUNE.bodyRollSpeedFloor);
 
@@ -139,12 +146,12 @@ export function update(dt) {
   // --- apply ---------------------------------------------------------------
   bobPhase += dt * TUNE.bobSpeed;
   carMount.rotation.set(0, 0, bodyRoll);
-  carMount.position.y = Math.sin(bobPhase) * TUNE.bobAmplitude * (0.4 + moving * 0.6);
+  carMount.position.y = Math.sin(bobPhase) * TUNE.bobAmplitude * HERO * (0.4 + moving * 0.6);
 
   // The contact shadow stays flat on the surface and does not inherit the body roll,
   // so it never peels off the asphalt on a corner.
   if (shadowMesh) {
-    shadowMesh.scale.setScalar(1 + speed * 0.06);
+    shadowMesh.scale.setScalar(HERO * (1 + speed * 0.06));
     shadowMesh.material.opacity = 0.85 - speed * 0.12;
   }
 

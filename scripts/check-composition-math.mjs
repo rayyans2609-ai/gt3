@@ -106,25 +106,56 @@ const before = poseAt(0.44).position.clone();
 poseAt(0.6); poseAt(0.3);
 const reversibilityM = poseAt(0.44).position.distanceTo(before);
 
-// Corner test spans from the curvature table (|normalised curvature| > 0.25):
-// turn 5 hairpin and the turns 6–7 chicane.
-const span = (from, to) => [from, to];
+// Fixed route spans covering turn 5 and turns 6–7. Validate their identity below
+// with the car's measured heading sweep; camera heading is a separate quantity.
+// Sum 3D path lengths, never divide endpoint displacements (a chicane can cancel).
 const cornerTest = (from, to) => {
   let camTravel = 0, carTravel = 0;
+  let carHeadingSweep = 0, carHeadingNet = 0, cameraHeadingSweep = 0;
+  let peakCamPerRouteM = 0, peakCarPerRouteM = 0;
   const steps = 400;
   let prevCam = null; const prevCar = new THREE.Vector3(); const c = new THREE.Vector3();
+  let prevHeading, prevCamHeading;
+  let firstCam, firstCar;
+  const bounds = new THREE.Box3();
+  const direction = new THREE.Vector3();
+  const angleDelta = (a, b) => Math.atan2(Math.sin(a - b), Math.cos(a - b));
   for (let i = 0; i <= steps; i++) {
     const t = from + (to - from) * i / steps;
-    const cam = poseAt(t).position.clone();
+    const pose = poseAt(t);
+    const cam = pose.position;
     line.pathPointAt(t, c);
-    if (prevCam) { camTravel += cam.distanceTo(prevCam); carTravel += c.distanceTo(prevCar); }
+    bounds.expandByPoint(c);
+    line.pathTangentAt(t, direction);
+    const heading = Math.atan2(direction.x, -direction.z);
+    direction.set(0, 0, -1).applyQuaternion(pose.quaternion);
+    const camHeading = Math.atan2(direction.x, -direction.z);
+    if (prevCam) {
+      const dc = cam.distanceTo(prevCam), dp = c.distanceTo(prevCar);
+      const routeStep = (to - from) * TRACK_LENGTH / steps;
+      camTravel += dc; carTravel += dp;
+      peakCamPerRouteM = Math.max(peakCamPerRouteM, dc / routeStep);
+      peakCarPerRouteM = Math.max(peakCarPerRouteM, dp / routeStep);
+      const turn = angleDelta(heading, prevHeading);
+      carHeadingSweep += Math.abs(turn); carHeadingNet += turn;
+      cameraHeadingSweep += Math.abs(angleDelta(camHeading, prevCamHeading));
+    } else { firstCam = cam.clone(); firstCar = c.clone(); }
     prevCam = cam; prevCar.copy(c);
+    prevHeading = heading; prevCamHeading = camHeading;
   }
-  return { tRange: [round(from), round(to)], cameraToCarTranslation: round(camTravel / carTravel),
-    headingChangeDeg: 0 };
+  const extent = bounds.getSize(new THREE.Vector3());
+  return { tRange: [from, to], cameraToCarPathLength: round(camTravel / carTravel),
+    cameraPathM: round(camTravel), carPathM: round(carTravel),
+    cameraNetDisplacementM: round(prevCam.distanceTo(firstCam)),
+    carNetDisplacementM: round(prevCar.distanceTo(firstCar)),
+    carSpatialExtentXZ: [round(extent.x), round(extent.z)],
+    peakCameraSpeedToPeakCarSpeed: round(peakCamPerRouteM / peakCarPerRouteM),
+    cameraHeadingSweepDeg: round(THREE.MathUtils.radToDeg(cameraHeadingSweep), 6),
+    carHeadingNetDeg: round(THREE.MathUtils.radToDeg(carHeadingNet), 2),
+    carHeadingSweepDeg: round(THREE.MathUtils.radToDeg(carHeadingSweep), 2) };
 };
-const hairpin = cornerTest(...span(0.263, 0.302));
-const chicane = cornerTest(...span(0.328, 0.376));
+const hairpin = cornerTest(0.263, 0.302);
+const chicane = cornerTest(0.328, 0.376);
 
 // Presentation numbers (indicative; runtime raycast coverage is leg 2).
 const frameWidthAtTarget = 2 * COMP.distance * Math.tan(THREE.MathUtils.degToRad(COMP.fov / 2)) * aspect;

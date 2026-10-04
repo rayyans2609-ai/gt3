@@ -545,7 +545,9 @@ async function runOne(index, warmed) {
     // Finish the route by real wheel input for the memory/whole-context result.
     // 0.9942 passes the physical finish gate while staying below the legacy
     // finish-screen threshold (0.995), so it keeps the Tour renderer active.
-    run.phases.fullLap = await drive(page, 0.9942, +1, length);
+    // Bounded modes carry up to ~55 m of credit past the stop point, so stop further back there or the
+    // run-on crosses 0.995 (finish screen, scroll locked by design) and aborts the drive.
+    run.phases.fullLap = await drive(page, scrollMode === 'default' ? 0.9942 : 0.985, +1, length);
     run.vm.push(vmStat('lapEnd'));
     run.rendererAtLapEnd = await page.evaluate(() => {
       const info = window.__gt3.renderer.info;

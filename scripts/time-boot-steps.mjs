@@ -154,8 +154,9 @@ async function main() {
   console.log(`
 NOT RUNNABLE IN NODE (need WebGL/DOM/audio) -- estimates only, from code:
   initScene(): WebGLRenderer + EffectComposer + 3 passes + lights; ESTIMATE 20-150 ms (context creation,
-    shadow-map/target allocation is lazy). studio.initStudio(): a SECOND WebGLRenderer/context plus
-    SphereGeometry(64x32), CircleGeometry(96); ESTIMATE 30-250 ms.
+    shadow-map/target allocation is lazy). studio.initStudio() (a SECOND WebGLRenderer/context plus
+    SphereGeometry(64x32), CircleGeometry(96); ESTIMATE 30-250 ms) is no longer run at boot: it is lazy,
+    on the first playMontage()/prewarmMontage(), which the Grand Tour never calls.
   morph/theme/themeToggle/soundControl/player/startScreen/soundCue/finishScreen/scrollDrive init:
     DOM construction and listener wiring, a few hundred nodes at most; ESTIMATE <30 ms total.
   Chrome shader compile is NOT in this boot task (programs compile on first render, which waits on warm-up).`);

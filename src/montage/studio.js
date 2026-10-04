@@ -712,7 +712,10 @@ function onKeyDown(event) {
   }
 }
 
-/** Create the one shared studio scene. Repeated calls return the same objects. */
+/**
+ * Create the one shared studio scene (and its second WebGL renderer). Repeated calls return the
+ * same objects. Not called at boot: playMontage() and prewarmMontage() call it on first use.
+ */
 export function initStudio() {
   if (initialized) {
     return {

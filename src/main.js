@@ -116,7 +116,6 @@ async function boot() {
   timed('init-aerial-camera', () => aerialCamera.initAerialCamera(camera));
 
   timed('init-morph-theme', () => { morph.initMorph(); theme.initTheme(); });
-  timed('init-studio', () => studio.initStudio());
   timed('init-hud', () => hud.initHUD());
   timed('init-ui-controls', () => {
     themeToggle.initThemeToggle();
@@ -318,7 +317,8 @@ async function boot() {
 
   // ---- wiring ------------------------------------------------------------
 
-  // The studio remains initialized for a later manual Showcase unlock flow.
+  // The studio (a second WebGL renderer, SPEC §27) is NOT created at boot: nothing in the Grand
+  // Tour starts a montage. playMontage()/prewarmMontage() call initStudio() on first real use.
   studio.setMorphHandler((index) => morph.morphTo(index));
   studio.onMontageComplete(() => set('mode', 'race'));
 

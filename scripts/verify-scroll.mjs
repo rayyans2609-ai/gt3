@@ -77,7 +77,19 @@ async function wheelTrace(cdp, ev, startMs) {
   }
 }
 
+/** Reaching progress >= 0.995 opens the finish screen and locks scroll (by design); release it so
+ * later scenarios measure the drive, not the lock. Returns whether a finish was open. */
+async function dismissFinish(page) {
+  return page.evaluate(async () => {
+    const { state } = await import('/src/core/state.js');
+    const was = state.mode === 'finish';
+    if (was) (await import('/src/ui/finishScreen.js')).hideFinishScreen();
+    return was;
+  });
+}
+
 async function runScenario(page, cdp, L, name, sc, startT) {
+  await dismissFinish(page);
   await page.evaluate(async t => { (await import('/src/scroll/scrollDrive.js')).seekTo(t, { instant: true }); }, startT);
   await pause(1500);
   await page.evaluate(() => { window.__vs.rows = []; window.__vs.wheel = []; window.__vs.on = true; });
@@ -87,10 +99,11 @@ async function runScenario(page, cdp, L, name, sc, startT) {
   await wheelTrace(cdp, sc.ev, 20);
   const settleWait = 3500;
   await pause(settleWait);
+  const finishedDuring = await page.evaluate(async () => (await import('/src/core/state.js')).state.mode === 'finish');
   const { rows, wheel } = await page.evaluate(() => { window.__vs.on = false; return { rows: window.__vs.rows, wheel: window.__vs.wheel }; });
   const fr = rows.map((r, i) => ({ t: (r[0] - inputStart) / 1000, p: r[1], m: r[1] * L, target: r[2], vel: r[3], speed01: r[4], y: r[5],
     speed: i ? (r[1] - rows[i - 1][1]) * L / Math.max(1e-3, (r[0] - rows[i - 1][0]) / 1000) : 0 }));
-  return { fr, t0, wheel: wheelRates(wheel) };
+  return { fr, t0, wheel: wheelRates(wheel), finishedDuring };
 }
 
 /** Observed wheel input in the page: events, px, mean px/s over the active span, peak px/s in any 100 ms window. */
@@ -158,11 +171,12 @@ async function runMode(mode) {
     const L = await page.evaluate(async () => (await import('/src/scene/trackCurve.js')).TRACK_LENGTH);
     await installSampler(page);
     for (const [name, sc] of Object.entries(SCEN)) {
-      const { fr, wheel } = await runScenario(page, cdp, L, name, sc, START_T);
-      res.scenarios[name] = { ...metrics(fr, sc, L), wheelSeen: wheel };
+      const { fr, wheel, finishedDuring } = await runScenario(page, cdp, L, name, sc, START_T);
+      res.scenarios[name] = { ...metrics(fr, sc, L), finishedDuring, wheelSeen: wheel };
       console.log(`${mode} ${name}: ${JSON.stringify(res.scenarios[name])}`);
     }
     // Page ends: push down past the end, then verify scrolling still continues both ways.
+    await dismissFinish(page);
     await page.evaluate(async () => (await import('/src/scroll/scrollDrive.js')).seekTo(0.97, { instant: true }));
     await pause(1200);
     await page.evaluate(() => { window.__vs.rows = []; window.__vs.on = true; });
@@ -170,10 +184,14 @@ async function runMode(mode) {
     await pause(1500);
     const endRows = await page.evaluate(() => window.__vs.rows);
     const pEnd = endRows.at(-1)[1];
+    // Reaching the end opens the finish screen and locks scroll by design; releasing it must leave the
+    // drive at the end and still scrollable back.
+    const finishAtEnd = await dismissFinish(page);
+    await pause(300);
     for (let i = 0; i < 120; i++) { await cdp.send('Input.dispatchMouseEvent', { type: 'mouseWheel', x: 800, y: 450, deltaX: 0, deltaY: -100 }); await pause(16); }
     await pause(1200);
     const backRows = await page.evaluate(() => { window.__vs.on = false; return window.__vs.rows; });
-    res.interactions.pageEnds = { progressAfterPushingDown: r2(pEnd), progressAfterReverse: r2(backRows.at(-1)[1]), movedBack: backRows.at(-1)[1] < pEnd - 0.002 };
+    res.interactions.pageEnds = { finishScreenAtEnd: finishAtEnd, progressAfterPushingDown: r2(pEnd), progressAfterReverse: r2(backRows.at(-1)[1]), movedBack: backRows.at(-1)[1] < pEnd - 0.002 };
     // Instant-seek contract (W7): after seekTo(t,{instant:true}) the car is at t with no banked target / motion.
     await page.evaluate(async () => (await import('/src/scroll/scrollDrive.js')).seekTo(0.5, { instant: true }));
     await pause(1500);

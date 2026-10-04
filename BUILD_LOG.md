@@ -709,3 +709,5 @@ Not merged to `main`. Phase 3 stays open until the user's live review (SPEC §30
   - Route-position restore across refresh (§24–25) is Phase 3.
   - Showcase and the montage must load full-resolution models; the Tour keeps its 512-px roster.
   - No Phase 4 until the user approves Phase 3.
+
+**2026-10-04 run 2 — W8 deferral:** keeping Showcase/montage at full texture quality (Tour stays 512-px) is deferred to Phase 6. Neither surface is reachable in Phase 3, and a loader with no Phase 3 consumer would be speculative. The requirement stays binding (SPEC §27, line 514, plus the user decision). Current discrepancy: `showcase.js` and `montage/studio.js` clone from the Tour-512 roster. **Not verified in Phase 3.**

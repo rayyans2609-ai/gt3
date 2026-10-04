@@ -56,7 +56,9 @@ function preflightOk() {
 async function installSampler(page) {
   await page.evaluate(async () => {
     const { state } = await import('/src/core/state.js');
-    window.__vs = { rows: [], on: false };
+    window.__vs = { rows: [], on: false, wheel: [] };
+    // Real wheel input as the page sees it (after any Chrome-side smoothing): for pace calibration.
+    window.addEventListener('wheel', e => { if (window.__vs.on) window.__vs.wheel.push([performance.now(), e.deltaY, e.deltaMode]); }, { passive: true, capture: true });
     const tick = t => {
       if (window.__vs.on) window.__vs.rows.push([t, state.progress, state.targetProgress, state.velocity, state.speed01, window.scrollY, state.scrollLocked ? 1 : 0]);
       requestAnimationFrame(tick);
@@ -78,17 +80,31 @@ async function wheelTrace(cdp, ev, startMs) {
 async function runScenario(page, cdp, L, name, sc, startT) {
   await page.evaluate(async t => { (await import('/src/scroll/scrollDrive.js')).seekTo(t, { instant: true }); }, startT);
   await pause(1500);
-  await page.evaluate(() => { window.__vs.rows = []; window.__vs.on = true; });
+  await page.evaluate(() => { window.__vs.rows = []; window.__vs.wheel = []; window.__vs.on = true; });
   const t0 = await page.evaluate(() => performance.now());
   await pause(250);
   const inputStart = (await page.evaluate(() => performance.now())) + 20;
   await wheelTrace(cdp, sc.ev, 20);
   const settleWait = 3500;
   await pause(settleWait);
-  const rows = await page.evaluate(() => { window.__vs.on = false; return window.__vs.rows; });
+  const { rows, wheel } = await page.evaluate(() => { window.__vs.on = false; return { rows: window.__vs.rows, wheel: window.__vs.wheel }; });
   const fr = rows.map((r, i) => ({ t: (r[0] - inputStart) / 1000, p: r[1], m: r[1] * L, target: r[2], vel: r[3], speed01: r[4], y: r[5],
     speed: i ? (r[1] - rows[i - 1][1]) * L / Math.max(1e-3, (r[0] - rows[i - 1][0]) / 1000) : 0 }));
-  return { fr, t0 };
+  return { fr, t0, wheel: wheelRates(wheel) };
+}
+
+/** Observed wheel input in the page: events, px, mean px/s over the active span, peak px/s in any 100 ms window. */
+function wheelRates(w) {
+  if (!w.length) return { events: 0 };
+  const span = Math.max(0.016, (w.at(-1)[0] - w[0][0]) / 1000);
+  let peak = 0;
+  for (let i = 0; i < w.length; i++) {
+    let sum = 0;
+    for (let j = i; j < w.length && w[j][0] - w[i][0] < 100; j++) sum += Math.abs(w[j][1]);
+    peak = Math.max(peak, sum / 0.1);
+  }
+  return { events: w.length, totalPx: r1(w.reduce((a, e) => a + Math.abs(e[1]), 0)), spanS: r2(span),
+    meanPxPerS: r1(w.reduce((a, e) => a + Math.abs(e[1]), 0) / span), peak100msPxPerS: r1(peak), deltaMode: w[0][2] };
 }
 
 function metrics(fr, sc, L) {
@@ -142,8 +158,8 @@ async function runMode(mode) {
     const L = await page.evaluate(async () => (await import('/src/scene/trackCurve.js')).TRACK_LENGTH);
     await installSampler(page);
     for (const [name, sc] of Object.entries(SCEN)) {
-      const { fr } = await runScenario(page, cdp, L, name, sc, START_T);
-      res.scenarios[name] = metrics(fr, sc, L);
+      const { fr, wheel } = await runScenario(page, cdp, L, name, sc, START_T);
+      res.scenarios[name] = { ...metrics(fr, sc, L), wheelSeen: wheel };
       console.log(`${mode} ${name}: ${JSON.stringify(res.scenarios[name])}`);
     }
     // Page ends: push down past the end, then verify scrolling still continues both ways.

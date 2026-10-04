@@ -21,6 +21,9 @@ import { state, set, subscribe } from './core/state.js';
 import { Clock } from './core/clock.js';
 import { getRestoredRouteProgress, restoreSession, startRoutePersistence } from './core/session.js';
 import { restoreExperience, setExperience } from './core/experience.js';
+// W2 review scaffolding: resolves ?comp= (pure, no scene imports) before any scene
+// module builds geometry. trackCurve.js also imports it, so order cannot regress.
+import { COMP } from './scene/composition.js';
 
 // Boot instrumentation: User Timing entries prefixed `gt3:` (read with
 // performance.getEntriesByType('mark'|'measure')). Costs microseconds; kept on purpose.
@@ -181,6 +184,18 @@ async function boot() {
   // initScene creates window.__gt3; these handles were previously attached after the full build.
   window.__gt3.readiness = readiness;
   window.__gt3.scrollMode = scrollDrive.scrollMode;
+  window.__gt3.comp = COMP;
+  if (!COMP.isDefault) {
+    // TEMPORARY (W2 review): tiny label naming the active composition candidate.
+    const label = document.createElement('div');
+    label.className = 'dev-comp-label';
+    label.textContent = `comp ${COMP.name}${COMP.cameraVariant !== 'leg1' ? ` / cam ${COMP.cameraVariant}` : ''}${Object.keys(COMP.overrides).length
+      ? ` ${Object.entries(COMP.overrides).map(([k, v]) => `${k}=${v}`).join(' ')}` : ''}`;
+    label.style.cssText = 'position:fixed;left:50%;bottom:6px;transform:translateX(-50%);'
+      + 'font:10px/1 ui-monospace,monospace;opacity:.55;pointer-events:none;z-index:9999;'
+      + 'color:#888;letter-spacing:.04em';
+    document.body.appendChild(label);
+  }
   await yieldToBrowser();
   scene.add(timed('build-track', () => track.buildTrack()));
   await yieldToBrowser();

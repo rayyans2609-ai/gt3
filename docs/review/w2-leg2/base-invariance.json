@@ -1,0 +1,10 @@
+{
+ "baseline": "0967653",
+ "candidateSource": "442dd88",
+ "noQueryDefault": {
+  "samples": 1800,
+  "maxPositionDifferenceM": 0,
+  "maxQuaternionComponentDifference": 0,
+  "fovEqual": true
+ }
+}

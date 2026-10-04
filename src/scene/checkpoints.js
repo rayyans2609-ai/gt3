@@ -9,7 +9,10 @@ import {
 import { createGateResponse } from './gateResponse.js';
 
 const postGeometry = new THREE.BoxGeometry(0.24, 7.6, 0.34);
-const beamGeometry = new THREE.BoxGeometry(18.9, 0.24, 0.55);
+// Posts stand just outside the curb; the beam spans them with 0.3 m overhang each
+// side (18.9 m on today's 14 m road), so gates fit any candidate road width.
+const POST_LATERAL = TRACK.halfWidth + TRACK.curbWidth + 1.0;
+const beamGeometry = new THREE.BoxGeometry(POST_LATERAL * 2 + 0.6, 0.24, 0.55);
 const postMaterial = new THREE.MeshStandardMaterial({
   color: 0xa9b1b4, metalness: 0.35, roughness: 0.55,
   transparent: true, opacity: 0.72, depthWrite: false,
@@ -42,7 +45,7 @@ export function buildCheckpoints() {
   }
   const root = new THREE.Group();
   root.name = 'checkpoints';
-  const lateral = TRACK.halfWidth + TRACK.curbWidth + 1.0;
+  const lateral = POST_LATERAL;
   const posts = new THREE.InstancedMesh(postGeometry, postMaterial, CHECKPOINT_T.length * 2);
   const beams = new THREE.InstancedMesh(beamGeometry, beamMaterial, CHECKPOINT_T.length);
   posts.name = 'checkpoint-posts';

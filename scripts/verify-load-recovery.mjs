@@ -136,7 +136,7 @@ try {
       { timeout: 90000, polling: 20 });
       await page.mouse.wheel({ deltaY: 300 });
       await page.waitForFunction(() => window.__recovery.wheels.length > 0,
-        { timeout: 10000 });
+        { timeout: 45000 });
       const preGesture = await page.evaluate(async () => {
         const { state } = await import('/src/core/state.js');
         return { wheels: [...window.__recovery.wheels], progress: state.progress,

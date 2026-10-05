@@ -437,7 +437,7 @@ async function boot() {
     // The legacy montage remains available for a later manual-unlock flow.
     try {
       if (gpuWarmup && !gpuWarmup.done && readiness.gpu === 'pending') {
-        if (!faults.warmHang && gpuWarmup.step()) {
+        if (!faults.warmHang && gpuWarmup.runFrame()) {
           gpuWarmup = null;
           settle('gpu', 'ready');
         }

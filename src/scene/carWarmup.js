@@ -8,6 +8,12 @@ import { beginWarmFade } from './morph.js';
 import { warmCheckpointResponse } from './checkpoints.js';
 
 const MESHES_PER_FRAME = 12;
+// Wall-time budget per animation frame for the warm-up driver. Solo measurement
+// (startup-run3, H 4dfc2c9): one step() per rAF left ~6.5 s of an 18 s warm-up as
+// idle rAF gaps (268 steps); running steps back-to-back until this budget is spent
+// recovers that without changing the draw set. 12 ms keeps frames near 60 fps when
+// draws are cheap; a single heavy first-use draw may still overshoot (always >= 1 step).
+export const WARMUP_FRAME_BUDGET_MS = 12;
 
 export function createCarWarmup(onProgress, onStep, { throwAtDraw = -1 } = {}) {
   const starter = carMount.children[0];
@@ -60,6 +66,7 @@ export function createCarWarmup(onProgress, onStep, { throwAtDraw = -1 } = {}) {
   let restored = false;
   let gateRestore = null;
   let drawNumber = 0;
+  let deferProgress = false;
 
   for (const car of cars) for (const entry of car.snapshot) {
     entry.object.visible = false;
@@ -113,7 +120,7 @@ export function createCarWarmup(onProgress, onStep, { throwAtDraw = -1 } = {}) {
 
   function advance() {
     completed++;
-    onProgress?.(completed / draws);
+    if (!deferProgress) onProgress?.(completed / draws);
   }
 
   function step() {
@@ -191,6 +198,25 @@ export function createCarWarmup(onProgress, onStep, { throwAtDraw = -1 } = {}) {
     }
   }
 
-  return { step, abort, get done() { return done; }, get restored() { return restored; },
+  // One animation frame of warm-up: run step() repeatedly until budgetMs of wall time
+  // has elapsed (at least one step; no new step starts once the budget is spent;
+  // stops at the final step). Same steps in the same order as one-step-per-frame, so
+  // the resident GPU state is identical. Errors propagate from step() unchanged
+  // (step() has already aborted/restored). Progress is reported once per frame.
+  function runFrame(budgetMs = WARMUP_FRAME_BUDGET_MS) {
+    const frameStart = performance.now();
+    const before = completed;
+    deferProgress = true;
+    let finished;
+    try {
+      do {
+        finished = step();
+      } while (!finished && !done && performance.now() - frameStart < budgetMs);
+    } finally { deferProgress = false; }
+    if (completed !== before) onProgress?.(completed / draws);
+    return finished;
+  }
+
+  return { step, runFrame, abort, get done() { return done; }, get restored() { return restored; },
     get progress() { return completed / draws; } };
 }

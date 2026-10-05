@@ -51,6 +51,19 @@ async function runCandidate(browser, comp, cam) {
   const errors = [];
   page.on('pageerror', e => errors.push(e.message));
   page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
+  if (process.env.GT3_DEBUG_PAGE === '1') {
+    // Diagnostics for pages that vanish mid-run (navigation, renderer crash, context loss).
+    const tag = `[${key}]`;
+    page.on('framenavigated', f => { if (f === page.mainFrame()) console.error(tag, 'NAVIGATED', f.url()); });
+    page.on('error', e => console.error(tag, 'PAGE-CRASH', e.message));
+    page.on('close', () => console.error(tag, 'PAGE-CLOSE'));
+    const cdp = await page.createCDPSession();
+    await cdp.send('Page.enable');
+    cdp.on('Page.frameRequestedNavigation', e => console.error(tag, 'NAV-REQUEST', e.reason, e.disposition, e.url));
+    cdp.on('Inspector.targetCrashed', () => console.error(tag, 'TARGET-CRASHED'));
+    page.on('requestfailed', r => { if (r.isNavigationRequest()) console.error(tag, 'NAV-REQ-FAILED', r.url()); });
+    page.on('console', m => { if (['warning', 'error'].includes(m.type())) console.error(tag, 'console.' + m.type(), m.text().slice(0, 240)); });
+  }
   const reviewUrl = new URL(`${base}/`);
   if (comp !== 'base') reviewUrl.searchParams.set('comp', comp);
   if (cam !== 'leg1') reviewUrl.searchParams.set('cam', cam);

@@ -3,11 +3,12 @@ import * as THREE from 'three';
 import { CARS } from '../data/cars.js';
 import { getCarModel } from './cars.js';
 import { carMount, rig } from './carRig.js';
-import { render, scene } from './sceneSetup.js';
+import { render, scene, renderer, camera, composer } from './sceneSetup.js';
 import { beginWarmFade } from './morph.js';
 import { warmCheckpointResponse } from './checkpoints.js';
 
 const MESHES_PER_FRAME = 12;
+const TEXTURES_PER_FRAME = 4;
 // Wall-time budget per animation frame for the warm-up driver. Solo measurement
 // (startup-run3, H 4dfc2c9): one step() per rAF left ~6.5 s of an 18 s warm-up as
 // idle rAF gaps (268 steps); running steps back-to-back until this budget is spent
@@ -23,13 +24,15 @@ export function createCarWarmup(onProgress, onStep, { throwAtDraw = -1 } = {}) {
     const model = getCarModel(index);
     const meshes = [];
     const snapshot = [];
+    let allVisible = true;
     model.traverse((object) => {
+      if (!object.visible) allVisible = false;
       if (!object.isMesh) return;
       snapshot.push({ object, visible: object.visible,
         frustumCulled: object.frustumCulled, material: object.material });
       if (object.visible) meshes.push(object);
     });
-    return { model, meshes, snapshot };
+    return { model, meshes, snapshot, allVisible };
   });
   let mappedTexture = null;
   for (const car of cars) {
@@ -67,6 +70,16 @@ export function createCarWarmup(onProgress, onStep, { throwAtDraw = -1 } = {}) {
   let gateRestore = null;
   let drawNumber = 0;
   let deferProgress = false;
+  let pauseFrame = false;
+  let textureUploads = 0;
+  let preparation = null;
+  let parallelCompile = typeof renderer.compileAsync === 'function' &&
+    typeof renderer.initTexture === 'function' &&
+    renderer.extensions?.has?.('KHR_parallel_shader_compile') &&
+    // compileAsync traverses hidden objects too. The shipped cars are all visible;
+    // retain the draw-only path for a future model with authored hidden geometry.
+    cars.every(car => car.allVisible);
+  const uploadedTextures = new Set();
 
   for (const car of cars) for (const entry of car.snapshot) {
     entry.object.visible = false;
@@ -123,8 +136,65 @@ export function createCarWarmup(onProgress, onStep, { throwAtDraw = -1 } = {}) {
     if (!deferProgress) onProgress?.(completed / draws);
   }
 
+  // Prepare the same normal/fade materials used by the draws below. The third
+  // compileAsync argument supplies the Tour's lights, environment and fog. Bind
+  // the RenderPass target only for the synchronous compile invocation: compiling
+  // to the screen would cache different tone-mapping/output-colour programs.
+  function prepare(car) {
+    if (!parallelCompile) return false;
+    try {
+      if (!preparation || preparation.car !== car || preparation.fading !== fading) {
+        const pending = { car, fading, ready: false, failed: false, error: null, textures: [] };
+        const textures = new Set();
+        car.model.traverse(object => {
+          if (!object.isMesh) return;
+          const materials = Array.isArray(object.material) ? object.material : [object.material];
+          for (const material of materials) for (const value of Object.values(material || {})) {
+            if (value?.isTexture && !uploadedTextures.has(value)) textures.add(value);
+          }
+        });
+        pending.textures = [...textures];
+        preparation = pending;
+        const target = renderer.getRenderTarget();
+        const face = renderer.getActiveCubeFace();
+        const mip = renderer.getActiveMipmapLevel();
+        try {
+          renderer.setRenderTarget(composer.readBuffer);
+          Promise.resolve(renderer.compileAsync(car.model, camera, scene)).then(() => {
+            if (!done && preparation === pending) pending.ready = true;
+          }, error => {
+            if (!done && preparation === pending) {
+              pending.failed = true;
+              pending.error = error;
+            }
+          });
+        } finally { renderer.setRenderTarget(target, face, mip); }
+        return true;
+      }
+      if (preparation.failed) throw preparation.error;
+      if (preparation.textures.length) {
+        const texture = preparation.textures.shift();
+        renderer.initTexture(texture);
+        uploadedTextures.add(texture);
+        pauseFrame = ++textureUploads >= TEXTURES_PER_FRAME;
+        return true;
+      }
+      pauseFrame = !preparation.ready; // yield instead of spinning on the Promise
+      return pauseFrame;
+    } catch (error) {
+      // Preparation is optional. A failed attempt resumes the original draw path;
+      // draw failures still use the existing abort/restore and readiness recovery.
+      parallelCompile = false;
+      preparation = null;
+      console.warn('[warmup] Async preparation unavailable; using draw warm-up.', error);
+      return false;
+    }
+  }
+
   function step() {
     if (done) return true;
+    pauseFrame = false;
+    if (!deferProgress) textureUploads = 0;
     try {
       if (carIndex >= cars.length) {
         if (gatePrepared) {
@@ -165,6 +235,7 @@ export function createCarWarmup(onProgress, onStep, { throwAtDraw = -1 } = {}) {
       }
 
       const { model, meshes } = cars[carIndex];
+      if (prepare(cars[carIndex])) return false;
       const batch = meshes.slice(offset, offset + MESHES_PER_FRAME);
       const enabled = new Set();
       for (const object of batch) {
@@ -200,18 +271,20 @@ export function createCarWarmup(onProgress, onStep, { throwAtDraw = -1 } = {}) {
 
   // One animation frame of warm-up: run step() repeatedly until budgetMs of wall time
   // has elapsed (at least one step; no new step starts once the budget is spent;
-  // stops at the final step). Same steps in the same order as one-step-per-frame, so
-  // the resident GPU state is identical. Errors propagate from step() unchanged
+  // stops at the final step). Preparation also yields on its texture quota or a
+  // pending compile. All original draws still run in order, retaining geometry,
+  // shadow, fade-pair, gate and composer coverage. Errors propagate from step() unchanged
   // (step() has already aborted/restored). Progress is reported once per frame.
   function runFrame(budgetMs = WARMUP_FRAME_BUDGET_MS) {
     const frameStart = performance.now();
     const before = completed;
+    textureUploads = 0;
     deferProgress = true;
     let finished;
     try {
       do {
         finished = step();
-      } while (!finished && !done && performance.now() - frameStart < budgetMs);
+      } while (!finished && !done && !pauseFrame && performance.now() - frameStart < budgetMs);
     } finally { deferProgress = false; }
     if (completed !== before) onProgress?.(completed / draws);
     return finished;

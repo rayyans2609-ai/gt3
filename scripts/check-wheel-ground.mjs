@@ -13,8 +13,14 @@ const ROOT = new URL('..', import.meta.url).pathname;
 const CANONICAL_LENGTH = 4.6;
 const TOLERANCE = 0.005;
 const EPSILON = 1e-7;
-const WHEEL_NAME = /wheel|tyre|tire|rim/i;
-const NON_WHEEL_NAME = /brake|caliper|disc|rotor|arch|well|steering/i;
+// Exact 8b59a7b Node results: classifier changes must preserve the applied pose.
+const EXPECTED_PITCH = {
+  lexus: 0.0028566373520990673,
+  nissan: -0.005623038940423264,
+  mclaren: -0.014687551832787804,
+};
+const WHEEL_NAME = /(?:^|[^a-z])(?:wheels?|tyres?|tires?|rims?)(?=$|[^a-z])/i;
+const NON_WHEEL_NAME = /brake|caliper|disc|rotor|arch|well|steering|wheel[\s_-]*house/i;
 const require = createRequire(import.meta.url);
 
 function multiply(a, b) {
@@ -48,6 +54,10 @@ function transform(matrix, [x, y, z]) {
 
 function namedWheel(name) {
   return WHEEL_NAME.test(name || '') && !NON_WHEEL_NAME.test(name || '');
+}
+
+function wheelAncestry(names) {
+  return !names.some(name => NON_WHEEL_NAME.test(name)) && names.some(namedWheel);
 }
 
 async function loadDraco() {
@@ -132,6 +142,14 @@ async function sourceVertices(modelPath, draco) {
   const { json, bin } = parseGlb(await readFile(modelPath));
   const vertices = [];
   const identity = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
+  let hasWheelNodes = false;
+  function census(index, ancestors) {
+    const node = json.nodes[index];
+    const names = [...ancestors, node.name || ''];
+    if (node.mesh !== undefined && wheelAncestry(names)) hasWheelNodes = true;
+    for (const child of node.children || []) census(child, names);
+  }
+  for (const root of json.scenes[json.scene ?? 0].nodes) census(root, []);
   function visit(index, parent, ancestorNames) {
     const node = json.nodes[index];
     const world = multiply(parent, localMatrix(node));
@@ -154,7 +172,8 @@ async function sourceVertices(modelPath, draco) {
         : [world];
       for (const primitive of json.meshes[node.mesh].primitives) {
         const materialName = json.materials?.[primitive.material]?.name || '';
-        const wheel = names.some(namedWheel) || namedWheel(materialName);
+        const wheel = wheelAncestry(names) || (!hasWheelNodes &&
+          !names.some(name => NON_WHEEL_NAME.test(name)) && namedWheel(materialName));
         const positions = decodePositions(draco, json, bin, primitive);
         for (const instance of instances) for (let i = 0; i < positions.length; i += 3) {
           vertices.push({ point: transform(instance, [positions[i], positions[i + 1], positions[i + 2]]), wheel });
@@ -268,7 +287,8 @@ for (const { car, tour, fullMatch } of outcomes) {
     `${String(tour.unchanged).padStart(9)}  ${fullMatch}`);
 }
 
-const failures = outcomes.filter(({ tour, fullMatch }) =>
+const failures = outcomes.filter(({ car, tour, fullMatch }) =>
+  tour.pitch !== (EXPECTED_PITCH[car.id] ?? 0) ||
   (tour.pitch !== 0 && Math.abs(tour.after.front - tour.after.rear) > EPSILON) || !fullMatch ||
   (tour.pitch === 0 && !tour.unchanged),
 );

@@ -1,17 +1,17 @@
 # GT3 Phase 3 — final live review package
 
-**Review build:** `phase3-integration` @ `<FINAL SHA>` (pushed; pin this SHA). **Nothing is merged to `main`. Phase 4 has not started.** Every decision below is yours; none has been pre-picked.
+**Review build:** `phase3-integration`, audited at `19dace5` (19dace50f6c31057f4ffd93355a9573f912b6c3e). Later commits on the branch are documentation only, so `src/` is identical from `360294a` (where the final W6C browser evidence was taken) through `19dace5` and the handoff head. **Nothing is merged to `main`. Phase 4 has not started.** Every decision below is yours; none has been pre-picked.
 
 ## How to run
 ```
 cd ~/Desktop/gt3/.claude/worktrees/phase3b-aerial-camera
-git log -1 --format=%h          # should print <FINAL SHA short>
+git diff --stat 360294a HEAD -- src   # should print nothing (same product code as the evidence)
 npm run dev                     # → http://localhost:5173/
 ```
 - The start screen shows loading progress. Once it reads ready, scroll with a wheel or trackpad to begin.
 - Review options are URL query parameters. They combine, for example `/?comp=b&cam=soft&scroll=pace&gate=quiet`, and survive a refresh. A small grey label at the bottom centre names the active composition and camera.
 - Refresh keeps your route position, discoveries, theme and audio settings for the browser session. A **new** tab or window starts fresh; Chrome's *Duplicate tab* copies the session and resumes it. Refreshing at the finish restores the finish card only. To start over, use Replay or a new tab.
-- Use a desktop window. With any `cam=` option, the first time a window shape is used the camera path is recomputed, a one-off 1–1.5 s pause (up to ~3 s).
+- Use a desktop window. With any `cam=` option, the first time a window shape is used the camera path is recomputed, a one-off 0.75–3 s pause (typically about 1–1.5 s).
 
 ### What is new by default, with no parameters, since your 09-28 walkthrough (Cloud audit F1)
 No parameters keeps today's **camera, road/path and scroll law**. These changes are on by default and have no "old" switch:
@@ -23,7 +23,7 @@ No parameters keeps today's **camera, road/path and scroll law**. These changes 
 - Legacy turn chevrons removed.
 - The model decoder is self-hosted, so the app works offline.
 - Three cars (McLaren, Nissan, Lexus) are now levelled so all four wheels touch the road. They were nose-up.
-- The Aston and Ferrari steering wheels no longer spin with the road wheels.
+- Steering wheels are excluded from the wheel-spin set. In fact the spin set is empty for every car, so **no wheels spin at all**. This predates Phase 3 (Cloud audit 2, A6) and is listed under Known limits.
 
 ---
 
@@ -39,7 +39,7 @@ SPEC §15 wants two things at once: "through a tight corner sequence the camera 
 | `/?comp=b&cam=hold` | **0 / 0** | 1.6–2.3 % | yes in corners | **at risk** | pans **~3× car speed** between corners; on a 4:3 window the chicane hold is skipped |
 | `/?comp=b&cam=wide` | **0 / 0** | **0.8–1.4 %** | yes | **no** | the hero is tiny; the combined hold needs window aspect ≥ 1.62 |
 
-- Hero % comes from the browser matrix at the final head (`w2/matrix-final.json`). Node geometry gives slightly wider ranges (see `docs/review/w2-leg3/`).
+- Hero % comes from the browser matrix run at `da67f54` (`w2/matrix-final.json`). The camera and composition code is unchanged since. The only later change affecting the car is the sub-degree wheel levelling of three models. Node geometry gives slightly wider ranges (see `docs/review/w2-leg3/`).
 - **Only lever on hero size:** `&hero=<1.0–3.0>`. It is a dev override, not a measured candidate. Raising it also shrinks the racing line on b and the road-to-car ratio. For example, `hero=2.5` gives about 2.8 road widths and a ±2.6 m line.
 - **Compare:** drive slowly through the turn-5 hairpin and the turns 6–7 chicane, forwards and backwards, in Day and Night. **Judge the camera together with your scroll choice (item 3):** a hold or wide pan moves about 3× route speed, so its feel depends on how fast the route moves.
 - **Decide:** which camera to keep, or which change to make, such as a larger hero or a different balance on the soft frontier.
@@ -119,14 +119,15 @@ Captures: `w5a/`, `w5/`. **Decide:** acceptable or not.
 
   - The last two runs are host-contaminated: the machine was swapping. Only their relative order means anything.
   - **`compileAsync` warm-up preparation** (audit F7, `ad9c746`) is verified correct: load recovery 9/9, zero first-crossing allocations. **It showed no startup gain**, and was about 3 s slower in both contaminated rounds.
-  - **Decide:** keep it, or revert `ad9c746`. Reverting returns to the warm-up code verified at ea95055; the wheel-classifier fix stays. The remaining cost is warming every car on the GPU before the Tour unlocks, which is what makes the first crossing smooth.
+  - **My recommendation: revert `ad9c746`.** It adds complexity without a measured gain. Its parallel compile runs per car, which limits overlap. The run doesn't record which path executed, so headless checks may only have exercised the fallback (Cloud audit 2, A2/A4). Reverting returns to the warm-up code verified at ea95055 (14.5 s, clean); the wheel-classifier fix stays.
+  - **What I need from you:** say "revert compileAsync" and I'll apply it with `git revert` and re-run the warm-up checks. My earlier attempt was blocked by the permission system, so this needs your explicit OK. The remaining cost is warming every car on the GPU before the Tour unlocks, which is what makes the first crossing smooth.
 - **Decide:** whether the first crossing feels smooth, and whether this startup time is acceptable.
 
 ## 9. §30.6 grass over the road
 - Machine sweep at the final head: **0 terrain hits between camera and car** in every configuration checked.
   - 101 route points: default, a × {leg1, glide, hold, wide, soft}, b × {leg1, glide}.
   - 62 route points, dense at the hairpin, chicane and the old McLaren→Aston section: b × {hold, wide, soft}, c/soft, b/wide at 16:10, b/hold at 4:3.
-  - c × {leg1, glide, hold, wide} were skipped intentionally (lean verification).
+  - c × {leg1, glide, hold, wide} were skipped intentionally (lean verification). **If you pick `comp=c` with any camera except `soft`, that combination is swept before §30.6 is retired.**
 - **Decide:** visually confirm the old McLaren→Aston section (route ≈0.63–0.70), so the item can be retired.
 
 ## 10. Overall Phase 3 acceptance and the SPEC classification
@@ -160,3 +161,8 @@ Folders: `w6/` (regression), `w2/` (camera matrix, captures), `startup-final2/` 
 - Fonts are trial files and are gitignored, so a clean clone builds without them.
 - The model decoder is copied from three r180. Re-copy it if three is upgraded.
 - 4 unexplained page-loss flakes occurred under heavy host load during automated runs. All reran clean.
+- **Wheel spin is inert for every car.** The spin-mesh finder matches only mesh names, while wheel identity lives on parent nodes. This predates Phase 3 and isn't fixed here.
+- A restored route position sets the route car but doesn't reconcile `unlocked` with the gates passed. It's invisible in Phase 3 and becomes relevant in Phase 6 (Showcase).
+- The new wheel classifier needs delimited names (`Wheel_FL`, not `FrontWheel`). The shipped models are fine; add a test fixture before adding a model.
+- The finish-restore check's "no sound cue" assertion would pass anyway, because the cue was already shown once in that session. The start-screen assertions do test the fix.
+- All browser evidence comes from headless Chrome on this Mac, not your GPU.

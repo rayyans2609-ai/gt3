@@ -1,6 +1,6 @@
 /**
  * W2 pure-node numeric checks (no Vite, no browser, no GPU). One candidate per process:
- *   node scripts/check-composition-math.mjs [base|a|b|c] [aspect=1.7778] [cam=leg1|glide|hold|wide]
+ *   node scripts/check-composition-math.mjs [base|a|b|c] [aspect=1.7778] [cam=leg1|glide|hold|wide|soft]
  * Reports racing-line amplitude/rate/clearance for all ten roster footprints (static
  * GLB accessor bounds), gate/finish post clearance, settled-rail framing (car bounds in
  * NDC), seam/reversibility of the deterministic pose, and the hairpin/chicane corner test.
@@ -98,6 +98,9 @@ const ndcStats = { maxReach: 0, overEngage: 0, overHard: 0, maxX: 0, maxY: 0,
 const camPath = [];
 const SAMPLES = 2000;
 const engage = COMP.camera === 'corridor' ? COMP.railZone : COMP.engageZone || { x: 0.76, y: 0.72 };
+const entryExit = Object.fromEntries(Object.entries(CORNER_SPANS).flatMap(([name, span]) =>
+  span.map((t, i) => [`${name}-${i ? 'exit' : 'entry'}`, { t, windowM: 20, samples: 0,
+    maxX: 0, maxY: 0, overZone: 0 }])));
 const local = new THREE.Vector3(), projectedCorner = new THREE.Vector3();
 const rigMatrix = new THREE.Matrix4(), rigQuaternion = new THREE.Quaternion();
 const rollQuaternion = new THREE.Quaternion(), rollAxis = new THREE.Vector3(0, 0, 1);
@@ -149,6 +152,11 @@ for (let i = 0; i <= SAMPLES; i++) {
   if (maxX > engage.x || maxY > engage.y) ndcStats.overEngage++;
   if (reach > 0.85) ndcStats.overHard++;
   if (reach > 1) ndcStats.overFrame++;
+  for (const boundary of Object.values(entryExit)) if (Math.abs(t - boundary.t) * TRACK_LENGTH <= boundary.windowM) {
+    boundary.samples++;
+    boundary.maxX = Math.max(boundary.maxX, maxX); boundary.maxY = Math.max(boundary.maxY, maxY);
+    if (maxX > engage.x || maxY > engage.y) boundary.overZone++;
+  }
 }
 const seam = poseAt(0).position.distanceTo(poseAt(1).position);
 const before = poseAt(0.44).position.clone();
@@ -209,8 +217,9 @@ const chicane = cornerTest(...CORNER_SPANS.chicane);
 // Can ONE fixed camera frame the whole named interval? Convex intersection of
 // exact perspective sphere constraints; binary-search distance (same FOV/pitch).
 const basis = cameraBasis();
-const targetY = curveModule.controlPoints.reduce((s, p) => s + p.y, 0)
-  / curveModule.controlPoints.length + 1.066 * hero;
+// Match the rail's 1024-sample height plane, rather than the control-point mean.
+const targetY = Array.from({ length: 1024 }, (_, i) => pointAt(i / 1024).y)
+  .reduce((s, y) => s + y, 0) / 1024 + 1.066 * hero;
 const feasibleAt = (from, to, distance, zone) => {
   let polygon = [[-10000, -10000], [10000, -10000], [10000, 10000], [-10000, 10000]];
   for (let i = 0; i <= 400 && polygon.length; i++) {
@@ -382,14 +391,20 @@ console.log(JSON.stringify({
     pctOverFrame: round(100 * ndcStats.overFrame / (SAMPLES + 1), 2),
     perModelMaxReachNdc: Object.fromEntries(Object.entries(ndcStats.perModel).map(([k,v]) => [k,round(v)])),
     railClampActiveFraction: window.__gt3.aerial?.rail?.clampActiveFraction ?? null },
+  entryExitFraming: Object.fromEntries(Object.entries(entryExit).map(([k, v]) => [k,
+    { ...v, maxX: round(v.maxX), maxY: round(v.maxY) }])),
   seamPositionDiffM: round(seam, 4), reversibilityPositionDiffM: round(reversibilityM, 6),
   cornerTest: { hairpin, chicane },
   feasibility, motionProxy,
   worldExtent: { marginM: 1000, requiredWorldSizeChangeM: 0, exposedRays: worldExposed,
     minBoundaryGapM: round(worldMargin), beyondCameraFar: farExposed, representative: worldPoints },
   railInitMs: round(railInitMs, 1),
+  railSolver: window.__gt3.aerial.rail?.solver,
+  railDenseCheck: window.__gt3.aerial.rail?.denseCheck,
+  railFallback: window.__gt3.aerial.rail?.fallback,
   railHolds: window.__gt3.aerial.rail?.holds,
   unavailableHolds: window.__gt3.aerial.rail?.unavailableHolds,
+  railHoldState: window.__gt3.aerial.rail?.holdState,
   presentation: { carLengthPctOfFrameWidth: round(100 * 4.6 * hero / frameWidthAtTarget, 2),
     projectedCarLengthPctRange: [round(Math.min(...projectedLengths), 2), round(Math.max(...projectedLengths), 2)],
     roadInMedianHeroWidths: round(2 * TRACK.halfWidth / (medianWidth * hero), 2),

@@ -2,7 +2,7 @@
  * W2 composition-candidate verification (real-GPU headless Chrome; host rules apply:
  * run the preflight first, one browser at a time, external Vite only).
  *   GT3_URL=http://127.0.0.1:5192 GT3_COMPS=base,a,b,c GT3_CAMS=leg1 node scripts/verify-composition.mjs
- * Independent camera matrix: GT3_COMPS=a,b,c GT3_CAMS=glide,hold,wide
+ * Independent camera matrix: GT3_COMPS=a,b,c GT3_CAMS=glide,hold,wide,soft
  * Env: GT3_CAPTURE_DIR (review stills/sequence; default ~/Desktop/gt3-review-2026-10-04/w2),
  *      GT3_NO_CAPTURE=1, GT3_SOFTWARE_GL=1.
  * Per candidate: yaw/pitch constancy, snaps, seam, deterministic + settled reversibility,
@@ -22,7 +22,9 @@ const rosterBounds = await Promise.all(CARS.map(async car =>
 
 const base = (process.env.GT3_URL || 'http://127.0.0.1:5192').replace(/\/$/, '');
 const comps = (process.env.GT3_COMPS || 'base,a,b,c').split(',').filter(Boolean);
+const cameraCandidates = ['leg1', 'glide', 'hold', 'wide', 'soft'];
 const cams = (process.env.GT3_CAMS || 'leg1').split(',').filter(Boolean);
+if (cams.some(cam => !cameraCandidates.includes(cam))) throw new Error(`GT3_CAMS must use ${cameraCandidates.join(',')}`);
 const captureDir = process.env.GT3_CAPTURE_DIR
   || '/Users/rayyansheikh/Desktop/gt3-review-2026-10-04/w2';
 const capture = process.env.GT3_NO_CAPTURE !== '1';
@@ -364,7 +366,7 @@ async function runCandidate(browser, comp, cam) {
     await page.screenshot({ path: `${captureDir}/${key}_hairpin-apex_night.png` });
   }
   // Resize: rail solve cost (pure rebuild per aspect) and the real frame-time spike while
-  // the viewport changes aspect (the camera rebuilds its rail on the next update).
+  // the viewport changes aspect (the normal debounced resize task prepares the rail).
   out.resize = await page.evaluate(async () => {
     const rail = {};
     try {
@@ -372,7 +374,7 @@ async function runCandidate(browser, comp, cam) {
       const solve = comp.camera === 'corridor'
         ? (await import('/src/scene/compositionRail.js')).buildCompositionRail
         : comp.camera === 'sector' ? (await import('/src/scene/aerialCamera.js')).buildSectorRail : null;
-      if (solve) for (const [k, a] of [['16:9', 16 / 9], ['4:3', 4 / 3], ['21:9', 21 / 9], ['9:16', 9 / 16]]) {
+      if (solve) for (const [k, a] of [['16:9', 16 / 9], ['16:10', 1.6], ['1.5', 1.5], ['4:3', 4 / 3], ['21:9', 21 / 9], ['9:16', 9 / 16]]) {
         const t0 = performance.now(); solve(a); rail[k] = +(performance.now() - t0).toFixed(1);
       }
     } catch (e) { rail.error = String(e); }
@@ -387,7 +389,8 @@ async function runCandidate(browser, comp, cam) {
     const r = await page.evaluate(() => {
       const f = window.__w2.frames; window.__w2.segment = null;
       return { dts: f.map(x => x.dt), aspect: window.__gt3.camera.aspect, rail: window.__gt3.aerial.rail
-        ? { aspect: window.__gt3.aerial.rail.aspect, unavailableHolds: window.__gt3.aerial.rail.unavailableHolds } : null };
+        ? { aspect: window.__gt3.aerial.rail.aspect, holdState: window.__gt3.aerial.rail.holdState,
+          unavailableHolds: window.__gt3.aerial.rail.unavailableHolds } : null };
     });
     out.resizeFrames.push({ name, frames: r.dts.length, maxFrameMs: Math.max(0, ...r.dts),
       p50FrameMs: percentile(r.dts, 0.5), aspect: r.aspect, rail: r.rail });

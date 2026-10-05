@@ -1,0 +1,37 @@
+{
+ "comp": "b",
+ "cam": "glide",
+ "aspect": 1.7777777777777777,
+ "settings": {},
+ "cornerRatios": [
+  0.920558762941796,
+  0.8425897979289314
+ ],
+ "motionProxy": {
+  "speed": 55.87051411700759,
+  "acceleration": 31.803578141516116,
+  "jerk": 138.8366782331365
+ },
+ "stopped": {
+  "beta": 0.001,
+  "speedWeight": 0,
+  "cornerWeight": 1,
+  "iterations": 1450,
+  "restarts": 2,
+  "errorBoundM": 0.03529448840965409,
+  "converged": true
+ },
+ "longer": {
+  "beta": 0.001,
+  "speedWeight": 0,
+  "cornerWeight": 1,
+  "iterations": 4350,
+  "restarts": 9,
+  "errorBoundM": 1.525109237437303e-08,
+  "converged": true
+ },
+ "maxDifferenceM": 0.0030022411943113406,
+ "buildMs": 303.995823,
+ "longerBuildMs": 631.7074100000001,
+ "independenceChecked": true
+}

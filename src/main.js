@@ -195,6 +195,14 @@ async function boot() {
       + 'font:10px/1 ui-monospace,monospace;opacity:.55;pointer-events:none;z-index:9999;'
       + 'color:#888;letter-spacing:.04em';
     document.body.appendChild(label);
+    if (COMP.camera === 'corridor') {
+      const caption = label.textContent;
+      aerialCamera.aerial.onRailChange = rail => {
+        label.textContent = `${caption} / ${rail.holdState} @ ${rail.aspect.toFixed(3)}`
+          + (rail.unavailableHolds.length ? ` / unavailable ${rail.unavailableHolds.join(',')}` : '')
+          + (rail.fallback ? ` / fallback ${rail.fallback}` : '');
+      };
+    }
   }
   await yieldToBrowser();
   scene.add(timed('build-track', () => track.buildTrack()));
@@ -427,7 +435,9 @@ async function boot() {
   registerUpdate(sceneSetup.updateScene);
 
   onResize((w, h) => {
-    void w; void h;
+    // Scene resize runs first. Solve/cached lookup in the debounced resize task,
+    // before RAF pose evaluation; direct diagnostic aspect changes remain guarded.
+    if (COMP.camera === 'corridor') aerialCamera.prepareCompositionRail(Math.max(1, w) / Math.max(1, h));
   });
 
   function frame() {

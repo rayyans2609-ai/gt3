@@ -43,6 +43,9 @@ const CAMERAS = {
     railSigmaM: 300, railZone: { x: 0.76, y: 0.74 }, anchorCorners: true },
   wide: { camera: 'corridor', distance: 440, fov: 48, pitchDeg: 52,
     railSigmaM: 350, railZone: { x: 0.76, y: 0.74 }, anchorCorners: true },
+  soft: { camera: 'corridor', distance: 400, fov: 40, pitchDeg: 52,
+    railSigmaM: 300, railZone: { x: 0.76, y: 0.74 }, anchorCorners: false,
+    speedWeight: 0.05, cornerWeight: 10, cornerEaseM: 120 },
 };
 
 const OVERRIDES = { dist: ['distance', 30, 520], pitch: ['pitchDeg', 30, 80],

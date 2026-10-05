@@ -19,8 +19,11 @@ const EXPECTED_CAR_COUNT = 10;
 // offline, all ten cars fell back to placeholders.
 const DRACO_DECODER_PATH = '/draco/gltf/';
 const WHEEL_NAME = /wheel|tyre|tire|rim/i;
-const NON_WHEEL_NAME = /brake|caliper|disc|rotor|arch|well/i;
+const NON_WHEEL_NAME = /brake|caliper|disc|rotor|arch|well|steering/i;
 const EPSILON = 1e-7;
+// Do not move a sound model for sub-5 mm authoring noise. This keeps the seven
+// already-level roster entries byte-for-byte on their existing transform path.
+const WHEEL_CONTACT_TOLERANCE = 0.005;
 
 const _box = new THREE.Box3();
 const _size = new THREE.Vector3();
@@ -28,6 +31,8 @@ const _centre = new THREE.Vector3();
 const _vertex = new THREE.Vector3();
 const _instanceMatrix = new THREE.Matrix4();
 const _vertexMatrix = new THREE.Matrix4();
+const _pitchAxis = new THREE.Vector3(1, 0, 0);
+const _pitchQuaternion = new THREE.Quaternion();
 
 let loadedCars = null;
 let completedCount = 0;
@@ -98,6 +103,98 @@ function validBounds(box) {
   box.getSize(_size);
   return Number.isFinite(_size.x) && Number.isFinite(_size.y) &&
     Number.isFinite(_size.z) && _size.x > EPSILON && _size.z > EPSILON;
+}
+
+function hasWheelName(object) {
+  const name = object?.name || '';
+  return WHEEL_NAME.test(name) && !NON_WHEEL_NAME.test(name);
+}
+
+function hasWheelMaterial(object) {
+  const materials = Array.isArray(object.material) ? object.material : [object.material];
+  return materials.some(material => hasWheelName(material));
+}
+
+// Most models label a parent WHEEL_/TYRE_ node rather than its mesh. The three
+// merged-geometry models only retain the tyre identity in their material name.
+function isWheelMesh(object, root) {
+  for (let node = object; node && node !== root.parent; node = node.parent) {
+    if (hasWheelName(node)) return true;
+  }
+  return hasWheelMaterial(object);
+}
+
+/** Lowest tyre/rim vertices at the front and rear axle in canonical space. */
+function measureWheelContacts(root, midpointZ) {
+  let frontY = Infinity;
+  let rearY = Infinity;
+  let frontZ = 0;
+  let rearZ = 0;
+
+  root.updateWorldMatrix(true, true);
+  root.traverse((object) => {
+    if (!object.isMesh || !isWheelMesh(object, root)) return;
+    const position = object.geometry?.getAttribute('position');
+    if (!position?.count) return;
+
+    const instanceCount = object.isInstancedMesh ? object.count : 1;
+    for (let instance = 0; instance < instanceCount; instance++) {
+      if (object.isInstancedMesh) {
+        object.getMatrixAt(instance, _instanceMatrix);
+        _vertexMatrix.multiplyMatrices(object.matrixWorld, _instanceMatrix);
+      } else {
+        _vertexMatrix.copy(object.matrixWorld);
+      }
+
+      for (let index = 0; index < position.count; index++) {
+        _vertex.fromBufferAttribute(position, index).applyMatrix4(_vertexMatrix);
+        if (_vertex.z <= midpointZ) {
+          if (_vertex.y < frontY) {
+            frontY = _vertex.y;
+            frontZ = _vertex.z;
+          }
+        } else if (_vertex.y < rearY) {
+          rearY = _vertex.y;
+          rearZ = _vertex.z;
+        }
+      }
+    }
+  });
+
+  if (!Number.isFinite(frontY) || !Number.isFinite(rearY) ||
+      Math.abs(frontZ - rearZ) <= EPSILON) {
+    return null;
+  }
+
+  return { frontY, rearY, frontZ, rearZ, lowestY: Math.min(frontY, rearY) };
+}
+
+function levelWheelContacts(group, midpointZ) {
+  const before = measureWheelContacts(group, midpointZ);
+  if (!before || Math.abs(before.frontY - before.rearY) <= WHEEL_CONTACT_TOLERANCE) {
+    return { before, after: before, pitchRadians: 0, applied: false };
+  }
+
+  let after = before;
+  let pitchRadians = 0;
+  // A tyre's lowest vertex can switch during the tiny rotation. Re-measure and
+  // converge on that actual contact, rather than assuming a fixed source vertex.
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const difference = after.frontY - after.rearY;
+    if (Math.abs(difference) <= EPSILON) break;
+    let correction = Math.atan2(difference, after.frontZ - after.rearZ);
+    if (correction > Math.PI / 2) correction -= Math.PI;
+    if (correction <= -Math.PI / 2) correction += Math.PI;
+    _pitchQuaternion.setFromAxisAngle(_pitchAxis, correction);
+    group.quaternion.premultiply(_pitchQuaternion);
+    group.updateWorldMatrix(true, true);
+    pitchRadians += correction;
+    // The old axle divider remains valid for these sub-degree corrections and
+    // avoids turning the correction into a source-orientation heuristic.
+    after = measureWheelContacts(group, midpointZ);
+    if (!after) throw new Error('Wheel contacts became unavailable while levelling a model.');
+  }
+  return { before, after, pitchRadians, applied: true };
 }
 
 /**
@@ -206,7 +303,18 @@ function normaliseScene(scene, car) {
 
   _box.setFromObject(group, true);
   _box.getCenter(_centre);
-  group.position.set(-_centre.x, -_box.min.y, -_centre.z);
+  const wheelLevel = levelWheelContacts(group, _centre.z);
+
+  _box.setFromObject(group, true);
+  _box.getCenter(_centre);
+  // The levelled cars are grounded from their tyres, not an arbitrary splitter
+  // or diffuser vertex. Unlevelled cars retain their exact old transform path;
+  // their wheel minimum equals the whole-model minimum (checked by the node
+  // verifier), which makes the two ground references equivalent.
+  const groundY = wheelLevel.applied && wheelLevel.after
+    ? wheelLevel.after.lowestY
+    : _box.min.y;
+  group.position.set(-_centre.x, -groundY, -_centre.z);
   group.updateWorldMatrix(true, true);
 
   cloneMaterialInstances(group);
@@ -217,6 +325,8 @@ function normaliseScene(scene, car) {
     flipApplied,
     negativeHalfVolume: halfVolumes.negativeZ,
     positiveHalfVolume: halfVolumes.positiveZ,
+    wheelPitchDegrees: THREE.MathUtils.radToDeg(wheelLevel.pitchRadians),
+    wheelLevelled: wheelLevel.applied,
   };
 
   console.info(

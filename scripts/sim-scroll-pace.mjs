@@ -18,10 +18,13 @@
  * constant 1/fps; scroll->t mapping is the module's own (t = scrollY / maxScroll for default).
  */
 import { mkdirSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 
 const args = process.argv.slice(2);
 const argOf = (name, dflt) => { const i = args.indexOf(name); return i >= 0 ? args[i + 1] : dflt; };
-const OUT = argOf('--out', '/Users/rayyansheikh/.claude/jobs/d1cd9f0a/tmp/w3');
+// Portable default (node-only script may run on any machine); pass --out to keep results.
+const OUT = argOf('--out', join(tmpdir(), 'gt3-sim-scroll-pace'));
 const FPS = Number(argOf('--fps', 60));
 const VH = Number(argOf('--vh', 900));
 const DT = 1 / FPS;

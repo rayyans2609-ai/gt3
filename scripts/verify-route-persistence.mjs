@@ -225,6 +225,64 @@ try {
   });
   report.fresh = freshResult;
 
+  const finishResult = await phase('finish-state refresh restores the scorecard only', async () => {
+    await page.goto(base, { waitUntil: 'domcontentloaded', timeout: 120000 });
+    await waitReady(page);
+    await page.mouse.wheel({ deltaY: 180 }); // a real gesture first, as a visitor would
+    await wait(300);
+    await page.evaluate(async () => {
+      const { seekTo } = await import('/src/scroll/scrollDrive.js');
+      seekTo(1, { instant: true });
+    });
+    await page.waitForFunction(async () => {
+      const { state } = await import('/src/core/state.js');
+      return state.mode === 'finish' && state.progress >= 0.995;
+    }, { timeout: 15000, polling: 100 });
+    await wait(600); // exceeds the 350 ms route write throttle before the reload lifecycle flush.
+    await page.reload({ waitUntil: 'domcontentloaded', timeout: 120000 });
+    await waitReady(page);
+    await wait(1800); // longer than the 1300 ms dismissal fade, so a late sound cue would exist by now
+    const finishDom = () => page.evaluate(() => {
+      const start = document.getElementById('start-screen');
+      const finish = document.getElementById('finish-screen');
+      const visible = (node) => !!node && !node.hidden && node.getAttribute('aria-hidden') !== 'true'
+        && getComputedStyle(node).display !== 'none' && getComputedStyle(node).visibility !== 'hidden'
+        && Number(getComputedStyle(node).opacity) > 0.5;
+      return {
+        startVisible: visible(start), startHidden: !!start?.hidden,
+        finishVisible: visible(finish), soundCue: !!document.querySelector('.sound-cue'),
+      };
+    });
+    const restoredDom = await finishDom();
+    const restored = await snapshot(page);
+    assert(restored.progress >= 0.995, `finish route position did not restore: ${restored.progress}`);
+    assert(restored.mode === 'finish' && restored.locked, `finish restore not locked: ${restored.mode}/${restored.locked}`);
+    assert(restoredDom.finishVisible, 'finish screen not visible after finish refresh');
+    assert(restoredDom.startHidden && !restoredDom.startVisible, 'start screen still visible under the finish card');
+    assert(!restoredDom.soundCue, 'sound cue appeared on a finish restore');
+    assert(restored.activity.morphFrames === 0 && restored.activity.gateFrames === 0, `finish restore was not silent: ${JSON.stringify(restored.activity)}`);
+
+    await page.click('#finish-screen .finish-replay');
+    await page.waitForFunction(async () => {
+      const { state } = await import('/src/core/state.js');
+      return state.progress === 0 && state.mode === 'race' && !state.scrollLocked;
+    }, { timeout: 15000, polling: 100 });
+    await wait(300);
+    const replayed = await snapshot(page);
+    assert(replayed.activeCarIndex === 0, `replay did not reset the route car: ${replayed.activeCarIndex}`);
+    let driven = replayed;
+    for (let attempt = 0; attempt < 12 && driven.progress <= 0.002; attempt += 1) {
+      await page.mouse.wheel({ deltaY: 300 });
+      await wait(180);
+      driven = await snapshot(page);
+    }
+    assert(driven.progress > 0.002, `drive did not work after replay: ${driven.progress}`);
+    const afterDom = await finishDom();
+    assert(!afterDom.finishVisible, 'finish screen still visible after replay');
+    return { restored, restoredDom, replayed, driven };
+  });
+  report.finish = finishResult;
+
   await phase('console errors', async () => {
     assert(errors.length === 0, `browser errors: ${errors.join(' | ')}`);
   });

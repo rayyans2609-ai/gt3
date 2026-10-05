@@ -3,7 +3,7 @@
  *  - car ray: camera -> car centre (rig + 1 m): first terrain hit nearer than the car?
  *  - frame grid (24x14 rays through the viewport): cells whose ray hits asphalt but hits terrain at least
  *    `tol` metres nearer (road hidden by terrain).
- * Configs default: base (default camera), b+soft (recommended candidate), b+wide (widest candidate).
+ * Configs default: base (default camera), b+soft (candidate), b+wide (widest candidate).
  * Usage: GT3_URL=http://127.0.0.1:5194 GT3_OUT=<dir> [GT3_STEP=0.01] [GT3_CONFIGS="|comp=b&cam=soft|comp=b&cam=wide"]
  *   node scripts/verify-occlusion.mjs   (host preflight first; one browser, one page at a time) */
 import puppeteer from 'puppeteer-core';

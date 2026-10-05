@@ -28,17 +28,17 @@ which was the verified-correct raw syntax on 0.157.1 if you ever need to bypass 
 
 From `~/.codex/models_cache.json` (Codex's own catalog, `fetched_at` 2026-10-04, client 0.160.0 — this file is refreshed by Codex itself, so re-check its `fetched_at` before trusting slugs long after this doc's date):
 
-| Slug | Catalog description | `supported_in_api` / `visibility` | Routing role (`model-routing.md` §3) |
+| Slug | Catalog description | `supported_in_api` / `visibility` | Routing role (`model-routing.md` §11) |
 |---|---|---|---|
-| `gpt-6.1-sol` | Latest workhorse model for coding and everyday work | true / list | **GPT-6.1 Sol** — serious engineering |
-| `gpt-6-astra` | Frontier intelligence for the most demanding work | true / list | GPT-6 Astra — last-resort takeover |
-| `gpt-6-luna` | Fast and affordable model for easier tasks | true / list | GPT-6 Luna — mechanical economy |
-| `gpt-5.6-terra` | Older balanced model for straightforward work | true / list | GPT-5.6 Terra — native bounded fallback |
+| `gpt-6.1-sol` | Latest workhorse model for coding and everyday work | true / list | **GPT-6.1 Sol** — heavyweight engineering / execution lead |
+| `gpt-6-astra` | Frontier intelligence for the most demanding work | true / list | GPT-6 Astra — rare, event-triggered senior escalation |
+| `gpt-6-luna` | Fast and affordable model for easier tasks | true / list | GPT-6 Luna — mechanical / deterministic execution |
+| `gpt-5.6-terra` | Older balanced model for straightforward work | true / list | GPT-5.6 Terra — reliable bounded paid worker |
 | `gpt-6-sol` | Previous generation workhorse model | true / list | none (superseded by `gpt-6.1-sol`) |
 | `gpt-5.6-sol` | Older generation workhorse model | true / list | none |
 | `gpt-5.6-luna` | Older fast and efficient model | true / list | none |
 
-Use `gpt-6.1-sol` for Sol; `gpt-6-sol` is the previous generation and is no longer the Sol route. `gpt-5.6-terra` stays in active routing as the reliable native bounded fallback/shortcut; the default bounded lane is now the free Muse route (`opencode-invocation.md`). (`gpt-5.5`, listed as "Legacy coding model", and hidden internal entries such as `gpt-reserve` and `codex-auto-review` are not part of the routing set.)
+Use `gpt-6.1-sol` for Sol; `gpt-6-sol` is the previous generation and is no longer the Sol route. `gpt-5.6-terra` stays in active routing as the reliable bounded paid worker, preferred over Sonnet for ordinary paid bounded work; much bounded work goes to the free Muse route first (`opencode-invocation.md`). (`gpt-5.5`, listed as "Legacy coding model", and hidden internal entries such as `gpt-reserve` and `codex-auto-review` are not part of the routing set.)
 
 ## Verified reasoning-effort values
 
@@ -74,7 +74,7 @@ Only one item remains: which reasoning-effort value wins for a *bare* `codex exe
 Operating notes from that run:
 
 - **Codex works unsandboxed in its launch directory.** Launch routed jobs from a dedicated worktree on the job's branch, never from the user's main checkout, so its commits and branch changes cannot touch the working copy. A symlinked `node_modules` is fine; list it in `.git/info/exclude`, because `.gitignore`'s `node_modules/` pattern only matches directories.
-- **Codex's own verification can be incomplete.** In its execution window it could not finish `npm run build` or get past the headless loading screen, and it reported that honestly. The manager re-ran the build and browser checks. Treat worker-reported verification gaps as manager work, per `model-routing.md` §6 "Implementation ≠ acceptance".
+- **Codex's own verification can be incomplete.** In its execution window it could not finish `npm run build` or get past the headless loading screen, and it reported that honestly. The manager re-ran the build and browser checks. Treat worker-reported verification gaps as manager work, per the acceptance ladder in `model-routing.md` §5.
 
 The `codex-executor` MCP server continues to fail with `CONNECTION_CLOSED` (as of 2026-09-26; still failing 2026-10-04) — routed jobs go through the `codex` CLI via Bash (or `scripts/codex-route.sh`), which draws on the same quota as the MCP path would.
 

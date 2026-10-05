@@ -14,8 +14,10 @@ import { CARS } from '../data/cars.js';
 export const CANONICAL_LENGTH = 4.6;
 
 const EXPECTED_CAR_COUNT = 10;
-const DRACO_DECODER_PATH =
-  'https://www.gstatic.com/draco/versioned/decoders/1.5.7/';
+// Self-hosted copy of three's bundled glTF Draco decoder (examples/jsm/libs/draco/gltf,
+// three r180). Loading it from a CDN made every model decode depend on the internet:
+// offline, all ten cars fell back to placeholders.
+const DRACO_DECODER_PATH = '/draco/gltf/';
 const WHEEL_NAME = /wheel|tyre|tire|rim/i;
 const NON_WHEEL_NAME = /brake|caliper|disc|rotor|arch|well/i;
 const EPSILON = 1e-7;

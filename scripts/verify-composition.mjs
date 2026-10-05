@@ -65,15 +65,19 @@ async function runCandidate(browser, comp, cam) {
   await page.mouse.wheel({ deltaY: 240 });
   await wait(1200);
 
-  async function goTo(t, settleMs = 600) {
+  // Default: real instant seek (state.progress set directly, no scroll-law glide), which
+  // is what Replay/restore use and costs one frame. `slow` drives the real scroll law to
+  // `t` (used where approach direction matters). A wheel-driven glide across a quarter lap
+  // took minutes on the loaded host, which is why static measurement points seek.
+  async function goTo(t, settleMs = 600, slow = false) {
     const start = Date.now();
     while (Date.now() - start < 90000) {
-      const s = await page.evaluate(target => {
-        const max = document.documentElement.scrollHeight - innerHeight;
-        window.scrollTo(0, target * max);
+      const s = await page.evaluate(async (target, instant) => {
+        if (instant) (await import('/src/scroll/scrollDrive.js')).seekTo(target, { instant: true });
+        else window.scrollTo(0, target * (document.documentElement.scrollHeight - innerHeight));
         const p = window.__gt3.probe();
         return { progress: p.progress, speed01: p.speed01, mode: p.mode };
-      }, t);
+      }, t, !slow);
       if (s.mode === 'finish') await page.click('.finish-replay').catch(() => {});
       if (Math.abs(s.progress - t) < 0.001 || (s.speed01 < 0.01 && Math.abs(s.progress - t) < 0.004)) {
         await wait(settleMs);
@@ -107,11 +111,21 @@ async function runCandidate(browser, comp, cam) {
     const ray = new THREE.Raycaster();
     const asphalt = g.scene.getObjectByName('track-asphalt');
     const all = g.scene.children.filter(o => o.name !== 'car-rig');
-    let road = 0, cells = 0, exposed = 0;
+    let road = 0, cells = 0, exposed = 0, roadOutsideShadow = 0;
+    const sunCam = g.scene.children.find(o => o.isDirectionalLight && o.castShadow)?.shadow.camera;
+    if (sunCam) sunCam.updateMatrixWorld();
+    const sunLp = new THREE.Vector3();
     for (let iy = 0; iy < 27; iy++) for (let ix = 0; ix < 48; ix++) {
       ray.setFromCamera({ x: (ix + 0.5) / 24 - 1, y: (iy + 0.5) / 13.5 - 1 }, cam);
       cells++;
-      if (ray.intersectObject(asphalt, false).length) road++;
+      const ah = ray.intersectObject(asphalt, false);
+      if (ah.length) {
+        road++;
+        if (sunCam) {
+          sunLp.copy(ah[0].point).applyMatrix4(sunCam.matrixWorldInverse);
+          if (Math.abs(sunLp.x) > sunCam.right || Math.abs(sunLp.y) > sunCam.top) roadOutsideShadow++;
+        }
+      }
       const edgeCell = ix === 0 || iy === 0 || ix === 47 || iy === 26;
       if (edgeCell) {
         const hits = ray.intersectObjects(all, true).filter(h => h.object.isMesh && h.object.visible);
@@ -124,24 +138,27 @@ async function runCandidate(browser, comp, cam) {
     const nose = rig.position.clone().addScaledVector(fwdLen, half).project(cam);
     const tail = rig.position.clone().addScaledVector(fwdLen, -half).project(cam);
     const carLengthPctOfFrame = 100 * Math.hypot((nose.x - tail.x) / 2, (nose.y - tail.y) / 2 / cam.aspect);
-    // Shadow-box and fog joins on the same grid: ground hits outside the cast-shadow
-    // box (light space), farthest border hit vs fog, and sky fraction.
+    // Shadow-box and fog joins on the same grid, analytic (ray vs the plane through the
+    // car; scene raycasts here cost minutes): ground points outside the cast-shadow
+    // box (light space), farthest border distance vs fog, and sky fraction.
     const sun = g.scene.children.find(o => o.isDirectionalLight && o.castShadow);
     const sc = sun?.shadow.camera;
     if (sc) sc.updateMatrixWorld();
     const lp = new THREE.Vector3();
-    let groundHits = 0, outsideShadow = 0, roadOutsideShadow = 0, sky = 0, borderMaxDist = 0;
+    const plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), -rig.position.y);
+    const hitPoint = new THREE.Vector3();
+    let groundHits = 0, outsideShadow = 0, sky = 0, borderMaxDist = 0;
     const fog = g.scene.fog;
     for (let iy = 0; iy < 27; iy++) for (let ix = 0; ix < 48; ix++) {
       ray.setFromCamera({ x: (ix + 0.5) / 24 - 1, y: (iy + 0.5) / 13.5 - 1 }, cam);
-      const hit = ray.intersectObjects(all, true).find(h => h.object.isMesh && h.object.visible);
-      if (!hit) { sky++; continue; }
-      if (ix === 0 || iy === 0 || ix === 47 || iy === 26) borderMaxDist = Math.max(borderMaxDist, hit.distance);
+      if (!ray.ray.intersectPlane(plane, hitPoint)) { sky++; continue; }
+      if (ix === 0 || iy === 0 || ix === 47 || iy === 26) {
+        borderMaxDist = Math.max(borderMaxDist, hitPoint.distanceTo(cam.position));
+      }
       if (!sc) continue;
       groundHits++;
-      lp.copy(hit.point).applyMatrix4(sc.matrixWorldInverse);
-      const out = Math.abs(lp.x) > sc.right || Math.abs(lp.y) > sc.top;
-      if (out) { outsideShadow++; if (hit.object === asphalt) roadOutsideShadow++; }
+      lp.copy(hitPoint).applyMatrix4(sc.matrixWorldInverse);
+      if (Math.abs(lp.x) > sc.right || Math.abs(lp.y) > sc.top) outsideShadow++;
     }
     // All-ten footprint clearance at this t with the rig's real pose.
     const centre = curve.pointAt(t, new THREE.Vector3());
@@ -212,9 +229,9 @@ async function runCandidate(browser, comp, cam) {
       const a = await import('/src/scene/aerialCamera.js');
       return [a.railPoseAt?.(t), a.railPoseAt?.(t)];
     }, t);
-    await goTo(t - 0.02, 200); await goTo(t, 2500);
+    await goTo(t - 0.02, 200); await goTo(t, 2500, true);
     const below = await measure();
-    await goTo(t + 0.02, 200); await goTo(t, 2500);
+    await goTo(t + 0.02, 200); await goTo(t, 2500, true);
     const above = await measure();
     out.reversibility.push({ t, railDeterministic: JSON.stringify(rail[0]) === JSON.stringify(rail[1]),
       settledPositionDiffM: Math.hypot(...below.camera.map((x, i) => x - above.camera[i])),

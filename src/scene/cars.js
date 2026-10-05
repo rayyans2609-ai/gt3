@@ -18,8 +18,10 @@ const EXPECTED_CAR_COUNT = 10;
 // three r180). Loading it from a CDN made every model decode depend on the internet:
 // offline, all ten cars fell back to placeholders.
 const DRACO_DECODER_PATH = '/draco/gltf/';
-const WHEEL_NAME = /wheel|tyre|tire|rim/i;
-const NON_WHEEL_NAME = /brake|caliper|disc|rotor|arch|well|steering/i;
+// Underscores/digits delimit glTF names; alphabetic substrings (trim, primitive,
+// wheelhouse) do not. Plurals cover material-only tyres/rims on merged models.
+const WHEEL_NAME = /(?:^|[^a-z])(?:wheels?|tyres?|tires?|rims?)(?=$|[^a-z])/i;
+const NON_WHEEL_NAME = /brake|caliper|disc|rotor|arch|well|steering|wheel[\s_-]*house/i;
 const EPSILON = 1e-7;
 // Do not move a sound model for sub-5 mm authoring noise. This keeps the seven
 // already-level roster entries byte-for-byte on their existing transform path.
@@ -117,11 +119,13 @@ function hasWheelMaterial(object) {
 
 // Most models label a parent WHEEL_/TYRE_ node rather than its mesh. The three
 // merged-geometry models only retain the tyre identity in their material name.
-function isWheelMesh(object, root) {
+function isWheelMesh(object, root, allowMaterialFallback) {
+  let wheelNode = false;
   for (let node = object; node && node !== root.parent; node = node.parent) {
-    if (hasWheelName(node)) return true;
+    if (NON_WHEEL_NAME.test(node.name || '')) return false;
+    if (hasWheelName(node)) wheelNode = true;
   }
-  return hasWheelMaterial(object);
+  return wheelNode || (allowMaterialFallback && hasWheelMaterial(object));
 }
 
 /** Lowest tyre/rim vertices at the front and rear axle in canonical space. */
@@ -130,10 +134,14 @@ function measureWheelContacts(root, midpointZ) {
   let rearY = Infinity;
   let frontZ = 0;
   let rearZ = 0;
+  let hasWheelNodes = false;
+  root.traverse(object => {
+    if (object.isMesh && isWheelMesh(object, root, false)) hasWheelNodes = true;
+  });
 
   root.updateWorldMatrix(true, true);
   root.traverse((object) => {
-    if (!object.isMesh || !isWheelMesh(object, root)) return;
+    if (!object.isMesh || !isWheelMesh(object, root, !hasWheelNodes)) return;
     const position = object.geometry?.getAttribute('position');
     if (!position?.count) return;
 

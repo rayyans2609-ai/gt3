@@ -31,7 +31,7 @@ const capture = process.env.GT3_NO_CAPTURE !== '1';
 // 10-frame chicane sequences are recorded for these comps only (disk budget).
 const seqComps = (process.env.GT3_SEQ_COMPS || 'base,b').split(',');
 const softwareGL = process.env.GT3_SOFTWARE_GL === '1';
-const root = '/tmp/gt3-w2';
+const root = process.env.GT3_WORK_DIR || '/tmp/gt3-w2';
 await mkdir(root, { recursive: true });
 if (capture) await mkdir(captureDir, { recursive: true });
 const t00 = Date.now();

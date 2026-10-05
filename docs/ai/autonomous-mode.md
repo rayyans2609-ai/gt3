@@ -38,7 +38,7 @@ If invoked mid-task, infer the objective and boundaries from the conversation an
 | Human-review boundaries | anything subjective: feel, visual/art direction, product intent |
 | Horizon | ~4 h, or objective done, whichever is first |
 
-The manager writes a run plan to the ledger (§11): objective, done criteria, work items, verification plan, exclusions. If done criteria cannot be stated, the objective is not bounded enough, so ask.
+The manager writes a run plan to the ledger (§11): objective, done criteria, work items, verification plan (sized by blast radius, with the triggers that would widen it: `model-routing.md` §5), exclusions. If done criteria cannot be stated, the objective is not bounded enough, so ask.
 
 ## 2. Manager
 
@@ -61,7 +61,7 @@ While the user is away, an independent model view can stand in for the user's ju
 
 **The manager decides.** The reviewer advises and may investigate. Overriding a material finding is allowed, but the finding and the reason go in the ledger and the handoff. If the warranted reviewer is unavailable, take the conservative option (checkpoint or block) for consequential decisions and log the gap.
 
-**Final acceptance is conditional.** When evidence is strong, integration was straightforward, no contradictions occurred, blast radius is low and manager confidence is high, the manager accepts directly. Independent final review (Astra included) happens only when the run's actual risk warrants it. The **human-verification sweep** is a cheap manager pass, not a model review. Before handoff, inspect every NEEDS HUMAN VERIFICATION item, drop bogus or redundant ones and anything automation already settled, and keep only genuine subjective judgment.
+**Final acceptance is conditional.** When evidence is strong, integration was straightforward, no contradictions occurred, blast radius is low and manager confidence is high, the manager accepts directly. Independent final review (Astra included) happens only when the run's actual risk warrants it, and it audits evidence sufficiency rather than replaying the checks. A final regression is a risk-based integration check (`model-routing.md` §5), not a replay of everything tested earlier in the run. The **human-verification sweep** is a cheap manager pass, not a model review. Before handoff, inspect every NEEDS HUMAN VERIFICATION item, drop bogus or redundant ones and anything automation already settled, and keep only genuine subjective judgment.
 
 ## 4. Manager continuity: Opus → Sol
 
@@ -157,7 +157,7 @@ The manager never polls workers itself. If observability already makes state obv
 
 ## 8. Verification, evidence, human-verification queue
 
-Verification depth and evidence reuse follow `model-routing.md` §5. Use the cheapest sufficient evidence, stop once it is sufficient, and move evidence upward in compressed form. If Luna already ran a valid browser check, nobody above re-runs it merely because authority moved up. Raw artifacts stay available for anomalies and disputes. Builds belong at meaningful checkpoints. Don't broad-rerun unaffected evidence.
+Verification follows **right-sized verification** in `model-routing.md` §5. That means blast-radius depth, dependency-cone scope, representative rather than combinatorial coverage, failure-driven escalation and the stop rule. Before launching a heavy verification task, answer §5's pre-verification questions in the ledger, because on this host every unnecessary browser sweep also costs swap and wall-clock (§6). Use the cheapest sufficient evidence, stop once it is sufficient, and move evidence upward in compressed form. If Luna already ran a valid browser check, nobody above re-runs it merely because authority moved up. Raw artifacts stay available for anomalies and disputes. Builds belong at meaningful checkpoints. Don't broad-rerun unaffected evidence.
 
 - **UNVERIFIED ≠ PASS. BLOCKED ≠ FAIL. NEEDS HUMAN VERIFICATION ≠ technical failure.** Static plausibility ≠ runtime proof. Build pass ≠ accepted. Worker finished ≠ accepted.
 - Inspect artifacts from interrupted runs before discarding them.
@@ -165,7 +165,7 @@ Verification depth and evidence reuse follow `model-routing.md` §5. Use the che
 - Working behavior is a regression boundary. Gather evidence before modifying it.
 - When the same check recurs across tasks or runs, note it as a candidate for a deterministic script (`model-routing.md` §8).
 
-**Human-verification queue.** Do everything machine-verifiable without the user. For each genuine subjective judgment: record the item, preserve the exact artifact/state (capture path, commit, URL/state), mark it NEEDS HUMAN VERIFICATION, and continue independent work. Agents may gather and prune evidence, but they never record human acceptance. The run stops for human review only when remaining meaningful work depends on it. The human-verification sweep (§3) prunes the queue before handoff.
+**Human-verification queue.** Settle without the user everything that machine evidence can usefully settle (to §5's stop rule, not exhaustively). For each genuine subjective judgment: record the item, preserve the exact artifact/state (capture path, commit, URL/state), mark it NEEDS HUMAN VERIFICATION, and continue independent work. Agents may gather and prune evidence, but they never record human acceptance. The run stops for human review only when remaining meaningful work depends on it. The human-verification sweep (§3) prunes the queue before handoff.
 
 ## 9. Recovery, stop conditions, light work
 
@@ -180,7 +180,7 @@ Verification depth and evidence reuse follow `model-routing.md` §5. Use the che
 - everything left needs user judgment;
 - further activity would only create speculative cleanup or scope creep.
 
-A clean checkpoint can be the optimal action. Stop when the objective is achieved, all machine-verifiable work is complete, only genuine human judgment remains, or remaining work is blocked and useful fallback is exhausted.
+A clean checkpoint can be the optimal action. Stop when the objective is achieved, machine verification is sufficient (`model-routing.md` §5), only genuine human judgment remains, or remaining work is blocked and useful fallback is exhausted.
 
 **Light-work fallback** (when heavy work is blocked): static inspection, evidence reconciliation, committed-diff review where justified, verification-script preparation, docs-vs-implementation consistency, stale-claim identification, handoff preparation, bounded next-step planning, factual repo reconnaissance, worker-brief preparation. Never speculative refactors, unrelated cleanup, new features or unnecessary documentation. When useful light work is exhausted, wait or stop.
 

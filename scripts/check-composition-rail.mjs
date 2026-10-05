@@ -12,14 +12,14 @@ const aspect = Number(aspectText), beta = Number(betaText);
 const settings = JSON.parse(settingsText);
 const stopped = buildCompositionRail(aspect, { ...settings, beta });
 // Frontier-only runs need no repeated independence test for every parameter.
-const longer = settings.frontier ? stopped : buildCompositionRail(aspect, { ...settings, beta, stop: false,
+const longer = settings.frontier ? null : buildCompositionRail(aspect, { ...settings, beta, stop: false,
   maxIterations: 3 * stopped.solver.iterations });
 const a = new Vector3(), b = new Vector3();
-let maxDifferenceM = 0;
-for (let i = 0; i < 4096; i++) maxDifferenceM = Math.max(maxDifferenceM,
+let maxDifferenceM = longer ? 0 : null;
+if (longer) for (let i = 0; i < 4096; i++) maxDifferenceM = Math.max(maxDifferenceM,
   stopped.at(i / 4096, a).distanceTo(longer.at(i / 4096, b)));
 assert(stopped.solver.converged);
-assert(maxDifferenceM <= 0.5, `iteration-dependent rail: ${maxDifferenceM} m`);
+if (longer) assert(maxDifferenceM <= 0.5, `iteration-dependent rail: ${maxDifferenceM} m`);
 const cornerRatios = [];
 for (const [from, to] of [[0.263, 0.302], [0.328, 0.376]]) {
   let cameraTravel = 0, carTravel = 0;
@@ -42,4 +42,5 @@ for (let i = 0; i < count; i++) {
   jerk = Math.max(jerk, d.clone().addScaledVector(c, -3).addScaledVector(b, 3).sub(a).length() / h ** 3 * 50 ** 3);
 }
 console.log(JSON.stringify({ comp, cam, aspect, settings, cornerRatios, motionProxy: { speed, acceleration, jerk }, stopped: stopped.solver,
-  longer: longer.solver, maxDifferenceM, buildMs: stopped.buildMs, longerBuildMs: longer.buildMs }, null, 1));
+  independenceChecked: Boolean(longer), longer: longer?.solver ?? null, maxDifferenceM,
+  buildMs: stopped.buildMs, longerBuildMs: longer?.buildMs ?? null }, null, 1));

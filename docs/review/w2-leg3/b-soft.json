@@ -112,6 +112,40 @@
   },
   "railClampActiveFraction": 0.0087890625
  },
+ "entryExitFraming": {
+  "hairpin-entry": {
+   "t": 0.263,
+   "windowM": 20,
+   "samples": 15,
+   "maxX": 0.37,
+   "maxY": 0.574,
+   "overZone": 0
+  },
+  "hairpin-exit": {
+   "t": 0.302,
+   "windowM": 20,
+   "samples": 15,
+   "maxX": 0.038,
+   "maxY": 0.606,
+   "overZone": 0
+  },
+  "chicane-entry": {
+   "t": 0.328,
+   "windowM": 20,
+   "samples": 15,
+   "maxX": 0.071,
+   "maxY": 0.281,
+   "overZone": 0
+  },
+  "chicane-exit": {
+   "t": 0.376,
+   "windowM": 20,
+   "samples": 15,
+   "maxX": 0.581,
+   "maxY": 0.311,
+   "overZone": 0
+  }
+ },
  "seamPositionDiffM": 0,
  "reversibilityPositionDiffM": 0,
  "cornerTest": {
@@ -313,7 +347,7 @@
    }
   ]
  },
- "railInitMs": 3252.1,
+ "railInitMs": 552.2,
  "railSolver": {
   "beta": 0.0001,
   "speedWeight": 0.05,
@@ -323,8 +357,14 @@
   "errorBoundM": 0.04638833046443351,
   "converged": true
  },
+ "railDenseCheck": {
+  "samples": 4096,
+  "maxResidualM": -5.6734779719960695
+ },
+ "railFallback": null,
  "railHolds": [],
  "unavailableHolds": [],
+ "railHoldState": "soft",
  "presentation": {
   "carLengthPctOfFrameWidth": 1.69,
   "projectedCarLengthPctRange": [

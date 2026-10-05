@@ -112,6 +112,40 @@
   },
   "railClampActiveFraction": 0.115234375
  },
+ "entryExitFraming": {
+  "hairpin-entry": {
+   "t": 0.263,
+   "windowM": 20,
+   "samples": 15,
+   "maxX": 0.681,
+   "maxY": 0.552,
+   "overZone": 0
+  },
+  "hairpin-exit": {
+   "t": 0.302,
+   "windowM": 20,
+   "samples": 15,
+   "maxX": 0.162,
+   "maxY": 0.5,
+   "overZone": 0
+  },
+  "chicane-entry": {
+   "t": 0.328,
+   "windowM": 20,
+   "samples": 15,
+   "maxX": 0.457,
+   "maxY": 0.53,
+   "overZone": 0
+  },
+  "chicane-exit": {
+   "t": 0.376,
+   "windowM": 20,
+   "samples": 15,
+   "maxX": 0.667,
+   "maxY": 0.6,
+   "overZone": 0
+  }
+ },
  "seamPositionDiffM": 0,
  "reversibilityPositionDiffM": 0,
  "cornerTest": {
@@ -313,14 +347,21 @@
    }
   ]
  },
- "railInitMs": 1690.6,
+ "railInitMs": 387.7,
  "railSolver": {
   "beta": 0.0001,
+  "speedWeight": 0,
+  "cornerWeight": 1,
   "iterations": 5000,
   "restarts": 3,
   "errorBoundM": 0.04867533519906856,
   "converged": true
  },
+ "railDenseCheck": {
+  "samples": 4096,
+  "maxResidualM": -2.588832767202227
+ },
+ "railFallback": null,
  "railHolds": [
   {
    "name": "hairpin",
@@ -338,6 +379,7 @@
   }
  ],
  "unavailableHolds": [],
+ "railHoldState": "strict:hairpin+chicane",
  "presentation": {
   "carLengthPctOfFrameWidth": 2.11,
   "projectedCarLengthPctRange": [

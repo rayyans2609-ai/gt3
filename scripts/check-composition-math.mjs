@@ -98,6 +98,9 @@ const ndcStats = { maxReach: 0, overEngage: 0, overHard: 0, maxX: 0, maxY: 0,
 const camPath = [];
 const SAMPLES = 2000;
 const engage = COMP.camera === 'corridor' ? COMP.railZone : COMP.engageZone || { x: 0.76, y: 0.72 };
+const entryExit = Object.fromEntries(Object.entries(CORNER_SPANS).flatMap(([name, span]) =>
+  span.map((t, i) => [`${name}-${i ? 'exit' : 'entry'}`, { t, windowM: 20, samples: 0,
+    maxX: 0, maxY: 0, overZone: 0 }])));
 const local = new THREE.Vector3(), projectedCorner = new THREE.Vector3();
 const rigMatrix = new THREE.Matrix4(), rigQuaternion = new THREE.Quaternion();
 const rollQuaternion = new THREE.Quaternion(), rollAxis = new THREE.Vector3(0, 0, 1);
@@ -149,6 +152,11 @@ for (let i = 0; i <= SAMPLES; i++) {
   if (maxX > engage.x || maxY > engage.y) ndcStats.overEngage++;
   if (reach > 0.85) ndcStats.overHard++;
   if (reach > 1) ndcStats.overFrame++;
+  for (const boundary of Object.values(entryExit)) if (Math.abs(t - boundary.t) * TRACK_LENGTH <= boundary.windowM) {
+    boundary.samples++;
+    boundary.maxX = Math.max(boundary.maxX, maxX); boundary.maxY = Math.max(boundary.maxY, maxY);
+    if (maxX > engage.x || maxY > engage.y) boundary.overZone++;
+  }
 }
 const seam = poseAt(0).position.distanceTo(poseAt(1).position);
 const before = poseAt(0.44).position.clone();
@@ -383,6 +391,8 @@ console.log(JSON.stringify({
     pctOverFrame: round(100 * ndcStats.overFrame / (SAMPLES + 1), 2),
     perModelMaxReachNdc: Object.fromEntries(Object.entries(ndcStats.perModel).map(([k,v]) => [k,round(v)])),
     railClampActiveFraction: window.__gt3.aerial?.rail?.clampActiveFraction ?? null },
+  entryExitFraming: Object.fromEntries(Object.entries(entryExit).map(([k, v]) => [k,
+    { ...v, maxX: round(v.maxX), maxY: round(v.maxY) }])),
   seamPositionDiffM: round(seam, 4), reversibilityPositionDiffM: round(reversibilityM, 6),
   cornerTest: { hairpin, chicane },
   feasibility, motionProxy,

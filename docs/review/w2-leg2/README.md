@@ -1,5 +1,8 @@
 # W2 leg 2 — computed camera range; no visual acceptance
 
+Historical leg-2 evidence below. [Leg-3 engineering update](../w2-leg3/README.md) supersedes
+the solver, anchor policy, candidate diagnostics, aspect state and build/failure handling.
+
 Worktree `/Users/rayyansheikh/Desktop/gt3/.claude/worktrees/p3-w2`, branch `p3-w2-composition`.
 Start verified: HEAD `0967653`, clean status, exact cwd/branch. Source and harness tested at `442dd88`.
 **Computed:** pure Node/Three.js geometry and poses, official roster GLB accessor bounds; no renderer.

@@ -1,15 +1,15 @@
 {
  "comp": "c",
- "cam": "soft",
+ "cam": "glide",
  "aspect": 1.778,
  "values": {
-  "distance": 400,
+  "distance": 240,
   "pitch": 52,
   "fov": 40,
   "hero": 1.8,
   "halfWidth": 6,
   "racingLineM": 1.922,
-  "fogScale": 7.407,
+  "fogScale": 4.444,
   "shadowScale": 2
  },
  "footprints": [
@@ -92,57 +92,57 @@
   "maxOffsetFinishClearanceM": 3.07
  },
  "framingSettled": {
-  "maxReachNdc": 0.726,
-  "maxX": 0.726,
-  "maxY": 0.697,
+  "maxReachNdc": 0.705,
+  "maxX": 0.705,
+  "maxY": 0.681,
   "pctOverEngageZone": 0,
   "pctOverHardZone": 0,
   "pctOverFrame": 0,
   "perModelMaxReachNdc": {
-   "lexus": 0.723,
-   "nissan": 0.723,
-   "audi": 0.726,
-   "bmw": 0.723,
-   "mercedes": 0.723,
-   "ferrari": 0.724,
-   "mclaren": 0.722,
-   "aston": 0.725,
-   "lamborghini": 0.724,
-   "porsche": 0.722
+   "lexus": 0.702,
+   "nissan": 0.701,
+   "audi": 0.705,
+   "bmw": 0.701,
+   "mercedes": 0.702,
+   "ferrari": 0.703,
+   "mclaren": 0.701,
+   "aston": 0.705,
+   "lamborghini": 0.703,
+   "porsche": 0.701
   },
-  "railClampActiveFraction": 0.0078125
+  "railClampActiveFraction": 0.0830078125
  },
  "entryExitFraming": {
   "hairpin-entry": {
    "t": 0.263,
    "windowM": 20,
    "samples": 15,
-   "maxX": 0.364,
-   "maxY": 0.579,
+   "maxX": 0.061,
+   "maxY": 0.613,
    "overZone": 0
   },
   "hairpin-exit": {
    "t": 0.302,
    "windowM": 20,
    "samples": 15,
-   "maxX": 0.033,
-   "maxY": 0.611,
+   "maxX": 0.117,
+   "maxY": 0.654,
    "overZone": 0
   },
   "chicane-entry": {
    "t": 0.328,
    "windowM": 20,
    "samples": 15,
-   "maxX": 0.066,
-   "maxY": 0.283,
+   "maxX": 0.11,
+   "maxY": 0.344,
    "overZone": 0
   },
   "chicane-exit": {
    "t": 0.376,
    "windowM": 20,
    "samples": 15,
-   "maxX": 0.575,
-   "maxY": 0.298,
+   "maxX": 0.203,
+   "maxY": 0.247,
    "overZone": 0
   }
  },
@@ -154,16 +154,16 @@
     0.263,
     0.302
    ],
-   "cameraToCarPathLength": 0.372,
-   "cameraPathM": 71.786,
+   "cameraToCarPathLength": 0.863,
+   "cameraPathM": 166.397,
    "carPathM": 192.919,
-   "cameraNetDisplacementM": 70.72,
+   "cameraNetDisplacementM": 146.656,
    "carNetDisplacementM": 159.539,
    "carSpatialExtentXZ": [
     72.699,
     152.101
    ],
-   "peakCameraSpeedToPeakCarSpeed": 0.406,
+   "peakCameraSpeedToPeakCarSpeed": 0.939,
    "cameraHeadingSweepDeg": 0,
    "carHeadingNetDeg": -109.28,
    "carHeadingSweepDeg": 109.29
@@ -173,16 +173,16 @@
     0.328,
     0.376
    ],
-   "cameraToCarPathLength": 0.396,
-   "cameraPathM": 94.637,
+   "cameraToCarPathLength": 0.836,
+   "cameraPathM": 199.949,
    "carPathM": 239.267,
-   "cameraNetDisplacementM": 94.588,
+   "cameraNetDisplacementM": 199.416,
    "carNetDisplacementM": 234.909,
    "carSpatialExtentXZ": [
     173.183,
     158.703
    ],
-   "peakCameraSpeedToPeakCarSpeed": 0.436,
+   "peakCameraSpeedToPeakCarSpeed": 0.842,
    "cameraHeadingSweepDeg": 0,
    "carHeadingNetDeg": -0.11,
    "carHeadingSweepDeg": 73.67
@@ -195,7 +195,7 @@
     51.97
    ],
    "stationaryFeasible": true,
-   "conservativeMinStationaryDistanceM": 176.1
+   "conservativeMinStationaryDistanceM": 181.1
   },
   "chicane": {
    "groundExtentRightForwardM": [
@@ -203,7 +203,7 @@
     124.941
    ],
    "stationaryFeasible": true,
-   "conservativeMinStationaryDistanceM": 204.9
+   "conservativeMinStationaryDistanceM": 211
   },
   "complex": {
    "groundExtentRightForwardM": [
@@ -211,22 +211,22 @@
     286.61
    ],
    "stationaryFeasible": false,
-   "conservativeMinStationaryDistanceM": 447.3
+   "conservativeMinStationaryDistanceM": 460.1
   },
   "safeGroundHalfExtentAtTargetM": [
-   189.294,
-   127.313
+   107.506,
+   70.408
   ]
  },
  "motionProxy": {
   "routeSpeedMps": 50,
   "sampleStepM": 0.5,
-  "cameraSpeedPeakMps": 76.99,
-  "accelerationPeakMps2": 55.21,
-  "jerkPeakMps3": 172.13,
-  "speedPeakT": 0.40264,
-  "accelerationPeakT": 0.39455,
-  "jerkPeakT": 0.31496,
+  "cameraSpeedPeakMps": 49.72,
+  "accelerationPeakMps2": 29.82,
+  "jerkPeakMps3": 51.87,
+  "speedPeakT": 0.29798,
+  "accelerationPeakT": 0.2862,
+  "jerkPeakT": 0.27751,
   "updatePoseDiffM": 0,
   "snapsDuringContinuousUpdates": 0
  },
@@ -234,221 +234,221 @@
   "marginM": 1000,
   "requiredWorldSizeChangeM": 0,
   "exposedRays": 0,
-  "minBoundaryGapM": 683.434,
+  "minBoundaryGapM": 785.055,
   "beyondCameraFar": 0,
   "representative": [
    {
     "t": 0.02,
     "exposed": 0,
-    "minBoundaryGapM": 840.469,
-    "maxCornerRayM": 791.344
+    "minBoundaryGapM": 975.679,
+    "maxCornerRayM": 512.888
    },
    {
     "t": 0.265,
     "exposed": 0,
-    "minBoundaryGapM": 806.307,
-    "maxCornerRayM": 791.344
+    "minBoundaryGapM": 879.434,
+    "maxCornerRayM": 512.888
    },
    {
     "t": 0.283,
     "exposed": 0,
-    "minBoundaryGapM": 818.256,
-    "maxCornerRayM": 791.344
+    "minBoundaryGapM": 875.625,
+    "maxCornerRayM": 512.888
    },
    {
     "t": 0.3,
     "exposed": 0,
-    "minBoundaryGapM": 841.976,
-    "maxCornerRayM": 791.344
+    "minBoundaryGapM": 932.249,
+    "maxCornerRayM": 512.888
    },
    {
     "t": 0.335,
     "exposed": 0,
-    "minBoundaryGapM": 887.098,
-    "maxCornerRayM": 791.344
+    "minBoundaryGapM": 1023.229,
+    "maxCornerRayM": 512.888
    },
    {
     "t": 0.352,
     "exposed": 0,
-    "minBoundaryGapM": 863.531,
-    "maxCornerRayM": 791.344
+    "minBoundaryGapM": 976.637,
+    "maxCornerRayM": 512.888
    },
    {
     "t": 0.37,
     "exposed": 0,
-    "minBoundaryGapM": 842.128,
-    "maxCornerRayM": 791.344
+    "minBoundaryGapM": 931.998,
+    "maxCornerRayM": 512.888
    },
    {
     "t": 0.465,
     "exposed": 0,
-    "minBoundaryGapM": 683.434,
-    "maxCornerRayM": 791.344
+    "minBoundaryGapM": 785.055,
+    "maxCornerRayM": 512.888
    },
    {
     "t": 0.09,
     "exposed": 0,
-    "minBoundaryGapM": 739.966,
-    "maxCornerRayM": 791.344
+    "minBoundaryGapM": 872.338,
+    "maxCornerRayM": 512.888
    },
    {
     "t": 0.18,
     "exposed": 0,
-    "minBoundaryGapM": 702.637,
-    "maxCornerRayM": 791.344
+    "minBoundaryGapM": 831.111,
+    "maxCornerRayM": 512.888
    },
    {
     "t": 0.255,
     "exposed": 0,
-    "minBoundaryGapM": 800.731,
-    "maxCornerRayM": 791.344
+    "minBoundaryGapM": 881.459,
+    "maxCornerRayM": 512.888
    },
    {
     "t": 0.39,
     "exposed": 0,
-    "minBoundaryGapM": 820.169,
-    "maxCornerRayM": 791.344
+    "minBoundaryGapM": 889.923,
+    "maxCornerRayM": 512.888
    },
    {
     "t": 0.495,
     "exposed": 0,
-    "minBoundaryGapM": 749.879,
-    "maxCornerRayM": 791.344
+    "minBoundaryGapM": 885.123,
+    "maxCornerRayM": 512.888
    },
    {
     "t": 0.585,
     "exposed": 0,
-    "minBoundaryGapM": 853.2,
-    "maxCornerRayM": 791.344
+    "minBoundaryGapM": 927.155,
+    "maxCornerRayM": 512.888
    },
    {
     "t": 0.68,
     "exposed": 0,
-    "minBoundaryGapM": 849.828,
-    "maxCornerRayM": 791.344
+    "minBoundaryGapM": 921.537,
+    "maxCornerRayM": 512.888
    },
    {
     "t": 0.775,
     "exposed": 0,
-    "minBoundaryGapM": 926.741,
-    "maxCornerRayM": 791.344
+    "minBoundaryGapM": 997.623,
+    "maxCornerRayM": 512.888
    },
    {
     "t": 0.86,
     "exposed": 0,
-    "minBoundaryGapM": 890.386,
-    "maxCornerRayM": 791.344
+    "minBoundaryGapM": 978.177,
+    "maxCornerRayM": 512.888
    },
    {
     "t": 0.994,
     "exposed": 0,
-    "minBoundaryGapM": 883.08,
-    "maxCornerRayM": 791.344
+    "minBoundaryGapM": 1015.841,
+    "maxCornerRayM": 512.888
    }
   ]
  },
- "railInitMs": 637.6,
+ "railInitMs": 350.3,
  "railSolver": {
   "beta": 0.0001,
-  "speedWeight": 0.05,
-  "cornerWeight": 10,
-  "iterations": 7850,
+  "speedWeight": 0,
+  "cornerWeight": 1,
+  "iterations": 4050,
   "restarts": 3,
-  "errorBoundM": 0.04718035143095495,
+  "errorBoundM": 0.04771557608084602,
   "converged": true
  },
  "railDenseCheck": {
   "samples": 4096,
-  "maxResidualM": -5.687822759967596
+  "maxResidualM": -1.8592712243156124
  },
  "railFallback": null,
  "railHolds": [],
  "unavailableHolds": [],
- "railHoldState": "soft",
+ "railHoldState": "none",
  "presentation": {
-  "carLengthPctOfFrameWidth": 1.6,
+  "carLengthPctOfFrameWidth": 2.67,
   "projectedCarLengthPctRange": [
-   1.11,
-   1.88
+   1.87,
+   2.95
   ],
   "roadInMedianHeroWidths": 3.34,
   "roadInWidestHeroWidths": 2.36,
-  "roadCoverageMedian": 0.0363,
-  "roadCoverageMax": 0.0579,
+  "roadCoverageMedian": 0.0548,
+  "roadCoverageMax": 0.088,
   "roadCoveragePoints": [
    {
     "t": 0.02,
-    "fraction": 0.0386
+    "fraction": 0.0648
    },
    {
     "t": 0.265,
-    "fraction": 0.0363
+    "fraction": 0.061
    },
    {
     "t": 0.283,
-    "fraction": 0.0347
+    "fraction": 0.0602
    },
    {
     "t": 0.3,
-    "fraction": 0.034
-   },
-   {
-    "t": 0.335,
-    "fraction": 0.034
-   },
-   {
-    "t": 0.352,
-    "fraction": 0.034
-   },
-   {
-    "t": 0.37,
-    "fraction": 0.0332
-   },
-   {
-    "t": 0.465,
-    "fraction": 0.0471
-   },
-   {
-    "t": 0.09,
-    "fraction": 0.0324
-   },
-   {
-    "t": 0.18,
-    "fraction": 0.037
-   },
-   {
-    "t": 0.255,
-    "fraction": 0.037
-   },
-   {
-    "t": 0.39,
-    "fraction": 0.0394
-   },
-   {
-    "t": 0.495,
     "fraction": 0.0548
    },
    {
-    "t": 0.585,
-    "fraction": 0.0347
+    "t": 0.335,
+    "fraction": 0.0494
    },
    {
-    "t": 0.68,
+    "t": 0.352,
+    "fraction": 0.054
+   },
+   {
+    "t": 0.37,
+    "fraction": 0.0509
+   },
+   {
+    "t": 0.465,
+    "fraction": 0.0548
+   },
+   {
+    "t": 0.09,
     "fraction": 0.0424
    },
    {
+    "t": 0.18,
+    "fraction": 0.0586
+   },
+   {
+    "t": 0.255,
+    "fraction": 0.0617
+   },
+   {
+    "t": 0.39,
+    "fraction": 0.0502
+   },
+   {
+    "t": 0.495,
+    "fraction": 0.088
+   },
+   {
+    "t": 0.585,
+    "fraction": 0.0532
+   },
+   {
+    "t": 0.68,
+    "fraction": 0.0733
+   },
+   {
     "t": 0.775,
-    "fraction": 0.034
+    "fraction": 0.054
    },
    {
     "t": 0.86,
-    "fraction": 0.0579
+    "fraction": 0.0455
    },
    {
     "t": 0.994,
-    "fraction": 0.034
+    "fraction": 0.0525
    }
   ],
-  "frameWidthAtTargetM": 517.6
+  "frameWidthAtTargetM": 310.6
  }
 }

@@ -27,10 +27,11 @@
   "cornerWeight": 10,
   "iterations": 23550,
   "restarts": 15,
-  "errorBoundM": 2.4761749021283057e-7,
+  "errorBoundM": 2.4761749021283057e-07,
   "converged": true
  },
  "maxDifferenceM": 0.00275347542199607,
- "buildMs": 559.5635599999999,
- "longerBuildMs": 2107.940219
+ "buildMs": 1424.7963379999999,
+ "longerBuildMs": 3261.376671,
+ "independenceChecked": true
 }

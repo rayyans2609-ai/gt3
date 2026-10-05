@@ -435,7 +435,9 @@ async function boot() {
   registerUpdate(sceneSetup.updateScene);
 
   onResize((w, h) => {
-    void w; void h;
+    // Scene resize runs first. Solve/cached lookup in the debounced resize task,
+    // before RAF pose evaluation; direct diagnostic aspect changes remain guarded.
+    if (COMP.camera === 'corridor') aerialCamera.prepareCompositionRail(Math.max(1, w) / Math.max(1, h));
   });
 
   function frame() {

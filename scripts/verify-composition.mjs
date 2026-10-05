@@ -366,7 +366,7 @@ async function runCandidate(browser, comp, cam) {
     await page.screenshot({ path: `${captureDir}/${key}_hairpin-apex_night.png` });
   }
   // Resize: rail solve cost (pure rebuild per aspect) and the real frame-time spike while
-  // the viewport changes aspect (the camera rebuilds its rail on the next update).
+  // the viewport changes aspect (the normal debounced resize task prepares the rail).
   out.resize = await page.evaluate(async () => {
     const rail = {};
     try {

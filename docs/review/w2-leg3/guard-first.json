@@ -12,6 +12,8 @@
   "unavailableHolds": [],
   "holdState": "leg1-sector",
   "buildAttempts": 1,
+  "cacheHit": false,
+  "attemptMs": 159.72838300000004,
   "fallback": "leg1-sector",
   "error": "W2 camera framing corridor is infeasible"
  },
@@ -26,7 +28,7 @@
   "holds": [],
   "unavailableHolds": [],
   "holdState": "soft",
-  "buildMs": 1344.141244,
+  "buildMs": 536.397693,
   "solver": {
    "beta": 0.0001,
    "speedWeight": 0.05,
@@ -41,6 +43,39 @@
    "maxResidualM": -4.708323212783685
   },
   "buildAttempts": 2,
+  "cacheHit": false,
+  "attemptMs": 536.455954,
+  "fallback": null,
+  "error": null
+ },
+ "revisited": {
+  "zone": {
+   "x": 0.76,
+   "y": 0.74
+  },
+  "aspect": 1.5,
+  "requestedAspect": 1.5,
+  "clampActiveFraction": 0.0224609375,
+  "holds": [],
+  "unavailableHolds": [],
+  "holdState": "soft",
+  "buildMs": 536.397693,
+  "solver": {
+   "beta": 0.0001,
+   "speedWeight": 0.05,
+   "cornerWeight": 10,
+   "iterations": 6550,
+   "restarts": 4,
+   "errorBoundM": 0.0452290767653387,
+   "converged": true
+  },
+  "denseCheck": {
+   "samples": 4096,
+   "maxResidualM": -4.708323212783685
+  },
+  "buildAttempts": 2,
+  "cacheHit": false,
+  "attemptMs": 536.455954,
   "fallback": null,
   "error": null
  },

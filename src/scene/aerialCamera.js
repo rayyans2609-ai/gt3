@@ -172,18 +172,28 @@ const CORRIDOR = COMP.camera === 'corridor';
 let compositionRail;
 let attemptedAspect = null;
 let railBuildAttempts = 0;
+const compositionRailCache = new Map(); // eight exact-aspect tables; no bucket jumps
 
 /** Build once per requested aspect, including failures. Keep the previous table
  * when a resize fails; on a first failure use the original sector formulation.
  * The optional builder lets Node diagnostics exercise real infeasible corridors.
  */
 export function prepareCompositionRail(aspect, build = buildCompositionRail) {
-  if (attemptedAspect !== null && Math.abs(attemptedAspect - aspect) <= 1e-3) return compositionRail;
+  if (attemptedAspect === aspect) return compositionRail;
+  const started = performance.now();
   attemptedAspect = aspect;
-  railBuildAttempts++;
+  const cacheHit = compositionRailCache.has(aspect);
   let error = null, fallback = null;
   try {
-    compositionRail = build(aspect);
+    if (cacheHit) {
+      compositionRail = compositionRailCache.get(aspect);
+      compositionRailCache.delete(aspect);
+    } else {
+      railBuildAttempts++;
+      compositionRail = build(aspect);
+    }
+    compositionRailCache.set(aspect, compositionRail);
+    if (compositionRailCache.size > 8) compositionRailCache.delete(compositionRailCache.keys().next().value);
   } catch (failure) {
     error = failure instanceof Error ? failure.message : String(failure);
     if (compositionRail) fallback = compositionRail.lens ? 'leg1-sector' : 'last-good';
@@ -210,7 +220,7 @@ export function prepareCompositionRail(aspect, build = buildCompositionRail) {
     clampActiveFraction: compositionRail.activeFraction, holds: compositionRail.holds,
     unavailableHolds: compositionRail.unavailableHolds, holdState: compositionRail.holdState,
     buildMs: compositionRail.buildMs, solver: compositionRail.solver, denseCheck: compositionRail.denseCheck,
-    buildAttempts: railBuildAttempts, fallback, error };
+    buildAttempts: railBuildAttempts, cacheHit, attemptMs: performance.now() - started, fallback, error };
   window.__gt3.comp = { ...COMP, railRuntime: aerial.rail };
   aerial.onRailChange?.(aerial.rail);
   return compositionRail;

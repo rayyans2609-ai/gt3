@@ -11,6 +11,10 @@ import { curve, TRACK_LENGTH } from './trackCurve.js';
 export const CORNER_SPANS = { hairpin: [0.263, 0.302], chicane: [0.328, 0.376] };
 const N = 1024;
 const wrap = i => (i % N + N) % N;
+const prev = Uint16Array.from({ length: N }, (_, i) => wrap(i - 1));
+const next = Uint16Array.from({ length: N }, (_, i) => wrap(i + 1));
+const prev2 = Uint16Array.from({ length: N }, (_, i) => wrap(i - 2));
+const next2 = Uint16Array.from({ length: N }, (_, i) => wrap(i + 2));
 
 // Roster accessor bounds: 4.6 × <=2.823 × <=2.132 m after normalization.
 // A sphere about y=1.066 covers that box, ±3.4° body roll and ±0.035 m bob.
@@ -111,6 +115,34 @@ function nearest(polygon, point) {
   return best;
 }
 
+// Pack static corridor edges once; the hot projection loop reuses one result.
+function packCorridor(polygon) {
+  if (!polygon.length) throw new Error('W2 camera framing corridor is infeasible');
+  return Float64Array.from(polygon.flatMap((p, i) => {
+    const q = polygon[(i + 1) % polygon.length], dx = q[0] - p[0], dy = q[1] - p[1];
+    return [p[0], p[1], dx, dy, Math.max(1e-20, dx * dx + dy * dy)];
+  }));
+}
+
+function projectPacked(edges, x, y, out) {
+  let inside = true;
+  for (let k = 0; k < edges.length; k += 5) {
+    if (edges[k + 2] * (y - edges[k + 1]) - edges[k + 3] * (x - edges[k]) < -1e-8) {
+      inside = false; break;
+    }
+  }
+  out[0] = x; out[1] = y;
+  if (inside) return;
+  let bestD = Infinity;
+  for (let k = 0; k < edges.length; k += 5) {
+    const f = Math.max(0, Math.min(1, ((x - edges[k]) * edges[k + 2]
+      + (y - edges[k + 1]) * edges[k + 3]) / edges[k + 4]));
+    const qx = edges[k] + f * edges[k + 2], qy = edges[k + 1] + f * edges[k + 3];
+    const d = (qx - x) ** 2 + (qy - y) ** 2;
+    if (d < bestD) { bestD = d; out[0] = qx; out[1] = qy; }
+  }
+}
+
 function smooth(values, sigmaM) {
   const sigma = sigmaM * N / TRACK_LENGTH, radius = Math.ceil(3 * sigma);
   const weights = Array.from({ length: 2 * radius + 1 }, (_, i) =>
@@ -133,6 +165,7 @@ export function buildCompositionRail(aspect, options = {}) {
   const zone = { x: COMP.railZone.x - 0.025, y: COMP.railZone.y - 0.025 };
   const planes = points.map(p => framingPlanes(p, targetY, aspect, distance, zone));
   const corridors = planes.map(p => clipPolygon(initialPolygon(), p));
+  const packed = corridors.map(packCorridor);
   let r = smooth(points.map(p => p.dot(basis.right)), COMP.railSigmaM);
   let g = smooth(points.map(p => p.dot(basis.ground)), COMP.railSigmaM);
   const seedR = r.slice(), seedG = g.slice();
@@ -206,24 +239,31 @@ export function buildCompositionRail(aspect, options = {}) {
   const convergenceM = options.convergenceM ?? 0.05;
   if (!(beta > 0)) throw new Error('W2 rail seed tether must be positive');
   const gradient = (values, seed, i) => 6 * values[i]
-    - 4 * (values[wrap(i - 1)] + values[wrap(i + 1)])
-    + values[wrap(i - 2)] + values[wrap(i + 2)] + beta * (values[i] - seed[i])
-    + speedWeight * (edgeWeights[i] * (values[i] - values[wrap(i + 1)])
-      + edgeWeights[wrap(i - 1)] * (values[i] - values[wrap(i - 1)]));
+    - 4 * (values[prev[i]] + values[next[i]])
+    + values[prev2[i]] + values[next2[i]] + beta * (values[i] - seed[i])
+    + speedWeight * (edgeWeights[i] * (values[i] - values[next[i]])
+      + edgeWeights[prev[i]] * (values[i] - values[prev[i]]));
   // A projected-gradient residual gives a conservative Euclidean distance bound
   // to the unique solution: ||x - P(x - grad/L)|| * L/beta. Check the feasible
   // iterate, not FISTA's extrapolation. Options support longer diagnostic runs.
   let iterations = 0, restarts = 0, errorBoundM = Infinity, converged = false;
   let yr = Float64Array.from(r), yg = Float64Array.from(g), momentum = 1;
+  let nr = new Float64Array(N), ng = new Float64Array(N);
+  const lockFlags = new Uint8Array(N), lockR = new Float64Array(N), lockG = new Float64Array(N);
+  for (const [i, p] of locked) { lockFlags[i] = 1; lockR[i] = p[0]; lockG[i] = p[1]; }
+  const q = new Float64Array(2);
+  const project = (i, x, y) => {
+    if (lockFlags[i]) { q[0] = lockR[i]; q[1] = lockG[i]; }
+    else projectPacked(packed[i], x, y, q);
+  };
   for (let iteration = 0; iteration < maxIterations; iteration++) {
-    const nr = new Float64Array(N), ng = new Float64Array(N);
     active = 0; let restartDot = 0;
     for (let i = 0; i < N; i++) {
-      const p = [yr[i] - gradient(yr, seedR, i) / lipschitz,
-        yg[i] - gradient(yg, seedG, i) / lipschitz];
-      const q = locked.get(i) || nearest(corridors[i], p);
-      if (Math.hypot(p[0] - q[0], p[1] - q[1]) > 1e-5) active++;
-      [nr[i], ng[i]] = q;
+      const x = yr[i] - gradient(yr, seedR, i) / lipschitz;
+      const y = yg[i] - gradient(yg, seedG, i) / lipschitz;
+      project(i, x, y);
+      if ((x - q[0]) ** 2 + (y - q[1]) ** 2 > 1e-10) active++;
+      nr[i] = q[0]; ng[i] = q[1];
       restartDot += (yr[i] - nr[i]) * (nr[i] - r[i])
         + (yg[i] - ng[i]) * (ng[i] - g[i]);
     }
@@ -235,14 +275,14 @@ export function buildCompositionRail(aspect, options = {}) {
       yr[i] = nr[i] + (restartDot > 0 ? 0 : gain * (nr[i] - r[i]));
       yg[i] = ng[i] + (restartDot > 0 ? 0 : gain * (ng[i] - g[i]));
     }
-    r = nr; g = ng; momentum = nextMomentum;
+    const oldR = r, oldG = g;
+    r = nr; nr = oldR; g = ng; ng = oldG; momentum = nextMomentum;
     iterations = iteration + 1;
     if (iterations % 50 === 0 || iterations === maxIterations) {
       let residual2 = 0;
       for (let i = 0; i < N; i++) {
-        const p = [r[i] - gradient(r, seedR, i) / lipschitz,
-          g[i] - gradient(g, seedG, i) / lipschitz];
-        const q = locked.get(i) || nearest(corridors[i], p);
+        project(i, r[i] - gradient(r, seedR, i) / lipschitz,
+          g[i] - gradient(g, seedG, i) / lipschitz);
         residual2 += (r[i] - q[0]) ** 2 + (g[i] - q[1]) ** 2;
       }
       errorBoundM = Math.sqrt(residual2) * lipschitz / beta;

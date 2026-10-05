@@ -34,5 +34,14 @@ aerial.update(1 / 60);
 assert.equal(window.__gt3.aerial.rail.fallback, null);
 assert.equal(camera.fov, 40);
 assert(window.__gt3.aerial.rail.denseCheck.maxResidualM <= 0);
+const recovered = window.__gt3.aerial.rail;
+const buildCount = recovered.buildAttempts;
+camera.aspect = first ? 1.5 : 16 / 9;
+aerial.update(1 / 60);
+if (!first) {
+  assert.equal(window.__gt3.aerial.rail.cacheHit, true);
+  assert.equal(window.__gt3.aerial.rail.buildAttempts, buildCount);
+}
 console.log(JSON.stringify({ mode: first ? 'first' : 'resize', failed,
-  recovered: window.__gt3.aerial.rail, framesWithoutRethrow: 200, infeasibleAttempts: attempts }, null, 1));
+  recovered, revisited: window.__gt3.aerial.rail,
+  framesWithoutRethrow: 200, infeasibleAttempts: attempts }, null, 1));

@@ -79,7 +79,7 @@ text/HUD/player UI. One fixed canvas behind it, one shared `WebGLRenderer`.
       showcase.js     Showcase scene + DOM (already uses shared renderer) [evolve]
       selector.js     bottom ten-car selector, ?/badge states [new]
       unlockFlow.js   manual unlock: flag wipe → montage → reveal → narration [new]
-      hud.js          sparse Grand Tour HUD: circuit map TR, car name TL [done, Phase 3d];
+      hud.js          sparse Grand Tour HUD: circuit map TR, car name TL, car info BL [Phase 3];
                       back-to-Hub control waits for Phase 5
       player.js       global music player: compact anchor / expanded / Hub variant [new]
       soundControl.js persistent speaker (master mute) + `+` launcher [evolve]
@@ -221,7 +221,10 @@ voice <audio> → MediaElementSource ──────────────�
   spacing (SPEC §14).
 - **Swap** (`morph.js`): short, non-blocking, runs in both directions, no scroll lock.
 - **HUD** (`hud.js`): circuit map (top-right, derived from `trackCurve`), car name (top-left),
-  theme toggle and speaker/`+`. Back-to-Hub waits for the Hub. Nothing else.
+  bottom-left car information (two lines from `cars.js`), first-use direction cue, a first-Tour
+  sound cue (`soundCue.js`), and one bottom edge row: the sun/moon Day/Night control
+  (`themeToggle.js`) plus speaker/`+`, recomposing when the player expands (SPEC §20, §8).
+  Back-to-Hub waits for the Hub. Nothing else.
 - **Finish target, Phase 7** (`finishSequence.js`): begins at route end; progressively
   hides environment groups, eases camera to a hero framing, resolves to the theme field, then
   `experience='complete'`. Backward scroll reverses it (SPEC §26). Whether its progress is

@@ -610,7 +610,7 @@ copy (a symlink outside the root is refused by Vite's fs guard) — no config ch
 9 instanced neutral gates at CHECKPOINT_T (451–4306 m; 676 m gap skips the technical
 section). Route car = number of gates ≤ progress (both directions); morph retargets without
 queueing or scroll lock; `unlocked` is monotonic, starts with Lexus, persisted in session
-(sorted valid indices); replay preserves discoveries; route position NOT persisted (Phase 4).
+(sorted valid indices); replay preserves discoveries; route position NOT persisted (Phase 4) — superseded 2026-10-04: route-position restore is Phase 3 (user decision; implemented by W7, 56328db).
 coins.js deleted; no chime/spec panel/montage on crossing; approach sound follows the next
 gate. Verified: build; direct forward/reverse state sweep; session serialization.
 **Open:** `scripts/verify-checkpoints.mjs` browser assertions, frame pacing and captures did

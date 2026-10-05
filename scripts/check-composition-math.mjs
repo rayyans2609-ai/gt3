@@ -209,8 +209,9 @@ const chicane = cornerTest(...CORNER_SPANS.chicane);
 // Can ONE fixed camera frame the whole named interval? Convex intersection of
 // exact perspective sphere constraints; binary-search distance (same FOV/pitch).
 const basis = cameraBasis();
-const targetY = curveModule.controlPoints.reduce((s, p) => s + p.y, 0)
-  / curveModule.controlPoints.length + 1.066 * hero;
+// Match the rail's 1024-sample height plane, rather than the control-point mean.
+const targetY = Array.from({ length: 1024 }, (_, i) => pointAt(i / 1024).y)
+  .reduce((s, y) => s + y, 0) / 1024 + 1.066 * hero;
 const feasibleAt = (from, to, distance, zone) => {
   let polygon = [[-10000, -10000], [10000, -10000], [10000, 10000], [-10000, 10000]];
   for (let i = 0; i <= 400 && polygon.length; i++) {
@@ -388,6 +389,7 @@ console.log(JSON.stringify({
   worldExtent: { marginM: 1000, requiredWorldSizeChangeM: 0, exposedRays: worldExposed,
     minBoundaryGapM: round(worldMargin), beyondCameraFar: farExposed, representative: worldPoints },
   railInitMs: round(railInitMs, 1),
+  railSolver: window.__gt3.aerial.rail?.solver,
   railHolds: window.__gt3.aerial.rail?.holds,
   unavailableHolds: window.__gt3.aerial.rail?.unavailableHolds,
   presentation: { carLengthPctOfFrameWidth: round(100 * 4.6 * hero / frameWidthAtTarget, 2),

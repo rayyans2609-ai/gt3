@@ -176,7 +176,8 @@ function corridorPose(t) {
     compositionRail = buildCompositionRail(camera.aspect);
     aerial.rail = { zone: COMP.railZone, aspect: camera.aspect,
       clampActiveFraction: compositionRail.activeFraction, holds: compositionRail.holds,
-      unavailableHolds: compositionRail.unavailableHolds };
+      unavailableHolds: compositionRail.unavailableHolds,
+      buildMs: compositionRail.buildMs, solver: compositionRail.solver };
   }
   sectorBasis();
   compositionRail.at(t, routeTarget);

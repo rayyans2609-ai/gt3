@@ -104,7 +104,8 @@ function smooth(values, sigmaM) {
   });
 }
 
-export function buildCompositionRail(aspect) {
+export function buildCompositionRail(aspect, options = {}) {
+  const started = performance.now();
   const basis = cameraBasis();
   const points = Array.from({ length: N }, (_, i) => curve.getPointAt(i / N));
   const targetY = points.reduce((sum, p) => sum + p.y, 0) / N + 1.066 * COMP.hero;
@@ -114,6 +115,7 @@ export function buildCompositionRail(aspect) {
   const corridors = planes.map(p => clipPolygon(initialPolygon(), p));
   let r = smooth(points.map(p => p.dot(basis.right)), COMP.railSigmaM);
   let g = smooth(points.map(p => p.dot(basis.ground)), COMP.railSigmaM);
+  const seedR = r.slice(), seedG = g.slice();
   const locked = new Map();
   const holds = [];
   const unavailableHolds = [];
@@ -153,31 +155,57 @@ export function buildCompositionRail(aspect) {
     }
   }
   let active = 0;
-  // Minimize squared second differences inside the convex corridors (minimum
-  // bending, not minimum camera/car ratio). Accelerated projected gradient avoids
-  // the abrupt hold boundaries produced by alternating nonlocal Gaussian clamps.
-  // The cyclic biharmonic gradient has Lipschitz constant 16, hence step 1/16.
+  // Minimize bending + beta * squared distance to the Gaussian seed, under the
+  // framing constraints. The tether removes the translation nullspace and makes
+  // the minimizer unique. This is not a camera/car ratio objective.
+  const beta = options.beta ?? 1e-4, lipschitz = 16 + beta;
+  const maxIterations = options.maxIterations ?? 12000;
+  const convergenceM = options.convergenceM ?? 0.05;
+  if (!(beta > 0)) throw new Error('W2 rail seed tether must be positive');
+  const gradient = (values, seed, i) => 6 * values[i]
+    - 4 * (values[wrap(i - 1)] + values[wrap(i + 1)])
+    + values[wrap(i - 2)] + values[wrap(i + 2)] + beta * (values[i] - seed[i]);
+  // A projected-gradient residual gives a conservative Euclidean distance bound
+  // to the unique solution: ||x - P(x - grad/L)|| * L/beta. Check the feasible
+  // iterate, not FISTA's extrapolation. Options support longer diagnostic runs.
+  let iterations = 0, restarts = 0, errorBoundM = Infinity, converged = false;
   let yr = Float64Array.from(r), yg = Float64Array.from(g), momentum = 1;
-  for (let iteration = 0; iteration < 6000; iteration++) {
+  for (let iteration = 0; iteration < maxIterations; iteration++) {
     const nr = new Float64Array(N), ng = new Float64Array(N);
-    active = 0;
+    active = 0; let restartDot = 0;
     for (let i = 0; i < N; i++) {
-      const prev = wrap(i - 1), next = wrap(i + 1), prev2 = wrap(i - 2), next2 = wrap(i + 2);
-      const dr = 6 * yr[i] - 4 * (yr[prev] + yr[next]) + yr[prev2] + yr[next2];
-      const dg = 6 * yg[i] - 4 * (yg[prev] + yg[next]) + yg[prev2] + yg[next2];
-      const p = [yr[i] - dr / 16, yg[i] - dg / 16];
+      const p = [yr[i] - gradient(yr, seedR, i) / lipschitz,
+        yg[i] - gradient(yg, seedG, i) / lipschitz];
       const q = locked.get(i) || nearest(corridors[i], p);
       if (Math.hypot(p[0] - q[0], p[1] - q[1]) > 1e-5) active++;
       [nr[i], ng[i]] = q;
+      restartDot += (yr[i] - nr[i]) * (nr[i] - r[i])
+        + (yg[i] - ng[i]) * (ng[i] - g[i]);
     }
-    const nextMomentum = (1 + Math.sqrt(1 + 4 * momentum ** 2)) / 2;
+    // Adaptive gradient restart discards momentum when it points uphill.
+    const nextMomentum = restartDot > 0 ? 1 : (1 + Math.sqrt(1 + 4 * momentum ** 2)) / 2;
+    if (restartDot > 0) restarts++;
     const gain = (momentum - 1) / nextMomentum;
     for (let i = 0; i < N; i++) {
-      yr[i] = nr[i] + gain * (nr[i] - r[i]);
-      yg[i] = ng[i] + gain * (ng[i] - g[i]);
+      yr[i] = nr[i] + (restartDot > 0 ? 0 : gain * (nr[i] - r[i]));
+      yg[i] = ng[i] + (restartDot > 0 ? 0 : gain * (ng[i] - g[i]));
     }
     r = nr; g = ng; momentum = nextMomentum;
+    iterations = iteration + 1;
+    if (iterations % 50 === 0 || iterations === maxIterations) {
+      let residual2 = 0;
+      for (let i = 0; i < N; i++) {
+        const p = [r[i] - gradient(r, seedR, i) / lipschitz,
+          g[i] - gradient(g, seedG, i) / lipschitz];
+        const q = locked.get(i) || nearest(corridors[i], p);
+        residual2 += (r[i] - q[0]) ** 2 + (g[i] - q[1]) ** 2;
+      }
+      errorBoundM = Math.sqrt(residual2) * lipschitz / beta;
+      converged = errorBoundM <= convergenceM;
+      if (converged && options.stop !== false) break;
+    }
   }
+  if (!converged && options.stop !== false) throw new Error(`W2 rail did not converge: ${errorBoundM.toFixed(3)} m bound`);
   const spline = (values, t) => {
     const u = ((t % 1 + 1) % 1) * N, i = Math.floor(u), f = u - i;
     const weights = [(1 - f) ** 3, 3 * f ** 3 - 6 * f * f + 4,
@@ -185,6 +213,8 @@ export function buildCompositionRail(aspect) {
     return weights.reduce((sum, w, k) => sum + w * values[wrap(i + k - 1)] / 6, 0);
   };
   return { aspect, targetY, activeFraction: active / N, unavailableHolds,
+    buildMs: performance.now() - started,
+    solver: { beta, iterations, restarts, errorBoundM, converged },
     holds: holds.map(h => ({ name: h.name, groundAnchor: h.point })),
     at(t, out) {
       return out.copy(basis.right).multiplyScalar(spline(r, t))

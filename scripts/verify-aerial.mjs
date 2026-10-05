@@ -308,10 +308,12 @@ if (!baseline) {
     || !!document.querySelector('#showcase-layer'));
   const afterFPose = await measure();
   const themeBefore = await page.evaluate(() => document.documentElement.dataset.theme);
-  await page.click('.theme-toggle');
+  // The theme control is a Day/Night segmented radiogroup (W5a): click the opposite side, then the original side.
+  const otherTheme = themeBefore === 'night' ? 'day' : 'night';
+  await page.click(`.theme-segmented__option[data-value="${otherTheme}"]`);
   await new Promise(r => setTimeout(r, 250));
   const themeAfterOne = await page.evaluate(() => document.documentElement.dataset.theme);
-  await page.click('.theme-toggle');
+  await page.click(`.theme-segmented__option[data-value="${themeBefore}"]`);
   await new Promise(r => setTimeout(r, 250));
   const themeAfterTwo = await page.evaluate(() => document.documentElement.dataset.theme);
   regression = { montagePlayed, montageCount, afterCoinProgress: afterCoin.progress,

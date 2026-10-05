@@ -257,14 +257,31 @@ export function buildCompositionRail(aspect, options = {}) {
       -3 * f ** 3 + 3 * f * f + 3 * f + 1, f ** 3];
     return weights.reduce((sum, w, k) => sum + w * values[wrap(i + k - 1)] / 6, 0);
   };
-  return { aspect, targetY, activeFraction: active / N, unavailableHolds,
+  const rail = { aspect, targetY, activeFraction: active / N, unavailableHolds,
     holdState: !COMP.anchorCorners ? (speedWeight > 0 ? 'soft' : 'none')
       : combinedHold ? 'strict-complex' : `strict:${holds.map(h => h.name).join('+') || 'unavailable'}`,
-    buildMs: performance.now() - started,
     solver: { beta, speedWeight, cornerWeight, iterations, restarts, errorBoundM, converged },
     holds: holds.map(h => ({ name: h.name, groundAnchor: h.point })),
     at(t, out) {
       return out.copy(basis.right).multiplyScalar(spline(r, t))
         .addScaledVector(basis.ground, spline(g, t)).setY(targetY);
     } };
+  // Dev and Node builds check the interpolated rail, not just its table knots.
+  // The sphere includes every roster model, roll/bob and FULL lateral amplitude.
+  if (options.assertDense ?? (import.meta.env?.DEV ?? true)) {
+    let maxResidualM = -Infinity;
+    const target = new THREE.Vector3();
+    for (let i = 0; i < 4096; i++) {
+      const t = i / 4096;
+      rail.at(t, target);
+      const r = target.dot(basis.right), g = target.dot(basis.ground);
+      for (const p of framingPlanes(curve.getPointAt(t), targetY, aspect, distance)) {
+        maxResidualM = Math.max(maxResidualM, (p.a * r + p.b * g - p.c) / Math.hypot(p.a, p.b));
+      }
+    }
+    rail.denseCheck = { samples: 4096, maxResidualM };
+    if (!(maxResidualM <= 1e-5)) throw new Error(`W2 dense framing residual: ${maxResidualM.toFixed(3)} m`);
+  }
+  rail.buildMs = performance.now() - started;
+  return rail;
 }

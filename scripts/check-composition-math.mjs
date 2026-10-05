@@ -390,6 +390,8 @@ console.log(JSON.stringify({
     minBoundaryGapM: round(worldMargin), beyondCameraFar: farExposed, representative: worldPoints },
   railInitMs: round(railInitMs, 1),
   railSolver: window.__gt3.aerial.rail?.solver,
+  railDenseCheck: window.__gt3.aerial.rail?.denseCheck,
+  railFallback: window.__gt3.aerial.rail?.fallback,
   railHolds: window.__gt3.aerial.rail?.holds,
   unavailableHolds: window.__gt3.aerial.rail?.unavailableHolds,
   railHoldState: window.__gt3.aerial.rail?.holdState,

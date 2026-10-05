@@ -199,7 +199,8 @@ async function boot() {
       const caption = label.textContent;
       aerialCamera.aerial.onRailChange = rail => {
         label.textContent = `${caption} / ${rail.holdState} @ ${rail.aspect.toFixed(3)}`
-          + (rail.unavailableHolds.length ? ` / unavailable ${rail.unavailableHolds.join(',')}` : '');
+          + (rail.unavailableHolds.length ? ` / unavailable ${rail.unavailableHolds.join(',')}` : '')
+          + (rail.fallback ? ` / fallback ${rail.fallback}` : '');
       };
     }
   }

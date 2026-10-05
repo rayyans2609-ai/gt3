@@ -170,23 +170,57 @@ export function update(dt) {
 const SECTOR = COMP.camera === 'sector';
 const CORRIDOR = COMP.camera === 'corridor';
 let compositionRail;
+let attemptedAspect = null;
+let railBuildAttempts = 0;
+
+/** Build once per requested aspect, including failures. Keep the previous table
+ * when a resize fails; on a first failure use the original sector formulation.
+ * The optional builder lets Node diagnostics exercise real infeasible corridors.
+ */
+export function prepareCompositionRail(aspect, build = buildCompositionRail) {
+  if (attemptedAspect !== null && Math.abs(attemptedAspect - aspect) <= 1e-3) return compositionRail;
+  attemptedAspect = aspect;
+  railBuildAttempts++;
+  let error = null, fallback = null;
+  try {
+    compositionRail = build(aspect);
+  } catch (failure) {
+    error = failure instanceof Error ? failure.message : String(failure);
+    if (compositionRail) fallback = compositionRail.lens ? 'leg1-sector' : 'last-good';
+    else {
+      const lens = { yawDeg: 75, pitchDeg: 52, distance: 140, fov: 32,
+        railSigmaM: 300, railZone: { x: 0.55, y: 0.5 } };
+      const table = buildSectorRail(aspect, lens);
+      // Capture buffers so a later successful rebuild cannot mutate the fallback.
+      const { x, y, z } = table;
+      compositionRail = { aspect, lens, holdState: 'leg1-sector', unavailableHolds: [], holds: [],
+        activeFraction: table.activeFraction,
+        at(t, out) {
+          const u = ((t % 1 + 1) % 1) * RAIL_N, i = Math.floor(u), f = u - i;
+          return out.set(x[i] * (1 - f) + x[i + 1] * f,
+            y[i] * (1 - f) + y[i + 1] * f, z[i] * (1 - f) + z[i + 1] * f);
+        } };
+      fallback = 'leg1-sector';
+    }
+  }
+  TUNE.fov = compositionRail.lens?.fov ?? COMP.fov;
+  if (camera && camera.fov !== TUNE.fov) { camera.fov = TUNE.fov; camera.updateProjectionMatrix(); }
+  aerial.rail = { zone: compositionRail.lens?.railZone ?? COMP.railZone,
+    aspect: compositionRail.aspect, requestedAspect: aspect,
+    clampActiveFraction: compositionRail.activeFraction, holds: compositionRail.holds,
+    unavailableHolds: compositionRail.unavailableHolds, holdState: compositionRail.holdState,
+    buildMs: compositionRail.buildMs, solver: compositionRail.solver, denseCheck: compositionRail.denseCheck,
+    buildAttempts: railBuildAttempts, fallback, error };
+  window.__gt3.comp = { ...COMP, railRuntime: aerial.rail };
+  aerial.onRailChange?.(aerial.rail);
+  return compositionRail;
+}
 
 function corridorPose(t) {
-  if (!compositionRail || Math.abs(compositionRail.aspect - camera.aspect) > 1e-3) {
-    compositionRail = buildCompositionRail(camera.aspect);
-    aerial.rail = { zone: COMP.railZone, aspect: camera.aspect,
-      clampActiveFraction: compositionRail.activeFraction, holds: compositionRail.holds,
-      unavailableHolds: compositionRail.unavailableHolds,
-      holdState: compositionRail.holdState,
-      buildMs: compositionRail.buildMs, solver: compositionRail.solver };
-    // Static config remains available beside the active aspect/hold policy.
-    // Hard-hold feasibility transitions must be visible to the reviewer.
-    window.__gt3.comp = { ...COMP, railRuntime: aerial.rail };
-    aerial.onRailChange?.(aerial.rail);
-  }
-  sectorBasis();
+  prepareCompositionRail(camera.aspect);
+  sectorBasis(compositionRail.lens ?? TUNE);
   compositionRail.at(t, routeTarget);
-  desiredPosition.copy(routeTarget).addScaledVector(forward, -TUNE.distance);
+  desiredPosition.copy(routeTarget).addScaledVector(forward, -(compositionRail.lens?.distance ?? TUNE.distance));
   viewMatrix.lookAt(desiredPosition, routeTarget, UP);
   orientation.setFromRotationMatrix(viewMatrix);
 }
@@ -211,9 +245,9 @@ const railPoint = new THREE.Vector3();
 const carCentre = new THREE.Vector3();
 let engaged = false;
 
-function sectorBasis() {
-  const yaw = THREE.MathUtils.degToRad(TUNE.yawDeg);
-  const pitch = THREE.MathUtils.degToRad(TUNE.pitchDeg);
+function sectorBasis(settings = TUNE) {
+  const yaw = THREE.MathUtils.degToRad(settings.yawDeg);
+  const pitch = THREE.MathUtils.degToRad(settings.pitchDeg);
   groundForward.set(Math.sin(yaw), 0, -Math.cos(yaw));
   forward.copy(groundForward).multiplyScalar(Math.cos(pitch)).setY(-Math.sin(pitch));
   right.set(Math.cos(yaw), 0, Math.sin(yaw));
@@ -252,8 +286,8 @@ function smoothWrapped(values, sigmaSamples) {
  * light smoothing alternated with a projection that keeps the scaled car inside
  * `railZone`. Where the frame allows, the rail stays as straight as the geography.
  */
-export function buildSectorRail(aspect) {
-  sectorBasis();
+export function buildSectorRail(aspect, settings = COMP) {
+  sectorBasis(settings);
   const ds = TRACK_LENGTH / RAIL_N;
   const car = { x: new Float64Array(RAIL_N + 1), y: new Float64Array(RAIL_N + 1),
     z: new Float64Array(RAIL_N + 1) };
@@ -262,19 +296,19 @@ export function buildSectorRail(aspect) {
     radius = carBounds(i / RAIL_N, carCentre);
     car.x[i] = carCentre.x; car.y[i] = carCentre.y; car.z[i] = carCentre.z;
   }
-  const heavy = COMP.railSigmaM / ds;
+  const heavy = settings.railSigmaM / ds;
   rail.x = smoothWrapped(car.x, heavy);
   rail.y = smoothWrapped(car.y, heavy);
   rail.z = smoothWrapped(car.z, heavy);
-  const tanHalf = Math.tan(THREE.MathUtils.degToRad(TUNE.fov) / 2);
-  const sinPitch = Math.sin(THREE.MathUtils.degToRad(TUNE.pitchDeg));
+  const tanHalf = Math.tan(THREE.MathUtils.degToRad(settings.fov) / 2);
+  const sinPitch = Math.sin(THREE.MathUtils.degToRad(settings.pitchDeg));
   const project = () => {
     let active = 0;
     for (let i = 0; i < RAIL_N; i++) {
       toCar.set(car.x[i] - rail.x[i], car.y[i] - rail.y[i], car.z[i] - rail.z[i]);
-      const depth = Math.max(10, TUNE.distance + toCar.dot(forward));
-      const limitX = Math.max(0, COMP.railZone.x * depth * tanHalf * aspect - radius);
-      const limitY = Math.max(0, COMP.railZone.y * depth * tanHalf - radius);
+      const depth = Math.max(10, settings.distance + toCar.dot(forward));
+      const limitX = Math.max(0, settings.railZone.x * depth * tanHalf * aspect - radius);
+      const limitY = Math.max(0, settings.railZone.y * depth * tanHalf - radius);
       const sx = toCar.dot(right);
       const sy = toCar.dot(camUp);
       const dx = Math.sign(sx) * Math.max(0, Math.abs(sx) - limitX);
@@ -298,7 +332,7 @@ export function buildSectorRail(aspect) {
   rail.x = smoothWrapped(rail.x, light);
   rail.z = smoothWrapped(rail.z, light);
   rail.aspect = aspect;
-  aerial.rail = { sigmaM: COMP.railSigmaM, zone: COMP.railZone, aspect,
+  aerial.rail = { sigmaM: settings.railSigmaM, zone: settings.railZone, aspect,
     clampActiveFraction: rail.activeFraction };
   return rail;
 }

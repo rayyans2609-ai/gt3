@@ -1,6 +1,6 @@
 /**
  * W2 pure-node numeric checks (no Vite, no browser, no GPU). One candidate per process:
- *   node scripts/check-composition-math.mjs [base|a|b|c] [aspect=1.7778] [cam=leg1|glide|hold|wide]
+ *   node scripts/check-composition-math.mjs [base|a|b|c] [aspect=1.7778] [cam=leg1|glide|hold|wide|soft]
  * Reports racing-line amplitude/rate/clearance for all ten roster footprints (static
  * GLB accessor bounds), gate/finish post clearance, settled-rail framing (car bounds in
  * NDC), seam/reversibility of the deterministic pose, and the hairpin/chicane corner test.

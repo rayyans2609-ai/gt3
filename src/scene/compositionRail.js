@@ -125,12 +125,13 @@ function smooth(values, sigmaM) {
 
 export function buildCompositionRail(aspect, options = {}) {
   const started = performance.now();
+  const distance = options.distance ?? COMP.distance;
   const basis = cameraBasis();
   const points = Array.from({ length: N }, (_, i) => curve.getPointAt(i / N));
   const targetY = points.reduce((sum, p) => sum + p.y, 0) / N + 1.066 * COMP.hero;
   // 0.025 NDC slack for interpolation between constraint samples.
   const zone = { x: COMP.railZone.x - 0.025, y: COMP.railZone.y - 0.025 };
-  const planes = points.map(p => framingPlanes(p, targetY, aspect, COMP.distance, zone));
+  const planes = points.map(p => framingPlanes(p, targetY, aspect, distance, zone));
   const corridors = planes.map(p => clipPolygon(initialPolygon(), p));
   let r = smooth(points.map(p => p.dot(basis.right)), COMP.railSigmaM);
   let g = smooth(points.map(p => p.dot(basis.ground)), COMP.railSigmaM);
@@ -182,13 +183,31 @@ export function buildCompositionRail(aspect, options = {}) {
   // Minimize bending + beta * squared distance to the Gaussian seed, under the
   // framing constraints. The tether removes the translation nullspace and makes
   // the minimizer unique. This is not a camera/car ratio objective.
-  const beta = options.beta ?? 1e-4, lipschitz = 16 + beta;
+  const beta = options.beta ?? 1e-4;
+  const speedWeight = options.speedWeight ?? COMP.speedWeight ?? 0;
+  const cornerWeight = options.cornerWeight ?? COMP.cornerWeight ?? 1;
+  const easeM = options.cornerEaseM ?? COMP.cornerEaseM ?? 40;
+  // Edge weights are 1 outside the corner approaches, cornerWeight in each
+  // curvature-core span, and raised-cosine eased over easeM on both sides.
+  // Soft observation points use no hard locks or stationary-feasibility branch.
+  const edgeWeights = Float64Array.from({ length: N }, (_, i) => {
+    const t = (i + 0.5) / N;
+    let strength = 0;
+    for (const [from, to] of Object.values(CORNER_SPANS)) {
+      const gapM = Math.max(from - t, t - to, 0) * TRACK_LENGTH;
+      if (gapM < easeM) strength = Math.max(strength, (1 + Math.cos(Math.PI * gapM / easeM)) / 2);
+    }
+    return 1 + (cornerWeight - 1) * strength;
+  });
+  const lipschitz = 16 + beta + 4 * speedWeight * cornerWeight;
   const maxIterations = options.maxIterations ?? 12000;
   const convergenceM = options.convergenceM ?? 0.05;
   if (!(beta > 0)) throw new Error('W2 rail seed tether must be positive');
   const gradient = (values, seed, i) => 6 * values[i]
     - 4 * (values[wrap(i - 1)] + values[wrap(i + 1)])
-    + values[wrap(i - 2)] + values[wrap(i + 2)] + beta * (values[i] - seed[i]);
+    + values[wrap(i - 2)] + values[wrap(i + 2)] + beta * (values[i] - seed[i])
+    + speedWeight * (edgeWeights[i] * (values[i] - values[wrap(i + 1)])
+      + edgeWeights[wrap(i - 1)] * (values[i] - values[wrap(i - 1)]));
   // A projected-gradient residual gives a conservative Euclidean distance bound
   // to the unique solution: ||x - P(x - grad/L)|| * L/beta. Check the feasible
   // iterate, not FISTA's extrapolation. Options support longer diagnostic runs.
@@ -238,7 +257,7 @@ export function buildCompositionRail(aspect, options = {}) {
   };
   return { aspect, targetY, activeFraction: active / N, unavailableHolds,
     buildMs: performance.now() - started,
-    solver: { beta, iterations, restarts, errorBoundM, converged },
+    solver: { beta, speedWeight, cornerWeight, iterations, restarts, errorBoundM, converged },
     holds: holds.map(h => ({ name: h.name, groundAnchor: h.point })),
     at(t, out) {
       return out.copy(basis.right).multiplyScalar(spline(r, t))

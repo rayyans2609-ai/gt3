@@ -2,7 +2,7 @@
  * W2 composition-candidate verification (real-GPU headless Chrome; host rules apply:
  * run the preflight first, one browser at a time, external Vite only).
  *   GT3_URL=http://127.0.0.1:5192 GT3_COMPS=base,a,b,c GT3_CAMS=leg1 node scripts/verify-composition.mjs
- * Independent camera matrix: GT3_COMPS=a,b,c GT3_CAMS=glide,hold,wide
+ * Independent camera matrix: GT3_COMPS=a,b,c GT3_CAMS=glide,hold,wide,soft
  * Env: GT3_CAPTURE_DIR (review stills/sequence; default ~/Desktop/gt3-review-2026-10-04/w2),
  *      GT3_NO_CAPTURE=1, GT3_SOFTWARE_GL=1.
  * Per candidate: yaw/pitch constancy, snaps, seam, deterministic + settled reversibility,
@@ -22,7 +22,9 @@ const rosterBounds = await Promise.all(CARS.map(async car =>
 
 const base = (process.env.GT3_URL || 'http://127.0.0.1:5192').replace(/\/$/, '');
 const comps = (process.env.GT3_COMPS || 'base,a,b,c').split(',').filter(Boolean);
+const cameraCandidates = ['leg1', 'glide', 'hold', 'wide', 'soft'];
 const cams = (process.env.GT3_CAMS || 'leg1').split(',').filter(Boolean);
+if (cams.some(cam => !cameraCandidates.includes(cam))) throw new Error(`GT3_CAMS must use ${cameraCandidates.join(',')}`);
 const captureDir = process.env.GT3_CAPTURE_DIR
   || '/Users/rayyansheikh/Desktop/gt3-review-2026-10-04/w2';
 const capture = process.env.GT3_NO_CAPTURE !== '1';

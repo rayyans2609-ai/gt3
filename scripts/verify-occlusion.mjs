@@ -13,6 +13,8 @@ const base = (process.env.GT3_URL || 'http://127.0.0.1:5194').replace(/\/$/, '')
 const out = process.env.GT3_OUT || '/tmp/gt3-occlusion';
 const step = Number(process.env.GT3_STEP || 0.01);
 const configs = (process.env.GT3_CONFIGS ?? '|comp=b&cam=soft|comp=b&cam=wide').split('|');
+const tsEnv = process.env.GT3_TS; // optional comma list of t (lean mode); otherwise 0..1 every `step`
+const tList = tsEnv ? tsEnv.split(',').map(Number) : null;
 const tol = 0.05;
 await mkdir(out, { recursive: true });
 const wait = ms => new Promise(r => setTimeout(r, ms));
@@ -26,8 +28,11 @@ const browser = await puppeteer.launch({
 const report = { base, at: new Date().toISOString(), step, tol, configs: {} };
 let failed = false;
 try {
-  for (const q of configs) {
+  for (const qFull of configs) {
+    // optional "@WxH" suffix sets the viewport for that config (aspect edge cases)
+    const [q, vp] = qFull.split('@');
     const page = await browser.newPage();
+    if (vp) { const [w, h] = vp.split('x').map(Number); await page.setViewport({ width: w, height: h }); }
     const errors = [];
     page.on('pageerror', e => errors.push(e.message));
     page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
@@ -46,7 +51,8 @@ try {
     await page.mouse.wheel({ deltaY: 240 });
     await wait(1200);
     const points = [];
-    for (let t = 0; t <= 1.0001; t += step) {
+    const tIter = tList ?? Array.from({ length: Math.floor(1.0001 / step) + 1 }, (_, i) => i * step);
+    for (const t of tIter) {
       const tt = Math.min(t, 0.999); curT = +tt.toFixed(3);
       // instant seek (what Replay/restore use); retry while a finish/montage layer settles
       let ok = false;
@@ -92,12 +98,12 @@ try {
       points.push(m);
     }
     const hiddenPts = points.filter(p => p.hidden > 0 || p.carRay.terrainHit !== null);
-    const sum = { config: q || 'default', points: points.length, withRoadCells: points.filter(p => p.roadCells > 0).length,
+    const sum = { config: qFull || 'default', points: points.length, withRoadCells: points.filter(p => p.roadCells > 0).length,
       minRoadCells: Math.min(...points.map(p => p.roadCells)), carRayTerrainHits: points.filter(p => p.carRay.terrainHit !== null).length,
       pointsWithHiddenRoad: points.filter(p => p.hidden > 0).length, maxHiddenCells: Math.max(...points.map(p => p.hidden)),
       worstMarginM: Math.max(...points.map(p => p.worstMarginM)), errors,
       pass: hiddenPts.length === 0 && errors.length === 0, failingT: hiddenPts.map(p => +p.t.toFixed(3)) };
-    report.configs[q || 'default'] = { summary: sum, points };
+    report.configs[qFull || 'default'] = { summary: sum, points };
     if (!sum.pass) failed = true;
     console.log(JSON.stringify(sum));
     await writeFile(`${out}/occlusion.json`, JSON.stringify(report, null, 1));

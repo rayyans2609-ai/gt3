@@ -69,6 +69,25 @@ export function clipPolygon(polygon, planes) {
 const initialPolygon = () => [[-10000, -10000], [10000, -10000],
   [10000, 10000], [-10000, 10000]];
 
+// Convex polygon distance is attained by a vertex and its projection onto an
+// opposite edge (or by a shared point). Minimize the required hold transfer;
+// centroid placement can spend hundreds of metres of unnecessary pan.
+function closestPair(a, b) {
+  const intersection = clipPolygon(a, b.map((p, i) => {
+    const q = b[(i + 1) % b.length];
+    return { a: q[1] - p[1], b: p[0] - q[0], c: (q[1] - p[1]) * p[0] + (p[0] - q[0]) * p[1] };
+  }));
+  if (intersection.length) return [intersection[0], intersection[0]];
+  let pair, distance2 = Infinity;
+  for (const [vertices, polygon, reversed] of [[a, b, false], [b, a, true]]) {
+    for (const p of vertices) {
+      const q = nearest(polygon, p), d = (q[0] - p[0]) ** 2 + (q[1] - p[1]) ** 2;
+      if (d < distance2) { distance2 = d; pair = reversed ? [q, p] : [p, q]; }
+    }
+  }
+  return pair;
+}
+
 function nearest(polygon, point) {
   if (!polygon.length) throw new Error('W2 camera framing corridor is infeasible');
   let inside = true;
@@ -133,10 +152,12 @@ export function buildCompositionRail(aspect, options = {}) {
         unavailableHolds.push(name);
         continue;
       }
-      // Interior anchor reserves entry/exit room. Choosing the closest boundary
-      // pair used up that reserve and forced acceleration just outside the hold.
-      const point = polygon.reduce((s, p) => [s[0] + p[0] / polygon.length,
-        s[1] + p[1] / polygon.length], [0, 0]);
+      // A single hold minimizes its seed-tether cost within the guarded polygon.
+      // The 0.025 NDC constraint slack, not distance from the polygon edge,
+      // reserves interpolation/framing room. All-ten entry/exit checks are separate.
+      let sr = 0, sg = 0;
+      for (let i = first; i <= last; i++) { sr += seedR[wrap(i)]; sg += seedG[wrap(i)]; }
+      const point = nearest(polygon, [sr / (last - first + 1), sg / (last - first + 1)]);
       holds.push({ name, first, last, polygon, point });
     }
     // If the combined complex also fits, keep one observation point through the
@@ -146,11 +167,14 @@ export function buildCompositionRail(aspect, options = {}) {
       complex = clipPolygon(complex, planes[wrap(i)]);
     }
     if (complex.length) {
-      const anchor = complex.reduce((s, p) => [s[0] + p[0] / complex.length,
-        s[1] + p[1] / complex.length], [0, 0]);
+      let sr = 0, sg = 0;
+      for (let i = holds[0].first; i <= holds[1].last; i++) { sr += seedR[i]; sg += seedG[i]; }
+      const count = holds[1].last - holds[0].first + 1;
+      const anchor = nearest(complex, [sr / count, sg / count]);
       holds[0].point = anchor; holds[1].point = anchor;
       for (let i = holds[0].first; i <= holds[1].last; i++) locked.set(wrap(i), anchor);
     } else {
+      if (holds.length === 2) [holds[0].point, holds[1].point] = closestPair(holds[0].polygon, holds[1].polygon);
       for (const h of holds) for (let i = h.first; i <= h.last; i++) locked.set(wrap(i), h.point);
     }
   }

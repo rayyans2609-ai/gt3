@@ -392,6 +392,7 @@ console.log(JSON.stringify({
   railSolver: window.__gt3.aerial.rail?.solver,
   railHolds: window.__gt3.aerial.rail?.holds,
   unavailableHolds: window.__gt3.aerial.rail?.unavailableHolds,
+  railHoldState: window.__gt3.aerial.rail?.holdState,
   presentation: { carLengthPctOfFrameWidth: round(100 * 4.6 * hero / frameWidthAtTarget, 2),
     projectedCarLengthPctRange: [round(Math.min(...projectedLengths), 2), round(Math.max(...projectedLengths), 2)],
     roadInMedianHeroWidths: round(2 * TRACK.halfWidth / (medianWidth * hero), 2),

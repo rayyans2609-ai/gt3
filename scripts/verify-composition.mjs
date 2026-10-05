@@ -374,7 +374,7 @@ async function runCandidate(browser, comp, cam) {
       const solve = comp.camera === 'corridor'
         ? (await import('/src/scene/compositionRail.js')).buildCompositionRail
         : comp.camera === 'sector' ? (await import('/src/scene/aerialCamera.js')).buildSectorRail : null;
-      if (solve) for (const [k, a] of [['16:9', 16 / 9], ['4:3', 4 / 3], ['21:9', 21 / 9], ['9:16', 9 / 16]]) {
+      if (solve) for (const [k, a] of [['16:9', 16 / 9], ['16:10', 1.6], ['1.5', 1.5], ['4:3', 4 / 3], ['21:9', 21 / 9], ['9:16', 9 / 16]]) {
         const t0 = performance.now(); solve(a); rail[k] = +(performance.now() - t0).toFixed(1);
       }
     } catch (e) { rail.error = String(e); }
@@ -389,7 +389,8 @@ async function runCandidate(browser, comp, cam) {
     const r = await page.evaluate(() => {
       const f = window.__w2.frames; window.__w2.segment = null;
       return { dts: f.map(x => x.dt), aspect: window.__gt3.camera.aspect, rail: window.__gt3.aerial.rail
-        ? { aspect: window.__gt3.aerial.rail.aspect, unavailableHolds: window.__gt3.aerial.rail.unavailableHolds } : null };
+        ? { aspect: window.__gt3.aerial.rail.aspect, holdState: window.__gt3.aerial.rail.holdState,
+          unavailableHolds: window.__gt3.aerial.rail.unavailableHolds } : null };
     });
     out.resizeFrames.push({ name, frames: r.dts.length, maxFrameMs: Math.max(0, ...r.dts),
       p50FrameMs: percentile(r.dts, 0.5), aspect: r.aspect, rail: r.rail });

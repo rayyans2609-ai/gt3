@@ -195,6 +195,13 @@ async function boot() {
       + 'font:10px/1 ui-monospace,monospace;opacity:.55;pointer-events:none;z-index:9999;'
       + 'color:#888;letter-spacing:.04em';
     document.body.appendChild(label);
+    if (COMP.camera === 'corridor') {
+      const caption = label.textContent;
+      aerialCamera.aerial.onRailChange = rail => {
+        label.textContent = `${caption} / ${rail.holdState} @ ${rail.aspect.toFixed(3)}`
+          + (rail.unavailableHolds.length ? ` / unavailable ${rail.unavailableHolds.join(',')}` : '');
+      };
+    }
   }
   await yieldToBrowser();
   scene.add(timed('build-track', () => track.buildTrack()));

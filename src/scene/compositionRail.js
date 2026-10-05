@@ -139,6 +139,7 @@ export function buildCompositionRail(aspect, options = {}) {
   const locked = new Map();
   const holds = [];
   const unavailableHolds = [];
+  let combinedHold = false;
   if (COMP.anchorCorners) {
     const guard = Math.ceil(10 * N / TRACK_LENGTH);
     for (const [name, [from, to]] of Object.entries(CORNER_SPANS)) {
@@ -168,6 +169,7 @@ export function buildCompositionRail(aspect, options = {}) {
       complex = clipPolygon(complex, planes[wrap(i)]);
     }
     if (complex.length) {
+      combinedHold = true;
       let sr = 0, sg = 0;
       for (let i = holds[0].first; i <= holds[1].last; i++) { sr += seedR[i]; sg += seedG[i]; }
       const count = holds[1].last - holds[0].first + 1;
@@ -256,6 +258,8 @@ export function buildCompositionRail(aspect, options = {}) {
     return weights.reduce((sum, w, k) => sum + w * values[wrap(i + k - 1)] / 6, 0);
   };
   return { aspect, targetY, activeFraction: active / N, unavailableHolds,
+    holdState: !COMP.anchorCorners ? (speedWeight > 0 ? 'soft' : 'none')
+      : combinedHold ? 'strict-complex' : `strict:${holds.map(h => h.name).join('+') || 'unavailable'}`,
     buildMs: performance.now() - started,
     solver: { beta, speedWeight, cornerWeight, iterations, restarts, errorBoundM, converged },
     holds: holds.map(h => ({ name: h.name, groundAnchor: h.point })),

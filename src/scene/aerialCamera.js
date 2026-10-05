@@ -177,7 +177,12 @@ function corridorPose(t) {
     aerial.rail = { zone: COMP.railZone, aspect: camera.aspect,
       clampActiveFraction: compositionRail.activeFraction, holds: compositionRail.holds,
       unavailableHolds: compositionRail.unavailableHolds,
+      holdState: compositionRail.holdState,
       buildMs: compositionRail.buildMs, solver: compositionRail.solver };
+    // Static config remains available beside the active aspect/hold policy.
+    // Hard-hold feasibility transitions must be visible to the reviewer.
+    window.__gt3.comp = { ...COMP, railRuntime: aerial.rail };
+    aerial.onRailChange?.(aerial.rail);
   }
   sectorBasis();
   compositionRail.at(t, routeTarget);

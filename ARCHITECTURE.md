@@ -49,7 +49,13 @@ text/HUD/player UI. One fixed canvas behind it, one shared `WebGLRenderer`.
       experience.js   experience state machine + transition driver [new]
     scroll/
       scrollDrive.js  sole owner of document scroll; per-experience mapping [evolve]
+      boundedPace.js  pure `?scroll=cap|pace` pace models (Phase 3 review candidates) [new]
     scene/
+      composition.js  `?comp=`/`?cam=` review scaffolding — remove at composition lock [new, temp]
+      compositionRail.js precomputed corridor camera rail for `?cam=` candidates [new, temp]
+      racingLine.js   hidden authored racing line (comp b/c) [new]
+      carWarmup.js    GPU warm-up of all cars before Tour unlock (SPEC §27) [new]
+      gateResponse.js restrained gate traversal response (`?gate=quiet` alternative) [new]
       sceneSetup.js   shared renderer, adaptive dpr, render dispatch per experience [evolve]
       theme.js        Day/Night scene presets + crossfade (from timeOfDay.js) [done, Phase 1a];
                       Night route lighting (SPEC §13a; approach open to design) is added
@@ -79,6 +85,7 @@ text/HUD/player UI. One fixed canvas behind it, one shared `WebGLRenderer`.
       showcase.js     Showcase scene + DOM (already uses shared renderer) [evolve]
       selector.js     bottom ten-car selector, ?/badge states [new]
       unlockFlow.js   manual unlock: flag wipe → montage → reveal → narration [new]
+      soundCue.js     one-time first-Tour "Sound" cue (visual only) [new]
       hud.js          sparse Grand Tour HUD: circuit map TR, car name TL, car info BL [Phase 3];
                       back-to-Hub control waits for Phase 5
       player.js       global music player: compact anchor / expanded / Hub variant [new]
@@ -167,12 +174,13 @@ Retired keys: `timeOfDay` (Phase 1a). `mode` and `started` are **transitional** 
 keys still used by the start/finish flow; a marked bridge in `main.js` maps the running
 race onto `experience='tour'`. Phase 3 removed Tour coins, in-Tour montage and the
 `F`-key Showcase. The start screen and finish screen remain until their later phases.
-`unlocked` now starts with Lexus, grows monotonically and persists for the session;
-route position still resets on refresh until the later navigation work lands.
+`unlocked` now starts with Lexus, grows monotonically and persists for the session.
+Route position persists for the session as `routeProgress` (Phase 3, W7). It is restored after
+readiness while scroll is locked; at or past 0.995 the finish state is restored.
 
 Keys land with the phase that owns their truth, so no key has two sources of truth.
 `masterMuted`/`audioReady` land in Phase 2, because the mute flag lives in
-`audioManager.js` today. Session persistence of `progress`/`activeCarIndex`/`unlocked`, and
+`audioManager.js` today. Session persistence of route position (`routeProgress`; the route car is derived from it) and `unlocked`, and
 `unlocked` starting as {0}, land in Phase 3, because `coins.js` tracks collection
 separately and the legacy replay clears `unlocked`.
 

@@ -549,3 +549,8 @@ A fresh implementation agent should be able to determine, from this file alone: 
    - the checkpoint traversal response (§18);
    - the bottom-left car-information content (§20);
    - final Phase 3 acceptance and approval to merge to `main`.
+10. **Owner decisions, 2026-10-04.** These are recorded here so the spec carries them:
+    - **Route position across refresh (§24, §25) is Phase 3 scope.** Implemented with `routeProgress` in `src/core/session.js`.
+    - **The Tour's reduced-texture strategy must not lower Showcase quality.** The Tour may use 512-px textures (W4c). Showcase and hero-inspection, including the manual-unlock montage (§11), must use full-resolution models when they become reachable. This extends §27's full-quality rule, which as written covers render resolution, to model/texture resolution. Implementation is deferred to Phase 6 (W8); deferring it is an agent proposal awaiting the owner's confirmation at Phase 3 review.
+    - **The ~30 s time-to-ready after the swap-hitch fix is not an accepted tradeoff by default.** It must be measured, and causes that need no tradeoff fixed, before the owner judges what remains.
+11. **§30.6 status (2026-10-05).** The "far grass skirt" geometry described in item 6 no longer exists: since Phase 3a, `environment.js` builds one triangulated ground with no crossing skirts or lower plane. A machine occlusion sweep (`scripts/verify-occlusion.mjs`) found no terrain between the camera and the car along the route. Owner visual acceptance is still required before item 6 is retired.

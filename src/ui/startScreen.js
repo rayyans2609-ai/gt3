@@ -14,6 +14,7 @@ let progressLabel = null;
 let progress = 0;
 let readiness = 'loading';
 let dismissComplete = false;
+let restoredSilently = false;
 const dismissCompleteHandlers = [];
 
 function element(tag, className, text) {
@@ -126,6 +127,7 @@ function buildScreen() {
  * registrations after completion run immediately.
  */
 export function onDismissComplete(fn) {
+  if (restoredSilently) return;
   if (dismissComplete) fn();
   else dismissCompleteHandlers.push(fn);
 }
@@ -145,6 +147,22 @@ export function dismissStartScreen() {
     dismissComplete = true;
     for (const fn of dismissCompleteHandlers.splice(0)) fn();
   }, DISMISS_DURATION);
+}
+
+/**
+ * Refresh-restore into the finished state: remove the introduction at once, with no gesture, fade
+ * or dismissal-complete handlers (so the first-Tour-entry sound cue never appears). Idempotent.
+ */
+export function dismissStartScreenForRestore() {
+  if (!root) root = document.getElementById('start-screen');
+  if (!root || restoredSilently) return;
+  restoredSilently = true;
+  dismissed = true;
+  window.clearTimeout(dismissTimer);
+  dismissCompleteHandlers.length = 0;
+  root.classList.add('is-leaving');
+  root.setAttribute('aria-hidden', 'true');
+  root.hidden = true;
 }
 
 /** Populate the existing start-screen root. Main owns asset preloading. */

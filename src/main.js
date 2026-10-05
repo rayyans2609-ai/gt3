@@ -277,7 +277,10 @@ async function boot() {
       aerialCamera.snap();
     }
     scrollDrive.unlockScroll();
-    if (restoreFinish) finishScreen.restoreFinishScreen();
+    if (restoreFinish) {
+      startScreen.dismissStartScreenForRestore(); // no gesture will come; keep it (and its sound cue) out of the finish card
+      finishScreen.restoreFinishScreen();
+    }
     startRoutePersistence();
     reportProgress();
     console.info(`[gt3] ${readiness.status} — three r${THREE.REVISION}`,

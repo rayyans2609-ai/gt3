@@ -23,7 +23,7 @@ body.is-player-open #hud-bottomright { right: calc(24px + var(--player-w, 274px)
 .hud-identity__slot.is-visible { opacity: 1; transform: translateY(0); }
 .hud-identity__name { overflow: hidden; max-width: 100%; color: var(--fg); font-family: var(--font-display); font-size: 23px; font-weight: 400; letter-spacing: -0.025em; line-height: 1.1; text-overflow: ellipsis; white-space: nowrap; }
 .hud-identity__headline { overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; margin-top: 7px; max-width: 34ch; color: var(--fg); font-family: var(--font-ui); font-size: 12px; font-weight: 400; letter-spacing: -0.005em; line-height: 1.35; opacity: .78; }
-.hud-identity__spec { overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; margin-top: 3px; max-width: 34ch; color: var(--fg); font-family: var(--font-mono); font-size: 10px; font-weight: 400; letter-spacing: .01em; line-height: 1.4; opacity: .62; overflow-wrap: break-word; }
+.hud-identity__spec { overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; margin-top: 3px; max-width: 100%; color: var(--fg); font-family: var(--font-mono); font-size: 10px; font-weight: 400; letter-spacing: .01em; line-height: 1.4; opacity: .62; overflow-wrap: break-word; }
 
 .hud-route { width: 170px; height: 170px; }
 .hud-route__svg { display: block; width: 170px; height: 170px; overflow: visible; }

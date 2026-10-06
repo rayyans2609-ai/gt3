@@ -1,0 +1,555 @@
+{
+  "base": "http://127.0.0.1:5200",
+  "startedAt": "2026-10-06T18:47:48.605Z",
+  "variants": {
+    "pulse": {
+      "dayResourceDelta": {
+        "programs": 0,
+        "textures": 0,
+        "geometries": 0
+      },
+      "nightResourceDelta": {
+        "programs": 0,
+        "textures": 0,
+        "geometries": 0
+      },
+      "phases": [
+        {
+          "label": "A1 input during GPU warm-up is ignored; first gesture after ready starts",
+          "status": "PASS",
+          "value": {
+            "wheelEventsSent": 19,
+            "pageDownSent": 3,
+            "wheelEventsHandledDuringWarmup": 19,
+            "warmupMs": 10769,
+            "warmStart": {
+              "progress": 0,
+              "active": 0,
+              "started": false,
+              "unlocked": [
+                0
+              ],
+              "locked": true,
+              "morphing": false,
+              "scrollY": 0,
+              "theme": "day",
+              "model": [
+                "car-lexus"
+              ],
+              "fadeMaterials": 0,
+              "gateResponseVisible": false,
+              "screen": "start-screen",
+              "gl": {
+                "createProgram": 10,
+                "compileShader": 20,
+                "createTexture": 16,
+                "createBuffer": 0,
+                "bufferData": 0,
+                "texImage2D": 8,
+                "texImage3D": 2,
+                "texStorage2D": 11,
+                "texStorage3D": 0,
+                "compressedTexImage2D": 0,
+                "compressedTexImage3D": 0,
+                "texSubImage2D": 11,
+                "texSubImage3D": 0,
+                "compressedTexSubImage2D": 0,
+                "compressedTexSubImage3D": 0
+              },
+              "programs": 10,
+              "textures": 12,
+              "geometries": 0
+            },
+            "atReady": {
+              "t": 18993.20000000298,
+              "progress": 0,
+              "target": 0,
+              "started": false,
+              "unlocked": [
+                0
+              ],
+              "scrollY": 0,
+              "locked": false
+            },
+            "after": {
+              "progress": 0.005637182033836549,
+              "active": 0,
+              "started": true,
+              "unlocked": [
+                0
+              ],
+              "locked": false,
+              "morphing": false,
+              "scrollY": 84,
+              "theme": "day",
+              "model": [
+                "car-lexus"
+              ],
+              "fadeMaterials": 0,
+              "gateResponseVisible": false,
+              "screen": "start-screen is-ready is-leaving",
+              "gl": {
+                "createProgram": 103,
+                "compileShader": 206,
+                "createTexture": 300,
+                "createBuffer": 5715,
+                "bufferData": 5715,
+                "texImage2D": 11,
+                "texImage3D": 2,
+                "texStorage2D": 292,
+                "texStorage3D": 0,
+                "compressedTexImage2D": 0,
+                "compressedTexImage3D": 0,
+                "texSubImage2D": 292,
+                "texSubImage3D": 0,
+                "compressedTexSubImage2D": 0,
+                "compressedTexSubImage3D": 0
+              },
+              "programs": 103,
+              "textures": 296,
+              "geometries": 1494
+            }
+          }
+        },
+        {
+          "label": "cold first crossing: zero GL allocations/uploads",
+          "status": "PASS",
+          "value": {
+            "programs": 0,
+            "textures": 0,
+            "geometries": 0,
+            "gl": {
+              "createProgram": 0,
+              "compileShader": 0,
+              "createTexture": 0,
+              "createBuffer": 0,
+              "bufferData": 0,
+              "texImage2D": 0,
+              "texImage3D": 0,
+              "texStorage2D": 0,
+              "texStorage3D": 0,
+              "compressedTexImage2D": 0,
+              "compressedTexImage3D": 0,
+              "texSubImage2D": 0,
+              "texSubImage3D": 0,
+              "compressedTexSubImage2D": 0,
+              "compressedTexSubImage3D": 0
+            }
+          }
+        },
+        {
+          "label": "day: reversal before the swap completes",
+          "status": "PASS",
+          "value": {
+            "atReverse": {
+              "msIntoSwap": 150,
+              "morphing": true,
+              "mount": [
+                "car-audi",
+                "car-bmw"
+              ],
+              "gateVisible": true
+            },
+            "end": {
+              "active": 2,
+              "model": [
+                "car-audi"
+              ]
+            },
+            "resourceDelta": {
+              "programs": 0,
+              "textures": 0,
+              "geometries": 0,
+              "gl": {
+                "createProgram": 0,
+                "compileShader": 0,
+                "createTexture": 0,
+                "createBuffer": 0,
+                "bufferData": 0,
+                "texImage2D": 0,
+                "texImage3D": 0,
+                "texStorage2D": 0,
+                "texStorage3D": 0,
+                "compressedTexImage2D": 0,
+                "compressedTexImage3D": 0,
+                "texSubImage2D": 0,
+                "texSubImage3D": 0,
+                "compressedTexSubImage2D": 0,
+                "compressedTexSubImage3D": 0
+              }
+            }
+          }
+        },
+        {
+          "label": "day: reversal after the swap midpoint",
+          "status": "PASS",
+          "value": {
+            "atReverse": {
+              "msIntoSwap": 383.3,
+              "morphing": true,
+              "mount": [
+                "car-audi",
+                "car-bmw"
+              ],
+              "gateVisible": true
+            },
+            "end": {
+              "active": 2,
+              "model": [
+                "car-audi"
+              ]
+            },
+            "resourceDelta": {
+              "programs": 0,
+              "textures": 0,
+              "geometries": 0,
+              "gl": {
+                "createProgram": 0,
+                "compileShader": 0,
+                "createTexture": 0,
+                "createBuffer": 0,
+                "bufferData": 0,
+                "texImage2D": 0,
+                "texImage3D": 0,
+                "texStorage2D": 0,
+                "texStorage3D": 0,
+                "compressedTexImage2D": 0,
+                "compressedTexImage3D": 0,
+                "texSubImage2D": 0,
+                "texSubImage3D": 0,
+                "compressedTexSubImage2D": 0,
+                "compressedTexSubImage3D": 0
+              }
+            }
+          }
+        },
+        {
+          "label": "day: retarget across two gates before completion",
+          "status": "PASS",
+          "value": {
+            "atRetarget": {
+              "msIntoSwap": 150,
+              "morphing": true,
+              "mount": [
+                "car-audi",
+                "car-bmw"
+              ],
+              "gateVisible": true
+            },
+            "end": {
+              "active": 4,
+              "model": [
+                "car-mercedes"
+              ],
+              "unlocked": [
+                0,
+                1,
+                2,
+                3,
+                4
+              ]
+            },
+            "resourceDelta": {
+              "programs": 0,
+              "textures": 0,
+              "geometries": 0,
+              "gl": {
+                "createProgram": 0,
+                "compileShader": 0,
+                "createTexture": 0,
+                "createBuffer": 0,
+                "bufferData": 0,
+                "texImage2D": 0,
+                "texImage3D": 0,
+                "texStorage2D": 0,
+                "texStorage3D": 0,
+                "compressedTexImage2D": 0,
+                "compressedTexImage3D": 0,
+                "texSubImage2D": 0,
+                "texSubImage3D": 0,
+                "compressedTexSubImage2D": 0,
+                "compressedTexSubImage3D": 0
+              }
+            }
+          }
+        },
+        {
+          "label": "day: gate response lifecycle",
+          "status": "PASS",
+          "value": {
+            "during": true,
+            "after": false,
+            "resourceDelta": {
+              "programs": 0,
+              "textures": 0,
+              "geometries": 0,
+              "gl": {
+                "createProgram": 0,
+                "compileShader": 0,
+                "createTexture": 0,
+                "createBuffer": 0,
+                "bufferData": 0,
+                "texImage2D": 0,
+                "texImage3D": 0,
+                "texStorage2D": 0,
+                "texStorage3D": 0,
+                "compressedTexImage2D": 0,
+                "compressedTexImage3D": 0,
+                "texSubImage2D": 0,
+                "texSubImage3D": 0,
+                "compressedTexSubImage2D": 0,
+                "compressedTexSubImage3D": 0
+              }
+            }
+          }
+        },
+        {
+          "label": "night: reversal before the swap completes",
+          "status": "PASS",
+          "value": {
+            "atReverse": {
+              "msIntoSwap": 150,
+              "morphing": true,
+              "mount": [
+                "car-ferrari",
+                "car-mclaren"
+              ],
+              "gateVisible": true
+            },
+            "end": {
+              "active": 5,
+              "model": [
+                "car-ferrari"
+              ]
+            },
+            "resourceDelta": {
+              "programs": 0,
+              "textures": 0,
+              "geometries": 0,
+              "gl": {
+                "createProgram": 0,
+                "compileShader": 0,
+                "createTexture": 0,
+                "createBuffer": 0,
+                "bufferData": 0,
+                "texImage2D": 0,
+                "texImage3D": 0,
+                "texStorage2D": 0,
+                "texStorage3D": 0,
+                "compressedTexImage2D": 0,
+                "compressedTexImage3D": 0,
+                "texSubImage2D": 0,
+                "texSubImage3D": 0,
+                "compressedTexSubImage2D": 0,
+                "compressedTexSubImage3D": 0
+              }
+            }
+          }
+        },
+        {
+          "label": "night: reversal after the swap midpoint",
+          "status": "PASS",
+          "value": {
+            "atReverse": {
+              "msIntoSwap": 383.3,
+              "morphing": true,
+              "mount": [
+                "car-ferrari",
+                "car-mclaren"
+              ],
+              "gateVisible": true
+            },
+            "end": {
+              "active": 5,
+              "model": [
+                "car-ferrari"
+              ]
+            },
+            "resourceDelta": {
+              "programs": 0,
+              "textures": 0,
+              "geometries": 0,
+              "gl": {
+                "createProgram": 0,
+                "compileShader": 0,
+                "createTexture": 0,
+                "createBuffer": 0,
+                "bufferData": 0,
+                "texImage2D": 0,
+                "texImage3D": 0,
+                "texStorage2D": 0,
+                "texStorage3D": 0,
+                "compressedTexImage2D": 0,
+                "compressedTexImage3D": 0,
+                "texSubImage2D": 0,
+                "texSubImage3D": 0,
+                "compressedTexSubImage2D": 0,
+                "compressedTexSubImage3D": 0
+              }
+            }
+          }
+        },
+        {
+          "label": "night: retarget across two gates before completion",
+          "status": "PASS",
+          "value": {
+            "atRetarget": {
+              "msIntoSwap": 133.3,
+              "morphing": true,
+              "mount": [
+                "car-ferrari",
+                "car-mclaren"
+              ],
+              "gateVisible": true
+            },
+            "end": {
+              "active": 7,
+              "model": [
+                "car-aston"
+              ],
+              "unlocked": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7
+              ]
+            },
+            "resourceDelta": {
+              "programs": 0,
+              "textures": 0,
+              "geometries": 0,
+              "gl": {
+                "createProgram": 0,
+                "compileShader": 0,
+                "createTexture": 0,
+                "createBuffer": 0,
+                "bufferData": 0,
+                "texImage2D": 0,
+                "texImage3D": 0,
+                "texStorage2D": 0,
+                "texStorage3D": 0,
+                "compressedTexImage2D": 0,
+                "compressedTexImage3D": 0,
+                "texSubImage2D": 0,
+                "texSubImage3D": 0,
+                "compressedTexSubImage2D": 0,
+                "compressedTexSubImage3D": 0
+              }
+            }
+          }
+        },
+        {
+          "label": "night: gate response lifecycle",
+          "status": "PASS",
+          "value": {
+            "during": true,
+            "after": false,
+            "resourceDelta": {
+              "programs": 0,
+              "textures": 0,
+              "geometries": 0,
+              "gl": {
+                "createProgram": 0,
+                "compileShader": 0,
+                "createTexture": 0,
+                "createBuffer": 0,
+                "bufferData": 0,
+                "texImage2D": 0,
+                "texImage3D": 0,
+                "texStorage2D": 0,
+                "texStorage3D": 0,
+                "compressedTexImage2D": 0,
+                "compressedTexImage3D": 0,
+                "texSubImage2D": 0,
+                "texSubImage3D": 0,
+                "compressedTexSubImage2D": 0,
+                "compressedTexSubImage3D": 0
+              }
+            }
+          }
+        },
+        {
+          "label": "replay returns to Lexus and keeps discoveries",
+          "status": "PASS",
+          "value": {
+            "unlocked": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9
+            ],
+            "resourceDelta": {
+              "programs": 0,
+              "textures": 0,
+              "geometries": 0,
+              "gl": {
+                "createProgram": 0,
+                "compileShader": 0,
+                "createTexture": 0,
+                "createBuffer": 0,
+                "bufferData": 0,
+                "texImage2D": 0,
+                "texImage3D": 0,
+                "texStorage2D": 0,
+                "texStorage3D": 0,
+                "compressedTexImage2D": 0,
+                "compressedTexImage3D": 0,
+                "texSubImage2D": 0,
+                "texSubImage3D": 0,
+                "compressedTexSubImage2D": 0,
+                "compressedTexSubImage3D": 0
+              }
+            }
+          }
+        },
+        {
+          "label": "mid-crossing stills",
+          "status": "PASS",
+          "value": [
+            {
+              "path": "/tmp/gt3-p3r-gates/pulse-final/captures/pulse-day-gate1.png",
+              "theme": "day",
+              "gate": 1,
+              "msIntoSwap": 266.5,
+              "morphing": true,
+              "gateVisible": true
+            },
+            {
+              "path": "/tmp/gt3-p3r-gates/pulse-final/captures/pulse-day-gate4.png",
+              "theme": "day",
+              "gate": 4,
+              "msIntoSwap": 300,
+              "morphing": true,
+              "gateVisible": true
+            },
+            {
+              "path": "/tmp/gt3-p3r-gates/pulse-final/captures/pulse-night-gate7.png",
+              "theme": "night",
+              "gate": 7,
+              "msIntoSwap": 283.4,
+              "morphing": true,
+              "gateVisible": true
+            }
+          ]
+        }
+      ],
+      "errors": []
+    }
+  },
+  "errors": [],
+  "browserPids": [
+    13504
+  ],
+  "endedAt": "2026-10-06T18:49:01.334Z",
+  "failed": 0
+}

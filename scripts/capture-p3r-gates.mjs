@@ -13,7 +13,7 @@ const browser = await puppeteer.launch({
   defaultViewport: { width: 1280, height: 720 },
 });
 const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
-const report = { base, captures: [], checks: [], errors: [] };
+const report = { base, captures: [], checks: [], gateComparisons: [], errors: [] };
 try {
   for (const [camera, query] of [['default', ''], ['glide', '?comp=b&cam=glide']]) {
     const page = await browser.newPage();
@@ -61,6 +61,39 @@ try {
     await wait(1400);
     const replay = await read();
     if (replay.signalling || replay.intensity > 0.005) throw new Error('lamps failed replay reset');
+    await page.close();
+  }
+  // A small reachability/lifecycle probe for the preserved gate comparisons,
+  // rather than repeating the full swap suite for unchanged treatments.
+  for (const treatment of ['sweep', 'quiet']) {
+    const page = await browser.newPage();
+    await installGpuCounters(page);
+    page.on('pageerror', error => report.errors.push(error.message));
+    await page.goto(`${base}/?gate=${treatment}`, { waitUntil: 'domcontentloaded' });
+    await page.waitForSelector('#start-screen.is-ready', { timeout: 120000 });
+    await page.mouse.wheel({ deltaY: 120 });
+    await wait(1700);
+    const gate = await page.evaluate(async () => (await import('/src/scene/trackCurve.js')).CHECKPOINT_T[0]);
+    const seek = t => page.evaluate(async progress =>
+      (await import('/src/scroll/scrollDrive.js')).seekTo(progress, { instant: true }), t);
+    await seek(gate - 0.003); await wait(1400);
+    const before = await page.evaluate(() => ({ ...window.__gt3GlCalls }));
+    await seek(gate + 0.003); await wait(120);
+    const mid = await page.evaluate(() => {
+      const group = window.__gt3.scene.getObjectByName('checkpoint-traversal-response');
+      return { treatment: group.userData.treatment, visible: group.visible };
+    });
+    if (mid.treatment !== treatment || mid.visible !== (treatment === 'sweep'))
+      throw new Error(`gate=${treatment} did not select the preserved response`);
+    await wait(1400);
+    const after = await page.evaluate(() => ({ visible:
+      window.__gt3.scene.getObjectByName('checkpoint-traversal-response').visible,
+      gl: { ...window.__gt3GlCalls } }));
+    const gl = gpuDelta(before, after.gl);
+    if (after.visible || Object.values(gl).some(value => value !== 0))
+      throw new Error(`gate=${treatment} lifecycle/GL probe failed: ${JSON.stringify(gl)}`);
+    report.gateComparisons.push({ treatment, midVisible: mid.visible, afterVisible: after.visible, gl });
+    console.log(`PASS gate=${treatment} selector/lifecycle; zero GL allocations/uploads`);
     await page.close();
   }
   if (report.errors.length) throw new Error(report.errors.join(' | '));

@@ -20,6 +20,7 @@ A running record of **material** model work. It feeds `model-routing.md` §15, w
 
 | Date | Task | Type | Model @ effort | Outcome | 1st-pass | Escalated to | Rework (owner) | Verified by | Notes |
 |---|---|---|---|---|---|---|---|---|---|
+| 2026-10-06 | Phase 3 gate feedback / swap comparison / finish gantry | implement + test | gpt-6.1-sol @ high | accepted (engineering; owner visual review pending) | N | — | Sol: narrowed beam emission, actual lifecycle wait + lean checkpoint mode, capture sampling | Sol: build; default/pulse swap + checkpoint checks; finish/legacy probes | Direct execution; no children or escalation. ~65 min wall incl. shared-lock/preflight waits; host stops respected. Zero measured crossing compiles/uploads/buffer allocations. |
 
 ## Emerging patterns
 

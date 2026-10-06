@@ -20,6 +20,7 @@ A running record of **material** model work. It feeds `model-routing.md` §15, w
 
 | Date | Task | Type | Model @ effort | Outcome | 1st-pass | Escalated to | Rework (owner) | Verified by | Notes |
 |---|---|---|---|---|---|---|---|---|---|
+| 2026-10-06 | Phase 3 F1 crossing SFX + F2 pre-ready input (diagnose, patch, new targeted harness) | implement | Opus @ high (session) | accepted | Y | — | — | Opus (harness verify-preready-input PASS) | Fast path justified for the ~40-line patch, but it **overreached**: Opus also iterated the new harness 4× in-browser and started an existing harness before handing to Luna (owner interrupted). Cause: §9 fast path's unbounded "verify" + no owner-before-execution rule; doctrine on Luna/§11 not applied. Corrected same day: §9 bounded fast path, autonomous-mode §1 owners in run plan, CLAUDE/AGENTS/MASTER_CONTEXT foundational reading. Thinking: ok. |
 
 ## Emerging patterns
 

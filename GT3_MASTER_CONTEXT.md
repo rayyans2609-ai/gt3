@@ -38,6 +38,8 @@ When sources disagree, in order:
 6. **`docs/archive/SPEC_V1.md`, `docs/archive/SPEC_V2.md`** — historical product direction only. `SPEC_V1.md` = the first historical direction: restrained luxury with a fixed chase camera and visible-identity coins. `SPEC_V2.md` = the second historical direction: a bold/colorful "Hot-Wheels" reversal with a homepage/collection hub. The root `SPEC.md` = the current third direction, effectively `SPEC_V3` (the filename stays `SPEC.md`, which remains canonical). Do not treat either archive as a partial current authority.
 7. **Decipher / GT3 Meta Archive** and branch chat history — deep historical context, retrieved only when genuinely needed.
 
+**Process truth** sits beside this product hierarchy and is equally foundational: `docs/ai/model-routing.md` (who does what, at what cost, and how much verification) and `docs/ai/autonomous-mode.md` (unattended runs, host limits). Read both at session start, before assigning work.
+
 ## Important project paths
 
 (Verified against the actual filesystem — note two names differ from what documentation elsewhere assumes.)

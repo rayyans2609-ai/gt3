@@ -38,7 +38,7 @@ If invoked mid-task, infer the objective and boundaries from the conversation an
 | Human-review boundaries | anything subjective: feel, visual/art direction, product intent |
 | Horizon | ~4 h, or objective done, whichever is first |
 
-The manager writes a run plan to the ledger (§11): objective, done criteria, work items, verification plan (sized by blast radius, with the triggers that would widen it: `model-routing.md` §5), exclusions. If done criteria cannot be stated, the objective is not bounded enough, so ask.
+The manager writes a run plan to the ledger (§11): objective, done criteria, work items **each with its owner (model @ effort), assigned before execution starts, with Opus-owned items labelled Anchor Task or bounded fast path (`model-routing.md` §9, §11)**, verification plan (with its executor) (sized by blast radius, with the triggers that would widen it: `model-routing.md` §5), exclusions. If done criteria cannot be stated, the objective is not bounded enough, so ask.
 
 ## 2. Manager
 

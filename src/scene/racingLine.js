@@ -80,9 +80,25 @@ if (amplitudeM > 0) {
     // + dog = toward the inside of a right turn = right = negative offset lateral.
     // tanh keeps the clamp soft so the line never visibly flattens against a wall.
     lateralTable[i] = -amplitudeM * Math.tanh(1.25 * dog[i] / peak) / Math.tanh(1.25);
+    for (const corner of COMP.curbCorners || []) {
+      const w = curbWeight(i / N, corner);
+      // Only the selected apex may use the curb. The existing geometry-led
+      // outside/inside/outside lobes remain everywhere else.
+      lateralTable[i] += w * (corner.side * COMP.curbLateralM - lateralTable[i]);
+    }
   }
 }
 lateralTable[N] = lateralTable[0];
+
+/** Compact C3 apex window; no nonzero tails on straights. */
+export function curbWeight(t, corner) {
+  const distanceM = Math.abs(((t - corner.t + 1.5) % 1) - 0.5) * TRACK_LENGTH;
+  return distanceM < corner.radiusM ? Math.cos(Math.PI * distanceM / (2 * corner.radiusM)) ** 4 : 0;
+}
+
+export function curbUseAt(t) {
+  return Math.max(0, ...(COMP.curbCorners || []).map(c => curbWeight(t, c)));
+}
 
 // Path curvature, normalised by the centreline peak so roll matches today's scale.
 {

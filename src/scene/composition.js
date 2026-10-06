@@ -48,6 +48,20 @@ const CAMERAS = {
     speedWeight: 0.05, cornerWeight: 10, cornerEaseM: 120 },
 };
 
+// Phase-3 closure: coupled B/glide compositions, not independent tuning knobs.
+// Road growth accommodates both the larger hero and the stronger ordinary line.
+// Curb events are compact windows on genuine apexes (+lateral = left).
+const HAIRPIN_CURB = { name: 'hairpin', t: 0.283, side: 1, radiusM: 65 };
+const CHICANE_CURB = { name: 'chicane-exit', t: 0.365, side: 1, radiusM: 70 };
+const LOOKS = {
+  r1: { title: 'glide+', distance: 240, fov: 40, pitchDeg: 55.64,
+    hero: 2.28, halfWidth: 8, lineGain: 1.15, curbCorners: [HAIRPIN_CURB] },
+  r2: { title: 'closer', distance: 218, fov: 38, pitchDeg: 54.6,
+    hero: 2.09, halfWidth: 7.5, lineGain: 1.1, curbCorners: [HAIRPIN_CURB] },
+  r3: { title: 'bold', distance: 240, fov: 40, pitchDeg: 57.2,
+    hero: 2.47, halfWidth: 8.6, lineGain: 1.2, curbCorners: [HAIRPIN_CURB, CHICANE_CURB] },
+};
+
 const OVERRIDES = { dist: ['distance', 30, 520], pitch: ['pitchDeg', 30, 80],
   fov: ['fov', 20, 60], hero: ['hero', 0.5, 3], hw: ['halfWidth', 3.5, 9] };
 
@@ -60,6 +74,11 @@ function resolve() {
   const requestedCamera = (params.get('cam') || '').toLowerCase();
   const cameraVariant = Object.hasOwn(CAMERAS, requestedCamera) ? requestedCamera : 'leg1';
   if (cameraVariant !== 'leg1') Object.assign(values, CAMERAS[cameraVariant]);
+  const requestedLook = (params.get('look') || '').toLowerCase();
+  const look = Object.hasOwn(LOOKS, requestedLook) ? requestedLook : null;
+  // A valid look owns the whole composition; comp/cam keep their old meaning
+  // when look is omitted or invalid. Numeric dev overrides still apply last.
+  if (look) Object.assign(values, CANDIDATES.b, CAMERAS.glide, LOOKS[look]);
   const overrides = {};
   // Numeric overrides are dev-only live-tuning aids, validated and clamped.
   const dev = typeof import.meta !== 'undefined' && import.meta.env?.DEV;
@@ -75,11 +94,21 @@ function resolve() {
   const scaledHalfWidth = CAR_HALF_WIDTH_M * values.hero;
   values.racingLineM = values.racingLine > 0 ? Math.max(0, values.racingLine
     * (values.halfWidth - scaledHalfWidth - RACING_MARGIN_M - RACING_YAW_ALLOWANCE_M)) : 0;
+  if (look) {
+    values.racingLineM = (7 - CAR_HALF_WIDTH_M * 1.9 - RACING_MARGIN_M - RACING_YAW_ALLOWANCE_M) * values.lineGain;
+    // Target puts a nominal 1.8 m tyre footprint just onto the inner curb.
+    // The largest roster body + yaw envelope must remain on the wide curb.
+    values.curbLateralM = Math.min(values.halfWidth - 0.9 * values.hero + 0.18,
+      values.halfWidth + 2.6 - scaledHalfWidth - 0.65);
+    values.racingLineMaxM = Math.max(values.racingLineM, values.curbLateralM);
+    values.curbCorners = Object.freeze(values.curbCorners.map(c => Object.freeze({ ...c })));
+  }
   // Fog keeps today's fog-to-subject relationship as the camera pulls back.
   values.fogScale = values.camera === 'legacy' ? 1 : values.distance / CANDIDATES.base.distance;
   values.shadowScale = values.camera === 'legacy' ? 1 : Math.min(2, values.fogScale);
-  return Object.freeze({ name, cameraVariant,
-    isDefault: name === 'base' && cameraVariant === 'leg1' && !Object.keys(overrides).length,
+  return Object.freeze({ name: look ? 'b' : name, cameraVariant: look ? 'glide' : cameraVariant,
+    ...(look ? { look } : {}),
+    isDefault: !look && name === 'base' && cameraVariant === 'leg1' && !Object.keys(overrides).length,
     ...values, overrides: Object.freeze(overrides) });
 }
 

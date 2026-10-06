@@ -189,7 +189,7 @@ async function boot() {
     // TEMPORARY (W2 review): tiny label naming the active composition candidate.
     const label = document.createElement('div');
     label.className = 'dev-comp-label';
-    label.textContent = `comp ${COMP.name}${COMP.cameraVariant !== 'leg1' ? ` / cam ${COMP.cameraVariant}` : ''}${Object.keys(COMP.overrides).length
+    label.textContent = `${COMP.look ? `look ${COMP.look} ${COMP.title} / ` : ''}comp ${COMP.name}${COMP.cameraVariant !== 'leg1' ? ` / cam ${COMP.cameraVariant}` : ''}${Object.keys(COMP.overrides).length
       ? ` ${Object.entries(COMP.overrides).map(([k, v]) => `${k}=${v}`).join(' ')}` : ''}`;
     label.style.cssText = 'position:fixed;left:50%;bottom:6px;transform:translateX(-50%);'
       + 'font:10px/1 ui-monospace,monospace;opacity:.55;pointer-events:none;z-index:9999;'
@@ -330,6 +330,8 @@ async function boot() {
   }
   function startWarmup() {
     try {
+      if (COMP.look) timed('curb-contact-cache', () => carRig.prepareCurbContacts(
+        Array.from({ length: 10 }, (_, index) => cars.getCarModel(index))));
       gpuWarmup = carWarmup.createCarWarmup(
         fraction => { fractions.gpu = fraction; reportProgress(); },
         entry => readiness.warmupSteps.push(entry),

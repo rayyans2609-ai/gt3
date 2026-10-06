@@ -3,7 +3,7 @@
  */
 import assert from 'node:assert/strict';
 const [comp = 'b', cam = 'glide', aspectText = String(16 / 9), betaText = '0.0001', settingsText = '{}'] = process.argv.slice(2);
-globalThis.location = { search: `?comp=${comp}&cam=${cam}` };
+globalThis.location = { search: comp.startsWith('r') ? `?look=${comp}` : `?comp=${comp}&cam=${cam}` };
 const { Vector3 } = await import('three');
 const { buildCompositionRail } = await import('../src/scene/compositionRail.js');
 const { TRACK_LENGTH } = await import('../src/scene/trackCurve.js');

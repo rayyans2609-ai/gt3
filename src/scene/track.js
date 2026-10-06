@@ -15,6 +15,7 @@ import {
   pointAt,
   tangentAt,
 } from './trackCurve.js';
+import { COMP } from './composition.js';
 
 const TARGET_SAMPLE_STEP = 1.1;
 const TRACK_SEGMENT_COUNT = Math.ceil(TRACK_LENGTH / TARGET_SAMPLE_STEP);
@@ -78,6 +79,12 @@ const curbWidthsRaw = new Float32Array(TRACK_SAMPLE_COUNT);
 for (let i = 0; i < TRACK_SAMPLE_COUNT; i += 1) {
   const distance = Math.min(i * SAMPLE_STEP, TRACK_LENGTH);
   let wideAmount = smoothstep(0.18, 0.68, Math.abs(sampleCurvatures[i]));
+
+  for (const corner of COMP.curbCorners || []) {
+    const separation = Math.abs(distance - corner.t * TRACK_LENGTH);
+    // Full-width support throughout the event + wheelbase and smoothing halo.
+    wideAmount = Math.max(wideAmount, 1 - smoothstep(corner.radiusM + 24, corner.radiusM + 52, separation));
+  }
 
   for (const accentDistance of accentDistances) {
     const separation = Math.abs(distance - accentDistance);

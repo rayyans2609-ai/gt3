@@ -87,7 +87,10 @@ try {
   const settled = await snap(page);
   const probe = await page.evaluate(() => window.__gt3Probe);
   report.cases.A = { wheelEventsSent: sent, maxGapMs, atStop, settled, probe };
-  const leaked = probe.filter(line => !/\|started=false\|y=0 /.test(line));
+  // Requirement: nothing moves or starts while locked or before ready. Lines after the unlock may
+  // legitimately show post-ready input (the stream polls readiness only every few events).
+  const leaked = probe.filter(line => (/^\d+ (none|loading)\|/.test(line) || /\|locked=true\|/.test(line))
+    && !/\|started=false\|y=0 /.test(line));
   assert(!leaked.length, `input moved/started before or at unlock: ${leaked.join(' ; ')}`);
   assert(!settled.started, 'pre-ready input started the Tour');
   assert(settled.progress === 0, `pre-ready input moved the car: progress=${settled.progress}`);

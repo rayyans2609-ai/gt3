@@ -4,7 +4,7 @@ Start with `GT3_MASTER_CONTEXT.md` for project orientation and the source-of-tru
 
 AI model routing and delegation are canonical at:
 
-- `docs/ai/model-routing.md` — roles, routing tree, escalation, reasoning-effort policy
+- `docs/ai/model-routing.md` — routing principles (scarcity, delegation, context, review, verification), current model roles, quota modes, reasoning-effort policy; evidence log in `docs/ai/routing-evidence.md`
 - `docs/ai/codex-cli-invocation.md` — Codex execution: verified slugs, invocation syntax, config-default trap
 - `docs/ai/opencode-invocation.md` — OpenCode/free-route execution: exact model IDs, `:free` rule, credential isolation
 

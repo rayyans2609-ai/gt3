@@ -43,10 +43,10 @@ Only these IDs are approved GT3 routes. Other entries in the catalog (OpenRouter
 
 ## Route health
 
-Free routes are shared and can be rate-limited, overloaded or withdrawn. A provider or route failure is **not** a model capability failure (`model-routing.md` §6). When a job fails on a route:
+Free routes are shared and can be rate-limited, overloaded or withdrawn. A provider or route failure is **not** a model capability failure (`model-routing.md` §10, "Free-route health"). When a job fails on a route:
 
 1. Re-check that the exact ID is still listed (command below) before concluding anything.
-2. Don't retry a broken free route in a loop. Fall through to the next lane in `model-routing.md` §9.
+2. Don't retry a broken free route in a loop. Fall through to the next lane in `model-routing.md` §14.
 3. If an ID has drifted, update this table rather than guessing a replacement.
 
 ## Credential isolation

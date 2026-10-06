@@ -732,3 +732,27 @@ Not merged to `main`. Phase 3 stays open until the user's live review (SPEC §30
 - W6C at 360294a (lean verification): build, wheel-ground, default-camera invariance, smoke, offline, load recovery 9/9, first crossing 0 GL allocations (6 contexts; clean windows max 50–83 ms, none >100 ms), checkpoints 10/10, swap response, route persistence incl. finish refresh, hero pivot all compositions (F2 closed), §30.6 occlusion 0 hits on the lean set (default, a×5, b×6 incl. 16:10/4:3; c/soft) — all PASS. Skipped by lean policy: c×{leg1,glide,hold,wide} occlusion.
 - Startup: clean solo 14.5 s at ea95055 vs 8.8 s at 602c462; final-head pair (host-contaminated) 28.3 s with `compileAsync` vs 25.4 s without — no measured gain; keep-or-revert of ad9c746 is an owner decision (revert attempt was not applied).
 - Review package: docs/review/phase3-final-review.md (local copy with captures: ~/Desktop/gt3-review-2026-10-04/README.md).
+
+## Phase 3 live review 2 — 2026-10-06 (owner decisions; NOT accepted)
+
+The owner reviewed the final machine-verified candidate (`19dace5`/`290baba`, `src/` = `360294a`) live. **Phase 3 is not accepted.** This entry records decisions only. SPEC §30.9 is the closure register, and §31 indexes the later-phase items. No implementation took place in this session.
+- **Confirmed (do not re-open without regression evidence):** `?scroll=cap` pacing; first-crossing hitch visually resolved; checkpoint gates over coins; existing typography retained; full-quality Showcase stays a Phase 6 requirement (settles the W8 deferral).
+- **Defects found:**
+  - **Crossing SFX missing.** Cause, confirmed statically: `playCoin()` has no caller since coins were retired, under SPEC §18's former "silent" wording, which the owner meant as "no ceremony".
+  - **Scroll registers as driving input before the experience is ready.**
+- **Rejected / reopened:**
+  - Neither gate effect works: sweep and `?gate=quiet` both rejected. Next is a refined effect, likely subtle illumination/emissive.
+  - The swap treatment is reopened: crossfade vs the restored pulse vs a light-based treatment.
+  - The finish is not recognizable enough. Next is a bounded 3D gantry with traffic lights and possibly a checkered flag.
+- **Camera/scale:** the earlier default was too close and the current framing too distant, with car detail illegible. A coordinated visual-design pass is required before acceptance. Provisional direction:
+  - start from `cam=glide`, with +5–10 % downward pitch;
+  - about 10–30 % more hero prominence at roughly the same distance;
+  - B over C, with slightly more weaving and curb use at one or two tight corners.
+  - None of these is an approved value.
+- **HUD:**
+  - consolidate car info into the top-left with a unified colour;
+  - minimap arrow and a yellow completed-section trail;
+  - refine the moon crescent;
+  - remove the redundant direction / "Scroll to Race" instructions.
+- **Still open from the 10-05 package:** 512-px textures; startup 14.5 s and the `compileAsync` revert; visual retirement of §30.6.
+- **Process note:** `phase3-integration` does not yet contain `main`'s routing commits `aa75b78`, `eb3ef32` and `665d5cc` (efficiency doctrine, Astra advisory-only, right-sized verification). Bring them in by merging `main` into this branch before routed implementation work, with owner OK. Until then, the canonical routing text is `main`'s `docs/ai/`.

@@ -9,10 +9,11 @@ the current implementation checkpoint is stated here to avoid treating future mo
 **Current on `phase3-integration` (2026-09-28):** Phases 1–3 and the typography slice
 are implemented. The live flow is still legacy start screen → Grand Tour → legacy finish;
 Landing, Hub, dedicated Showcase and completion hero are later work. The Tour has a
-closed-loop circuit, route-led world-space aerial camera, nine silent checkpoints,
+closed-loop circuit, route-led world-space aerial camera, nine ceremony-free checkpoints,
 bidirectional route car swaps, monotonic session discoveries and a sparse map/name HUD.
 The Tour has no coin collection, in-Tour montage or `F`-key Showcase. Phase 3 technical
-verification is complete; camera/gate/HUD visual acceptance and merge remain open.
+verification is complete, but the 2026-10-06 live review did not accept it. The closure work
+(SPEC §30.9) is listed under *Phase 3 closure — technical touchpoints* below; merge remains open.
 
 Desktop-only single-page WebGL experience. Vite + Three.js (ESM, no framework).
 Four experiences — Landing, Grand Tour Hub, Showcase, Grand Tour (+ completion state) — are
@@ -74,7 +75,8 @@ text/HUD/player UI. One fixed canvas behind it, one shared `WebGLRenderer`.
       coins.js        visible-identity coins [retired, Phase 3c]
       morph.js        in-tour car swap, forward + reverse [done, Phase 3c]
       finishSequence.js route-end hero transition + completion hero car [new]
-      finishLine.js   checkered gate at FINISH_T [evolve or fold into finishSequence]
+      finishLine.js   finish at FINISH_T → bounded 3D gantry with traffic lights (Phase 3
+                      closure, SPEC §18); finishSequence may later reuse it [evolve]
       landingStage.js Landing field scene: floating Lexus, cursor response, push-in [new]
     montage/
       studio.js       montage studio (own renderer — sanctioned exception, see below) [keep]
@@ -86,7 +88,8 @@ text/HUD/player UI. One fixed canvas behind it, one shared `WebGLRenderer`.
       selector.js     bottom ten-car selector, ?/badge states [new]
       unlockFlow.js   manual unlock: flag wipe → montage → reveal → narration [new]
       soundCue.js     one-time first-Tour "Sound" cue (visual only) [new]
-      hud.js          sparse Grand Tour HUD: circuit map TR, car name TL, car info BL [Phase 3];
+      hud.js          sparse Grand Tour HUD: circuit map TR, car name + info TL (BL info
+                      moves TL in Phase 3 closure) [Phase 3];
                       back-to-Hub control waits for Phase 5
       player.js       global music player: compact anchor / expanded / Hub variant [new]
       soundControl.js persistent speaker (master mute) + `+` launcher [evolve]
@@ -157,7 +160,7 @@ Grand Tour (route state — follows scroll bidirectionally, SPEC §26)
 
 Discovery (monotonic within a session, SPEC §26)
 - `unlocked` ★    Set<number> of discovered car indices; only ever grows. Starts as {0}
-                   (Lexus). Written by checkpoint crossing (silent) and manual unlock.
+                   (Lexus). Written by checkpoint crossing (no ceremony) and manual unlock.
                    [keep name, new semantics]
 - `showcaseCarIndex` ★ selected car in Showcase [new]
 
@@ -228,8 +231,8 @@ voice <audio> → MediaElementSource ──────────────�
   to `unlocked`; backward crossing → reverse swap only. Spacing ~30–50% longer than the coin
   spacing (SPEC §14).
 - **Swap** (`morph.js`): short, non-blocking, runs in both directions, no scroll lock.
-- **HUD** (`hud.js`): circuit map (top-right, derived from `trackCurve`), car name (top-left),
-  bottom-left car information (two lines from `cars.js`), first-use direction cue, a first-Tour
+- **HUD** (`hud.js`): circuit map (top-right, derived from `trackCurve`), car name with its two-line info from `cars.js` (top-left; consolidated from
+  bottom-left in the Phase 3 closure), first-use direction cue, a first-Tour
   sound cue (`soundCue.js`), and one bottom edge row: the sun/moon Day/Night control
   (`themeToggle.js`) plus speaker/`+`, recomposing when the player expands (SPEC §20, §8).
   Back-to-Hub waits for the Hub. Nothing else.
@@ -272,6 +275,34 @@ No mobile/responsive breakpoints. No physics engine. No opponents/traffic/AI. No
 accounts, currency, achievements or extra modes. No hard model swaps in Grand Tour. No arcade
 chrome. No new renderers beyond the sanctioned montage exception. No URL routes / synthetic
 history entries. Audio: the existing SFX + the 10 voice files + the 6 playlist tracks, no others.
+
+## Phase 3 closure — technical touchpoints (SPEC §30.9, 2026-10-06)
+Only the implications that touch module boundaries or shared systems; product truth is in SPEC.
+- **Crossing SFX:** `audioManager.playCoin()` (`coin.mp3`, sfxBus) still exists but lost its caller
+  when `coins.js` was retired. Re-wire it from the checkpoint crossing path; no new audio files,
+  and never an audio-init path.
+- **No input before ready:** gate route input in `scrollDrive.js` (the sole scroll owner) until
+  readiness. Restored `routeProgress` must still apply exactly. This is shared input state, so
+  verification is high blast radius (scroll + route persistence).
+- **Gate effect / swap treatment:** `gateResponse.js` and `morph.js` carry review candidates
+  (crossfade / restored pulse / light-based). Any emissive gate response is local to the gate
+  mesh and is not Night route lighting (Phase 8). Zero new GPU work at crossings still holds.
+- **Visual-design pass:** `composition.js` / `compositionRail.js` / `racingLine.js` / `aerialCamera.js`.
+  Curb usage widens the racing line's lateral bound at selected corners only. World-edge and
+  occlusion checks (`verify-occlusion.mjs`) apply to the chosen candidate.
+- **HUD:** `hud.js` moves car info to top-left, swaps the map dot for a heading arrow and adds a
+  progress trail derived from route progress (reverses with route state). The start screen's
+  "Scroll to Race" copy and the direction cue are reconciled; the loading UX is not redesigned.
+
+## Future technical implications (SPEC §31)
+- The spinning HUD car and 3D emblem (Phase 6) render on the **one shared renderer**: no second
+  renderer, and no HUD canvas with its own context. The click-through to a single-car
+  presentation is a new user-initiated `tour → showcase`-family transition that preserves route
+  state; its state shape is decided in Phase 6.
+- Volume sliders (Phase 5) map onto the existing `masterGain` / `musicMuteGain` chain as separate
+  level gains, so mute and level stay independent. New persisted keys land with that phase.
+- A Landing hero change (Phase 4) may decouple "Landing hero" from roster index 0 / the Tour
+  starting car; that coupling is currently assumed throughout and needs an owner decision first.
 
 ## Known later dependencies and phase ownership
 - **Night route lighting (SPEC §13a) is owned by Phase 8** (scenery / lighting / performance

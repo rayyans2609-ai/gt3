@@ -21,7 +21,8 @@ const rosterBounds = await Promise.all(CARS.map(async car =>
   ({ id: car.id, ...(await glbFootprint(modelDir + car.modelFile)) })));
 
 const base = (process.env.GT3_URL || 'http://127.0.0.1:5192').replace(/\/$/, '');
-const comps = (process.env.GT3_COMPS || 'base,a,b,c').split(',').filter(Boolean);
+const looks = process.env.GT3_LOOKS?.split(',').filter(Boolean);
+const comps = looks || (process.env.GT3_COMPS || 'base,a,b,c').split(',').filter(Boolean);
 const cameraCandidates = ['leg1', 'glide', 'hold', 'wide', 'soft'];
 const cams = (process.env.GT3_CAMS || 'leg1').split(',').filter(Boolean);
 if (cams.some(cam => !cameraCandidates.includes(cam))) throw new Error(`GT3_CAMS must use ${cameraCandidates.join(',')}`);
@@ -43,7 +44,7 @@ const percentile = (values, f) => values.length
 // Representative route points (t from the curvature table; see check-composition-math).
 const POINTS = [['start-straight', 0.02], ['hairpin-entry', 0.265], ['hairpin-apex', 0.283],
   ['hairpin-exit', 0.300], ['chicane-in', 0.335], ['chicane-mid', 0.352],
-  ['chicane-out', 0.370], ['turn9', 0.465]];
+  ['chicane-out', looks ? 0.365 : 0.370], ['turn9', 0.465]];
 
 async function runCandidate(browser, comp, cam) {
   const key = cam === 'leg1' ? comp : `${comp}-${cam}`;
@@ -65,7 +66,7 @@ async function runCandidate(browser, comp, cam) {
     page.on('console', m => { if (['warning', 'error'].includes(m.type())) console.error(tag, 'console.' + m.type(), m.text().slice(0, 240)); });
   }
   const reviewUrl = new URL(`${base}/`);
-  if (comp !== 'base') reviewUrl.searchParams.set('comp', comp);
+  if (comp !== 'base') reviewUrl.searchParams.set(looks ? 'look' : 'comp', comp);
   if (cam !== 'leg1') reviewUrl.searchParams.set('cam', cam);
   reviewUrl.searchParams.set('gate', 'quiet');
   const url = reviewUrl.href;
@@ -216,7 +217,7 @@ async function runCandidate(browser, comp, cam) {
   for (const [label, t] of POINTS) {
     await goTo(t); phase(`${key} point ${label}`);
     out.points.push({ label, ...(await measure()) });
-    if (capture) {
+    if (capture && (!looks || (comp === 'r3' ? ['start-straight', 'hairpin-apex', 'chicane-out'] : ['start-straight', 'hairpin-entry', 'hairpin-apex']).includes(label))) {
       await page.screenshot({ path: `${captureDir}/${key}_${label}_day.png` });
     }
   }
@@ -231,7 +232,7 @@ async function runCandidate(browser, comp, cam) {
   for (const t of gateTs) {
     await goTo(t, 450);
     const m = await measure();
-    if (capture && t === thresholds[0]) {
+    if (capture && !looks && t === thresholds[0]) {
       await page.screenshot({ path: `${captureDir}/${key}_checkpoint1_day.png` });
     }
     out.gates.push({ t, roadEdgeGapM: m.roadEdgeGapM, gatePostGapM: m.gatePostGapM,
@@ -363,7 +364,7 @@ async function runCandidate(browser, comp, cam) {
   });
   out.seamPositionDiffM = seam;
   phase(`${key} captures`);
-  if (capture) {
+  if (capture && !looks) {
     // Chicane frame sequence (~3 s) and one Night still at the hairpin apex.
     if (seqComps.includes(comp)) {
       await goTo(0.325, 1200);
@@ -387,7 +388,7 @@ async function runCandidate(browser, comp, cam) {
       const solve = comp.camera === 'corridor'
         ? (await import('/src/scene/compositionRail.js')).buildCompositionRail
         : comp.camera === 'sector' ? (await import('/src/scene/aerialCamera.js')).buildSectorRail : null;
-      if (solve) for (const [k, a] of [['16:9', 16 / 9], ['16:10', 1.6], ['1.5', 1.5], ['4:3', 4 / 3], ['21:9', 21 / 9], ['9:16', 9 / 16]]) {
+      if (solve) for (const [k, a] of (process.env.GT3_LEAN === '1' ? [['16:9', 16 / 9], ['4:3', 4 / 3]] : [['16:9', 16 / 9], ['16:10', 1.6], ['1.5', 1.5], ['4:3', 4 / 3], ['21:9', 21 / 9], ['9:16', 9 / 16]])) {
         const t0 = performance.now(); solve(a); rail[k] = +(performance.now() - t0).toFixed(1);
       }
     } catch (e) { rail.error = String(e); }
@@ -411,6 +412,24 @@ async function runCandidate(browser, comp, cam) {
       await page.screenshot({ path: `${captureDir}/${key}_hairpin-apex-4x3_day.jpg`, type: 'jpeg', quality: 82 });
     }
   }
+  out.routeHero = await page.evaluate(async () => {
+    const THREE = await import('/node_modules/three/build/three.module.js');
+    const { railPoseAt } = await import('/src/scene/aerialCamera.js');
+    const { pathPointAt, pathTangentAt } = await import('/src/scene/racingLine.js');
+    const cam = window.__gt3.camera.clone();
+    const values = [];
+    for (let i = 0; i <= 500; i++) {
+      const t = i / 500, pose = railPoseAt(t);
+      cam.position.fromArray(pose.position); cam.quaternion.fromArray(pose.quaternion); cam.updateMatrixWorld(true);
+      const p = pathPointAt(t), fwd = pathTangentAt(t).setY(0).normalize();
+      const half = 2.3 * window.__gt3.comp.hero;
+      const nose = p.clone().addScaledVector(fwd, half).project(cam);
+      const tail = p.clone().addScaledVector(fwd, -half).project(cam);
+      values.push(50 * Math.hypot(nose.x - tail.x, (nose.y - tail.y) / cam.aspect));
+    }
+    return { samples: values.length, metric: '4.6m nose-to-tail projected length / frame width',
+      minPct: Math.min(...values), maxPct: Math.max(...values) };
+  });
   phase(`${key} done`);
   await page.close();
   return out;
@@ -425,6 +444,7 @@ const browser = await puppeteer.launch({
     `--user-data-dir=${root}/chrome-${process.pid}`, '--window-size=1600,900'],
   defaultViewport: { width: 1600, height: 900 },
 });
+process.once('SIGTERM', async () => { await browser.close(); process.exit(143); });
 const results = [];
 try {
   for (const comp of comps) for (const cam of cams) {

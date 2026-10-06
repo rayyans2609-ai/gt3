@@ -20,7 +20,7 @@ const next2 = Uint16Array.from({ length: N }, (_, i) => wrap(i + 2));
 // A sphere about y=1.066 covers that box, ±3.4° body roll and ±0.035 m bob.
 // Adding the FULL racing-line amplitude protects every lateral position, not
 // only the actual line. Exact all-ten projected boxes are checked in node.
-export const framingRadiusM = () => 3.05 * COMP.hero + COMP.racingLineM;
+export const framingRadiusM = () => 3.05 * COMP.hero + (COMP.racingLineMaxM ?? COMP.racingLineM);
 
 export function cameraBasis() {
   const yaw = THREE.MathUtils.degToRad(COMP.yawDeg);

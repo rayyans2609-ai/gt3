@@ -25,6 +25,7 @@ const browser = await puppeteer.launch({
     `--user-data-dir=${out}/chrome-${process.pid}`, '--window-size=1600,900'],
   defaultViewport: { width: 1600, height: 900 },
 });
+process.once('SIGTERM', async () => { await browser.close(); process.exit(143); });
 const report = { base, at: new Date().toISOString(), step, tol, configs: {} };
 let failed = false;
 try {

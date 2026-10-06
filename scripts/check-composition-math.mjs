@@ -8,7 +8,7 @@
 const comp = process.argv[2] || 'base';
 const aspect = Number(process.argv[3] || 16 / 9);
 const cam = process.argv[4] || 'leg1';
-globalThis.location = { search: `?comp=${comp}&cam=${cam}`, hash: '' };
+globalThis.location = { search: comp.startsWith('r') ? `?look=${comp}` : `?comp=${comp}&cam=${cam}`, hash: '' };
 globalThis.window = { __gt3: {} };
 
 const THREE = await import('three');

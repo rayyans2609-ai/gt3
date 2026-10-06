@@ -505,16 +505,19 @@ try {
           const head = slot.querySelector('.hud-identity__headline');
           const spec = slot.querySelector('.hud-identity__spec');
           const lh = Number.parseFloat(getComputedStyle(head).lineHeight);
+          const specLh = Number.parseFloat(getComputedStyle(spec).lineHeight);
           const name = document.querySelector('.hud-identity__slot[aria-hidden="false"] .hud-identity__name');
           return { headlineLines: Math.round(head.getBoundingClientRect().height / lh),
+            specLines: Math.round(spec.getBoundingClientRect().height / specLh),
             specOverflowPx: Math.max(0, spec.scrollWidth - spec.clientWidth),
+            specTruncated: spec.scrollWidth > spec.clientWidth + 0.5 || spec.scrollHeight > spec.clientHeight + 0.5,
             slotHeight: slot.getBoundingClientRect().height,
             contentHeight: head.getBoundingClientRect().height + spec.getBoundingClientRect().height + 3,
             nameTruncated: name.scrollWidth > name.clientWidth };
         });
         assert(fit.headlineLines <= 2, `car ${i}: headline wraps to ${fit.headlineLines} lines`);
         assert(fit.contentHeight <= fit.slotHeight + 0.5, `car ${i}: info content ${fit.contentHeight} taller than block ${fit.slotHeight}`);
-        assert(fit.specOverflowPx <= 0, `car ${i}: spec line overflows the 330 px block by ${fit.specOverflowPx}px`);
+        assert(fit.specLines <= 2 && !fit.specTruncated && fit.specOverflowPx <= 0, `car ${i}: spec truncated/wrapped to ${fit.specLines} lines (overflow ${fit.specOverflowPx}px)`);
         report.carInfo.push({ viewport: `${width}x${height}`, index: i, name: CARS[i].displayName,
           line1: CARS[i].showcase.headline, line2: specLine(CARS[i]), ...fit });
         checkNoOverlap(await layout(page), `car ${i} @${width}`);

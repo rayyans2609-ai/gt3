@@ -1,9 +1,13 @@
 /** Browser verification for Phase 3c. Usage: GT3_URL=http://127.0.0.1:5187 node scripts/verify-checkpoints.mjs */
 import puppeteer from 'puppeteer-core';
+import { installGpuCounters, gpuDelta } from './lib/gpu-counters.mjs';
 import { mkdir, writeFile } from 'node:fs/promises';
 
 const base = process.env.GT3_URL || 'http://127.0.0.1:5187';
-const root = '/tmp/gt3-3c';
+const root = process.env.GT3_OUT || '/tmp/gt3-3c';
+// Right-sized gate review: retain both sides of every threshold and every phase,
+// omit the extra uniform route grid, and rely on the real morph-completion signal.
+const lean = process.env.GT3_LEAN === '1';
 const softwareGL = process.env.GT3_SOFTWARE_GL === '1';
 await mkdir(root, { recursive: true });
 const browser = await puppeteer.launch({
@@ -16,6 +20,7 @@ const browser = await puppeteer.launch({
   defaultViewport: { width: 1600, height: 900 },
 });
 const page = await browser.newPage();
+await installGpuCounters(page);
 const errors = [];
 page.on('pageerror', error => errors.push(error.message));
 page.on('console', message => { if (message.type() === 'error') errors.push(message.text()); });
@@ -36,7 +41,7 @@ const recordPhase = async (name, work) => {
     return undefined;
   }
 };
-const report = { renderer: softwareGL ? 'SwiftShader fallback' : 'ANGLE/Metal', phases, errors };
+const report = { base, lean, renderer: softwareGL ? 'SwiftShader fallback' : 'ANGLE/Metal', phases, errors };
 
 try {
   const ready = await recordPhase('startup', async () => {
@@ -75,7 +80,7 @@ try {
     });
   }
 
-  async function seek(progress, { instant = false, settle = 1050 } = {}) {
+  async function seek(progress, { instant = false, settle = lean ? 150 : 1050 } = {}) {
     await page.evaluate(async ({ progress, instant }) => {
       const { seekTo } = await import('/src/scroll/scrollDrive.js');
       seekTo(progress, { instant });
@@ -116,7 +121,7 @@ try {
 
   const forward = [];
   const backward = [];
-  const stops = [...new Set([0, ...Array.from({ length: 20 }, (_, i) => (i + 1) * 0.049),
+  const stops = [...new Set([0, ...(lean ? [] : Array.from({ length: 20 }, (_, i) => (i + 1) * 0.049)),
     ...thresholds.flatMap(t => [t - 0.003, t + 0.003]), 1])].sort((a, b) => a - b);
   await recordPhase('forward and backward discovery sweeps', async () => {
     let forwardUnlocked = 1;
@@ -142,6 +147,24 @@ try {
       backward.push(snapshot);
     }
     console.log(`backward sweep: ${backward.length} stops`);
+  });
+
+  await recordPhase('all nine gates: zero GL allocations/uploads forward and reverse', async () => {
+    const crossings = [];
+    for (const direction of [1, -1]) {
+      for (const gate of direction > 0 ? thresholds : [...thresholds].reverse()) {
+        await seek(gate - direction * 0.003, { instant: true });
+        const before = await page.evaluate(() => ({ ...window.__gt3GlCalls }));
+        const snapshot = await seek(gate + direction * 0.003, { instant: true });
+        check(snapshot, `GPU crossing ${gate} direction ${direction}`);
+        const after = await page.evaluate(() => ({ ...window.__gt3GlCalls }));
+        const delta = gpuDelta(before, after);
+        assert(Object.values(delta).every(value => value === 0),
+          `gate ${gate} direction ${direction}: ${JSON.stringify(delta)}`);
+        crossings.push({ gate, direction, gl: delta });
+      }
+    }
+    report.gpuCrossings = crossings;
   });
 
   const oscillation = [];

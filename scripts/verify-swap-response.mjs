@@ -2,10 +2,11 @@
  * Usage: GT3_URL=http://127.0.0.1:5191 node scripts/verify-swap-response.mjs
  * Env: GT3_CAPTURES (directory for mid-crossing stills), GT3_OUT (report directory).
  * Covers: input during GPU warm-up, reversal/retarget before a swap completes, replay,
- * Day/Night, and both `sweep` (default) and `?gate=quiet` responses.
+ * Day/Night, and `edge` (default), sweep/quiet and the pulse swap comparison.
  * Run the host preflight before launching; it starts exactly one browser.
  */
 import puppeteer from 'puppeteer-core';
+import { installGpuCounters, gpuDelta } from './lib/gpu-counters.mjs';
 import { mkdir, writeFile } from 'node:fs/promises';
 
 const base = process.env.GT3_URL || 'http://127.0.0.1:5191';
@@ -16,17 +17,21 @@ await mkdir(captureDir, { recursive: true });
 const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
 const assert = (ok, message) => { if (!ok) throw new Error(message); };
 const report = { base, startedAt: new Date().toISOString(), variants: {}, errors: [] };
-const browser = await puppeteer.launch({
+let browser = null;
+const launchBrowser = () => puppeteer.launch({
   executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
   headless: 'new', pipe: true, timeout: 300000, protocolTimeout: 300000,
   args: ['--no-sandbox', '--no-first-run', '--enable-gpu', '--use-gl=angle', '--use-angle=metal',
     `--user-data-dir=${outDir}/chrome-${process.pid}`, '--window-size=1600,900'],
   defaultViewport: { width: 1600, height: 900 },
 });
-report.browserPid = browser.process()?.pid;
+report.browserPids = [];
 
 async function variant(name, query) {
+  browser = await launchBrowser();
+  report.browserPids.push(browser.process()?.pid);
   const page = await browser.newPage();
+  await installGpuCounters(page);
   const phases = [];
   const errors = [];
   const record = async (label, work) => {
@@ -61,6 +66,7 @@ async function variant(name, query) {
       model: mount.children.map(c => c.name), fadeMaterials,
       gateResponseVisible: gt3.scene.getObjectByName('checkpoint-traversal-response')?.visible ?? null,
       screen: document.querySelector('#start-screen')?.className,
+      gl: { ...window.__gt3GlCalls },
       programs: info.programs?.length ?? 0, textures: info.memory.textures, geometries: info.memory.geometries };
   });
   const seek = async (t, instant = true) => {
@@ -110,7 +116,10 @@ async function variant(name, query) {
       .map(key => [key, after[key] - before[key]]));
     assert(Object.values(delta).every(value => value === 0),
       `${label}: crossing changed resources ${JSON.stringify(delta)}`);
-    return delta;
+    const gl = gpuDelta(before.gl, after.gl);
+    assert(Object.values(gl).every(value => value === 0),
+      `${label}: crossing made GL allocations/uploads ${JSON.stringify(gl)}`);
+    return { ...delta, gl };
   };
 
   // Record input and state in-page, so the ready boundary is exact rather than a CDP round-trip later.
@@ -190,6 +199,15 @@ async function variant(name, query) {
       gates: (await import('/src/scene/trackCurve.js')).CHECKPOINT_T,
       ids: (await import('/src/data/cars.js')).CARS.map(c => c.id) }));
 
+    await record('cold first crossing: zero GL allocations/uploads', async () => {
+      await seek(gates[0] - 0.003); await settle();
+      const before = await read();
+      await seek(gates[0] + 0.003);
+      const after = await settle();
+      checkSettled(after, ids, 1, 'cold first crossing');
+      return checkResourceDelta(before, after, 'cold first crossing');
+    });
+
     for (const theme of ['day', 'night']) {
       await page.evaluate(async t => (await import('/src/scene/theme.js')).applyTheme(t, { instant: true }), theme);
       await wait(400);
@@ -235,14 +253,18 @@ async function variant(name, query) {
         const resourcesBefore = await read();
         const mid = await crossThen(gates[k] + 0.003, 60, gates[k] + 0.003);
         const during = { gateResponseVisible: mid.gateVisible };
-        await wait(900);
+        // The 0.85 s effect advances on the app's capped frame clock. Wait for
+        // its actual completion instead of assuming 900 ms of wall time at Night.
+        await page.waitForFunction(() =>
+          !window.__gt3.scene.getObjectByName('checkpoint-traversal-response')?.visible,
+        { timeout: 5000, polling: 50 });
         const after = await read();
         if (query.includes('gate=quiet')) {
           assert(during.gateResponseVisible === false && after.gateResponseVisible === false,
-            'quiet variant showed the gate sweep');
+            'quiet variant showed gate feedback');
         } else {
-          assert(during.gateResponseVisible === true, 'sweep not visible during the crossing');
-          assert(after.gateResponseVisible === false, 'sweep still visible 0.9 s after the crossing');
+          assert(during.gateResponseVisible === true, 'gate feedback not visible during crossing');
+          assert(after.gateResponseVisible === false, 'gate feedback still visible after its duration');
         }
         const end = await settle();
         return { during: during.gateResponseVisible, after: after.gateResponseVisible,
@@ -320,12 +342,18 @@ async function variant(name, query) {
   } finally {
     report.variants[name] = { ...(report.variants[name] || {}), phases, errors };
     await page.close();
+    await browser.close();
+    browser = null;
   }
 }
 
 try {
-  await variant('sweep', '');
-  await variant('quiet', '?gate=quiet');
+  const options = { edge: '', pulse: '?swap=pulse', sweep: '?gate=sweep', quiet: '?gate=quiet' };
+  const selected = (process.env.GT3_VARIANTS || 'edge,pulse,sweep,quiet').split(',');
+  for (const name of selected) {
+    assert(Object.hasOwn(options, name), `Unknown GT3_VARIANTS entry: ${name}`);
+    await variant(name, options[name]);
+  }
 } catch (error) {
   report.errors.push(error.stack || String(error));
 } finally {
@@ -336,6 +364,6 @@ try {
   console.log(JSON.stringify(Object.fromEntries(Object.entries(report.variants).map(([k, v]) =>
     [k, { phases: v.phases.map(p => `${p.status} ${p.label}${p.message ? `: ${p.message}` : ''}`),
       errors: v.errors, day: v.dayResourceDelta, night: v.nightResourceDelta }])), null, 2));
-  await browser.close();
+  await browser?.close();
   if (report.failed) process.exitCode = 1;
 }

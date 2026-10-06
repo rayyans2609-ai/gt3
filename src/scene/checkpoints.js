@@ -99,8 +99,8 @@ export function updateCheckpoints() {
   }
   if (nextIndex !== routeIndex) {
     const gate = Math.max(nextIndex, routeIndex) - 1;
-    response?.trigger(gate);
     const crossing = { gate, direction: nextIndex > routeIndex ? 1 : -1 };
+    response?.trigger(gate, crossing.direction);
     for (const fn of crossingHandlers) fn(crossing);
   }
   routeIndex = nextIndex;

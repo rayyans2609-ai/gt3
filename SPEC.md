@@ -616,7 +616,9 @@ A fresh implementation agent should be able to determine, from this file alone: 
      - a clearer, more substantial moon crescent;
      - one non-redundant direction/"Scroll to Race" instruction, with better placement;
      - Day/Night readability throughout.
+   - *Status 2026-10-07:* all required work above is implemented and machine-verified on `phase3-integration`, awaiting the owner's live review (`docs/review/phase3-refinement-review.md`). Candidates: `?look=r1|r2|r3`, `?gate=edge|sweep|quiet` (edge is the default), `?swap=crossfade|pulse`. None of the camera candidates meets §15's "camera barely moves" (84–93 % of car travel).
    - **Owner choices still open:**
+     - **non-spinning wheels:** a defect that predates Phase 3. The spin set is empty for every car, and a safe fix needs per-car wheel pivot or instance re-authoring (a separate rig task); deferred for owner review (BUILD_LOG 2026-10-07);
      - the final camera/scale/path values from the pass (§15);
      - the gate effect (§18);
      - the swap treatment (§19);

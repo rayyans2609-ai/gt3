@@ -756,3 +756,15 @@ The owner reviewed the final machine-verified candidate (`19dace5`/`290baba`, `s
   - remove the redundant direction / "Scroll to Race" instructions.
 - **Still open from the 10-05 package:** 512-px textures; startup 14.5 s and the `compileAsync` revert; visual retirement of §30.6.
 - **Process note:** `phase3-integration` does not yet contain `main`'s routing commits `aa75b78`, `eb3ef32` and `665d5cc` (efficiency doctrine, Astra advisory-only, right-sized verification). Bring them in by merging `main` into this branch before routed implementation work, with owner OK. Until then, the canonical routing text is `main`'s `docs/ai/`.
+
+## Phase 3 refinement run — 2026-10-06/07 (Autonomous Mode; NOT accepted, owner review pending)
+
+Implements the SPEC §30.9 closure work. Review package: `docs/review/phase3-refinement-review.md`.
+- **Crossing SFX** (`ec9b697`): `checkpoints.onCrossing` → `audio.playCheckpointCross()` on forward crossings (`coin.mp3`; the old `playCoin()` had no caller).
+- **No input before ready** (`ec9b697`, harness `aab4ab7`/`c96bd8a`): the drive lock used to run after ~20 awaited imports, so loading-time scroll moved the page, started the Tour and (legacy law) banked distance. Fix: an inline boot guard in `index.html` plus a 250 ms quiet-gated unlock. `scroll=cap` is now the no-query default; `?scroll=legacy` is kept for comparison.
+- **HUD** (Muse `a27a814`; trail write-cache `445d950`; spec wrap `b272c58`/`bf9e53b`): consolidated top-left block, map arrow, completed-route trail, filled moon, "Scroll to race" + a one-time "Scroll up to reverse".
+- **Gates / swap / finish** (Sol `c69aafc`): edge illumination is the default (`?gate=sweep|quiet` kept); `?swap=pulse` restored without particles; finish gantry with five signals per face, green over the final 120 m. Zero GL work at crossings.
+- **Visual candidates** (Sol `0f37c8b`): `?look=r1|r2|r3`, curb contact with tyres seated ≤ 0.93 cm. Camera still travels 84–93 % of car travel.
+- **Wheels: deferred.** `cars.js:503` selects spin meshes by name only, and road-wheel names sit on ancestors, so the spin set is empty for all 10 cars. 9 cars have off-axle, instanced or merged wheel geometry (Mercedes 1.24 m off-axis), so a name fix would orbit or wobble. A safe fix needs per-car pivot/instance re-authoring. Diagnostic check `scripts/check-wheel-spin.mjs` is on branch `p3r-wheels` (`051fccd`), not merged.
+- **Runtime trap (new): a long-running Vite dev server invalidates harnesses that import modules into the page.** After source edits, Vite serves the app's modules with `?t=` HMR URLs, while a harness doing `import('/src/…')` gets a *second* module instance. `seekTo` then drives nothing and crossings never happen. The first post-merge batch showed 3 false regressions this way; on a fresh server all passed. **Restart the dev server after merges/edits and before module-importing harnesses, and keep the tree frozen while they run.**
+- **Verification (final tree):** see the review package §8.

@@ -1,6 +1,6 @@
 # GT3 Phase 3 refinement — live review package
 
-Product owner review. Open the app and judge visually. Nothing here picks a winner or claims visual quality — only facts, exact URLs, and what to look at. Every decision below is yours; none has been pre-picked. Nothing is merged to `main` before your approval (item 10).
+Product owner review. Open the app and judge visually. Nothing here picks a winner or claims visual quality — only facts, exact URLs, and what to look at. Every decision below is yours; none has been pre-picked. Nothing is merged to `main` before your approval (item 9).
 
 ## How to run
 
@@ -21,7 +21,7 @@ npm run dev   # → http://localhost:5173/
 - **HUD refinements** (item 6): consolidated top-left identity, map arrow, completed-route trail, new moon, single instruction system.
 - **Gate / finish / swap** (items 3–5): edge illumination is the default gate effect, pulse is a swap comparison option, finish gantry with signals is built.
 - **Three coupled camera/car/road candidates** (item 2): `/?look=r1`, `/?look=r2`, `/?look=r3`.
-- **Wheels:** {{WHEELS}}
+- **Wheels: still not spinning, deferred to you.** The cause is found: spin parts are chosen by mesh name, and these models name their wheels on parent nodes, so no car has any. A safe fix isn't a filter change: 9 of 10 cars have wheel geometry off its own axle, shared or merged (Mercedes 1.24 m off-axis), so it needs per-car wheel pivot re-authoring, a separate rig task with its own performance and visual checks. **Decide:** schedule that task, or accept static wheels for now. (Diagnostic check on branch `p3r-wheels`, `051fccd`.)
 
 ## 2. Decide: camera / car / road — `?look=`
 
@@ -91,7 +91,24 @@ Deferred items belonging to later phases are listed in SPEC §31, not here.
 
 ## 8. Verification status
 
-{{VERIFY}}
+Final tree `bf9e53b` (docs-only commits after it), on a fresh dev server. Executed by Luna and Sol.
+
+| Check | Result |
+|---|---|
+| Build | PASS |
+| No input before ready (`verify-preready-input`): pre-ready wheel input, quiet-gated unlock under 16 ms momentum, exact restore under input, crossing SFX forward-only | PASS |
+| Scroll, `cap` default + `legacy` (`verify-scroll`) | PASS |
+| Route persistence across refresh (`verify-route-persistence`) | PASS |
+| Checkpoints: discovery sweeps, all nine gates zero GL allocations both ways, reversals, reload/replay (`verify-checkpoints`) | PASS |
+| Swap response, `edge` gate × crossfade and × pulse: cold first crossing zero GL work, reversals, retargets, Day/Night (`verify-swap-response`) | PASS (both) |
+| Startup smoke for `/`, `?look=r1`, `?look=r2`, `?look=r3&swap=pulse` | PASS |
+| Occlusion: r1/r2/r3 at 15 points each (Sol); r2 at 7 points on the merged tree | PASS (0 terrain hits) |
+| Tyre seating on curbs (r1/r2/r3) | PASS (≤ 0.93 cm) |
+| Gates/finish (Sol): signal lifecycle, both cameras and themes | PASS |
+| HUD (`verify-hud`): layout, crossings, cancellation, sound cue, narrow width, reduced motion, F key, Day/Night | PASS, except one check |
+| HUD ten-car spec fit, car 2 (Audi) | Harness FAIL. **A direct measurement shows no clipping:** 2 rendered lines, scrollHeight = clientHeight = 28 px at 1600 and 1101 widths. Classified as a harness artifact; the harness itself is not yet fixed. |
+
+Not machine-verifiable, so yours: everything in items 2–6 (look and feel), Night appearance, trackpad feel.
 
 ## 9. After approval
 

@@ -5,9 +5,12 @@
  *    `tol` metres nearer (road hidden by terrain).
  * Configs default: base (default camera), b+soft (candidate), b+wide (widest candidate).
  * Usage: GT3_URL=http://127.0.0.1:5194 GT3_OUT=<dir> [GT3_STEP=0.01] [GT3_CONFIGS="|comp=b&cam=soft|comp=b&cam=wide"]
+ * GT3_TS=<comma list> selects a lean sweep. GT3_RESUME=1 + GT3_SOURCE=<product tree>
+ * resumes atomic per-point checkpoints only for identical source/config/point inputs.
  *   node scripts/verify-occlusion.mjs   (host preflight first; one browser, one page at a time) */
 import puppeteer from 'puppeteer-core';
-import { mkdir, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile, rename } from 'node:fs/promises';
+import assert from 'node:assert/strict';
 
 const base = (process.env.GT3_URL || 'http://127.0.0.1:5194').replace(/\/$/, '');
 const out = process.env.GT3_OUT || '/tmp/gt3-occlusion';
@@ -17,6 +20,19 @@ const tsEnv = process.env.GT3_TS; // optional comma list of t (lean mode); other
 const tList = tsEnv ? tsEnv.split(',').map(Number) : null;
 const tol = 0.05;
 await mkdir(out, { recursive: true });
+// Resume only pinned, identical source/config/point sweeps after a host pause.
+const source = process.env.GT3_SOURCE || null;
+let saved = null;
+if (process.env.GT3_RESUME === '1') {
+  assert.ok(source, 'GT3_RESUME requires GT3_SOURCE (tested product tree)');
+  try { saved = JSON.parse(await readFile(`${out}/occlusion.json`, 'utf8')); }
+  catch (e) { if (e.code !== 'ENOENT') throw e; }
+  if (saved) {
+    assert.equal(saved.source, source); assert.equal(saved.base, base);
+    assert.equal(saved.tol, tol); assert.equal(saved.step, step);
+    assert.deepEqual(saved.requestedT, tList); assert.deepEqual(saved.requestedConfigs, configs);
+  }
+}
 const wait = ms => new Promise(r => setTimeout(r, ms));
 const browser = await puppeteer.launch({
   executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
@@ -26,10 +42,19 @@ const browser = await puppeteer.launch({
   defaultViewport: { width: 1600, height: 900 },
 });
 process.once('SIGTERM', async () => { await browser.close(); process.exit(143); });
-const report = { base, at: new Date().toISOString(), step, tol, configs: {} };
+const report = saved || { base, source, at: new Date().toISOString(), step, tol,
+  requestedT: tList, requestedConfigs: configs, configs: {} };
+const checkpoint = async () => {
+  await writeFile(`${out}/occlusion.tmp.json`, JSON.stringify(report, null, 1));
+  await rename(`${out}/occlusion.tmp.json`, `${out}/occlusion.json`);
+};
 let failed = false;
 try {
   for (const qFull of configs) {
+    const key = qFull || 'default';
+    if (report.configs[key]?.summary?.pass && report.configs[key]?.summary?.complete) {
+      console.log('REUSED', key, JSON.stringify(report.configs[key].summary)); continue;
+    }
     // optional "@WxH" suffix sets the viewport for that config (aspect edge cases)
     const [q, vp] = qFull.split('@');
     const page = await browser.newPage();
@@ -51,10 +76,13 @@ try {
     }
     await page.mouse.wheel({ deltaY: 240 });
     await wait(1200);
-    const points = [];
+    const points = report.configs[key]?.points || [];
+    errors.push(...(report.configs[key]?.errors || []));
+    report.configs[key] = { points, errors, summary: { pass: false, complete: false } };
     const tIter = tList ?? Array.from({ length: Math.floor(1.0001 / step) + 1 }, (_, i) => i * step);
     for (const t of tIter) {
       const tt = Math.min(t, 0.999); curT = +tt.toFixed(3);
+      if (points.some(p => Math.abs(p.requestedT - tt) < 1e-9)) continue;
       // instant seek (what Replay/restore use); retry while a finish/montage layer settles
       let ok = false;
       for (let i = 0; i < 40 && !ok; i++) {
@@ -66,6 +94,7 @@ try {
         ok = Math.abs(s.progress - tt) < 0.002;
         if (!ok) await wait(90);
       }
+      assert.ok(ok, `seek failed at ${tt}`);
       await wait(450);
       const m = await page.evaluate(async tol => {
         const THREE = await import('/node_modules/three/build/three.module.js');
@@ -96,20 +125,24 @@ try {
         return { t: g.probe().progress, camPos: camPos.toArray().map(v => +v.toFixed(1)), carRay, cells, roadCells, hidden,
           worstMarginM: +worst.toFixed(2) };
       }, tol);
-      points.push(m);
+      points.push({ requestedT: tt, ...m });
+      await checkpoint();
+      console.log('POINT', key, curT, 'hidden', m.hidden, 'carTerrain', m.carRay.terrainHit);
     }
     const hiddenPts = points.filter(p => p.hidden > 0 || p.carRay.terrainHit !== null);
     const sum = { config: qFull || 'default', points: points.length, withRoadCells: points.filter(p => p.roadCells > 0).length,
       minRoadCells: Math.min(...points.map(p => p.roadCells)), carRayTerrainHits: points.filter(p => p.carRay.terrainHit !== null).length,
       pointsWithHiddenRoad: points.filter(p => p.hidden > 0).length, maxHiddenCells: Math.max(...points.map(p => p.hidden)),
       worstMarginM: Math.max(...points.map(p => p.worstMarginM)), errors,
-      pass: hiddenPts.length === 0 && errors.length === 0, failingT: hiddenPts.map(p => +p.t.toFixed(3)) };
+      complete: points.length === tIter.length,
+      pass: points.length === tIter.length && hiddenPts.length === 0 && errors.length === 0,
+      failingT: hiddenPts.map(p => +p.t.toFixed(3)) };
     report.configs[qFull || 'default'] = { summary: sum, points };
     if (!sum.pass) failed = true;
     console.log(JSON.stringify(sum));
-    await writeFile(`${out}/occlusion.json`, JSON.stringify(report, null, 1));
+    await checkpoint();
     await page.close();
   }
 } finally { await browser.close(); }
-await writeFile(`${out}/occlusion.json`, JSON.stringify(report, null, 1));
+await checkpoint();
 process.exit(failed ? 1 : 0);

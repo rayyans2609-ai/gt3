@@ -373,6 +373,14 @@ for (const t of representative) {
 const frameWidthAtTarget = 2 * COMP.distance * Math.tan(THREE.MathUtils.degToRad(COMP.fov / 2)) * aspect;
 const widths = footprints.map(f => f.width).sort((a, b) => a - b);
 const medianWidth = widths[5];
+// Route-wide same 4.6 m nose-to-tail proxy as verify-composition, rather than
+// inferring hero prominence from only the representative corner points.
+const routeHeroLengths = Array.from({ length: 501 }, (_, i) => {
+  const t = i / 500;
+  poseAt(t); line.pathPointAt(t, car); line.pathTangentAt(t, ptan).setY(0).normalize();
+  const ends = [-1, 1].map(sign => car.clone().addScaledVector(ptan, sign * 2.3 * hero).project(camera));
+  return 50 * Math.hypot(ends[0].x - ends[1].x, (ends[0].y - ends[1].y) / aspect);
+});
 console.log(JSON.stringify({
   comp: COMP.name, cam: COMP.cameraVariant, aspect: round(aspect), values: { distance: COMP.distance, pitch: COMP.pitchDeg,
     fov: COMP.fov, hero, halfWidth: TRACK.halfWidth, racingLineM: round(COMP.racingLineM),
@@ -406,6 +414,8 @@ console.log(JSON.stringify({
   unavailableHolds: window.__gt3.aerial.rail?.unavailableHolds,
   railHoldState: window.__gt3.aerial.rail?.holdState,
   presentation: { carLengthPctOfFrameWidth: round(100 * 4.6 * hero / frameWidthAtTarget, 2),
+    routeHeroSamples: routeHeroLengths.length,
+    routeHeroLengthPctRange: [round(Math.min(...routeHeroLengths), 3), round(Math.max(...routeHeroLengths), 3)],
     projectedCarLengthPctRange: [round(Math.min(...projectedLengths), 2), round(Math.max(...projectedLengths), 2)],
     roadInMedianHeroWidths: round(2 * TRACK.halfWidth / (medianWidth * hero), 2),
     roadInWidestHeroWidths: round(2 * TRACK.halfWidth / (widest.width * hero), 2),

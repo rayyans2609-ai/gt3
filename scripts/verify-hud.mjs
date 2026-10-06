@@ -1,5 +1,6 @@
-/** Browser verification for W5b HUD work: circuit map size, bottom-left car info,
- * first-Tour-entry sound cue, and their composition with the W5a edge-row controls.
+/** Browser verification for the Phase 3-refined HUD: consolidated top-left identity,
+ * directional minimap arrow, completed-route trail, reverse-only direction cue,
+ * first-Tour-entry sound cue, and their composition with the edge-row controls.
  *
  * Usage: node scripts/verify-hud.mjs [baseUrl] [outDir]
  * Defaults: baseUrl http://127.0.0.1:5194/  outDir /Users/rayyansheikh/Desktop/gt3-review-2026-10-04/w5/
@@ -106,7 +107,7 @@ async function layout(page) {
       theme: document.documentElement.dataset.theme,
       player: box(q('.music-player')), anchor: box(q('.audio-anchor')),
       theme_control: box(q('#hud-bottomright')), cue: box(q('.sound-cue')),
-      map: box(q('.hud-route')), info: box(q('.hud-info')), direction: box(q('.hud-direction')),
+      map: box(q('.hud-route')), info: box(q('.hud-identity')), direction: box(q('.hud-direction')),
       identity: box(q('.hud-identity')),
       open: q('#audio-layer')?.classList.contains('is-open') ?? false,
       vw: innerWidth, vh: innerHeight,
@@ -173,22 +174,31 @@ const audioState = page => read(page, async () => {
   return { ready: state.audioReady, master: window.__gt3audio?.gains().master ?? null };
 });
 
-/** Active car, name slot and info slot as the user would perceive them right now. */
+/** Active car and consolidated top-left identity as the user perceives it now. */
 const hudState = page => read(page, async () => {
   const { state } = await import('/src/core/state.js');
   const { isMorphing } = await import('/src/scene/morph.js');
-  const nameSlots = [...document.querySelectorAll('.hud-identity__slot')];
-  const infoSlots = [...document.querySelectorAll('.hud-info__slot')];
-  const pick = slots => slots.filter(s => s.getAttribute('aria-hidden') === 'false');
-  const nameVis = pick(nameSlots);
-  const infoVis = pick(infoSlots);
+  const slots = [...document.querySelectorAll('.hud-identity__slot')];
+  const pick = list => list.filter(s => s.getAttribute('aria-hidden') === 'false');
+  const vis = pick(slots);
+  const marker = document.querySelector('.hud-route__marker');
+  const doneSegs = [...document.querySelectorAll('.hud-route__done-seg')];
+  const svg = document.querySelector('.hud-route__svg');
+  const order = svg ? [...svg.children].map(el => el.getAttribute('class')) : [];
   return {
     active: state.activeCarIndex, progress: state.progress, morphing: isMorphing(),
-    name: nameVis.map(s => s.textContent),
-    headline: infoVis.map(s => s.querySelector('.hud-info__headline').textContent),
-    spec: infoVis.map(s => s.querySelector('.hud-info__spec').textContent),
-    nameCount: nameVis.length, infoCount: infoVis.length,
-    infoHiddenWithClass: infoSlots.filter(s => s.classList.contains('is-visible')).length,
+    name: vis.map(s => s.querySelector('.hud-identity__name').textContent),
+    headline: vis.map(s => s.querySelector('.hud-identity__headline').textContent),
+    spec: vis.map(s => s.querySelector('.hud-identity__spec').textContent),
+    nameCount: vis.length, infoCount: vis.length,
+    infoHiddenWithClass: slots.filter(s => s.classList.contains('is-visible')).length,
+    legacyInfoBlocks: document.querySelectorAll('.hud-info').length,
+    bottomLeftChildren: document.querySelector('#hud-bottomleft')?.childElementCount ?? -1,
+    markerTag: marker?.tagName.toLowerCase() ?? null,
+    markerTransform: marker?.getAttribute('transform') ?? null,
+    trailSegs: doneSegs.length,
+    trailVisible: doneSegs.filter(s => s.style.visibility !== 'hidden').length,
+    svgOrder: order,
   };
 });
 
@@ -254,11 +264,27 @@ try {
     await load(page);
     report.readiness = await read(page, () => window.__gt3.readiness.status);
 
-    // Before Tour entry: first-use direction cue present, info already shows car 0, no sound cue.
-    checkHud(await hudState(page), 'initial');
+    // Before Tour entry: reverse hint hidden until first forward motion, info already
+    // shows car 0 in the consolidated top-left block, no sound cue yet.
+    const h0 = await hudState(page);
+    checkHud(h0, 'initial');
+    assert(h0.legacyInfoBlocks === 0, 'legacy .hud-info block still in the DOM');
+    assert(h0.bottomLeftChildren === 0, `bottom-left not empty: ${h0.bottomLeftChildren} children`);
+    assert(h0.markerTag === 'g', `minimap marker is <${h0.markerTag}>, expected the <g> arrow`);
+    assert(h0.trailSegs === 160, `trail has ${h0.trailSegs} segments, expected 160`);
+    assert(h0.trailVisible === 0, `trail visible before any progress: ${h0.trailVisible} segs`);
+    const order = h0.svgOrder;
+    const iPath = order.indexOf('hud-route__path');
+    const iDone = order.indexOf('hud-route__done');
+    const iFirstDot = order.indexOf('hud-route__checkpoint');
+    const iArrow = order.indexOf('hud-route__marker');
+    assert(iPath >= 0 && iPath < iDone && iDone < iFirstDot && iFirstDot < iArrow,
+      `map z-order wrong (route→trail→dots→arrow): ${JSON.stringify(order.filter((v, i) => order.indexOf(v) === i))}`);
+    const promptLabel = await read(page, () => document.querySelector('.start-prompt__label')?.textContent);
+    assert(promptLabel === 'Scroll to race', `start prompt "${promptLabel}" != "Scroll to race"`);
     assert(!(await cueState(page)).present, 'sound cue present before Tour entry');
     const pre = await layout(page);
-    assert(pre.direction?.shown, 'direction cue not visible at start');
+    assert(!pre.direction?.shown, 'reverse hint visible before any motion (it teaches only after forward drive)');
     assert(!intersects(pre.direction, pre.info), `direction cue overlaps info: ${JSON.stringify([pre.direction, pre.info])}`);
 
     // Monitor: the cue must never be visible while the start screen is still on screen.
@@ -269,6 +295,13 @@ try {
         const c = document.querySelector('.sound-cue');
         if (c && s && !s.hidden) window.__cueEarly++;
       }, 20);
+    });
+    // Watch the reverse hint across entry: it must appear on forward motion, then retire.
+    await read(page, () => {
+      window.__dirSeen = 0;
+      window.__dirMonitor = setInterval(() => {
+        if (document.querySelector('.hud-direction.is-visible')) window.__dirSeen++;
+      }, 50);
     });
     const wheelAt = Date.now();
     await page.mouse.wheel({ deltaY: 240 });
@@ -285,10 +318,10 @@ try {
     const audio = await audioState(page);
     assert(audio.ready === false, `scrolling made audio usable: ${JSON.stringify(audio)}`);
 
-    // Geometry with the cue up: map size, info width, no overlaps, cue clear of theme control.
+    // Geometry with the cue up: map size, identity width, no overlaps, cue clear of theme control.
     const l = await layout(page);
     assert(Math.abs(l.map.width - 170) <= 1 && Math.abs(l.map.height - 170) <= 1, `map ${l.map.width}x${l.map.height} != 170`);
-    assert(l.info.width <= 320.5, `info width ${l.info.width} > 320`);
+    assert(l.info.width <= 330.5, `identity width ${l.info.width} > 330`);
     assert(l.cue?.shown, 'cue not shown');
     checkNoOverlap(l, 'closed+cue');
     // Cue sits above the anchor, pointing down at the speaker.
@@ -305,6 +338,63 @@ try {
     await page.click('.theme-segmented [role="radio"][aria-label="Day"]');
     await wait(900);
     await idle(page);
+
+    // Reverse-hint lifecycle: shown on forward motion, retired ~3 s later.
+    const dirSeen = await read(page, () => { clearInterval(window.__dirMonitor); return window.__dirSeen; });
+    assert(dirSeen > 0, 'reverse hint never appeared after forward drive');
+    const dirCopy = await read(page, () => ({
+      text: document.querySelector('.hud-direction')?.textContent,
+      aria: document.querySelector('.hud-direction')?.getAttribute('aria-label'),
+    }));
+    assert(/Scroll up to reverse/.test(dirCopy.text ?? ''), `hint copy "${dirCopy.text}" missing "Scroll up to reverse"`);
+    assert(/↑/.test(dirCopy.text ?? ''), 'hint missing the up arrow');
+    assert(/reverse/i.test(dirCopy.aria ?? ''), `hint aria-label "${dirCopy.aria}" not meaningful`);
+    await page.waitForFunction(() => {
+      const el = document.querySelector('.hud-direction');
+      return el && !el.classList.contains('is-visible');
+    }, { timeout: 8000 });
+    // Bottom-centre placement, ~44 px above the viewport bottom (rect is still
+    // measurable after retirement — only opacity changed).
+    const dirBox = await read(page, () => {
+      const r = document.querySelector('.hud-direction').getBoundingClientRect();
+      return { x: r.x, y: r.y, width: r.width, height: r.height, vw: innerWidth, vh: innerHeight };
+    });
+    assert(Math.abs((dirBox.x + dirBox.width / 2) - dirBox.vw / 2) <= 6,
+      `hint not bottom-centre: ${JSON.stringify(dirBox)}`);
+    assert(Math.abs(dirBox.vh - (dirBox.y + dirBox.height) - 44) <= 10,
+      `hint not ~44 px above the bottom: ${JSON.stringify(dirBox)}`);
+
+    // Arrow + trail against real route state.
+    const angleOf = t => read(page, async target => {
+      (await import('/src/scroll/scrollDrive.js')).seekTo(target, { instant: true });
+    }, t).then(() => wait(500)).then(() => read(page, () => {
+      const tr = document.querySelector('.hud-route__marker')?.getAttribute('transform') ?? '';
+      const m = /rotate\(([^)]+)\)/.exec(tr);
+      return { transform: tr, angle: m ? Number.parseFloat(m[1]) : NaN };
+    }));
+    await seek(page, 0.25, true);
+    await wait(600);
+    let h = await hudState(page);
+    assert(/translate\(.+\) rotate\(.+\)/.test(h.markerTransform ?? ''),
+      `arrow transform missing translate+rotate: "${h.markerTransform}"`);
+    assert(h.trailVisible > 0 && h.trailVisible < h.trailSegs,
+      `trail should be partial at t=0.25 (visible ${h.trailVisible}/${h.trailSegs})`);
+    const opacities = await read(page, () => [...document.querySelectorAll('.hud-route__done-seg')]
+      .filter(s => s.style.visibility !== 'hidden').map(s => Number.parseFloat(s.style.opacity)));
+    assert(opacities.every(o => o >= 0.37 && o <= 1.001),
+      `trail opacities outside [0.38, 1]: min=${Math.min(...opacities)} max=${Math.max(...opacities)}`);
+    assert(Math.max(...opacities) > 0.9, 'trail never reaches full strength right behind the car');
+    const a1 = await angleOf(0.1);
+    const a2 = await angleOf(0.55);
+    assert(Number.isFinite(a1.angle) && Number.isFinite(a2.angle), `arrow angles not finite: ${a1.angle}, ${a2.angle}`);
+    let diff = Math.abs(a1.angle - a2.angle) % 360;
+    if (diff > 180) diff = 360 - diff;
+    assert(diff > 5, `arrow does not follow the tangent (t=0.1: ${a1.angle}°, t=0.55: ${a2.angle}°)`);
+    // Reversing shrinks the trail: back near the start nothing is completed.
+    await seek(page, 0.002, true);
+    await wait(600);
+    h = await hudState(page);
+    assert(h.trailVisible === 0, `trail did not shrink on reverse: ${h.trailVisible} segs visible`);
   });
 
   // ---- S2 car info through wheel-driven checkpoint crossings (default + bounded) ----
@@ -411,9 +501,9 @@ try {
         const h = await hudState(page);
         checkHud(h, `car ${i} @${width}`);
         const fit = await read(page, () => {
-          const slot = [...document.querySelectorAll('.hud-info__slot')].find(s => s.getAttribute('aria-hidden') === 'false');
-          const head = slot.querySelector('.hud-info__headline');
-          const spec = slot.querySelector('.hud-info__spec');
+          const slot = [...document.querySelectorAll('.hud-identity__slot')].find(s => s.getAttribute('aria-hidden') === 'false');
+          const head = slot.querySelector('.hud-identity__headline');
+          const spec = slot.querySelector('.hud-identity__spec');
           const lh = Number.parseFloat(getComputedStyle(head).lineHeight);
           const name = document.querySelector('.hud-identity__slot[aria-hidden="false"] .hud-identity__name');
           return { headlineLines: Math.round(head.getBoundingClientRect().height / lh),
@@ -424,7 +514,7 @@ try {
         });
         assert(fit.headlineLines <= 2, `car ${i}: headline wraps to ${fit.headlineLines} lines`);
         assert(fit.contentHeight <= fit.slotHeight + 0.5, `car ${i}: info content ${fit.contentHeight} taller than block ${fit.slotHeight}`);
-        assert(fit.specOverflowPx <= 0, `car ${i}: spec line overflows the 320 px block by ${fit.specOverflowPx}px`);
+        assert(fit.specOverflowPx <= 0, `car ${i}: spec line overflows the 330 px block by ${fit.specOverflowPx}px`);
         report.carInfo.push({ viewport: `${width}x${height}`, index: i, name: CARS[i].displayName,
           line1: CARS[i].showcase.headline, line2: specLine(CARS[i]), ...fit });
         checkNoOverlap(await layout(page), `car ${i} @${width}`);
@@ -568,7 +658,7 @@ try {
       await page.waitForFunction(() => document.querySelector('.sound-cue.is-visible'), { timeout: 4000 });
       const dur = await read(page, () => getComputedStyle(document.querySelector('.sound-cue')).transitionDuration);
       assert(/^0s(, 0s)*$/.test(dur), `reduced-motion cue transition ${dur}`);
-      const infoDur = await read(page, () => getComputedStyle(document.querySelector('.hud-info__slot')).transitionDuration);
+      const infoDur = await read(page, () => getComputedStyle(document.querySelector('.hud-identity__slot')).transitionDuration);
       assert(/^0s(, 0s)*$/.test(infoDur), `reduced-motion info transition ${infoDur}`);
       await page.focus('.audio-launcher');
       await page.keyboard.press('Enter');

@@ -330,6 +330,8 @@ async function boot() {
   }
   function startWarmup() {
     try {
+      if (COMP.look) timed('curb-contact-cache', () => carRig.prepareCurbContacts(
+        Array.from({ length: 10 }, (_, index) => cars.getCarModel(index))));
       gpuWarmup = carWarmup.createCarWarmup(
         fraction => { fractions.gpu = fraction; reportProgress(); },
         entry => readiness.warmupSteps.push(entry),

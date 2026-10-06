@@ -38,13 +38,15 @@ let shadowMesh = null;
 let wheels = [];          // meshes rotated for the spin blur, supplied by cars.js
 let contacts = [];
 const contactCache = new WeakMap();
+export const curbContactCacheStats = { builds: 0, buildMs: 0 };
 
 // Candidate-only ground support. Cache four tyre contact vertices once per model,
 // in normalized mount space; do not change the existing wheel-spin classifier.
 function tyreContacts(model) {
   if (contactCache.has(model)) return contactCache.get(model);
-  carMount.updateWorldMatrix(true, true);
-  const inverse = carMount.matrixWorld.clone().invert();
+  const started = performance.now();
+  model.updateWorldMatrix(true, true);
+  const inverse = model.parent ? model.parent.matrixWorld.clone().invert() : new THREE.Matrix4();
   const v = new THREE.Vector3(), matrix = new THREE.Matrix4(), instance = new THREE.Matrix4();
   const quadrants = {}, treadBins = {};
   const wheelName = s => /wheel|tyre|tire|rim/i.test(s || '') && !/brake|caliper|disc|rotor|arch|well|steering/i.test(s || '');
@@ -73,7 +75,14 @@ function tyreContacts(model) {
   const result = Object.entries(quadrants).map(([q, lowest]) => Object.entries(treadBins)
     .filter(([bin, p]) => bin.startsWith(q + ':') && p.y <= lowest.y + 0.025).map(([, p]) => p));
   contactCache.set(model, result);
+  curbContactCacheStats.builds++;
+  curbContactCacheStats.buildMs += performance.now() - started;
   return result;
+}
+
+/** Prepare during loading, so no vertex traversal lands on the first swap. */
+export function prepareCurbContacts(models) {
+  if (COMP.look) for (const model of models) tyreContacts(model);
 }
 
 const contactWorld = new THREE.Vector3(), surfaceCenter = new THREE.Vector3();

@@ -80,6 +80,7 @@ async function measure(page, ts) {
     const V3 = rig.position.constructor;
     const M4 = mount.matrixWorld.constructor;
     const hero = COMP.hero;
+    const cacheBefore = { ...carRig.curbContactCacheStats };
     const results = [];
     for (let carIndex = 0; carIndex < 10; carIndex++) {
       const model = cars.getCarModel(carIndex);
@@ -161,7 +162,7 @@ async function measure(page, ts) {
           rootScale, wheelScale, mountScale, curbWheels, roadFound: Object.values(quads).every(q => q !== null) });
       }
     }
-    return { hero, asphaltIdentity: identity, triCount, bobAmpCm: +(carRig.rigTuning.bobAmplitude * hero * 100).toFixed(2),
+    return { hero, asphaltIdentity: identity, triCount, cacheBefore, cacheAfter: { ...carRig.curbContactCacheStats }, bobAmpCm: +(carRig.rigTuning.bobAmplitude * hero * 100).toFixed(2),
       rollDeg: carRig.rigTuning.bodyRollDeg, results };
   }, ts);
 }
@@ -187,6 +188,7 @@ try {
       `roadFound=${rs.every(x => x.roadFound)} errors=${errors.length}`);
     r.pass = errors.length === 0 && rs.length === 10 * ts.length && rs.every(x => x.roadFound && x.quadrants === 4 && x.worstAbsCm <= (looks ? 1 : 3) && x.mountScale.every(v => v === r.hero)
       && Math.max(...x.rootScale) - Math.min(...x.rootScale) < 1e-7);
+    if (looks) r.pass &&= r.cacheBefore.builds === 10 && r.cacheAfter.builds === 10;
     console.log(`${c || 'base'} curb contacts: ${JSON.stringify(rs.filter(x => x.carIndex === 3 && x.curbWheels > 0).map(x => ({ t: x.t, wheels: x.curbWheels })))}`);
     failed ||= !r.pass;
     console.log(`${c || 'base'} ${r.pass ? 'PASS' : 'FAIL'}`);

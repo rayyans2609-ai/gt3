@@ -91,7 +91,8 @@ async function waitForRest(page) {
 async function driveToMiddle(page) {
   await page.mouse.wheel({ deltaY: 180 }); // real gesture dismisses the start screen
   await wait(120);
-  for (let attempt = 0; attempt < 48; attempt += 1) {
+  // Budget sized for the default capped pace (≤ 55 m per gesture, 200 m/s ceiling), not the old law.
+  for (let attempt = 0; attempt < 240; attempt += 1) {
     const current = await snapshot(page);
     if (current.progress >= 0.37) {
       await waitForRest(page);

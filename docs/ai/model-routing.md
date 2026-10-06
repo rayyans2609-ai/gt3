@@ -168,7 +168,18 @@ Decomposition, routing, broad project synthesis, integration judgment, resolving
 ### GPT-6.1 Sol — heavyweight engineering + execution lead
 Difficult implementation and debugging, complex integration, camera/3D/math, rendering and performance-sensitive work, state/lifecycle/race conditions, technically uncertain engineering, and major technical decisions below the project-wide layer. Sol should solve the overwhelming majority of hard GT3 engineering without Astra. A hard bounded problem gets Sol at higher reasoning, not a stronger model (§12).
 
-For substantial engineering batches Sol may act as **execution lead** under Opus (User → Opus → Sol → bounded workers). It delegates bounded subproblems by preference to: Muse (capable free generalist work), Luna (mechanical), Terra (stronger bounded reliability), DeepSeek (debugging/root-cause subproblems), Bunny (fact retrieval for a child's packet). **Sol is not required to spawn anything.** If it already holds the context and can finish a coupled subtask more cheaply than briefing and integrating a child, it does it. Sol is a lead when useful, not a mandatory middle-management layer. *Sol-as-lead is new on GT3: its first runs are tracked in `routing-evidence.md` before the pattern is trusted further.*
+For substantial engineering batches Sol may act as **execution lead** under Opus (User → Opus → Sol → bounded workers). It delegates bounded subproblems by preference to: Muse (capable free generalist work), Luna (mechanical), Terra (stronger bounded reliability), DeepSeek (debugging/root-cause subproblems), Bunny (fact retrieval for a child's packet). **Sol is not required to spawn anything.** If it already holds the context and can finish a coupled subtask more cheaply than briefing and integrating a child, it does it. Sol is a lead when useful, not a mandatory middle-management layer.
+
+**Who decides the split.** Opus hands Sol the engineering objective, constraints and acceptance conditions, not an internal worker allocation. On receiving the task, Sol decides from the current repo state whether to execute directly or delegate.
+- Sol delegates only when total expected cost/time plus integration risk beats doing it itself (§3).
+- Sol keeps technical ownership, architectural coherence, integration and the final verification judgment.
+- Sol picks each child by this file's capabilities and economics (§10–§14), with no fixed lane or breakdown.
+- Each child gets a clear interface, its own files and acceptance criteria. No overlapping edits.
+- Parallelism stays modest, and Sol avoids recursive delegation.
+- Sol reports child outcomes upward (model, effort, accepted/rework/escalated) so they reach `routing-evidence.md`.
+- Blockers escalate per §6. Host limits (`autonomous-mode.md` §6), verification policy (§5) and Opus Anchor boundaries still apply.
+
+*Sol-as-lead is new on GT3: its first runs are tracked in `routing-evidence.md` before the pattern is trusted further.*
 
 Benchmark nuance: an early Sol performance run self-reported ~84 % improvement, but the manager-owned grader measured ~59 % under the same conditions. Sol still clearly beat the free alternatives. The lesson is to verify performance claims, not to distrust Sol.
 

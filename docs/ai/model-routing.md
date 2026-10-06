@@ -8,6 +8,7 @@ Execution-specific detail lives separately, and this file does not duplicate it:
 
 - [`codex-cli-invocation.md`](./codex-cli-invocation.md): Codex models (Luna, Terra, Sol, Astra), verified slugs, reasoning-effort values, invocation. Route through `scripts/codex-route.sh`.
 - [`opencode-invocation.md`](./opencode-invocation.md): OpenCode free routes (Muse, DeepSeek, Bunny, MiMo), exact model IDs, credential isolation, route health. Route through `scripts/opencode-route.sh`.
+- [`cloud-opus-invocation.md`](./cloud-opus-invocation.md): Cloud Opus (independent senior reviewer in a Claude cloud session), the push-and-SHA-confirm rule, launcher `scripts/cloud-opus-launch.exp`.
 - [`routing-evidence.md`](./routing-evidence.md): the running record of material model work that §15 learns from.
 
 **Two layers.** Part I is general principle, written to transfer beyond GT3. Part II is the current GT3 model map, which is evidence-based and revisable. When a model name changes, Part II changes; Part I should not need to.

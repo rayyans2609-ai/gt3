@@ -752,7 +752,7 @@ The owner reviewed the final machine-verified candidate (`19dace5`/`290baba`, `s
 - **HUD:**
   - consolidate car info into the top-left with a unified colour;
   - minimap arrow and a yellow completed-section trail;
-  - refine the moon crescent;
+  - a clearer, more substantial moon crescent (owner correction: not necessarily thinner);
   - remove the redundant direction / "Scroll to Race" instructions.
 - **Still open from the 10-05 package:** 512-px textures; startup 14.5 s and the `compileAsync` revert; visual retirement of §30.6.
 - **Process note:** `phase3-integration` does not yet contain `main`'s routing commits `aa75b78`, `eb3ef32` and `665d5cc` (efficiency doctrine, Astra advisory-only, right-sized verification). Bring them in by merging `main` into this branch before routed implementation work, with owner OK. Until then, the canonical routing text is `main`'s `docs/ai/`.

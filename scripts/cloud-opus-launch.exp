@@ -1,0 +1,30 @@
+#!/usr/bin/expect -f
+# Canonical GT3 Cloud Opus launcher — see docs/ai/cloud-opus-invocation.md.
+# Proven during Phase 3 (2026-10-04/05: W2 review, final audits 1–2).
+#
+# Launches a Claude Code cloud session non-interactively with an explicit model and a prompt
+# read from a file: accepts the startup settings warning, prints CLOUD_URL=<session url>,
+# then detaches (the cloud session keeps running).
+#
+# Usage: expect scripts/cloud-opus-launch.exp <prompt-file> <model> <log-file>
+#   model is required (e.g. claude-opus-5-5); never rely on a default.
+# The prompt MUST pin the pushed branch + exact SHA (STEP 0) — see the doc.
+if {[llength $argv] != 3} { puts stderr "usage: cloud-opus-launch.exp <prompt-file> <model> <log-file>"; exit 2 }
+set promptFile [lindex $argv 0]
+set model [lindex $argv 1]
+set logf [lindex $argv 2]
+if {$model eq ""} { puts stderr "explicit model required"; exit 2 }
+set fh [open $promptFile r]; set prompt [read $fh]; close $fh
+log_file -noappend $logf
+set timeout 120
+spawn claude --cloud $prompt --model $model
+expect {
+  -re {confirm} { sleep 1; send "\r"; exp_continue }
+  -re {(https://claude\.ai/code/[A-Za-z0-9_/-]+)} { puts "\nCLOUD_URL=$expect_out(1,string)"; }
+  timeout { puts "\nCLOUD_TIMEOUT"; }
+  eof { puts "\nCLOUD_EOF"; }
+}
+set timeout 15
+expect { eof {} timeout {} }
+catch { send "\x03" }
+catch { close }

@@ -468,7 +468,7 @@ Preferred: a short digital/pixelated morph, but performance outranks the exact e
 - **Bottom-left:** free in Phase 3 after the consolidation. It is the future home of a **spinning 3D car presentation** (§31): a later phase, on the one shared renderer only, and only if measurement proves it cheap (§27).
 - **First-use direction cue** (§14): makes forward and reverse obvious, then retires once the interaction is learned. No permanent clutter. *Phase 3 refinement (2026-10-06):* the forward/reverse cue and the start screen's "Scroll to Race" instruction currently say overlapping things. Resolve that into **one clear instruction sequence** with better indicator placement. The legacy start screen and its loading UX are not redesigned in Phase 3 (§25, §31).
 - **Sound cue** (§10): a brief, visual-only pointer to the Sound control on first Grand Tour entry while audio is off.
-- **Bottom/edge:** the Day/Night control (§13) and the persistent audio control (§8), always present. They compose as one edge row that recomposes when the player expands (§8). *Phase 3 refinement (2026-10-06):* refine the moon icon's crescent thickness and inner gap so it reads cleanly at control size.
+- **Bottom/edge:** the Day/Night control (§13) and the persistent audio control (§8), always present. They compose as one edge row that recomposes when the player expands (§8). *Phase 3 refinement (2026-10-06):* make the moon a **clearer, more substantial-looking crescent** that reads immediately at control size, by reworking its crescent body and inner gap. Thinner is not the goal (corrected 2026-10-06).
 
 Every Phase 3 HUD refinement preserves Day and Night readability.
 
@@ -613,7 +613,7 @@ A fresh implementation agent should be able to determine, from this file alone: 
      - consolidate car information into the top-left hierarchy with a unified colour;
      - a directional arrow on the minimap;
      - a yellow completed-section trail;
-     - a refined moon crescent;
+     - a clearer, more substantial moon crescent;
      - one non-redundant direction/"Scroll to Race" instruction, with better placement;
      - Day/Night readability throughout.
    - **Owner choices still open:**
@@ -654,3 +654,10 @@ Raised during Phase 3 review, owned by later phases, and **not to be implemented
 | Full-quality Showcase models (Tour stays 512-px) | R | Phase 6 | §30.10 |
 | UI/UX craft uplift (hierarchy, interactions, transitions, modelling/lighting, delight) | R | every phase | §23 |
 | Custom site-wide cursor | dropped | — | §28 |
+
+**Placement clarifications (owner, 2026-10-06).** These are recorded as the working placements:
+1. **HUD-car click-through** is a deliberate, user-initiated exit from Grand Tour, like *Leaving Grand Tour mid-run*, not an interruption. It preserves route and discovery state and belongs to Phase 6 (§25).
+2. **The spinning 3D car** lives in the **Grand Tour HUD bottom-left**, the space freed by the Phase 3 top-left consolidation. Its click-through presentation is Phase 6.
+3. **Landing hero vs Tour starting car:** still open. Replacing the Landing hero (Phase 4) does not by itself change the Tour starting car, roster index 0, or the discovered-at-start car. The owner decides before Phase 4 implementation.
+4. **Gate illumination** is Phase 3 checkpoint feedback, local to the gate. It is not Night route lighting, which remains Phase 8 (§13a).
+5. **Volume sliders** belong to Phase 5's player pass. They may be pulled forward as a small standalone task if the owner asks.

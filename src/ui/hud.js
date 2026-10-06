@@ -4,6 +4,12 @@
  * The frame loop is owned by main.js. This module only reflects route position
  * and active-car state; the marker uses an SVG transform attribute so it never
  * causes layout work while the route is moving.
+ *
+ * Top-left is one consolidated car-identity block (name + headline + spec in a
+ * single two-slot crossfade). Top-right is the circuit map with a directional
+ * arrow and a completed-route trail. Bottom-left stays empty (a later phase's
+ * spinning-car home). The direction cue lives bottom-centre and teaches only
+ * the reverse gesture once the car is moving forward.
  */
 
 import * as THREE from 'three';
@@ -17,22 +23,33 @@ const MAP_SIZE = 170;
 const MAP_PADDING = 9;
 const MAP_SAMPLES = 160;
 const DIRECTION_DEAD_ZONE = 0.035;
-const CUE_HIDE_DELAY = 1400;
+// "Scroll up to reverse" shows once the car moves forward, then retires.
+const CUE_HIDE_DELAY = 3000;
+// Completed-route trail: strongest right behind the car, easing over this lap
+// fraction back to a quiet base opacity.
+const TRAIL_FADE_SPAN = 0.22;
+const TRAIL_BASE_OPACITY = 0.38;
+// Route-tangent probe for the minimap arrow (forward tangent always).
+const TANGENT_EPSILON = 0.002;
 
 let initialized = false;
 let identitySlots = [];
-let infoSlots = [];
 let visibleIdentitySlot = 0;
-let visibleInfoSlot = 0;
 let renderedCarIndex = -1;
 let routeProject;
-let routePoint;
-const routeWorldPoint = new THREE.Vector3();
+let routePointA;
+let routePointB;
+const routeWorldA = new THREE.Vector3();
+const routeWorldB = new THREE.Vector3();
 let routeMarker;
+let trailSegs = [];
+let lastTrailProgress = NaN;
 let writtenRouteX = NaN;
 let writtenRouteY = NaN;
+let writtenRouteAngle = NaN;
 let directionRoot;
 let directionTimer = 0;
+let cueShown = false;
 let cueUsed = false;
 let identityMeasureId = 0;
 
@@ -49,6 +66,13 @@ function svgElement(tag, attributes = {}) {
   return node;
 }
 
+/**
+ * Top-left consolidated identity block. Each of the two crossfade slots holds
+ * the car name plus the car info (editorial headline + one factual line built
+ * only from existing roster data), so name and info always swap in the same
+ * pass. "(BoP-dependent)" compresses to "· BoP", which keeps the qualifier;
+ * nothing is invented or rounded.
+ */
 function buildIdentity(root) {
   const copy = element('div', 'hud-identity__copy');
   for (let i = 0; i < 2; i++) {
@@ -57,38 +81,21 @@ function buildIdentity(root) {
     // painted at once), so assistive tech needs aria-hidden kept in sync separately.
     slot.setAttribute('aria-hidden', i === 0 ? 'false' : 'true');
     const name = element('div', 'hud-identity__name');
-    slot.append(name);
+    const headline = element('div', 'hud-identity__headline');
+    const spec = element('div', 'hud-identity__spec');
+    slot.append(name, headline, spec);
     copy.append(slot);
-    identitySlots.push({ slot, name });
+    identitySlots.push({ slot, name, headline, spec });
   }
   root.classList.add('hud-identity');
   root.append(copy);
 }
 
-/**
- * Bottom-left car info: the editorial headline plus one factual line built only
- * from existing roster data. "(BoP-dependent)" compresses to "· BoP", which keeps
- * the qualifier; nothing is invented or rounded.
- */
 function specLine(car) {
   const power = car.engine.power;
   const bop = /\s*\(BoP-dependent\)/.test(power);
   const figure = power.replace(/\s*\(BoP-dependent\)/, '');
   return `${car.engine.configuration} · ${figure}${bop ? ' · BoP' : ''}`;
-}
-
-function buildInfo(root) {
-  const block = element('div', 'hud-info');
-  for (let i = 0; i < 2; i++) {
-    const slot = element('div', `hud-info__slot${i === 0 ? ' is-visible' : ''}`);
-    slot.setAttribute('aria-hidden', i === 0 ? 'false' : 'true');
-    const headline = element('div', 'hud-info__headline');
-    const spec = element('div', 'hud-info__spec');
-    slot.append(headline, spec);
-    block.append(slot);
-    infoSlots.push({ slot, headline, spec });
-  }
-  root.append(block);
 }
 
 function buildRouteMap(root) {
@@ -123,25 +130,49 @@ function buildRouteMap(root) {
     return `${index === 0 ? 'M' : 'L'}${projected.x.toFixed(2)} ${projected.y.toFixed(2)}`;
   }).join(' ');
   svg.append(svgElement('path', { class: 'hud-route__path', d }));
+  // Completed-route trail: one short segment per map sample, drawn over the
+  // base route at the same stroke width. Per-frame work only touches inline
+  // opacity/visibility, and only when progress actually changed.
+  const done = svgElement('g', { class: 'hud-route__done' });
+  for (let i = 0; i < MAP_SAMPLES; i++) {
+    const a = routeProject(points[i], { x: 0, y: 0 });
+    const b = routeProject(points[i + 1], { x: 0, y: 0 });
+    const seg = svgElement('path', {
+      class: 'hud-route__done-seg',
+      d: `M${a.x.toFixed(2)} ${a.y.toFixed(2)}L${b.x.toFixed(2)} ${b.y.toFixed(2)}`,
+    });
+    seg.style.visibility = 'hidden';
+    done.append(seg);
+    trailSegs.push(seg);
+  }
+  svg.append(done);
   for (const t of CHECKPOINT_T) {
     const projected = routeProject(pointAt(t), { x: 0, y: 0 });
     svg.append(svgElement('circle', { class: 'hud-route__checkpoint', cx: projected.x.toFixed(2), cy: projected.y.toFixed(2), r: 1.35 }));
   }
-  routeMarker = svgElement('circle', { class: 'hud-route__marker', cx: 0, cy: 0, r: 2.7 });
+  // Direction arrow: a small filled chevron (~8 px long in map units) pointing
+  // along the route's forward tangent. It lives in a <g> so position and
+  // rotation compose in one transform attribute update per frame.
+  routeMarker = svgElement('g', { class: 'hud-route__marker' });
+  routeMarker.append(svgElement('path', { class: 'hud-route__marker-shape', d: 'M0 -4.6L3.1 3.6L0 1.7L-3.1 3.6Z' }));
   svg.append(routeMarker);
   root.classList.add('hud-route');
   root.append(svg);
 }
 
+/**
+ * Bottom-centre reverse hint. The start screen already owns the "Scroll to
+ * race" prompt, so this cue teaches only the remaining gesture: once the car
+ * is moving forward it shows "Scroll up to reverse" for a few seconds, then
+ * retires for the session. Reversing before it ever shows retires it unseen.
+ */
 function buildDirectionCue(root) {
-  directionRoot = element('div', 'hud-direction is-primer');
-  directionRoot.setAttribute('aria-label', 'Scroll down to drive forward. Scroll up to reverse.');
+  directionRoot = element('div', 'hud-direction');
+  directionRoot.setAttribute('aria-label', 'Scroll up to reverse');
   directionRoot.append(
-    element('span', 'hud-direction__arrow', '↑'), element('span', 'hud-direction__copy', 'reverse'),
-    element('span', 'hud-direction__divider', '/'),
-    element('span', 'hud-direction__copy', 'forward'), element('span', 'hud-direction__arrow', '↓'),
+    element('span', 'hud-direction__arrow', '↑'),
+    element('span', 'hud-direction__copy', 'Scroll up to reverse'),
   );
-  root.classList.add('hud-direction-host');
   root.append(directionRoot);
 }
 
@@ -152,18 +183,11 @@ function setIdentity(index, immediate = false) {
   const car = getCar(index);
   const nextIndex = immediate ? visibleIdentitySlot : 1 - visibleIdentitySlot;
   identitySlots[nextIndex].name.textContent = car.displayName;
-  // Car info swaps in the same pass as the name (never waits on morph completion,
-  // which does not fire on cancellation), so retargets/reversals stay in step.
-  const nextInfo = immediate ? visibleInfoSlot : 1 - visibleInfoSlot;
-  infoSlots[nextInfo].headline.textContent = car.showcase.headline;
-  infoSlots[nextInfo].spec.textContent = specLine(car);
-  if (!immediate) {
-    infoSlots[visibleInfoSlot].slot.classList.remove('is-visible');
-    infoSlots[visibleInfoSlot].slot.setAttribute('aria-hidden', 'true');
-    infoSlots[nextInfo].slot.classList.add('is-visible');
-    infoSlots[nextInfo].slot.setAttribute('aria-hidden', 'false');
-    visibleInfoSlot = nextInfo;
-  }
+  // Car info is written in the same pass as the name (never waits on morph
+  // completion, which does not fire on cancellation), so retargets/reversals
+  // stay in step — and both live in the same slot, so they fade as one block.
+  identitySlots[nextIndex].headline.textContent = car.showcase.headline;
+  identitySlots[nextIndex].spec.textContent = specLine(car);
   if (!immediate) {
     identitySlots[visibleIdentitySlot].slot.classList.remove('is-visible');
     identitySlots[visibleIdentitySlot].slot.setAttribute('aria-hidden', 'true');
@@ -178,32 +202,67 @@ function setIdentity(index, immediate = false) {
   performance.clearMarks(end);
 }
 
+function smoothstep01(x) {
+  const clamped = x < 0 ? 0 : x > 1 ? 1 : x;
+  return clamped * clamped * (3 - 2 * clamped);
+}
+
+function updateTrail(progress) {
+  if (progress === lastTrailProgress) return;
+  lastTrailProgress = progress;
+  const count = trailSegs.length;
+  for (let i = 0; i < count; i++) {
+    const segEnd = (i + 1) / count;
+    const behind = progress - segEnd;
+    const seg = trailSegs[i];
+    if (behind < 0) {
+      seg.style.visibility = 'hidden';
+      continue;
+    }
+    // Strongest right behind the car, easing to the quiet base further back.
+    const closeness = 1 - behind / TRAIL_FADE_SPAN;
+    const opacity = TRAIL_BASE_OPACITY + (1 - TRAIL_BASE_OPACITY) * smoothstep01(closeness);
+    seg.style.opacity = opacity.toFixed(3);
+    seg.style.visibility = 'visible';
+  }
+}
+
 function updateDirectionCue(dt) {
-  if (cueUsed) return;
+  if (cueUsed || !directionRoot) return;
   const velocity = Number(state.velocity) || 0;
-  if (directionTimer === 0) {
-    if (Math.abs(velocity) <= DIRECTION_DEAD_ZONE) return;
-    directionRoot.classList.toggle('is-forward', velocity > 0);
-    directionRoot.classList.toggle('is-reverse', velocity < 0);
+  if (!cueShown) {
+    if (velocity < -DIRECTION_DEAD_ZONE) {
+      cueUsed = true;
+      directionRoot.classList.add('is-dismissed');
+      return;
+    }
+    if (velocity <= DIRECTION_DEAD_ZONE) return;
+    cueShown = true;
+    directionTimer = 0;
+    directionRoot.classList.add('is-visible');
+    return;
   }
   directionTimer += dt;
   if (directionTimer >= CUE_HIDE_DELAY / 1000) {
     cueUsed = true;
+    directionRoot.classList.remove('is-visible');
     directionRoot.classList.add('is-dismissed');
   }
 }
 
 export function initHUD() {
   if (initialized) return;
+  const hud = document.querySelector('#hud');
   const topLeft = document.querySelector('#hud-topleft');
   const topRight = document.querySelector('#hud-topright');
   const bottomLeft = document.querySelector('#hud-bottomleft');
-  if (!topLeft || !topRight || !bottomLeft) throw new Error('[hud] Required HUD roots are missing.');
+  if (!hud || !topLeft || !topRight || !bottomLeft) throw new Error('[hud] Required HUD roots are missing.');
   buildIdentity(topLeft);
   buildRouteMap(topRight);
-  buildDirectionCue(bottomLeft);
-  buildInfo(bottomLeft);
-  routePoint = { x: 0, y: 0 };
+  // Bottom-centre, clear of the bottom edge row; bottom-left stays empty.
+  buildDirectionCue(hud);
+  routePointA = { x: 0, y: 0 };
+  routePointB = { x: 0, y: 0 };
   initialized = true;
   setIdentity(state.activeCarIndex, true);
 }
@@ -211,13 +270,25 @@ export function initHUD() {
 export function update(dt) {
   if (!initialized) return;
   if (state.activeCarIndex !== renderedCarIndex) setIdentity(state.activeCarIndex);
-  routeProject(pointAt(state.progress, routeWorldPoint), routePoint);
-  const x = Math.round(routePoint.x * 100) / 100;
-  const y = Math.round(routePoint.y * 100) / 100;
-  if (x !== writtenRouteX || y !== writtenRouteY) {
+  routeProject(pointAt(state.progress, routeWorldA), routePointA);
+  let ahead = state.progress + TANGENT_EPSILON;
+  if (ahead > 1) ahead -= 1;
+  routeProject(pointAt(ahead, routeWorldB), routePointB);
+  const x = Math.round(routePointA.x * 100) / 100;
+  const y = Math.round(routePointA.y * 100) / 100;
+  const dx = routePointB.x - routePointA.x;
+  const dy = routePointB.y - routePointA.y;
+  let angle = writtenRouteAngle;
+  if (dx * dx + dy * dy > 1e-10) {
+    // The chevron is drawn pointing up (-Y), so the map angle needs +90°.
+    angle = Math.round((Math.atan2(dy, dx) * 180 / Math.PI + 90) * 2) / 2;
+  }
+  if (x !== writtenRouteX || y !== writtenRouteY || angle !== writtenRouteAngle) {
     writtenRouteX = x;
     writtenRouteY = y;
-    routeMarker.setAttribute('transform', `translate(${x} ${y})`);
+    writtenRouteAngle = angle;
+    routeMarker.setAttribute('transform', `translate(${x} ${y}) rotate(${angle})`);
   }
+  updateTrail(state.progress);
   updateDirectionCue(Math.max(0, Math.min(Number(dt) || 0, 0.1)));
 }

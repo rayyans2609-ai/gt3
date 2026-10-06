@@ -112,7 +112,7 @@ function buildScreen() {
   panel.append(eyebrow, makeIdentityMark(), title, explanation, loading);
 
   const prompt = element('div', 'start-prompt');
-  const promptLabel = element('span', 'start-prompt__label', 'Scroll to Race');
+  const promptLabel = element('span', 'start-prompt__label', 'Scroll to race');
   const cue = element('span', 'start-prompt__cue');
   cue.setAttribute('aria-hidden', 'true');
   cue.append(element('span', 'start-prompt__line'));

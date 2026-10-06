@@ -10,6 +10,7 @@
   --line: rgba(18, 21, 23, 0.18);
   --surface: rgba(255, 255, 255, 0.72);
   --accent: #65521d;
+  --route-done: #c58f00;
 }
 
 :root[data-theme="night"] {
@@ -19,4 +20,5 @@
   --line: rgba(237, 240, 234, 0.18);
   --surface: rgba(19, 36, 62, 0.78);
   --accent: #d8b94f;
+  --route-done: #e8c34a;
 }

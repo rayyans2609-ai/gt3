@@ -43,6 +43,7 @@ const routeWorldA = new THREE.Vector3();
 const routeWorldB = new THREE.Vector3();
 let routeMarker;
 let trailSegs = [];
+const trailState = []; // last written per-segment state: 'h' (hidden) or opacity string
 let lastTrailProgress = NaN;
 let writtenRouteX = NaN;
 let writtenRouteY = NaN;
@@ -214,16 +215,20 @@ function updateTrail(progress) {
   for (let i = 0; i < count; i++) {
     const segEnd = (i + 1) / count;
     const behind = progress - segEnd;
+    // Strongest right behind the car, easing to the quiet base further back. Only segments whose
+    // state changed are written (most sit hidden or at the base opacity), keeping DOM writes per
+    // frame to the few segments near the car.
+    const state = behind < 0 ? 'h'
+      : (TRAIL_BASE_OPACITY + (1 - TRAIL_BASE_OPACITY)
+        * smoothstep01(1 - behind / TRAIL_FADE_SPAN)).toFixed(2);
+    if (trailState[i] === state) continue;
     const seg = trailSegs[i];
-    if (behind < 0) {
-      seg.style.visibility = 'hidden';
-      continue;
+    if (state === 'h') seg.style.visibility = 'hidden';
+    else {
+      seg.style.opacity = state;
+      if (trailState[i] === 'h' || trailState[i] === undefined) seg.style.visibility = 'visible';
     }
-    // Strongest right behind the car, easing to the quiet base further back.
-    const closeness = 1 - behind / TRAIL_FADE_SPAN;
-    const opacity = TRAIL_BASE_OPACITY + (1 - TRAIL_BASE_OPACITY) * smoothstep01(closeness);
-    seg.style.opacity = opacity.toFixed(3);
-    seg.style.visibility = 'visible';
+    trailState[i] = state;
   }
 }
 

@@ -1,9 +1,16 @@
-/** A short body-only cross-fade. The route rig never changes during a swap. */
+/** Short body-only crossfade, with the historical emissive pulse as an option. */
+import * as THREE from 'three';
 import { state } from '../core/state.js';
+import { CARS } from '../data/cars.js';
 import { carMount, setCarModel, setWheels } from './carRig.js';
 import { getCarModel, findWheels } from './cars.js';
 
 const DURATION = 0.56;
+export const swapTreatment = new URLSearchParams(location.search).get('swap') === 'pulse'
+  ? 'pulse' : 'crossfade';
+const PEAK_AT = 0.40 / 0.85; // Historical pulse crest, normalized to today's duration.
+const pulseColors = CARS.map(car => new THREE.Color(car.brandColor)
+  .lerp(new THREE.Color(0xffe9c0), 0.55));
 const materialCache = new WeakMap();
 let measureId = 0;
 
@@ -54,7 +61,10 @@ function materialsFor(model) {
     const fade = Array.isArray(normal) ? normal.map(fadeOne) : fadeOne(normal);
     assignments.push({ object, normal, fade });
   });
-  const result = { assignments, fades: [...fades.values()] };
+  const result = { assignments, fades: [...fades.values()],
+    emission: [...fades.values()].filter(mat => mat.emissive).map(mat => ({
+      mat, color: mat.emissive.clone(), intensity: mat.emissiveIntensity,
+    })) };
   materialCache.set(model, result);
   finishMeasure();
   return result;
@@ -70,18 +80,26 @@ function restore(model) {
   for (const { object, normal } of materialsFor(model).assignments) object.material = normal;
 }
 
-function applyFade(model, opacity) {
+function applyFade(model, opacity, glow = 0, glowColor = pulseColors[0]) {
   if (!model) return;
   for (const mat of materialsFor(model).fades) {
     mat.opacity = opacity;
     mat.depthWrite = opacity > 0.985;
+  }
+  if (swapTreatment === 'pulse') {
+    // Same half-sine, brand/warm-white mix and intensity law as 1864cbe^,
+    // using cached fade materials; opaque originals are never modified.
+    for (const { mat, color, intensity } of materialsFor(model).emission) {
+      mat.emissive.copy(color).lerp(glowColor, glow);
+      mat.emissiveIntensity = intensity + glow * 2.4;
+    }
   }
 }
 
 /** Draw this exact material state during the real GPU warm-up. */
 export function beginWarmFade(model) {
   activate(model);
-  applyFade(model, 0.5);
+  applyFade(model, 0.5, swapTreatment === 'pulse' ? 1 : 0);
 }
 
 export function endWarmFade(model) {
@@ -183,7 +201,11 @@ export function updateMorph(dt) {
   if (!active) return;
   clock = Math.min(1, clock + dt / DURATION);
   const cross = smooth(clock);
-  applyFade(outgoing, 1 - cross);
-  applyFade(incoming, cross);
+  const pulseT = clock <= PEAK_AT ? clock / PEAK_AT * 0.5 :
+    0.5 + (clock - PEAK_AT) / (1 - PEAK_AT) * 0.5;
+  const glow = swapTreatment === 'pulse' ? Math.sin(Math.PI * pulseT) : 0;
+  const color = pulseColors[pendingIndex];
+  applyFade(outgoing, 1 - cross, glow, color);
+  applyFade(incoming, cross, glow, color);
   if (clock >= 1) finish();
 }

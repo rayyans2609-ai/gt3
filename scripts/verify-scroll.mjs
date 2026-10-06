@@ -152,7 +152,7 @@ async function runMode(mode) {
     defaultViewport: { width: 1600, height: 900 } });
   const res = { mode, errors: [], scenarios: {}, interactions: {} };
   try {
-    const params = [mode === 'default' ? '' : `scroll=${mode}`, extra].filter(Boolean).join('&');
+    const params = [`scroll=${mode === 'default' ? 'legacy' : mode}`, extra].filter(Boolean).join('&');
     const url = params ? `${base}/?${params}` : base;
     res.url = url;
     const page = await browser.newPage();

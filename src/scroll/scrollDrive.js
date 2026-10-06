@@ -47,11 +47,13 @@ const TUNE = {
 };
 
 // ---------------------------------------------------------------------------
-// ?scroll= pace candidates (SPEC §14 "Bounded pace"). Independent URL parameter: this module
-// reads only `scroll`, never `comp`/`cam`/`gate`, and no other module reads it. No param (or an
-// unknown value) = the default law below, unchanged.
-//   ?scroll=cap   capped glide: bounded lead, hard speed ceiling, bounded acceleration
-//   ?scroll=pace  input intensity sets pace through a compressive curve into a narrow band
+// Scroll pace laws (SPEC §14 "Bounded pace"). Independent URL parameter: this module reads only
+// `scroll`, never `comp`/`cam`/`gate`, and no other module reads it.
+//   (no param)      capped glide — the owner-selected pace (2026-10-06): bounded lead, hard speed
+//                   ceiling, bounded acceleration. Same model as `?scroll=cap`.
+//   ?scroll=legacy  the pre-W3 damped law (internally `scrollMode === 'default'`), kept for
+//                   comparison/harnesses until Phase 3 closure removes it
+//   ?scroll=pace    input intensity sets pace through a compressive curve into a narrow band
 //
 // Alignment contract for the candidates (the default mode is untouched):
 //   - The page scrollbar is only an INPUT DEVICE. Each frame update() reads window.scrollY and
@@ -69,8 +71,9 @@ const TUNE = {
 function readScrollMode() {
   try {
     const v = new URLSearchParams(globalThis.location?.search || '').get('scroll');
-    return v === 'cap' || v === 'pace' ? v : 'default';
-  } catch { return 'default'; }
+    if (v === 'legacy') return 'default';
+    return v === 'pace' ? 'pace' : 'cap';
+  } catch { return 'cap'; }
 }
 export const scrollMode = readScrollMode();
 const bounded = scrollMode === 'default' ? null : createBoundedModel(scrollMode, TRACK_LENGTH);
@@ -86,6 +89,11 @@ let lockedScrollY = 0;  // scroll position frozen at the moment of locking
 let hasStarted = false;
 let swallowersAttached = false;
 let suppressProgrammaticStartUntil = 0;
+let lastSwallowedAt = 0;  // last wheel/touch/key input swallowed while locked (incl. boot guard)
+let quietTimer = 0;
+// A gesture still in flight when the drive unlocks (trackpad momentum, a held wheel) belongs to
+// the time before readiness; the boot unlock waits until input has been idle this long.
+const UNLOCK_QUIET_MS = 250;
 
 const firstScrollHandlers = [];
 
@@ -155,6 +163,7 @@ const SCROLL_KEYS = new Set([
 
 function swallow(e) {
   if (state.scrollLocked) {
+    lastSwallowedAt = performance.now();
     e.preventDefault();
     e.stopPropagation();
   }
@@ -162,6 +171,7 @@ function swallow(e) {
 
 function swallowKeys(e) {
   if (state.scrollLocked && SCROLL_KEYS.has(e.key)) {
+    lastSwallowedAt = performance.now();
     e.preventDefault();
   }
 }
@@ -189,6 +199,8 @@ function detachSwallowers() {
  * cannot be scrolled. Used by the montage, the fullscreen card and Showcase Mode.
  */
 export function lockScroll() {
+  releaseBootGuard();
+  clearTimeout(quietTimer); // a newer lock owner (e.g. finish restore) cancels a pending quiet unlock
   if (state.scrollLocked) {
     attachSwallowers();
     return;
@@ -198,11 +210,36 @@ export function lockScroll() {
   attachSwallowers();
 }
 
+function releaseBootGuard() {
+  const guard = globalThis.window?.__gt3BootGuard;
+  if (!guard) return;
+  lastSwallowedAt = Math.max(lastSwallowedAt, guard.lastInputAt || 0);
+  guard.detach?.();
+  window.__gt3BootGuard = null;
+}
+
+/**
+ * Unlock once input has been idle for UNLOCK_QUIET_MS (SPEC §14 "No driving input before
+ * ready"). Until then the drive stays locked and swallowing, so momentum or a held wheel begun
+ * during loading never becomes route input. Calls `onUnlocked` after the real unlock.
+ */
+export function unlockScrollWhenQuiet(onUnlocked) {
+  clearTimeout(quietTimer);
+  const wait = UNLOCK_QUIET_MS - (performance.now() - lastSwallowedAt);
+  if (state.scrollLocked && wait > 0) {
+    quietTimer = setTimeout(() => unlockScrollWhenQuiet(onUnlocked), wait);
+    return;
+  }
+  unlockScroll();
+  onUnlocked?.();
+}
+
 /**
  * Release the drive exactly where it was frozen — the race resumes from the same
  * point, with no jump, because rawTarget was never allowed to drift while locked.
  */
 export function unlockScroll() {
+  clearTimeout(quietTimer);
   if (!state.scrollLocked) {
     detachSwallowers();
     return;

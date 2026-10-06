@@ -59,7 +59,7 @@ function installBrowser(modeParam, vh) {
 }
 
 async function bootMode(mode, vh = VH) {
-  const env = installBrowser(mode === 'default' ? '' : mode, vh);
+  const env = installBrowser(mode === 'default' ? 'legacy' : mode, vh);
   const mod = await import(`../src/scroll/scrollDrive.js?sim=${mode}-${vh}-${Math.random()}`);
   if (mod.scrollMode !== mode) throw new Error(`mode mismatch ${mod.scrollMode} != ${mode}`);
   state.started = false; state.scrollLocked = false;

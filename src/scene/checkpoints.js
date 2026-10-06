@@ -29,6 +29,12 @@ const instance = new THREE.Object3D();
 const approach = { index: -1, proximity: 0 };
 let routeIndex = 0;
 let response = null;
+const crossingHandlers = [];
+
+/** Live gate crossings only (never boot restore). `direction` is +1 forward, -1 reverse. */
+export function onCrossing(fn) {
+  crossingHandlers.push(fn);
+}
 
 export function indexAt(progress) {
   let index = 0;
@@ -91,7 +97,12 @@ export function updateCheckpoints() {
     }
     if (discovered) set('unlocked', discovered);
   }
-  if (nextIndex !== routeIndex) response?.trigger(Math.max(nextIndex, routeIndex) - 1);
+  if (nextIndex !== routeIndex) {
+    const gate = Math.max(nextIndex, routeIndex) - 1;
+    response?.trigger(gate);
+    const crossing = { gate, direction: nextIndex > routeIndex ? 1 : -1 };
+    for (const fn of crossingHandlers) fn(crossing);
+  }
   routeIndex = nextIndex;
   if (state.activeCarIndex !== nextIndex) set('activeCarIndex', nextIndex);
 }

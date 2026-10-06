@@ -25,7 +25,7 @@ import { join } from 'node:path';
 const base = process.env.GT3_URL || 'http://127.0.0.1:5191';
 const scrollMode = process.env.GT3_SCROLL || 'default';
 if (!['default', 'cap', 'pace'].includes(scrollMode)) throw new Error(`GT3_SCROLL must be default|cap|pace, got ${scrollMode}`);
-const pageParams = [scrollMode === 'default' ? '' : `scroll=${scrollMode}`, (process.env.GT3_QUERY || '').replace(/^[?&]/, '')]
+const pageParams = [`scroll=${scrollMode === 'default' ? 'legacy' : scrollMode}`, (process.env.GT3_QUERY || '').replace(/^[?&]/, '')]
   .filter(Boolean).join('&');
 const pageUrl = pageParams ? `${base.replace(/\/$/, '')}/?${pageParams}` : base;
 const wheelDeltaAbs = Number(process.env.GT3_WHEEL_DELTA || 2);

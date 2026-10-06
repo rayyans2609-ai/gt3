@@ -6,6 +6,28 @@
     <meta name="theme-color" content="#0b0b0c" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>GT3: A Grand Tour</title>
+    <script>
+      // Boot input guard (SPEC §14): until scrollDrive locks the drive, scroll input made while the
+      // modules load must not move the page. Removed by scrollDrive.lockScroll(); records the last
+      // swallowed gesture so the post-ready unlock can wait out any in-flight momentum.
+      (function () {
+        if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+        var keys = { ArrowUp: 1, ArrowDown: 1, PageUp: 1, PageDown: 1, Home: 1, End: 1, ' ': 1, Spacebar: 1 };
+        var guard = { lastInputAt: 0 };
+        function swallow(e) { guard.lastInputAt = performance.now(); e.preventDefault(); }
+        function swallowKey(e) { if (keys[e.key]) swallow(e); }
+        var opts = { passive: false };
+        window.addEventListener('wheel', swallow, opts);
+        window.addEventListener('touchmove', swallow, opts);
+        window.addEventListener('keydown', swallowKey, opts);
+        guard.detach = function () {
+          window.removeEventListener('wheel', swallow, opts);
+          window.removeEventListener('touchmove', swallow, opts);
+          window.removeEventListener('keydown', swallowKey, opts);
+        };
+        window.__gt3BootGuard = guard;
+      })();
+    </script>
   </head>
   <body>
     <canvas id="scene"></canvas>

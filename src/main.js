@@ -276,7 +276,8 @@ async function boot() {
       morph.resetMorph(routeIndex);
       aerialCamera.snap();
     }
-    scrollDrive.unlockScroll();
+    // Unlock only once any gesture begun during loading has finished (SPEC §14).
+    scrollDrive.unlockScrollWhenQuiet();
     if (restoreFinish) {
       startScreen.dismissStartScreenForRestore(); // no gesture will come; keep it (and its sound cue) out of the finish card
       finishScreen.restoreFinishScreen();
@@ -404,6 +405,11 @@ async function boot() {
   let dispatchedApproachIndex = -1;
   let dispatchedApproachStep = -1;
   let dispatchedAudioApproachStep = -1;
+
+  // Forward crossings carry the restrained crossing sound (SPEC §18); reverse stays visual only.
+  checkpoints.onCrossing(({ direction }) => {
+    if (direction > 0) audio.playCheckpointCross();
+  });
 
   registerUpdate(scrollDrive.update);
   registerUpdate(carRig.update);

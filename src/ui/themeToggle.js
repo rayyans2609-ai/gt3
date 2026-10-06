@@ -5,7 +5,11 @@ let options = [];
 
 // Inline SVG strokes (~1.5 px, round caps) matching the speaker icon's line language.
 const SUN_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.8v2.4m0 13.6v2.4M2.8 12h2.4m13.6 0h2.4M5.5 5.5l1.7 1.7m9.6 9.6 1.7 1.7m0-12.9-1.7 1.7m-9.6 9.6-1.7 1.7"/></svg>';
-const MOON_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg>';
+// Filled crescent: an outer disc minus an offset inner disc (mask cutout), so the
+// body stays substantial — thickest part ~45 % of the outer diameter — with a
+// clean inner gap. Painted with fill (see the night-option override in hud.css),
+// matching the sun icon's optical weight at the same 24 px viewBox.
+const MOON_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><defs><mask id="gt3-moon-cut"><rect x="0" y="0" width="24" height="24" fill="white"/><circle cx="16.2" cy="9.2" r="4.9" fill="black"/></mask></defs><circle cx="12" cy="12" r="7" fill="currentColor" stroke="none" mask="url(#gt3-moon-cut)"/></svg>';
 
 function render(theme = state.theme) {
   if (!group) return;

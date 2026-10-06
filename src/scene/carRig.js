@@ -46,7 +46,7 @@ function tyreContacts(model) {
   carMount.updateWorldMatrix(true, true);
   const inverse = carMount.matrixWorld.clone().invert();
   const v = new THREE.Vector3(), matrix = new THREE.Matrix4(), instance = new THREE.Matrix4();
-  const quadrants = {};
+  const quadrants = {}, treadBins = {};
   const wheelName = s => /wheel|tyre|tire|rim/i.test(s || '') && !/brake|caliper|disc|rotor|arch|well|steering/i.test(s || '');
   model.traverse(o => {
     if (!o.isMesh) return;
@@ -63,10 +63,15 @@ function tyreContacts(model) {
         v.fromBufferAttribute(p, i).applyMatrix4(matrix);
         const q = `${v.x >= 0 ? 'R' : 'L'}${v.z <= 0 ? 'F' : 'B'}`;
         if (!quadrants[q] || v.y < quadrants[q].y) quadrants[q] = v.clone();
+        // Lowest vertex in 2 cm lateral bins retains the tread's contact width;
+        // one arbitrary bottom vertex misses the raised half of a straddling tyre.
+        const bin = `${q}:${Math.round(v.x / 0.02)}`;
+        if (!treadBins[bin] || v.y < treadBins[bin].y) treadBins[bin] = v.clone();
       }
     }
   });
-  const result = Object.values(quadrants);
+  const result = Object.entries(quadrants).map(([q, lowest]) => Object.entries(treadBins)
+    .filter(([bin, p]) => bin.startsWith(q + ':') && p.y <= lowest.y + 0.025).map(([, p]) => p));
   contactCache.set(model, result);
   return result;
 }
@@ -80,7 +85,7 @@ function seatOnCurb(t) {
   if (!weight || contacts.length !== 4) return;
   // Fit delta-y = a*x + b*z + c to the four real tyre contacts. The curb is
   // the existing 0.005 -> 0.105 m ramp, widened to TRACK.curbWidthWide here.
-  const rows = contacts.map(p => {
+  const rows = contacts.map(tread => tread.map(p => {
     contactWorld.copy(p).multiplyScalar(HERO).applyQuaternion(rig.quaternion).add(rig.position);
     let u = t;
     for (let i = 0; i < 3; i++) {
@@ -93,7 +98,7 @@ function seatOnCurb(t) {
     const curbY = lateral > TRACK.halfWidth
       ? 0.005 + 0.1 * Math.min(1, (lateral - TRACK.halfWidth) / TRACK.curbWidthWide) : -0.02;
     return [p.x * HERO, p.z * HERO, 1, surfaceCenter.y + curbY - contactWorld.y];
-  });
+  }).reduce((a, b) => b[3] > a[3] ? b : a));
   const matrix = Array.from({ length: 3 }, (_, i) => Array.from({ length: 4 }, (_, j) =>
     rows.reduce((sum, row) => sum + row[i] * row[j], 0)));
   for (let i = 0; i < 3; i++) {

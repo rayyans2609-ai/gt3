@@ -31,10 +31,14 @@ async function measure(page, ts) {
     const scene = window.__gt3.scene;
     const asphalt = scene.getObjectByName('track-asphalt');
     const curbs = scene.getObjectByName('track-curbs');
-    const { mergeGeometries } = await import('/node_modules/three/examples/jsm/utils/BufferGeometryUtils.js');
-    const surface = COMP.look ? mergeGeometries([asphalt.geometry.toNonIndexed(), curbs.geometry]) : asphalt.geometry;
-    const pos = surface.getAttribute('position');
-    const index = surface.index;
+    // Read the two existing mesh buffers directly. Importing an untransformed
+    // examples utility from /node_modules would leave its bare 'three' unresolved.
+    const asphaltPos = (COMP.look ? asphalt.geometry.toNonIndexed() : asphalt.geometry).getAttribute('position');
+    const curbPos = curbs.geometry.getAttribute('position');
+    const combined = COMP.look ? new Float32Array(asphaltPos.array.length + curbPos.array.length) : null;
+    if (combined) { combined.set(asphaltPos.array); combined.set(curbPos.array, asphaltPos.array.length); }
+    const pos = combined ? new asphaltPos.constructor(combined, 3) : asphaltPos;
+    const index = COMP.look ? null : asphalt.geometry.index;
     asphalt.updateWorldMatrix(true, false);
     const aw = asphalt.matrixWorld.elements;
     const identity = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1].every((v, i) => Math.abs(v - aw[i]) < 1e-9);
@@ -43,14 +47,21 @@ async function measure(page, ts) {
     const tri = i => index ? [index.getX(3 * i), index.getX(3 * i + 1), index.getX(3 * i + 2)] : [3 * i, 3 * i + 1, 3 * i + 2];
     // Road surface height under (x, z): vertical ray vs triangles (xz barycentric), nearest-in-y to `hint`.
     const triBox = new Float32Array(triCount * 4);
+    const surfaceCells = new Map(), cellSize = 10;
     for (let i = 0; i < triCount; i++) {
       const [a, b, c] = tri(i);
       const xs = [pos.getX(a), pos.getX(b), pos.getX(c)], zs = [pos.getZ(a), pos.getZ(b), pos.getZ(c)];
       triBox.set([Math.min(...xs), Math.max(...xs), Math.min(...zs), Math.max(...zs)], 4 * i);
+      for (let x = Math.floor(triBox[4 * i] / cellSize); x <= Math.floor(triBox[4 * i + 1] / cellSize); x++)
+        for (let z = Math.floor(triBox[4 * i + 2] / cellSize); z <= Math.floor(triBox[4 * i + 3] / cellSize); z++) {
+          const key = `${x},${z}`;
+          if (!surfaceCells.has(key)) surfaceCells.set(key, []);
+          surfaceCells.get(key).push(i);
+        }
     }
     function roadY(x, z, hint) {
       let best = null;
-      for (let i = 0; i < triCount; i++) {
+      for (const i of surfaceCells.get(`${Math.floor(x / cellSize)},${Math.floor(z / cellSize)}`) || []) {
         if (x < triBox[4 * i] || x > triBox[4 * i + 1] || z < triBox[4 * i + 2] || z > triBox[4 * i + 3]) continue;
         const [a, b, c] = tri(i);
         const ax = pos.getX(a), az = pos.getZ(a), bx = pos.getX(b), bz = pos.getZ(b), cx = pos.getX(c), cz = pos.getZ(c);
@@ -98,6 +109,7 @@ async function measure(page, ts) {
         const right = new V3(1, 0, 0).transformDirection(rig.matrixWorld);
         const fwd = new V3(0, 0, -1).transformDirection(rig.matrixWorld);
         const lowest = {}; // quadrant -> {y, x, z}
+        const tread = {};
         let minAll = Infinity;
         const v = new V3(), im = new M4(), wm = new M4();
         for (const w of wheels) {
@@ -110,6 +122,13 @@ async function measure(page, ts) {
               const dx = v.x - rig.position.x, dz = v.z - rig.position.z;
               const q = `${(dx * right.x + dz * right.z) >= 0 ? 'R' : 'L'}${(dx * fwd.x + dz * fwd.z) >= 0 ? 'F' : 'B'}`;
               if (!lowest[q] || v.y < lowest[q].y) lowest[q] = { y: v.y, x: v.x, z: v.z };
+              // Keep a bounded vertical band near the tyre floor. Independent
+              // real-triangle measurement across the footprint, rather than
+              // comparing a straddling tyre's one lowest point to asphalt.
+              if (COMP.look) {
+                if (!tread[q]) tread[q] = [];
+                if (v.y <= lowest[q].y + 0.15) tread[q].push({ y: v.y, x: v.x, z: v.z });
+              }
               if (v.y < minAll) minAll = v.y;
             }
           }
@@ -118,8 +137,14 @@ async function measure(page, ts) {
         let curbWheels = 0;
         let worstAbs = 0, minErr = Infinity, maxErr = -Infinity;
         for (const [q, l] of Object.entries(lowest)) {
-          const ry = roadY(l.x, l.z, rig.position.y);
-          const err = ry === null ? null : l.y - ry.y;
+          const candidates = COMP.look ? tread[q].filter(v => v.y <= l.y + 0.15) : [l];
+          let contact = null;
+          for (const v of candidates) {
+            const ry = roadY(v.x, v.z, rig.position.y);
+            if (ry && (!contact || v.y - ry.y < contact.err)) contact = { err: v.y - ry.y, curb: ry.curb };
+          }
+          const ry = contact;
+          const err = contact?.err ?? null;
           if (ry?.curb) curbWheels++;
           quads[q] = err === null ? null : +(err * 100).toFixed(2); // cm, + floating / - sunk
           if (err !== null) { worstAbs = Math.max(worstAbs, Math.abs(err)); minErr = Math.min(minErr, err); maxErr = Math.max(maxErr, err); }
@@ -165,6 +190,7 @@ try {
     console.log(`${c || 'base'} curb contacts: ${JSON.stringify(rs.filter(x => x.carIndex === 3 && x.curbWheels > 0).map(x => ({ t: x.t, wheels: x.curbWheels })))}`);
     failed ||= !r.pass;
     console.log(`${c || 'base'} ${r.pass ? 'PASS' : 'FAIL'}`);
+    await writeFile(`${out}/hero-pivot.json`, JSON.stringify(report, null, 1));
     await page.close();
   }
 } finally { await browser.close(); }

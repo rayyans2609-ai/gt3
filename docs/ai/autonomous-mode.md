@@ -147,8 +147,9 @@ Supervision wakes on **events**. Clocks are only a fallback liveness mechanism.
 **Fallback liveness.** Use this only where progress isn't otherwise observable. Prefer deterministic signals: PID alive, log or output still advancing, expected files appearing. These cost nothing and need no model. Schedule checks to match the task's expected duration, how visible its progress is, failure risk, host and quota state, and observability quality. **The healthier the observability, the less supervision should cost.** No fixed interval is an automatic model invocation point. Don't invoke an agent because 15, 30 or 60 minutes passed if state is clearly healthy.
 
 **When a model is genuinely needed to judge progress** (deterministic signals are ambiguous: stuck vs. legitimate wait, loop, scope creep), route it by scarcity:
-- Luna for mechanical liveness and known health checks.
-- Muse when the status needs modest interpretation or light evidence synthesis.
+- No model for completion detection, timeouts, PID/log/marker checks, host sampling or notifications: those are scripts (`model-routing.md` §8).
+- Luna for browser/test execution and known health checks.
+- Muse for watchdog judgment that needs modest interpretation, log/anomaly reading or light evidence synthesis (trial scope, `model-routing.md` §11).
 - Terra when a stronger bounded interpretation is worth paid capacity.
 - Bunny experimentally for factual status or repo-state reading (tracked).
 - Sonnet only with a clear task-specific advantage that justifies Claude capacity.

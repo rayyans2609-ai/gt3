@@ -257,6 +257,17 @@ This section locks the **outcome**. The lighting design and technical approach r
 
 **Ownership:** designed and implemented in **Phase 8 (scenery / lighting / performance pass)**. Earlier phases, **including Phase 3 (Grand Tour core), must not pre-build it.** Until Phase 8, Grand Tour at Night uses the existing `src/scene/theme.js` night preset. Phase 3 may place checkpoint structures without any Night-lighting provisions.
 
+### Owner Night direction (2026-10-09) — Phase 8
+The owner prefers a **selectively illuminated motorsport facility**, not a uniformly floodlit circuit:
+- a small number of tall **floodlight towers/masts** around major facility zones;
+- **smaller integrated fixtures** on barriers, gantries, service structures and future pits/grandstands, where they are functional;
+- **model-aware headlights** that follow the active car through swaps;
+- optional subtle, **local light spill** from checkpoint traversal and the Night swap pulse.
+
+**Darker stretches between light pools are part of the atmosphere**, while the road and car stay readable. Performance should shape the visual language: few real-time lights, emissive or static/baked candidates, selective shadows, all measured on the 8 GB Mac. Selective lighting is not assumed to be cheap. Fixture count, placement and technique are not locked.
+
+**Phase 3 does not modify Night rendering or add any lighting fix.** Physical light-pole silhouettes appear in Phase 3 only if structurally needed, and unlit.
+
 ---
 
 # 14. Page 4 — Grand Tour
@@ -267,7 +278,7 @@ Do not interrupt Grand Tour with narration, Showcase, montage, info card, modal,
 
 ## Scroll interaction quality
 
-Scroll quality is the primary user-facing performance metric — not average FPS alone. Test wheel and trackpad, forward and backward, slow and fast, sustained scrolling, and repeated direction changes. Target fluid, predictable, responsive, controllable; avoid sudden jumps, over-sensitive mapping, uncontrolled inertia, choppy damping, unreliable reversing. Provide a subtle first-use/contextual cue for forward/backward direction without turning it into permanent HUD clutter. The old HUD telemetry cue described in `BUILD_LOG.md` job N was retired with the Phase 3d sparse HUD; its historical implementation is not a current UI requirement. Preserve the accepted reversible-scroll behavior where technically compatible.
+Scroll quality is the primary user-facing performance metric — not average FPS alone. Test wheel and trackpad, forward and backward, slow and fast, sustained scrolling, and repeated direction changes. Target fluid, predictable, responsive, controllable; avoid sudden jumps, over-sensitive mapping, uncontrolled inertia, choppy damping, unreliable reversing. Provide a subtle first-use cue without turning it into permanent HUD clutter. *Phase 3 (owner, 2026-10-09):* until the Phases 4–5 entry overlay (§25) replaces it, that cue is **one restrained, centred "SCROLL TO RACE" prompt with a thicker animated vertical scroll indicator**. The separate one-time "Scroll up to reverse" cue is retired. The old HUD telemetry cue described in `BUILD_LOG.md` job N was retired with the Phase 3d sparse HUD; its historical implementation is not a current UI requirement. Preserve the accepted reversible-scroll behavior where technically compatible.
 
 **Bounded pace.** The target feel is a high-quality scroll-driven website, not a racing game. The user should never have to learn a personal "correct scroll strength":
 
@@ -307,14 +318,14 @@ After the 2026-09-28 review, GT3 pushes further than before toward aerial distan
 **Three separate visual controls.** A proportional zoom-out solves only the first of these and damages the third, so it is not a solution.
 
 1. **World coverage.** Show substantially more environment than the 2026-09-28 build: wider circuit context, terrain, distant track sections, large architectural masses and surrounding negative space. The levers are elevation, distance, FOV and rail breadth/composition.
-2. **Road apparent scale.** The circuit reads as a **thin graphic ribbon inside a much larger world**, not as the dominant object filling the viewport. The road occupies well under a third of the frame in typical compositions. Solve this with camera/world composition and road width (see *Hero-car path*) before rewriting track geometry.
+2. **Road apparent scale.** The circuit reads as a **thin graphic ribbon inside a much larger world**, not as the dominant object filling the viewport. The road occupies well under a third of the frame in typical compositions. Solve this with camera/world composition and road width (see *Hero-car path*) before rewriting track geometry. *(The frame-share guidance is superseded 2026-10-09; see "Car / road / camera proportions" below.)*
 3. **Hero-car apparent scale.** The GT3 car stays **deliberately oversized relative to road and environment**. Moving the camera away scales the car and nearby road together, so where needed use a deliberate hero-car scale treatment:
    - **uniform** scale only, proportions preserved, never non-uniform;
    - scaled around a ground-contact-aware pivot, so the tyres stay seated on the road;
    - body, wheel and suspension relationships stay believable;
    - orientation, swap and checkpoint behavior are unaffected.
 
-The intended relationship is **far more world + visually thinner circuit + intentionally oversized hero car.** A road reading at roughly **3–4 hero-car widths** is a starting reference for tuning, not a locked value. This scale relationship is the **only** thing taken from the Hot Wheels reference. Materials, lighting, car proportions and motion stay realistic and premium. Do not bring in toy materials, exaggerated toy proportions, arcade rendering, arcade/game camera motion, or miniature-diorama styling, unless the last emerges naturally from the architectural language of §16. The hero car must never become tiny.
+The intended relationship is **far more world + visually thinner circuit + intentionally oversized hero car.** A road reading at roughly **3–4 hero-car widths** is a starting reference for tuning, not a locked value. *(The thinner-circuit/oversized-hero relationship and this reference are superseded 2026-10-09 by "Car / road / camera proportions" below.)* This scale relationship is the **only** thing taken from the Hot Wheels reference. Materials, lighting, car proportions and motion stay realistic and premium. Do not bring in toy materials, exaggerated toy proportions, arcade rendering, arcade/game camera motion, or miniature-diorama styling, unless the last emerges naturally from the architectural language of §16. The hero car must never become tiny.
 
 **Kept from the first Phase 3 build.** The camera keeps **stable world-space orientation**, is independent of the car rig, and does **not** rotate with the car. The car turns beneath and within the frame, and this is one of the strongest qualities of the build. It stays: no conventional chase camera, no car-relative orbit, no constant recentering, no pinning the car to one screen coordinate, no speed-linked FOV pumping. (The pre-Phase-3 camera was a child of the car rig; do not return to it.)
 
@@ -331,19 +342,26 @@ The intended relationship is **far more world + visually thinner circuit + inten
 
 FOV, elevation, pitch, distance, rail smoothing, safe-zone and correction timing, and hero-car scale are runtime-tuned. Final values are chosen by the user's visual review of a small number of named whole-composition candidates, not from theory. Earlier parameter sweeps are historical evidence only.
 
-## Car / road / camera visual-design pass (Phase 3 closure, 2026-10-06)
+## Car / road / camera proportions (Phase 3 closure, 2026-10-09)
 
-The live review found the earlier default camera **too close** and the current framing **too distant**: car detail is no longer legible enough. Phase 3 is not accepted until one dedicated, coordinated proportion pass finds the visual sweet spot between them. It treats camera, hero-car scale, road width and path as one composition. It is not arbitrary scaling of one value.
+The 2026-10-06 pass produced the `?look=r1|r2|r3` candidates: glide distance, deeper pitch, and a hero 10–30 % larger. The owner's 2026-10-09 review of them:
 
-*Provisional preferences (directional, not approved values):*
-- **Start from `cam=glide`.** Test a modest **5–10 % further downward pitch** relative to its current angle, staying inside the §15 45–60° band.
-- **Hero-car prominence:** explore roughly **10–30 % more apparent hero-car size**, preserving the current camera distance where practical. Use the uniform, ground-contact-aware scale treatment above.
-- **Road/car proportions** change only where needed to keep believable scale (§17).
-- **Path:** composition **B is preferred over C**; preserve B's racing-line weaving (*Hero-car path* below).
+- **Camera kept (owner).** The established high-oblique aerial composition (the glide / `look=r1` family: distance, zoom, attitude and world context) is broadly satisfactory. **Broad camera experiments stop.** Car readability is not solved by moving the camera.
+- **Car larger, never cartoonish (owner).** The hero car is still too small. Its apparent size increases while it keeps **believable motorsport proportions**.
+- **Proportional relationship (owner).** The **racing surface** widens coherently with the car, so the car reads as a real GT3 car on a real circuit. Width comes from the authored width hierarchy (§17), not a uniform stretch.
+- **Real-world-sized infrastructure (owner).** Grid boxes, curbs, barriers, boards, gantries and other infrastructure are **not** scaled by the hero factor. They are sized from realistic circuit dimensions and judged per element for aerial readability.
+- **Not targets.** The earlier "20–40 % larger" and "80–90 % of a yellow dash" are comparative feedback, not targets.
 
-*Unchanged constraints:* world-edge safety (§16 *Ownership*), visual smoothness, the elevated drone composition, the stable world-space camera and the "never tiny" hero rule.
+**This supersedes** the hero/road guidance in items 2–3 above:
+- "visually thinner circuit / intentionally oversized hero relative to road";
+- the "roughly 3–4 hero-car widths" starting reference;
+- "the road occupies well under a third of the frame".
 
-The user selects the final treatment from a small set of named candidates; none of the numbers above is an approved value. The reviewed candidate ranges (camera motion ratios, hero % of frame width, road width in hero-car widths) are in `docs/review/phase3-final-review.md` §1–2.
+Where coherent proportions need a wider road, the road may take more of the frame. Item 1 (world coverage), the uniform ground-contact-aware hero scale and the stable world-space camera are unchanged.
+
+**Selection.** The implementation ships the strongest evidence-based provisional proportion at the default URL, plus a small number of `?look=` comparisons. **The owner selects the final scale visually.**
+
+**Open (unchanged).** The measured camera-stillness shortfall stands: camera translation is ~84–93 % of car travel through tight corners, against *Observable behavior* above. A small bounded correction follows only if the owner asks after review.
 
 ## Hero-car path
 
@@ -355,9 +373,13 @@ The hero car need not ride locked to the road's centre spline. Two strategies (p
 
 Checkpoint crossing, swaps, orientation and discovery semantics behave identically under any path.
 
-**Review status (2026-10-06).** The user prefers **B over C** and keeps B's racing-line weaving. That is a provisional preference: final values are still selected in the visual-design pass above (§30.9). Within B:
-- **Slightly more weaving** than the reviewed build, still believable and tied to circuit geometry. The "no constant weaving / slalom" rule above still holds.
-- **Realistic curb usage** at one or two appropriate tight corners: the line may run the car's wheels onto the inside or exit curb, as real GT drivers do. No off-track running, and no curb use as a constant effect.
+**Review status (2026-10-09, owner).** **B** (an authored line on a wider road) is the direction. The line is a **restrained, GT-style realistic line**:
+- outside before entry → a meaningful apex → track-out;
+- **linked-corner compromises**, sometimes sacrificing one exit to set up the next corner;
+- occasional **physically credible curb contact** at genuine corners only (no off-track running, never a constant effect);
+- calm on straights.
+
+No perpetual slalom, random weaving or simulator physics. The line follows the **local** drivable width (§17), not one global amplitude. This supersedes the 2026-10-06 "slightly more weaving".
 
 ---
 
@@ -372,6 +394,24 @@ All repo reference images (`scenery/`, `camera_angles/`, `showcase_ref.jpeg`) re
 - `sceneref_3` = OMA architectural model — white foam-board massing study with abstracted green cube "trees," a red pedestrian accent path, and translucent tower forms. **Take:** the white/off-white sculptural material language, abstraction, massing, hierarchy, primary-vs-secondary form discipline, terrain-as-object — a strong directional reference for the Grand Tour environment language below, alongside the other scenery and motorsport references, not a blueprint. **Do not take:** the literal foam-board texture, green cube "trees", literal architecture, or a tabletop-miniature sense of scale — GT3 is that language brought to life at full scale.
 - `sceneref_4` = Gran Turismo Sport — an **indoor showroom** scene (glass-roofed hall, stone walls, wood floor, a single red heritage Ferrari). **Take only:** finish quality, material restraint, lighting discipline, proportional refinement. **Do not take:** the showroom, its indoor spatial logic, or its exact static presentation — this reference is explicitly indoor and must not leak an interior-showroom feeling into an outdoor circuit.
 - `sceneref_5` = Driveclub — a dramatic snowy mountain pass with photoreal rock/snow/pine and strong foreground/mid/background depth. **Take:** scale, atmosphere, foreground/mid/background depth, distant-world presence, atmospheric falloff. **Do not take:** dense photoreal vegetation, roadside clutter, exact realism level.
+
+## Circuit reference principles (owner packet, 2026-10-09)
+
+**Provenance.** The owner supplied nine third-party photographs, each with take/avoid notes. They are **not committed to this repository** without the owner's permission, so nothing depends on their location. The principles below are the durable record.
+
+**Use.** They are comparative principles, never blueprints. Do not copy layouts, structures, branding, logos or signage.
+
+| # | Reference | Take | Avoid | Phase |
+|---|---|---|---|---|
+| 1 | Monza start/finish | Long staggered grid cadence and clear grid boxes. A broad start/finish corridor with a parallel pit lane and wall. One gantry plus selective large furniture making this section feel institutionally important. Plausible front-grid start. Grid width and car size are judged together. | Monza's layout, grandstands, pit buildings, signage, crowds and infrastructure density | 3 (major architecture → 8) |
+| 2 | Suzuka connected corners | A line that prepares from the outside, takes a meaningful apex, uses track on exit, and sometimes sacrifices an exit for the next corner. Road, curbs, runoff and lateral path reinforce each other. | Its figure-eight and corners. A constant slalom: the line moves for geometric reasons and stays calm on straights. | 3 |
+| 3 | Bahrain width/runoff | Ordinary width vs important corner/braking approaches, paved extensions and runoff. Usable asphalt kept distinct from edge lines, curbs, shoulders and runoff. A few smoothly transitioning width classes and asymmetric corners. | Desert scenery, painted branding, F1-scale runoff everywhere. Curvature-driven width bulges, pinching or ballooning. | 3 (environment → 8) |
+| 4 | Spa Raidillon (aerial) | Aerial legibility of asphalt vs white boundary lines vs curbs vs runoff vs barriers. Varying exterior runoff widening the perceived corridor. | Eau Rouge geometry, colours, forest, grandstands. Any Phase 3 elevation (crest/compression is a Phase 8 reference). | 3 (elevation → 8) |
+| 5 | Nürburgring Karussell | Banking, cuts, embankments and grade authored as one connected spatial form | The literal concrete bowl, graffiti, extreme banking. Random vertical noise or abrupt camber. | 8 only |
+| 6 | OMA architectural model | Monolithic masses, terrain relief, negative space, restrained pale palette, the circuit as the primary spatial feature | The foam-board look, all-white flatness, miniature/toy scale, populating a city | 8 only |
+| 7 | Braking boards / barriers | Large sequential 150/100/50 boards before two or three genuine heavy-braking zones, related to edge, verge and simple barriers | Boards at every turn, wrong order or spacing, billboard-size boards, branding, dense fencing, tiny meshes | 3 |
+| 8 | Le Mans landmark | One strong route-crossing or track-adjacent landmark giving a sector identity | Decorative arches, the Dunlop bridge, branding. Forcing a landmark that hurts hierarchy, clearance, performance or schedule. | 3 optional / 8 |
+| 9 | F1 game start lights | Screen-space five-lamp start choreography only (§25) | Cockpit, F1/team branding, telemetry, race HUD, countdown numbers, competing cues | 4–5 |
 
 ## Grand Tour environment — art direction
 
@@ -421,9 +461,45 @@ An original closed-loop circuit, broadly inspired by Spa-Francorchamps and Circu
 
 **Track realism.** The circuit must feel like a plausible real GT/endurance circuit that could physically exist, even though its surroundings are stylized (§16). Do not abstract the road into something toy-like, futuristic, graphic-only or architectural. Preserve believable circuit width, corner radii, braking zones, long-straight rhythm, technical-sector rhythm, elevation, curbing, runoff logic, barriers/safety logic where appropriate, and trackside proportions. Real endurance circuits such as Circuit de la Sarthe may inform rhythm, scale and plausibility; copy none literally. The road feels real; the world presenting it feels curated and architectural. These are plausibility qualities, not a chosen layout: exact straight lengths, chicane and corner placement, and sector rhythm remain open and are settled through implementation and visual review.
 
-**Road width is a composition decision under review** (§15 *Hero-car path*). A narrower apparent road (strategy A) is acceptable only if the circuit still reads as a plausible real circuit from the aerial view. A wider, more believable road with an authored racing line (strategy B) keeps closer to full-scale proportions. Either way, the hero car's deliberate oversizing (§15) is an intentional presentation choice, not a realism error.
+**Road width follows strategy B (2026-10-09):** a wider, more believable road with an authored racing line (§15 *Hero-car path*). The racing surface widens coherently with the enlarged hero car (§15 *Car / road / camera proportions*), while infrastructure stays at realistic dimensions.
 
-**Elevation — exploratory R&D, not Phase 3 (2026-10-06, §31).** Low-cost R&D into modest circuit elevation: a hill near the back corner, subtle banking, and possibly other elevation features. It must respect the camera, occlusion (§30.6) and scroll-performance constraints. No terrain or track-elevation geometry is implemented until that R&D is reviewed.
+**Cross-section and width hierarchy (Phase 3 closure, owner 2026-10-09).** Replace the uniform extruded ribbon with an **authored, motorsport-logical cross-section**:
+- normal road;
+- wider significant sections: the start/finish corridor, and major braking/turn areas where warranted;
+- differentiated paved runoff;
+- asymmetric edge geometry.
+
+**Layers.** Distinguish the **drivable racing surface** from white edge lines, curbs, shoulder, paved runoff, pit/access strips and terrain.
+
+**Width changes** are few, purposeful and smoothly transitioning:
+- no automatic apex widening and no curvature-driven bulges;
+- real-circuit scale is a sanity check, not homologation: transitions of roughly 1 m of total width per 20 m, broad start corridors;
+- three or four width classes are expected. A design guide, not a target: normal 1.0×, major entry/braking ~1.1–1.2×, start/finish corridor ~1.25–1.4×, plus local paved extensions.
+
+**Curbs** are **semantic**: entry, apex or exit, where a driver would use them. Their block spacing is even, and they are **not** continuous along both edges.
+
+**Edge lines** stay **continuous through bends**.
+
+**Road paint.** The centre dashed line and other non-circuit road paint are removed. Real circuits have no centre line.
+
+**Open.** Exact classes, their section mapping, and curb placement are implementation decisions, reviewed visually by the owner. The layout stays original. Car, track and camera scale stay coherent (§15).
+
+**Trackside furniture (Phase 3, owner 2026-10-09).** Sparse, large, functional, aerial-readable pieces, chosen by visual gain × functional credibility × aerial readability against time, GPU and clutter:
+- 150/100/50 braking boards before two or three genuine heavy-braking zones;
+- selective Armco/concrete barriers and catch fencing in credible risk areas;
+- short service strips;
+- occasional marshal posts;
+- credible tyre stacks;
+- sparse bollards at real junctions;
+- at most one optional landmark, only if inexpensive and justified.
+
+**Excluded:** pit complexes, detailed grandstands, crowds, architectural scenery, dozens of repetitive props, and series or manufacturer branding. Light-pole silhouettes appear only if structurally needed, unlit (§13a).
+
+**Generic markers.** The evenly spaced generic distance markers are **replaced**, not supplemented.
+
+**Elevation — Phase 8 (2026-10-09; supersedes the 2026-10-06 R&D note, §31).** Authored grades, crests/compressions, banked turns/camber and terrain integrated with the road are **Phase 8** design and R&D, with their own human review (§16 references 4–5). "Realistic elevation" means authored, correlated geometry, never uncorrelated procedural noise.
+
+**Phase 3 adds no elevation.** It may change only the existing terrain-to-track attachment/edge geometry, and only where variable track width or occlusion safety technically requires it (§30.6).
 
 ---
 
@@ -439,9 +515,20 @@ Because identity is now hidden until discovery (§11), checkpoints must **not** 
 
 **Traversal response.** The physical timing-gate form is liked and kept. Crossing the gate, together with the car swap (§19) and the crossing SFX, should feel **satisfying through restrained, premium audiovisual feedback**: one smooth, very short local response, never arcade scoring. It is never a collectible burst, arcade flash, giant glow, portal effect, score, modal, narration, card or pause.
 
-*Status (2026-10-06):* **neither reviewed gate effect is satisfactory**: the default sweep and `?gate=quiet`, which has no visible response. Keep the feedback itself, but plan a refined alternative. The leading direction is **subtle illumination / emissive response on the gate structure**, which should read particularly well at Night. This is the gate's own feedback, not Night route lighting, so it does not pre-build §13a; it must stay readable and restrained in Day too. The user selects the final effect.
+*Status (2026-10-09, owner):* after comparing edge, sweep and quiet, the owner **selected `gate=sweep`**, the 0.52 s moving band. It becomes the default, and `edge`/`quiet` are removed at acceptance. The forward-only crossing SFX and functional reversibility are preserved. Environmental light spill from gates or swaps is Phase 8 (§13a).
 
-**Finish line — Phase 3.** The finish must be substantially more recognizable than the current restrained finish gate and painted strip: a **bounded 3D racing gantry**, clearly larger than an ordinary checkpoint gate, with **traffic-light signalling** and possibly a **suspended checkered flag**. It stays realistic motorsport infrastructure (§16–17), theme-aware, and performance-safe (§27). It does not anticipate the Phase 7 completion sequence (§21). When and how the traffic lights signal is a design choice still open (§30.9).
+**Start/finish facility — Phase 3 (owner, 2026-10-09; supersedes the 2026-10-06 "Finish line").**
+- **Gantry.** A **larger, grander, functional gantry**, clearly the facility's focal structure, with signals. Restrained, camera-legible flags are possible.
+- **Grid.** **Recognisable staggered grid slots** before the line.
+- **Corridor.** A broad special corridor, with a selective pit-wall/parallel-lane reading (no pit complex). Everything stays realistic motorsport infrastructure (§16–17), theme-aware and performance-safe (§27).
+- **Progression — Option A, owner-approved:**
+  - the car starts in a credible **front-grid slot** behind the line;
+  - its **first gantry crossing is neutral**;
+  - the Tour **completes when the car returns to the gantry** after the full circuit.
+- **Car changes.** **The gantry never changes the car**; only the nine checkpoint gates do.
+- **Preserved.** Checkpoint order, session persistence, reversible traversal and completion correctness.
+- **Provisional.** P1 vs P2 placement and signal timing are provisional and reviewed visually.
+- **Phase 7.** The completion sequence (§21) is separate from this physical gantry.
 
 **No legacy racing cues.** Remove in-world cues left over from the pre-V3 race that no longer serve the Tour, such as painted turn-direction chevrons on the road. This does not remove the first-use scroll-direction cue (§14, §20).
 
@@ -451,7 +538,14 @@ Because identity is now hidden until discovery (§11), checkpoints must **not** 
 
 Preferred: a short digital/pixelated morph, but performance outranks the exact effect — acceptable alternatives include dither dissolve, masked crossfade, motion smear, or lightweight model replacement. Requirements: very short, smooth, no pause, no scroll interruption, no heavy reload, no meaningful frame-time spike, no narration/info-card/montage/Showcase. Use runtime measurement to pick the cheapest clean technique. Evolve the existing morph system (`src/scene/morph.js`) rather than rebuilding from zero unless measurement says otherwise. Its visual treatment follows the restraint in §18 *Traversal response*.
 
-**Swap treatment — open comparison (2026-10-06).** The current build uses a plain crossfade. The earlier car-transition **pulse** is restored as a **comparison option** against it, and a **light-based treatment** (a restrained illumination pass across the car) is explored as a third option. No winner is selected; the user chooses in review (§30.9). Whether the restored pulse brings back the original particle burst is also open; by default it is the emissive pulse alone, given §18's restraint. Every option keeps the requirements above, including the zero-new-GPU-work crossing.
+**Swap treatment (owner, 2026-10-09).**
+- **Day:** plain crossfade.
+- **Night:** restrained emissive pulse, with no particles.
+- The light-based option is dropped.
+
+The treatment follows the active theme at the moment each swap starts. A theme toggle mid-swap lets the swap finish with its starting treatment (*agent-designed — revisable*).
+
+Both states are warmed, so a theme change never puts new GPU work on a crossing. The first-crossing rule below holds in both themes.
 
 **The first crossing is as smooth as any later crossing.** The first time the tour crosses a gate, there is no hitch and no apparent speed jump from dropped frames, and the cold crossing feels identical to a re-cross after reversing. The asset lifecycle is: **load globally, render locally, warm ahead, dispose only if measurement proves memory pressure requires it.** Reverse travel stays cheap. **Confirmed (2026-10-06):** the user visually accepts the first-crossing hitch as resolved. Do not re-open it without concrete regression evidence. Startup time remains a separate open item (§30.10).
 
@@ -466,7 +560,14 @@ Preferred: a short digital/pixelated morph, but performance outranks the exact e
   - **completed track sections are highlighted yellow**, through a subtle gradient trailing behind the car. It reverses with route state (§26) and stays readable in Day and Night.
 - **Top-left — one consolidated car-identity hierarchy.** *Phase 3 refinement (2026-10-06):* the car information formerly shown bottom-left moves here. The car name leads, and the short car information sits beneath it in one hierarchy with **one unified colour treatment**, compact, never a large enclosing card. The content rules are unchanged: only existing roster data from `src/data/cars.js` (manufacturer, display name, BoP-aware figures, engine/chassis data, editorial headline/copy), never invented specifications; it updates with the swap. The current two lines (editorial line, then engine · power · BoP) are the starting point. The **manufacturer mark** sits beside the name once properly sourced marks exist (§30.8); until then, the name stands alone. A future **spinning 3D manufacturer emblem** belongs here (§31, not Phase 3).
 - **Bottom-left:** free in Phase 3 after the consolidation. It is the future home of a **spinning 3D car presentation** (§31): a later phase, on the one shared renderer only, and only if measurement proves it cheap (§27).
-- **First-use direction cue** (§14): makes forward and reverse obvious, then retires once the interaction is learned. No permanent clutter. *Phase 3 refinement (2026-10-06):* the forward/reverse cue and the start screen's "Scroll to Race" instruction currently say overlapping things. Resolve that into **one clear instruction sequence** with better indicator placement. The legacy start screen and its loading UX are not redesigned in Phase 3 (§25, §31).
+- **First-use cue** (§14). *Phase 3 (owner, 2026-10-09):*
+  - **One restrained, centred "SCROLL TO RACE" prompt** with a thicker animated vertical indicator, replacing the lower-right placement beside the edge controls.
+  - The one-time "Scroll up to reverse" cue is retired.
+  - Redundant ready/route indicators (e.g. "Route ready · reduced assets") and inaccurate legacy copy are removed.
+  - The legacy start card gets only the repairs serious interim usability/readability needs. It retires in Phase 4, and its loading UX is not redesigned here (§25, §31).
+- **Identity legibility (owner, 2026-10-09).** The top-left name, headline and spec need **strong legibility, weight and contrast** in Day and Night over the actual terrain, keeping one unified treatment and no enclosing card.
+- **Spec-fit check.** The ten-car fit check is diagnosed against the rendered DOM before any CSS change.
+- **Dev labels.** Dev review labels are removed at acceptance.
 - **Sound cue** (§10): a brief, visual-only pointer to the Sound control on first Grand Tour entry while audio is off.
 - **Bottom/edge:** the Day/Night control (§13) and the persistent audio control (§8), always present. They compose as one edge row that recomposes when the player expands (§8). *Phase 3 refinement (2026-10-06):* make the moon a **clearer, more substantial-looking crescent** that reads immediately at control size, by reworking its crescent body and inner gap. Thinner is not the goal (corrected 2026-10-06).
 
@@ -519,6 +620,18 @@ The following were left open by product direction and are **designed here**, eac
 **Entering Showcase.** *Agent-designed flow — revisable.* Clicking "Cars" on the Hub composition-transitions (cross-fade/push, no hard cut, reusing the shared renderer) into Showcase. Grand Tour never transitions into Showcase **automatically**, even when a checkpoint discovers a new car (§18). Discovery there is ceremony-free, and the car becomes selectable the next time Showcase is opened. *Future exception (owner direction 2026-10-06, Phase 6):* a deliberate user click on the spinning HUD car (§20) opens that car's dedicated presentation (§11). Like *Leaving Grand Tour mid-run* below, this is a user-chosen exit, not an interruption. It preserves route position and discovery state, and its return path is designed in Phase 6 (§31).
 
 **Loading and start experience — deferred (2026-10-06).** The full loading UX is redesigned later: progress from 0–100 %, no interaction before ready, then a prominent **Start Race** action. That redesign is **deferred until the major pages and their navigation/transition flow are designed together**, so loading sits coherently within Landing → Hub → Grand Tour (§31). Phase 3 fixes only the premature-scroll defect (§14).
+
+**Standing-start entry overlay — Phases 4–5 (direction selected by the owner, 2026-10-09).** A **screen-space** overlay inspired by an F1 standing start:
+- **Lamps.** Five large circular lamps across the upper-middle band light red in sequence, all go out together, then a brief, large **GO**.
+- **Scroll control.** Beneath them sits **one thicker animated vertical down-scroll control labelled SCROLL TO RACE**, dismissed by genuine scroll input.
+- **Not included:**
+  - a cockpit, F1/team branding, a race dashboard or telemetry;
+  - countdown numbers;
+  - competing cues;
+  - automatic launch;
+  - travel stored during red lights (consistent with §14).
+- **Theme.** Global Day/Night is preserved.
+- **Phase 3 scope.** Phase 3 builds only the physical grid and gantry (§18). The screen choreography and its integration with loading and input belong to the Phases 4–5 entry-flow design.
 
 **Leaving Showcase.** *Agent-designed flow — revisable.* Showcase is a bounded inspection environment, not a scroll-route page (§11) — exit is an explicit small back/home UI affordance that reverses the entry transition back to the Hub.
 
@@ -576,7 +689,7 @@ Primary user-facing metric: **scroll feel**, not raw FPS. Use measure → attrib
 
 # 28. Non-goals (repeated for emphasis)
 
-Do not add: mobile, opponents, traffic, racing AI, multiplayer, accounts, database/backend, leaderboards, achievements, currency, unlock economy, extra cars, unnecessary race modes, a garage/comparison page, photo mode, manual/free-camera Showcase, additional collectible systems, dealership/gallery-site structure, or a custom site-wide cursor (dropped 2026-10-06). Do not drift into generic SaaS design, a realistic simulator UI, F1 imitation, cyberpunk/neon styling, or a cluttered game HUD.
+Do not add: mobile, opponents, traffic, racing AI, multiplayer, accounts, database/backend, leaderboards, achievements, currency, unlock economy, extra cars, unnecessary race modes, a garage/comparison page, photo mode, manual/free-camera Showcase, additional collectible systems, dealership/gallery-site structure, or a custom site-wide cursor (dropped 2026-10-06). Do not drift into generic SaaS design, a realistic simulator UI, F1 imitation, cyberpunk/neon styling, or a cluttered game HUD. ("F1 imitation" means F1 branding, cockpit, telemetry or series graphics. The abstract five-lamp start sequence in §25 is permitted.)
 
 ---
 
@@ -616,19 +729,38 @@ A fresh implementation agent should be able to determine, from this file alone: 
      - a clearer, more substantial moon crescent;
      - one non-redundant direction/"Scroll to Race" instruction, with better placement;
      - Day/Night readability throughout.
-   - *Status 2026-10-07:* all required work above is implemented and machine-verified on `phase3-integration`, awaiting the owner's live review (`docs/review/phase3-refinement-review.md`). Candidates: `?look=r1|r2|r3`, `?gate=edge|sweep|quiet` (edge is the default), `?swap=crossfade|pulse`. None of the camera candidates meets §15's "camera barely moves" (84–93 % of car travel).
+   - *Status 2026-10-07:* all required work above was implemented and machine-verified, then reviewed live by the owner on 2026-10-09 (below).
+   - **Owner review 2026-10-09: confirmed decisions.**
+     - `gate=sweep` (§18).
+     - Day crossfade / Night pulse (§19).
+     - Camera composition kept (§15).
+     - Start/finish **Option A** (§18).
+     - One centred interim prompt with the reverse cue retired (§14, §20).
+     - **Static wheels are acceptable for Phase 3.** The pre-existing wheel-spin defect leaves the open list: no ten-car re-rig. Wheel motion blur is exploratory only (§31).
+   - **Required closure work (2026-10-09):**
+     - car/road proportions with the racing surface widened coherently and infrastructure at real-world size (§15);
+     - variable-width cross-section, runoff, semantic curbs and continuous edge lines (§17);
+     - the restrained GT racing line (§15);
+     - the start/finish corridor, grid and grander gantry with Option A progression (§18);
+     - sparse functional furniture (§17);
+     - sweep as default, plus swap by theme (§18–19);
+     - HUD legibility and the interim prompt (§20);
+     - the HUD fit-harness diagnosis;
+     - the degraded-readiness investigation;
+     - proportionate integration and performance verification.
    - **Owner choices still open:**
-     - **non-spinning wheels:** a defect that predates Phase 3. The spin set is empty for every car, and a safe fix needs per-car wheel pivot or instance re-authoring (a separate rig task); deferred for owner review (BUILD_LOG 2026-10-07);
-     - the final camera/scale/path values from the pass (§15);
-     - the gate effect (§18);
-     - the swap treatment (§19);
-     - the finish-gantry form and when its lights signal (§18);
-     - the content and colour of the consolidated top-left info (§20);
-     - the Day-mode yellow of the progress trail (§20);
+     - visual acceptance of the provisional proportion, width mapping, curb placement, P1/P2, gantry form/flags, furniture density and HUD treatment (each shipped with comparison alternatives);
+     - whether the camera-stillness shortfall needs a small correction (§15);
      - 512-px Tour textures acceptable or not;
      - startup time and the `compileAsync` keep-or-revert (item 10);
      - final Phase 3 acceptance and approval to merge to `main`.
-   - **Superseded gates:** bottom-left car-information content (replaced by the top-left consolidation); "sweep or quiet" (neither accepted); "A, B or C" (B preferred, final values in the pass).
+   - **Superseded gates:**
+     - bottom-left car-information content (replaced by the top-left consolidation);
+     - "sweep or quiet", "edge default" and the light-based swap;
+     - "A, B or C" (B is the direction);
+     - `?look=r1|r2|r3` as final candidates (they remain comparison baselines);
+     - the 2026-10-06 "slightly more weaving";
+     - the non-spinning-wheels decision.
 10. **Owner decisions, 2026-10-04.** These are recorded here so the spec carries them:
     - **Route position across refresh (§24, §25) is Phase 3 scope.** Implemented with `routeProgress` in `src/core/session.js`.
     - **The Tour's reduced-texture strategy must not lower Showcase quality.** The Tour may use 512-px textures (W4c). Showcase and hero-inspection, including the manual-unlock montage (§11), must use full-resolution models when they become reachable. This extends §27's full-quality rule, which as written covers render resolution, to model/texture resolution. Implementation is deferred to Phase 6 (W8). The owner confirmed on 2026-10-06 that the Phase 6 full-quality Showcase requirement is preserved, which settles the deferral to Phase 6.
@@ -650,7 +782,12 @@ Raised during Phase 3 review, owned by later phases, and **not to be implemented
 | Landing hero car replaces Lexus; candidates Ferrari, Lamborghini, Porsche, McLaren; none selected | R | Phase 4 | §4 |
 | Independent master-volume and music-volume sliders with separate mutes | R | Phase 5 (Hub player pass) | §7 |
 | Full loading UX: 0–100 % progress, no early interaction, prominent Start Race | D | designed with the page/navigation flow (Phases 4–5) | §25 |
-| Modest circuit elevation (back-corner hill, subtle banking, others) | E | Phase 8 R&D | §17 |
+| Authored elevation: grades, crests/compressions, banked turns, terrain-integrated road (supersedes "modest circuit elevation") | E | Phase 8 | §17, §16 |
+| Standing-start five-lamp overlay + single SCROLL TO RACE control | R | Phases 4–5 | §25 |
+| Selective Night illumination: floodlight towers, integrated fixtures, model-aware headlights, local gate/swap spill | R | Phase 8 | §13a |
+| Richer facility architecture: pit complex, landmark structures, grandstands | E | Phase 8 | §16–17 |
+| Wheel-only motion blur | E | unassigned (Phase 8 polish) | §30.9 |
+| Ten-car wheel-spin rig re-authoring | D | only if the owner reopens it | §30.9 |
 | Environment comparison: OMA white, gray/night, white with light/shadow variations, green as baseline | E | Phase 8 | §16 |
 | Full-quality Showcase models (Tour stays 512-px) | R | Phase 6 | §30.10 |
 | UI/UX craft uplift (hierarchy, interactions, transitions, modelling/lighting, delight) | R | every phase | §23 |

@@ -85,7 +85,7 @@ One query owns the whole composition (distance, hero scale, road width, racing l
 - **512-px Tour textures acceptable or not.** Tour cars use 512-px textures (288 MiB vs 817 MiB). Full-quality Showcase models are deferred to Phase 6 — confirmed, not re-decided here.
 - **Startup time.** Clean solo median 14.5 s (8.8 s before GPU warm-up). The earlier 25–30 s figures were host memory pressure.
 - **`compileAsync` revert (`ad9c746`).** No measured startup gain (about 3 s slower in contaminated runs); recommendation stands at revert. Needs your explicit OK.
-- **§30.6 visual retirement.** Machine sweep finds no terrain between camera and car. Visually confirm the old McLaren→Aston section (route ≈ t 0.63–0.70) so the item can be retired.
+- ~~**§30.6 visual retirement.**~~ **Done 2026-10-09:** you confirmed the McLaren→Aston section (route ≈ t 0.63–0.70) is clear; SPEC §30.6 is closed.
 
 Deferred items belonging to later phases are listed in SPEC §31, not here.
 

@@ -2,6 +2,7 @@
 import puppeteer from 'puppeteer-core';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { execFileSync } from 'node:child_process';
+import assert from 'node:assert/strict';
 
 const base = (process.env.GT3_URL || 'http://127.0.0.1:5201').replace(/\/$/, '');
 const out = process.env.GT3_OUT || '/tmp/gt3-perf-geom';
@@ -37,10 +38,14 @@ try {
     const errors = [];
     page.on('pageerror', e => errors.push(String(e).slice(0, 300)));
     page.on('console', m => { if (m.type() === 'error') errors.push(m.text().slice(0, 300)); });
+    page.on('response', r => { if (r.status() >= 400) errors.push(`HTTP ${r.status()} ${r.url()}`); });
     const url = `${base}/?${config ? `${config}&` : ''}gate=quiet`;
     await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 180000 });
     await page.waitForFunction(() => window.__gt3?.readiness?.status && window.__gt3.readiness.status !== 'loading'
       && window.__gt3?.renderer, { timeout: 240000, polling: 250 });
+    const readiness = await page.evaluate(() => window.__gt3.readiness);
+    assert.ok(readiness.model === 'ready' && readiness.gpu === 'ready',
+      `unusable comparison readiness: ${JSON.stringify(readiness)}`);
     await page.evaluate(async () => {
       const stateMod = await import('/src/core/state.js');
       const rigMod = await import('/src/scene/carRig.js');
@@ -134,12 +139,13 @@ try {
       return { points: rows, namedTrackMeshes: namedTrack, renderer: g.renderer.getContext().getParameter(g.renderer.getContext().RENDERER) };
     }, { points });
     const hostAfterMeasurement = hostSnapshot();
-    report.configs[config || 'default'] = { url, errors, ...result,
+    report.configs[config || 'default'] = { url, errors, readiness, ...result,
       host: { before: hostBeforeMeasurement, after: hostAfterMeasurement,
         pageoutsDelta: hostAfterMeasurement.pageouts - hostBeforeMeasurement.pageouts,
         swapoutsDelta: hostAfterMeasurement.swapouts - hostBeforeMeasurement.swapouts } };
     // Preserve completed comparisons if the strict host monitor stops a later one.
     await writeFile(`${out}/perf-geom.json`, JSON.stringify(report, null, 2));
+    assert.equal(errors.length, 0, `comparison browser errors: ${errors.join(' | ')}`);
     await page.screenshot({ path: `${out}/${config.replace(/[^a-z0-9-]/gi, '-') || 'default'}.png` });
     await page.close();
   }

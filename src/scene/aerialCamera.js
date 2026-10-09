@@ -1,7 +1,7 @@
 /** World-space Grand Tour camera. Route samples, not the car rig, define its rail. */
 import * as THREE from 'three';
 import { state } from '../core/state.js';
-import { curve, TRACK_LENGTH, pointAt } from './trackCurve.js';
+import { curve, TRACK_LENGTH, routeTAt, pointAt } from './trackCurve.js';
 import { COMP } from './composition.js';
 import { pathPointAt } from './racingLine.js';
 import { buildCompositionRail } from './compositionRail.js';
@@ -96,7 +96,7 @@ function safetyOffset(testPosition) {
   camera.position.copy(testPosition);
   camera.quaternion.copy(orientation);
   camera.updateMatrixWorld();
-  pointAt(state.progress, car);
+  pointAt(routeTAt(state.progress), car);
   car.y += 1.2;
   projected.copy(car).project(camera);
   aerial.carNdc.x = projected.x;
@@ -118,7 +118,7 @@ export function snap() {
   if (!camera) return;
   if (CORRIDOR) { corridorUpdate(true); return; }
   if (SECTOR) { sectorSnap(); return; }
-  routePose(state.progress);
+  routePose(routeTAt(state.progress));
   basePosition.copy(desiredPosition);
   safetyOffset(basePosition);
   correction.copy(wantedCorrection);
@@ -149,7 +149,7 @@ export function update(dt) {
     snap();
     return;
   }
-  routePose(state.progress);
+  routePose(routeTAt(state.progress));
   const alpha = TUNE.dampingSeconds <= 0 ? 1
     : 1 - Math.exp(-Math.max(0, dt) / TUNE.dampingSeconds);
   basePosition.lerp(desiredPosition, alpha);
@@ -238,7 +238,7 @@ function corridorPose(t) {
 function corridorUpdate(explicitSnap) {
   const instantSeek = lastProgress === null || (Math.abs(state.progress - lastProgress) > TUNE.snapProgress
     && Math.abs(state.velocity) < 0.1);
-  corridorPose(state.progress);
+  corridorPose(routeTAt(state.progress));
   camera.position.copy(desiredPosition);
   camera.quaternion.copy(orientation);
   camera.updateMatrixWorld();
@@ -394,7 +394,7 @@ function shiftInto(ndc, zone) {
 }
 
 function sectorFraming(dt, snapNow) {
-  const t = state.progress;
+  const t = routeTAt(state.progress);
   // Hysteresis: engage only when the rendered framing reaches the outer zone;
   // release once the rail alone frames the car inside the inner zone again.
   testPosition.copy(basePosition).add(correction);
@@ -422,7 +422,7 @@ function sectorFraming(dt, snapNow) {
 const testPosition = new THREE.Vector3();
 
 function sectorSnap() {
-  sectorPose(state.progress);
+  sectorPose(routeTAt(state.progress));
   basePosition.copy(desiredPosition);
   correction.set(0, 0, 0);
   engaged = false;
@@ -441,7 +441,7 @@ function sectorUpdate(dt) {
     sectorSnap();
     return;
   }
-  sectorPose(state.progress);
+  sectorPose(routeTAt(state.progress));
   const alpha = COMP.dampingSeconds <= 0 ? 1
     : 1 - Math.exp(-Math.max(0, dt) / COMP.dampingSeconds);
   basePosition.lerp(desiredPosition, alpha);

@@ -14,7 +14,7 @@
 import * as THREE from 'three';
 import { state } from '../core/state.js';
 import { getCar } from '../data/cars.js';
-import { CHECKPOINT_T, pointAt } from '../scene/trackCurve.js';
+import { CHECKPOINT_ROUTE_T, GRID_T, GRID_GAP, routeTAt, pointAt } from '../scene/trackCurve.js';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
 // Keep in step with .hud-route in hud.css (170 px, ~15 % over the original 148).
@@ -139,7 +139,7 @@ function buildRouteMap(root) {
     trailSegs.push(seg);
   }
   svg.append(done);
-  for (const t of CHECKPOINT_T) {
+  for (const t of CHECKPOINT_ROUTE_T) {
     const projected = routeProject(pointAt(t), { x: 0, y: 0 });
     svg.append(svgElement('circle', { class: 'hud-route__checkpoint', cx: projected.x.toFixed(2), cy: projected.y.toFixed(2), r: 1.35 }));
   }
@@ -190,7 +190,10 @@ function updateTrail(progress) {
   const count = trailSegs.length;
   for (let i = 0; i < count; i++) {
     const segEnd = (i + 1) / count;
-    const behind = progress - segEnd;
+    // Most recent visit of this lap segment along the unwrapped Tour.
+    const end = GRID_T + progress * (1 + GRID_GAP);
+    const visit = segEnd + Math.floor(end - segEnd);
+    const behind = visit < GRID_T ? -1 : (end - visit) / (1 + GRID_GAP);
     // Strongest right behind the car, easing to the quiet base further back. Only segments whose
     // state changed are written (most sit hidden or at the base opacity), keeping DOM writes per
     // frame to the few segments near the car.
@@ -225,8 +228,8 @@ export function initHUD() {
 export function update() {
   if (!initialized) return;
   if (state.activeCarIndex !== renderedCarIndex) setIdentity(state.activeCarIndex);
-  routeProject(pointAt(state.progress, routeWorldA), routePointA);
-  let ahead = state.progress + TANGENT_EPSILON;
+  routeProject(pointAt(routeTAt(state.progress), routeWorldA), routePointA);
+  let ahead = routeTAt(state.progress) + TANGENT_EPSILON;
   if (ahead > 1) ahead -= 1;
   routeProject(pointAt(ahead, routeWorldB), routePointB);
   const x = Math.round(routePointA.x * 100) / 100;

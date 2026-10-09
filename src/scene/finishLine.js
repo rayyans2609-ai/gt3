@@ -5,7 +5,7 @@ import { state } from '../core/state.js';
 import { groundHeightAt } from './environment.js';
 import {
   FINISH_T,
-  TRACK_LENGTH,
+  TRACK_LENGTH, TOUR_LENGTH, FINISH_THRESHOLD,
   offsetPointAt,
   pointAt,
   tangentAt,
@@ -17,7 +17,7 @@ const FINISH_SPAN = gateSpanAt(FINISH_T, 1.25);
 const POST_LEFT = FINISH_SPAN.left, POST_RIGHT = FINISH_SPAN.right;
 const BANNER_HEIGHT = 0.85;
 const CLEARANCE = 8.6;
-const APPROACH_T = 120 / TRACK_LENGTH;
+const APPROACH_T = 120 / TOUR_LENGTH;
 const STRIP_LENGTH = 2.0;
 const STRIP_CELL_M = 1;
 const STRIP_ROWS = 2;
@@ -228,7 +228,7 @@ export function buildFinishLine() {
 /** Static infrastructure; only the already-resident lamp emissive uniform changes. */
 export function update(dt) {
   if (!lampMaterial) return;
-  const approaching = state.progress >= FINISH_T - APPROACH_T;
+  const approaching = state.progress >= FINISH_THRESHOLD - APPROACH_T;
   // Simple 150 ms intensity ramp; reversing out and replay both return lamps off.
   const target = approaching ? (state.theme === 'night' ? 1.8 : 1.2) : 0;
   signalLevel += (target - signalLevel) * (1 - Math.exp(-Math.max(0, dt) / 0.15));

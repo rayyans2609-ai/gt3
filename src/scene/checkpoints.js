@@ -3,7 +3,7 @@ import * as THREE from 'three';
 import { state, set } from '../core/state.js';
 import { CARS } from '../data/cars.js';
 import {
-  CHECKPOINT_T, CHECKPOINT_APPROACH_T,
+  CHECKPOINT_T, CHECKPOINT_ROUTE_T, CHECKPOINT_APPROACH_T,
   offsetPointAt, tangentAt,
 } from './trackCurve.js';
 import { gateSpanAt } from './trackProfile.js';
@@ -12,7 +12,7 @@ import { createGateResponse } from './gateResponse.js';
 const postGeometry = new THREE.BoxGeometry(0.24, 7.6, 0.34);
 // Keep a realistic reference span in geometry.parameters for the existing gate
 // response owner; instance scale adjusts only span, leaving thickness untouched.
-const BEAM_REFERENCE_WIDTH = gateSpanAt(CHECKPOINT_T[0]).width + .6;
+const BEAM_REFERENCE_WIDTH = gateSpanAt(CHECKPOINT_ROUTE_T[0]).width + .6;
 const beamGeometry = new THREE.BoxGeometry(BEAM_REFERENCE_WIDTH, 0.24, 0.55);
 const postMaterial = new THREE.MeshStandardMaterial({
   color: 0xa9b1b4, metalness: 0.35, roughness: 0.55,
@@ -61,7 +61,7 @@ export function buildCheckpoints() {
   posts.frustumCulled = false;
   beams.frustumCulled = false;
   for (let i = 0; i < CHECKPOINT_T.length; i++) {
-    const t = CHECKPOINT_T[i];
+    const t = CHECKPOINT_ROUTE_T[i];
     const span = gateSpanAt(t);
     instance.scale.set(1, 1, 1);
     tangentAt(t, tangent);

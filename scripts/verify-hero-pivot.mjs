@@ -104,7 +104,7 @@ async function measure(page, ts) {
       });
       carRig.setWheels(cars.findWheels(model));
       for (const t of ts) {
-        state.progress = t; state.targetProgress = t; state.speed01 = 0; state.velocity = 0;
+        state.progress = (await import('/src/scene/trackCurve.js')).progressAtRouteT(t); state.targetProgress = state.progress; state.speed01 = 0; state.velocity = 0;
         carRig.update(0);
         mount.rotation.set(0, 0, 0); mount.position.set(0, 0, 0); // pivot error only
         rig.updateMatrixWorld(true);

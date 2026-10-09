@@ -1,9 +1,9 @@
 import { state, set, subscribe } from '../core/state.js';
 import { CARS, getCar } from '../data/cars.js';
 import { playFinish } from '../audio/audioManager.js';
-import { lockScroll, resetToStart, unlockScroll } from '../scroll/scrollDrive.js';
+import { lockScroll, resetToStart, unlockScroll, seekTo } from '../scroll/scrollDrive.js';
 
-const FINISH_THRESHOLD = 0.995;
+import { FINISH_THRESHOLD, TOUR_LENGTH } from '../scene/trackCurve.js';
 
 const CREDIT_GROUPS = Object.freeze([
   {
@@ -37,6 +37,7 @@ let visible = false;
 let runFinished = false;
 let finishSoundPlayed = false;
 let replayHandler = null;
+let reverseInput = null;
 let unsubscribeProgress = null;
 let root = null;
 let recapGrid = null;
@@ -202,7 +203,25 @@ export function initFinishScreen() {
   initialized = true;
   buildScreen();
   renderRecap();
-  unsubscribeProgress = subscribe('progress', maybeFinish);
+  unsubscribeProgress = subscribe('progress', progress => {
+    if (runFinished && progress < FINISH_THRESHOLD) {
+      hideFinishScreen();
+      runFinished = false;
+      finishSoundPlayed = false;
+    }
+    maybeFinish(progress);
+  });
+  // The legacy card locks the page; consume only reverse input to leave completion.
+  reverseInput = event => {
+    const wheel = event.type === 'wheel' && event.deltaY < 0;
+    const key = event.type === 'keydown' && ['ArrowUp', 'PageUp', 'Home'].includes(event.key);
+    if (!visible || (!wheel && !key) || window.__gt3?.readiness?.status === 'loading') return;
+    event.preventDefault();
+    hideFinishScreen();
+    seekTo(1 - 2 / TOUR_LENGTH, { instant: true });
+  };
+  window.addEventListener('wheel', reverseInput, { passive: false });
+  window.addEventListener('keydown', reverseInput);
   maybeFinish();
 }
 
@@ -249,6 +268,8 @@ export function hideFinishScreen() {
   if (!root || !visible) return;
 
   visible = false;
+  // Re-arm only after progress leaves the endpoint. Hiding while still at p=1
+  // must not reopen the card on the frame before a reverse glide starts.
   root.classList.remove('is-visible');
   root.setAttribute('aria-hidden', 'true');
   if (state.mode === 'finish') set('mode', 'race');
@@ -265,6 +286,9 @@ export function update(dt) {
 // Retained only so hot-module teardown/debug tooling can release the subscription.
 export function disposeFinishScreen() {
   unsubscribeProgress?.();
+  window.removeEventListener('wheel', reverseInput);
+  window.removeEventListener('keydown', reverseInput);
+  reverseInput = null;
   unsubscribeProgress = null;
   initialized = false;
 }

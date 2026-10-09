@@ -13,8 +13,8 @@ const route = await import('../src/scene/trackCurve.js');
 const { profileAt, gateSpanAt, WIDTH_SECTIONS, CURB_SEGMENTS, RUNOFF_REGIONS, CROSS_SECTION } = await import('../src/scene/trackProfile.js');
 const line = await import('../src/scene/racingLine.js');
 assert.ok(Math.abs(route.TRACK_LENGTH - 5006.8196682221) < 1e-8, 'route length changed');
-assert.deepEqual(route.CHECKPOINT_T, [.09,.18,.255,.39,.495,.585,.68,.775,.86]);
-assert.equal(route.FINISH_T,.994);
+assert.deepEqual(route.CHECKPOINT_ROUTE_T, [.09,.18,.255,.39,.495,.585,.68,.775,.86]);
+assert.equal(route.FINISH_T,0);
 assert.deepEqual(profileAt(0), profileAt(1));
 const footprints = await Promise.all(CARS.map(async c => ({ id:c.id, ...await glbFootprint(`public/models/tour/${c.modelFile}`) })));
 const out = { source: execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim(), look: COMP.look, hero:COMP.hero,
@@ -54,10 +54,10 @@ for(const t of ts) {
 }
 assert.ok(out.maxTotalWidthSlope<=.05001,'width transitions exceed 1:20');
 for(const f of footprints) assert.ok(out.minClearance[f.id].m >= .05,`${f.id} clipped road/curb: ${JSON.stringify(out.minClearance[f.id])}`);
-for(const t of [...route.CHECKPOINT_T,route.FINISH_T]) {
+for(const t of [...route.CHECKPOINT_ROUTE_T,route.FINISH_T]) {
   const p=profileAt(t), span=gateSpanAt(t,t===route.FINISH_T?1.25:1);
-  const leftGap=span.left-p.left-p.curbLeft-(t===route.FINISH_T?.55/2:.34/2);
-  const rightGap=span.right-p.right-p.curbRight-(t===route.FINISH_T?.55/2:.34/2);
+  const leftGap=span.left-p.left-p.curbLeft-(t===route.FINISH_T?.9/2:.34/2);
+  const rightGap=span.right-p.right-p.curbRight-(t===route.FINISH_T?.9/2:.34/2);
   assert.ok(leftGap>.5 && rightGap>.5);
   out.gates.push({t,span:span.width,leftGap,rightGap});
 }

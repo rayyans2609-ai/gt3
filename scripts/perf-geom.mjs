@@ -7,7 +7,7 @@ const base = (process.env.GT3_URL || 'http://127.0.0.1:5201').replace(/\/$/, '')
 const out = process.env.GT3_OUT || '/tmp/gt3-perf-geom';
 const source = process.env.GT3_SOURCE || execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
 const configs = (process.env.GT3_CONFIGS ?? 'look=r1').split('|');
-const points = [0.012, 0.283, 0.365, 0.616, 0.645, 0.985];
+const points = (process.env.GT3_POINTS || '0.012,0.283,0.365,0.616,0.645,0.985').split(',').map(Number);
 const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
 const quantile = (values, p) => {
   const sorted = [...values].sort((a, b) => a - b);
@@ -22,7 +22,7 @@ const browser = await puppeteer.launch({
   defaultViewport: { width: 1280, height: 800, deviceScaleFactor: 1 },
 });
 process.once('SIGTERM', async () => { await browser.close(); process.exit(143); });
-const report = { method: 'controlled scene RAF; fixed Lexus; adaptive resolution; no swap; 2s idle/3s motion', url: base, source, tree: execFileSync('git', ['status', '--porcelain=v1'], { encoding: 'utf8' }).trim(),
+const report = { method: 'controlled scene RAF; fixed Lexus; adaptive resolution; no swap; 2s idle/3s motion', url: base, source, tree: process.env.GT3_TREE ?? execFileSync('git', ['status', '--porcelain=v1'], { encoding: 'utf8' }).trim(),
   viewport: { width: 1280, height: 800, deviceScaleFactor: 1 }, configs: {}, at: new Date().toISOString() };
 try {
   for (const config of configs) {
@@ -40,6 +40,7 @@ try {
       const aerialMod = await import('/src/scene/aerialCamera.js');
       const setup = await import('/src/scene/sceneSetup.js');
       const cars = await import('/src/scene/cars.js');
+      const route = await import('/src/scene/trackCurve.js');
       // Stop only the named app frame loop after startup. One final pending app
       // frame may execute; subsequent measurements render controlled state directly.
       const raf = window.requestAnimationFrame.bind(window);
@@ -48,6 +49,7 @@ try {
       rigMod.setCarModel(cars.getCarModel(0));
       rigMod.setWheels([]);
       stateMod.state.mode = 'race';
+      window.__geomRoute = route;
       window.__geomMods = { state: stateMod.state, rig: rigMod, aerial: aerialMod, setup };
       // Startup's completed model warmup leaves the Lexus mounted. Keep that instance for all points.
       stateMod.state.activeCarIndex = 0;
@@ -58,7 +60,7 @@ try {
         const p = window.__geomPerf;
         const s = window.__geomMods.state;
         // Controlled scene RAF: no checkpoint/morph work or unrelated page input.
-        s.progress = window.__geomT; s.targetProgress = window.__geomT;
+        s.progress = route.progressAtRouteT ? route.progressAtRouteT(window.__geomT) : window.__geomT; s.targetProgress = s.progress;
         s.velocity = p.motion ? .2 : 0; s.speed01 = p.motion ? .5 : 0;
         window.__geomMods.rig.update(1 / 60);
         window.__geomMods.aerial.update(1 / 60);
@@ -117,7 +119,7 @@ try {
         const idle = await measure(2000, null);
         const motion = await measure(3000, { center: requestedT });
         const p = g.probe();
-        rows.push({ requestedT, actualT: p.progress, mode: p.mode, activeCarIndex: window.__geomMods.state.activeCarIndex,
+        rows.push({ requestedT, actualT: window.__geomRoute.routeTAt ? window.__geomRoute.routeTAt(p.progress) : p.progress, actualProgress:p.progress, mode: p.mode, activeCarIndex: window.__geomMods.state.activeCarIndex,
           render, idle, motion });
       }
       return { points: rows, namedTrackMeshes: namedTrack, renderer: g.renderer.getContext().getParameter(g.renderer.getContext().RENDERER) };

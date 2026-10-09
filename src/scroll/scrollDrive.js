@@ -17,7 +17,7 @@
 
 import { state, set } from '../core/state.js';
 import { persistRouteProgress } from '../core/session.js';
-import { TRACK_LENGTH } from '../scene/trackCurve.js';
+import { TOUR_LENGTH } from '../scene/trackCurve.js';
 import { createBoundedModel } from './boundedPace.js';
 
 const REFERENCE_LENGTH = 3472.646166835742;
@@ -32,7 +32,7 @@ const TUNE = {
 
   // Progress-per-second that counts as "flat out". A full route is 1.0 of progress,
   // so 0.09 means roughly eleven seconds of sustained hard scrolling end to end.
-  velocityFullScale: 0.09 * REFERENCE_LENGTH / TRACK_LENGTH,
+  velocityFullScale: 0.09 * REFERENCE_LENGTH / TOUR_LENGTH,
 
   // Rise/fall smoothing for speed01. Speed builds a little faster than it decays so
   // acceleration reads instantly but the scene settles gracefully when you stop.
@@ -43,7 +43,7 @@ const TUNE = {
   idleEpsilon: 0.00004,
 
   // Total scroll spacer height in viewport heights. Must match #scroll-spacer in CSS.
-  spacerVh: 1200 * TRACK_LENGTH / REFERENCE_LENGTH,
+  spacerVh: 1200 * TOUR_LENGTH / REFERENCE_LENGTH,
 };
 
 // ---------------------------------------------------------------------------
@@ -76,7 +76,7 @@ function readScrollMode() {
   } catch { return 'cap'; }
 }
 export const scrollMode = readScrollMode();
-const bounded = scrollMode === 'default' ? null : createBoundedModel(scrollMode, TRACK_LENGTH);
+const bounded = scrollMode === 'default' ? null : createBoundedModel(scrollMode, TOUR_LENGTH);
 const RESYNC_IDLE_S = 0.14;
 const STRANDED_IDLE_S = 0.05;
 let lastY = 0;               // page scrollY already accounted for (candidates only)
@@ -248,7 +248,7 @@ export function unlockScroll() {
   detachSwallowers();
   if (bounded) {
     // Nothing received while locked is banked: the page goes to the car, the model starts at rest.
-    bounded.reset(state.progress * TRACK_LENGTH);
+    bounded.reset(state.progress * TOUR_LENGTH);
     syncPageTo(state.progress);
     rawTarget = state.progress;
     set('targetProgress', state.progress);
@@ -300,8 +300,8 @@ export function seekTo(t, { instant = false } = {}) {
   if (bounded) {
     lastY = window.scrollY || 0;
     // Instant: no banked credit, no glide, no speed. Otherwise a speed-limited glide to `t`.
-    if (instant) bounded.reset(clamped * TRACK_LENGTH);
-    else bounded.seek(clamped * TRACK_LENGTH);
+    if (instant) bounded.reset(clamped * TOUR_LENGTH);
+    else bounded.seek(clamped * TOUR_LENGTH);
   }
   if (instant) {
     lastProgress = clamped;
@@ -356,17 +356,17 @@ function updateBounded(dt) {
   if (locked) {
     // Frozen: anything the page did while locked is discarded, the model sits at rest on the car.
     lastY = window.scrollY || 0;
-    bounded.reset(state.progress * TRACK_LENGTH);
+    bounded.reset(state.progress * TOUR_LENGTH);
   } else {
     const y = window.scrollY || 0;
     const dy = y - lastY;
     lastY = y;
-    if (dy !== 0) bounded.addInput(dy, TRACK_LENGTH / maxScroll());
+    if (dy !== 0) bounded.addInput(dy, TOUR_LENGTH / maxScroll());
   }
   bounded.step(dt);
 
-  const p = Math.min(1, Math.max(0, bounded.p / TRACK_LENGTH));
-  const targetP = Math.min(1, Math.max(0, bounded.targetMeters() / TRACK_LENGTH));
+  const p = Math.min(1, Math.max(0, bounded.p / TOUR_LENGTH));
+  const targetP = Math.min(1, Math.max(0, bounded.targetMeters() / TOUR_LENGTH));
   rawTarget = targetP;
   set('targetProgress', targetP);
 

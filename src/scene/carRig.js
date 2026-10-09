@@ -1,11 +1,12 @@
+import { tourPathPointAt, tourPathTangentAt } from './tourPath.js';
 /** Route-bound car, body motion, wheels and contact shadow. The race camera is independent. */
 
 import * as THREE from 'three';
 import { state } from '../core/state.js';
 import { surfaceOffsetAt, CROSS_SECTION } from './trackProfile.js';
 import { COMP } from './composition.js';
-import { pathPointAt, pathTangentAt, pathCurvatureAt, curbUseAt } from './racingLine.js';
-import { pointAt, tangentAt, offsetPointAt, TRACK_LENGTH } from './trackCurve.js';
+import { pathCurvatureAt, curbUseAt } from './racingLine.js';
+import { pointAt, tangentAt, offsetPointAt, routeTAt, TRACK_LENGTH } from './trackCurve.js';
 
 // W2 hero scale: uniform, about the mount origin, which is the models' ground plane
 // (cars.js normaliseScene grounds every car at y=0), so tyres stay seated.
@@ -209,12 +210,12 @@ export function setWheels(meshes) {
 // ---------------------------------------------------------------------------
 
 export function update(dt) {
-  const t = state.progress;
+  const t = routeTAt(state.progress);
 
   // --- travel: position and orientation on the driven path ------------------
   // Centreline unless a racing line is active; heading follows the path's own tangent.
-  pathPointAt(t, _pos);
-  pathTangentAt(t, _tan);
+  tourPathPointAt(state.progress, _pos);
+  tourPathTangentAt(state.progress, _tan);
   rig.position.copy(_pos);
   // The real asphalt vertices are 2 cm below the spline, not at spline y.
   if (COMP.look) rig.position.y += CROSS_SECTION.asphaltY;

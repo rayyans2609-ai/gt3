@@ -87,8 +87,10 @@ try {
       let ok = false;
       for (let i = 0; i < 40 && !ok; i++) {
         const s = await page.evaluate(async target => {
-          (await import('/src/scroll/scrollDrive.js')).seekTo(target, { instant: true });
-          const p = window.__gt3.probe(); return { progress: p.progress, mode: p.mode };
+          const route = await import('/src/scene/trackCurve.js');
+          const progress = route.progressAtRouteT(target);
+          (await import('/src/scroll/scrollDrive.js')).seekTo(progress, { instant: true });
+          const p = window.__gt3.probe(); return { progress: route.routeTAt(p.progress), mode: p.mode };
         }, tt);
         if (s.mode === 'finish') await page.click('.finish-replay').catch(() => {});
         ok = Math.abs(s.progress - tt) < 0.002;

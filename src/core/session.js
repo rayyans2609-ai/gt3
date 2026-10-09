@@ -1,3 +1,4 @@
+import { ROUTE_MAPPING, GRID_DISTANCE, TRACK_LENGTH, TOUR_LENGTH } from '../scene/trackCurve.js';
 import { set, state, subscribe } from './state.js';
 import { EXPERIENCES } from './experience.js';
 import { CARS } from '../data/cars.js';
@@ -37,6 +38,8 @@ function writeSession() {
   try {
     const value = Object.fromEntries(STATE_SESSION_KEYS.map((key) => [key, state[key]]));
     value.routeProgress = routeProgress;
+    value.routeMapping = ROUTE_MAPPING;
+    value.routeGridDistance = GRID_DISTANCE;
     value.unlocked = [...state.unlocked].filter((index) =>
       Number.isInteger(index) && index >= 0 && index < CARS.length).sort((a, b) => a - b);
     window.sessionStorage.setItem(STORAGE_KEY, JSON.stringify(value));
@@ -55,8 +58,8 @@ export function restoreSession() {
     if (VALID_SESSION_VALUES[key].has(saved?.[key])) set(key, saved[key]);
   }
   if (VALID_SESSION_VALUES.routeProgress.has(saved?.routeProgress)) {
-    restoredRouteProgress = saved.routeProgress;
-    routeProgress = saved.routeProgress;
+    restoredRouteProgress = migrateRouteProgress(saved);
+    routeProgress = restoredRouteProgress;
   }
   const unlocked = new Set([0]);
   if (Array.isArray(saved?.unlocked)) {
@@ -102,4 +105,16 @@ export function startRoutePersistence() {
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'hidden') flush();
   });
+}
+
+/** Preserve old world positions and completed state without replaying effects. */
+export function migrateRouteProgress(saved) {
+  const p = saved.routeProgress;
+  if (saved.routeMapping !== ROUTE_MAPPING) {
+    if (p === 0) return 0;
+    if (p >= .995) return 1;
+    return (p * TRACK_LENGTH + GRID_DISTANCE) / TOUR_LENGTH;
+  }
+  const oldDistance = Number.isFinite(saved.routeGridDistance) ? saved.routeGridDistance : GRID_DISTANCE;
+  return Math.min(1, Math.max(0, (p * (TRACK_LENGTH + oldDistance) - oldDistance + GRID_DISTANCE) / TOUR_LENGTH));
 }

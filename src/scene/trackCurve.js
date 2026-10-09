@@ -195,7 +195,7 @@ export function distanceToT(distance) {
 // ---------------------------------------------------------------------------
 // Positions favour straight or corner-exit road. Third-to-fourth spacing is a
 // deliberate long run across the technical sequence rather than a gate in a bend.
-export const CHECKPOINT_T = [
+export const CHECKPOINT_ROUTE_T = [
   0.090, // Nissan      — breathing chute after turn 1
   0.180, // Audi        — uphill chute after the tightening left
   0.255, // BMW         — back chute after the big right
@@ -207,8 +207,23 @@ export const CHECKPOINT_T = [
   0.860, // Porsche     — closing chute after broad left
 ];
 
-/** Last 140 m of approach carries the restrained proximity sound. */
-export const CHECKPOINT_APPROACH_T = 140 / TRACK_LENGTH;
-
 /** Where the finish gate stands. */
-export const FINISH_T = 0.994;
+export const FINISH_T = 0;
+export const FINISH_THRESHOLD = 1;
+export const GRID_SLOT = new URLSearchParams(globalThis.location?.search || '').get('grid') === 'p2' ? 'p2' : 'p1';
+export const GRID_DISTANCE = GRID_SLOT === 'p2' ? 26 : 18;
+export const GRID_LATERAL = GRID_SLOT === 'p2' ? -6 : 6;
+export const GRID_GAP = GRID_DISTANCE / TRACK_LENGTH;
+export const TOUR_LENGTH = TRACK_LENGTH + GRID_DISTANCE;
+export const GRID_T = 1 - GRID_GAP;
+export const FIRST_LINE_PROGRESS = GRID_DISTANCE / TOUR_LENGTH;
+export const ROUTE_MAPPING = 'grid-v1';
+const wrapRoute = t => ((t % 1) + 1) % 1;
+/** Tour progress -> wrapped lap geometry. No geometry API silently consumes p. */
+export function routeTAt(p) { return wrapRoute(GRID_T + p * (1 + GRID_GAP)); }
+/** Lap t -> progress on the main lap (the neutral opening approach is separate). */
+export function progressAtRouteT(t) { return (wrapRoute(t) + GRID_GAP) / (1 + GRID_GAP); }
+export const CHECKPOINT_T = CHECKPOINT_ROUTE_T.map(progressAtRouteT);
+
+/** Last 140 m of checkpoint approach, in Tour progress. */
+export const CHECKPOINT_APPROACH_T = 140 / TOUR_LENGTH;

@@ -5,7 +5,7 @@ import puppeteer from 'puppeteer-core';
 import { mkdir } from 'node:fs/promises';
 
 const base = process.argv[2] || 'http://127.0.0.1:5198/';
-const root = '/tmp/gt3-route-persistence';
+const root = process.env.GT3_OUT || '/tmp/gt3-route-persistence';
 const softwareGL = process.env.GT3_SOFTWARE_GL === '1';
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const assert = (condition, message) => {
@@ -200,7 +200,7 @@ try {
     // otherwise the saved value legitimately trails the position persisted a moment later.
     await waitForRest(page);
     const saved = await snapshot(page);
-    assert(saved.progress > 0 && saved.progress < 0.995,
+    assert(saved.progress > 0 && saved.progress < 1,
       `pace route did not remain in a restorable range: ${saved.progress}`);
     const restored = await reloadAndAssert(page, saved, paceSearch);
     const wheel = await proveWheelDirections(page, restored);
@@ -237,7 +237,7 @@ try {
     });
     await page.waitForFunction(async () => {
       const { state } = await import('/src/core/state.js');
-      return state.mode === 'finish' && state.progress >= 0.995;
+      return state.mode === 'finish' && state.progress === 1;
     }, { timeout: 15000, polling: 100 });
     await wait(600); // exceeds the 350 ms route write throttle before the reload lifecycle flush.
     await page.reload({ waitUntil: 'domcontentloaded', timeout: 120000 });
@@ -256,7 +256,7 @@ try {
     });
     const restoredDom = await finishDom();
     const restored = await snapshot(page);
-    assert(restored.progress >= 0.995, `finish route position did not restore: ${restored.progress}`);
+    assert(restored.progress === 1, `finish route position did not restore: ${restored.progress}`);
     assert(restored.mode === 'finish' && restored.locked, `finish restore not locked: ${restored.mode}/${restored.locked}`);
     assert(restoredDom.finishVisible, 'finish screen not visible after finish refresh');
     assert(restoredDom.startHidden && !restoredDom.startVisible, 'start screen still visible under the finish card');
@@ -284,7 +284,16 @@ try {
   });
   report.finish = finishResult;
 
-  await phase('console errors', async () => {
+  await phase('unversioned old-session world position', async () => {
+    await page.evaluate(() => sessionStorage.setItem('gt3.session.v1',JSON.stringify({routeProgress:.4,unlocked:[0,1,2,3,4]})));
+    await page.reload({waitUntil:'domcontentloaded',timeout:120000});await waitReady(page);await wait(250);
+    const snap=await snapshot(page);
+    const t=await page.evaluate(async()=>{const r=await import('/src/scene/trackCurve.js');const {state}=await import('/src/core/state.js');return r.routeTAt(state.progress);});
+    assert(Math.abs(t-.4)<1e-8,`old save moved to t=${t}`);
+    assert(snap.activeCarIndex===4 && !snap.morphing && snap.activity.gateFrames===0,'old save car/effects incorrect');
+    return {t,snap};
+  });
+  await phase('console errors' , async () => {
     assert(errors.length === 0, `browser errors: ${errors.join(' | ')}`);
   });
 } catch (error) {

@@ -2,9 +2,10 @@
 
 import * as THREE from 'three';
 import { state } from '../core/state.js';
+import { surfaceOffsetAt, CROSS_SECTION } from './trackProfile.js';
 import { COMP } from './composition.js';
 import { pathPointAt, pathTangentAt, pathCurvatureAt, curbUseAt } from './racingLine.js';
-import { pointAt, tangentAt, offsetPointAt, TRACK, TRACK_LENGTH } from './trackCurve.js';
+import { pointAt, tangentAt, offsetPointAt, TRACK_LENGTH } from './trackCurve.js';
 
 // W2 hero scale: uniform, about the mount origin, which is the models' ground plane
 // (cars.js normaliseScene grounds every car at y=0), so tyres stay seated.
@@ -92,8 +93,8 @@ const supportEuler = new THREE.Euler(), supportRotation = new THREE.Quaternion()
 function seatOnCurb(t) {
   const weight = THREE.MathUtils.smoothstep(curbUseAt(t), 0, 0.1);
   if (!weight || contacts.length !== 4) return;
-  // Fit delta-y = a*x + b*z + c to the four real tyre contacts. The curb is
-  // the existing 0.005 -> 0.105 m ramp, widened to TRACK.curbWidthWide here.
+  // Fit delta-y = a*x + b*z + c to four real tread contacts against the
+  // same local asphalt/semantic curb ramp used to construct track geometry.
   const rows = contacts.map(tread => tread.map(p => {
     contactWorld.copy(p).multiplyScalar(HERO).applyQuaternion(rig.quaternion).add(rig.position);
     let u = t;
@@ -103,9 +104,8 @@ function seatOnCurb(t) {
     }
     pointAt(u, surfaceCenter);
     offsetPointAt(u, 1, 0, surfaceLeft).sub(surfaceCenter).setY(0).normalize();
-    const lateral = Math.abs(contactWorld.clone().sub(surfaceCenter).dot(surfaceLeft));
-    const curbY = lateral > TRACK.halfWidth
-      ? 0.005 + 0.1 * Math.min(1, (lateral - TRACK.halfWidth) / TRACK.curbWidthWide) : -0.02;
+    const lateral = contactWorld.clone().sub(surfaceCenter).dot(surfaceLeft);
+    const curbY = surfaceOffsetAt(u, lateral);
     return [p.x * HERO, p.z * HERO, 1, surfaceCenter.y + curbY - contactWorld.y];
   }).reduce((a, b) => b[3] > a[3] ? b : a));
   const matrix = Array.from({ length: 3 }, (_, i) => Array.from({ length: 4 }, (_, j) =>
@@ -217,7 +217,7 @@ export function update(dt) {
   pathTangentAt(t, _tan);
   rig.position.copy(_pos);
   // The real asphalt vertices are 2 cm below the spline, not at spline y.
-  if (COMP.look) rig.position.y -= 0.02;
+  if (COMP.look) rig.position.y += CROSS_SECTION.asphaltY;
 
   // Matrix4.lookAt sets +Z to (eye - target). Aiming it at a point AHEAD therefore
   // puts -Z along the direction of travel, which is the direction the models face.
@@ -238,8 +238,11 @@ export function update(dt) {
 
   // --- apply ---------------------------------------------------------------
   bobPhase += dt * TUNE.bobSpeed;
-  carMount.rotation.set(0, 0, bodyRoll);
-  carMount.position.y = Math.sin(bobPhase) * TUNE.bobAmplitude * HERO * (0.4 + moving * 0.6);
+  // The supplied models have no suspension-only body rig. Rolling/bobbing the
+  // whole model also moves the tyres off the road. Review looks keep real tyre
+  // seating; the legacy comp URLs retain the old motion for comparison.
+  carMount.rotation.set(0, 0, COMP.look ? 0 : bodyRoll);
+  carMount.position.y = COMP.look ? 0 : Math.sin(bobPhase) * TUNE.bobAmplitude * HERO * (0.4 + moving * 0.6);
 
   // The contact shadow stays flat on the surface and does not inherit the body roll,
   // so it never peels off the asphalt on a corner.

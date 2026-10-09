@@ -18,19 +18,6 @@
  */
 
 import * as THREE from 'three';
-import { COMP } from './composition.js';
-
-// ---------------------------------------------------------------------------
-// Track dimensions
-// ---------------------------------------------------------------------------
-export const TRACK = {
-  // 7.0 (14 m asphalt) by default; a W2 review candidate may set it, before any
-  // geometry is built (composition.js resolves at import time).
-  halfWidth: COMP.halfWidth,
-  curbWidth: 1.15,       // red/white rumble strip, thin by default
-  curbWidthWide: 2.6,    // thickened block through corners and accent points
-  shoulderWidth: 3.0,    // dark run-off between curb and grass
-};
 
 /**
  * The route, as a driver would call it.
@@ -119,8 +106,7 @@ export const TRACK_LENGTH = curve.getLength();
 // ---------------------------------------------------------------------------
 // Curvature — sampled once, read every frame.
 // ---------------------------------------------------------------------------
-// Drives: camera corner-lean (§5), car body roll (§7), and where the curbs thicken
-// into blocks (§6). Signed: positive = turning right, negative = turning left.
+// Drives camera/car motion only; the authored profile owns widths and curbs. Signed: positive = turning right, negative = turning left.
 
 const CURVATURE_SAMPLES = 800;
 const curvatureTable = new Float32Array(CURVATURE_SAMPLES + 1);
@@ -188,7 +174,7 @@ export function tangentAt(t, out = new THREE.Vector3()) {
 }
 
 /**
- * A point offset laterally from the centreline. `lateral` is metres to the right of
+ * A point offset laterally from the centreline. `lateral` is metres to the left of
  * the direction of travel; `height` is metres above the surface. This is how curbs,
  * markings, roadside dressing and the finish gate are all placed.
  */

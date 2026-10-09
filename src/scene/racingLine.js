@@ -1,155 +1,131 @@
-/**
- * Hidden authored racing line (W2 candidates b/c; SPEC §15 "Hero-car path").
- * Never rendered. A precomputed, wrapped lateral table derived from circuit geometry:
- * a difference of Gaussians of the (soft-thresholded) curvature puts the car outside
- * before entry, inside at the apex and outside again on exit, smoothly (C∞), and
- * almost nothing on straights and gentle bends. Deterministic in t (reversible).
- * With amplitude 0 every function here is exactly the centreline.
- */
+/** Hidden authored GT line. Pure in route t, wrapped, reversible; never rendered. */
 import * as THREE from 'three';
-import { COMP } from './composition.js';
+import { COMP, CAR_HALF_WIDTH_M, CAR_HALF_LENGTH_M, RACING_MARGIN_M } from './composition.js';
 import { curve, TRACK_LENGTH, curvatureAt } from './trackCurve.js';
+import { profileAt, CORNERS } from './trackProfile.js';
 
-const N = 2048;
-const ds = TRACK_LENGTH / N;
-const SIGMA_APEX_M = 55;     // corner-scale smoothing: where the apex sits
-const SIGMA_WIDE_M = 140;    // wider smoothing: approach/exit outside lobes
-const GENTLE_KAPPA = 1 / 500; // below this radius-equivalent nothing happens
-const FULL_KAPPA = 1 / 120;   // at/above this a corner gets the full treatment
-
+const N = 4096;
 export const amplitudeM = COMP.racingLineM;
-const lateralTable = new Float32Array(N + 1);  // offsetPointAt convention (+ = left)
-const pathCurvatureTable = new Float32Array(N + 1); // normalised like curvatureAt
-
+const lateralTable = new Float32Array(N + 1);
+const pathCurvatureTable = new Float32Array(N + 1);
 const wrap = t => ((t % 1) + 1) % 1;
 const sample = (table, t) => {
-  const x = wrap(t) * N;
-  const i = Math.floor(x);
-  const f = x - i;
+  const x = wrap(t) * N, i = Math.floor(x), f = x - i;
   return table[i] * (1 - f) + table[i + 1] * f;
 };
-
-function gaussian(signal, sigmaM) {
-  const s = sigmaM / ds;
-  const radius = Math.ceil(3 * s);
-  const weights = [];
-  let sum = 0;
-  for (let k = -radius; k <= radius; k++) {
-    const w = Math.exp(-0.5 * (k / s) ** 2);
-    weights.push(w); sum += w;
+// Fractions of LOCAL usable half-width, not a global amplitude. First exits of
+// linked corners stay on the side that prepares the next apex (chicane, slowdowns).
+// The long acceleration straights have explicitly centred, flat intervals.
+export const LINE_KNOTS = Object.freeze([
+  [0, 0], [.015, 0], [.029, .45], [.056, -.72], [.086, .25],
+  [.104, -.50], [.123, .50], [.137, .20], [.159, .76], [.181, .20],
+  [.190, .50], [.219, -.85], [.246, .30], [.261, -.62], [.283, 'hairpin'],
+  [.312, .20], [.320, .48], [.337, -.66], [.349, -.40], [.365, 'chicane-out'],
+  [.394, -.55], [.402, .40], [.420, -.62], [.436, -.38], [.470, .82],
+  [.508, -.55], [.535, 0], [.590, 0], [.616, .62], [.635, -.70],
+  [.644, -.40], [.654, .83], [.680, -.55], [.695, -.30], [.709, -.62],
+  [.729, .66], [.737, .40], [.748, -.84], [.780, .55], [.799, 0],
+  [.812, -.45], [.835, .50], [.860, -.30], [.871, -.40], [.898, .55],
+  [.928, -.45], [.939, -.45], [.952, .72], [.979, -.20], [.990, 0], [1, 0],
+].map(Object.freeze));
+function knotValue(t, value) {
+  const p = profileAt(t);
+  const contact = typeof value === 'string' ? CORNERS.find(c => c.id === value) : null;
+  const side = contact?.side ?? Math.sign(value);
+  const width = side >= 0 ? p.left : p.right;
+  const usable = Math.max(0, width - CAR_HALF_WIDTH_M * COMP.hero - RACING_MARGIN_M - .45);
+  if (contact) {
+    // A nominal 1.8 m tyre footprint clips only this 1.8 m curb. The widest
+    // mirror/body envelope can overhang the asphalt, but clears the curb exterior.
+    return side * Math.min(width - .9 * COMP.hero + .06,
+      width + (side > 0 ? p.curbLeft : p.curbRight) - CAR_HALF_WIDTH_M * COMP.hero - .25);
   }
-  const out = new Float64Array(N);
-  for (let i = 0; i < N; i++) {
-    let v = 0;
-    for (let k = -radius; k <= radius; k++) v += signal[((i + k) % N + N) % N] * weights[k + radius];
-    out[i] = v / sum;
-  }
-  return out;
+  return Number(value) * usable * (COMP.racingLine || 0);
 }
-
-const points = Array.from({ length: N }, (_, i) => curve.getPointAt(i / N, new THREE.Vector3()));
-const lefts = points.map((p, i) => {
-  const next = points[(i + 1) % N];
-  const prev = points[(i - 1 + N) % N];
-  const tangent = next.clone().sub(prev).setY(0).normalize();
-  // offsetPointAt's +lateral side: -(tangent × up).
-  return new THREE.Vector3(tangent.z, 0, -tangent.x);
+const knots = LINE_KNOTS.map(([t, value]) => ({ t, y: knotValue(t, value) }));
+// Shape-preserving Hermite: slope zero at extrema, harmonic slope elsewhere.
+// This avoids oscillating overshoot and retains flat straight intervals.
+const slopes = knots.map((k, i) => {
+  if (i === 0 || i === knots.length - 1) return 0;
+  const a = (k.y - knots[i - 1].y) / (k.t - knots[i - 1].t);
+  const b = (knots[i + 1].y - k.y) / (knots[i + 1].t - k.t);
+  return a * b > 0 ? 2 * a * b / (a + b) : 0;
 });
-
-// Signed curvature (1/m, + = right turn) from heading change, lightly smoothed.
-const kappa = new Float64Array(N);
+let segment = 0;
 for (let i = 0; i < N; i++) {
-  const a = points[i].clone().sub(points[(i - 1 + N) % N]).setY(0).normalize();
-  const b = points[(i + 1) % N].clone().sub(points[i]).setY(0).normalize();
-  const cross = a.x * b.z - a.z * b.x; // > 0 for a right turn in this world
-  kappa[i] = Math.atan2(cross, a.dot(b)) / ds;
-}
-const kappaSmooth = gaussian(kappa, 12);
-let kappaPeak = 1e-6;
-for (const k of kappaSmooth) kappaPeak = Math.max(kappaPeak, Math.abs(k));
-
-if (amplitudeM > 0) {
-  const weighted = kappaSmooth.map(k =>
-    k * THREE.MathUtils.smoothstep(Math.abs(k), GENTLE_KAPPA, FULL_KAPPA));
-  const apex = gaussian(weighted, SIGMA_APEX_M);
-  const wide = gaussian(weighted, SIGMA_WIDE_M);
-  const dog = apex.map((v, i) => v - wide[i]);
-  let peak = 1e-9;
-  for (const v of dog) peak = Math.max(peak, Math.abs(v));
-  for (let i = 0; i < N; i++) {
-    // + dog = toward the inside of a right turn = right = negative offset lateral.
-    // tanh keeps the clamp soft so the line never visibly flattens against a wall.
-    lateralTable[i] = -amplitudeM * Math.tanh(1.25 * dog[i] / peak) / Math.tanh(1.25);
-    for (const corner of COMP.curbCorners || []) {
-      const w = curbWeight(i / N, corner);
-      // Only the selected apex may use the curb. The existing geometry-led
-      // outside/inside/outside lobes remain everywhere else.
-      lateralTable[i] += w * (corner.side * COMP.curbLateralM - lateralTable[i]);
-    }
-  }
+  const t = i / N;
+  while (segment + 1 < knots.length - 1 && t > knots[segment + 1].t) segment++;
+  const a = knots[segment], b = knots[segment + 1], dt = b.t - a.t;
+  const u = (t - a.t) / dt;
+  lateralTable[i] = amplitudeM <= 0 ? 0 :
+    (2 * u ** 3 - 3 * u ** 2 + 1) * a.y + (u ** 3 - 2 * u ** 2 + u) * dt * slopes[segment]
+    + (-2 * u ** 3 + 3 * u ** 2) * b.y + (u ** 3 - u ** 2) * dt * slopes[segment + 1];
 }
 lateralTable[N] = lateralTable[0];
 
-/** Compact C3 apex window; no nonzero tails on straights. */
-export function curbWeight(t, corner) {
-  const distanceM = Math.abs(((t - corner.t + 1.5) % 1) - 0.5) * TRACK_LENGTH;
-  return distanceM < corner.radiusM ? Math.cos(Math.PI * distanceM / (2 * corner.radiusM)) ** 4 : 0;
-}
-
-export function curbUseAt(t) {
-  return Math.max(0, ...(COMP.curbCorners || []).map(c => curbWeight(t, c)));
-}
-
-// Path curvature, normalised by the centreline peak so roll matches today's scale.
-{
-  const path = points.map((p, i) => p.clone().addScaledVector(lefts[i], lateralTable[i]));
-  for (let i = 0; i < N; i++) {
-    const p0 = path[(i - 1 + N) % N], p1 = path[i], p2 = path[(i + 1) % N];
-    const a = p1.clone().sub(p0).setY(0);
-    const b = p2.clone().sub(p1).setY(0);
-    const angle = Math.atan2(a.x * b.z - a.z * b.x, a.dot(b));
-    pathCurvatureTable[i] = angle / ((a.length() + b.length()) * 0.5) / kappaPeak;
-  }
-  pathCurvatureTable[N] = pathCurvatureTable[0];
-}
-
-/** Lateral offset (offsetPointAt convention) at t. */
-export function lateralAt(t) {
-  return amplitudeM > 0 ? sample(lateralTable, t) : 0;
-}
-
-const _a = new THREE.Vector3();
-const _b = new THREE.Vector3();
-const _left = new THREE.Vector3();
-
-function rawPathPoint(t, out) {
+// Clamp the FULL conservative yaw envelope, not just the car's centre. Three
+// deterministic construction passes account for path heading and front/rear
+// width changes. No time-dependent clamp or per-frame geometry work.
+const a = new THREE.Vector3(), b = new THREE.Vector3(), tan = new THREE.Vector3();
+function raw(t, out) {
   const u = wrap(t);
   curve.getPointAt(u, out);
-  if (amplitudeM <= 0) return out;
-  const lateral = sample(lateralTable, u);
-  curve.getTangentAt(u, _left);
-  _left.set(_left.z, 0, -_left.x).normalize();
-  return out.addScaledVector(_left, lateral);
+  curve.getTangentAt(u, tan);
+  tan.set(tan.z, 0, -tan.x).normalize();
+  return out.addScaledVector(tan, sample(lateralTable, u));
 }
-
-/** Car position at t (centreline when there is no racing line). */
+if (amplitudeM > 0) for (let pass = 0; pass < 3; pass++) {
+  const next = lateralTable.slice();
+  for (let i = 0; i < N; i++) {
+    const t = i / N, h = .75 / TRACK_LENGTH;
+    raw(t - h, a); raw(t + h, b);
+    const pathTan = b.sub(a).setY(0).normalize();
+    curve.getTangentAt(t, a).setY(0).normalize();
+    const cos = Math.abs(a.dot(pathTan));
+    const sin = Math.abs(a.x * pathTan.z - a.z * pathTan.x);
+    const extent = COMP.hero * (CAR_HALF_WIDTH_M * cos + CAR_HALF_LENGTH_M * sin);
+    const p = profileAt(t), fore = profileAt(t + CAR_HALF_LENGTH_M * COMP.hero / TRACK_LENGTH);
+    const rear = profileAt(t - CAR_HALF_LENGTH_M * COMP.hero / TRACK_LENGTH);
+    const left = Math.min(p.left + p.curbLeft, fore.left + fore.curbLeft, rear.left + rear.curbLeft);
+    const right = Math.min(p.right + p.curbRight, fore.right + fore.curbRight, rear.right + rear.curbRight);
+    next[i] = THREE.MathUtils.clamp(lateralTable[i], -right + extent + .12, left - extent - .12);
+  }
+  lateralTable.set(next); lateralTable[N] = lateralTable[0];
+}
+export function lateralAt(t) { return amplitudeM > 0 ? sample(lateralTable, t) : 0; }
 export function pathPointAt(t, out = new THREE.Vector3()) {
-  if (amplitudeM <= 0) return curve.getPointAt(THREE.MathUtils.clamp(t, 0, 1), out);
-  return rawPathPoint(t, out);
+  return amplitudeM > 0 ? raw(t, out) : curve.getPointAt(THREE.MathUtils.clamp(t, 0, 1), out);
 }
-
-/** Unit tangent of the offset path itself, so the car never crabs. */
+const _a = new THREE.Vector3(), _b = new THREE.Vector3();
 export function pathTangentAt(t, out = new THREE.Vector3()) {
   if (amplitudeM <= 0) return curve.getTangentAt(THREE.MathUtils.clamp(t, 0, 1), out).normalize();
-  const h = 0.75 / TRACK_LENGTH;
-  rawPathPoint(t - h, _a);
-  rawPathPoint(t + h, _b);
+  const h = .75 / TRACK_LENGTH;
+  raw(t - h, _a); raw(t + h, _b);
   return out.subVectors(_b, _a).normalize();
 }
-
-/** Normalised signed curvature of the driven path (today's curvatureAt when centred). */
-export function pathCurvatureAt(t) {
-  return amplitudeM > 0 ? sample(pathCurvatureTable, t) : curvatureAt(t);
+/** Only the two selected apex windows can request tyre/curb support. */
+export function curbUseAt(t) {
+  const u = wrap(t);
+  return amplitudeM > 0 ? Math.max(0, ...CORNERS.filter(c => c.contact).map(c => {
+    const d = Math.abs(u - c.apex) * TRACK_LENGTH;
+    return d < 60 ? Math.cos(Math.PI * d / 120) ** 4 : 0;
+  })) : 0;
 }
-
+// Curvature uses the driven path, normalized against the same centreline peak.
+const ds = TRACK_LENGTH / N;
+let peak = 1e-8;
+const path = Array.from({ length: N }, (_, i) => pathPointAt(i / N));
+for (let i = 0; i < N; i++) {
+  curve.getTangentAt(wrap((i - 1) / N), a).setY(0).normalize();
+  curve.getTangentAt(wrap((i + 1) / N), b).setY(0).normalize();
+  peak = Math.max(peak, Math.abs(Math.atan2(a.x * b.z - a.z * b.x, a.dot(b))) / (2 * ds));
+}
+for (let i = 0; i < N; i++) {
+  a.subVectors(path[i], path[(i - 1 + N) % N]).setY(0);
+  b.subVectors(path[(i + 1) % N], path[i]).setY(0);
+  pathCurvatureTable[i] = Math.atan2(a.x * b.z - a.z * b.x, a.dot(b))
+    / ((a.length() + b.length()) / 2) / peak;
+}
+pathCurvatureTable[N] = pathCurvatureTable[0];
+export function pathCurvatureAt(t) { return amplitudeM > 0 ? sample(pathCurvatureTable, t) : curvatureAt(t); }
 export const racingLineTables = { N, lateral: lateralTable, curvature: pathCurvatureTable };

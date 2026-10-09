@@ -1,10 +1,10 @@
 /** A bounded racing gantry, approach signals and the painted checker strip. */
 import * as THREE from 'three';
+import { gateSpanAt, profileAt } from './trackProfile.js';
 import { state } from '../core/state.js';
 import { groundHeightAt } from './environment.js';
 import {
   FINISH_T,
-  TRACK,
   TRACK_LENGTH,
   offsetPointAt,
   pointAt,
@@ -13,12 +13,13 @@ import {
 
 const UP = new THREE.Vector3(0, 1, 0);
 const TRUSS_DEPTH = 1.4;
-const POST_LATERAL = TRACK.halfWidth + TRACK.curbWidth + 1.25;
+const FINISH_SPAN = gateSpanAt(FINISH_T, 1.25);
+const POST_LEFT = FINISH_SPAN.left, POST_RIGHT = FINISH_SPAN.right;
 const BANNER_HEIGHT = 0.85;
 const CLEARANCE = 8.6;
 const APPROACH_T = 120 / TRACK_LENGTH;
 const STRIP_LENGTH = 2.0;
-const STRIP_COLUMNS = 14;
+const STRIP_CELL_M = 1;
 const STRIP_ROWS = 2;
 
 let finishRoot = null;
@@ -71,13 +72,17 @@ function buildPaintedStrip(root) {
     const t0 = (FINISH_T + fromDistance / TRACK_LENGTH + 1) % 1;
     const t1 = (FINISH_T + toDistance / TRACK_LENGTH + 1) % 1;
 
-    for (let column = 0; column < STRIP_COLUMNS; column += 1) {
-      const x0 = -TRACK.halfWidth + (column / STRIP_COLUMNS) * TRACK.halfWidth * 2;
-      const x1 = -TRACK.halfWidth + ((column + 1) / STRIP_COLUMNS) * TRACK.halfWidth * 2;
+    const p0 = profileAt(t0), p1 = profileAt(t1);
+    const columns = Math.ceil(Math.max(p0.left + p0.right, p1.left + p1.right) / STRIP_CELL_M);
+    for (let column = 0; column < columns; column += 1) {
+      const x0 = -p0.right + Math.min(column * STRIP_CELL_M, p0.left + p0.right);
+      const x1 = -p0.right + Math.min((column + 1) * STRIP_CELL_M, p0.left + p0.right);
+      const y0 = -p1.right + Math.min(column * STRIP_CELL_M, p1.left + p1.right);
+      const y1 = -p1.right + Math.min((column + 1) * STRIP_CELL_M, p1.left + p1.right);
       const a = root.worldToLocal(offsetPointAt(t0, x0, 0.045, new THREE.Vector3()));
       const b = root.worldToLocal(offsetPointAt(t0, x1, 0.045, new THREE.Vector3()));
-      const c = root.worldToLocal(offsetPointAt(t1, x1, 0.045, new THREE.Vector3()));
-      const d = root.worldToLocal(offsetPointAt(t1, x0, 0.045, new THREE.Vector3()));
+      const c = root.worldToLocal(offsetPointAt(t1, y1, 0.045, new THREE.Vector3()));
+      const d = root.worldToLocal(offsetPointAt(t1, y0, 0.045, new THREE.Vector3()));
       const color = (row + column) % 2 === 0 ? light : dark;
       addTriangle(positions, colors, a, c, b, color);
       addTriangle(positions, colors, a, d, c, color);
@@ -122,25 +127,25 @@ function structure(root, ground, bottom, top, material) {
     parts.push(matrix.matrix.clone());
   };
   for (let side = 0; side < 2; side++) {
-    const x = side ? POST_LATERAL : -POST_LATERAL;
+    const x = side ? POST_LEFT : -POST_RIGHT;
     const height = top - ground[side];
     add(x, ground[side] + height / 2, 0, 0.55, height, 0.85);
     add(x, ground[side] + 0.15, 0, 1.1, 0.3, 1.25);
   }
-  const span = POST_LATERAL * 2;
+  const span = FINISH_SPAN.width;
   const trussHeight = top - bottom;
   for (const z of [-TRUSS_DEPTH / 2, TRUSS_DEPTH / 2]) {
-    for (const y of [bottom, top]) add(0, y, z, span + 0.55, 0.16, 0.16);
+    for (const y of [bottom, top]) add(FINISH_SPAN.center, y, z, span + 0.55, 0.16, 0.16);
     const cells = 10;
     const width = span / cells;
     for (let i = 0; i < cells; i++) {
       const dx = width;
       const dy = (i % 2 ? -1 : 1) * trussHeight;
-      add(-POST_LATERAL + (i + 0.5) * width, (bottom + top) / 2, z,
+      add(-POST_RIGHT + (i + 0.5) * width, (bottom + top) / 2, z,
         Math.hypot(dx, dy), 0.105, 0.105, Math.atan2(dy, dx));
     }
   }
-  for (const x of [-POST_LATERAL, 0, POST_LATERAL]) {
+  for (const x of [-POST_RIGHT, FINISH_SPAN.center, POST_LEFT]) {
     for (const y of [bottom, top]) add(x, y, 0, 0.14, 0.14, TRUSS_DEPTH);
   }
   const frame = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 1, 1), material, parts.length);
@@ -197,7 +202,7 @@ export function buildFinishLine() {
   finishRoot.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(right, UP, forward));
   finishRoot.updateMatrixWorld(true);
 
-  const ground = [-POST_LATERAL, POST_LATERAL].map(lateral => {
+  const ground = [-POST_RIGHT, POST_LEFT].map(lateral => {
     const p = offsetPointAt(FINISH_T, lateral, 0, new THREE.Vector3());
     return groundHeightAt(p.x, p.z);
   });
@@ -207,11 +212,11 @@ export function buildFinishLine() {
   structure(finishRoot, ground, bottom, top, metal);
   signals(finishRoot, (bottom + top) / 2);
 
-  const banner = new THREE.Mesh(new THREE.PlaneGeometry(POST_LATERAL * 2 - 0.55, BANNER_HEIGHT),
+  const banner = new THREE.Mesh(new THREE.PlaneGeometry(FINISH_SPAN.width - 0.55, BANNER_HEIGHT),
     new THREE.MeshStandardMaterial({ map: checkerTexture(), color: 0xffffff,
       roughness: 0.88, metalness: 0, side: THREE.DoubleSide }));
   banner.name = 'finish-gate-checkered-banner';
-  banner.position.set(0, bottom - BANNER_HEIGHT / 2, 0);
+  banner.position.set(FINISH_SPAN.center, bottom - BANNER_HEIGHT / 2, 0);
   banner.frustumCulled = false;
   finishRoot.add(banner);
   buildPaintedStrip(finishRoot);

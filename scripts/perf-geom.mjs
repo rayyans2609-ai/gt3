@@ -7,7 +7,7 @@ const base = (process.env.GT3_URL || 'http://127.0.0.1:5201').replace(/\/$/, '')
 const out = process.env.GT3_OUT || '/tmp/gt3-perf-geom';
 const source = process.env.GT3_SOURCE || execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
 const configs = (process.env.GT3_CONFIGS ?? 'look=r1').split('|');
-const points = [0.012, 0.283, 0.365, 0.555, 0.645, 0.985];
+const points = [0.012, 0.283, 0.365, 0.616, 0.645, 0.985];
 const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
 const quantile = (values, p) => {
   const sorted = [...values].sort((a, b) => a - b);
@@ -21,7 +21,8 @@ const browser = await puppeteer.launch({
     `--user-data-dir=${out}/chrome-${process.pid}`, '--window-size=1280,800'],
   defaultViewport: { width: 1280, height: 800, deviceScaleFactor: 1 },
 });
-const report = { url: base, source, tree: execFileSync('git', ['status', '--porcelain=v1'], { encoding: 'utf8' }).trim(),
+process.once('SIGTERM', async () => { await browser.close(); process.exit(143); });
+const report = { method: 'controlled scene RAF; fixed Lexus; adaptive resolution; no swap; 2s idle/3s motion', url: base, source, tree: execFileSync('git', ['status', '--porcelain=v1'], { encoding: 'utf8' }).trim(),
   viewport: { width: 1280, height: 800, deviceScaleFactor: 1 }, configs: {}, at: new Date().toISOString() };
 try {
   for (const config of configs) {
@@ -37,7 +38,17 @@ try {
       const stateMod = await import('/src/core/state.js');
       const rigMod = await import('/src/scene/carRig.js');
       const aerialMod = await import('/src/scene/aerialCamera.js');
-      window.__geomMods = { state: stateMod.state, rig: rigMod, aerial: aerialMod };
+      const setup = await import('/src/scene/sceneSetup.js');
+      const cars = await import('/src/scene/cars.js');
+      // Stop only the named app frame loop after startup. One final pending app
+      // frame may execute; subsequent measurements render controlled state directly.
+      const raf = window.requestAnimationFrame.bind(window);
+      window.requestAnimationFrame = fn => fn.name === 'frame' ? 0 : raf(fn);
+      await new Promise(resolve => raf(() => raf(resolve)));
+      rigMod.setCarModel(cars.getCarModel(0));
+      rigMod.setWheels([]);
+      stateMod.state.mode = 'race';
+      window.__geomMods = { state: stateMod.state, rig: rigMod, aerial: aerialMod, setup };
       // Startup's completed model warmup leaves the Lexus mounted. Keep that instance for all points.
       stateMod.state.activeCarIndex = 0;
       window.__geomT = 0.012;
@@ -46,12 +57,13 @@ try {
       const loop = now => {
         const p = window.__geomPerf;
         const s = window.__geomMods.state;
-        // Run after the application's RAF callback and pin state without publishing
-        // progress events, so checkpoint/morph subscribers cannot swap the Lexus.
+        // Controlled scene RAF: no checkpoint/morph work or unrelated page input.
         s.progress = window.__geomT; s.targetProgress = window.__geomT;
-        s.velocity = 0; s.speed01 = 0;
+        s.velocity = p.motion ? .2 : 0; s.speed01 = p.motion ? .5 : 0;
         window.__geomMods.rig.update(1 / 60);
         window.__geomMods.aerial.update(1 / 60);
+        window.__geomMods.setup.updateScene(1 / 60);
+        window.__geomMods.setup.render(1 / 60);
         if (p.on) p.frames.push(now - p.last);
         p.last = now;
         requestAnimationFrame(loop);
@@ -82,7 +94,7 @@ try {
         return sample;
       };
       const measure = async (duration, motionT) => {
-        window.__geomPerf.frames = []; window.__geomPerf.on = true;
+        window.__geomPerf.frames = []; window.__geomPerf.on = true; window.__geomPerf.motion = Boolean(motionT);
         const start = performance.now();
         while (performance.now() - start < duration) {
           if (motionT) {
@@ -91,7 +103,7 @@ try {
           }
           await new Promise(requestAnimationFrame);
         }
-        window.__geomPerf.on = false;
+        window.__geomPerf.on = false; window.__geomPerf.motion = false;
         const frames = window.__geomPerf.frames.slice(3);
         return { frames: frames.length, p50Ms: quantile(frames, .5), p75Ms: quantile(frames, .75),
           p95Ms: quantile(frames, .95), over33ms: frames.filter(x => x > 33.4).length };
@@ -108,13 +120,14 @@ try {
         rows.push({ requestedT, actualT: p.progress, mode: p.mode, activeCarIndex: window.__geomMods.state.activeCarIndex,
           render, idle, motion });
       }
-      return { points: rows, namedTrackMeshes: namedTrack };
+      return { points: rows, namedTrackMeshes: namedTrack, renderer: g.renderer.getContext().getParameter(g.renderer.getContext().RENDERER) };
     }, { points });
     report.configs[config || 'default'] = { url, errors, ...result };
+    await page.screenshot({ path: `${out}/${config.replace(/[^a-z0-9-]/gi, '-') || 'default'}.png` });
     await page.close();
   }
   await writeFile(`${out}/perf-geom.json`, JSON.stringify(report, null, 2));
-  console.log(JSON.stringify({ out: `${out}/perf-geom.json`, source, configs: Object.keys(report.configs), errors: report.configs }));
+  console.log(JSON.stringify({ out: `${out}/perf-geom.json`, source, configs: report.configs }));
 } finally {
   await browser.close();
 }

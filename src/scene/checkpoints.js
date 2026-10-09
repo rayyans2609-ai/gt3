@@ -3,16 +3,17 @@ import * as THREE from 'three';
 import { state, set } from '../core/state.js';
 import { CARS } from '../data/cars.js';
 import {
-  CHECKPOINT_T, CHECKPOINT_APPROACH_T, TRACK,
+  CHECKPOINT_T, CHECKPOINT_APPROACH_T,
   offsetPointAt, tangentAt,
 } from './trackCurve.js';
+import { gateSpanAt } from './trackProfile.js';
 import { createGateResponse } from './gateResponse.js';
 
 const postGeometry = new THREE.BoxGeometry(0.24, 7.6, 0.34);
-// Posts stand just outside the curb; the beam spans them with 0.3 m overhang each
-// side (18.9 m on today's 14 m road), so gates fit any candidate road width.
-const POST_LATERAL = TRACK.halfWidth + TRACK.curbWidth + 1.0;
-const beamGeometry = new THREE.BoxGeometry(POST_LATERAL * 2 + 0.6, 0.24, 0.55);
+// Keep a realistic reference span in geometry.parameters for the existing gate
+// response owner; instance scale adjusts only span, leaving thickness untouched.
+const BEAM_REFERENCE_WIDTH = gateSpanAt(CHECKPOINT_T[0]).width + .6;
+const beamGeometry = new THREE.BoxGeometry(BEAM_REFERENCE_WIDTH, 0.24, 0.55);
 const postMaterial = new THREE.MeshStandardMaterial({
   color: 0xa9b1b4, metalness: 0.35, roughness: 0.55,
   transparent: true, opacity: 0.72, depthWrite: false,
@@ -51,7 +52,6 @@ export function buildCheckpoints() {
   }
   const root = new THREE.Group();
   root.name = 'checkpoints';
-  const lateral = POST_LATERAL;
   const posts = new THREE.InstancedMesh(postGeometry, postMaterial, CHECKPOINT_T.length * 2);
   const beams = new THREE.InstancedMesh(beamGeometry, beamMaterial, CHECKPOINT_T.length);
   posts.name = 'checkpoint-posts';
@@ -62,15 +62,18 @@ export function buildCheckpoints() {
   beams.frustumCulled = false;
   for (let i = 0; i < CHECKPOINT_T.length; i++) {
     const t = CHECKPOINT_T[i];
+    const span = gateSpanAt(t);
+    instance.scale.set(1, 1, 1);
     tangentAt(t, tangent);
     instance.rotation.set(0, Math.atan2(tangent.x, tangent.z), 0);
     for (let side = 0; side < 2; side++) {
-      offsetPointAt(t, side === 0 ? -lateral : lateral, 3.8, position);
+      offsetPointAt(t, side === 0 ? -span.right : span.left, 3.8, position);
       instance.position.copy(position);
       instance.updateMatrix();
       posts.setMatrixAt(i * 2 + side, instance.matrix);
     }
-    offsetPointAt(t, 0, 7.7, position);
+    offsetPointAt(t, span.center, 7.7, position);
+    instance.scale.x = (span.width + .6) / BEAM_REFERENCE_WIDTH;
     instance.position.copy(position);
     instance.updateMatrix();
     beams.setMatrixAt(i, instance.matrix);

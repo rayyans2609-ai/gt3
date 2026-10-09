@@ -1,21 +1,18 @@
 /**
  * Static track geometry generated from the shared route spline.
  *
- * Four materials deliberately map to four merged meshes: asphalt, shoulders,
- * painted markings, and vertex-coloured curbs. Nothing in this module rebuilds
+ * Five materials deliberately map to five merged meshes: asphalt, shoulders,
+ * paved runoff, painted markings, and vertex-coloured curbs. Nothing in this module rebuilds
  * geometry during the render loop.
  */
 import * as THREE from 'three';
 import {
-  TRACK,
   TRACK_LENGTH,
-  curvatureAt,
-  distanceToT,
   offsetPointAt,
   pointAt,
   tangentAt,
 } from './trackCurve.js';
-import { COMP } from './composition.js';
+import { profileAt, CURB_SEGMENTS, CROSS_SECTION } from './trackProfile.js';
 
 const TARGET_SAMPLE_STEP = 1.1;
 const TRACK_SEGMENT_COUNT = Math.ceil(TRACK_LENGTH / TARGET_SAMPLE_STEP);
@@ -30,89 +27,20 @@ export const trackSampleT = sampledT;
 const sampleCenters = new Array(TRACK_SAMPLE_COUNT);
 const sampleRights = new Array(TRACK_SAMPLE_COUNT);
 const sampleNormals = new Array(TRACK_SAMPLE_COUNT);
-const sampleCurvatures = new Float32Array(TRACK_SAMPLE_COUNT);
-
+const sampleProfiles = new Array(TRACK_SAMPLE_COUNT);
 const tempOffset = new THREE.Vector3();
-for (let i = 0; i < TRACK_SAMPLE_COUNT; i += 1) {
+for (let i = 0; i < TRACK_SAMPLE_COUNT; i++) {
   const t = i / TRACK_SEGMENT_COUNT;
   sampledT[i] = t;
-
   const center = pointAt(t, new THREE.Vector3());
   const tangent = tangentAt(t, new THREE.Vector3());
-  const right = offsetPointAt(t, 1, 0, tempOffset).clone().sub(center).normalize();
-  const normal = new THREE.Vector3().crossVectors(tangent, right).normalize();
+  const left = offsetPointAt(t, 1, 0, tempOffset).clone().sub(center).normalize();
+  const normal = new THREE.Vector3().crossVectors(tangent, left).normalize();
   if (normal.dot(UP) < 0) normal.negate();
-
   sampleCenters[i] = center;
-  sampleRights[i] = right;
+  sampleRights[i] = left; // historical buffer name; +lateral is left
   sampleNormals[i] = normal;
-  sampleCurvatures[i] = curvatureAt(t);
-}
-
-function smoothstep(edge0, edge1, value) {
-  const x = THREE.MathUtils.clamp((value - edge0) / (edge1 - edge0), 0, 1);
-  return x * x * (3 - 2 * x);
-}
-
-function nearestStraightIndex(targetDistance) {
-  const target = Math.round(targetDistance / SAMPLE_STEP);
-  let bestIndex = target;
-  let bestDelta = Infinity;
-
-  for (let i = 0; i < TRACK_SAMPLE_COUNT; i += 1) {
-    if (Math.abs(sampleCurvatures[i]) >= 0.14) continue;
-    const delta = Math.abs(i - target);
-    if (delta < bestDelta) {
-      bestIndex = i;
-      bestDelta = delta;
-    }
-  }
-  return bestIndex;
-}
-
-// Three route-even targets are snapped to their nearest genuine straight.
-const accentDistances = [1, 2, 3].map((quarter) => (
-  nearestStraightIndex((TRACK_LENGTH * quarter) / 4) * SAMPLE_STEP
-));
-
-const curbWidthsRaw = new Float32Array(TRACK_SAMPLE_COUNT);
-for (let i = 0; i < TRACK_SAMPLE_COUNT; i += 1) {
-  const distance = Math.min(i * SAMPLE_STEP, TRACK_LENGTH);
-  let wideAmount = smoothstep(0.18, 0.68, Math.abs(sampleCurvatures[i]));
-
-  for (const corner of COMP.curbCorners || []) {
-    const separation = Math.abs(distance - corner.t * TRACK_LENGTH);
-    // Full-width support throughout the event + wheelbase and smoothing halo.
-    wideAmount = Math.max(wideAmount, 1 - smoothstep(corner.radiusM + 24, corner.radiusM + 52, separation));
-  }
-
-  for (const accentDistance of accentDistances) {
-    const separation = Math.abs(distance - accentDistance);
-    // A broad full-width core survives the moving average, with long tapered ends.
-    const accentAmount = 1 - smoothstep(18, 48, separation);
-    wideAmount = Math.max(wideAmount, accentAmount);
-  }
-
-  curbWidthsRaw[i] = THREE.MathUtils.lerp(
-    TRACK.curbWidth,
-    TRACK.curbWidthWide,
-    wideAmount,
-  );
-}
-
-// A centred 25-sample moving average turns all curb-width changes into ramps.
-const CURB_SMOOTH_RADIUS = 12;
-const curbWidths = new Float32Array(TRACK_SAMPLE_COUNT);
-for (let i = 0; i < TRACK_SAMPLE_COUNT; i += 1) {
-  let sum = 0;
-  let count = 0;
-  const from = Math.max(0, i - CURB_SMOOTH_RADIUS);
-  const to = Math.min(TRACK_SAMPLE_COUNT - 1, i + CURB_SMOOTH_RADIUS);
-  for (let j = from; j <= to; j += 1) {
-    sum += curbWidthsRaw[j];
-    count += 1;
-  }
-  curbWidths[i] = sum / count;
+  sampleProfiles[i] = profileAt(t);
 }
 
 function sampledPoint(index, lateral, height = 0) {
@@ -124,9 +52,10 @@ function sampledPoint(index, lateral, height = 0) {
 /** Outer shoulder edges consumed by the environment's grass geometry. */
 export const trackEdges = { left: [], right: [] };
 for (let i = 0; i < TRACK_SAMPLE_COUNT; i += 1) {
-  const outerLateral = TRACK.halfWidth + curbWidths[i] + TRACK.shoulderWidth;
-  trackEdges.left.push(sampledPoint(i, -outerLateral, -0.03));
-  trackEdges.right.push(sampledPoint(i, outerLateral, -0.03));
+  const p = sampleProfiles[i];
+  // Preserve contour ordering expected by environment.js (negative/positive).
+  trackEdges.left.push(sampledPoint(i, -p.outerRight, CROSS_SECTION.vergeY));
+  trackEdges.right.push(sampledPoint(i, p.outerLeft, CROSS_SECTION.vergeY));
 }
 
 function setCommonAttributes(geometry, positions, normals, uvs, colors = null) {
@@ -155,7 +84,7 @@ function buildAsphaltGeometry() {
   for (let i = 0; i < TRACK_SAMPLE_COUNT; i += 1) {
     const distance = Math.min(i * SAMPLE_STEP, TRACK_LENGTH);
     for (let j = 0; j < across.length; j += 1) {
-      pushVector(positions, sampledPoint(i, across[j] * TRACK.halfWidth, -0.02));
+      pushVector(positions, sampledPoint(i, across[j] * (across[j] < 0 ? sampleProfiles[i].right : sampleProfiles[i].left), CROSS_SECTION.asphaltY));
       pushVector(normals, sampleNormals[i]);
       uvs.push(j / (across.length - 1), distance / 4);
       colors.push(brightness[j], brightness[j], brightness[j]);
@@ -181,40 +110,27 @@ function buildAsphaltGeometry() {
   return geometry;
 }
 
-function buildShoulderGeometry() {
-  const positions = [];
-  const normals = [];
-  const uvs = [];
-  const indices = [];
-
-  for (let i = 0; i < TRACK_SAMPLE_COUNT; i += 1) {
-    const curbOuter = TRACK.halfWidth + curbWidths[i];
-    const laterals = [
-      -curbOuter - TRACK.shoulderWidth,
-      -curbOuter,
-      curbOuter,
-      curbOuter + TRACK.shoulderWidth,
-    ];
-    const distance = Math.min(i * SAMPLE_STEP, TRACK_LENGTH);
-    for (let j = 0; j < laterals.length; j += 1) {
-      pushVector(positions, sampledPoint(i, laterals[j], -0.03));
+function buildExteriorGeometry(runoff = false) {
+  const positions = [], normals = [], uvs = [], indices = [];
+  for (let i = 0; i < TRACK_SAMPLE_COUNT; i++) {
+    const p = sampleProfiles[i];
+    const right = p.right + p.curbRight, left = p.left + p.curbLeft;
+    const laterals = runoff ? [-p.outerRight, -right - p.shoulder, left + p.shoulder, p.outerLeft]
+      : [-right - p.shoulder, -right, left, left + p.shoulder];
+    for (let j = 0; j < 4; j++) {
+      pushVector(positions, sampledPoint(i, laterals[j], CROSS_SECTION.vergeY));
       pushVector(normals, sampleNormals[i]);
-      uvs.push(j === 0 || j === 2 ? 0 : 1, distance / 4);
+      uvs.push(j % 2, i * SAMPLE_STEP / 4);
     }
   }
-
-  for (let i = 0; i < TRACK_SEGMENT_COUNT; i += 1) {
-    const row = i * 4;
-    const nextRow = row + 4;
-    for (const j of [0, 2]) {
-      const a = row + j;
-      const b = a + 1;
-      const c = nextRow + j;
-      const d = c + 1;
-      indices.push(a, c, b, b, c, d);
+  for (let i = 0; i < TRACK_SEGMENT_COUNT; i++) for (const j of [0, 2]) {
+    if (runoff) {
+      const key = j === 0 ? 'runoffRight' : 'runoffLeft';
+      if (sampleProfiles[i][key] === 0 && sampleProfiles[i + 1][key] === 0) continue;
     }
+    const a = i * 4 + j, b = a + 1, c = a + 4, d = c + 1;
+    indices.push(a, c, b, b, c, d);
   }
-
   const geometry = setCommonAttributes(new THREE.BufferGeometry(), positions, normals, uvs);
   geometry.setIndex(indices);
   return geometry;
@@ -257,136 +173,72 @@ function createTriangleWriter(positions, normals, uvs, colors = null) {
 }
 
 function buildCurbGeometry() {
-  const positions = [];
-  const normals = [];
-  const uvs = [];
-  const colors = [];
+  const positions = [], normals = [], uvs = [], colors = [], blocks = [];
   const writeTriangle = createTriangleWriter(positions, normals, uvs, colors);
-  const red = new THREE.Color('#B22A2A');
-  const white = new THREE.Color('#D8D4CC');
-  const blockLength = 2.4;
-
-  for (let i = 0; i < TRACK_SEGMENT_COUNT; i += 1) {
-    const distance0 = i * SAMPLE_STEP;
-    const distance1 = Math.min((i + 1) * SAMPLE_STEP, TRACK_LENGTH);
-    const color = Math.floor(((distance0 + distance1) * 0.5) / blockLength) % 2
-      ? white
-      : red;
-
-    for (const side of [-1, 1]) {
-      const inner0 = sampledPoint(i, side * TRACK.halfWidth, 0.005);
-      const inner1 = sampledPoint(i + 1, side * TRACK.halfWidth, 0.005);
-      const outer0 = sampledPoint(i, side * (TRACK.halfWidth + curbWidths[i]), 0.105);
-      const outer1 = sampledPoint(
-        i + 1,
-        side * (TRACK.halfWidth + curbWidths[i + 1]),
-        0.105,
-      );
-      const outerBottom0 = sampledPoint(
-        i,
-        side * (TRACK.halfWidth + curbWidths[i]),
-        -0.03,
-      );
-      const outerBottom1 = sampledPoint(
-        i + 1,
-        side * (TRACK.halfWidth + curbWidths[i + 1]),
-        -0.03,
-      );
-      const topNormal = sampleNormals[i].clone().add(sampleNormals[i + 1]).normalize();
-      const outward = sampleRights[i].clone()
-        .add(sampleRights[i + 1])
-        .multiplyScalar(side)
-        .normalize();
-      const v0 = distance0 / 4;
-      const v1 = distance1 / 4;
-
-      writeTriangle(
-        inner0, inner1, outer0, topNormal, color,
-        [[0, v0], [0, v1], [1, v0]],
-      );
-      writeTriangle(
-        outer0, inner1, outer1, topNormal, color,
-        [[1, v0], [0, v1], [1, v1]],
-      );
-      writeTriangle(
-        outerBottom0, outer0, outerBottom1, outward, color,
-        [[0, v0], [1, v0], [0, v1]],
-      );
-      writeTriangle(
-        outerBottom1, outer0, outer1, outward, color,
-        [[0, v1], [1, v0], [1, v1]],
-      );
+  const red = new THREE.Color('#B22A2A'), white = new THREE.Color('#D8D4CC');
+  const blockLength = CROSS_SECTION.curbBlockLength;
+  for (const segment of CURB_SEGMENTS) {
+    const count = Math.ceil((segment.to - segment.from) * TRACK_LENGTH / TARGET_SAMPLE_STEP);
+    const rows = [];
+    let distance = 0;
+    for (let i = 0; i <= count; i++) {
+      const t = segment.from + (segment.to - segment.from) * i / count;
+      const p = profileAt(t), side = segment.side;
+      const edge = side > 0 ? p.left : p.right;
+      const width = side > 0 ? p.curbLeft : p.curbRight;
+      const inner = offsetPointAt(t, side * edge, CROSS_SECTION.curbInnerY);
+      const outerY = CROSS_SECTION.curbInnerY + (CROSS_SECTION.curbOuterY - CROSS_SECTION.curbInnerY) * width / segment.width;
+      const outer = offsetPointAt(t, side * (edge + width), outerY);
+      const bottom = offsetPointAt(t, side * (edge + width), CROSS_SECTION.vergeY);
+      if (i) distance += inner.distanceTo(rows[i - 1].inner);
+      rows.push({ s: distance, inner, outer, bottom, width });
     }
+    // Split at EVERY physical inner-edge 2.4 m boundary. Geometry sample edges
+    // cannot quantise paint cadence; only the terminal block may be shorter.
+    for (let i = 0; i < count; i++) {
+      const a = rows[i], b = rows[i + 1];
+      const cuts = [a.s];
+      for (let s = (Math.floor(a.s / blockLength) + 1) * blockLength; s < b.s - 1e-9; s += blockLength) cuts.push(s);
+      cuts.push(b.s);
+      const rowAt = s => {
+        const f = (s - a.s) / (b.s - a.s);
+        return { inner: a.inner.clone().lerp(b.inner, f), outer: a.outer.clone().lerp(b.outer, f),
+          bottom: a.bottom.clone().lerp(b.bottom, f) };
+      };
+      for (let k = 0; k < cuts.length - 1; k++) {
+        const s0 = cuts[k], s1 = cuts[k + 1], r0 = rowAt(s0), r1 = rowAt(s1);
+        const color = Math.floor((s0 + s1) / (2 * blockLength)) % 2 ? white : red;
+        const outward = r0.outer.clone().sub(r0.inner).setY(0).normalize();
+        writeTriangle(r0.inner, r1.inner, r0.outer, UP, color);
+        writeTriangle(r0.outer, r1.inner, r1.outer, UP, color);
+        writeTriangle(r0.bottom, r0.outer, r1.bottom, outward, color);
+        writeTriangle(r1.bottom, r0.outer, r1.outer, outward, color);
+      }
+    }
+    for (let s = 0; s < distance; s += blockLength) blocks.push({ segment: segment.id, fromM: s, toM: Math.min(s + blockLength, distance), terminal: s + blockLength >= distance });
   }
-
-  return setCommonAttributes(
-    new THREE.BufferGeometry(), positions, normals, uvs, colors,
-  );
+  const geometry = setCommonAttributes(new THREE.BufferGeometry(), positions, normals, uvs, colors);
+  geometry.userData.blocks = blocks;
+  return geometry;
 }
 
 function buildMarkingGeometry() {
-  const positions = [];
-  const normals = [];
-  const uvs = [];
+  const positions = [], normals = [], uvs = [];
   const writeTriangle = createTriangleWriter(positions, normals, uvs);
-  const surfaceHeight = 0.012;
-
-  function pointAtDistance(distance, lateral) {
-    return offsetPointAt(
-      distanceToT(THREE.MathUtils.clamp(distance, 0, TRACK_LENGTH)),
-      lateral,
-      surfaceHeight,
-      new THREE.Vector3(),
-    );
+  const half = CROSS_SECTION.edgeLineWidth / 2;
+  for (let i = 0; i < TRACK_SEGMENT_COUNT; i++) for (const side of [-1, 1]) {
+    const p0 = sampleProfiles[i], p1 = sampleProfiles[i + 1];
+    const edge0 = side > 0 ? p0.left : p0.right;
+    const edge1 = side > 0 ? p1.left : p1.right;
+    const x0 = side * (edge0 - CROSS_SECTION.edgeLineInset);
+    const x1 = side * (edge1 - CROSS_SECTION.edgeLineInset);
+    const a = sampledPoint(i, x0 - half, CROSS_SECTION.asphaltY + .003);
+    const b = sampledPoint(i + 1, x1 - half, CROSS_SECTION.asphaltY + .003);
+    const c = sampledPoint(i, x0 + half, CROSS_SECTION.asphaltY + .003);
+    const d = sampledPoint(i + 1, x1 + half, CROSS_SECTION.asphaltY + .003);
+    writeTriangle(a, b, c, UP); writeTriangle(c, b, d, UP);
   }
-
-  function normalAtDistance(distance) {
-    const t = distanceToT(THREE.MathUtils.clamp(distance, 0, TRACK_LENGTH));
-    const tangent = tangentAt(t, new THREE.Vector3());
-    const center = pointAt(t, new THREE.Vector3());
-    const right = offsetPointAt(t, 1, 0, new THREE.Vector3()).sub(center).normalize();
-    const normal = new THREE.Vector3().crossVectors(tangent, right).normalize();
-    return normal.dot(UP) < 0 ? normal.negate() : normal;
-  }
-
-  function addSurfaceQuad(a, b, c, d, normal) {
-    writeTriangle(a, b, c, normal, null, [[0, 0], [0, 1], [1, 0]]);
-    writeTriangle(c, b, d, normal, null, [[1, 0], [0, 1], [1, 1]]);
-  }
-
-  function addTrackQuad(distance0, distance1, lateral, halfWidth0, halfWidth1 = halfWidth0) {
-    if (halfWidth0 <= 0.0001 && halfWidth1 <= 0.0001) return;
-    const a = pointAtDistance(distance0, lateral - halfWidth0);
-    const b = pointAtDistance(distance1, lateral - halfWidth1);
-    const c = pointAtDistance(distance0, lateral + halfWidth0);
-    const d = pointAtDistance(distance1, lateral + halfWidth1);
-    addSurfaceQuad(a, b, c, d, normalAtDistance((distance0 + distance1) * 0.5));
-  }
-
-  // Four metres of paint followed by five metres of open asphalt.
-  for (let distance = 0; distance < TRACK_LENGTH; distance += 9) {
-    addTrackQuad(distance, Math.min(distance + 4, TRACK_LENGTH), 0, 0.14);
-  }
-
-  // The straight-only edge accents taper geometrically to a point at |curvature|=.2.
-  const accentLateral = TRACK.halfWidth - 0.9;
-  const straightWidth = (curvature) => (
-    Math.abs(curvature) >= 0.2
-      ? 0
-      : 0.11 * (1 - smoothstep(0.1, 0.2, Math.abs(curvature)))
-  );
-  for (let i = 0; i < TRACK_SEGMENT_COUNT; i += 1) {
-    const width0 = straightWidth(sampleCurvatures[i]);
-    const width1 = straightWidth(sampleCurvatures[i + 1]);
-    if (width0 <= 0.0001 && width1 <= 0.0001) continue;
-    const distance0 = i * SAMPLE_STEP;
-    const distance1 = Math.min((i + 1) * SAMPLE_STEP, TRACK_LENGTH);
-    addTrackQuad(distance0, distance1, -accentLateral, width0, width1);
-    addTrackQuad(distance0, distance1, accentLateral, width0, width1);
-  }
-
-  // Legacy turn-direction chevrons were removed (SPEC §18: no legacy racing cues).
-
+  // Circuits have no centre dashed line.
   return setCommonAttributes(new THREE.BufferGeometry(), positions, normals, uvs);
 }
 
@@ -402,7 +254,7 @@ function makeStaticMesh(name, geometry, material, castsShadow = false) {
 
 let builtTrack = null;
 
-// ALBEDO NOTE: the design-system hexes (#26262A asphalt, #E8C33A yellow) describe how
+// ALBEDO NOTE: the design-system hexes describe how
 // these surfaces should LOOK on screen once lit. Feeding them in as PBR albedo renders
 // them near-black, because #26262A is only 0.018 in linear space. The albedos below are
 // lifted so that the LIT result lands on the intended tone.
@@ -431,15 +283,18 @@ export function buildTrack() {
 
   group.add(makeStaticMesh(
     'track-shoulders',
-    buildShoulderGeometry(),
+    buildExteriorGeometry(),
     shoulderMaterial,
   ));
+
+  group.add(makeStaticMesh('track-runoff', buildExteriorGeometry(true),
+    new THREE.MeshStandardMaterial({ color: '#777872', roughness: 1, metalness: 0 })));
 
   group.add(makeStaticMesh(
     'track-markings',
     buildMarkingGeometry(),
     new THREE.MeshStandardMaterial({
-      color: '#F2D45C',
+      color: '#E8E6DF',
       emissive: 0x000000,
       emissiveIntensity: 0,
       roughness: 0.7,

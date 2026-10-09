@@ -25,6 +25,8 @@ const modes = (process.env.GT3_MODES || 'default,cap,pace').split(',');
 const extra = (process.env.GT3_QUERY || '').replace(/^[?&]/, '');
 const headless = process.env.GT3_HEADLESS === '1';
 const sound = process.env.GT3_SOUND === '1';
+const only = process.env.GT3_SCROLL_ONLY || '';
+assert.ok(!only || only === 'interactions', `unknown GT3_SCROLL_ONLY: ${only}`);
 const preflight = process.env.GT3_PREFLIGHT || '/Users/rayyansheikh/.claude/jobs/d1cd9f0a/tmp/preflight-session.sh';
 const chrome = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 const pause = ms => new Promise(r => setTimeout(r, ms));
@@ -174,7 +176,7 @@ async function runMode(mode) {
       return route.TOUR_LENGTH ?? route.TRACK_LENGTH;
     });
     await installSampler(page);
-    for (const [name, sc] of Object.entries(SCEN)) {
+    for (const [name, sc] of Object.entries(only ? {} : SCEN)) {
       const { fr, wheel, finishedDuring } = await runScenario(page, cdp, L, name, sc, START_T);
       assert.ok(fr.length > 1 && wheel.events > 0, `${mode} ${name}: missing frame/input samples`);
       res.scenarios[name] = { ...metrics(fr, sc, L), finishedDuring, wheelSeen: wheel };
@@ -203,12 +205,16 @@ async function runMode(mode) {
     res.interactions.instantSeek = await page.evaluate(async () => { const { state } = await import('/src/core/state.js');
       return { progress: state.progress, target: state.targetProgress, velocity: state.velocity, speed01: state.speed01 }; });
     res.interactions.adaptiveResolution = await page.evaluate(() => window.__gt3?.renderer ? { pixelRatio: window.__gt3.renderer.getPixelRatio() } : null);
+    console.log(`${mode} interactions: ${JSON.stringify(res.interactions)}`);
     assert.ok(res.interactions.pageEnds.finishScreenAtEnd && res.interactions.pageEnds.movedBack,
       `${mode}: completion/reversal failed`);
     const instant = res.interactions.instantSeek;
     assert.ok(Math.abs(instant.progress - .5) < 1e-8 && instant.target === instant.progress
       && instant.velocity === 0 && instant.speed01 === 0, `${mode}: instant seek did not settle`);
     assert.equal(res.errors.length, 0, `${mode}: browser errors ${res.errors.join(' | ')}`);
+  } catch (error) {
+    error.result = res;
+    throw error;
   } finally {
     await browser.close();
   }
@@ -216,9 +222,9 @@ async function runMode(mode) {
 }
 
 await mkdir(out, { recursive: true });
-const all = { startedAt: new Date().toISOString(), source: process.env.GT3_SOURCE, base, headless, sound, extra, modes: {} };
+const all = { startedAt: new Date().toISOString(), source: process.env.GT3_SOURCE, base, headless, sound, extra, only, modes: {} };
 for (const m of modes) {
-  try { all.modes[m] = await runMode(m); } catch (e) { all.modes[m] = { error: String(e.message || e) }; console.error(`${m} failed: ${e.message}`); }
+  try { all.modes[m] = await runMode(m); } catch (e) { all.modes[m] = { ...e.result, error: String(e.message || e) }; console.error(`${m} failed: ${e.message}`); }
   await writeFile(join(out, `verify-scroll${sound ? '-sound' : ''}.json`), JSON.stringify(all, null, 2) + '\n');
 }
 console.log(`wrote ${join(out, `verify-scroll${sound ? '-sound' : ''}.json`)}`);

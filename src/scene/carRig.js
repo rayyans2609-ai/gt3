@@ -103,7 +103,8 @@ function seatOnSurface(t) {
     let u = t;
     for (let i = 0; i < 3; i++) {
       pointAt(u, surfaceCenter); tangentAt(u, surfaceTan).setY(0).normalize();
-      u = THREE.MathUtils.clamp(u + contactWorld.clone().sub(surfaceCenter).dot(surfaceTan) / TRACK_LENGTH, 0, 1);
+      // Tyres can straddle the neutral/return line on this closed circuit.
+      u = (u + contactWorld.clone().sub(surfaceCenter).dot(surfaceTan) / TRACK_LENGTH + 1) % 1;
     }
     pointAt(u, surfaceCenter);
     offsetPointAt(u, 1, 0, surfaceLeft).sub(surfaceCenter).setY(0).normalize();

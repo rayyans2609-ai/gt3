@@ -66,8 +66,7 @@ function renderProgress() {
   root.dataset.readiness = readiness;
   root.classList.toggle('is-ready', readiness === 'ready' || readiness === 'degraded');
   progressLabel.textContent = readiness === 'failed' ? 'Route unavailable'
-    : readiness === 'degraded' ? 'Route ready · reduced assets'
-      : readiness === 'ready' ? 'Route ready' : 'Preparing the grid';
+      : readiness === 'ready' || readiness === 'degraded' ? 'Route ready' : 'Preparing the grid';
   if (root.classList.contains('is-ready') && state.started) dismissStartScreen();
 }
 
@@ -85,7 +84,6 @@ function buildScreen() {
   root.setAttribute('aria-hidden', 'false');
 
   const panel = element('section', 'start-screen__panel');
-  const eyebrow = element('p', 'start-screen__eyebrow', 'Ten machines · one continuous route');
   const title = element('h1', 'start-screen__title', 'GT3: A Grand Tour');
   const explanation = element(
     'p',
@@ -109,7 +107,7 @@ function buildScreen() {
   loadingTrack.append(progressFill);
   loading.append(loadingMeta, loadingTrack);
 
-  panel.append(eyebrow, makeIdentityMark(), title, explanation, loading);
+  panel.append(makeIdentityMark(), title, explanation, loading);
 
   const prompt = element('div', 'start-prompt');
   const promptLabel = element('span', 'start-prompt__label', 'Scroll to race');

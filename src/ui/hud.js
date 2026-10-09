@@ -8,8 +8,7 @@
  * Top-left is one consolidated car-identity block (name + headline + spec in a
  * single two-slot crossfade). Top-right is the circuit map with a directional
  * arrow and a completed-route trail. Bottom-left stays empty (a later phase's
- * spinning-car home). The direction cue lives bottom-centre and teaches only
- * the reverse gesture once the car is moving forward.
+ * spinning-car home).
  */
 
 import * as THREE from 'three';
@@ -22,9 +21,6 @@ const SVG_NS = 'http://www.w3.org/2000/svg';
 const MAP_SIZE = 170;
 const MAP_PADDING = 9;
 const MAP_SAMPLES = 160;
-const DIRECTION_DEAD_ZONE = 0.035;
-// "Scroll up to reverse" shows once the car moves forward, then retires.
-const CUE_HIDE_DELAY = 3000;
 // Completed-route trail: strongest right behind the car, easing over this lap
 // fraction back to a quiet base opacity.
 const TRAIL_FADE_SPAN = 0.22;
@@ -48,10 +44,6 @@ let lastTrailProgress = NaN;
 let writtenRouteX = NaN;
 let writtenRouteY = NaN;
 let writtenRouteAngle = NaN;
-let directionRoot;
-let directionTimer = 0;
-let cueShown = false;
-let cueUsed = false;
 let identityMeasureId = 0;
 
 function element(tag, className, text) {
@@ -161,22 +153,6 @@ function buildRouteMap(root) {
   root.append(svg);
 }
 
-/**
- * Bottom-centre reverse hint. The start screen already owns the "Scroll to
- * race" prompt, so this cue teaches only the remaining gesture: once the car
- * is moving forward it shows "Scroll up to reverse" for a few seconds, then
- * retires for the session. Reversing before it ever shows retires it unseen.
- */
-function buildDirectionCue(root) {
-  directionRoot = element('div', 'hud-direction');
-  directionRoot.setAttribute('aria-label', 'Scroll up to reverse');
-  directionRoot.append(
-    element('span', 'hud-direction__arrow', '↑'),
-    element('span', 'hud-direction__copy', 'Scroll up to reverse'),
-  );
-  root.append(directionRoot);
-}
-
 function setIdentity(index, immediate = false) {
   const start = `gt3:hudIdentity:start:${++identityMeasureId}`;
   const end = `gt3:hudIdentity:end:${identityMeasureId}`;
@@ -232,47 +208,21 @@ function updateTrail(progress) {
   }
 }
 
-function updateDirectionCue(dt) {
-  if (cueUsed || !directionRoot) return;
-  const velocity = Number(state.velocity) || 0;
-  if (!cueShown) {
-    if (velocity < -DIRECTION_DEAD_ZONE) {
-      cueUsed = true;
-      directionRoot.classList.add('is-dismissed');
-      return;
-    }
-    if (velocity <= DIRECTION_DEAD_ZONE) return;
-    cueShown = true;
-    directionTimer = 0;
-    directionRoot.classList.add('is-visible');
-    return;
-  }
-  directionTimer += dt;
-  if (directionTimer >= CUE_HIDE_DELAY / 1000) {
-    cueUsed = true;
-    directionRoot.classList.remove('is-visible');
-    directionRoot.classList.add('is-dismissed');
-  }
-}
-
 export function initHUD() {
   if (initialized) return;
-  const hud = document.querySelector('#hud');
   const topLeft = document.querySelector('#hud-topleft');
   const topRight = document.querySelector('#hud-topright');
   const bottomLeft = document.querySelector('#hud-bottomleft');
-  if (!hud || !topLeft || !topRight || !bottomLeft) throw new Error('[hud] Required HUD roots are missing.');
+  if (!topLeft || !topRight || !bottomLeft) throw new Error('[hud] Required HUD roots are missing.');
   buildIdentity(topLeft);
   buildRouteMap(topRight);
-  // Bottom-centre, clear of the bottom edge row; bottom-left stays empty.
-  buildDirectionCue(hud);
   routePointA = { x: 0, y: 0 };
   routePointB = { x: 0, y: 0 };
   initialized = true;
   setIdentity(state.activeCarIndex, true);
 }
 
-export function update(dt) {
+export function update() {
   if (!initialized) return;
   if (state.activeCarIndex !== renderedCarIndex) setIdentity(state.activeCarIndex);
   routeProject(pointAt(state.progress, routeWorldA), routePointA);
@@ -295,5 +245,4 @@ export function update(dt) {
     routeMarker.setAttribute('transform', `translate(${x} ${y}) rotate(${angle})`);
   }
   updateTrail(state.progress);
-  updateDirectionCue(Math.max(0, Math.min(Number(dt) || 0, 0.1)));
 }

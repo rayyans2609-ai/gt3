@@ -1,4 +1,4 @@
-/* Sparse Grand Tour HUD: consolidated identity, route position, and a temporary reverse cue. */
+/* Sparse Grand Tour HUD: consolidated identity and route position. */
 
 #hud { position: fixed; inset: 0; color: var(--fg); pointer-events: none; }
 #hud-topleft, #hud-topright, #hud-bottomleft, #hud-bottomright { position: absolute; }
@@ -21,9 +21,13 @@ body.is-player-open #hud-bottomright { right: calc(24px + var(--player-w, 274px)
 .hud-identity__copy { position: relative; min-height: 86px; }
 .hud-identity__slot { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: flex-start; opacity: 0; transform: translateY(4px); transition: opacity 440ms var(--ease), transform 520ms var(--ease); }
 .hud-identity__slot.is-visible { opacity: 1; transform: translateY(0); }
-.hud-identity__name { overflow: hidden; max-width: 100%; color: var(--fg); font-family: var(--font-display); font-size: 23px; font-weight: 400; letter-spacing: -0.025em; line-height: 1.1; text-overflow: ellipsis; white-space: nowrap; }
-.hud-identity__headline { overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; margin-top: 7px; max-width: 34ch; color: var(--fg); font-family: var(--font-ui); font-size: 12px; font-weight: 400; letter-spacing: -0.005em; line-height: 1.35; opacity: .78; }
-.hud-identity__spec { overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; margin-top: 3px; max-width: 100%; color: var(--fg); font-family: var(--font-mono); font-size: 10px; font-weight: 400; letter-spacing: .01em; line-height: 1.4; opacity: .62; overflow-wrap: break-word; }
+.hud-identity__name { overflow: hidden; max-width: 100%; color: var(--fg); font-family: var(--font-display); font-size: 23px; font-weight: 650; letter-spacing: -0.025em; line-height: 1.1; text-overflow: ellipsis; white-space: nowrap; }
+.hud-identity__headline { overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; margin-top: 7px; max-width: 34ch; color: var(--fg); font-family: var(--font-ui); font-size: 12px; font-weight: 500; letter-spacing: -0.005em; line-height: 1.35; opacity: .92; }
+.hud-identity__spec { overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; margin-top: 3px; max-width: 100%; color: var(--fg); font-family: var(--font-mono); font-size: 10px; font-weight: 500; letter-spacing: .01em; line-height: 1.4; opacity: .85; overflow-wrap: break-word; }
+/* Theme-aware halo: one unified ink colour (var(--fg)) everywhere; contrast over
+   terrain comes from weight/opacity plus this subtle shadow, never a card. */
+:root[data-theme='day'] .hud-identity__name, :root[data-theme='day'] .hud-identity__headline, :root[data-theme='day'] .hud-identity__spec { text-shadow: 0 0 1px rgba(247, 246, 242, 0.9), 0 1px 10px rgba(247, 246, 242, 0.7); }
+:root[data-theme='night'] .hud-identity__name, :root[data-theme='night'] .hud-identity__headline, :root[data-theme='night'] .hud-identity__spec { text-shadow: 0 0 1px rgba(12, 25, 48, 0.9), 0 1px 10px rgba(12, 25, 48, 0.65); }
 
 .hud-route { width: 170px; height: 170px; }
 .hud-route__svg { display: block; width: 170px; height: 170px; overflow: visible; }
@@ -36,12 +40,6 @@ body.is-player-open #hud-bottomright { right: calc(24px + var(--player-w, 274px)
    shape inherits the marker colour. Z-order in the SVG is route, trail,
    checkpoints, arrow — the trail never covers dots or arrow. */
 .hud-route__marker { fill: var(--accent); stroke: var(--field); stroke-width: 1.5px; vector-effect: non-scaling-stroke; }
-
-/* Bottom-centre reverse hint: small, low-contrast, ~44 px above the viewport
-   bottom so it never touches the bottom edge row (Day/Night pill + audio). */
-.hud-direction { position: absolute; left: 50%; bottom: 44px; display: flex; min-height: 18px; align-items: center; gap: 7px; color: var(--fg-muted); font-family: var(--font-ui); font-size: 10px; font-weight: 400; letter-spacing: .045em; line-height: 1; opacity: 0; text-transform: lowercase; transform: translateX(-50%); transition: opacity 420ms var(--ease); }
-.hud-direction.is-visible { opacity: .82; }
-.hud-direction.is-dismissed { opacity: 0; }
 
 /* Day/Night segmented control: two icon targets in one pill, the active side shown
    by a sliding filled thumb. Slightly larger and more opaque than the old text
@@ -60,4 +58,4 @@ body.is-player-open #hud-bottomright { right: calc(24px + var(--player-w, 274px)
 .theme-segmented__option:active { color: var(--accent); }
 .theme-segmented__option:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
-@media (prefers-reduced-motion: reduce) { .hud-identity__slot, .hud-direction, #hud-bottomright, .theme-segmented, .theme-segmented__thumb, .theme-segmented__option { transition-duration: 0ms; } }
+@media (prefers-reduced-motion: reduce) { .hud-identity__slot, #hud-bottomright, .theme-segmented, .theme-segmented__thumb, .theme-segmented__option { transition-duration: 0ms; } }

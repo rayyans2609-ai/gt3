@@ -1,5 +1,5 @@
 /** Browser verification for the Phase 3-refined HUD: consolidated top-left identity,
- * directional minimap arrow, completed-route trail, reverse-only direction cue,
+ * directional minimap arrow, completed-route trail, centred start prompt,
  * first-Tour-entry sound cue, and their composition with the edge-row controls.
  *
  * Usage: node scripts/verify-hud.mjs [baseUrl] [outDir]
@@ -107,7 +107,7 @@ async function layout(page) {
       theme: document.documentElement.dataset.theme,
       player: box(q('.music-player')), anchor: box(q('.audio-anchor')),
       theme_control: box(q('#hud-bottomright')), cue: box(q('.sound-cue')),
-      map: box(q('.hud-route')), info: box(q('.hud-identity')), direction: box(q('.hud-direction')),
+      map: box(q('.hud-route')), info: box(q('.hud-identity')),
       identity: box(q('.hud-identity')),
       open: q('#audio-layer')?.classList.contains('is-open') ?? false,
       vw: innerWidth, vh: innerHeight,
@@ -115,10 +115,10 @@ async function layout(page) {
   });
 }
 
-/** No two of player / theme control / cue / anchor / info / map / direction may overlap. */
+/** No two of player / theme control / cue / anchor / info / map may overlap. */
 function checkNoOverlap(l, label) {
   const named = { player: l.player, theme: l.theme_control, cue: l.cue, anchor: l.anchor,
-    info: l.info, direction: l.direction, map: l.map };
+    info: l.info, map: l.map };
   const names = Object.keys(named);
   for (let i = 0; i < names.length; i++) for (let j = i + 1; j < names.length; j++) {
     const a = named[names[i]];
@@ -264,8 +264,8 @@ try {
     await load(page);
     report.readiness = await read(page, () => window.__gt3.readiness.status);
 
-    // Before Tour entry: reverse hint hidden until first forward motion, info already
-    // shows car 0 in the consolidated top-left block, no sound cue yet.
+    // Before Tour entry: info already shows car 0 in the consolidated top-left
+    // block, no sound cue yet. The start prompt is centred and clear of the edge controls.
     const h0 = await hudState(page);
     checkHud(h0, 'initial');
     assert(h0.legacyInfoBlocks === 0, 'legacy .hud-info block still in the DOM');
@@ -284,8 +284,19 @@ try {
     assert(promptLabel === 'Scroll to race', `start prompt "${promptLabel}" != "Scroll to race"`);
     assert(!(await cueState(page)).present, 'sound cue present before Tour entry');
     const pre = await layout(page);
-    assert(!pre.direction?.shown, 'reverse hint visible before any motion (it teaches only after forward drive)');
-    assert(!intersects(pre.direction, pre.info), `direction cue overlaps info: ${JSON.stringify([pre.direction, pre.info])}`);
+    const promptBox = await read(page, () => {
+      const r = document.querySelector('.start-prompt').getBoundingClientRect();
+      return { x: r.x, y: r.y, width: r.width, height: r.height, vw: innerWidth, vh: innerHeight };
+    });
+    assert(Math.abs((promptBox.x + promptBox.width / 2) - promptBox.vw / 2) <= 8,
+      `start prompt not horizontally centred: ${JSON.stringify(promptBox)}`);
+    for (const [name, box] of [['theme control', pre.theme_control], ['anchor', pre.anchor], ['player', pre.player]]) {
+      if (box?.shown) assert(!intersects(promptBox, box),
+        `start prompt overlaps ${name}: ${JSON.stringify({ promptBox, box })}`);
+    }
+    const cueLineWidth = await read(page, () =>
+      Number.parseFloat(getComputedStyle(document.querySelector('.start-prompt__cue')).width));
+    assert(cueLineWidth >= 1.9, `prompt cue line not thicker: ${cueLineWidth}px`);
 
     // Monitor: the cue must never be visible while the start screen is still on screen.
     await read(page, () => {
@@ -295,13 +306,6 @@ try {
         const c = document.querySelector('.sound-cue');
         if (c && s && !s.hidden) window.__cueEarly++;
       }, 20);
-    });
-    // Watch the reverse hint across entry: it must appear on forward motion, then retire.
-    await read(page, () => {
-      window.__dirSeen = 0;
-      window.__dirMonitor = setInterval(() => {
-        if (document.querySelector('.hud-direction.is-visible')) window.__dirSeen++;
-      }, 50);
     });
     const wheelAt = Date.now();
     await page.mouse.wheel({ deltaY: 240 });
@@ -338,31 +342,6 @@ try {
     await page.click('.theme-segmented [role="radio"][aria-label="Day"]');
     await wait(900);
     await idle(page);
-
-    // Reverse-hint lifecycle: shown on forward motion, retired ~3 s later.
-    const dirSeen = await read(page, () => { clearInterval(window.__dirMonitor); return window.__dirSeen; });
-    assert(dirSeen > 0, 'reverse hint never appeared after forward drive');
-    const dirCopy = await read(page, () => ({
-      text: document.querySelector('.hud-direction')?.textContent,
-      aria: document.querySelector('.hud-direction')?.getAttribute('aria-label'),
-    }));
-    assert(/Scroll up to reverse/.test(dirCopy.text ?? ''), `hint copy "${dirCopy.text}" missing "Scroll up to reverse"`);
-    assert(/↑/.test(dirCopy.text ?? ''), 'hint missing the up arrow');
-    assert(/reverse/i.test(dirCopy.aria ?? ''), `hint aria-label "${dirCopy.aria}" not meaningful`);
-    await page.waitForFunction(() => {
-      const el = document.querySelector('.hud-direction');
-      return el && !el.classList.contains('is-visible');
-    }, { timeout: 8000 });
-    // Bottom-centre placement, ~44 px above the viewport bottom (rect is still
-    // measurable after retirement — only opacity changed).
-    const dirBox = await read(page, () => {
-      const r = document.querySelector('.hud-direction').getBoundingClientRect();
-      return { x: r.x, y: r.y, width: r.width, height: r.height, vw: innerWidth, vh: innerHeight };
-    });
-    assert(Math.abs((dirBox.x + dirBox.width / 2) - dirBox.vw / 2) <= 6,
-      `hint not bottom-centre: ${JSON.stringify(dirBox)}`);
-    assert(Math.abs(dirBox.vh - (dirBox.y + dirBox.height) - 44) <= 10,
-      `hint not ~44 px above the bottom: ${JSON.stringify(dirBox)}`);
 
     // Arrow + trail against real route state.
     const angleOf = t => read(page, async target => {
@@ -507,17 +486,41 @@ try {
           const lh = Number.parseFloat(getComputedStyle(head).lineHeight);
           const specLh = Number.parseFloat(getComputedStyle(spec).lineHeight);
           const name = document.querySelector('.hud-identity__slot[aria-hidden="false"] .hud-identity__name');
-          return { headlineLines: Math.round(head.getBoundingClientRect().height / lh),
-            specLines: Math.round(spec.getBoundingClientRect().height / specLh),
-            specOverflowPx: Math.max(0, spec.scrollWidth - spec.clientWidth),
-            specTruncated: spec.scrollWidth > spec.clientWidth + 0.5 || spec.scrollHeight > spec.clientHeight + 0.5,
+          // Natural (unclamped) line counts: -webkit-line-clamp caps the rendered box at
+          // two lines, so a clamped box always reports <= 2 rendered lines with
+          // scrollHeight == clientHeight even when content is genuinely truncated — and
+          // scrollWidth vs clientWidth on a wrapping vertical -webkit-box misfires on
+          // sub-pixel rounding (integer scrollWidth vs fractional clientWidth, ~1 px on
+          // the longest spec) with zero visual overflow. Lift the clamp briefly to
+          // measure the true content, then restore.
+          const natural = (el, lineH) => {
+            const prevClamp = el.style.webkitLineClamp;
+            const prevDisplay = el.style.display;
+            const prevOverflow = el.style.overflow;
+            el.style.display = 'block';
+            el.style.webkitLineClamp = 'none';
+            el.style.overflow = 'visible';
+            void el.offsetHeight;
+            const out = { lines: Math.round(el.scrollHeight / lineH), height: el.scrollHeight };
+            el.style.display = prevDisplay;
+            el.style.webkitLineClamp = prevClamp;
+            el.style.overflow = prevOverflow;
+            void el.offsetHeight;
+            return out;
+          };
+          const headNatural = natural(head, lh);
+          const specNatural = natural(spec, specLh);
+          return { headlineLines: headNatural.lines,
+            specLines: specNatural.lines,
+            specOverflowPx: Math.max(0, specNatural.height - spec.clientHeight),
+            specTruncated: specNatural.lines > 2,
             slotHeight: slot.getBoundingClientRect().height,
             contentHeight: head.getBoundingClientRect().height + spec.getBoundingClientRect().height + 3,
-            nameTruncated: name.scrollWidth > name.clientWidth };
+            nameTruncated: name.scrollWidth > name.clientWidth + 1.5 };
         });
-        assert(fit.headlineLines <= 2, `car ${i}: headline wraps to ${fit.headlineLines} lines`);
+        assert(fit.headlineLines <= 2, `car ${i}: headline needs ${fit.headlineLines} lines unclamped`);
         assert(fit.contentHeight <= fit.slotHeight + 0.5, `car ${i}: info content ${fit.contentHeight} taller than block ${fit.slotHeight}`);
-        assert(fit.specLines <= 2 && !fit.specTruncated && fit.specOverflowPx <= 0, `car ${i}: spec truncated/wrapped to ${fit.specLines} lines (overflow ${fit.specOverflowPx}px)`);
+        assert(fit.specLines <= 2 && !fit.specTruncated, `car ${i}: spec needs ${fit.specLines} lines unclamped (overflow ${fit.specOverflowPx}px)`);
         report.carInfo.push({ viewport: `${width}x${height}`, index: i, name: CARS[i].displayName,
           line1: CARS[i].showcase.headline, line2: specLine(CARS[i]), ...fit });
         checkNoOverlap(await layout(page), `car ${i} @${width}`);

@@ -84,7 +84,45 @@ A degraded start label names only the aggregate state, not the cause; audio, mod
 
 ## 9. Verification status
 
-{{VERIFY}}
+All machine checks PASS. Evidence: run job folder.
+
+| Check | Result | Tested SHA |
+|---|---|---|
+| Integrated mesh pro/p1/p2 + wheel normalisation | PASS | 0bff493 |
+| Facility static mapping / finish / mesh | PASS | 0bff493 |
+| Final build + bounded endpoint model | PASS | 9e27a72 |
+| Tyre seating: pro/P1/P2, all 390 samples | PASS | 0afc419 |
+| Full terrain matrix 48 points + targeted final 15 | PASS | caa2560 / 0afc419 |
+| HUD: all 15 scenarios | PASS | 9e27a72 |
+| Scroll: default/cap/pace, all 8 traces per mode | PASS | 9e27a72 |
+| Facility persistence: all 5 cases | PASS | 0abc3b6 / ee9869e |
+| Facility neutral line / finish / reverse / silent refresh + captures | PASS | 9e27a72 |
+| Facility checkpoints + all 9 cold gates both ways | PASS | ee9869e |
+| Facility pre-ready input + crossing SFX | PASS | ee9869e |
+| Facility theme swaps: Day-start + Night-start | PASS | ee9869e |
+| Facility healthy-load smoke: both variants | PASS | ee9869e |
+| Before perf, r1 runtime 8795519 | PASS | 8c09ce6 |
+| After perf: default / look=p1 / look=p2 | PASS | ee9869e |
+| P1 curb hotspot: three warm repeats | PASS | 9e27a72 |
+
+Product code at merge `fb99921` is identical to the final verified `9e27a72` (docs-only difference).
+
+What Sol fixed:
+
+- Harness/environment: IPv4 bind (server advertised localhost, harness used IPv4), false-PASS scroll harness (errors now fatal, true cap default and Tour distance), stale persistence fixture (seed incoming document before app reads), host interruption (pageout/swapout, EXIT 143 — not app defects).
+- Real app fixes: tyre seating fitted to local road grade outside deliberate curb use; closed-seam tyre wrap at t=0/1 (worst errors ~0.5 cm vs 1 cm limit).
+- Real app fix: exact finish at the endpoint under bounded pace — physical endpoint input passes through the 55 m credit bound; all modes finish exactly at 1 and reverse naturally.
+
+Perf verdict: no meaningful difference in observed steady frame pacing (1280×800 DPR1, controlled Lexus, six positions, 2 s idle / 3 s motion; p95 = median of the six window p95s).
+
+| Product | Calls | Triangles | Idle p95 median (ms) | Motion p95 median (ms) |
+|---|---:|---:|---|---|
+| Before r1 | 500 | 853394 | 33.3 | 33.3 |
+| After default | 509 | 845008 | 33.3 | 33.4 |
+| After p1 | 509 | 845096 | 33.3 | 33.4 |
+| After p2 | 509 | 844896 | 33.4 | 33.4 |
+
+Not machine-verifiable (yours): all look and feel in items 2–7, Night appearance, real wheel/trackpad feel.
 
 ## 10. Still open for you
 
@@ -98,4 +136,15 @@ After approval: choices recorded in SPEC, losing params / `edge` / `quiet` / dev
 
 ## 11. Visual checklist
 
-{{CHECKLIST}}
+1. `/` vs `?look=p1` vs `?look=p2` (vs `?look=r1` / `?look=base`): car/road proportion.
+2. Width hierarchy at the start/finish corridor, hairpin t≈0.283, chicane t≈0.365, slowdowns 1–2.
+3. Curb placement and white edge lines; no centre line.
+4. Racing-line feel through linked corners; calm straights.
+5. Grid start P1 vs `?grid=p2`; the first gantry pass does nothing; the return completes the Tour.
+6. Gantry with flags vs `?gantry=plain`; signals on the final approach.
+7. Furniture density, full vs `?props=lean`; braking-board numbers readable from the camera.
+8. Sweep gate effect in Day and Night.
+9. Day crossfade vs Night pulse swap.
+10. Top-left HUD legibility over terrain in both themes; centred "Scroll to race".
+11. Night looks unchanged otherwise.
+12. Note the captures in the job folder `p3c-sol-fac-captures/` (paths in the Sol report).

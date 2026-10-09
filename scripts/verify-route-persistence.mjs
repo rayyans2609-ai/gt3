@@ -2,7 +2,7 @@
  * Usage: node scripts/verify-route-persistence.mjs [base-url]
  */
 import puppeteer from 'puppeteer-core';
-import { mkdir } from 'node:fs/promises';
+import { mkdir, writeFile } from 'node:fs/promises';
 
 const base = process.argv[2] || 'http://127.0.0.1:5198/';
 const root = process.env.GT3_OUT || '/tmp/gt3-route-persistence';
@@ -12,7 +12,9 @@ const assert = (condition, message) => {
   if (!condition) throw new Error(message);
 };
 const errors = [];
-const report = { base, renderer: softwareGL ? 'SwiftShader fallback' : 'ANGLE/Metal', phases: [], errors };
+const only = process.env.GT3_PERSIST_ONLY;
+const report = { base, source: process.env.GT3_SOURCE, only,
+  renderer: softwareGL ? 'SwiftShader fallback' : 'ANGLE/Metal', phases: [], errors };
 
 function withQuery(url, search) {
   const next = new URL(url);
@@ -151,14 +153,18 @@ async function reloadAndAssert(page, before, expectedSearch) {
 }
 
 async function phase(name, work) {
+  if (only && name !== 'console errors' && !name.includes(only)) return;
   try {
     const value = await work();
     report.phases.push({ name, status: 'PASS' });
+    console.log(`PASS ${name}`);
     return value;
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     report.phases.push({ name, status: 'FAIL', message });
     throw error;
+  } finally {
+    await writeFile(`${root}/report.json`, JSON.stringify(report, null, 2));
   }
 }
 
@@ -285,8 +291,13 @@ try {
   report.finish = finishResult;
 
   await phase('unversioned old-session world position', async () => {
-    await page.evaluate(() => sessionStorage.setItem('gt3.session.v1',JSON.stringify({routeProgress:.4,unlocked:[0,1,2,3,4]})));
-    await page.reload({waitUntil:'domcontentloaded',timeout:120000});await waitReady(page);await wait(250);
+    // Seed the incoming document: the outgoing page's lifecycle flush correctly
+    // persists its live route and would overwrite a fixture written before reload.
+    await page.evaluateOnNewDocument(() => sessionStorage.setItem('gt3.session.v1',JSON.stringify({routeProgress:.4,unlocked:[0,1,2,3,4]})));
+    if (page.url() === 'about:blank') {
+      await page.goto(base, { waitUntil: 'domcontentloaded', timeout: 120000 });
+    } else await page.reload({waitUntil:'domcontentloaded',timeout:120000});
+    await waitReady(page);await wait(250);
     const snap=await snapshot(page);
     const t=await page.evaluate(async()=>{const r=await import('/src/scene/trackCurve.js');const {state}=await import('/src/core/state.js');return r.routeTAt(state.progress);});
     assert(Math.abs(t-.4)<1e-8,`old save moved to t=${t}`);
@@ -294,6 +305,7 @@ try {
     return {t,snap};
   });
   await phase('console errors' , async () => {
+    assert(report.phases.some(entry => entry.name !== 'console errors'), 'no persistence scenario matched');
     assert(errors.length === 0, `browser errors: ${errors.join(' | ')}`);
   });
 } catch (error) {
@@ -302,6 +314,7 @@ try {
   report.errors = errors;
   report.failed = report.phases.filter((entry) => entry.status === 'FAIL').length;
   if (report.failure && report.failed === 0) report.failed = 1;
+  await writeFile(`${root}/report.json`, JSON.stringify(report, null, 2));
   console.log(JSON.stringify(report, null, 2));
   await browser?.close();
   if (report.failed) process.exitCode = 1;

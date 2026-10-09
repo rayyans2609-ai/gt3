@@ -361,7 +361,11 @@ function updateBounded(dt) {
     const y = window.scrollY || 0;
     const dy = y - lastY;
     lastY = y;
-    if (dy !== 0) bounded.addInput(dy, TOUR_LENGTH / maxScroll());
+    if (dy !== 0) {
+      const max = maxScroll();
+      const endpoint = dy > 0 && y >= max - 1 ? TOUR_LENGTH : dy < 0 && y <= 1 ? 0 : null;
+      bounded.addInput(dy, TOUR_LENGTH / max, endpoint);
+    }
   }
   bounded.step(dt);
 

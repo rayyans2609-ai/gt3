@@ -2,12 +2,20 @@
 import puppeteer from 'puppeteer-core';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { execFileSync } from 'node:child_process';
+import assert from 'node:assert/strict';
 
 const base = (process.env.GT3_URL || 'http://127.0.0.1:5201').replace(/\/$/, '');
 const out = process.env.GT3_OUT || '/tmp/gt3-perf-geom';
 const source = process.env.GT3_SOURCE || execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
 const configs = (process.env.GT3_CONFIGS ?? 'look=r1').split('|');
 const points = (process.env.GT3_POINTS || '0.012,0.283,0.365,0.616,0.645,0.985').split(',').map(Number);
+const hostSnapshot = () => {
+  const vm = execFileSync('vm_stat', [], { encoding: 'utf8' });
+  return { at: new Date().toISOString(),
+    pressure: Number(execFileSync('sysctl', ['-n', 'kern.memorystatus_vm_pressure_level'], { encoding: 'utf8' }).trim()),
+    pageouts: Number(/Pageouts:\s*(\d+)/.exec(vm)[1]),
+    swapouts: Number(/Swapouts:\s*(\d+)/.exec(vm)[1]) };
+};
 const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
 const quantile = (values, p) => {
   const sorted = [...values].sort((a, b) => a - b);
@@ -30,10 +38,14 @@ try {
     const errors = [];
     page.on('pageerror', e => errors.push(String(e).slice(0, 300)));
     page.on('console', m => { if (m.type() === 'error') errors.push(m.text().slice(0, 300)); });
+    page.on('response', r => { if (r.status() >= 400) errors.push(`HTTP ${r.status()} ${r.url()}`); });
     const url = `${base}/?${config ? `${config}&` : ''}gate=quiet`;
     await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 180000 });
     await page.waitForFunction(() => window.__gt3?.readiness?.status && window.__gt3.readiness.status !== 'loading'
       && window.__gt3?.renderer, { timeout: 240000, polling: 250 });
+    const readiness = await page.evaluate(() => window.__gt3.readiness);
+    assert.ok(readiness.model === 'ready' && readiness.gpu === 'ready',
+      `unusable comparison readiness: ${JSON.stringify(readiness)}`);
     await page.evaluate(async () => {
       const stateMod = await import('/src/core/state.js');
       const rigMod = await import('/src/scene/carRig.js');
@@ -73,6 +85,7 @@ try {
       requestAnimationFrame(loop);
     });
     await wait(2000); // allow the initial point and startup rendering to settle
+    const hostBeforeMeasurement = hostSnapshot();
     const result = await page.evaluate(async ({ points }) => {
       const wait = ms => new Promise(r => setTimeout(r, ms));
       const g = window.__gt3;
@@ -108,7 +121,8 @@ try {
         window.__geomPerf.on = false; window.__geomPerf.motion = false;
         const frames = window.__geomPerf.frames.slice(3);
         return { frames: frames.length, p50Ms: quantile(frames, .5), p75Ms: quantile(frames, .75),
-          p95Ms: quantile(frames, .95), over33ms: frames.filter(x => x > 33.4).length };
+          p95Ms: quantile(frames, .95), over33ms: frames.filter(x => x > 33.4).length,
+          over33ExactMs: frames.filter(x => x > 33).length };
       };
       const quantile = (a, p) => { const s = [...a].sort((x, y) => x - y); return s.length ? s[Math.min(s.length - 1, Math.floor(s.length * p))] : null; };
       const rows = [];
@@ -124,7 +138,14 @@ try {
       }
       return { points: rows, namedTrackMeshes: namedTrack, renderer: g.renderer.getContext().getParameter(g.renderer.getContext().RENDERER) };
     }, { points });
-    report.configs[config || 'default'] = { url, errors, ...result };
+    const hostAfterMeasurement = hostSnapshot();
+    report.configs[config || 'default'] = { url, errors, readiness, ...result,
+      host: { before: hostBeforeMeasurement, after: hostAfterMeasurement,
+        pageoutsDelta: hostAfterMeasurement.pageouts - hostBeforeMeasurement.pageouts,
+        swapoutsDelta: hostAfterMeasurement.swapouts - hostBeforeMeasurement.swapouts } };
+    // Preserve completed comparisons if the strict host monitor stops a later one.
+    await writeFile(`${out}/perf-geom.json`, JSON.stringify(report, null, 2));
+    assert.equal(errors.length, 0, `comparison browser errors: ${errors.join(' | ')}`);
     await page.screenshot({ path: `${out}/${config.replace(/[^a-z0-9-]/gi, '-') || 'default'}.png` });
     await page.close();
   }

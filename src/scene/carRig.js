@@ -91,22 +91,26 @@ const contactWorld = new THREE.Vector3(), surfaceCenter = new THREE.Vector3();
 const surfaceTan = new THREE.Vector3(), surfaceLeft = new THREE.Vector3();
 const supportEuler = new THREE.Euler(), supportRotation = new THREE.Quaternion();
 
-function seatOnCurb(t) {
+function seatOnSurface(t) {
   const weight = THREE.MathUtils.smoothstep(curbUseAt(t), 0, 0.1);
-  if (!weight || contacts.length !== 4) return;
+  if (contacts.length !== 4) return;
   // Fit delta-y = a*x + b*z + c to four real tread contacts against the
-  // same local asphalt/semantic curb ramp used to construct track geometry.
-  const rows = contacts.map(tread => tread.map(p => {
+  // local surface. A path tangent alone misses the grade under a yawed axle.
+  // Away from deliberate curb use, one floor vertex per tyre is sufficient;
+  // straddling a curb still needs the cached tread width.
+  const rows = contacts.map(tread => (weight ? tread : [tread.reduce((a, b) => b.y < a.y ? b : a)]).map(p => {
     contactWorld.copy(p).multiplyScalar(HERO).applyQuaternion(rig.quaternion).add(rig.position);
     let u = t;
     for (let i = 0; i < 3; i++) {
       pointAt(u, surfaceCenter); tangentAt(u, surfaceTan).setY(0).normalize();
-      u = THREE.MathUtils.clamp(u + contactWorld.clone().sub(surfaceCenter).dot(surfaceTan) / TRACK_LENGTH, 0, 1);
+      // Tyres can straddle the neutral/return line on this closed circuit.
+      u = (u + contactWorld.clone().sub(surfaceCenter).dot(surfaceTan) / TRACK_LENGTH + 1) % 1;
     }
     pointAt(u, surfaceCenter);
     offsetPointAt(u, 1, 0, surfaceLeft).sub(surfaceCenter).setY(0).normalize();
     const lateral = contactWorld.clone().sub(surfaceCenter).dot(surfaceLeft);
-    const curbY = surfaceOffsetAt(u, lateral);
+    const curbY = CROSS_SECTION.asphaltY
+      + (surfaceOffsetAt(u, lateral) - CROSS_SECTION.asphaltY) * weight;
     return [p.x * HERO, p.z * HERO, 1, surfaceCenter.y + curbY - contactWorld.y];
   }).reduce((a, b) => b[3] > a[3] ? b : a));
   const matrix = Array.from({ length: 3 }, (_, i) => Array.from({ length: 4 }, (_, j) =>
@@ -120,10 +124,10 @@ function seatOnCurb(t) {
       for (let j = i; j < 4; j++) matrix[k][j] -= factor * matrix[i][j];
     }
   }
-  supportEuler.set(-Math.atan(matrix[1][3]) * weight, 0, Math.atan(matrix[0][3]) * weight);
+  supportEuler.set(-Math.atan(matrix[1][3]), 0, Math.atan(matrix[0][3]));
   supportRotation.setFromEuler(supportEuler);
   rig.quaternion.multiply(supportRotation);
-  rig.position.y += matrix[2][3] * weight;
+  rig.position.y += matrix[2][3];
 }
 
 // Smoothed values, so nothing in here can snap.
@@ -225,7 +229,7 @@ export function update(dt) {
   _target.copy(_pos).add(_tan);
   _m.lookAt(_pos, _target, _up);
   rig.quaternion.setFromRotationMatrix(_m);
-  if (COMP.look) seatOnCurb(t);
+  if (COMP.look) seatOnSurface(t);
 
   // --- corner signals ------------------------------------------------------
   const curvature = pathCurvatureAt(t);

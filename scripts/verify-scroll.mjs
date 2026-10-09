@@ -16,8 +16,8 @@
 import puppeteer from 'puppeteer-core';
 import { spawnSync } from 'node:child_process';
 import { mkdir, mkdtemp, writeFile } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import assert from 'node:assert/strict';
 
 const base = process.env.GT3_URL || 'http://127.0.0.1:5193';
 const out = process.env.GT3_OUT || '/Users/rayyansheikh/.claude/jobs/d1cd9f0a/tmp/w3';
@@ -25,6 +25,8 @@ const modes = (process.env.GT3_MODES || 'default,cap,pace').split(',');
 const extra = (process.env.GT3_QUERY || '').replace(/^[?&]/, '');
 const headless = process.env.GT3_HEADLESS === '1';
 const sound = process.env.GT3_SOUND === '1';
+const only = process.env.GT3_SCROLL_ONLY || '';
+assert.ok(!only || only === 'interactions', `unknown GT3_SCROLL_ONLY: ${only}`);
 const preflight = process.env.GT3_PREFLIGHT || '/Users/rayyansheikh/.claude/jobs/d1cd9f0a/tmp/preflight-session.sh';
 const chrome = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 const pause = ms => new Promise(r => setTimeout(r, ms));
@@ -77,7 +79,7 @@ async function wheelTrace(cdp, ev, startMs) {
   }
 }
 
-/** Reaching progress >= 0.995 opens the finish screen and locks scroll (by design); release it so
+/** Reaching progress=1 opens the finish screen and locks scroll (Option A); release it so
  * later scenarios measure the drive, not the lock. Returns whether a finish was open. */
 async function dismissFinish(page) {
   return page.evaluate(async () => {
@@ -145,14 +147,14 @@ function metrics(fr, sc, L) {
 
 async function runMode(mode) {
   preflightOk();
-  const profile = await mkdtemp(join(tmpdir(), 'gt3-vscroll-'));
+  const profile = await mkdtemp(join(out, 'chrome-'));
   const browser = await puppeteer.launch({ executablePath: chrome, headless: headless ? 'new' : false, pipe: true,
     timeout: 300000, protocolTimeout: 300000,
     args: ['--no-sandbox', '--no-first-run', '--enable-gpu', '--use-gl=angle', '--use-angle=metal', `--user-data-dir=${profile}`, '--window-size=1600,900'],
     defaultViewport: { width: 1600, height: 900 } });
   const res = { mode, errors: [], scenarios: {}, interactions: {} };
   try {
-    const params = [`scroll=${mode === 'default' ? 'legacy' : mode}`, extra].filter(Boolean).join('&');
+    const params = [mode === 'default' ? '' : `scroll=${mode}`, extra].filter(Boolean).join('&');
     const url = params ? `${base}/?${params}` : base;
     res.url = url;
     const page = await browser.newPage();
@@ -161,6 +163,7 @@ async function runMode(mode) {
     await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 120000 });
     await page.waitForFunction(() => window.__gt3?.readiness?.status === 'ready' && document.querySelector('#start-screen.is-ready'), { timeout: 180000 });
     res.scrollModeReported = await page.evaluate(() => window.__gt3.scrollMode);
+    assert.equal(res.scrollModeReported, mode === 'default' ? 'cap' : mode === 'legacy' ? 'default' : mode);
     // Loading-lifecycle spot check happens before the first wheel: nothing moved, nothing started.
     res.interactions.postReadyBeforeInput = await page.evaluate(async () => { const { state } = await import('/src/core/state.js');
       return { progress: state.progress, started: state.started, locked: state.scrollLocked, y: window.scrollY }; });
@@ -168,10 +171,14 @@ async function runMode(mode) {
     await cdp.send('Input.dispatchMouseEvent', { type: 'mouseWheel', x: 800, y: 450, deltaX: 0, deltaY: 2 });
     await pause(1800);
     if (sound) { await page.click('.audio-speaker'); await pause(1500); res.sound = await page.evaluate(() => document.querySelector('.audio-speaker')?.dataset.sound); }
-    const L = await page.evaluate(async () => (await import('/src/scene/trackCurve.js')).TRACK_LENGTH);
+    const L = await page.evaluate(async () => {
+      const route = await import('/src/scene/trackCurve.js');
+      return route.TOUR_LENGTH ?? route.TRACK_LENGTH;
+    });
     await installSampler(page);
-    for (const [name, sc] of Object.entries(SCEN)) {
+    for (const [name, sc] of Object.entries(only ? {} : SCEN)) {
       const { fr, wheel, finishedDuring } = await runScenario(page, cdp, L, name, sc, START_T);
+      assert.ok(fr.length > 1 && wheel.events > 0, `${mode} ${name}: missing frame/input samples`);
       res.scenarios[name] = { ...metrics(fr, sc, L), finishedDuring, wheelSeen: wheel };
       console.log(`${mode} ${name}: ${JSON.stringify(res.scenarios[name])}`);
     }
@@ -186,18 +193,28 @@ async function runMode(mode) {
     const pEnd = endRows.at(-1)[1];
     // Reaching the end opens the finish screen and locks scroll by design; releasing it must leave the
     // drive at the end and still scrollable back.
-    const finishAtEnd = await dismissFinish(page);
+    const finishAtEnd = await page.evaluate(async () => (await import('/src/core/state.js')).state.mode === 'finish');
     await pause(300);
     for (let i = 0; i < 120; i++) { await cdp.send('Input.dispatchMouseEvent', { type: 'mouseWheel', x: 800, y: 450, deltaX: 0, deltaY: -100 }); await pause(16); }
     await pause(1200);
     const backRows = await page.evaluate(() => { window.__vs.on = false; return window.__vs.rows; });
-    res.interactions.pageEnds = { finishScreenAtEnd: finishAtEnd, progressAfterPushingDown: r2(pEnd), progressAfterReverse: r2(backRows.at(-1)[1]), movedBack: backRows.at(-1)[1] < pEnd - 0.002 };
+    res.interactions.pageEnds = { finishScreenAtEnd: finishAtEnd, progressAfterPushingDown: pEnd, progressAfterReverse: backRows.at(-1)[1], movedBack: backRows.at(-1)[1] < pEnd - 0.002 };
     // Instant-seek contract (W7): after seekTo(t,{instant:true}) the car is at t with no banked target / motion.
     await page.evaluate(async () => (await import('/src/scroll/scrollDrive.js')).seekTo(0.5, { instant: true }));
     await pause(1500);
     res.interactions.instantSeek = await page.evaluate(async () => { const { state } = await import('/src/core/state.js');
       return { progress: state.progress, target: state.targetProgress, velocity: state.velocity, speed01: state.speed01 }; });
     res.interactions.adaptiveResolution = await page.evaluate(() => window.__gt3?.renderer ? { pixelRatio: window.__gt3.renderer.getPixelRatio() } : null);
+    console.log(`${mode} interactions: ${JSON.stringify(res.interactions)}`);
+    assert.ok(pEnd === 1 && res.interactions.pageEnds.finishScreenAtEnd && res.interactions.pageEnds.movedBack,
+      `${mode}: completion/reversal failed`);
+    const instant = res.interactions.instantSeek;
+    assert.ok(Math.abs(instant.progress - .5) < 1e-8 && instant.target === instant.progress
+      && instant.velocity === 0 && instant.speed01 === 0, `${mode}: instant seek did not settle`);
+    assert.equal(res.errors.length, 0, `${mode}: browser errors ${res.errors.join(' | ')}`);
+  } catch (error) {
+    error.result = res;
+    throw error;
   } finally {
     await browser.close();
   }
@@ -205,9 +222,10 @@ async function runMode(mode) {
 }
 
 await mkdir(out, { recursive: true });
-const all = { startedAt: new Date().toISOString(), base, headless, sound, extra, modes: {} };
+const all = { startedAt: new Date().toISOString(), source: process.env.GT3_SOURCE, base, headless, sound, extra, only, modes: {} };
 for (const m of modes) {
-  try { all.modes[m] = await runMode(m); } catch (e) { all.modes[m] = { error: String(e.message || e) }; console.error(`${m} failed: ${e.message}`); }
+  try { all.modes[m] = await runMode(m); } catch (e) { all.modes[m] = { ...e.result, error: String(e.message || e) }; console.error(`${m} failed: ${e.message}`); }
   await writeFile(join(out, `verify-scroll${sound ? '-sound' : ''}.json`), JSON.stringify(all, null, 2) + '\n');
 }
 console.log(`wrote ${join(out, `verify-scroll${sound ? '-sound' : ''}.json`)}`);
+if (Object.values(all.modes).some(result => result.error)) process.exitCode = 1;

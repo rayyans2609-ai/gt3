@@ -72,17 +72,20 @@ export function createBoundedModel(kind, routeLength, overrides = {}) {
     idle: 1e9,       // seconds since last non-zero input
     discarded: 0,    // metres of input discarded by the lead bound (diagnostic)
     pendingPx: 0,
+    pendingEndpoint: null,
     mPerPx: 0,
     seeking: false,   // programmatic glide in progress (credit exempt from maxLead)
   };
 
   /** Queue page-scroll delta (px) observed this frame. mPerPx = routeLength / maxScroll. */
-  m.addInput = (dyPx, mPerPx) => { m.pendingPx += dyPx; m.mPerPx = mPerPx; };
+  m.addInput = (dyPx, mPerPx, endpoint = null) => {
+    m.pendingPx += dyPx; m.mPerPx = mPerPx; m.pendingEndpoint = endpoint;
+  };
 
   /** Hard reset to position `meters` with no motion, no credit, no input memory. */
   m.reset = meters => {
     m.p = Math.min(routeLength, Math.max(0, meters));
-    m.v = 0; m.credit = 0; m.rate = 0; m.idle = 1e9; m.pendingPx = 0; m.seeking = false;
+    m.v = 0; m.credit = 0; m.rate = 0; m.idle = 1e9; m.pendingPx = 0; m.pendingEndpoint = null; m.seeking = false;
   };
 
   /** Programmatic glide to `meters`, exempt from the lead bound (cancelled by the next user input). */
@@ -90,6 +93,7 @@ export function createBoundedModel(kind, routeLength, overrides = {}) {
     m.credit = Math.min(routeLength, Math.max(0, meters)) - m.p;
     m.seeking = m.credit !== 0;
     m.pendingPx = 0;
+    m.pendingEndpoint = null;
   };
 
   m.targetMeters = () => m.p + m.credit;
@@ -99,13 +103,18 @@ export function createBoundedModel(kind, routeLength, overrides = {}) {
     if (dt <= 0) return;
 
     const dy = m.pendingPx;
+    const endpoint = m.pendingEndpoint;
     m.pendingPx = 0;
+    m.pendingEndpoint = null;
     if (dy !== 0 && m.mPerPx > 0) {
       m.idle = 0;
       const dm = dy * m.mPerPx * cfg.inputGain;
       if (m.seeking) { m.seeking = false; m.credit = 0; }           // user input cancels a seek glide
       if (dm * m.credit < 0) m.credit = 0;                          // reversal: drop opposite credit
-      const wanted = m.credit + dm;
+      // At a physical page end there is no more scroll delta to supply the
+      // input-gain remainder. Honor that endpoint through the same lead bound.
+      const terminal = (endpoint === routeLength && dm > 0) || (endpoint === 0 && dm < 0);
+      const wanted = terminal ? endpoint - m.p : m.credit + dm;
       let bounded = Math.min(cfg.maxLead, Math.max(-cfg.maxLead, wanted));
       bounded = Math.min(routeLength - m.p, Math.max(-m.p, bounded)); // never beyond either end
       m.discarded += Math.abs(wanted - bounded);
@@ -146,6 +155,9 @@ export function createBoundedModel(kind, routeLength, overrides = {}) {
     m.p = Math.min(routeLength, Math.max(0, m.p + move));
     move = m.p - before;                              // route ends clamp the move
     m.credit -= move;
+    // Land on the credit target before discarding the sub-millimetre tail;
+    // Option A completes at exactly p=1, not an approximate lap threshold.
+    if (Math.abs(m.credit) < 1e-3) m.p = Math.min(routeLength, Math.max(0, m.p + m.credit));
     if (Math.abs(m.credit) < 1e-3 || m.p <= 0 || m.p >= routeLength) {
       m.credit = 0;
       if (dy === 0 || m.p <= 0 || m.p >= routeLength) m.v = 0;

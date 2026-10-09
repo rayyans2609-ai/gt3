@@ -17,6 +17,7 @@ import puppeteer from 'puppeteer-core';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { pathToFileURL } from 'node:url';
 import { resolve } from 'node:path';
+import { execFileSync } from 'node:child_process';
 
 const base = (process.argv[2] || 'http://127.0.0.1:5194/').replace(/\/?$/, '/');
 const outDir = (process.argv[3] || '/Users/rayyansheikh/Desktop/gt3-review-2026-10-04/w5/').replace(/\/?$/, '/');
@@ -36,14 +37,15 @@ const browser = await puppeteer.launch({
   args: ['--no-sandbox', '--no-first-run',
     ...(softwareGL ? ['--disable-gpu', '--enable-unsafe-swiftshader', '--use-gl=angle', '--use-angle=swiftshader']
       : ['--enable-gpu', '--use-gl=angle', '--use-angle=metal']),
-    `--user-data-dir=/tmp/gt3-w5b/chrome-${process.pid}`, '--window-size=1600,900'],
+    `--user-data-dir=${outDir}chrome-${process.pid}`, '--window-size=1600,900'],
   defaultViewport: { width: 1600, height: 900 },
 });
 
 const wait = ms => new Promise(r => setTimeout(r, ms));
 const assert = (c, m) => { if (!c) throw new Error(m); };
 const phases = [];
-const report = { base, outDir, renderer: softwareGL ? 'SwiftShader fallback' : 'ANGLE/Metal',
+const report = { base, outDir, source: execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(),
+  renderer: softwareGL ? 'SwiftShader fallback' : 'ANGLE/Metal',
   phases, carInfo: [], shots: [], errors: [], degradedConsoleErrors: [], notes: [] };
 let scenarioErrors = [];
 let scenarioName = '';
@@ -255,7 +257,12 @@ async function scenario(name, opts, fn, kind = 'healthy') {
   const page = await openPage(opts);
   try {
     await phase(name, async () => { await fn(page); endScenario(kind); });
-  } finally { await page.close().catch(() => {}); }
+  } finally {
+    await page.close().catch(() => {});
+    // Completed scenarios remain evidence if the strict host monitor stops a later one.
+    report.failed = phases.filter(p => p.status === 'FAIL').length;
+    await writeFile(`${outDir}verification-hud.json`, JSON.stringify(report, null, 2));
+  }
 }
 
 try {

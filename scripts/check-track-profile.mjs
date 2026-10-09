@@ -35,7 +35,9 @@ function gapAt(world, t) {
 }
 // Sampling every <=2 m plus all line extrema detects yaw+width coupling at
 // front/rear body corners; the .1 m minimum margin exceeds interpolation error.
-const ts = [...Array.from({length:Math.ceil(route.TRACK_LENGTH/2)+1},(_,i)=>i/Math.ceil(route.TRACK_LENGTH/2)), ...line.LINE_KNOTS.map(k=>k[0])];
+const ts = [...Array.from({length:Math.ceil(route.TRACK_LENGTH/2)+1},(_,i)=>i/Math.ceil(route.TRACK_LENGTH/2)), ...line.LINE_KNOTS.map(k=>k[0]),
+  ...Array.from({length:321},(_,i)=>.270+i*.0001),
+  ...Array.from({length:291},(_,i)=>.350+i*.0001)];
 for(const f of footprints) out.minClearance[f.id]={m:Infinity,t:null};
 for(const t of ts) {
   const p=profileAt(t);

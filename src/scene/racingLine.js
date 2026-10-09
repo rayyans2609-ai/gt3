@@ -20,7 +20,7 @@ export const LINE_KNOTS = Object.freeze([
   [0, 0], [.015, 0], [.029, .45], [.056, -.72], [.086, .25],
   [.104, -.50], [.123, .50], [.137, .20], [.159, .76], [.181, .20],
   [.190, .50], [.219, -.85], [.246, .30], [.261, -.62], [.280, 'hairpin'], [.283, 'hairpin'], [.286, 'hairpin'],
-  [.312, .20], [.320, .48], [.337, -.66], [.349, -.40], [.362, 'chicane-out'], [.365, 'chicane-out'], [.368, 'chicane-out'],
+  [.312, .20], [.320, .48], [.337, -.66], [.344, -.40], [.362, 'chicane-out'], [.365, 'chicane-out'], [.368, 'chicane-out'],
   [.394, -.55], [.402, .40], [.420, -.62], [.436, -.38], [.470, .82],
   [.508, -.55], [.535, 0], [.590, 0], [.616, .62], [.635, -.70],
   [.644, -.40], [.654, .83], [.680, -.55], [.695, -.30], [.709, -.62],
@@ -42,11 +42,11 @@ function knotValue(t, value) {
   }
   return Number(value) * usable * (COMP.racingLine || 0);
 }
-const knots = LINE_KNOTS.map(([t, value]) => ({ t, y: knotValue(t, value) }));
+const knots = LINE_KNOTS.map(([t, value]) => ({ t, y: knotValue(t, value), contact: typeof value === 'string' }));
 // Shape-preserving Hermite: slope zero at extrema, harmonic slope elsewhere.
 // This avoids oscillating overshoot and retains flat straight intervals.
 const slopes = knots.map((k, i) => {
-  if (i === 0 || i === knots.length - 1) return 0;
+  if (i === 0 || i === knots.length - 1 || k.contact || knots[i - 1].contact || knots[i + 1].contact) return 0;
   const a = (k.y - knots[i - 1].y) / (k.t - knots[i - 1].t);
   const b = (knots[i + 1].y - k.y) / (knots[i + 1].t - k.t);
   return a * b > 0 ? 2 * a * b / (a + b) : 0;
@@ -57,7 +57,15 @@ for (let i = 0; i < N; i++) {
   while (segment + 1 < knots.length - 1 && t > knots[segment + 1].t) segment++;
   const a = knots[segment], b = knots[segment + 1], dt = b.t - a.t;
   const u = (t - a.t) / dt;
-  lateralTable[i] = amplitudeM <= 0 ? 0 :
+  if (amplitudeM <= 0) { lateralTable[i] = 0; continue; }
+  if (a.contact || b.contact) {
+    // Contact approaches flatten with zero first/second derivative before the
+    // tyre reaches the curb; this leaves room for the widest yawed body.
+    const w = u * u * u * (10 + u * (-15 + 6 * u));
+    lateralTable[i] = a.y + (b.y - a.y) * w;
+    continue;
+  }
+  lateralTable[i] =
     (2 * u ** 3 - 3 * u ** 2 + 1) * a.y + (u ** 3 - 2 * u ** 2 + u) * dt * slopes[segment]
     + (-2 * u ** 3 + 3 * u ** 2) * b.y + (u ** 3 - u ** 2) * dt * slopes[segment + 1];
 }

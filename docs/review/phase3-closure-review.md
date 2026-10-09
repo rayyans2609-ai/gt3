@@ -69,7 +69,7 @@ npm run dev   # → http://localhost:5173/
 
 - Gate default is **sweep** (0.52 s moving band). `?gate=edge` / `?gate=quiet` remain selectable until cleanup. Forward crossings play the SFX; reverse stays silent.
 - Swap default follows the theme at each swap start: **Day crossfade, Night restrained emissive pulse** (no particles). `?swap=crossfade` / `?swap=pulse` force one treatment for comparison.
-- **Decide:** gate effect, swap treatments.
+- **Confirm in use** (both already chosen on 10-09): sweep in Day and Night; the Day crossfade / Night pulse feel.
 
 ## 7. Look at: HUD
 

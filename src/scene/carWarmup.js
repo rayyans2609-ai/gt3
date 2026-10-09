@@ -57,7 +57,7 @@ export function createCarWarmup(onProgress, onStep, { throwAtDraw = -1 } = {}) {
   });
   const draws = cars.reduce((sum, car) =>
     sum + Math.max(1, Math.ceil(car.meshes.length / MESHES_PER_FRAME)) * 2,
-    2 + shadowProbes.length + cars.length - 1);
+    2 + shadowProbes.length + cars.length - 1 + cars.length);
   let completed = 0;
   let carIndex = 0;
   let offset = 0;
@@ -253,9 +253,19 @@ export function createCarWarmup(onProgress, onStep, { throwAtDraw = -1 } = {}) {
       if (offset >= meshes.length) {
         offset = 0;
         if (!fading) {
-          beginWarmFade(model);
+          beginWarmFade(model, 'crossfade');
           fading = true;
         } else {
+          // Pulse changes uniforms on the SAME resident fade materials/programs.
+          // All meshes just drew that shader. Exercise the alternate values in
+          // one bounded batch per car, rather than replaying the entire roster.
+          draw('pulse-solo', () => {
+            beginWarmFade(model, 'pulse');
+            for (const object of enabled) object.visible = true;
+            mount(model);
+          });
+          for (const object of enabled) object.visible = false;
+          advance();
           fading = false;
           carIndex++;
         }

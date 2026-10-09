@@ -6,8 +6,9 @@ import { carMount, setCarModel, setWheels } from './carRig.js';
 import { getCarModel, findWheels } from './cars.js';
 
 const DURATION = 0.56;
-export const swapTreatment = new URLSearchParams(location.search).get('swap') === 'pulse'
-  ? 'pulse' : 'crossfade';
+const requested = new URLSearchParams(location.search).get('swap');
+const override = ['pulse', 'crossfade'].includes(requested) ? requested : null;
+export let swapTreatment = override ?? (state.theme === 'night' ? 'pulse' : 'crossfade');
 const PEAK_AT = 0.40 / 0.85; // Historical pulse crest, normalized to today's duration.
 const pulseColors = CARS.map(car => new THREE.Color(car.brandColor)
   .lerp(new THREE.Color(0xffe9c0), 0.55));
@@ -80,26 +81,27 @@ function restore(model) {
   for (const { object, normal } of materialsFor(model).assignments) object.material = normal;
 }
 
-function applyFade(model, opacity, glow = 0, glowColor = pulseColors[0]) {
+function applyFade(model, opacity, glow = 0, glowColor = pulseColors[0], treatment = swapTreatment) {
   if (!model) return;
   for (const mat of materialsFor(model).fades) {
     mat.opacity = opacity;
     mat.depthWrite = opacity > 0.985;
   }
-  if (swapTreatment === 'pulse') {
+  {
+    const emissionGlow = treatment === 'pulse' ? glow : 0;
     // Same half-sine, brand/warm-white mix and intensity law as 1864cbe^,
     // using cached fade materials; opaque originals are never modified.
     for (const { mat, color, intensity } of materialsFor(model).emission) {
-      mat.emissive.copy(color).lerp(glowColor, glow);
-      mat.emissiveIntensity = intensity + glow * 2.4;
+      mat.emissive.copy(color).lerp(glowColor, emissionGlow);
+      mat.emissiveIntensity = intensity + emissionGlow * 2.4;
     }
   }
 }
 
 /** Draw this exact material state during the real GPU warm-up. */
-export function beginWarmFade(model) {
+export function beginWarmFade(model, treatment = 'crossfade') {
   activate(model);
-  applyFade(model, 0.5, swapTreatment === 'pulse' ? 1 : 0);
+  applyFade(model, 0.5, treatment === 'pulse' ? 1 : 0, pulseColors[0], treatment);
 }
 
 export function endWarmFade(model) {
@@ -132,6 +134,7 @@ export function morphTo(index) {
       return;
     }
 
+    swapTreatment = override ?? (state.theme === 'night' ? 'pulse' : 'crossfade');
     outgoing = carMount.children[0] || null;
     incoming = next;
     pendingIndex = index;

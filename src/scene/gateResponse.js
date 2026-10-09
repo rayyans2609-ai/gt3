@@ -3,7 +3,7 @@ import * as THREE from 'three';
 import { state } from '../core/state.js';
 
 const requested = new URLSearchParams(location.search).get('gate');
-export const gateTreatment = ['sweep', 'quiet'].includes(requested) ? requested : 'edge';
+export const gateTreatment = ['edge', 'quiet'].includes(requested) ? requested : 'sweep';
 const quiet = gateTreatment === 'quiet';
 const sweep = gateTreatment === 'sweep';
 const DURATION = sweep ? 0.52 : 0.85;

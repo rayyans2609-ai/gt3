@@ -50,7 +50,7 @@ async function variant(name, query) {
 
   const read = () => page.evaluate(async () => {
     const { state } = await import('/src/core/state.js');
-    const { isMorphing } = await import('/src/scene/morph.js');
+    const { isMorphing, swapTreatment } = await import('/src/scene/morph.js');
     const { getCarModel } = await import('/src/scene/cars.js');
     const gt3 = window.__gt3;
     const mount = gt3.scene.getObjectByName('car-mount');
@@ -62,7 +62,7 @@ async function variant(name, query) {
     const info = gt3.renderer.info;
     return { progress: state.progress, active: state.activeCarIndex, started: state.started,
       unlocked: [...state.unlocked].sort((a, b) => a - b), locked: state.scrollLocked,
-      morphing: isMorphing(), scrollY: window.scrollY, theme: state.theme,
+      morphing: isMorphing(), swapTreatment, scrollY: window.scrollY, theme: state.theme,
       model: mount.children.map(c => c.name), fadeMaterials,
       gateResponseVisible: gt3.scene.getObjectByName('checkpoint-traversal-response')?.visible ?? null,
       screen: document.querySelector('#start-screen')?.className,
@@ -199,12 +199,24 @@ async function variant(name, query) {
       gates: (await import('/src/scene/trackCurve.js')).CHECKPOINT_T,
       ids: (await import('/src/data/cars.js')).CARS.map(c => c.id) }));
 
+    await record('theme toggle before cold crossing', async () => {
+      const target = name === 'autoNight' ? 'night' : 'day';
+      await page.evaluate(async target => {
+        const { applyTheme } = await import('/src/scene/theme.js');
+        applyTheme(target === 'day' ? 'night' : 'day', {instant:true});
+        await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
+        applyTheme(target, {instant:true});
+      }, target);
+      await wait(400);
+      return {theme:(await read()).theme};
+    });
     await record('cold first crossing: zero GL allocations/uploads', async () => {
       await seek(gates[0] - 0.003); await settle();
       const before = await read();
       await seek(gates[0] + 0.003);
       const after = await settle();
       checkSettled(after, ids, 1, 'cold first crossing');
+      if (name.startsWith('auto')) assert(after.swapTreatment === (after.theme === 'night' ? 'pulse' : 'crossfade'), 'wrong theme-selected treatment');
       return checkResourceDelta(before, after, 'cold first crossing');
     });
 
@@ -214,6 +226,30 @@ async function variant(name, query) {
       const before = await read();
       const k = theme === 'day' ? 2 : 5; // gate index; crossing it forward activates car k+1
 
+      if (name.startsWith('auto')) await record(`${theme}: mid-swap theme toggle pins treatment`, async () => {
+        await seek(gates[k] - .003);await settle();
+        const at = await page.evaluate(async ({p,theme}) => {
+          const drive=await import('/src/scroll/scrollDrive.js');
+          const morph=await import('/src/scene/morph.js');
+          const themes=await import('/src/scene/theme.js');
+          drive.seekTo(p,{instant:true});
+          const deadline=performance.now()+5000;
+          while(!morph.isMorphing()) {
+            if(performance.now()>deadline) throw new Error('swap did not start');
+            await new Promise(r=>requestAnimationFrame(r));
+          }
+          const treatment=morph.swapTreatment;
+          themes.applyTheme(theme==='day'?'night':'day',{instant:true});
+          await new Promise(r=>requestAnimationFrame(r));
+          return {treatment,afterToggle:morph.swapTreatment,morphing:morph.isMorphing()};
+        },{p:gates[k]+.003,theme});
+        assert(at.morphing && at.treatment===at.afterToggle,'toggle replaced in-flight treatment');
+        assert(at.treatment===(theme==='night'?'pulse':'crossfade'),'wrong starting treatment');
+        const completed=await settle();
+        assert(completed.swapTreatment===at.treatment,'treatment changed before swap finished');
+        await page.evaluate(async theme=>(await import('/src/scene/theme.js')).applyTheme(theme,{instant:true}),theme);
+        return at;
+      });
       await record(`${theme}: reversal before the swap completes`, async () => {
         await seek(gates[k] - 0.003); checkSettled(await settle(), ids, k, 'setup');
         const resourcesBefore = await read();
@@ -348,8 +384,8 @@ async function variant(name, query) {
 }
 
 try {
-  const options = { edge: '', pulse: '?swap=pulse', sweep: '?gate=sweep', quiet: '?gate=quiet' };
-  const selected = (process.env.GT3_VARIANTS || 'edge,pulse,sweep,quiet').split(',');
+  const options = { autoDay: '', autoNight: '', edge: '?gate=edge', pulse: '?swap=pulse', sweep: '?gate=sweep', quiet: '?gate=quiet' };
+  const selected = (process.env.GT3_VARIANTS || 'autoDay,autoNight').split(',');
   for (const name of selected) {
     assert(Object.hasOwn(options, name), `Unknown GT3_VARIANTS entry: ${name}`);
     await variant(name, options[name]);

@@ -65,9 +65,10 @@ try {
       const tri = o => Math.round((o.geometry?.index?.count ?? o.geometry?.attributes?.position?.count ?? 0) / 3);
       const namedTrack = [];
       g.scene.traverse(o => {
-        if (!(o.isMesh || o.isInstancedMesh) || !/track|road|asphalt|curb|kerb/i.test(o.name || '')) return;
+        if (!(o.isMesh || o.isInstancedMesh)) return;
         let parent = o;
         while (parent && !parent.name) parent = parent.parent;
+        if (!/track|road|asphalt|curb|kerb/i.test(parent?.name || o.name || '')) return;
         namedTrack.push({ name: o.name || parent?.name || '(unnamed)', ancestor: parent?.name || null,
           triangles: tri(o) * (o.isInstancedMesh ? o.count : 1), visible: o.visible });
       });

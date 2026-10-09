@@ -193,12 +193,12 @@ async function runMode(mode) {
     const pEnd = endRows.at(-1)[1];
     // Reaching the end opens the finish screen and locks scroll by design; releasing it must leave the
     // drive at the end and still scrollable back.
-    const finishAtEnd = await dismissFinish(page);
+    const finishAtEnd = await page.evaluate(async () => (await import('/src/core/state.js')).state.mode === 'finish');
     await pause(300);
     for (let i = 0; i < 120; i++) { await cdp.send('Input.dispatchMouseEvent', { type: 'mouseWheel', x: 800, y: 450, deltaX: 0, deltaY: -100 }); await pause(16); }
     await pause(1200);
     const backRows = await page.evaluate(() => { window.__vs.on = false; return window.__vs.rows; });
-    res.interactions.pageEnds = { finishScreenAtEnd: finishAtEnd, progressAfterPushingDown: r2(pEnd), progressAfterReverse: r2(backRows.at(-1)[1]), movedBack: backRows.at(-1)[1] < pEnd - 0.002 };
+    res.interactions.pageEnds = { finishScreenAtEnd: finishAtEnd, progressAfterPushingDown: pEnd, progressAfterReverse: backRows.at(-1)[1], movedBack: backRows.at(-1)[1] < pEnd - 0.002 };
     // Instant-seek contract (W7): after seekTo(t,{instant:true}) the car is at t with no banked target / motion.
     await page.evaluate(async () => (await import('/src/scroll/scrollDrive.js')).seekTo(0.5, { instant: true }));
     await pause(1500);
@@ -206,7 +206,7 @@ async function runMode(mode) {
       return { progress: state.progress, target: state.targetProgress, velocity: state.velocity, speed01: state.speed01 }; });
     res.interactions.adaptiveResolution = await page.evaluate(() => window.__gt3?.renderer ? { pixelRatio: window.__gt3.renderer.getPixelRatio() } : null);
     console.log(`${mode} interactions: ${JSON.stringify(res.interactions)}`);
-    assert.ok(res.interactions.pageEnds.finishScreenAtEnd && res.interactions.pageEnds.movedBack,
+    assert.ok(pEnd === 1 && res.interactions.pageEnds.finishScreenAtEnd && res.interactions.pageEnds.movedBack,
       `${mode}: completion/reversal failed`);
     const instant = res.interactions.instantSeek;
     assert.ok(Math.abs(instant.progress - .5) < 1e-8 && instant.target === instant.progress

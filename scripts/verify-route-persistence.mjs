@@ -291,13 +291,13 @@ try {
   report.finish = finishResult;
 
   await phase('unversioned old-session world position', async () => {
-    // A filtered standalone run needs a same-origin document for sessionStorage.
+    // Seed the incoming document: the outgoing page's lifecycle flush correctly
+    // persists its live route and would overwrite a fixture written before reload.
+    await page.evaluateOnNewDocument(() => sessionStorage.setItem('gt3.session.v1',JSON.stringify({routeProgress:.4,unlocked:[0,1,2,3,4]})));
     if (page.url() === 'about:blank') {
       await page.goto(base, { waitUntil: 'domcontentloaded', timeout: 120000 });
-      await waitReady(page);
-    }
-    await page.evaluate(() => sessionStorage.setItem('gt3.session.v1',JSON.stringify({routeProgress:.4,unlocked:[0,1,2,3,4]})));
-    await page.reload({waitUntil:'domcontentloaded',timeout:120000});await waitReady(page);await wait(250);
+    } else await page.reload({waitUntil:'domcontentloaded',timeout:120000});
+    await waitReady(page);await wait(250);
     const snap=await snapshot(page);
     const t=await page.evaluate(async()=>{const r=await import('/src/scene/trackCurve.js');const {state}=await import('/src/core/state.js');return r.routeTAt(state.progress);});
     assert(Math.abs(t-.4)<1e-8,`old save moved to t=${t}`);

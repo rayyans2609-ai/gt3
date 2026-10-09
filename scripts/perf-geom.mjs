@@ -108,7 +108,8 @@ try {
         window.__geomPerf.on = false; window.__geomPerf.motion = false;
         const frames = window.__geomPerf.frames.slice(3);
         return { frames: frames.length, p50Ms: quantile(frames, .5), p75Ms: quantile(frames, .75),
-          p95Ms: quantile(frames, .95), over33ms: frames.filter(x => x > 33.4).length };
+          p95Ms: quantile(frames, .95), over33ms: frames.filter(x => x > 33.4).length,
+          over33ExactMs: frames.filter(x => x > 33).length };
       };
       const quantile = (a, p) => { const s = [...a].sort((x, y) => x - y); return s.length ? s[Math.min(s.length - 1, Math.floor(s.length * p))] : null; };
       const rows = [];
@@ -125,6 +126,8 @@ try {
       return { points: rows, namedTrackMeshes: namedTrack, renderer: g.renderer.getContext().getParameter(g.renderer.getContext().RENDERER) };
     }, { points });
     report.configs[config || 'default'] = { url, errors, ...result };
+    // Preserve completed comparisons if the strict host monitor stops a later one.
+    await writeFile(`${out}/perf-geom.json`, JSON.stringify(report, null, 2));
     await page.screenshot({ path: `${out}/${config.replace(/[^a-z0-9-]/gi, '-') || 'default'}.png` });
     await page.close();
   }

@@ -11,6 +11,9 @@ fi
 node node_modules/vite/bin/vite.js --host 127.0.0.1 --port 5201 --strictPort > "$TASK_LOG" 2>&1 &
 TASK_VITE=$!
 TASK_IDENTITY=$(ps -o lstart=,command= -p "$TASK_VITE")
+printf '%s\n' "$TASK_VITE" > "$TASK_LOG.pid"
+printf '%s\n' "$TASK_IDENTITY" > "$TASK_LOG.identity"
+pwd -P > "$TASK_LOG.root"
 cleanup() {
   TASK_CURRENT=$(ps -o lstart=,command= -p "$TASK_VITE" 2>/dev/null || true)
   if [ -n "$TASK_CURRENT" ] && [ "$TASK_CURRENT" = "$TASK_IDENTITY" ]; then

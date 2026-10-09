@@ -1,4 +1,4 @@
-/** SPEC §15 hero-car pivot check. For each composition (hero scale 1 / a 1.7 / b 1.9 / c 1.8), every roster car and
+/** SPEC §15 hero-car pivot check. For each requested look/composition, every roster car and
  * several route positions: the lowest wheel vertex per wheel quadrant is compared to the REAL asphalt triangle under
  * it (vertical ray against the 'track-asphalt' mesh), with body roll and idle bob removed (pivot error only; bob and
  * roll amplitudes are reported separately). Also records world scale per axis of the car root and wheel meshes
@@ -198,7 +198,6 @@ try {
       const contactTs = [.283, .365].filter(t => ts.includes(t));
       r.pass &&= contactTs.every(t => rs.some(x => x.carIndex === 3 && x.t === t && x.curbWheels > 0));
     }
-    failed ||= !r.pass;
     failed ||= !r.pass;
     console.log(`${c || 'base'} ${r.pass ? 'PASS' : 'FAIL'}`);
     await writeFile(`${out}/hero-pivot.json`, JSON.stringify(report, null, 1));

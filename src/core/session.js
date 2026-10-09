@@ -1,4 +1,4 @@
-import { ROUTE_MAPPING, GRID_DISTANCE, TRACK_LENGTH, TOUR_LENGTH } from '../scene/trackCurve.js';
+import { ROUTE_MAPPING, GRID_DISTANCE, TRACK_LENGTH, TOUR_LENGTH, CHECKPOINT_T, progressAtRouteT } from '../scene/trackCurve.js';
 import { set, state, subscribe } from './state.js';
 import { EXPERIENCES } from './experience.js';
 import { CARS } from '../data/cars.js';
@@ -113,8 +113,12 @@ export function migrateRouteProgress(saved) {
   if (saved.routeMapping !== ROUTE_MAPPING) {
     if (p === 0) return 0;
     if (p >= .995) return 1;
-    return (p * TRACK_LENGTH + GRID_DISTANCE) / TOUR_LENGTH;
+    return progressAtRouteT(p);
   }
   const oldDistance = Number.isFinite(saved.routeGridDistance) ? saved.routeGridDistance : GRID_DISTANCE;
-  return Math.min(1, Math.max(0, (p * (TRACK_LENGTH + oldDistance) - oldDistance + GRID_DISTANCE) / TOUR_LENGTH));
+  if (oldDistance === GRID_DISTANCE) return p;
+  const mapped = Math.min(1, Math.max(0, (p * (TRACK_LENGTH + oldDistance) - oldDistance + GRID_DISTANCE) / TOUR_LENGTH));
+  // Round-off during a grid alternative change must not move a saved exact
+  // checkpoint to its previous-car side. This is < 0.00001 mm on this circuit.
+  return CHECKPOINT_T.find(t => Math.abs(t - mapped) < 1e-12) ?? mapped;
 }

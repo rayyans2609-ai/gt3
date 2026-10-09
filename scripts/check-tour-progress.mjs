@@ -12,6 +12,8 @@ assert.equal(r.FINISH_THRESHOLD,1);
 assert.ok(r.FIRST_LINE_PROGRESS<r.CHECKPOINT_T[0]);
 for(let i=0;i<9;i++) {
   near(r.routeTAt(r.CHECKPOINT_T[i]),r.CHECKPOINT_ROUTE_T[i]);
+  assert.equal(migrateRouteProgress({routeProgress:r.CHECKPOINT_ROUTE_T[i]}),r.CHECKPOINT_T[i]);
+  assert.equal(migrateRouteProgress({routeMapping:r.ROUTE_MAPPING,routeGridDistance:r.GRID_DISTANCE,routeProgress:r.CHECKPOINT_T[i]}),r.CHECKPOINT_T[i]);
   assert.equal(r.CHECKPOINT_T.filter(p=>p<=r.CHECKPOINT_T[i]).length,i+1);
   assert.ok(r.CHECKPOINT_T[i]>(r.CHECKPOINT_T[i-1]||r.FIRST_LINE_PROGRESS));
 }

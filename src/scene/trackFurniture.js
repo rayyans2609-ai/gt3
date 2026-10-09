@@ -15,14 +15,14 @@ export const BARRIER_RUNS = [
   {from:.711,to:.748,side:-1,concrete:false,fence:false},
 ];
 export function buildTrackFurniture() {
-  // Five static instanced draws stay resident from boot, including the atlas
+  // Static instanced draws stay resident from boot, including the atlas
   // shader; a later zone entering view must not allocate at a checkpoint.
   const root=new THREE.Group();root.name='trackside-furniture';root.userData.variant=lean?'lean':'full';
   const pale=new THREE.MeshStandardMaterial({color:0xd5d4cc,roughness:.85});
   const steel=new THREE.MeshStandardMaterial({color:0x8e999e,roughness:.65,metalness:.35});
   const dark=new THREE.MeshStandardMaterial({color:0x52575b,roughness:.96});
   const box=new THREE.BoxGeometry(1,1,1), o=new THREE.Object3D();
-  const parts={concrete:[],steel:[],service:[],marshal:[]};
+  const parts={concrete:[],steel:[],service:[],marshal:[]}, fenceParts=[];
   const add=(bucket,t,lateral,height,sx,sy,sz) => {
     groundPositionAt(t,lateral,o.position,sx*.5+.2,2);
     o.position.y+=height;const tan=tangentAt(t);
@@ -74,13 +74,12 @@ export function buildTrackFurniture() {
       }
       if(run.fence && !lean) {
         const back=lateral+run.side*.8;
-        add(parts.steel,t,back,1.8,.09,3.6,.09);
-        // Open catch fence: sparse rails and vertical wires; no transparent planes.
-        for(const y of [1.3,1.8,2.3,2.8,3.3]) add(parts.steel,t,back,y,.035,.035,length);
-        for(const dz of [-1.5,-.5,.5,1.5]) {
-          const u=t+dz/TRACK_LENGTH;
-          add(parts.steel,u,outerEdgeAt(u,run.side)+run.side*4.8,2.3,.025,2.3,.025);
-        }
+        add(parts.steel,t,back,1.8,.12,3.6,.12);
+        add(parts.steel,t,back,3.5,.08,.08,length);
+        // One cutout panel per bay instead of many sub-pixel wire boxes.
+        groundPositionAt(t,back,o.position,.25,2);o.position.y+=1.9;
+        const tan=tangentAt(t);o.rotation.set(0,Math.atan2(tan.x,tan.z)+Math.PI/2,0);
+        o.scale.set(length,3.2,1);o.updateMatrix();fenceParts.push(o.matrix.clone());
       }
     }
   }
@@ -95,6 +94,21 @@ export function buildTrackFurniture() {
     const mesh=new THREE.InstancedMesh(box,material,matrices.length);mesh.name=`furniture-${key}`;
     matrices.forEach((m,i)=>mesh.setMatrixAt(i,m));mesh.instanceMatrix.needsUpdate=true;
     mesh.computeBoundingSphere();mesh.frustumCulled=false;mesh.receiveShadow=true;root.add(mesh);
+  }
+  if(fenceParts.length) {
+    const canvas=document.createElement('canvas');canvas.width=canvas.height=128;
+    const context=canvas.getContext('2d');context.clearRect(0,0,128,128);
+    context.strokeStyle='#bdc8cd';context.lineWidth=3;
+    for(let d=-128;d<=256;d+=32) {
+      context.beginPath();context.moveTo(d,0);context.lineTo(d+128,128);context.stroke();
+      context.beginPath();context.moveTo(d,0);context.lineTo(d-128,128);context.stroke();
+    }
+    const wire=new THREE.CanvasTexture(canvas);wire.colorSpace=THREE.SRGBColorSpace;
+    wire.wrapS=wire.wrapT=THREE.RepeatWrapping;wire.repeat.set(3,3);
+    const mesh=new THREE.InstancedMesh(new THREE.PlaneGeometry(1,1),new THREE.MeshStandardMaterial({
+      map:wire,color:0xffffff,alphaTest:.05,roughness:.8,side:THREE.DoubleSide}),fenceParts.length);
+    mesh.name='furniture-catch-fencing';fenceParts.forEach((m,i)=>mesh.setMatrixAt(i,m));
+    mesh.instanceMatrix.needsUpdate=true;mesh.computeBoundingSphere();mesh.frustumCulled=false;root.add(mesh);
   }
   return root;
 }

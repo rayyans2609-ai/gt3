@@ -1,6 +1,6 @@
 /** Hidden authored GT line. Pure in route t, wrapped, reversible; never rendered. */
 import * as THREE from 'three';
-import { COMP, CAR_HALF_WIDTH_M, CAR_HALF_LENGTH_M, RACING_MARGIN_M } from './composition.js';
+import { COMP, CAR_HALF_WIDTH_M, RACING_MARGIN_M } from './composition.js';
 import { curve, TRACK_LENGTH, curvatureAt } from './trackCurve.js';
 import { profileAt, CORNERS } from './trackProfile.js';
 
@@ -19,8 +19,8 @@ const sample = (table, t) => {
 export const LINE_KNOTS = Object.freeze([
   [0, 0], [.015, 0], [.029, .45], [.056, -.72], [.086, .25],
   [.104, -.50], [.123, .50], [.137, .20], [.159, .76], [.181, .20],
-  [.190, .50], [.219, -.85], [.246, .30], [.261, -.62], [.283, 'hairpin'],
-  [.312, .20], [.320, .48], [.337, -.66], [.349, -.40], [.365, 'chicane-out'],
+  [.190, .50], [.219, -.85], [.246, .30], [.261, -.62], [.280, 'hairpin'], [.283, 'hairpin'], [.286, 'hairpin'],
+  [.312, .20], [.320, .48], [.337, -.66], [.349, -.40], [.362, 'chicane-out'], [.365, 'chicane-out'], [.368, 'chicane-out'],
   [.394, -.55], [.402, .40], [.420, -.62], [.436, -.38], [.470, .82],
   [.508, -.55], [.535, 0], [.590, 0], [.616, .62], [.635, -.70],
   [.644, -.40], [.654, .83], [.680, -.55], [.695, -.30], [.709, -.62],
@@ -63,9 +63,10 @@ for (let i = 0; i < N; i++) {
 }
 lateralTable[N] = lateralTable[0];
 
-// Clamp the FULL conservative yaw envelope, not just the car's centre. Three
-// deterministic construction passes account for path heading and front/rear
-// width changes. No time-dependent clamp or per-frame geometry work.
+// The two contacts hold a short constant LOCAL edge-relative plateau, so the
+// car follows the curb rather than arriving at it with a large lateral yaw.
+// Whole-footprint clearance is verified by check-track-profile, including the
+// road curvature under front/rear corners; a centre-offset clamp is insufficient.
 const a = new THREE.Vector3(), b = new THREE.Vector3(), tan = new THREE.Vector3();
 function raw(t, out) {
   const u = wrap(t);
@@ -73,24 +74,6 @@ function raw(t, out) {
   curve.getTangentAt(u, tan);
   tan.set(tan.z, 0, -tan.x).normalize();
   return out.addScaledVector(tan, sample(lateralTable, u));
-}
-if (amplitudeM > 0) for (let pass = 0; pass < 3; pass++) {
-  const next = lateralTable.slice();
-  for (let i = 0; i < N; i++) {
-    const t = i / N, h = .75 / TRACK_LENGTH;
-    raw(t - h, a); raw(t + h, b);
-    const pathTan = b.sub(a).setY(0).normalize();
-    curve.getTangentAt(t, a).setY(0).normalize();
-    const cos = Math.abs(a.dot(pathTan));
-    const sin = Math.abs(a.x * pathTan.z - a.z * pathTan.x);
-    const extent = COMP.hero * (CAR_HALF_WIDTH_M * cos + CAR_HALF_LENGTH_M * sin);
-    const p = profileAt(t), fore = profileAt(t + CAR_HALF_LENGTH_M * COMP.hero / TRACK_LENGTH);
-    const rear = profileAt(t - CAR_HALF_LENGTH_M * COMP.hero / TRACK_LENGTH);
-    const left = Math.min(p.left + p.curbLeft, fore.left + fore.curbLeft, rear.left + rear.curbLeft);
-    const right = Math.min(p.right + p.curbRight, fore.right + fore.curbRight, rear.right + rear.curbRight);
-    next[i] = THREE.MathUtils.clamp(lateralTable[i], -right + extent + .12, left - extent - .12);
-  }
-  lateralTable.set(next); lateralTable[N] = lateralTable[0];
 }
 export function lateralAt(t) { return amplitudeM > 0 ? sample(lateralTable, t) : 0; }
 export function pathPointAt(t, out = new THREE.Vector3()) {

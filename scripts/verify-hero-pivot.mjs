@@ -9,6 +9,7 @@ import { mkdir, writeFile } from 'node:fs/promises';
 
 const base = (process.env.GT3_URL || 'http://127.0.0.1:5194').replace(/\/$/, '');
 const out = process.env.GT3_OUT || '/tmp/gt3-hero-pivot';
+const source = process.env.GT3_SOURCE || null;
 const looks = process.env.GT3_LOOKS?.split(',');
 const comps = looks || (process.env.GT3_COMPS || ',a,b,c').split(',');
 const ts = (process.env.GT3_TS || '0.02,0.1,0.25,0.4,0.55,0.7,0.85,0.97').split(',').map(Number);
@@ -168,7 +169,7 @@ async function measure(page, ts) {
 }
 
 let failed = false;
-const report = { base, at: new Date().toISOString(), ts, comps: {} };
+const report = { base, source, at: new Date().toISOString(), ts, comps: {} };
 try {
   for (const c of comps) {
     const page = await browser.newPage();
@@ -189,7 +190,15 @@ try {
     r.pass = errors.length === 0 && rs.length === 10 * ts.length && rs.every(x => x.roadFound && x.quadrants === 4 && x.worstAbsCm <= (looks ? 1 : 3) && x.mountScale.every(v => v === r.hero)
       && Math.max(...x.rootScale) - Math.min(...x.rootScale) < 1e-7);
     if (looks) r.pass &&= r.cacheBefore.builds === 10 && r.cacheAfter.builds === 10;
-    console.log(`${c || 'base'} curb contacts: ${JSON.stringify(rs.filter(x => x.carIndex === 3 && x.curbWheels > 0).map(x => ({ t: x.t, wheels: x.curbWheels })))}`);
+    r.curbContacts = rs.filter(x => x.curbWheels > 0).map(x => ({ car: x.carIndex, t: x.t, wheels: x.curbWheels }));
+    console.log(`${c || 'base'} curb contacts: ${JSON.stringify(r.curbContacts)}`);
+    // Two deliberate contacts must exist for the route-active BMW in the
+    // selected closure looks; nominal path proximity alone is insufficient.
+    if (looks && ['pro', 'p1', 'p2'].includes(c)) {
+      const contactTs = [.283, .365].filter(t => ts.includes(t));
+      r.pass &&= contactTs.every(t => rs.some(x => x.carIndex === 3 && x.t === t && x.curbWheels > 0));
+    }
+    failed ||= !r.pass;
     failed ||= !r.pass;
     console.log(`${c || 'base'} ${r.pass ? 'PASS' : 'FAIL'}`);
     await writeFile(`${out}/hero-pivot.json`, JSON.stringify(report, null, 1));

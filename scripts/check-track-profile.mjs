@@ -12,7 +12,6 @@ const { COMP } = await import('../src/scene/composition.js');
 const route = await import('../src/scene/trackCurve.js');
 const { profileAt, gateSpanAt, WIDTH_SECTIONS, CURB_SEGMENTS, RUNOFF_REGIONS, CROSS_SECTION } = await import('../src/scene/trackProfile.js');
 const line = await import('../src/scene/racingLine.js');
-const { buildTrack, TRACK_SAMPLE_COUNT } = await import('../src/scene/track.js');
 assert.ok(Math.abs(route.TRACK_LENGTH - 5006.8196682221) < 1e-8, 'route length changed');
 assert.deepEqual(route.CHECKPOINT_T, [.09,.18,.255,.39,.495,.585,.68,.775,.86]);
 assert.equal(route.FINISH_T,.994);
@@ -65,12 +64,18 @@ assert.equal(line.lateralAt(0),line.lateralAt(1));
 for(const t of [.012,.283,.365,.616,.63,.645,.66,.673,.7,.985]) {
   assert.ok(line.pathPointAt(t).distanceTo(line.pathPointAt(t))===0,'not deterministic');
 }
-const track=buildTrack();
-out.meshes=track.children.map(m=>({name:m.name,triangles:(m.geometry.index?.count??m.geometry.attributes.position.count)/3}));
-assert.equal(out.meshes.length,5);
-assert.equal(out.meshes.find(m=>m.name==='track-markings').triangles,(TRACK_SAMPLE_COUNT-1)*4,'edge line gap or unexpected centre paint');
-const blocks=track.getObjectByName('track-curbs').geometry.userData.blocks;
-assert.ok(blocks.every(b=>b.terminal || Math.abs(b.toM-b.fromM-CROSS_SECTION.curbBlockLength)<1e-8));
-out.curbBlocks=blocks.length;out.semanticCurbSegments=CURB_SEGMENTS.length;out.runoffRegions=RUNOFF_REGIONS.length;
+// Mesh construction is opt-in for an acquired heavy slot. The default is a
+// small pure-math/source contract check that needs no renderer/build process.
+if (process.env.GT3_MESH === '1') {
+  const { buildTrack, TRACK_SAMPLE_COUNT } = await import('../src/scene/track.js');
+  const track=buildTrack();
+  out.meshes=track.children.map(m=>({name:m.name,triangles:(m.geometry.index?.count??m.geometry.attributes.position.count)/3}));
+  assert.equal(out.meshes.length,5);
+  assert.equal(out.meshes.find(m=>m.name==='track-markings').triangles,(TRACK_SAMPLE_COUNT-1)*4,'edge line gap or unexpected centre paint');
+  const blocks=track.getObjectByName('track-curbs').geometry.userData.blocks;
+  assert.ok(blocks.every(b=>b.terminal || Math.abs(b.toM-b.fromM-CROSS_SECTION.curbBlockLength)<1e-8));
+  out.curbBlocks=blocks.length;
+}
+out.semanticCurbSegments=CURB_SEGMENTS.length;out.runoffRegions=RUNOFF_REGIONS.length;
 out.pass=true;console.log(JSON.stringify(out,null,2));
 if(process.env.GT3_RESULT) await writeFile(process.env.GT3_RESULT,JSON.stringify(out,null,2));

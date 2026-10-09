@@ -39,6 +39,8 @@ A running record of **material** model work. It feeds `model-routing.md` §15, w
 | 2026-10-09 | WS4d degraded-readiness diagnosis | debug | tokenharbor/deepseek-v4.1-flash:free | failed (route stall) | N | Sol @ medium | — | — | 60-min cap hit, no output/report/commit; second identical stall on this route (also 82 min 2026-10-07). Classified provider/route, not capability
 | 2026-10-09 | WS4d degraded-readiness diagnosis (escalated) | debug | gpt-6.1-sol @ medium | accepted (findings only) | Y | — | — | Opus: report review | Leading cause audio-timeout (15 s, armed pre-scene); no patch without owner console evidence; 110,425 tokens
 | 2026-10-09 | Phase 3 closure review package draft | docs | opencode/muse-spark-1.3-contributor-free | accepted | Y | — | Opus: one line (gate/swap already chosen) | Opus: read against worker reports | Second accepted Muse package draft
+| 2026-10-09 | Phase 3 closure verification triage, fixes and full strict-gated rerun | debug + test | gpt-6.1-sol @ xhigh | accepted | Y | — | — | Opus: report review; all 16 checks PASS at stated SHAs | 840,740 tokens; most failures harness/env (IPv4 bind, false-PASS scroll harness, stale fixture, host interruption); 3 real app fixes (grade seating, seam wrap, exact finish). No children
+| 2026-10-09 | Review package verification + checklist fill | docs | opencode/muse-spark-1.3-contributor-free | accepted | Y | — | — | Opus: section read against Sol report | Third accepted Muse docs task this phase
 
 ## Emerging patterns
 

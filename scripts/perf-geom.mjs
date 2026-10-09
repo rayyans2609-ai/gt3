@@ -8,6 +8,13 @@ const out = process.env.GT3_OUT || '/tmp/gt3-perf-geom';
 const source = process.env.GT3_SOURCE || execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
 const configs = (process.env.GT3_CONFIGS ?? 'look=r1').split('|');
 const points = (process.env.GT3_POINTS || '0.012,0.283,0.365,0.616,0.645,0.985').split(',').map(Number);
+const hostSnapshot = () => {
+  const vm = execFileSync('vm_stat', [], { encoding: 'utf8' });
+  return { at: new Date().toISOString(),
+    pressure: Number(execFileSync('sysctl', ['-n', 'kern.memorystatus_vm_pressure_level'], { encoding: 'utf8' }).trim()),
+    pageouts: Number(/Pageouts:\s*(\d+)/.exec(vm)[1]),
+    swapouts: Number(/Swapouts:\s*(\d+)/.exec(vm)[1]) };
+};
 const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
 const quantile = (values, p) => {
   const sorted = [...values].sort((a, b) => a - b);
@@ -73,6 +80,7 @@ try {
       requestAnimationFrame(loop);
     });
     await wait(2000); // allow the initial point and startup rendering to settle
+    const hostBeforeMeasurement = hostSnapshot();
     const result = await page.evaluate(async ({ points }) => {
       const wait = ms => new Promise(r => setTimeout(r, ms));
       const g = window.__gt3;
@@ -125,7 +133,11 @@ try {
       }
       return { points: rows, namedTrackMeshes: namedTrack, renderer: g.renderer.getContext().getParameter(g.renderer.getContext().RENDERER) };
     }, { points });
-    report.configs[config || 'default'] = { url, errors, ...result };
+    const hostAfterMeasurement = hostSnapshot();
+    report.configs[config || 'default'] = { url, errors, ...result,
+      host: { before: hostBeforeMeasurement, after: hostAfterMeasurement,
+        pageoutsDelta: hostAfterMeasurement.pageouts - hostBeforeMeasurement.pageouts,
+        swapoutsDelta: hostAfterMeasurement.swapouts - hostBeforeMeasurement.swapouts } };
     // Preserve completed comparisons if the strict host monitor stops a later one.
     await writeFile(`${out}/perf-geom.json`, JSON.stringify(report, null, 2));
     await page.screenshot({ path: `${out}/${config.replace(/[^a-z0-9-]/gi, '-') || 'default'}.png` });

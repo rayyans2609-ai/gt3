@@ -1,3 +1,4 @@
+import { buildStartFacility } from './startFacility.js';
 /** A bounded racing gantry, approach signals and the painted checker strip. */
 import * as THREE from 'three';
 import { gateSpanAt, profileAt } from './trackProfile.js';
@@ -12,11 +13,11 @@ import {
 } from './trackCurve.js';
 
 const UP = new THREE.Vector3(0, 1, 0);
-const TRUSS_DEPTH = 1.4;
+const TRUSS_DEPTH = 2.4;
 const FINISH_SPAN = gateSpanAt(FINISH_T, 1.25);
 const POST_LEFT = FINISH_SPAN.left, POST_RIGHT = FINISH_SPAN.right;
-const BANNER_HEIGHT = 0.85;
-const CLEARANCE = 8.6;
+const BANNER_HEIGHT = 1.2;
+const CLEARANCE = 10.5;
 const APPROACH_T = 120 / TOUR_LENGTH;
 const STRIP_LENGTH = 2.0;
 const STRIP_CELL_M = 1;
@@ -129,24 +130,24 @@ function structure(root, ground, bottom, top, material) {
   for (let side = 0; side < 2; side++) {
     const x = side ? POST_LEFT : -POST_RIGHT;
     const height = top - ground[side];
-    add(x, ground[side] + height / 2, 0, 0.55, height, 0.85);
-    add(x, ground[side] + 0.15, 0, 1.1, 0.3, 1.25);
+    add(x, ground[side] + height / 2, 0, 0.9, height, 1.35);
+    add(x, ground[side] + 0.15, 0, 1.6, 0.3, 1.9);
   }
   const span = FINISH_SPAN.width;
   const trussHeight = top - bottom;
   for (const z of [-TRUSS_DEPTH / 2, TRUSS_DEPTH / 2]) {
-    for (const y of [bottom, top]) add(FINISH_SPAN.center, y, z, span + 0.55, 0.16, 0.16);
+    for (const y of [bottom, top]) add(FINISH_SPAN.center, y, z, span + 0.9, 0.24, 0.24);
     const cells = 10;
     const width = span / cells;
     for (let i = 0; i < cells; i++) {
       const dx = width;
       const dy = (i % 2 ? -1 : 1) * trussHeight;
       add(-POST_RIGHT + (i + 0.5) * width, (bottom + top) / 2, z,
-        Math.hypot(dx, dy), 0.105, 0.105, Math.atan2(dy, dx));
+        Math.hypot(dx, dy), 0.17, 0.17, Math.atan2(dy, dx));
     }
   }
   for (const x of [-POST_RIGHT, FINISH_SPAN.center, POST_LEFT]) {
-    for (const y of [bottom, top]) add(x, y, 0, 0.14, 0.14, TRUSS_DEPTH);
+    for (const y of [bottom, top]) add(x, y, 0, 0.22, 0.22, TRUSS_DEPTH);
   }
   const frame = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 1, 1), material, parts.length);
   frame.name = 'finish-gantry-truss';
@@ -167,19 +168,19 @@ function signals(root, height) {
     roughness: 0.35, metalness: 0.1,
   });
   // Five hooded lamp pods on each face: readable from either camera/reverse travel.
-  const housings = new THREE.InstancedMesh(new THREE.BoxGeometry(0.82, 0.82, 0.52), housingMaterial, 10);
-  const lenses = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.28, 0.28, 0.055, 16), lampMaterial, 10);
+  const housings = new THREE.InstancedMesh(new THREE.BoxGeometry(1.5, 1.5, 0.8), housingMaterial, 10);
+  const lenses = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.56, 0.56, 0.07, 16), lampMaterial, 10);
   housings.name = 'finish-signal-pods';
   lenses.name = 'finish-signal-lamps';
   const instance = new THREE.Object3D();
   for (let face = 0; face < 2; face++) for (let i = 0; i < 5; i++) {
     const sign = face ? 1 : -1;
     const index = face * 5 + i;
-    instance.position.set((i - 2) * 1.15, height, sign * (TRUSS_DEPTH / 2 + 0.24));
+    instance.position.set(FINISH_SPAN.center + (i - 2) * 2.1, height, sign * (TRUSS_DEPTH / 2 + 0.24));
     instance.rotation.set(0, 0, 0);
     instance.updateMatrix();
     housings.setMatrixAt(index, instance.matrix);
-    instance.position.z += sign * 0.28;
+    instance.position.z += sign * 0.43;
     instance.rotation.x = Math.PI / 2;
     instance.updateMatrix();
     lenses.setMatrixAt(index, instance.matrix);
@@ -207,7 +208,7 @@ export function buildFinishLine() {
     return groundHeightAt(p.x, p.z);
   });
   const bottom = Math.max(...ground) + CLEARANCE;
-  const top = bottom + 1.45;
+  const top = bottom + 2.4;
   const metal = new THREE.MeshStandardMaterial({ color: 0x949b9e, roughness: 0.58, metalness: 0.55 });
   structure(finishRoot, ground, bottom, top, metal);
   signals(finishRoot, (bottom + top) / 2);
@@ -220,6 +221,21 @@ export function buildFinishLine() {
   banner.frustumCulled = false;
   finishRoot.add(banner);
   buildPaintedStrip(finishRoot);
+  if (new URLSearchParams(location.search).get('gantry') !== 'plain') {
+    const flags = new THREE.InstancedMesh(new THREE.PlaneGeometry(2.4, 1.4),
+      new THREE.MeshStandardMaterial({color:0xd4d2c9,roughness:.9,side:THREE.DoubleSide}), 2);
+    const o = new THREE.Object3D();
+    for (let i=0;i<2;i++) {
+      o.position.set(i ? POST_LEFT : -POST_RIGHT, top + .7, 0);
+      o.updateMatrix();flags.setMatrixAt(i,o.matrix);
+    }
+    flags.name='gantry-static-flags';flags.frustumCulled=false;flags.instanceMatrix.needsUpdate=true;finishRoot.add(flags);
+  }
+  // Facility paint/lanes are authored in world coordinates.
+  finishRoot.updateMatrixWorld(true);
+  const facility = buildStartFacility();
+  facility.applyMatrix4(finishRoot.matrixWorld.clone().invert());
+  finishRoot.add(facility);
   finishRoot.updateMatrixWorld(true);
   update(0);
   return finishRoot;

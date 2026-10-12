@@ -225,7 +225,9 @@ function buildCurbGeometry() {
 function buildMarkingGeometry() {
   const positions = [], normals = [], uvs = [];
   const writeTriangle = createTriangleWriter(positions, normals, uvs);
-  const half = CROSS_SECTION.edgeLineWidth / 2;
+  // A transparent guard band lets the fragment shader integrate coverage even
+  // when the physical paint is narrower than one post-processing pixel.
+  const half = CROSS_SECTION.edgeLineWidth / 2 + 0.6;
   for (let i = 0; i < TRACK_SEGMENT_COUNT; i++) for (const side of [-1, 1]) {
     const p0 = sampleProfiles[i], p1 = sampleProfiles[i + 1];
     const edge0 = side > 0 ? p0.left : p0.right;
@@ -236,10 +238,37 @@ function buildMarkingGeometry() {
     const b = sampledPoint(i + 1, x1 - half, CROSS_SECTION.asphaltY + .003);
     const c = sampledPoint(i, x0 + half, CROSS_SECTION.asphaltY + .003);
     const d = sampledPoint(i + 1, x1 + half, CROSS_SECTION.asphaltY + .003);
-    writeTriangle(a, b, c, UP); writeTriangle(c, b, d, UP);
+    writeTriangle(a, b, c, UP, null, [[0, -half], [1, -half], [0, half]]);
+    writeTriangle(c, b, d, UP, null, [[0, half], [1, -half], [1, half]]);
   }
   // Circuits have no centre dashed line.
   return setCommonAttributes(new THREE.BufferGeometry(), positions, normals, uvs);
+}
+
+function markingMaterial() {
+  const material = new THREE.MeshStandardMaterial({
+    color: '#E8E6DF', roughness: 0.7, metalness: 0,
+    transparent: true, depthWrite: false,
+    polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1,
+  });
+  material.onBeforeCompile = shader => {
+    shader.uniforms.edgeHalfWidth = { value: CROSS_SECTION.edgeLineWidth / 2 };
+    shader.vertexShader = 'varying float vEdgeLateral;\n' + shader.vertexShader;
+    shader.vertexShader = shader.vertexShader.replace('#include <begin_vertex>',
+      '#include <begin_vertex>\nvEdgeLateral = uv.y;');
+    shader.fragmentShader = 'varying float vEdgeLateral;\nuniform float edgeHalfWidth;\n' + shader.fragmentShader;
+    shader.fragmentShader = shader.fragmentShader.replace('#include <color_fragment>', `
+      #include <color_fragment>
+      // Integrate a physical paint interval across a pixel footprint. Unlike
+      // hard triangle edges, this stays continuous through sub-pixel bends.
+      float pixelWidth = max(fwidth(vEdgeLateral), 0.0001);
+      float coverage = clamp((vEdgeLateral + edgeHalfWidth) / pixelWidth + 0.5, 0.0, 1.0)
+        - clamp((vEdgeLateral - edgeHalfWidth) / pixelWidth + 0.5, 0.0, 1.0);
+      diffuseColor.a *= coverage;
+    `);
+  };
+  material.customProgramCacheKey = () => 'continuous-edge-paint-v1';
+  return material;
 }
 
 function makeStaticMesh(name, geometry, material, castsShadow = false) {
@@ -270,7 +299,7 @@ export function buildTrack() {
     vertexColors: true,
   });
   const shoulderMaterial = new THREE.MeshStandardMaterial({
-    color: '#33333A',
+    color: '#A18D70',
     roughness: 0.96,
     metalness: 0,
   });
@@ -288,21 +317,12 @@ export function buildTrack() {
   ));
 
   group.add(makeStaticMesh('track-runoff', buildExteriorGeometry(true),
-    new THREE.MeshStandardMaterial({ color: '#777872', roughness: 1, metalness: 0 })));
+    new THREE.MeshStandardMaterial({ color: '#B6A080', roughness: 1, metalness: 0 })));
 
   group.add(makeStaticMesh(
     'track-markings',
     buildMarkingGeometry(),
-    new THREE.MeshStandardMaterial({
-      color: '#E8E6DF',
-      emissive: 0x000000,
-      emissiveIntensity: 0,
-      roughness: 0.7,
-      metalness: 0,
-      polygonOffset: true,
-      polygonOffsetFactor: -1,
-      polygonOffsetUnits: -1,
-    }),
+    markingMaterial(),
   ));
 
   group.add(makeStaticMesh(

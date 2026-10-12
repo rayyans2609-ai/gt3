@@ -1,4 +1,4 @@
-import { buildTrackFurniture } from './trackFurniture.js';
+import { buildTrackFurniture, FULL_PROPS } from './trackFurniture.js';
 /**
  * environment.js — grass, sky and sparse circuit dressing. (SPEC §6, §11, §14)
  *
@@ -582,56 +582,21 @@ function yawForTangent(t) {
   return Math.atan2(-tangent.z, tangent.x);
 }
 
-function buildTreeInstances(random) {
-  const indexedTrunk = new THREE.CylinderGeometry(0.42, 0.58, 2.2, 5, 1);
-  const trunk = paintGeometry(
-    indexedTrunk.toNonIndexed().translate(0, 1.1, 0),
-    '#8A765E',
-  );
-  indexedTrunk.dispose();
-  const canopy = paintGeometry(
-    new THREE.IcosahedronGeometry(2.8, 0).scale(1, 1.28, 1).translate(0, 4.8, 0),
-    '#5D8965',
-  );
-  const geometry = mergeGeometries([trunk, canopy], false);
-  if (!geometry.getAttribute('normal')) geometry.computeVertexNormals();
-  geometry.normalizeNormals();
-  trunk.dispose();
-  canopy.dispose();
-
-  const material = new THREE.MeshStandardMaterial({
-    color: 0xffffff,
-    roughness: 1,
-    metalness: 0,
-    flatShading: false,
-    vertexColors: true,
-  });
-  const count = 140;
-  const mesh = new THREE.InstancedMesh(geometry, material, count);
-  mesh.name = 'roadside-trees';
-  const matrix = new THREE.Matrix4();
-  const quaternion = new THREE.Quaternion();
+// Preserve the accepted terrain attachment seeds and the seeded random stream
+// for surviving tyre stacks. No tree geometry/material/instances are created.
+function formerTreeFoundations(random) {
+  const points = [];
   const position = new THREE.Vector3();
-  const scale = new THREE.Vector3();
-  // Instance colours are subtle multipliers over the already-green canopy albedo.
-  // Keeping them near white preserves the trunk colour and visible sun modeling.
-  const treeColors = [new THREE.Color('#D2E0D2'), new THREE.Color('#FFFFFF')];
-
-  for (let i = 0; i < count; i++) {
-    const t = THREE.MathUtils.clamp((i + 0.2 + random() * 0.6) / count, 0.002, 0.998);
+  for (let i = 0; i < 140; i++) {
+    const t = THREE.MathUtils.clamp((i + 0.2 + random() * 0.6) / 140, 0.002, 0.998);
     const side = random() < 0.5 ? -1 : 1;
-    const distanceFromEdge = 30 + random() * 150;
-    const lateral = asphaltEdgeAt(t, side) + side * distanceFromEdge;
-    const uniformScale = 0.8 + random() * 0.8;
-    groundPositionAt(t, lateral, position, 4.5 * uniformScale);
-    scale.setScalar(uniformScale);
-    quaternion.setFromAxisAngle(UP, random() * Math.PI * 2);
-    matrix.compose(position, quaternion, scale);
-    mesh.setMatrixAt(i, matrix);
-    mesh.setColorAt(i, treeColors[random() < 0.52 ? 0 : 1]);
+    const lateral = asphaltEdgeAt(t, side) + side * (30 + random() * 150);
+    const scale = 0.8 + random() * 0.8;
+    groundPositionAt(t, lateral, position, 4.5 * scale);
+    points.push({ x: position.x, z: position.z });
+    random(); random(); // former yaw and instance tint
   }
-
-  return finishInstances(mesh);
+  return points;
 }
 
 function sharpCornerPeaks() {
@@ -814,13 +779,13 @@ export function buildEnvironment() {
   backgroundLayer.add(sky);
 
   const random = seededRandom();
-  const trees = buildTreeInstances(random);
+  const formerTreePoints = formerTreeFoundations(random);
   const furniture = buildTrackFurniture();
   const furnitureMeshes = furniture.children;
   const tireStacks = buildTireInstances(random);
-  const grandstands = buildGrandstandInstances(random);
-  const dressing = [trees, ...furnitureMeshes, tireStacks, grandstands];
-  const dressingPoints = [];
+  const grandstands = FULL_PROPS ? buildGrandstandInstances(random) : null;
+  const dressing = [...furnitureMeshes, tireStacks, ...(grandstands ? [grandstands] : [])];
+  const dressingPoints = formerTreePoints;
   const dressingSeeds = new Set();
   const instanceMatrix = new THREE.Matrix4();
   for (const mesh of dressing) for (let i = 0; i < mesh.count; i++) {
@@ -839,7 +804,8 @@ export function buildEnvironment() {
   root.add(grass);
   // Only the effectively infinite sky receives cursor parallax. Moving a grounded
   // grandstand with this layer would lift it away from its sampled terrain height.
-  root.add(backgroundLayer, trees, furniture, tireStacks, grandstands);
+  root.add(backgroundLayer, furniture, tireStacks);
+  if (grandstands) root.add(grandstands);
 
   if (!dressingCountLogged) {
     const dressingTriangles = dressing

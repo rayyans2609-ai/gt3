@@ -6,12 +6,14 @@ const base=process.env.GT3_URL||'http://127.0.0.1:5201';
 const out=process.env.GT3_OUT||'/tmp/gt3-facility';await mkdir(out,{recursive:true});
 const assert=(ok,msg)=>{if(!ok)throw new Error(msg);};
 const wait=ms=>new Promise(r=>setTimeout(r,ms));
-const report={sha:execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim(),tree:execFileSync('git',['status','--porcelain'],{encoding:'utf8'}).trim(),base,variants:[],errors:[]};
+const report={sha:process.env.GT3_SOURCE||execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim(),tree:process.env.GT3_TREE??execFileSync('git',['status','--porcelain'],{encoding:'utf8'}).trim(),base,variants:[],errors:[]};
 const browser=await puppeteer.launch({executablePath:'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',headless:'new',pipe:true,timeout:180000,protocolTimeout:180000,
  args:['--no-sandbox','--no-first-run','--enable-gpu','--use-gl=angle','--use-angle=metal',`--user-data-dir=${out}/chrome-${process.pid}`],defaultViewport:{width:1600,height:900}});
 process.once('SIGTERM',async()=>{await browser.close();process.exit(143);});
 try {
-for(const query of ['', '?grid=p2&gantry=plain&props=lean']) {
+const captureOnly=process.env.GT3_CAPTURE_ONLY==='1';
+const queries=process.env.GT3_QUERIES!==undefined?process.env.GT3_QUERIES.split('|'):['', '?grid=p2&gantry=plain&props=lean'];
+for(const query of queries) {
  const page=await browser.newPage();
  page.on('pageerror',e=>report.errors.push(e.message));page.on('console',m=>{if(m.type()==='error')report.errors.push(m.text());});
  await page.evaluateOnNewDocument(()=>{
@@ -35,6 +37,30 @@ for(const query of ['', '?grid=p2&gantry=plain&props=lean']) {
   const r=await import('/src/scene/trackCurve.js');const rig=window.__gt3.scene.getObjectByName('car-rig');
   const expected=r.offsetPointAt(r.GRID_T,r.GRID_LATERAL);return {error:Math.hypot(rig.position.x-expected.x,rig.position.z-expected.z),boxes:window.__gt3.scene.getObjectByName('staggered-grid-paint')?.geometry.getAttribute('position').count};
  });assert(grid.error<.05,'car is not in its grid slot');assert(grid.boxes===180,'grid is not ten merged U boxes');
+ if(captureOnly) {
+  const shots=[];
+  const label=query.replace(/[^a-z0-9-]/gi,'-')||'default';
+  const capture=async name=>{const path=`${out}/${label}-${name}.png`;await page.screenshot({path});shots.push(path);};
+  await capture('day-grid-parked');
+  await page.mouse.wheel({deltaY:20});await wait(1500);await seek(0);
+  await capture('day-grid');
+  for(const [name,t] of [['day-edge-corner',.123],['day-runoff-barrier',.283],['day-checkpoint',.18],['day-slowdown-verge',.645],['day-braking-boards',.254-100/5006.8196682221]]) {
+   const p=await page.evaluate(async t=>(await import('/src/scene/trackCurve.js')).progressAtRouteT(t),t);
+   await seek(p);await capture(name);
+  }
+  await page.evaluate(async()=>(await import('/src/scene/theme.js')).applyTheme('night',{instant:true}));
+  await seek(0);await capture('night-grid-spot');
+  const scene=await page.evaluate(()=>{
+   const g=window.__gt3, furniture=g.scene.getObjectByName('trackside-furniture');
+   return {variant:furniture.userData.variant,trees:!!g.scene.getObjectByName('roadside-trees'),
+    furniture:furniture.children.map(o=>({name:o.name,instances:o.count})),
+    post:g.scene.getObjectByName('checkpoint-posts').geometry.parameters,
+    beam:g.scene.getObjectByName('checkpoint-beams').geometry.parameters,
+    stripeVertices:g.scene.getObjectByName('checkpoint-road-stripes')?.geometry.attributes.position.count??0};
+  });
+  report.variants.push({query,constants,grid,scene,shots});
+  await page.close();continue;
+ }
  await page.mouse.wheel({deltaY:20});await wait(1500);await seek(0);
  const before=await snap();await seek(constants.first+.25/constants.length);const neutral=await snap();
  assert(neutral.active===0 && neutral.mode==='race' && !neutral.signals,'first line pass changed car/completed/signalled');

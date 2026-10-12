@@ -7,7 +7,7 @@ import { TRACK_LENGTH } from './trackCurve.js';
 
 export const CROSS_SECTION = Object.freeze({
   asphaltY: -0.02, vergeY: -0.03, curbInnerY: -0.02, curbOuterY: 0.08,
-  shoulderWidth: 1.5, edgeLineWidth: 0.15, edgeLineInset: 0.20, curbBlockLength: 2.4,
+  shoulderWidth: 1.5, edgeLineWidth: 0.25, edgeLineInset: 0.25, curbBlockLength: 2.4,
 });
 export const WIDTH_CLASSES = Object.freeze(['technical', 'ordinary', 'braking', 'start-finish']);
 // Boundaries describe class centres; transitions straddle them. The wrapped

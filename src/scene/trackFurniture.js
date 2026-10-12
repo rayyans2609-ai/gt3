@@ -3,7 +3,8 @@ import * as THREE from 'three';
 import { TRACK_LENGTH, tangentAt } from './trackCurve.js';
 import { CORNERS, WIDTH_SECTIONS, outerEdgeAt } from './trackProfile.js';
 import { groundPositionAt } from './environment.js';
-const lean = new URLSearchParams(globalThis.location?.search || '').get('props') === 'lean';
+export const FULL_PROPS = new URLSearchParams(globalThis.location?.search || '').get('props') === 'full';
+const lean = !FULL_PROPS;
 // Braking classes select zones, corner entries locate the 150/100/50 sequence.
 export const BRAKING_ZONES = WIDTH_SECTIONS.filter(s => s.classIndex === 2).map(s => {
   const corner=CORNERS.find(c=>c.entry>=s.from && c.entry<s.to);
@@ -38,7 +39,7 @@ export function buildTrackFurniture() {
   const boardGeometry=new THREE.PlaneGeometry(1.6,2.4);
   // Ordinary lit surface: no emissive/light changes or Night-specific treatment.
   const boardMaterial=new THREE.MeshStandardMaterial({map:texture,color:0xffffff,roughness:.95,side:THREE.DoubleSide});
-  const zones=lean?BRAKING_ZONES.slice(0,2):BRAKING_ZONES;
+  const zones=BRAKING_ZONES;
   const boards=new THREE.InstancedMesh(boardGeometry,boardMaterial,zones.length*3);boards.name='braking-150-100-50';
   // Per-instance atlas offsets, shader compiled at boot; no per-frame mutation.
   const offsets=new Float32Array(boards.count);
@@ -83,7 +84,7 @@ export function buildTrackFurniture() {
       }
     }
   }
-  for(const t of lean?[.605]:[.247,.605]) {
+  for(const t of lean?[]:[.247,.605]) {
     const side=1,lateral=outerEdgeAt(t,side)+12;
     add(parts.marshal,t,lateral,1.5,2.8,3,2.5);
     add(parts.steel,t,lateral,3.05,3.5,.18,3.2);

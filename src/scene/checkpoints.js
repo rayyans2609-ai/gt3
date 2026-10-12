@@ -6,14 +6,14 @@ import {
   CHECKPOINT_T, CHECKPOINT_ROUTE_T, CHECKPOINT_APPROACH_T,
   offsetPointAt, tangentAt,
 } from './trackCurve.js';
-import { gateSpanAt } from './trackProfile.js';
+import { gateSpanAt, profileAt, CROSS_SECTION } from './trackProfile.js';
 import { createGateResponse } from './gateResponse.js';
 
-const postGeometry = new THREE.BoxGeometry(0.24, 7.6, 0.34);
+const postGeometry = new THREE.BoxGeometry(0.55, 7.6, 0.65);
 // Keep a realistic reference span in geometry.parameters for the existing gate
 // response owner; instance scale adjusts only span, leaving thickness untouched.
 const BEAM_REFERENCE_WIDTH = gateSpanAt(CHECKPOINT_ROUTE_T[0]).width + .6;
-const beamGeometry = new THREE.BoxGeometry(BEAM_REFERENCE_WIDTH, 0.24, 0.55);
+const beamGeometry = new THREE.BoxGeometry(BEAM_REFERENCE_WIDTH, 0.65, 0.9);
 const postMaterial = new THREE.MeshStandardMaterial({
   color: 0xa9b1b4, metalness: 0.35, roughness: 0.55,
   transparent: true, opacity: 0.72, depthWrite: false,
@@ -54,6 +54,10 @@ export function buildCheckpoints() {
   root.name = 'checkpoints';
   const posts = new THREE.InstancedMesh(postGeometry, postMaterial, CHECKPOINT_T.length * 2);
   const beams = new THREE.InstancedMesh(beamGeometry, beamMaterial, CHECKPOINT_T.length);
+  // Nine substantial two-metre transverse stripes, merged and drawn at boot.
+  // Surface paint follows the route grade; it never changes tyre support.
+  const stripeVertices = [];
+  const stripeGeometry = new THREE.BufferGeometry();
   posts.name = 'checkpoint-posts';
   beams.name = 'checkpoint-beams';
   // The instances cover the full lap; two tiny static draws are cheaper than
@@ -63,6 +67,16 @@ export function buildCheckpoints() {
   for (let i = 0; i < CHECKPOINT_T.length; i++) {
     const t = CHECKPOINT_ROUTE_T[i];
     const span = gateSpanAt(t);
+    const profile = profileAt(t);
+    const left = profile.left - .45, right = -profile.right + .45;
+    const forward = tangentAt(t);
+    const corners = [];
+    for (const distance of [-1, 1]) for (const lateral of [right, left]) {
+      corners.push(offsetPointAt(t, lateral, CROSS_SECTION.asphaltY + .01)
+        .addScaledVector(forward, distance));
+    }
+    for (const v of [corners[0], corners[2], corners[1], corners[1], corners[2], corners[3]])
+      stripeVertices.push(v.x, v.y, v.z);
     instance.scale.set(1, 1, 1);
     tangentAt(t, tangent);
     instance.rotation.set(0, Math.atan2(tangent.x, tangent.z), 0);
@@ -72,7 +86,8 @@ export function buildCheckpoints() {
       instance.updateMatrix();
       posts.setMatrixAt(i * 2 + side, instance.matrix);
     }
-    offsetPointAt(t, span.center, 7.7, position);
+    // Grow upward from the original underside, preserving vertical clearance.
+    offsetPointAt(t, span.center, 7.58 + beamGeometry.parameters.height / 2, position);
     instance.scale.x = (span.width + .6) / BEAM_REFERENCE_WIDTH;
     instance.position.copy(position);
     instance.updateMatrix();
@@ -80,7 +95,17 @@ export function buildCheckpoints() {
   }
   posts.instanceMatrix.needsUpdate = true;
   beams.instanceMatrix.needsUpdate = true;
-  root.add(posts, beams);
+  stripeGeometry.setAttribute('position', new THREE.Float32BufferAttribute(stripeVertices, 3));
+  stripeGeometry.computeVertexNormals();
+  const stripes = new THREE.Mesh(stripeGeometry, new THREE.MeshStandardMaterial({
+    color: 0xe8e6df, roughness: .86, metalness: 0,
+    polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2,
+    side: THREE.DoubleSide,
+  }));
+  stripes.name = 'checkpoint-road-stripes';
+  stripes.frustumCulled = false; // Buffers and lit material actually draw during boot warmup.
+  stripes.receiveShadow = true;
+  root.add(posts, beams, stripes);
   response = createGateResponse(posts, beams);
   root.add(response.group);
   routeIndex = indexAt(state.progress);

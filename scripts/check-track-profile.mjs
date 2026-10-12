@@ -56,8 +56,8 @@ assert.ok(out.maxTotalWidthSlope<=.05001,'width transitions exceed 1:20');
 for(const f of footprints) assert.ok(out.minClearance[f.id].m >= .05,`${f.id} clipped road/curb: ${JSON.stringify(out.minClearance[f.id])}`);
 for(const t of [...route.CHECKPOINT_ROUTE_T,route.FINISH_T]) {
   const p=profileAt(t), span=gateSpanAt(t,t===route.FINISH_T?1.25:1);
-  const leftGap=span.left-p.left-p.curbLeft-(t===route.FINISH_T?.9/2:.34/2);
-  const rightGap=span.right-p.right-p.curbRight-(t===route.FINISH_T?.9/2:.34/2);
+  const leftGap=span.left-p.left-p.curbLeft-(t===route.FINISH_T?.9/2:.55/2);
+  const rightGap=span.right-p.right-p.curbRight-(t===route.FINISH_T?.9/2:.55/2);
   assert.ok(leftGap>.5 && rightGap>.5);
   out.gates.push({t,span:span.width,leftGap,rightGap});
 }

@@ -86,7 +86,8 @@ export function buildCheckpoints() {
       instance.updateMatrix();
       posts.setMatrixAt(i * 2 + side, instance.matrix);
     }
-    offsetPointAt(t, span.center, 7.7, position);
+    // Grow upward from the original underside, preserving vertical clearance.
+    offsetPointAt(t, span.center, 7.58 + beamGeometry.parameters.height / 2, position);
     instance.scale.x = (span.width + .6) / BEAM_REFERENCE_WIDTH;
     instance.position.copy(position);
     instance.updateMatrix();

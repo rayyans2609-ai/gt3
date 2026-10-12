@@ -1,0 +1,33 @@
+/* Interim Phase 3 notice: the shared road scene and scroll remain available. */
+#finish-screen.finish-screen--tail {
+  inset: auto;
+  left: 50%;
+  bottom: 30px;
+  width: auto;
+  padding: 0;
+  transform: translateX(-50%);
+  background: none;
+  backdrop-filter: none;
+  pointer-events: none;
+}
+.finish-screen--tail .finish-screen__panel {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  width: auto;
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  pointer-events: none;
+}
+.finish-screen--tail .finish-screen__header,
+.finish-screen--tail .finish-screen__footer { display: block; margin: 0; padding: 0; }
+.finish-screen--tail .finish-screen__eyebrow { margin: 0; font: 600 13px/1.4 var(--font-ui); color: var(--fg); }
+.finish-screen--tail .finish-screen__closing,
+.finish-screen--tail .finish-screen__rule,
+.finish-screen--tail .finish-recap,
+.finish-screen--tail .finish-credits { display: none; }
+.finish-screen--tail .finish-replay { margin: 0; pointer-events: auto; color: var(--fg); }

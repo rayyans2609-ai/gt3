@@ -1,9 +1,9 @@
 import { state, set, subscribe } from '../core/state.js';
 import { CARS, getCar } from '../data/cars.js';
 import { playFinish } from '../audio/audioManager.js';
-import { lockScroll, resetToStart, unlockScroll, seekTo } from '../scroll/scrollDrive.js';
+import { resetToStart } from '../scroll/scrollDrive.js';
 
-import { FINISH_THRESHOLD, TOUR_LENGTH } from '../scene/trackCurve.js';
+import { FINISH_THRESHOLD } from '../scene/trackCurve.js';
 
 const CREDIT_GROUPS = Object.freeze([
   {
@@ -35,9 +35,7 @@ const CREDIT_GROUPS = Object.freeze([
 let initialized = false;
 let visible = false;
 let runFinished = false;
-let finishSoundPlayed = false;
 let replayHandler = null;
-let reverseInput = null;
 let unsubscribeProgress = null;
 let root = null;
 let recapGrid = null;
@@ -128,7 +126,6 @@ function replayRoute() {
   hideFinishScreen();
 
   runFinished = false;
-  finishSoundPlayed = false;
 
   if (typeof replayHandler === 'function') {
     try {
@@ -140,14 +137,14 @@ function replayRoute() {
 }
 
 function buildScreen() {
-  root.className = 'finish-screen';
+  root.className = 'finish-screen finish-screen--tail';
   root.hidden = false;
   root.setAttribute('aria-hidden', 'true');
-  root.setAttribute('aria-label', 'Route finish and car discovery recap');
+  root.setAttribute('aria-label', 'Grand Tour complete');
 
   const panel = element('section', 'finish-screen__panel');
   const header = element('header', 'finish-screen__header');
-  const eyebrow = element('p', 'finish-screen__eyebrow', 'Route complete · final classification');
+  const eyebrow = element('p', 'finish-screen__eyebrow', 'GRAND TOUR COMPLETE');
   const closing = element('h2', 'finish-screen__closing', 'The circuit falls quiet. The machines remain.');
   const rule = element('span', 'finish-screen__rule');
   header.append(eyebrow, closing, rule);
@@ -207,25 +204,13 @@ export function initFinishScreen() {
     if (runFinished && progress < FINISH_THRESHOLD) {
       hideFinishScreen();
       runFinished = false;
-      finishSoundPlayed = false;
     }
     maybeFinish(progress);
   });
-  // The legacy card locks the page; consume only reverse input to leave completion.
-  reverseInput = event => {
-    const wheel = event.type === 'wheel' && event.deltaY < 0;
-    const key = event.type === 'keydown' && ['ArrowUp', 'PageUp', 'Home'].includes(event.key);
-    if (!visible || (!wheel && !key) || window.__gt3?.readiness?.status === 'loading') return;
-    event.preventDefault();
-    hideFinishScreen();
-    seekTo(1 - 2 / TOUR_LENGTH, { instant: true });
-  };
-  window.addEventListener('wheel', reverseInput, { passive: false });
-  window.addEventListener('keydown', reverseInput);
   maybeFinish();
 }
 
-/** Reveal the in-world scorecard with a slow, single eased entrance. */
+/** A compact completion notice leaves the road scene and native scroll available. */
 export function showFinishScreen() {
   if (!initialized) initFinishScreen();
   if (visible || runFinished) return;
@@ -233,7 +218,6 @@ export function showFinishScreen() {
   visible = true;
   runFinished = true;
   renderRecap();
-  lockScroll();
   set('mode', 'finish');
   root.hidden = false;
   root.setAttribute('aria-hidden', 'false');
@@ -242,8 +226,8 @@ export function showFinishScreen() {
     if (visible && root) root.classList.add('is-visible');
   });
 
-  if (!finishSoundPlayed) {
-    finishSoundPlayed = true;
+  if (!state.finishAcknowledged) {
+    set('finishAcknowledged', true);
     playFinish();
   }
 }
@@ -256,14 +240,14 @@ export function restoreFinishScreen() {
   visible = true;
   runFinished = true;
   renderRecap();
-  lockScroll();
   set('mode', 'finish');
   root.hidden = false;
   root.setAttribute('aria-hidden', 'false');
   root.classList.add('is-visible');
+  set('finishAcknowledged', true);
 }
 
-/** Hide the scorecard. Replay uses resetToStart(), which has already released scroll. */
+/** Reverse-out hides the notice; replay also resets the stopwatch and tail. */
 export function hideFinishScreen() {
   if (!root || !visible) return;
 
@@ -273,7 +257,6 @@ export function hideFinishScreen() {
   root.classList.remove('is-visible');
   root.setAttribute('aria-hidden', 'true');
   if (state.mode === 'finish') set('mode', 'race');
-  if (state.scrollLocked) unlockScroll();
 }
 
 /** Frame-loop fallback; the progress subscription also makes the trigger deterministic. */
@@ -286,9 +269,6 @@ export function update(dt) {
 // Retained only so hot-module teardown/debug tooling can release the subscription.
 export function disposeFinishScreen() {
   unsubscribeProgress?.();
-  window.removeEventListener('wheel', reverseInput);
-  window.removeEventListener('keydown', reverseInput);
-  reverseInput = null;
   unsubscribeProgress = null;
   initialized = false;
 }

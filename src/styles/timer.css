@@ -1,0 +1,11 @@
+/* Provisional simple stopwatch, independent of manager-owned HUD typography. */
+.hud-lap-timer {
+  position: absolute;
+  left: 30px;
+  bottom: 30px;
+  color: var(--fg);
+  font: 600 23px/1 var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -.04em;
+  pointer-events: none;
+}

@@ -39,6 +39,18 @@ export const aerial = {
 };
 
 let camera;
+let finishHeld = false;
+let heldFov = 0;
+const heldPosition = new THREE.Vector3();
+const heldQuaternion = new THREE.Quaternion();
+/** sceneSetup owns dynamic FOV; main reapplies the held lens after scene feedback. */
+export function enforceFinishHold() {
+  if (!camera || !finishHeld) return;
+  camera.position.copy(heldPosition);
+  camera.quaternion.copy(heldQuaternion);
+  if (camera.fov !== heldFov) { camera.fov = heldFov; camera.updateProjectionMatrix(); }
+  camera.updateMatrixWorld();
+}
 let lastProgress = null;
 const routeTarget = new THREE.Vector3();
 const desiredPosition = new THREE.Vector3();
@@ -116,6 +128,7 @@ function safetyOffset(testPosition) {
 
 export function snap() {
   if (!camera) return;
+  finishHeld = false;
   if (CORRIDOR) { corridorUpdate(true); return; }
   if (SECTOR) { sectorSnap(); return; }
   routePose(routeTAt(state.progress));
@@ -139,6 +152,16 @@ export function initAerialCamera(raceCamera) {
 
 export function update(dt) {
   if (!camera) return;
+  if (state.progress >= 1) {
+    if (!finishHeld) {
+      // Capture the actual finishing view, without snapping to a corrected endpoint pose.
+      heldPosition.copy(camera.position); heldQuaternion.copy(camera.quaternion); heldFov = camera.fov;
+      finishHeld = true;
+      lastProgress = 1;
+    }
+    return;
+  }
+  finishHeld = false;
   if (CORRIDOR) { aerial.frames++; corridorUpdate(false); return; }
   if (SECTOR) { sectorUpdate(dt); return; }
   aerial.frames++;

@@ -12,10 +12,12 @@ const VALID_SESSION_VALUES = Object.freeze({
   trackIndex: { has: (value) => Number.isInteger(value) && value >= 0 && value < 6 },
   trackPosition: { has: (value) => Number.isFinite(value) && value >= 0 },
   playIntent: { has: (value) => typeof value === 'boolean' },
+  lapElapsedMs: { has: (value) => Number.isFinite(value) && value >= 0 },
+  finishAcknowledged: { has: (value) => typeof value === 'boolean' },
   routeProgress: { has: (value) => Number.isFinite(value) && value >= 0 && value <= 1 },
 });
 const STATE_SESSION_KEYS = Object.freeze(Object.keys(VALID_SESSION_VALUES)
-  .filter((key) => key !== 'routeProgress'));
+  .filter((key) => !['routeProgress', 'lapElapsedMs'].includes(key)));
 const ROUTE_WRITE_INTERVAL_MS = 350;
 let initialized = false;
 let restoredRouteProgress = null;
@@ -38,6 +40,7 @@ function writeSession() {
   try {
     const value = Object.fromEntries(STATE_SESSION_KEYS.map((key) => [key, state[key]]));
     value.routeProgress = routeProgress;
+    value.lapElapsedMs = state.lapElapsedMs;
     value.routeMapping = ROUTE_MAPPING;
     value.routeGridDistance = GRID_DISTANCE;
     value.unlocked = [...state.unlocked].filter((index) =>
@@ -61,6 +64,10 @@ export function restoreSession() {
     restoredRouteProgress = migrateRouteProgress(saved);
     routeProgress = restoredRouteProgress;
   }
+  if (restoredRouteProgress !== null && VALID_SESSION_VALUES.lapElapsedMs.has(saved?.lapElapsedMs)) {
+    set('lapElapsedMs', saved.lapElapsedMs);
+  }
+  set('lapFrozen', restoredRouteProgress === 1);
   const unlocked = new Set([0]);
   if (Array.isArray(saved?.unlocked)) {
     for (const index of saved.unlocked) {
@@ -101,6 +108,7 @@ export function startRoutePersistence() {
   routePersistenceStarted = true;
   const flush = () => persistRouteProgress(state.progress, { flush: true });
   subscribe('progress', (progress) => persistRouteProgress(progress));
+  subscribe('lapElapsedMs', () => persistRouteProgress(state.progress));
   window.addEventListener('pagehide', flush);
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'hidden') flush();

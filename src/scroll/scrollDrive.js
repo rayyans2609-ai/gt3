@@ -19,6 +19,10 @@ import { state, set } from '../core/state.js';
 import { persistRouteProgress } from '../core/session.js';
 import { TOUR_LENGTH } from '../scene/trackCurve.js';
 import { createBoundedModel } from './boundedPace.js';
+import { FINISH_TAIL_METERS } from './finishTail.js';
+import { LAP_MIN_SPEED_MPS, updateLapTimer, pauseLapTimer, resetLapTimer } from '../core/lapTimer.js';
+
+const DRIVE_LENGTH = TOUR_LENGTH + FINISH_TAIL_METERS;
 
 const REFERENCE_LENGTH = 3472.646166835742;
 
@@ -43,7 +47,7 @@ const TUNE = {
   idleEpsilon: 0.00004,
 
   // Total scroll spacer height in viewport heights. Must match #scroll-spacer in CSS.
-  spacerVh: 1200 * TOUR_LENGTH / REFERENCE_LENGTH,
+  spacerVh: 1200 * DRIVE_LENGTH / REFERENCE_LENGTH,
 };
 
 // ---------------------------------------------------------------------------
@@ -76,12 +80,13 @@ function readScrollMode() {
   } catch { return 'cap'; }
 }
 export const scrollMode = readScrollMode();
-const bounded = scrollMode === 'default' ? null : createBoundedModel(scrollMode, TOUR_LENGTH);
+const bounded = scrollMode === 'default' ? null : createBoundedModel(scrollMode, DRIVE_LENGTH);
 const RESYNC_IDLE_S = 0.14;
 const STRANDED_IDLE_S = 0.05;
 let lastY = 0;               // page scrollY already accounted for (candidates only)
 let thumbHeld = false;       // classic-scrollbar drag in progress (candidates only)
 
+let lastUserInputAt = -Infinity;
 let rawTarget = 0;      // undamped progress straight from the scrollbar
 let lastProgress = 0;   // previous frame's damped progress, for velocity
 let smoothedSpeed = 0;  // eased 0..1 intensity
@@ -107,7 +112,7 @@ function maxScroll() {
 
 function readScroll() {
   const y = window.scrollY || window.pageYOffset || 0;
-  return Math.min(1, Math.max(0, y / maxScroll()));
+  return Math.min(DRIVE_LENGTH / TOUR_LENGTH, Math.max(0, y / maxScroll() * DRIVE_LENGTH / TOUR_LENGTH));
 }
 
 function onScroll() {
@@ -123,14 +128,14 @@ function onScroll() {
   if (bounded) {
     // Candidates: input is polled per frame in update(); the event only dismisses the start screen.
     if (!hasStarted && (window.scrollY || 0) > 0
-      && performance.now() >= suppressProgrammaticStartUntil) startDrive();
+      && performance.now() >= suppressProgrammaticStartUntil && userInputIsRecent()) startDrive();
     return;
   }
 
   rawTarget = readScroll();
-  set('targetProgress', rawTarget);
+  set('targetProgress', Math.min(1, rawTarget));
 
-  if (!hasStarted && rawTarget > 0 && performance.now() >= suppressProgrammaticStartUntil) {
+  if (!hasStarted && rawTarget > 0 && performance.now() >= suppressProgrammaticStartUntil && userInputIsRecent()) {
     startDrive();
   }
 }
@@ -144,14 +149,25 @@ function startDrive() {
 
 /** Candidates: place the page at route progress `t` and mark that scroll position as accounted for. */
 function syncPageTo(t) {
-  const y = Math.min(1, Math.max(0, t)) * maxScroll();
+  const y = Math.min(DRIVE_LENGTH / TOUR_LENGTH, Math.max(0, t)) * TOUR_LENGTH / DRIVE_LENGTH * maxScroll();
   if (Math.abs((window.scrollY || 0) - y) > 0.5) window.scrollTo(0, y);
   lastY = window.scrollY || 0;
 }
 
+function userInputIsRecent(now = performance.now()) { return now - lastUserInputAt <= 1000; }
+function noteUserInput(e) {
+  if (!e.isTrusted || state.scrollLocked || document.visibilityState === 'hidden') return;
+  if (e.type === 'keydown' && !SCROLL_KEYS.has(e.key)) return;
+  if (e.type === 'wheel' && e.deltaY === 0) return;
+  lastUserInputAt = performance.now();
+}
+function pauseDriving() {
+  lastUserInputAt = -Infinity;
+  pauseLapTimer();
+}
 function pointerDown(e) {
   const root = document.documentElement;
-  if (e.clientX >= root.clientWidth || e.clientY >= root.clientHeight) thumbHeld = true;
+  if (e.clientX >= root.clientWidth || e.clientY >= root.clientHeight) { thumbHeld = true; noteUserInput(e); }
 }
 function pointerUp() { thumbHeld = false; }
 
@@ -205,6 +221,7 @@ export function lockScroll() {
     attachSwallowers();
     return;
   }
+  pauseDriving();
   lockedScrollY = window.scrollY;
   set('scrollLocked', true);
   attachSwallowers();
@@ -248,15 +265,15 @@ export function unlockScroll() {
   detachSwallowers();
   if (bounded) {
     // Nothing received while locked is banked: the page goes to the car, the model starts at rest.
-    bounded.reset(state.progress * TOUR_LENGTH);
-    syncPageTo(state.progress);
-    rawTarget = state.progress;
+    bounded.reset(state.progress * TOUR_LENGTH + state.finishTailMeters);
+    syncPageTo(state.progress + state.finishTailMeters / TOUR_LENGTH);
+    rawTarget = state.progress + state.finishTailMeters / TOUR_LENGTH;
     set('targetProgress', state.progress);
     return;
   }
   window.scrollTo(0, lockedScrollY);
   rawTarget = readScroll();
-  set('targetProgress', rawTarget);
+  set('targetProgress', Math.min(1, rawTarget));
 }
 
 /** Register a callback for the very first scroll input (start screen, audio gate). */
@@ -267,6 +284,10 @@ export function onFirstScroll(fn) {
 
 /** Jump the drive back to the start line — the "Replay route" control. */
 export function resetToStart() {
+  pauseDriving();
+  resetLapTimer();
+  set('finishAcknowledged', false);
+  set('finishTailMeters', 0);
   set('scrollLocked', false);
   detachSwallowers();
   window.scrollTo(0, 0);
@@ -288,7 +309,10 @@ export function resetToStart() {
  */
 export function seekTo(t, { instant = false } = {}) {
   const clamped = Math.min(1, Math.max(0, t));
-  window.scrollTo(0, clamped * maxScroll());
+  pauseDriving();
+  pauseLapTimer(performance.now(), clamped >= 1);
+  set('finishTailMeters', 0);
+  window.scrollTo(0, clamped * TOUR_LENGTH / DRIVE_LENGTH * maxScroll());
   if (state.scrollLocked) {
     lockedScrollY = window.scrollY || 0;
     // A restore runs while locked, but its queued scroll event can arrive just after unlock.
@@ -303,6 +327,7 @@ export function seekTo(t, { instant = false } = {}) {
     if (instant) bounded.reset(clamped * TOUR_LENGTH);
     else bounded.seek(clamped * TOUR_LENGTH);
   }
+  smoothedSpeed = 0;
   if (instant) {
     lastProgress = clamped;
     set('progress', clamped);
@@ -325,12 +350,14 @@ export function update(dt) {
   // frame rate; this gives the same feel at 60, 120 and 144 Hz.
   const k = 1 - Math.pow(1 - TUNE.damping, dt * 60);
 
-  const target = state.scrollLocked ? state.progress : rawTarget;
-  let p = state.progress + (target - state.progress) * k;
+  const target = state.scrollLocked ? state.progress + state.finishTailMeters / TOUR_LENGTH : rawTarget;
+  const before = state.progress + state.finishTailMeters / TOUR_LENGTH;
+  let p = before + (target - before) * k;
 
   // Snap when we're within a hair of the target so the car actually comes to rest.
   if (Math.abs(target - p) < TUNE.idleEpsilon) p = target;
-  p = Math.min(1, Math.max(0, p));
+  p = Math.min(DRIVE_LENGTH / TOUR_LENGTH, Math.max(0, p));
+  if (before < 1 && p >= 1) { p = 1; rawTarget = 1; syncPageTo(1); }
 
   // Signed velocity in progress-per-second, normalised so 1 is flat out.
   // Negative when scrolling back up — the drive reverses smoothly.
@@ -345,8 +372,10 @@ export function update(dt) {
   smoothedSpeed += (targetSpeed - smoothedSpeed) * (1 - Math.pow(1 - sk, dt * 60));
   if (smoothedSpeed < 0.0015) smoothedSpeed = 0;
 
+  publishTravel(p * TOUR_LENGTH, dp * TOUR_LENGTH, dt);
   lastProgress = p;
-  set('progress', p);
+  set('finishTailMeters', Math.max(0, (p - 1) * TOUR_LENGTH));
+  set('progress', Math.min(1, p));
   set('velocity', velocity);
   set('speed01', smoothedSpeed);
 }
@@ -356,19 +385,27 @@ function updateBounded(dt) {
   if (locked) {
     // Frozen: anything the page did while locked is discarded, the model sits at rest on the car.
     lastY = window.scrollY || 0;
-    bounded.reset(state.progress * TOUR_LENGTH);
+    bounded.reset(state.progress * TOUR_LENGTH + state.finishTailMeters);
   } else {
     const y = window.scrollY || 0;
     const dy = y - lastY;
     lastY = y;
     if (dy !== 0) {
       const max = maxScroll();
-      const endpoint = dy > 0 && y >= max - 1 ? TOUR_LENGTH : dy < 0 && y <= 1 ? 0 : null;
-      bounded.addInput(dy, TOUR_LENGTH / max, endpoint);
+      const endpoint = dy > 0 && y >= max - 1 ? DRIVE_LENGTH : dy < 0 && y <= 1 ? 0 : null;
+      bounded.addInput(dy, DRIVE_LENGTH / max, endpoint);
     }
   }
+  const before = bounded.p;
   bounded.step(dt);
+  // Land on the logical gantry before accepting a new scroll into the presentation tail.
+  // No leftover lap credit can launch the car beyond the line automatically.
+  if (before < TOUR_LENGTH && bounded.p >= TOUR_LENGTH) {
+    bounded.reset(TOUR_LENGTH);
+    syncPageTo(1);
+  }
 
+  const presentationP = bounded.p / TOUR_LENGTH;
   const p = Math.min(1, Math.max(0, bounded.p / TOUR_LENGTH));
   const targetP = Math.min(1, Math.max(0, bounded.targetMeters() / TOUR_LENGTH));
   rawTarget = targetP;
@@ -377,7 +414,7 @@ function updateBounded(dt) {
   if (!locked && !thumbHeld) {
     const max = maxScroll();
     const y = window.scrollY || 0;
-    const wantY = targetP * max;
+    const wantY = bounded.targetMeters() / DRIVE_LENGTH * max;
     const stranded = (y <= 1 && wantY > 1) || (y >= max - 1 && wantY < max - 1);
     if (Math.abs(y - wantY) > 1 && bounded.idle >= (stranded ? STRANDED_IDLE_S : RESYNC_IDLE_S)) {
       window.scrollTo(0, wantY);
@@ -385,17 +422,28 @@ function updateBounded(dt) {
     }
   }
 
-  const dp = p - lastProgress;
+  const dp = presentationP - lastProgress;
   const velocity = Math.max(-1.6, Math.min(1.6, dt > 0 ? dp / dt / TUNE.velocityFullScale : 0));
   const targetSpeed = Math.min(1, Math.abs(velocity));
   const sk = targetSpeed > smoothedSpeed ? TUNE.speedAttack : TUNE.speedRelease;
   smoothedSpeed += (targetSpeed - smoothedSpeed) * (1 - Math.pow(1 - sk, dt * 60));
   if (smoothedSpeed < 0.0015) smoothedSpeed = 0;
 
-  lastProgress = p;
+  publishTravel(bounded.p, dp * TOUR_LENGTH, dt);
+  lastProgress = presentationP;
+  set('finishTailMeters', Math.max(0, bounded.p - TOUR_LENGTH));
   set('progress', p);
   set('velocity', velocity);
   set('speed01', smoothedSpeed);
+}
+
+function publishTravel(meters, delta, dt) {
+  const now = performance.now();
+  if (thumbHeld && delta !== 0) lastUserInputAt = now;
+  const enabled = !state.scrollLocked && document.visibilityState !== 'hidden';
+  const driving = enabled && userInputIsRecent(now) && dt > 0
+    && Math.abs(delta) / dt >= LAP_MIN_SPEED_MPS;
+  updateLapTimer(now, { driving, enabled, finished: meters >= TOUR_LENGTH });
 }
 
 // ---------------------------------------------------------------------------
@@ -404,7 +452,7 @@ function updateBounded(dt) {
 
 function onResize() {
   // Page height changed: re-place the page on the car so px<->metre mapping stays aligned.
-  if (bounded && !state.scrollLocked) syncPageTo(state.progress);
+  if (bounded && !state.scrollLocked) syncPageTo(state.progress + state.finishTailMeters / TOUR_LENGTH);
   onScroll();
 }
 
@@ -418,6 +466,11 @@ export function initScrollDrive() {
   window.scrollTo(0, 0);
 
   window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('wheel', noteUserInput, { passive: true });
+  window.addEventListener('touchmove', noteUserInput, { passive: true });
+  window.addEventListener('keydown', noteUserInput, { passive: true });
+  window.addEventListener('blur', pauseDriving);
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') pauseDriving(); });
   window.addEventListener('keydown', swallowKeys, { passive: false });
   window.addEventListener('resize', onResize);
   if (bounded) {

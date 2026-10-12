@@ -1,0 +1,24 @@
+/** Deterministic stopwatch semantics, including exact idle clipping and frozen intervals. */
+import assert from 'node:assert/strict';
+import { createLapTimer, formatLapTime } from '../src/core/lapTimer.js';
+const timer = createLapTimer();
+assert.equal(timer.tick(5000).elapsedMs, 0, 'load/ready must not count');
+assert.equal(timer.tick(6000, { driving: true }).elapsedMs, 0);
+assert.equal(timer.tick(6500, { driving: true }).elapsedMs, 500);
+assert.equal(timer.tick(10000).elapsedMs, 1500, 'idle grace must stop exactly at one second');
+assert.equal(timer.tick(12000).running, false);
+assert.equal(timer.tick(15000, { driving: true }).elapsedMs, 1500, 'resume must exclude paused gap');
+assert.equal(timer.tick(15500, { driving: true }).elapsedMs, 2000);
+assert.equal(timer.tick(15750, { finished: true }).elapsedMs, 2250);
+assert.equal(timer.tick(40000, { driving: true, finished: true }).elapsedMs, 2250, 'tail must add nothing');
+assert.equal(timer.tick(41000, { driving: true }).elapsedMs, 2250, 'reverse must exclude frozen gap');
+assert.equal(timer.tick(41500, { driving: true }).elapsedMs, 2750);
+assert.equal(timer.pause(41750).elapsedMs, 3000);
+assert.equal(timer.tick(70000).elapsedMs, 3000, 'seek/loading/hidden must add nothing');
+const restored = createLapTimer(3000);
+assert.equal(restored.tick(1000000).elapsedMs, 3000, 'restore never counts away time');
+assert.equal(restored.tick(1001000, { driving: true }).elapsedMs, 3000);
+assert.equal(restored.tick(1001200, { driving: true }).elapsedMs, 3200);
+assert.equal(formatLapTime(61599), '01:01.5');
+timer.reset(); assert.equal(timer.tick(100000).elapsedMs, 0);
+console.log('PASS: readiness, travel, exact idle grace, pause/resume, finish/tail freeze, reverse reconciliation, programmatic pause, reload, format/replay');

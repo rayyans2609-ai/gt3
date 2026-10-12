@@ -13,6 +13,7 @@
 
 import * as THREE from 'three';
 import { state } from '../core/state.js';
+import { formatLapTime } from '../core/lapTimer.js';
 import { getCar } from '../data/cars.js';
 import { CHECKPOINT_ROUTE_T, GRID_T, GRID_GAP, routeTAt, pointAt } from '../scene/trackCurve.js';
 
@@ -28,6 +29,8 @@ const TRAIL_BASE_OPACITY = 0.38;
 // Route-tangent probe for the minimap arrow (forward tangent always).
 const TANGENT_EPSILON = 0.002;
 
+let timerElement;
+let writtenTimer = '';
 let initialized = false;
 let identitySlots = [];
 let visibleIdentitySlot = 0;
@@ -219,6 +222,9 @@ export function initHUD() {
   if (!topLeft || !topRight || !bottomLeft) throw new Error('[hud] Required HUD roots are missing.');
   buildIdentity(topLeft);
   buildRouteMap(topRight);
+  timerElement = element('div', 'hud-lap-timer', formatLapTime(state.lapElapsedMs));
+  timerElement.setAttribute('aria-label', 'Tour elapsed time');
+  document.querySelector('#hud').append(timerElement);
   routePointA = { x: 0, y: 0 };
   routePointB = { x: 0, y: 0 };
   initialized = true;
@@ -227,6 +233,8 @@ export function initHUD() {
 
 export function update() {
   if (!initialized) return;
+  const timerText = formatLapTime(state.lapElapsedMs);
+  if (timerText !== writtenTimer) { timerElement.textContent = timerText; writtenTimer = timerText; }
   if (state.activeCarIndex !== renderedCarIndex) setIdentity(state.activeCarIndex);
   routeProject(pointAt(routeTAt(state.progress), routeWorldA), routePointA);
   let ahead = routeTAt(state.progress) + TANGENT_EPSILON;

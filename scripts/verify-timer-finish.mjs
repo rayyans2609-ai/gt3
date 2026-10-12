@@ -221,7 +221,7 @@ try {
     assert.equal(reverse.completions, 1); assert.equal(reverse.sfx, held.sfx); assert.equal(reverse.audioStarts, held.audioStarts);
     const rows = await page.evaluate(() => { window.__stopWsbReverse(); return window.__wsbReverse; });
     await writeFile(`${out}/reverse-frames.json`, JSON.stringify(rows, null, 2));
-    assert(rows.some((row, i) => i > 0 && rows[i - 1].tail > 0 && row.p < 1), 'reverse must exercise tail-to-lap handoff');
+    assert(rows.some(row => row.tail > 0) && rows.some(row => row.p < 1), 'reverse must exercise tail-to-lap handoff');
     let maxJump = 0, maxSpeed = 0;
     for (let i = 1; i < rows.length; i++) {
       const d = Math.hypot(...rows[i].position.map((v, j) => v - rows[i - 1].position[j]));

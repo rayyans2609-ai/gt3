@@ -86,6 +86,7 @@ const STRANDED_IDLE_S = 0.05;
 let lastY = 0;               // page scrollY already accounted for (candidates only)
 let thumbHeld = false;       // classic-scrollbar drag in progress (candidates only)
 
+let programmaticMotion = false;
 let lastUserInputAt = -Infinity;
 let rawTarget = 0;      // undamped progress straight from the scrollbar
 let lastProgress = 0;   // previous frame's damped progress, for velocity
@@ -159,6 +160,7 @@ function noteUserInput(e) {
   if (!e.isTrusted || state.scrollLocked || document.visibilityState === 'hidden') return;
   if (e.type === 'keydown' && !SCROLL_KEYS.has(e.key)) return;
   if (e.type === 'wheel' && e.deltaY === 0) return;
+  programmaticMotion = false;
   lastUserInputAt = performance.now();
 }
 function pauseDriving() {
@@ -309,6 +311,7 @@ export function resetToStart() {
  */
 export function seekTo(t, { instant = false } = {}) {
   const clamped = Math.min(1, Math.max(0, t));
+  programmaticMotion = true;
   pauseDriving();
   pauseLapTimer(performance.now(), clamped >= 1);
   set('finishTailMeters', 0);
@@ -439,9 +442,9 @@ function updateBounded(dt) {
 
 function publishTravel(meters, delta, dt) {
   const now = performance.now();
-  if (thumbHeld && delta !== 0) lastUserInputAt = now;
+  if (thumbHeld && !programmaticMotion && delta !== 0) lastUserInputAt = now;
   const enabled = !state.scrollLocked && document.visibilityState !== 'hidden';
-  const driving = enabled && userInputIsRecent(now) && dt > 0
+  const driving = enabled && !programmaticMotion && userInputIsRecent(now) && dt > 0
     && Math.abs(delta) / dt >= LAP_MIN_SPEED_MPS;
   updateLapTimer(now, { driving, enabled, finished: meters >= TOUR_LENGTH });
 }

@@ -16,6 +16,8 @@
  */
 
 import './styles/base.css';
+import './styles/timer.css';
+import './styles/finishTail.css';
 import * as THREE from 'three';
 import { state, set, subscribe } from './core/state.js';
 import { Clock } from './core/clock.js';
@@ -89,7 +91,8 @@ async function boot() {
   // resolution; today's running race is the V3 Grand Tour regardless of saved state.
   restoreExperience('tour');
   subscribe('mode', (mode) => {
-    if (mode === 'finish') setExperience('complete');
+    // The Phase 3 tail remains in Tour; Phase 7 owns the completion experience.
+    if (mode === 'finish') return;
     else if (mode === 'race' && state.experience === 'complete') setExperience('tour');
   });
 
@@ -416,6 +419,7 @@ async function boot() {
   registerUpdate(scrollDrive.update);
   registerUpdate(carRig.update);
   registerUpdate(aerialCamera.update);
+  // Tail distance never enters checkpoint logic: progress stays exactly 1.
   registerUpdate(checkpoints.updateCheckpoints);
   registerUpdate(checkpoints.updateGateResponse);
   registerUpdate(() => morph.morphTo(state.activeCarIndex));
@@ -425,7 +429,7 @@ async function boot() {
   registerUpdate(studio.updateMontage);
   registerUpdate((dt) => {
     // Checkpoint proximity drives only the existing, identity-free audio cue.
-    const approach = checkpoints.getApproach();
+    const approach = state.progress < 1 ? checkpoints.getApproach() : null;
     const index = approach ? approach.index : -1;
     const proximity = approach ? approach.proximity : 0;
     const step = Math.round(proximity * 100) / 100;
@@ -444,6 +448,7 @@ async function boot() {
   registerUpdate(audio.updateAudio);
   registerUpdate(player.updatePlayer);
   registerUpdate(sceneSetup.updateScene);
+  registerUpdate(aerialCamera.enforceFinishHold);
 
   onResize((w, h) => {
     // Scene resize runs first. Solve/cached lookup in the debounced resize task,

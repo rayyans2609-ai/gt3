@@ -1,6 +1,11 @@
 export const state = {
   progress: 0,
   targetProgress: 0,
+  finishTailMeters: 0,
+  lapElapsedMs: 0,
+  lapRunning: false,
+  lapFrozen: false,
+  finishAcknowledged: false,
   velocity: 0,
   speed01: 0,
   started: false,

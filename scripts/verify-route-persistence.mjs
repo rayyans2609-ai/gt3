@@ -263,7 +263,7 @@ try {
     const restoredDom = await finishDom();
     const restored = await snapshot(page);
     assert(restored.progress === 1, `finish route position did not restore: ${restored.progress}`);
-    assert(restored.mode === 'finish' && restored.locked, `finish restore not locked: ${restored.mode}/${restored.locked}`);
+    assert(restored.mode === 'finish' && !restored.locked, `finish restore must permit tail/reverse scroll: ${restored.mode}/${restored.locked}`);
     assert(restoredDom.finishVisible, 'finish screen not visible after finish refresh');
     assert(restoredDom.startHidden && !restoredDom.startVisible, 'start screen still visible under the finish card');
     assert(!restoredDom.soundCue, 'sound cue appeared on a finish restore');

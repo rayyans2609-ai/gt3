@@ -205,9 +205,14 @@ try {
   await record('reverse retraces tail then resumes same timer no teleport or duplicate completion', async () => {
     await page.evaluate(async () => {
       const { state } = await import('/src/core/state.js'); const rig = window.__gt3.scene.getObjectByName('car-rig');
-      window.__wsbReverse = []; let active = true; window.__stopWsbReverse = () => { active = false; };
-      function sample(t) { if (!active) return; window.__wsbReverse.push({ t, p: state.progress,
-        tail: state.finishTailMeters, position: rig.position.toArray() }); requestAnimationFrame(sample); } requestAnimationFrame(sample);
+      const { registerUpdate } = await import('/src/main.js');
+      window.__wsbReverse = [];
+      // Observe every completed pose with the same dt that advanced the drive.
+      // RAF's vsync timestamp can precede a delayed app callback, whereas Clock
+      // ticks performance.now(); mixing those clocks invents speed spikes.
+      window.__stopWsbReverse = registerUpdate(dt => window.__wsbReverse.push({
+        dt, now: performance.now(), p: state.progress,
+        tail: state.finishTailMeters, position: rig.position.toArray() }));
     });
     await wheels(-100, 2); const partial = await snap(); assert(partial.tail < held.tail && partial.tail > 0 && partial.p === 1);
     assert(samePose(held, partial)); assert.equal(partial.elapsed, held.elapsed);
@@ -215,10 +220,13 @@ try {
     assert(reverse.tail === 0 && reverse.mode === 'race' && !reverse.frozen && reverse.elapsed >= held.elapsed);
     assert.equal(reverse.completions, 1); assert.equal(reverse.sfx, held.sfx); assert.equal(reverse.audioStarts, held.audioStarts);
     const rows = await page.evaluate(() => { window.__stopWsbReverse(); return window.__wsbReverse; });
+    await writeFile(`${out}/reverse-frames.json`, JSON.stringify(rows, null, 2));
+    assert(rows.some((row, i) => i > 0 && rows[i - 1].tail > 0 && row.p < 1), 'reverse must exercise tail-to-lap handoff');
     let maxJump = 0, maxSpeed = 0;
     for (let i = 1; i < rows.length; i++) {
       const d = Math.hypot(...rows[i].position.map((v, j) => v - rows[i - 1].position[j]));
-      maxJump = Math.max(maxJump, d); maxSpeed = Math.max(maxSpeed, d / ((rows[i].t - rows[i - 1].t) / 1000));
+      assert(rows[i].dt > 0, 'reverse sample must have a positive app timestep');
+      maxJump = Math.max(maxJump, d); maxSpeed = Math.max(maxSpeed, d / rows[i].dt);
     }
     assert(maxJump < 15 && maxSpeed < 230, `discontinuous reverse ${maxJump}m / ${maxSpeed}mps`);
     await until(s => s.p === 1, 150); const recross = await snap();

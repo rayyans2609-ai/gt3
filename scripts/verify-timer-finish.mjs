@@ -7,7 +7,8 @@ import { mkdir, writeFile } from 'node:fs/promises';
 const base = process.env.GT3_URL || 'http://127.0.0.1:5204';
 const out = process.env.GT3_OUT || '/tmp/gt3-timer-finish';
 await mkdir(out, { recursive: true });
-const report = { source: process.env.GT3_SOURCE, base, checks: {}, errors: [] };
+const finishOnly = process.env.GT3_TIMER_ONLY === 'finish';
+const report = { finishOnly, source: process.env.GT3_SOURCE, base, checks: {}, errors: [] };
 const wait = ms => new Promise(r => setTimeout(r, ms));
 const browser = await puppeteer.launch({
   executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
@@ -79,6 +80,7 @@ try {
       cp1: r.CHECKPOINT_ROUTE_T[0], tailMax: t.FINISH_TAIL_METERS };
   });
   report.constants = constants;
+  if (!finishOnly) {
   await record('readiness and programmatic seeks never start stopwatch', async () => {
     const initial = await snap(); assert.equal(initial.elapsed, 0); assert.equal(initial.running, false);
     await seek(.03); await seek(.04, false); const sought = await snap();
@@ -129,6 +131,7 @@ try {
     }
     assert.notEqual(data.day.color, data.night.color); return data;
   });
+  }
   await page.evaluate(async () => {
     const { subscribe } = await import('/src/core/state.js'); window.__wsbCompletions = 0;
     subscribe('finishAcknowledged', ack => { if (ack) window.__wsbCompletions++; });
@@ -141,16 +144,23 @@ try {
     return { before, restored };
   });
   await page.evaluate(async () => {
-    const { subscribe } = await import('/src/core/state.js'); window.__wsbCompletions = 0;
+    const { subscribe, state, set } = await import('/src/core/state.js'); window.__wsbCompletions = 0;
     subscribe('finishAcknowledged', ack => { if (ack) window.__wsbCompletions++; });
+    subscribe('progress', (p, previous) => {
+      if (p === 1 && previous < 1) window.__wsbFinishEdge = { tail: state.finishTailMeters,
+        elapsed: state.lapElapsedMs, frozen: state.lapFrozen, running: state.lapRunning, now: performance.now() };
+    });
+    set('theme', 'night');
   });
   await page.click('.audio-speaker'); await wait(700);
   await record('logical finish freezes stopwatch once without scroll lock', async () => {
     const before = await snap(); const finish = await until(s => s.p === 1, 100);
     assert(finish.frozen && !finish.running && !finish.locked && finish.ack && finish.car === 9);
-    assert.equal(finish.mode, 'finish'); assert.equal(finish.completions, 1); assert.equal(finish.tail, 0);
+    assert.equal(finish.mode, 'finish'); assert.equal(finish.completions, 1);
+    const edge = await page.evaluate(() => window.__wsbFinishEdge);
+    assert.equal(edge.tail, 0); assert(edge.frozen && !edge.running); assert.equal(finish.elapsed, edge.elapsed);
     await wait(1700); const idle = await snap(); assert.equal(idle.elapsed, finish.elapsed); assert(samePose(finish, idle));
-    await page.screenshot({ path: `${out}/gantry-finish-night.png` }); return { before, finish, idle };
+    await page.screenshot({ path: `${out}/gantry-finish-night.png` }); return { before, edge, finish, idle };
   });
   let held;
   await record('scroll tail moves car in fixed view stops before checkpoint1 with no effects', async () => {

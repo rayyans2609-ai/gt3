@@ -419,7 +419,8 @@ async function boot() {
   registerUpdate(scrollDrive.update);
   registerUpdate(carRig.update);
   registerUpdate(aerialCamera.update);
-  registerUpdate(() => { if (state.progress < 1) checkpoints.updateCheckpoints(); });
+  // Tail distance never enters checkpoint logic: progress stays exactly 1.
+  registerUpdate(checkpoints.updateCheckpoints);
   registerUpdate(checkpoints.updateGateResponse);
   registerUpdate(() => morph.morphTo(state.activeCarIndex));
   registerUpdate(morph.updateMorph);

@@ -25,9 +25,18 @@
 }
 .finish-screen--tail .finish-screen__header,
 .finish-screen--tail .finish-screen__footer { display: block; margin: 0; padding: 0; }
-.finish-screen--tail .finish-screen__eyebrow { margin: 0; font: 600 13px/1.4 var(--font-ui); color: var(--fg); }
+.finish-screen--tail .finish-screen__eyebrow { margin: 0; font: 600 13px/1.4 var(--font-ui); color: #f7f6f2; }
 .finish-screen--tail .finish-screen__closing,
 .finish-screen--tail .finish-screen__rule,
 .finish-screen--tail .finish-recap,
 .finish-screen--tail .finish-credits { display: none; }
-.finish-screen--tail .finish-replay { margin: 0; pointer-events: auto; color: var(--fg); }
+.finish-screen--tail .finish-replay { margin: 0; pointer-events: auto; color: #f7f6f2; }
+
+.finish-screen--tail .finish-screen__eyebrow,
+.finish-screen--tail .finish-replay {
+  -webkit-text-stroke: 1px #121517;
+  paint-order: stroke fill;
+}
+.finish-screen--tail .finish-replay { font-weight: 600; border-color: rgba(247, 246, 242, .65); }
+:root[data-theme="night"] .finish-screen--tail .finish-screen__eyebrow,
+:root[data-theme="night"] .finish-screen--tail .finish-replay { color: var(--accent); }

@@ -7,6 +7,7 @@ import { mkdir, writeFile } from 'node:fs/promises';
 const base = process.env.GT3_URL || 'http://127.0.0.1:5204';
 const out = process.env.GT3_OUT || '/tmp/gt3-timer-finish';
 await mkdir(out, { recursive: true });
+const visualOnly = process.env.GT3_TIMER_ONLY === 'visual';
 const finishOnly = process.env.GT3_TIMER_ONLY === 'finish';
 const report = { finishOnly, source: process.env.GT3_SOURCE, base, checks: {}, errors: [] };
 const wait = ms => new Promise(r => setTimeout(r, ms));
@@ -80,6 +81,28 @@ try {
       cp1: r.CHECKPOINT_ROUTE_T[0], tailMax: t.FINISH_TAIL_METERS };
   });
   report.constants = constants;
+  if (visualOnly) {
+    await seek(1 - 12 / constants.length);
+    await until(s => s.p === 1, 100);
+    await until(s => s.tail >= constants.tailMax - 1e-5, 200);
+    await wait(1500);
+    await record('refreshed timer and completion Day Night captures', async () => {
+      const data = {};
+      for (const theme of ['day', 'night']) {
+        await page.evaluate(async t => (await import('/src/core/state.js')).set('theme', t), theme);
+        await wait(1000);
+        await page.screenshot({ path: `${out}/tail-stop-${theme}.png` });
+        data[theme] = await snap();
+        data[theme].timerStyle = await page.evaluate(() => {
+          const s = getComputedStyle(document.querySelector('.hud-lap-timer'));
+          return { color: s.color, stroke: s.webkitTextStroke, weight: s.fontWeight };
+        });
+      }
+      await page.click('.audio-launcher'); await wait(500);
+      await page.screenshot({ path: `${out}/tail-player-expanded.png` });
+      return data;
+    });
+  } else {
   if (!finishOnly) {
   await record('readiness and programmatic seeks never start stopwatch', async () => {
     const initial = await snap(); assert.equal(initial.elapsed, 0); assert.equal(initial.running, false);
@@ -212,6 +235,7 @@ try {
     assert.equal(replay.p, 0); assert.equal(replay.elapsed, 0); assert(!replay.ack && !replay.frozen);
     await wheels(150, 4); assert((await snap()).elapsed > 0); return { before, restored, replay };
   });
+  }
   assert.equal(report.errors.length, 0, report.errors.join(' | ')); report.pass = true;
 } catch (error) {
   report.pass = false; report.failure = error.stack; console.error(error.stack); process.exitCode = 1;

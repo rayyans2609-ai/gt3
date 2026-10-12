@@ -119,6 +119,26 @@ try {
     if (!allowFinish) assert(!snapshot.locked, `${label}: scroll locked`);
   }
 
+  // Measure each first live crossing before the traversal sweeps warm it.
+  await recordPhase('all nine gates: zero GL allocations/uploads forward and reverse', async () => {
+    const crossings = [];
+    for (const direction of [1, -1]) {
+      for (const gate of direction > 0 ? thresholds : [...thresholds].reverse()) {
+        await seek(gate - direction * 0.003, { instant: true });
+        const before = await page.evaluate(() => ({ ...window.__gt3GlCalls }));
+        const snapshot = await seek(gate + direction * 0.003, { instant: true });
+        check(snapshot, `GPU crossing ${gate} direction ${direction}`);
+        const after = await page.evaluate(() => ({ ...window.__gt3GlCalls }));
+        const delta = gpuDelta(before, after);
+        assert(Object.values(delta).every(value => value === 0),
+          `gate ${gate} direction ${direction}: ${JSON.stringify(delta)}`);
+        crossings.push({ gate, direction, gl: delta });
+      }
+    }
+    report.gpuCrossings = crossings;
+  });
+
+
   const forward = [];
   const backward = [];
   const stops = [...new Set([0, ...(lean ? [] : Array.from({ length: 20 }, (_, i) => (i + 1) * 0.049)),
@@ -149,23 +169,6 @@ try {
     console.log(`backward sweep: ${backward.length} stops`);
   });
 
-  await recordPhase('all nine gates: zero GL allocations/uploads forward and reverse', async () => {
-    const crossings = [];
-    for (const direction of [1, -1]) {
-      for (const gate of direction > 0 ? thresholds : [...thresholds].reverse()) {
-        await seek(gate - direction * 0.003, { instant: true });
-        const before = await page.evaluate(() => ({ ...window.__gt3GlCalls }));
-        const snapshot = await seek(gate + direction * 0.003, { instant: true });
-        check(snapshot, `GPU crossing ${gate} direction ${direction}`);
-        const after = await page.evaluate(() => ({ ...window.__gt3GlCalls }));
-        const delta = gpuDelta(before, after);
-        assert(Object.values(delta).every(value => value === 0),
-          `gate ${gate} direction ${direction}: ${JSON.stringify(delta)}`);
-        crossings.push({ gate, direction, gl: delta });
-      }
-    }
-    report.gpuCrossings = crossings;
-  });
 
   const oscillation = [];
   await recordPhase('real-wheel gate reversals', async () => {

@@ -25,7 +25,7 @@ const report = { base, dpr, css: [1280, 800], started: new Date().toISOString(),
   sha: process.env.GT3_SOURCE_SHA || execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(),
   tree: execFileSync('git', ['status', '--porcelain'], { encoding: 'utf8' }).trim(), runs: [], errors: [] };
 await mkdir(out, { recursive: true });
-await preflight(out);
+let admitted = await preflight(out);
 const browser = await puppeteer.launch({ executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
   headless: 'new', pipe: true, timeout: 180000, protocolTimeout: 180000,
   args: ['--no-sandbox', '--no-first-run', '--enable-gpu', '--use-gl=angle', '--use-angle=metal',
@@ -34,14 +34,61 @@ const browser = await puppeteer.launch({ executablePath: '/Applications/Google C
 report.browserPid = browser.process().pid;
 await writeFile(`${out}/browser.pid`, String(report.browserPid));
 let stopped = false;
-process.once('SIGTERM', async () => { stopped = true; await browser.close(); });
+let page, traceRunning = false, stopping;
+const persist = () => writeFile(`${out}/report.json`, JSON.stringify(report, null, 2));
+// Startup can page before the first measured repetition. Cover that interval and
+// retain incomplete telemetry before closing the browser; it is never a valid run.
+async function stop(reason) {
+  if (stopping) return stopping;
+  stopped = true;
+  report.stop = { reason, at: new Date().toISOString(), incomplete: true };
+  stopping = (async () => {
+    try {
+      if (page && !page.isClosed()) {
+        const partial = await Promise.race([page.evaluate(() => {
+          const p = window.__perf;
+          if (!p) return null;
+          p.recording = false;
+          return { frames: p.frames, gl: p.gl, switches: p.switches,
+            input: p.input, longTasks: p.longTasks, disjoint: p.disjoint };
+        }), wait(3000).then(() => null)]);
+        if (partial) {
+          report.stop.partial = `${out}/interrupted-frames.json.gz`;
+          await writeFile(report.stop.partial, gzipSync(JSON.stringify(partial)));
+        }
+        if (traceRunning) {
+          traceRunning = false;
+          await Promise.race([page.tracing.stop(), wait(3000)]);
+        }
+      }
+    } catch (error) { report.stop.captureError = error.message; }
+    finally { await persist(); await browser.close(); }
+  })();
+  return stopping;
+}
+const terminate = () => { void stop('SIGTERM').catch(error => { report.errors.push(error.message); }); };
+process.once('SIGTERM', terminate);
+let monitorBusy = false;
+const monitor = setInterval(async () => {
+  if (monitorBusy || stopped) return;
+  monitorBusy = true;
+  try {
+    const sample = hostSample();
+    await appendFile(`${out}/host.jsonl`, `${JSON.stringify({ kind: 'monitor', sample })}\n`);
+    if (hostDegraded(admitted, sample)) await stop('Host degraded during startup/run');
+  } catch (error) { await stop(`Host monitor failed: ${error.message}`); }
+  finally { monitorBusy = false; }
+}, 30000);
 try {
   report.browser = await browser.version();
   const cdp = await browser.target().createCDPSession();
   report.gpu = (await cdp.send('SystemInfo.getInfo')).gpu;
-  const page = await browser.newPage();
+  page = await browser.newPage();
   page.on('pageerror', error => report.errors.push(error.message));
   page.on('console', message => { if (message.type() === 'error') report.errors.push(message.text()); });
+  page.on('response', response => {
+    if (response.status() >= 400) report.errors.push(`HTTP ${response.status()}: ${response.url()}`);
+  });
   await page.evaluateOnNewDocument(() => {
     // Wrap the real application RAF, including updates before composer.render().
     const raf = window.requestAnimationFrame.bind(window);
@@ -75,6 +122,7 @@ try {
   });
   for (const config of configs) {
     if (stopped) break;
+    if (config !== configs[0]) admitted = await preflight(out);
     await page.goto(`${base}/${config === 'D' ? '?props=lean' : ''}`, { waitUntil: 'domcontentloaded', timeout: 180000 });
     await page.waitForFunction(() => window.__gt3?.readiness?.status === 'ready', { timeout: 180000 });
     await wait(800);
@@ -126,12 +174,23 @@ try {
         aaTargets: g.passes.antialias ? [g.passes.antialias._edgesRT.width, g.passes.antialias._edgesRT.height] : null };
     }, { config, dpr });
     console.log('SETUP', config, JSON.stringify(setup));
+    report.setups ??= [];
+    report.setups.push({ config, ...setup });
+    await persist();
+    const startupHost = hostSample();
+    await appendFile(`${out}/host.jsonl`, `${JSON.stringify({ kind: 'startup', config, admitted, sample: startupHost })}\n`);
+    if (stopped || hostDegraded(admitted, startupHost)) {
+      await stop('Host degraded during startup; no measured repetition admitted');
+      throw new Error(report.stop.reason);
+    }
+    if (report.errors.length) throw new Error('Page/resource errors invalidate this configuration; inspect report.errors');
     for (let rep = 1; rep <= repeats; rep++) {
       const before = hostSample();
       if (before.pressure !== 1 || before.idle < 25 || before.system >= 50) throw new Error('Host no longer meets dispatch gate');
       const tracePath = `${out}/${config}-${rep}-trace.json`;
       if (rep === 1) await page.tracing.start({ path: tracePath,
         categories: ['toplevel', 'devtools.timeline', 'v8', 'blink.user_timing', 'disabled-by-default-v8.gc'] });
+      traceRunning = rep === 1;
       const heapBefore = await page.evaluate(() => performance.memory?.usedJSHeapSize);
       await page.evaluate(() => {
         const p = window.__perf; p.frames = []; p.gl = []; p.switches = []; p.input = []; p.longTasks = [];
@@ -159,7 +218,7 @@ try {
         await page.evaluate(region => { performance.mark(`p3y-end:${region}`); window.__perf.recording = false; }, region);
         if (stopped) throw new Error('Host stop requested');
       }
-      if (rep === 1) await page.tracing.stop();
+      if (rep === 1) { await page.tracing.stop(); traceRunning = false; }
       const data = await page.evaluate(() => {
         const p = window.__perf;
         return { frames: p.frames, gl: p.gl, switches: p.switches, input: p.input, longTasks: p.longTasks,
@@ -216,6 +275,9 @@ try {
   }
 } catch (error) { report.errors.push(error.stack); throw error; }
 finally {
+  clearInterval(monitor);
+  process.removeListener('SIGTERM', terminate);
+  if (stopping) await stopping;
   report.ended = new Date().toISOString();
   await writeFile(`${out}/report.json`, JSON.stringify(report, null, 2));
   await browser.close();

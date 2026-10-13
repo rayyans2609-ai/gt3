@@ -1,0 +1,162 @@
+{
+  "status": "HOST_STOPPED_INCOMPLETE",
+  "source": "A 3d5c504 archive; no product changes",
+  "browser": "Chrome/155.0.8059.40",
+  "setup": {
+    "gpu": "ANGLE (Intel, ANGLE Metal Renderer: Intel(R) UHD Graphics 617, Unspecified Version)",
+    "css": [
+      1280,
+      800
+    ],
+    "dpr": 2,
+    "probe": {
+      "mode": "race",
+      "locked": false,
+      "speed01": 0,
+      "progress": 0.0010684265002331185,
+      "applied": 2,
+      "level": "high",
+      "still": 837.6000000089407,
+      "sinceSwitch": 417.1000000089407,
+      "canvasW": 2560,
+      "ratio": 2
+    },
+    "passes": [
+      {
+        "type": "RenderPass",
+        "enabled": true
+      },
+      {
+        "type": "ShaderPass",
+        "enabled": true
+      },
+      {
+        "type": "ShaderPass",
+        "enabled": true
+      }
+    ],
+    "memory": {
+      "geometries": 1497,
+      "textures": 297
+    },
+    "heap": 234670919,
+    "gates": [
+      0.09,
+      0.18,
+      0.255,
+      0.39,
+      0.495,
+      0.585,
+      0.68,
+      0.775,
+      0.86
+    ],
+    "checkpointProgress": 0.39218515304528045,
+    "aaTargets": null
+  },
+  "setupProvenance": "stdout from original harness; setup was not yet persisted in report.json",
+  "runCount": 0,
+  "errors": [
+    "Failed to load resource: the server responded with a status of 403 (Forbidden)",
+    "Failed to load resource: the server responded with a status of 403 (Forbidden)",
+    "Failed to load resource: the server responded with a status of 403 (Forbidden)",
+    "Failed to load resource: the server responded with a status of 403 (Forbidden)",
+    "Failed to load resource: the server responded with a status of 403 (Forbidden)",
+    "Failed to load resource: the server responded with a status of 403 (Forbidden)",
+    "TargetCloseError: Protocol error (Input.dispatchMouseEvent): Target closed\n    at CallbackRegistry.clear (file:///Users/rayyansheikh/Desktop/gt3/node_modules/puppeteer-core/lib/puppeteer/common/CallbackRegistry.js:88:36)\n    at CdpCDPSession.onClosed (file:///Users/rayyansheikh/Desktop/gt3/node_modules/puppeteer-core/lib/puppeteer/cdp/CdpSession.js:121:25)\n    at #onClose (file:///Users/rayyansheikh/Desktop/gt3/node_modules/puppeteer-core/lib/puppeteer/cdp/Connection.js:217:21)\n    at Connection.dispose (file:///Users/rayyansheikh/Desktop/gt3/node_modules/puppeteer-core/lib/puppeteer/cdp/Connection.js:223:22)\n    at CdpBrowser.disconnect (file:///Users/rayyansheikh/Desktop/gt3/node_modules/puppeteer-core/lib/puppeteer/cdp/Browser.js:417:26)\n    at CdpBrowser.close (file:///Users/rayyansheikh/Desktop/gt3/node_modules/puppeteer-core/lib/puppeteer/cdp/Browser.js:413:20)\n    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at async process.<anonymous> (file:///Users/rayyansheikh/Desktop/gt3/.claude/worktrees/p3y-perf/scripts/perf-p3y.mjs:37:55)"
+  ],
+  "host": [
+    {
+      "kind": "preflight",
+      "a": {
+        "at": "2026-10-13T19:27:31.982Z",
+        "pressure": 1,
+        "pageouts": 374090,
+        "swapouts": 19507594,
+        "user": 7.97,
+        "system": 20.74,
+        "idle": 71.27,
+        "swap": "total = 3072.00M  used = 1600.25M  free = 1471.75M  (encrypted)"
+      },
+      "b": {
+        "at": "2026-10-13T19:27:42.836Z",
+        "pressure": 1,
+        "pageouts": 374090,
+        "swapouts": 19507594,
+        "user": 6.38,
+        "system": 20.21,
+        "idle": 73.4,
+        "swap": "total = 3072.00M  used = 1600.25M  free = 1471.75M  (encrypted)"
+      },
+      "pass": true
+    },
+    {
+      "kind": "startup-degradation",
+      "sample": {
+        "at": "2026-10-13T19:29:25.687Z",
+        "pressure": 1,
+        "pageouts": 377960,
+        "swapouts": 19693210,
+        "user": 28.43,
+        "system": 25.39,
+        "idle": 46.17,
+        "swap": "total = 3072.00M  used = 2230.00M  free = 842.00M  (encrypted)"
+      }
+    },
+    {
+      "kind": "post-cleanup",
+      "sample": {
+        "at": "2026-10-13T19:31:09.357Z",
+        "pressure": 1,
+        "pageouts": 377999,
+        "swapouts": 19693210,
+        "user": 17.51,
+        "system": 30.41,
+        "idle": 52.7,
+        "swap": "total = 3072.00M  used = 2166.00M  free = 906.00M  (encrypted)"
+      }
+    },
+    {
+      "kind": "preflight",
+      "a": {
+        "at": "2026-10-13T19:28:19.668Z",
+        "pressure": 1,
+        "pageouts": 374208,
+        "swapouts": 19507594,
+        "user": 7.93,
+        "system": 20.63,
+        "idle": 71.42,
+        "swap": "total = 3072.00M  used = 1600.25M  free = 1471.75M  (encrypted)"
+      },
+      "b": {
+        "at": "2026-10-13T19:28:30.563Z",
+        "pressure": 1,
+        "pageouts": 374208,
+        "swapouts": 19507594,
+        "user": 13.52,
+        "system": 24.63,
+        "idle": 61.83,
+        "swap": "total = 3072.00M  used = 1568.25M  free = 1503.75M  (encrypted)"
+      },
+      "pass": true
+    }
+  ],
+  "cleanup": [
+    {
+      "pid": 33635,
+      "identity": "PID  PPID STARTED                      COMMAND\n33635 33105 Tue Oct 13 22:28:18 2026     node scripts/perf-p3y.mjs",
+      "action": "TERM"
+    },
+    {
+      "pid": 33608,
+      "identity": "PID  PPID STARTED                      COMMAND\n33608 33105 Tue Oct 13 22:28:08 2026     node node_modules/vite/bin/vite.js --host 127.0.0.1 --port 5212 --strictPort",
+      "action": "TERM"
+    }
+  ],
+  "rawProvenance": {
+    "host.jsonl": "2b6aad86f035813fd279f8e0cd280e908d0836ca2726e422c084137e793d35b2",
+    "A-audit/host.jsonl": "053cb331375bf385126fb3602262d9610f8f7a470b686b1e9eba393fa398bf3f",
+    "A-audit/report.json": "1db4c0d45858703baa815432b50b4258a3d3cbde895e98aacab0a5d398df7221",
+    "cleanup.json": "ac4fcb1fc6d26c23646bbb3cc8694295112f02f4ee71f341d92774da32b7c909"
+  }
+}

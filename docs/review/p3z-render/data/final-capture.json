@@ -1,0 +1,3561 @@
+{
+  "base": "http://127.0.0.1:5211",
+  "startedAt": "2026-10-13T16:10:34.061Z",
+  "sha": "45f6c7ad5b3a4db5f3335e3d08a7bbf46437c2a0",
+  "tree": "M scripts/capture-p3z-render.mjs\n?? docs/review/p3z-render/",
+  "captures": [
+    {
+      "name": "grid-parked",
+      "path": "/tmp/gt3-p3z-run/final-capture/grid-parked.png",
+      "at": "2026-10-13T16:11:00.291Z",
+      "settings": {
+        "probe": {
+          "mode": "race",
+          "locked": false,
+          "speed01": 0,
+          "progress": 0,
+          "applied": 1,
+          "level": "high",
+          "still": 2918.199999973178,
+          "sinceSwitch": null,
+          "canvasW": 1600,
+          "ratio": 1
+        },
+        "css": {
+          "width": 1600,
+          "height": 900
+        },
+        "devicePixelRatio": 1,
+        "contextAntialias": true,
+        "canvasSamples": 4,
+        "maxSamples": 8,
+        "halfFloatSamples": [
+          8,
+          4,
+          2
+        ],
+        "gpu": "ANGLE (Intel, ANGLE Metal Renderer: Intel(R) UHD Graphics 617, Unspecified Version)",
+        "targets": [
+          {
+            "width": 1600,
+            "height": 900,
+            "type": 1016,
+            "requestedSamples": 0,
+            "actualSamples": 0
+          },
+          {
+            "width": 1600,
+            "height": 900,
+            "type": 1016,
+            "requestedSamples": 0,
+            "actualSamples": 0
+          }
+        ],
+        "calls": 1,
+        "triangles": 1,
+        "memory": {
+          "geometries": 1501,
+          "textures": 302
+        },
+        "jsHeap": 254866366
+      },
+      "camera": {
+        "position": [
+          -144.6290592444007,
+          208.2878532625406,
+          32.32205740136035
+        ],
+        "quaternion": [
+          -0.3702543457061976,
+          -0.5383996395935492,
+          -0.28410615187685734,
+          0.701656071046874
+        ],
+        "fov": 40,
+        "rig": [
+          -6.000000082076107,
+          -0.3972196865061604,
+          18.079071082138032
+        ]
+      }
+    },
+    {
+      "name": "grid",
+      "path": "/tmp/gt3-p3z-run/final-capture/grid.png",
+      "at": "2026-10-13T16:11:06.397Z",
+      "settings": {
+        "probe": {
+          "mode": "race",
+          "locked": false,
+          "speed01": 0,
+          "progress": 0,
+          "applied": 1,
+          "level": "high",
+          "still": 4921.4000000059605,
+          "sinceSwitch": null,
+          "canvasW": 1600,
+          "ratio": 1
+        },
+        "css": {
+          "width": 1600,
+          "height": 900
+        },
+        "devicePixelRatio": 1,
+        "contextAntialias": true,
+        "canvasSamples": 4,
+        "maxSamples": 8,
+        "halfFloatSamples": [
+          8,
+          4,
+          2
+        ],
+        "gpu": "ANGLE (Intel, ANGLE Metal Renderer: Intel(R) UHD Graphics 617, Unspecified Version)",
+        "targets": [
+          {
+            "width": 1600,
+            "height": 900,
+            "type": 1016,
+            "requestedSamples": 0,
+            "actualSamples": 0
+          },
+          {
+            "width": 1600,
+            "height": 900,
+            "type": 1016,
+            "requestedSamples": 0,
+            "actualSamples": 0
+          }
+        ],
+        "calls": 1,
+        "triangles": 1,
+        "memory": {
+          "geometries": 1501,
+          "textures": 302
+        },
+        "jsHeap": 243002944
+      },
+      "camera": {
+        "position": [
+          -144.6290592444007,
+          208.2878532625406,
+          32.32205740136035
+        ],
+        "quaternion": [
+          -0.3702543457061976,
+          -0.5383996395935492,
+          -0.28410615187685734,
+          0.701656071046874
+        ],
+        "fov": 40,
+        "rig": [
+          -6.000000082076107,
+          -0.3972196865061604,
+          18.079071082138032
+        ]
+      }
+    },
+    {
+      "name": "edge-corner",
+      "path": "/tmp/gt3-p3z-run/final-capture/edge-corner.png",
+      "at": "2026-10-13T16:11:11.805Z",
+      "settings": {
+        "probe": {
+          "mode": "race",
+          "locked": false,
+          "speed01": 0,
+          "progress": 0.12614160527985382,
+          "applied": 1,
+          "level": "high",
+          "still": 9521.40000000596,
+          "sinceSwitch": null,
+          "canvasW": 1600,
+          "ratio": 1
+        },
+        "css": {
+          "width": 1600,
+          "height": 900
+        },
+        "devicePixelRatio": 1,
+        "contextAntialias": true,
+        "canvasSamples": 4,
+        "maxSamples": 8,
+        "halfFloatSamples": [
+          8,
+          4,
+          2
+        ],
+        "gpu": "ANGLE (Intel, ANGLE Metal Renderer: Intel(R) UHD Graphics 617, Unspecified Version)",
+        "targets": [
+          {
+            "width": 1600,
+            "height": 900,
+            "type": 1016,
+            "requestedSamples": 0,
+            "actualSamples": 0
+          },
+          {
+            "width": 1600,
+            "height": 900,
+            "type": 1016,
+            "requestedSamples": 0,
+            "actualSamples": 0
+          }
+        ],
+        "calls": 1,
+        "triangles": 1,
+        "memory": {
+          "geometries": 1501,
+          "textures": 302
+        },
+        "jsHeap": 243660154
+      },
+      "camera": {
+        "position": [
+          46.20042740532611,
+          208.2878532625406,
+          -490.5572287766979
+        ],
+        "quaternion": [
+          -0.3702543457061976,
+          -0.5383996395935492,
+          -0.28410615187685734,
+          0.701656071046874
+        ],
+        "fov": 40,
+        "rig": [
+          254.75654126797372,
+          6.290483922693631,
+          -510.4076071434834
+        ]
+      }
+    },
+    {
+      "name": "runoff-barrier",
+      "path": "/tmp/gt3-p3z-run/final-capture/runoff-barrier.png",
+      "at": "2026-10-13T16:11:15.963Z",
+      "settings": {
+        "probe": {
+          "mode": "race",
+          "locked": false,
+          "speed01": 0,
+          "progress": 0.28556845038273104,
+          "applied": 1,
+          "level": "high",
+          "still": 13688.5,
+          "sinceSwitch": null,
+          "canvasW": 1600,
+          "ratio": 1
+        },
+        "css": {
+          "width": 1600,
+          "height": 900
+        },
+        "devicePixelRatio": 1,
+        "contextAntialias": true,
+        "canvasSamples": 4,
+        "maxSamples": 8,
+        "halfFloatSamples": [
+          8,
+          4,
+          2
+        ],
+        "gpu": "ANGLE (Intel, ANGLE Metal Renderer: Intel(R) UHD Graphics 617, Unspecified Version)",
+        "targets": [
+          {
+            "width": 1600,
+            "height": 900,
+            "type": 1016,
+            "requestedSamples": 0,
+            "actualSamples": 0
+          },
+          {
+            "width": 1600,
+            "height": 900,
+            "type": 1016,
+            "requestedSamples": 0,
+            "actualSamples": 0
+          }
+        ],
+        "calls": 1,
+        "triangles": 1,
+        "memory": {
+          "geometries": 1501,
+          "textures": 302
+        },
+        "jsHeap": 242400230
+      },
+      "camera": {
+        "position": [
+          -0.20268450923688874,
+          208.2878532625406,
+          -1113.9248944309954
+        ],
+        "quaternion": [
+          -0.3702543457061976,
+          -0.5383996395935492,
+          -0.28410615187685734,
+          0.701656071046874
+        ],
+        "fov": 40,
+        "rig": [
+          183.27286884709667,
+          10.903028227029715,
+          -1169.2993937106755
+        ]
+      }
+    },
+    {
+      "name": "checkpoint",
+      "path": "/tmp/gt3-p3z-run/final-capture/checkpoint.png",
+      "at": "2026-10-13T16:11:19.687Z",
+      "settings": {
+        "probe": {
+          "mode": "race",
+          "locked": false,
+          "speed01": 0,
+          "progress": 0.1829374188477538,
+          "applied": 1,
+          "level": "high",
+          "still": 17357.20000000298,
+          "sinceSwitch": null,
+          "canvasW": 1600,
+          "ratio": 1
+        },
+        "css": {
+          "width": 1600,
+          "height": 900
+        },
+        "devicePixelRatio": 1,
+        "contextAntialias": true,
+        "canvasSamples": 4,
+        "maxSamples": 8,
+        "halfFloatSamples": [
+          8,
+          4,
+          2
+        ],
+        "gpu": "ANGLE (Intel, ANGLE Metal Renderer: Intel(R) UHD Graphics 617, Unspecified Version)",
+        "targets": [
+          {
+            "width": 1600,
+            "height": 900,
+            "type": 1016,
+            "requestedSamples": 0,
+            "actualSamples": 0
+          },
+          {
+            "width": 1600,
+            "height": 900,
+            "type": 1016,
+            "requestedSamples": 0,
+            "actualSamples": 0
+          }
+        ],
+        "calls": 1,
+        "triangles": 1,
+        "memory": {
+          "geometries": 1501,
+          "textures": 302
+        },
+        "jsHeap": 247457386
+      },
+      "camera": {
+        "position": [
+          36.23535217785306,
+          208.2878532625406,
+          -711.9490859154905
+        ],
+        "quaternion": [
+          -0.3702543457061976,
+          -0.5383996395935492,
+          -0.28410615187685734,
+          0.701656071046874
+        ],
+        "fov": 40,
+        "rig": [
+          178.8973739299269,
+          8.979467654494488,
+          -747.141153092679
+        ]
+      }
+    },
+    {
+      "name": "braking-boards",
+      "path": "/tmp/gt3-p3z-run/final-capture/braking-boards.png",
+      "at": "2026-10-13T16:11:23.053Z",
+      "settings": {
+        "probe": {
+          "mode": "race",
+          "locked": false,
+          "speed01": 0,
+          "progress": 0.23677112300218492,
+          "applied": 1,
+          "level": "high",
+          "still": 20763.79999999702,
+          "sinceSwitch": null,
+          "canvasW": 1600,
+          "ratio": 1
+        },
+        "css": {
+          "width": 1600,
+          "height": 900
+        },
+        "devicePixelRatio": 1,
+        "contextAntialias": true,
+        "canvasSamples": 4,
+        "maxSamples": 8,
+        "halfFloatSamples": [
+          8,
+          4,
+          2
+        ],
+        "gpu": "ANGLE (Intel, ANGLE Metal Renderer: Intel(R) UHD Graphics 617, Unspecified Version)",
+        "targets": [
+          {
+            "width": 1600,
+            "height": 900,
+            "type": 1016,
+            "requestedSamples": 0,
+            "actualSamples": 0
+          },
+          {
+            "width": 1600,
+            "height": 900,
+            "type": 1016,
+            "requestedSamples": 0,
+            "actualSamples": 0
+          }
+        ],
+        "calls": 1,
+        "triangles": 1,
+        "memory": {
+          "geometries": 1501,
+          "textures": 302
+        },
+        "jsHeap": 263506470
+      },
+      "camera": {
+        "position": [
+          -6.976206876763399,
+          208.2878532625406,
+          -919.8286010367337
+        ],
+        "quaternion": [
+          -0.3702543457061976,
+          -0.5383996395935492,
+          -0.28410615187685734,
+          0.701656071046874
+        ],
+        "fov": 40,
+        "rig": [
+          86.93712313619655,
+          14.828678952507413,
+          -966.6859874661844
+        ]
+      }
+    },
+    {
+      "name": "control",
+      "path": "/tmp/gt3-p3z-run/final-capture/control.png",
+      "at": "2026-10-13T16:11:27.353Z",
+      "settings": {
+        "probe": {
+          "mode": "race",
+          "locked": false,
+          "speed01": 0,
+          "progress": 0.531683642510298,
+          "applied": 1,
+          "level": "high",
+          "still": 25032.20000000298,
+          "sinceSwitch": null,
+          "canvasW": 1600,
+          "ratio": 1
+        },
+        "css": {
+          "width": 1600,
+          "height": 900
+        },
+        "devicePixelRatio": 1,
+        "contextAntialias": true,
+        "canvasSamples": 4,
+        "maxSamples": 8,
+        "halfFloatSamples": [
+          8,
+          4,
+          2
+        ],
+        "gpu": "ANGLE (Intel, ANGLE Metal Renderer: Intel(R) UHD Graphics 617, Unspecified Version)",
+        "targets": [
+          {
+            "width": 1600,
+            "height": 900,
+            "type": 1016,
+            "requestedSamples": 0,
+            "actualSamples": 0
+          },
+          {
+            "width": 1600,
+            "height": 900,
+            "type": 1016,
+            "requestedSamples": 0,
+            "actualSamples": 0
+          }
+        ],
+        "calls": 1,
+        "triangles": 1,
+        "memory": {
+          "geometries": 1501,
+          "textures": 302
+        },
+        "jsHeap": 247890583
+      },
+      "camera": {
+        "position": [
+          -697.6277633972118,
+          208.2878532625406,
+          -1262.3600049296144
+        ],
+        "quaternion": [
+          -0.37025434570619775,
+          -0.5383996395935492,
+          -0.2841061518768574,
+          0.701656071046874
+        ],
+        "fov": 40,
+        "rig": [
+          -596.9527840764669,
+          14.873327860577383,
+          -1331.3130443298203
+        ]
+      }
+    },
+    {
+      "name": "lexus-dark",
+      "path": "/tmp/gt3-p3z-run/final-capture/lexus-dark.png",
+      "at": "2026-10-13T16:11:31.763Z",
+      "settings": {
+        "probe": {
+          "mode": "race",
+          "locked": false,
+          "speed01": 0,
+          "progress": 0.12614160527985382,
+          "applied": 1,
+          "level": "high",
+          "still": 29345.59999999404,
+          "sinceSwitch": null,
+          "canvasW": 1600,
+          "ratio": 1
+        },
+        "css": {
+          "width": 1600,
+          "height": 900
+        },
+        "devicePixelRatio": 1,
+        "contextAntialias": true,
+        "canvasSamples": 4,
+        "maxSamples": 8,
+        "halfFloatSamples": [
+          8,
+          4,
+          2
+        ],
+        "gpu": "ANGLE (Intel, ANGLE Metal Renderer: Intel(R) UHD Graphics 617, Unspecified Version)",
+        "targets": [
+          {
+            "width": 1600,
+            "height": 900,
+            "type": 1016,
+            "requestedSamples": 0,
+            "actualSamples": 0
+          },
+          {
+            "width": 1600,
+            "height": 900,
+            "type": 1016,
+            "requestedSamples": 0,
+            "actualSamples": 0
+          }
+        ],
+        "calls": 1,
+        "triangles": 1,
+        "memory": {
+          "geometries": 1501,
+          "textures": 302
+        },
+        "jsHeap": 244900990
+      },
+      "camera": {
+        "position": [
+          46.20042740532611,
+          208.2878532625406,
+          -490.5572287766979
+        ],
+        "quaternion": [
+          -0.3702543457061976,
+          -0.5383996395935492,
+          -0.28410615187685734,
+          0.701656071046874
+        ],
+        "fov": 40,
+        "rig": [
+          254.75654126797372,
+          6.290514539995742,
+          -510.4076071434834
+        ]
+      }
+    },
+    {
+      "name": "bmw-bright",
+      "path": "/tmp/gt3-p3z-run/final-capture/bmw-bright.png",
+      "at": "2026-10-13T16:11:35.352Z",
+      "settings": {
+        "probe": {
+          "mode": "race",
+          "locked": false,
+          "speed01": 0,
+          "progress": 0.12614160527985382,
+          "applied": 1,
+          "level": "high",
+          "still": 32812.40000000596,
+          "sinceSwitch": null,
+          "canvasW": 1600,
+          "ratio": 1
+        },
+        "css": {
+          "width": 1600,
+          "height": 900
+        },
+        "devicePixelRatio": 1,
+        "contextAntialias": true,
+        "canvasSamples": 4,
+        "maxSamples": 8,
+        "halfFloatSamples": [
+          8,
+          4,
+          2
+        ],
+        "gpu": "ANGLE (Intel, ANGLE Metal Renderer: Intel(R) UHD Graphics 617, Unspecified Version)",
+        "targets": [
+          {
+            "width": 1600,
+            "height": 900,
+            "type": 1016,
+            "requestedSamples": 0,
+            "actualSamples": 0
+          },
+          {
+            "width": 1600,
+            "height": 900,
+            "type": 1016,
+            "requestedSamples": 0,
+            "actualSamples": 0
+          }
+        ],
+        "calls": 1,
+        "triangles": 1,
+        "memory": {
+          "geometries": 1501,
+          "textures": 302
+        },
+        "jsHeap": 242789786
+      },
+      "camera": {
+        "position": [
+          46.20042740532611,
+          208.2878532625406,
+          -490.5572287766979
+        ],
+        "quaternion": [
+          -0.3702543457061976,
+          -0.5383996395935492,
+          -0.28410615187685734,
+          0.701656071046874
+        ],
+        "fov": 40,
+        "rig": [
+          254.75654126797372,
+          6.289401296301363,
+          -510.4076071434834
+        ]
+      }
+    },
+    {
+      "name": "lamborghini",
+      "path": "/tmp/gt3-p3z-run/final-capture/lamborghini.png",
+      "at": "2026-10-13T16:11:39.327Z",
+      "settings": {
+        "probe": {
+          "mode": "race",
+          "locked": false,
+          "speed01": 0,
+          "progress": 0.12614160527985382,
+          "applied": 1,
+          "level": "high",
+          "still": 36638.20000000298,
+          "sinceSwitch": null,
+          "canvasW": 1600,
+          "ratio": 1
+        },
+        "css": {
+          "width": 1600,
+          "height": 900
+        },
+        "devicePixelRatio": 1,
+        "contextAntialias": true,
+        "canvasSamples": 4,
+        "maxSamples": 8,
+        "halfFloatSamples": [
+          8,
+          4,
+          2
+        ],
+        "gpu": "ANGLE (Intel, ANGLE Metal Renderer: Intel(R) UHD Graphics 617, Unspecified Version)",
+        "targets": [
+          {
+            "width": 1600,
+            "height": 900,
+            "type": 1016,
+            "requestedSamples": 0,
+            "actualSamples": 0
+          },
+          {
+            "width": 1600,
+            "height": 900,
+            "type": 1016,
+            "requestedSamples": 0,
+            "actualSamples": 0
+          }
+        ],
+        "calls": 1,
+        "triangles": 1,
+        "memory": {
+          "geometries": 1501,
+          "textures": 302
+        },
+        "jsHeap": 242497526
+      },
+      "camera": {
+        "position": [
+          46.20042740532611,
+          208.2878532625406,
+          -490.5572287766979
+        ],
+        "quaternion": [
+          -0.3702543457061976,
+          -0.5383996395935492,
+          -0.28410615187685734,
+          0.701656071046874
+        ],
+        "fov": 40,
+        "rig": [
+          254.75654126797372,
+          6.289360498188063,
+          -510.4076071434834
+        ]
+      }
+    },
+    {
+      "name": "night-edge-spot",
+      "path": "/tmp/gt3-p3z-run/final-capture/night-edge-spot.png",
+      "at": "2026-10-13T16:11:43.093Z",
+      "settings": {
+        "probe": {
+          "mode": "race",
+          "locked": false,
+          "speed01": 0,
+          "progress": 0.12614160527985382,
+          "applied": 1,
+          "level": "high",
+          "still": 40322.19999998808,
+          "sinceSwitch": null,
+          "canvasW": 1600,
+          "ratio": 1
+        },
+        "css": {
+          "width": 1600,
+          "height": 900
+        },
+        "devicePixelRatio": 1,
+        "contextAntialias": true,
+        "canvasSamples": 4,
+        "maxSamples": 8,
+        "halfFloatSamples": [
+          8,
+          4,
+          2
+        ],
+        "gpu": "ANGLE (Intel, ANGLE Metal Renderer: Intel(R) UHD Graphics 617, Unspecified Version)",
+        "targets": [
+          {
+            "width": 1600,
+            "height": 900,
+            "type": 1016,
+            "requestedSamples": 0,
+            "actualSamples": 0
+          },
+          {
+            "width": 1600,
+            "height": 900,
+            "type": 1016,
+            "requestedSamples": 0,
+            "actualSamples": 0
+          }
+        ],
+        "calls": 1,
+        "triangles": 1,
+        "memory": {
+          "geometries": 1501,
+          "textures": 302
+        },
+        "jsHeap": 248582040
+      },
+      "camera": {
+        "position": [
+          46.20042740532611,
+          208.2878532625406,
+          -490.5572287766979
+        ],
+        "quaternion": [
+          -0.3702543457061976,
+          -0.5383996395935492,
+          -0.28410615187685734,
+          0.701656071046874
+        ],
+        "fov": 40,
+        "rig": [
+          254.75654126797372,
+          6.290483922693631,
+          -510.4076071434834
+        ]
+      }
+    },
+    {
+      "name": "aa-shipped-edge",
+      "path": "/tmp/gt3-p3z-run/final-capture/aa-shipped-edge.png",
+      "at": "2026-10-13T16:11:47.546Z",
+      "settings": {
+        "probe": {
+          "mode": "race",
+          "locked": false,
+          "speed01": 0,
+          "progress": 0.12614160527985382,
+          "applied": 1,
+          "level": "high",
+          "still": 44774.39999999106,
+          "sinceSwitch": null,
+          "canvasW": 1600,
+          "ratio": 1
+        },
+        "css": {
+          "width": 1600,
+          "height": 900
+        },
+        "devicePixelRatio": 1,
+        "contextAntialias": true,
+        "canvasSamples": 4,
+        "maxSamples": 8,
+        "halfFloatSamples": [
+          8,
+          4,
+          2
+        ],
+        "gpu": "ANGLE (Intel, ANGLE Metal Renderer: Intel(R) UHD Graphics 617, Unspecified Version)",
+        "targets": [
+          {
+            "width": 1600,
+            "height": 900,
+            "type": 1016,
+            "requestedSamples": 0,
+            "actualSamples": 0
+          },
+          {
+            "width": 1600,
+            "height": 900,
+            "type": 1016,
+            "requestedSamples": 0,
+            "actualSamples": 0
+          }
+        ],
+        "calls": 1,
+        "triangles": 1,
+        "memory": {
+          "geometries": 1501,
+          "textures": 302
+        },
+        "jsHeap": 240926722
+      },
+      "camera": {
+        "position": [
+          46.20042740532611,
+          208.2878532625406,
+          -490.5572287766979
+        ],
+        "quaternion": [
+          -0.3702543457061976,
+          -0.5383996395935492,
+          -0.28410615187685734,
+          0.701656071046874
+        ],
+        "fov": 40,
+        "rig": [
+          254.75654126797372,
+          6.290483922693631,
+          -510.4076071434834
+        ]
+      }
+    },
+    {
+      "name": "aa-without-smaa-edge",
+      "path": "/tmp/gt3-p3z-run/final-capture/aa-without-smaa-edge.png",
+      "at": "2026-10-13T16:11:57.487Z",
+      "settings": {
+        "probe": {
+          "mode": "race",
+          "locked": false,
+          "speed01": 0,
+          "progress": 0.12614160527985382,
+          "applied": 1,
+          "level": "high",
+          "still": 3471.5999999940395,
+          "sinceSwitch": null,
+          "canvasW": 1600,
+          "ratio": 1
+        },
+        "css": {
+          "width": 1600,
+          "height": 900
+        },
+        "devicePixelRatio": 1,
+        "contextAntialias": true,
+        "canvasSamples": 4,
+        "maxSamples": 8,
+        "halfFloatSamples": [
+          8,
+          4,
+          2
+        ],
+        "gpu": "ANGLE (Intel, ANGLE Metal Renderer: Intel(R) UHD Graphics 617, Unspecified Version)",
+        "targets": [
+          {
+            "width": 1600,
+            "height": 900,
+            "type": 1016,
+            "requestedSamples": 0,
+            "actualSamples": 0
+          },
+          {
+            "width": 1600,
+            "height": 900,
+            "type": 1016,
+            "requestedSamples": 0,
+            "actualSamples": 0
+          }
+        ],
+        "calls": 1,
+        "triangles": 1,
+        "memory": {
+          "geometries": 1501,
+          "textures": 302
+        },
+        "jsHeap": 266299392
+      },
+      "camera": {
+        "position": [
+          46.20042740532611,
+          208.2878532625406,
+          -490.5572287766979
+        ],
+        "quaternion": [
+          -0.3702543457061976,
+          -0.5383996395935492,
+          -0.28410615187685734,
+          0.701656071046874
+        ],
+        "fov": 40,
+        "rig": [
+          254.75654126797372,
+          6.290483922693631,
+          -510.4076071434834
+        ]
+      }
+    },
+    {
+      "name": "native-shipped-lexus-dark",
+      "path": "/tmp/gt3-p3z-run/final-capture/native-shipped-lexus-dark.png",
+      "clip": {
+        "x": 724,
+        "y": 120,
+        "width": 100,
+        "height": 100
+      },
+      "at": "2026-10-13T16:12:13.960Z",
+      "settings": {
+        "probe": {
+          "mode": "race",
+          "locked": false,
+          "speed01": 0,
+          "progress": 0.12614160527985382,
+          "applied": 2,
+          "level": "high",
+          "still": 1481.800000011921,
+          "sinceSwitch": 1050.7000000029802,
+          "canvasW": 2560,
+          "ratio": 2
+        },
+        "css": {
+          "width": 1280,
+          "height": 800
+        },
+        "devicePixelRatio": 2,
+        "contextAntialias": true,
+        "canvasSamples": 4,
+        "maxSamples": 8,
+        "halfFloatSamples": [
+          8,
+          4,
+          2
+        ],
+        "gpu": "ANGLE (Intel, ANGLE Metal Renderer: Intel(R) UHD Graphics 617, Unspecified Version)",
+        "targets": [
+          {
+            "width": 2560,
+            "height": 1600,
+            "type": 1016,
+            "requestedSamples": 0,
+            "actualSamples": 0
+          },
+          {
+            "width": 2560,
+            "height": 1600,
+            "type": 1016,
+            "requestedSamples": 0,
+            "actualSamples": 0
+          }
+        ],
+        "calls": 1,
+        "triangles": 1,
+        "memory": {
+          "geometries": 1501,
+          "textures": 302
+        },
+        "jsHeap": 195747625
+      },
+      "camera": {
+        "position": [
+          46.200510689824654,
+          208.2878532625406,
+          -490.5570069311549
+        ],
+        "quaternion": [
+          -0.3702543457061976,
+          -0.5383996395935492,
+          -0.28410615187685734,
+          0.701656071046874
+        ],
+        "fov": 40,
+        "rig": [
+          254.75654126797372,
+          6.290514539995742,
+          -510.4076071434834
+        ]
+      },
+      "imageQA": "INVALID: document clip missed fixed canvas; replaced by native-cars data/images"
+    },
+    {
+      "name": "native-shipped-bmw-bright",
+      "path": "/tmp/gt3-p3z-run/final-capture/native-shipped-bmw-bright.png",
+      "clip": {
+        "x": 724,
+        "y": 120,
+        "width": 100,
+        "height": 100
+      },
+      "at": "2026-10-13T16:12:14.905Z",
+      "settings": {
+        "probe": {
+          "mode": "race",
+          "locked": false,
+          "speed01": 0,
+          "progress": 0.12614160527985382,
+          "applied": 2,
+          "level": "high",
+          "still": 2376.600000023842,
+          "sinceSwitch": 1945.5000000149012,
+          "canvasW": 2560,
+          "ratio": 2
+        },
+        "css": {
+          "width": 1280,
+          "height": 800
+        },
+        "devicePixelRatio": 2,
+        "contextAntialias": true,
+        "canvasSamples": 4,
+        "maxSamples": 8,
+        "halfFloatSamples": [
+          8,
+          4,
+          2
+        ],
+        "gpu": "ANGLE (Intel, ANGLE Metal Renderer: Intel(R) UHD Graphics 617, Unspecified Version)",
+        "targets": [
+          {
+            "width": 2560,
+            "height": 1600,
+            "type": 1016,
+            "requestedSamples": 0,
+            "actualSamples": 0
+          },
+          {
+            "width": 2560,
+            "height": 1600,
+            "type": 1016,
+            "requestedSamples": 0,
+            "actualSamples": 0
+          }
+        ],
+        "calls": 1,
+        "triangles": 1,
+        "memory": {
+          "geometries": 1501,
+          "textures": 302
+        },
+        "jsHeap": 196725056
+      },
+      "camera": {
+        "position": [
+          46.200510689824654,
+          208.2878532625406,
+          -490.5570069311549
+        ],
+        "quaternion": [
+          -0.3702543457061976,
+          -0.5383996395935492,
+          -0.28410615187685734,
+          0.701656071046874
+        ],
+        "fov": 40,
+        "rig": [
+          254.75654126797372,
+          6.289401296301363,
+          -510.4076071434834
+        ]
+      },
+      "imageQA": "INVALID: document clip missed fixed canvas; replaced by native-cars data/images"
+    },
+    {
+      "name": "native-shipped-lamborghini",
+      "path": "/tmp/gt3-p3z-run/final-capture/native-shipped-lamborghini.png",
+      "clip": {
+        "x": 724,
+        "y": 120,
+        "width": 100,
+        "height": 100
+      },
+      "at": "2026-10-13T16:12:16.216Z",
+      "settings": {
+        "probe": {
+          "mode": "race",
+          "locked": false,
+          "speed01": 0,
+          "progress": 0.12614160527985382,
+          "applied": 2,
+          "level": "high",
+          "still": 3100.9000000208616,
+          "sinceSwitch": 2669.800000011921,
+          "canvasW": 2560,
+          "ratio": 2
+        },
+        "css": {
+          "width": 1280,
+          "height": 800
+        },
+        "devicePixelRatio": 2,
+        "contextAntialias": true,
+        "canvasSamples": 4,
+        "maxSamples": 8,
+        "halfFloatSamples": [
+          8,
+          4,
+          2
+        ],
+        "gpu": "ANGLE (Intel, ANGLE Metal Renderer: Intel(R) UHD Graphics 617, Unspecified Version)",
+        "targets": [
+          {
+            "width": 2560,
+            "height": 1600,
+            "type": 1016,
+            "requestedSamples": 0,
+            "actualSamples": 0
+          },
+          {
+            "width": 2560,
+            "height": 1600,
+            "type": 1016,
+            "requestedSamples": 0,
+            "actualSamples": 0
+          }
+        ],
+        "calls": 1,
+        "triangles": 1,
+        "memory": {
+          "geometries": 1501,
+          "textures": 302
+        },
+        "jsHeap": 200367348
+      },
+      "camera": {
+        "position": [
+          46.200510689824654,
+          208.2878532625406,
+          -490.5570069311549
+        ],
+        "quaternion": [
+          -0.3702543457061976,
+          -0.5383996395935492,
+          -0.28410615187685734,
+          0.701656071046874
+        ],
+        "fov": 40,
+        "rig": [
+          254.75654126797372,
+          6.289360498188063,
+          -510.4076071434834
+        ]
+      },
+      "imageQA": "INVALID: document clip missed fixed canvas; replaced by native-cars data/images"
+    },
+    {
+      "name": "native-without-smaa-lexus-dark",
+      "path": "/tmp/gt3-p3z-run/final-capture/native-without-smaa-lexus-dark.png",
+      "clip": {
+        "x": 724,
+        "y": 120,
+        "width": 100,
+        "height": 100
+      },
+      "at": "2026-10-13T16:12:24.897Z",
+      "settings": {
+        "probe": {
+          "mode": "race",
+          "locked": false,
+          "speed01": 0,
+          "progress": 0.12614160527985382,
+          "applied": 2,
+          "level": "high",
+          "still": 1735.699999988079,
+          "sinceSwitch": 1300.2999999970198,
+          "canvasW": 2560,
+          "ratio": 2
+        },
+        "css": {
+          "width": 1280,
+          "height": 800
+        },
+        "devicePixelRatio": 2,
+        "contextAntialias": true,
+        "canvasSamples": 4,
+        "maxSamples": 8,
+        "halfFloatSamples": [
+          8,
+          4,
+          2
+        ],
+        "gpu": "ANGLE (Intel, ANGLE Metal Renderer: Intel(R) UHD Graphics 617, Unspecified Version)",
+        "targets": [
+          {
+            "width": 2560,
+            "height": 1600,
+            "type": 1016,
+            "requestedSamples": 0,
+            "actualSamples": 0
+          },
+          {
+            "width": 2560,
+            "height": 1600,
+            "type": 1016,
+            "requestedSamples": 0,
+            "actualSamples": 0
+          }
+        ],
+        "calls": 1,
+        "triangles": 1,
+        "memory": {
+          "geometries": 1501,
+          "textures": 300
+        },
+        "jsHeap": 208568388
+      },
+      "camera": {
+        "position": [
+          46.200510689824654,
+          208.2878532625406,
+          -490.5570069311549
+        ],
+        "quaternion": [
+          -0.3702543457061976,
+          -0.5383996395935492,
+          -0.28410615187685734,
+          0.701656071046874
+        ],
+        "fov": 40,
+        "rig": [
+          254.75654126797372,
+          6.290514539995742,
+          -510.4076071434834
+        ]
+      },
+      "imageQA": "INVALID: document clip missed fixed canvas; replaced by native-cars data/images"
+    },
+    {
+      "name": "native-without-smaa-bmw-bright",
+      "path": "/tmp/gt3-p3z-run/final-capture/native-without-smaa-bmw-bright.png",
+      "clip": {
+        "x": 724,
+        "y": 120,
+        "width": 100,
+        "height": 100
+      },
+      "at": "2026-10-13T16:12:26.079Z",
+      "settings": {
+        "probe": {
+          "mode": "race",
+          "locked": false,
+          "speed01": 0,
+          "progress": 0.12614160527985382,
+          "applied": 2,
+          "level": "high",
+          "still": 2527.8999999910593,
+          "sinceSwitch": 2092.5,
+          "canvasW": 2560,
+          "ratio": 2
+        },
+        "css": {
+          "width": 1280,
+          "height": 800
+        },
+        "devicePixelRatio": 2,
+        "contextAntialias": true,
+        "canvasSamples": 4,
+        "maxSamples": 8,
+        "halfFloatSamples": [
+          8,
+          4,
+          2
+        ],
+        "gpu": "ANGLE (Intel, ANGLE Metal Renderer: Intel(R) UHD Graphics 617, Unspecified Version)",
+        "targets": [
+          {
+            "width": 2560,
+            "height": 1600,
+            "type": 1016,
+            "requestedSamples": 0,
+            "actualSamples": 0
+          },
+          {
+            "width": 2560,
+            "height": 1600,
+            "type": 1016,
+            "requestedSamples": 0,
+            "actualSamples": 0
+          }
+        ],
+        "calls": 1,
+        "triangles": 1,
+        "memory": {
+          "geometries": 1501,
+          "textures": 300
+        },
+        "jsHeap": 191392116
+      },
+      "camera": {
+        "position": [
+          46.200510689824654,
+          208.2878532625406,
+          -490.5570069311549
+        ],
+        "quaternion": [
+          -0.3702543457061976,
+          -0.5383996395935492,
+          -0.28410615187685734,
+          0.701656071046874
+        ],
+        "fov": 40,
+        "rig": [
+          254.75654126797372,
+          6.289401296301363,
+          -510.4076071434834
+        ]
+      },
+      "imageQA": "INVALID: document clip missed fixed canvas; replaced by native-cars data/images"
+    },
+    {
+      "name": "native-without-smaa-lamborghini",
+      "path": "/tmp/gt3-p3z-run/final-capture/native-without-smaa-lamborghini.png",
+      "clip": {
+        "x": 724,
+        "y": 120,
+        "width": 100,
+        "height": 100
+      },
+      "at": "2026-10-13T16:12:27.463Z",
+      "settings": {
+        "probe": {
+          "mode": "race",
+          "locked": false,
+          "speed01": 0,
+          "progress": 0.12614160527985382,
+          "applied": 2,
+          "level": "high",
+          "still": 3366.0999999791384,
+          "sinceSwitch": 2930.699999988079,
+          "canvasW": 2560,
+          "ratio": 2
+        },
+        "css": {
+          "width": 1280,
+          "height": 800
+        },
+        "devicePixelRatio": 2,
+        "contextAntialias": true,
+        "canvasSamples": 4,
+        "maxSamples": 8,
+        "halfFloatSamples": [
+          8,
+          4,
+          2
+        ],
+        "gpu": "ANGLE (Intel, ANGLE Metal Renderer: Intel(R) UHD Graphics 617, Unspecified Version)",
+        "targets": [
+          {
+            "width": 2560,
+            "height": 1600,
+            "type": 1016,
+            "requestedSamples": 0,
+            "actualSamples": 0
+          },
+          {
+            "width": 2560,
+            "height": 1600,
+            "type": 1016,
+            "requestedSamples": 0,
+            "actualSamples": 0
+          }
+        ],
+        "calls": 1,
+        "triangles": 1,
+        "memory": {
+          "geometries": 1501,
+          "textures": 300
+        },
+        "jsHeap": 195907092
+      },
+      "camera": {
+        "position": [
+          46.200510689824654,
+          208.2878532625406,
+          -490.5570069311549
+        ],
+        "quaternion": [
+          -0.3702543457061976,
+          -0.5383996395935492,
+          -0.28410615187685734,
+          0.701656071046874
+        ],
+        "fov": 40,
+        "rig": [
+          254.75654126797372,
+          6.289360498188063,
+          -510.4076071434834
+        ]
+      },
+      "imageQA": "INVALID: document clip missed fixed canvas; replaced by native-cars data/images"
+    }
+  ],
+  "errors": [],
+  "performance": [
+    {
+      "label": "shipped-1600x900-dpr1-rest",
+      "motion": false,
+      "startedAt": "2026-10-13T16:11:48.643Z",
+      "endedAt": "2026-10-13T16:11:50.664Z",
+      "gpu": {
+        "n": 96,
+        "p50": 16.137999,
+        "p95": 16.871584,
+        "max": 17.106333,
+        "over100": 0
+      },
+      "raf": {
+        "n": 100,
+        "p50": 18,
+        "p95": 36.20000000298023,
+        "max": 74.80000001192093,
+        "over100": 0
+      },
+      "cpu": {
+        "n": 101,
+        "p50": 6.600000008940697,
+        "p95": 25.700000002980232,
+        "max": 56.900000005960464,
+        "over100": 0
+      },
+      "timerQuery": true,
+      "draws": {
+        "calls": 326,
+        "triangles": 763143
+      },
+      "ratioRange": [
+        1
+      ],
+      "progressRange": [
+        0.12614160527985382,
+        0.12614160527985382
+      ],
+      "settings": {
+        "probe": {
+          "mode": "race",
+          "locked": false,
+          "speed01": 0,
+          "progress": 0.12614160527985382,
+          "applied": 1,
+          "level": "high",
+          "still": 47840.5,
+          "sinceSwitch": null,
+          "canvasW": 1600,
+          "ratio": 1
+        },
+        "css": {
+          "width": 1600,
+          "height": 900
+        },
+        "devicePixelRatio": 1,
+        "contextAntialias": true,
+        "canvasSamples": 4,
+        "maxSamples": 8,
+        "halfFloatSamples": [
+          8,
+          4,
+          2
+        ],
+        "gpu": "ANGLE (Intel, ANGLE Metal Renderer: Intel(R) UHD Graphics 617, Unspecified Version)",
+        "targets": [
+          {
+            "width": 1600,
+            "height": 900,
+            "type": 1016,
+            "requestedSamples": 0,
+            "actualSamples": 0
+          },
+          {
+            "width": 1600,
+            "height": 900,
+            "type": 1016,
+            "requestedSamples": 0,
+            "actualSamples": 0
+          }
+        ],
+        "calls": 326,
+        "triangles": 763143,
+        "memory": {
+          "geometries": 1501,
+          "textures": 302
+        },
+        "jsHeap": 247753760
+      }
+    },
+    {
+      "label": "shipped-1600x900-dpr1-motion",
+      "motion": true,
+      "startedAt": "2026-10-13T16:11:51.879Z",
+      "endedAt": "2026-10-13T16:11:53.934Z",
+      "gpu": {
+        "n": 88,
+        "p50": 16.524833,
+        "p95": 17.267583,
+        "max": 17.457416,
+        "over100": 0
+      },
+      "raf": {
+        "n": 89,
+        "p50": 20.200000002980232,
+        "p95": 45,
+        "max": 62.099999994039536,
+        "over100": 0
+      },
+      "cpu": {
+        "n": 90,
+        "p50": 7.899999991059303,
+        "p95": 14.899999991059303,
+        "max": 16.299999997019768,
+        "over100": 0
+      },
+      "timerQuery": true,
+      "draws": {
+        "calls": 326,
+        "triangles": 763143
+      },
+      "ratioRange": [
+        1
+      ],
+      "progressRange": [
+        0.10820608520578015,
+        0.16241767359274153
+      ],
+      "settings": {
+        "probe": {
+          "mode": "race",
+          "locked": false,
+          "speed01": 0.4901346748828429,
+          "progress": 0.16241767359274153,
+          "applied": 1,
+          "level": "high",
+          "still": 0,
+          "sinceSwitch": null,
+          "canvasW": 1600,
+          "ratio": 1
+        },
+        "css": {
+          "width": 1600,
+          "height": 900
+        },
+        "devicePixelRatio": 1,
+        "contextAntialias": true,
+        "canvasSamples": 4,
+        "maxSamples": 8,
+        "halfFloatSamples": [
+          8,
+          4,
+          2
+        ],
+        "gpu": "ANGLE (Intel, ANGLE Metal Renderer: Intel(R) UHD Graphics 617, Unspecified Version)",
+        "targets": [
+          {
+            "width": 1600,
+            "height": 900,
+            "type": 1016,
+            "requestedSamples": 0,
+            "actualSamples": 0
+          },
+          {
+            "width": 1600,
+            "height": 900,
+            "type": 1016,
+            "requestedSamples": 0,
+            "actualSamples": 0
+          }
+        ],
+        "calls": 326,
+        "triangles": 763143,
+        "memory": {
+          "geometries": 1501,
+          "textures": 302
+        },
+        "jsHeap": 253951808
+      }
+    },
+    {
+      "label": "without-smaa-1600x900-dpr1-rest",
+      "motion": false,
+      "startedAt": "2026-10-13T16:11:58.734Z",
+      "endedAt": "2026-10-13T16:12:00.761Z",
+      "gpu": {
+        "n": 117,
+        "p50": 14.004333,
+        "p95": 14.625417,
+        "max": 15.009583,
+        "over100": 0
+      },
+      "raf": {
+        "n": 118,
+        "p50": 16.5,
+        "p95": 20.599999994039536,
+        "max": 36.1000000089407,
+        "over100": 0
+      },
+      "cpu": {
+        "n": 119,
+        "p50": 7,
+        "p95": 15,
+        "max": 29,
+        "over100": 0
+      },
+      "timerQuery": true,
+      "draws": {
+        "calls": 323,
+        "triangles": 763140
+      },
+      "ratioRange": [
+        1
+      ],
+      "progressRange": [
+        0.12614160527985382,
+        0.12614160527985382
+      ],
+      "settings": {
+        "probe": {
+          "mode": "race",
+          "locked": false,
+          "speed01": 0,
+          "progress": 0.12614160527985382,
+          "applied": 1,
+          "level": "high",
+          "still": 6774.70000000298,
+          "sinceSwitch": null,
+          "canvasW": 1600,
+          "ratio": 1
+        },
+        "css": {
+          "width": 1600,
+          "height": 900
+        },
+        "devicePixelRatio": 1,
+        "contextAntialias": true,
+        "canvasSamples": 4,
+        "maxSamples": 8,
+        "halfFloatSamples": [
+          8,
+          4,
+          2
+        ],
+        "gpu": "ANGLE (Intel, ANGLE Metal Renderer: Intel(R) UHD Graphics 617, Unspecified Version)",
+        "targets": [
+          {
+            "width": 1600,
+            "height": 900,
+            "type": 1016,
+            "requestedSamples": 0,
+            "actualSamples": 0
+          },
+          {
+            "width": 1600,
+            "height": 900,
+            "type": 1016,
+            "requestedSamples": 0,
+            "actualSamples": 0
+          }
+        ],
+        "calls": 1,
+        "triangles": 1,
+        "memory": {
+          "geometries": 1501,
+          "textures": 302
+        },
+        "jsHeap": 251824692
+      }
+    },
+    {
+      "label": "without-smaa-1600x900-dpr1-motion",
+      "motion": true,
+      "startedAt": "2026-10-13T16:12:01.810Z",
+      "endedAt": "2026-10-13T16:12:03.838Z",
+      "gpu": {
+        "n": 94,
+        "p50": 13.888,
+        "p95": 14.375333,
+        "max": 14.551,
+        "over100": 0
+      },
+      "raf": {
+        "n": 95,
+        "p50": 18,
+        "p95": 32.900000005960464,
+        "max": 46,
+        "over100": 0
+      },
+      "cpu": {
+        "n": 96,
+        "p50": 9,
+        "p95": 15,
+        "max": 19,
+        "over100": 0
+      },
+      "timerQuery": true,
+      "draws": {
+        "calls": 323,
+        "triangles": 763140
+      },
+      "ratioRange": [
+        1
+      ],
+      "progressRange": [
+        0.10820608520578015,
+        0.16189576354782376
+      ],
+      "settings": {
+        "probe": {
+          "mode": "race",
+          "locked": false,
+          "speed01": 0.49034752032231105,
+          "progress": 0.16247620198345972,
+          "applied": 1,
+          "level": "high",
+          "still": 0,
+          "sinceSwitch": null,
+          "canvasW": 1600,
+          "ratio": 1
+        },
+        "css": {
+          "width": 1600,
+          "height": 900
+        },
+        "devicePixelRatio": 1,
+        "contextAntialias": true,
+        "canvasSamples": 4,
+        "maxSamples": 8,
+        "halfFloatSamples": [
+          8,
+          4,
+          2
+        ],
+        "gpu": "ANGLE (Intel, ANGLE Metal Renderer: Intel(R) UHD Graphics 617, Unspecified Version)",
+        "targets": [
+          {
+            "width": 1600,
+            "height": 900,
+            "type": 1016,
+            "requestedSamples": 0,
+            "actualSamples": 0
+          },
+          {
+            "width": 1600,
+            "height": 900,
+            "type": 1016,
+            "requestedSamples": 0,
+            "actualSamples": 0
+          }
+        ],
+        "calls": 1,
+        "triangles": 1,
+        "memory": {
+          "geometries": 1501,
+          "textures": 302
+        },
+        "jsHeap": 258794664
+      }
+    },
+    {
+      "label": "shipped-native-1280x800-dpr2-rest",
+      "motion": false,
+      "startedAt": "2026-10-13T16:12:06.733Z",
+      "endedAt": "2026-10-13T16:12:08.744Z",
+      "gpu": {
+        "n": 41,
+        "p50": 38.074833,
+        "p95": 39.960082,
+        "max": 40.306833,
+        "over100": 0
+      },
+      "raf": {
+        "n": 45,
+        "p50": 43.3999999910593,
+        "p95": 45.400000005960464,
+        "max": 46.70000000298023,
+        "over100": 0
+      },
+      "cpu": {
+        "n": 46,
+        "p50": 4.5,
+        "p95": 5.5,
+        "max": 7.0999999940395355,
+        "over100": 0
+      },
+      "timerQuery": true,
+      "draws": {
+        "calls": 326,
+        "triangles": 763143
+      },
+      "ratioRange": [
+        2
+      ],
+      "progressRange": [
+        0.12614160527985382,
+        0.12614160527985382
+      ],
+      "settings": {
+        "probe": {
+          "mode": "race",
+          "locked": false,
+          "speed01": 0,
+          "progress": 0.12614160527985382,
+          "applied": 2,
+          "level": "high",
+          "still": 2483.1000000089407,
+          "sinceSwitch": 2056.2000000029802,
+          "canvasW": 2560,
+          "ratio": 2
+        },
+        "css": {
+          "width": 1280,
+          "height": 800
+        },
+        "devicePixelRatio": 2,
+        "contextAntialias": true,
+        "canvasSamples": 4,
+        "maxSamples": 8,
+        "halfFloatSamples": [
+          8,
+          4,
+          2
+        ],
+        "gpu": "ANGLE (Intel, ANGLE Metal Renderer: Intel(R) UHD Graphics 617, Unspecified Version)",
+        "targets": [
+          {
+            "width": 2560,
+            "height": 1600,
+            "type": 1016,
+            "requestedSamples": 0,
+            "actualSamples": 0
+          },
+          {
+            "width": 2560,
+            "height": 1600,
+            "type": 1016,
+            "requestedSamples": 0,
+            "actualSamples": 0
+          }
+        ],
+        "calls": 326,
+        "triangles": 763143,
+        "memory": {
+          "geometries": 1501,
+          "textures": 302
+        },
+        "jsHeap": 211995078
+      }
+    },
+    {
+      "label": "shipped-native-1280x800-adaptive-motion",
+      "motion": true,
+      "startedAt": "2026-10-13T16:12:09.930Z",
+      "endedAt": "2026-10-13T16:12:12.025Z",
+      "gpu": {
+        "n": 90,
+        "p50": 11.822583,
+        "p95": 13.043917,
+        "max": 39.613667,
+        "over100": 0
+      },
+      "raf": {
+        "n": 91,
+        "p50": 18.5,
+        "p95": 34.70000000298023,
+        "max": 188.8999999910593,
+        "over100": 1
+      },
+      "cpu": {
+        "n": 92,
+        "p50": 9.5,
+        "p95": 11.700000002980232,
+        "max": 16.100000008940697,
+        "over100": 0
+      },
+      "timerQuery": true,
+      "draws": {
+        "calls": 326,
+        "triangles": 763143
+      },
+      "ratioRange": [
+        2,
+        1
+      ],
+      "progressRange": [
+        0.10820608520578015,
+        0.1656181506338574
+      ],
+      "settings": {
+        "probe": {
+          "mode": "race",
+          "locked": false,
+          "speed01": 0.513274089351955,
+          "progress": 0.16620328521075775,
+          "applied": 1,
+          "level": "low",
+          "still": 0,
+          "sinceSwitch": 1875.5999999940395,
+          "canvasW": 1280,
+          "ratio": 1
+        },
+        "css": {
+          "width": 1280,
+          "height": 800
+        },
+        "devicePixelRatio": 2,
+        "contextAntialias": true,
+        "canvasSamples": 4,
+        "maxSamples": 8,
+        "halfFloatSamples": [
+          8,
+          4,
+          2
+        ],
+        "gpu": "ANGLE (Intel, ANGLE Metal Renderer: Intel(R) UHD Graphics 617, Unspecified Version)",
+        "targets": [
+          {
+            "width": 1280,
+            "height": 800,
+            "type": 1016,
+            "requestedSamples": 0,
+            "actualSamples": 0
+          },
+          {
+            "width": 1280,
+            "height": 800,
+            "type": 1016,
+            "requestedSamples": 0,
+            "actualSamples": 0
+          }
+        ],
+        "calls": 1,
+        "triangles": 1,
+        "memory": {
+          "geometries": 1501,
+          "textures": 302
+        },
+        "jsHeap": 211203815
+      }
+    },
+    {
+      "label": "without-smaa-native-1280x800-dpr2-rest",
+      "motion": false,
+      "startedAt": "2026-10-13T16:12:17.870Z",
+      "endedAt": "2026-10-13T16:12:19.891Z",
+      "gpu": {
+        "n": 47,
+        "p50": 33.483499,
+        "p95": 34.743583,
+        "max": 35.469416,
+        "over100": 0
+      },
+      "raf": {
+        "n": 51,
+        "p50": 38.8999999910593,
+        "p95": 42,
+        "max": 42.69999998807907,
+        "over100": 0
+      },
+      "cpu": {
+        "n": 52,
+        "p50": 4.9000000059604645,
+        "p95": 6.4000000059604645,
+        "max": 7.300000011920929,
+        "over100": 0
+      },
+      "timerQuery": true,
+      "draws": {
+        "calls": 323,
+        "triangles": 763140
+      },
+      "ratioRange": [
+        2
+      ],
+      "progressRange": [
+        0.12614160527985382,
+        0.12614160527985382
+      ],
+      "settings": {
+        "probe": {
+          "mode": "race",
+          "locked": false,
+          "speed01": 0,
+          "progress": 0.12614160527985382,
+          "applied": 2,
+          "level": "high",
+          "still": 6263.100000023842,
+          "sinceSwitch": 5832.000000014901,
+          "canvasW": 2560,
+          "ratio": 2
+        },
+        "css": {
+          "width": 1280,
+          "height": 800
+        },
+        "devicePixelRatio": 2,
+        "contextAntialias": true,
+        "canvasSamples": 4,
+        "maxSamples": 8,
+        "halfFloatSamples": [
+          8,
+          4,
+          2
+        ],
+        "gpu": "ANGLE (Intel, ANGLE Metal Renderer: Intel(R) UHD Graphics 617, Unspecified Version)",
+        "targets": [
+          {
+            "width": 2560,
+            "height": 1600,
+            "type": 1016,
+            "requestedSamples": 0,
+            "actualSamples": 0
+          },
+          {
+            "width": 2560,
+            "height": 1600,
+            "type": 1016,
+            "requestedSamples": 0,
+            "actualSamples": 0
+          }
+        ],
+        "calls": 323,
+        "triangles": 763140,
+        "memory": {
+          "geometries": 1501,
+          "textures": 302
+        },
+        "jsHeap": 190448407
+      }
+    },
+    {
+      "label": "without-smaa-native-1280x800-adaptive-motion",
+      "motion": true,
+      "startedAt": "2026-10-13T16:12:21.080Z",
+      "endedAt": "2026-10-13T16:12:23.160Z",
+      "gpu": {
+        "n": 93,
+        "p50": 10.187499,
+        "p95": 10.933833,
+        "max": 34.758832,
+        "over100": 0
+      },
+      "raf": {
+        "n": 93,
+        "p50": 17.200000002980232,
+        "p95": 35,
+        "max": 193.29999999701977,
+        "over100": 1
+      },
+      "cpu": {
+        "n": 94,
+        "p50": 8.299999997019768,
+        "p95": 10.400000005960464,
+        "max": 13.5,
+        "over100": 0
+      },
+      "timerQuery": true,
+      "draws": {
+        "calls": 323,
+        "triangles": 763140
+      },
+      "ratioRange": [
+        2,
+        1
+      ],
+      "progressRange": [
+        0.10820608520578015,
+        0.16488558600121406
+      ],
+      "settings": {
+        "probe": {
+          "mode": "race",
+          "locked": false,
+          "speed01": 0.5613451010802089,
+          "progress": 0.16488558600121406,
+          "applied": 1,
+          "level": "low",
+          "still": 0,
+          "sinceSwitch": 1847.7999999970198,
+          "canvasW": 1280,
+          "ratio": 1
+        },
+        "css": {
+          "width": 1280,
+          "height": 800
+        },
+        "devicePixelRatio": 2,
+        "contextAntialias": true,
+        "canvasSamples": 4,
+        "maxSamples": 8,
+        "halfFloatSamples": [
+          8,
+          4,
+          2
+        ],
+        "gpu": "ANGLE (Intel, ANGLE Metal Renderer: Intel(R) UHD Graphics 617, Unspecified Version)",
+        "targets": [
+          {
+            "width": 1280,
+            "height": 800,
+            "type": 1016,
+            "requestedSamples": 0,
+            "actualSamples": 0
+          },
+          {
+            "width": 1280,
+            "height": 800,
+            "type": 1016,
+            "requestedSamples": 0,
+            "actualSamples": 0
+          }
+        ],
+        "calls": 323,
+        "triangles": 763140,
+        "memory": {
+          "geometries": 1501,
+          "textures": 300
+        },
+        "jsHeap": 190404604
+      }
+    }
+  ],
+  "gpu": {
+    "devices": [
+      {
+        "vendorId": 32902,
+        "deviceId": 34752,
+        "vendorString": "Google Inc. (Intel)",
+        "deviceString": "ANGLE (Intel, ANGLE Metal Renderer: Intel(R) UHD Graphics 617, Version 14.8.4 (Build 23J319))",
+        "driverVendor": "Intel",
+        "driverVersion": "14.8.4"
+      }
+    ],
+    "auxAttributes": {
+      "amdSwitchable": false,
+      "canSupportThreadedTextureMailbox": false,
+      "directRenderingVersion": "",
+      "displayType": "ANGLE_METAL",
+      "glExtensions": "GL_AMD_performance_monitor GL_ANGLE_base_vertex_base_instance_shader_builtin GL_ANGLE_blob_cache GL_ANGLE_client_arrays GL_ANGLE_clip_cull_distance GL_ANGLE_depth_texture GL_ANGLE_framebuffer_blit GL_ANGLE_framebuffer_multisample GL_ANGLE_get_serialized_context_string GL_ANGLE_get_tex_level_parameter GL_ANGLE_instanced_arrays GL_ANGLE_memory_size GL_ANGLE_pack_reverse_row_order GL_ANGLE_polygon_mode GL_ANGLE_program_binary_readiness_query GL_ANGLE_program_cache_control GL_ANGLE_provoking_vertex GL_ANGLE_renderability_validation GL_ANGLE_request_extension GL_ANGLE_rgbx_internal_format GL_ANGLE_robust_client_memory GL_ANGLE_shader_pixel_local_storage GL_ANGLE_shader_pixel_local_storage_coherent GL_ANGLE_stencil_texturing GL_ANGLE_texture_compression_dxt3 GL_ANGLE_texture_compression_dxt5 GL_ANGLE_texture_multisample GL_ANGLE_translated_shader_source GL_APPLE_clip_distance GL_ARM_rgba8 GL_CHROMIUM_bind_generates_resource GL_CHROMIUM_bind_uniform_location GL_CHROMIUM_copy_texture GL_CHROMIUM_lose_context GL_EXT_base_instance GL_EXT_blend_func_extended GL_EXT_blend_minmax GL_EXT_clip_control GL_EXT_color_buffer_float GL_EXT_color_buffer_half_float GL_EXT_compressed_ETC1_RGB8_sub_texture GL_EXT_conservative_depth GL_EXT_debug_label GL_EXT_debug_marker GL_EXT_depth_clamp GL_EXT_discard_framebuffer GL_EXT_disjoint_timer_query GL_EXT_draw_buffers GL_EXT_draw_buffers_indexed GL_EXT_draw_elements_base_vertex GL_EXT_float_blend GL_EXT_frag_depth GL_EXT_instanced_arrays GL_EXT_map_buffer_range GL_EXT_occlusion_query_boolean GL_EXT_polygon_offset_clamp GL_EXT_read_format_bgra GL_EXT_render_snorm GL_EXT_robustness GL_EXT_sRGB GL_EXT_shader_texture_lod GL_EXT_texture_compression_bptc GL_EXT_texture_compression_dxt1 GL_EXT_texture_compression_rgtc GL_EXT_texture_compression_s3tc_srgb GL_EXT_texture_filter_anisotropic GL_EXT_texture_format_BGRA8888 GL_EXT_texture_mirror_clamp_to_edge GL_EXT_texture_norm16 GL_EXT_texture_rg GL_EXT_texture_shadow_lod GL_EXT_texture_storage GL_KHR_debug GL_KHR_parallel_shader_compile GL_KHR_robustness GL_MESA_framebuffer_flip_y GL_NV_fence GL_NV_framebuffer_blit GL_NV_pixel_buffer_object GL_NV_shader_noperspective_interpolation GL_OES_EGL_image GL_OES_EGL_sync GL_OES_compressed_ETC1_RGB8_texture GL_OES_depth24 GL_OES_depth32 GL_OES_depth_texture GL_OES_draw_buffers_indexed GL_OES_draw_elements_base_vertex GL_OES_element_index_uint GL_OES_fbo_render_mipmap GL_OES_get_program_binary GL_OES_mapbuffer GL_OES_packed_depth_stencil GL_OES_required_internalformat GL_OES_rgb8_rgba8 GL_OES_sample_variables GL_OES_shader_multisample_interpolation GL_OES_standard_derivatives GL_OES_surfaceless_context GL_OES_texture_3D GL_OES_texture_float GL_OES_texture_float_linear GL_OES_texture_half_float GL_OES_texture_half_float_linear GL_OES_texture_npot GL_OES_texture_stencil8 GL_OES_vertex_array_object ",
+      "glImplementationParts": "(gl=egl-angle,angle=metal)",
+      "glRenderer": "ANGLE (Intel, ANGLE Metal Renderer: Intel(R) UHD Graphics 617, Version 14.8.4 (Build 23J319))",
+      "glResetNotificationStrategy": 33362,
+      "glVendor": "Google Inc. (Intel)",
+      "glVersion": "OpenGL ES 3.0 (ANGLE 2.1.28853 git hash: 170484eea03a)",
+      "glWsExtensions": "",
+      "glWsVendor": "",
+      "glWsVersion": "",
+      "inProcessGpu": false,
+      "initializationTime": 0.131924,
+      "isAsan": false,
+      "isClangCoverage": false,
+      "jpegDecodeAcceleratorSupported": false,
+      "maxMsaaSamples": "8",
+      "optimus": false,
+      "passthroughCmdDecoder": true,
+      "pixelShaderVersion": "3.00",
+      "processCrashCount": 0,
+      "sandboxed": false,
+      "skiaBackendType": "GraphiteDawnMetal",
+      "subpixelFontRendering": true,
+      "targetCpuBits": 64,
+      "vertexShaderVersion": "3.00",
+      "visibilityCallbackCallCount": 0
+    }
+  },
+  "browser": "Chrome/155.0.8059.40",
+  "baselineSettings": {
+    "probe": {
+      "mode": "race",
+      "locked": false,
+      "speed01": 0,
+      "progress": 0,
+      "applied": 1,
+      "level": "high",
+      "still": 103.59999999403954,
+      "sinceSwitch": null,
+      "canvasW": 1600,
+      "ratio": 1
+    },
+    "css": {
+      "width": 1600,
+      "height": 900
+    },
+    "devicePixelRatio": 1,
+    "contextAntialias": true,
+    "canvasSamples": 4,
+    "maxSamples": 8,
+    "halfFloatSamples": [
+      8,
+      4,
+      2
+    ],
+    "gpu": "ANGLE (Intel, ANGLE Metal Renderer: Intel(R) UHD Graphics 617, Unspecified Version)",
+    "targets": [
+      {
+        "width": 1600,
+        "height": 900,
+        "type": 1016,
+        "requestedSamples": 0,
+        "actualSamples": 0
+      },
+      {
+        "width": 1600,
+        "height": 900,
+        "type": 1016,
+        "requestedSamples": 0,
+        "actualSamples": 0
+      }
+    ],
+    "calls": 1,
+    "triangles": 1,
+    "memory": {
+      "geometries": 1501,
+      "textures": 302
+    },
+    "jsHeap": 235772410
+  },
+  "modelFacts": [
+    {
+      "index": 0,
+      "meshes": 224,
+      "triangles": 323594,
+      "missingNormals": 0,
+      "materials": [
+        {
+          "name": "cockpit_lr",
+          "roughness": 0.5,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "int_occlusion_inst",
+          "roughness": 0.30000000000000004,
+          "metalness": 1,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "int_plastic",
+          "roughness": 0.957705,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "int_carbon",
+          "roughness": 0.5,
+          "metalness": 1,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "int_leather1",
+          "roughness": 0.5,
+          "metalness": 1,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "int_electronics",
+          "roughness": 0.957705,
+          "metalness": 1,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "int_leather2",
+          "roughness": 0.957705,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "RACELOGIC_MONITOR",
+          "roughness": 0.957705,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "int_decals",
+          "roughness": 0.957705,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "int_glass",
+          "roughness": 0.19999999999999996,
+          "metalness": 1,
+          "flatShading": false,
+          "normalMap": false,
+          "map": false
+        },
+        {
+          "name": "int_windows",
+          "roughness": 0.957705,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "int_windshield",
+          "roughness": 0.957705,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "int_chrome",
+          "roughness": 0.957705,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": false
+        },
+        {
+          "name": "int_steer",
+          "roughness": 0.957705,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "INT_STEER_LEATHER",
+          "roughness": 1,
+          "metalness": 1,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "int_steer_carbon",
+          "roughness": 0.957705,
+          "metalness": 1,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "int_net",
+          "roughness": 0.957705,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "belt_schroth",
+          "roughness": 0.957705,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "INT_LCD",
+          "roughness": 0.957705,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "INT_LCD_0",
+          "roughness": 0.04229499999999997,
+          "metalness": 1,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "lexgt3_display",
+          "roughness": 0.957705,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "mirror",
+          "roughness": 0,
+          "metalness": 1,
+          "flatShading": false,
+          "normalMap": false,
+          "map": false
+        },
+        {
+          "name": "dash_2_a",
+          "roughness": 0.957705,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "DASH_2",
+          "roughness": 0.957705,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "ext_disc",
+          "roughness": 0.957705,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "ext_rim_decals",
+          "roughness": 0.957705,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "ext_rim",
+          "roughness": 0.30000000000000004,
+          "metalness": 1,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "EXT_Tyre",
+          "roughness": 0.5,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "RIM_BLUR",
+          "roughness": 0.957705,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "LEX_RIM1",
+          "roughness": 0.957705,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "ext_mechanics",
+          "roughness": 0.957705,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "ext_decals",
+          "roughness": 0.957705,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "EXT_Tyre_0",
+          "roughness": 0.957705,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "ext_mechanics_0",
+          "roughness": 0.957705,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "ext_mechanics_1",
+          "roughness": 0.19999999999999996,
+          "metalness": 1,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "ext_banner",
+          "roughness": 0.957705,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "ext_logo",
+          "roughness": 0.30000000000000004,
+          "metalness": 1,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "ext_emissive_light_front",
+          "roughness": 0.19999999999999996,
+          "metalness": 1,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "ext_windows",
+          "roughness": 0.957705,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "ext_glass_emissive_front",
+          "roughness": 0.957705,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": false
+        },
+        {
+          "name": "ext_glass_emissive_rear_0",
+          "roughness": 0,
+          "metalness": 1,
+          "flatShading": false,
+          "normalMap": false,
+          "map": false
+        },
+        {
+          "name": "ext_grid",
+          "roughness": 0.30000000000000004,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "ext_carpaint_inst",
+          "roughness": 0.09999999999999998,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "Material_60",
+          "roughness": 0.957705,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "LED_Panel",
+          "roughness": 0.957705,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": true,
+          "map": true
+        },
+        {
+          "name": "2019numberplate",
+          "roughness": 0.957705,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "2018numberplate",
+          "roughness": 0.957705,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "2018numberplate_0",
+          "roughness": 0.957705,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        }
+      ]
+    },
+    {
+      "index": 3,
+      "meshes": 213,
+      "triangles": 1290024,
+      "missingNormals": 0,
+      "materials": [
+        {
+          "name": "material",
+          "roughness": 0.30000000000000004,
+          "metalness": 1,
+          "flatShading": false,
+          "normalMap": false,
+          "map": false
+        },
+        {
+          "name": "body",
+          "roughness": 0.9,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "black_m",
+          "roughness": 0.79,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": false
+        },
+        {
+          "name": "material_3",
+          "roughness": 0,
+          "metalness": 1,
+          "flatShading": false,
+          "normalMap": false,
+          "map": false
+        },
+        {
+          "name": "chrome",
+          "roughness": 0,
+          "metalness": 1,
+          "flatShading": false,
+          "normalMap": false,
+          "map": false
+        },
+        {
+          "name": "carbon",
+          "roughness": 0.79,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "interior1",
+          "roughness": 0.79,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": false
+        },
+        {
+          "name": "decals",
+          "roughness": 0,
+          "metalness": 1,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "silver",
+          "roughness": 0.20999999999999996,
+          "metalness": 1,
+          "flatShading": false,
+          "normalMap": false,
+          "map": false
+        },
+        {
+          "name": "interior",
+          "roughness": 0.4,
+          "metalness": 1,
+          "flatShading": false,
+          "normalMap": false,
+          "map": false
+        },
+        {
+          "name": "d_glass",
+          "roughness": 0,
+          "metalness": 1,
+          "flatShading": false,
+          "normalMap": false,
+          "map": false
+        },
+        {
+          "name": "black",
+          "roughness": 0.79,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": false
+        },
+        {
+          "name": "tire",
+          "roughness": 1,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": false
+        },
+        {
+          "name": "carbon_brakedisc",
+          "roughness": 0.9,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "r_glass",
+          "roughness": 0.79,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": false
+        },
+        {
+          "name": "glass",
+          "roughness": 0,
+          "metalness": 1,
+          "flatShading": false,
+          "normalMap": false,
+          "map": false
+        },
+        {
+          "name": "logo",
+          "roughness": 0.9,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "nblue",
+          "roughness": 0.78,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": false
+        },
+        {
+          "name": "blue",
+          "roughness": 0.78,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": false
+        },
+        {
+          "name": "cluster",
+          "roughness": 0.9,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "radio",
+          "roughness": 0.9,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        }
+      ]
+    },
+    {
+      "index": 8,
+      "meshes": 61,
+      "triangles": 321153,
+      "missingNormals": 0,
+      "materials": [
+        {
+          "name": "AUX_LIGHT.005",
+          "roughness": 0.19999999999999996,
+          "metalness": 1,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "EXT_Grid_2.005",
+          "roughness": 0.717157,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": true,
+          "map": true
+        },
+        {
+          "name": "EXT_Grid.005",
+          "roughness": 0.717157,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "METAL_FUEL.005",
+          "roughness": 0.826795,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "EXT_Mechanics.005",
+          "roughness": 0.755051,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": true,
+          "map": true
+        },
+        {
+          "name": "EXT_Details.005",
+          "roughness": 0.776393,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": true,
+          "map": true
+        },
+        {
+          "name": "EXT_Banner.005",
+          "roughness": 0.552786,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "EXT_Carpaint_Inst.007",
+          "roughness": 0.30000000000000004,
+          "metalness": 0.9,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "EXT_Glass_Emissive_Rear.005",
+          "roughness": 0.552786,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "EXT_Glass_Emissive_Front.005",
+          "roughness": 0,
+          "metalness": 1,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "EXT_Windows.005",
+          "roughness": 0,
+          "metalness": 1,
+          "flatShading": false,
+          "normalMap": false,
+          "map": false
+        },
+        {
+          "name": "EXT_Emissive_Light_Rear.005",
+          "roughness": 0.683772,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": true,
+          "map": true
+        },
+        {
+          "name": "EXT_Emissive_Light_Front.005",
+          "roughness": 0.31622799999999995,
+          "metalness": 1,
+          "flatShading": false,
+          "normalMap": true,
+          "map": true
+        },
+        {
+          "name": "INT_Glass.001",
+          "roughness": 0.9,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": false
+        },
+        {
+          "name": "INT_Windshield.001",
+          "roughness": 0,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": false
+        },
+        {
+          "name": "INT_WELDING.003",
+          "roughness": 0.8,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": true,
+          "map": false
+        },
+        {
+          "name": "INT_Stitching.001",
+          "roughness": 0.826795,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "INT_Carbon_Kevlar.003",
+          "roughness": 0.8,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "INT_CAB_BORRACHA.005",
+          "roughness": 0.19999999999999996,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": false
+        },
+        {
+          "name": "INT_DECALS.003",
+          "roughness": 0.776393,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "INT_ELECTRONICS.005",
+          "roughness": 0.776393,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "INT_Occlusion_Inst.005",
+          "roughness": 0.19999999999999996,
+          "metalness": 1,
+          "flatShading": false,
+          "normalMap": false,
+          "map": false
+        },
+        {
+          "name": "DASH_PANEL_ALCANTRA.005",
+          "roughness": 0.9,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "INT_Racelogic.003",
+          "roughness": 0.223607,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": true,
+          "map": true
+        },
+        {
+          "name": "DISPLAY.003",
+          "roughness": 0.858579,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "DISPLAY_SAS.001",
+          "roughness": 0.858579,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "BORRACHA_DOORS.005",
+          "roughness": 0.826795,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": true,
+          "map": false
+        },
+        {
+          "name": "INT_CABLES.005",
+          "roughness": 0.19999999999999996,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "INT_CARBON_BAGE.003",
+          "roughness": 0.8,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "INT_CARBON_BLACK.005",
+          "roughness": 0.8,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "INT_MANG.003",
+          "roughness": 0.8,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "INT_MANG2.001",
+          "roughness": 0.8,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": false
+        },
+        {
+          "name": "INT_METAL_GRAY.003",
+          "roughness": 0.826795,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": false
+        },
+        {
+          "name": "INT_PLASTIC_GRAY.003",
+          "roughness": 0.8,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": false
+        },
+        {
+          "name": "INT_PLATE_AZUL.005",
+          "roughness": 0.826795,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "INT_METAL_GRAY_GRAY.003",
+          "roughness": 0.858579,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "METAL_BLACK.005",
+          "roughness": 0.858579,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "MIRROR.005",
+          "roughness": 0,
+          "metalness": 1,
+          "flatShading": false,
+          "normalMap": false,
+          "map": false
+        },
+        {
+          "name": "LED_RACELOGIC.001",
+          "roughness": 0.9,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "INT_SAS.001",
+          "roughness": 0.17320500000000005,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": true,
+          "map": true
+        },
+        {
+          "name": "SPARCO_FOAM.003",
+          "roughness": 0.9,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "SEAT_ALCANTARA.005",
+          "roughness": 0.858579,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "INT_CHROME.001",
+          "roughness": 0.30000000000000004,
+          "metalness": 1,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "STEER_ALCANTARA.003",
+          "roughness": 0.5,
+          "metalness": 1,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "INT_Steer.003",
+          "roughness": 0.30000000000000004,
+          "metalness": 1,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "INT_Steer_Carbon.003",
+          "roughness": 0.17320500000000005,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "INT_LED.001",
+          "roughness": 0.452277,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": true,
+          "map": true
+        },
+        {
+          "name": "PHISICS_DASH.001",
+          "roughness": 0.968377,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": false
+        },
+        {
+          "name": "MI_Tyre_Flex_Dry_L.005",
+          "roughness": 0.30000000000000004,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": true,
+          "map": true
+        },
+        {
+          "name": "EXT_RIM_BLUR.003",
+          "roughness": 0.826795,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": true,
+          "map": false
+        },
+        {
+          "name": "EXT_RIM.005",
+          "roughness": 0.24494899999999997,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "BELT_OMP.003",
+          "roughness": 0.745049,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": true,
+          "map": true
+        },
+        {
+          "name": "INT_NET.003",
+          "roughness": 0.264575,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": true,
+          "map": true
+        },
+        {
+          "name": "EXT_Disc.003",
+          "roughness": 0.223607,
+          "metalness": 1,
+          "flatShading": false,
+          "normalMap": true,
+          "map": true
+        },
+        {
+          "name": "EXT_CALIPER.003",
+          "roughness": 0.826795,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "RADIATOR.005",
+          "roughness": 0.717157,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "EXALTS.005",
+          "roughness": 0.7,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": true,
+          "map": true
+        },
+        {
+          "name": "CHASIS_KEVLAR.005",
+          "roughness": 0.826795,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "WorldGridMaterial.005",
+          "roughness": 0.755051,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        }
+      ]
+    }
+  ],
+  "boardShader": {
+    "hasInstanceAtlasSampling": true
+  },
+  "pitLane": {
+    "points": 202,
+    "hits": 202,
+    "belowGround": 0,
+    "minGapM": 0.032706315959110555,
+    "maxGapM": 0.06990816322230842,
+    "sampleMs": 1442.2999999970198
+  },
+  "checkpoints": [
+    {
+      "gate": 1,
+      "t": 0.09,
+      "progress": 0.09325981847738549,
+      "stripeCenterErrorM": 3.1115780168873325e-06,
+      "postPosition": [
+        152.85198974609375,
+        7.826475620269775,
+        -379.6091003417969
+      ]
+    },
+    {
+      "gate": 2,
+      "t": 0.18,
+      "progress": 0.1829374188477538,
+      "stripeCenterErrorM": 7.24035295359392e-06,
+      "postPosition": [
+        190.63644409179688,
+        12.799660682678223,
+        -762.7194213867188
+      ]
+    },
+    {
+      "gate": 3,
+      "t": 0.255,
+      "progress": 0.25766875248972754,
+      "stripeCenterErrorM": 2.8452545380277785e-05,
+      "postPosition": [
+        166.8753662109375,
+        17.521095275878906,
+        -1036.8302001953125
+      ]
+    },
+    {
+      "gate": 4,
+      "t": 0.39,
+      "progress": 0.39218515304528045,
+      "stripeCenterErrorM": 2.01903118643628e-06,
+      "postPosition": [
+        -230.23040771484375,
+        6.619945526123047,
+        -1471.2176513671875
+      ]
+    },
+    {
+      "gate": 5,
+      "t": 0.495,
+      "progress": 0.49680902014404366,
+      "stripeCenterErrorM": 2.811467535917031e-05,
+      "postPosition": [
+        -622.9130249023438,
+        15.327781677246094,
+        -1504.86669921875
+      ]
+    },
+    {
+      "gate": 6,
+      "t": 0.585,
+      "progress": 0.586486620514412,
+      "stripeCenterErrorM": 1.1532045001922796e-05,
+      "postPosition": [
+        -599.1906127929688,
+        17.60812759399414,
+        -1055.4456787109375
+      ]
+    },
+    {
+      "gate": 7,
+      "t": 0.68,
+      "progress": 0.6811463097942456,
+      "stripeCenterErrorM": 6.907379200326535e-06,
+      "postPosition": [
+        -651.3408813476562,
+        14.137344360351562,
+        -599.1427001953125
+      ]
+    },
+    {
+      "gate": 8,
+      "t": 0.775,
+      "progress": 0.7758059990740788,
+      "stripeCenterErrorM": 9.926916755305912e-06,
+      "postPosition": [
+        -531.865234375,
+        10.471380233764648,
+        -165.35289001464844
+      ]
+    },
+    {
+      "gate": 9,
+      "t": 0.86,
+      "progress": 0.8605015105349823,
+      "stripeCenterErrorM": 3.838463896950562e-06,
+      "postPosition": [
+        -420.76702880859375,
+        7.7998046875,
+        243.1949005126953
+      ]
+    }
+  ],
+  "inventory": {
+    "trees": false,
+    "variant": "full",
+    "furniture": [
+      {
+        "name": "braking-150-100-50",
+        "instances": 9
+      },
+      {
+        "name": "furniture-concrete",
+        "instances": 34
+      },
+      {
+        "name": "furniture-steel",
+        "instances": 390
+      },
+      {
+        "name": "furniture-service",
+        "instances": 5
+      },
+      {
+        "name": "furniture-marshal",
+        "instances": 1
+      },
+      {
+        "name": "furniture-catch-fencing",
+        "instances": 34
+      }
+    ],
+    "boards": [
+      {
+        "zone": "hairpin",
+        "distance": 150,
+        "t": 0.2240408622758997,
+        "lateral": -22.41114956088421
+      },
+      {
+        "zone": "hairpin",
+        "distance": 100,
+        "t": 0.23402724151726648,
+        "lateral": -23.704925305464183
+      },
+      {
+        "zone": "hairpin",
+        "distance": 50,
+        "t": 0.24401362075863325,
+        "lateral": -23.790515841000747
+      },
+      {
+        "zone": "slowdown-1-in",
+        "distance": 150,
+        "t": 0.5850408622758997,
+        "lateral": 21.23651855951456
+      },
+      {
+        "zone": "slowdown-1-in",
+        "distance": 100,
+        "t": 0.5950272415172665,
+        "lateral": 22.22819151819106
+      },
+      {
+        "zone": "slowdown-1-in",
+        "distance": 50,
+        "t": 0.6050136207586332,
+        "lateral": 23
+      },
+      {
+        "zone": "slowdown-2-in",
+        "distance": 150,
+        "t": 0.6760408622758997,
+        "lateral": -23.047593270708727
+      },
+      {
+        "zone": "slowdown-2-in",
+        "distance": 100,
+        "t": 0.6860272415172665,
+        "lateral": -21.2
+      },
+      {
+        "zone": "slowdown-2-in",
+        "distance": 50,
+        "t": 0.6960136207586332,
+        "lateral": -21.623745283273152
+      }
+    ],
+    "glCalls": {
+      "createProgram": 113,
+      "compileShader": 226,
+      "createTexture": 306,
+      "createBuffer": 5742,
+      "bufferData": 5742,
+      "texImage2D": 13,
+      "texImage3D": 2,
+      "texStorage2D": 296,
+      "texStorage3D": 0,
+      "compressedTexImage2D": 0,
+      "compressedTexImage3D": 0,
+      "texSubImage2D": 296,
+      "texSubImage3D": 0,
+      "compressedTexSubImage2D": 0,
+      "compressedTexSubImage3D": 0
+    }
+  },
+  "pass": true
+}

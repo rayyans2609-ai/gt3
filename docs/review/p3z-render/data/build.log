@@ -1,0 +1,84 @@
+vite v7.3.6 building client environment for production...
+transforming...
+
+../../font/Neue Haas Grotesk/Neue Haas Grotesk Display Family/NeueHaasGrotDisp-15XXThin-Trial.otf referenced in ../../font/Neue Haas Grotesk/Neue Haas Grotesk Display Family/NeueHaasGrotDisp-15XXThin-Trial.otf didn't resolve at build time, it will remain unchanged to be resolved at runtime
+
+../../font/Neue Haas Grotesk/Neue Haas Grotesk Display Family/NeueHaasGrotDisp-16XXThinItalic-Trial.otf referenced in ../../font/Neue Haas Grotesk/Neue Haas Grotesk Display Family/NeueHaasGrotDisp-16XXThinItalic-Trial.otf didn't resolve at build time, it will remain unchanged to be resolved at runtime
+
+../../font/Neue Haas Grotesk/Neue Haas Grotesk Display Family/NeueHaasGrotDisp-35Thin-Trial.otf referenced in ../../font/Neue Haas Grotesk/Neue Haas Grotesk Display Family/NeueHaasGrotDisp-35Thin-Trial.otf didn't resolve at build time, it will remain unchanged to be resolved at runtime
+
+../../font/Neue Haas Grotesk/Neue Haas Grotesk Display Family/NeueHaasGrotDisp-36ThinItalic-Trial.otf referenced in ../../font/Neue Haas Grotesk/Neue Haas Grotesk Display Family/NeueHaasGrotDisp-36ThinItalic-Trial.otf didn't resolve at build time, it will remain unchanged to be resolved at runtime
+
+../../font/Neue Haas Grotesk/Neue Haas Grotesk Display Family/NeueHaasGrotDisp-45Light-Trial.otf referenced in ../../font/Neue Haas Grotesk/Neue Haas Grotesk Display Family/NeueHaasGrotDisp-45Light-Trial.otf didn't resolve at build time, it will remain unchanged to be resolved at runtime
+
+../../font/Neue Haas Grotesk/Neue Haas Grotesk Display Family/NeueHaasGrotDisp-46LightItalic-Trial.otf referenced in ../../font/Neue Haas Grotesk/Neue Haas Grotesk Display Family/NeueHaasGrotDisp-46LightItalic-Trial.otf didn't resolve at build time, it will remain unchanged to be resolved at runtime
+
+../../font/Neue Haas Grotesk/Neue Haas Grotesk Display Family/NeueHaasGrotDisp-55Roman-Trial.otf referenced in ../../font/Neue Haas Grotesk/Neue Haas Grotesk Display Family/NeueHaasGrotDisp-55Roman-Trial.otf didn't resolve at build time, it will remain unchanged to be resolved at runtime
+
+../../font/Neue Haas Grotesk/Neue Haas Grotesk Display Family/NeueHaasGrotDisp-56Italic-Trial.otf referenced in ../../font/Neue Haas Grotesk/Neue Haas Grotesk Display Family/NeueHaasGrotDisp-56Italic-Trial.otf didn't resolve at build time, it will remain unchanged to be resolved at runtime
+
+../../font/Neue Haas Grotesk/Neue Haas Grotesk Display Family/NeueHaasGrotDisp-65Medium-Trial.otf referenced in ../../font/Neue Haas Grotesk/Neue Haas Grotesk Display Family/NeueHaasGrotDisp-65Medium-Trial.otf didn't resolve at build time, it will remain unchanged to be resolved at runtime
+
+../../font/Neue Haas Grotesk/Neue Haas Grotesk Display Family/NeueHaasGrotDisp-66MediumItalic-Trial.otf referenced in ../../font/Neue Haas Grotesk/Neue Haas Grotesk Display Family/NeueHaasGrotDisp-66MediumItalic-Trial.otf didn't resolve at build time, it will remain unchanged to be resolved at runtime
+
+../../font/Neue Haas Grotesk/Neue Haas Grotesk Display Family/NeueHaasGrotDisp-75Bold-Trial.otf referenced in ../../font/Neue Haas Grotesk/Neue Haas Grotesk Display Family/NeueHaasGrotDisp-75Bold-Trial.otf didn't resolve at build time, it will remain unchanged to be resolved at runtime
+
+../../font/Neue Haas Grotesk/Neue Haas Grotesk Display Family/NeueHaasGrotDisp-76BoldItalic-Trial.otf referenced in ../../font/Neue Haas Grotesk/Neue Haas Grotesk Display Family/NeueHaasGrotDisp-76BoldItalic-Trial.otf didn't resolve at build time, it will remain unchanged to be resolved at runtime
+
+../../font/Neue Haas Grotesk/Neue Haas Grotesk Display Family/NeueHaasGrotDisp-95Black-Trial.otf referenced in ../../font/Neue Haas Grotesk/Neue Haas Grotesk Display Family/NeueHaasGrotDisp-95Black-Trial.otf didn't resolve at build time, it will remain unchanged to be resolved at runtime
+
+../../font/Neue Haas Grotesk/Neue Haas Grotesk Display Family/NeueHaasGrotDisp-96BlackItalic-Trial.otf referenced in ../../font/Neue Haas Grotesk/Neue Haas Grotesk Display Family/NeueHaasGrotDisp-96BlackItalic-Trial.otf didn't resolve at build time, it will remain unchanged to be resolved at runtime
+
+../../font/Neue Haas Grotesk/Neue Haas Grotesk Text Family/NeueHaasGrotText-55Roman-Trial.otf referenced in ../../font/Neue Haas Grotesk/Neue Haas Grotesk Text Family/NeueHaasGrotText-55Roman-Trial.otf didn't resolve at build time, it will remain unchanged to be resolved at runtime
+
+../../font/Neue Haas Grotesk/Neue Haas Grotesk Text Family/NeueHaasGrotText-56Italic-Trial.otf referenced in ../../font/Neue Haas Grotesk/Neue Haas Grotesk Text Family/NeueHaasGrotText-56Italic-Trial.otf didn't resolve at build time, it will remain unchanged to be resolved at runtime
+
+../../font/Neue Haas Grotesk/Neue Haas Grotesk Text Family/NeueHaasGrotText-65Medium-Trial.otf referenced in ../../font/Neue Haas Grotesk/Neue Haas Grotesk Text Family/NeueHaasGrotText-65Medium-Trial.otf didn't resolve at build time, it will remain unchanged to be resolved at runtime
+
+../../font/Neue Haas Grotesk/Neue Haas Grotesk Text Family/NeueHaasGrotText-66MediumItalic-Trial.otf referenced in ../../font/Neue Haas Grotesk/Neue Haas Grotesk Text Family/NeueHaasGrotText-66MediumItalic-Trial.otf didn't resolve at build time, it will remain unchanged to be resolved at runtime
+
+../../font/Neue Haas Grotesk/Neue Haas Grotesk Text Family/NeueHaasGrotText-75Bold-Trial.otf referenced in ../../font/Neue Haas Grotesk/Neue Haas Grotesk Text Family/NeueHaasGrotText-75Bold-Trial.otf didn't resolve at build time, it will remain unchanged to be resolved at runtime
+
+../../font/Neue Haas Grotesk/Neue Haas Grotesk Text Family/NeueHaasGrotText-76BoldItalic-Trial.otf referenced in ../../font/Neue Haas Grotesk/Neue Haas Grotesk Text Family/NeueHaasGrotText-76BoldItalic-Trial.otf didn't resolve at build time, it will remain unchanged to be resolved at runtime
+
+../../font/Geist Mono/Geist_Mono/GeistMono-VariableFont_wght.ttf referenced in ../../font/Geist Mono/Geist_Mono/GeistMono-VariableFont_wght.ttf didn't resolve at build time, it will remain unchanged to be resolved at runtime
+
+../../font/Geist Mono/Geist_Mono/GeistMono-Italic-VariableFont_wght.ttf referenced in ../../font/Geist Mono/Geist_Mono/GeistMono-Italic-VariableFont_wght.ttf didn't resolve at build time, it will remain unchanged to be resolved at runtime
+✓ 67 modules transformed.
+
+(!) outDir /tmp/gt3-p3z-run/final-build is not inside project root and will not be emptied.
+Use --emptyOutDir to override.
+
+rendering chunks...
+[plugin vite:reporter] 
+(!) /Users/rayyansheikh/Desktop/gt3/.claude/worktrees/p3z-render/src/scroll/scrollDrive.js is dynamically imported by /Users/rayyansheikh/Desktop/gt3/.claude/worktrees/p3z-render/src/main.js but also statically imported by /Users/rayyansheikh/Desktop/gt3/.claude/worktrees/p3z-render/src/core/experience.js, /Users/rayyansheikh/Desktop/gt3/.claude/worktrees/p3z-render/src/montage/studio.js, /Users/rayyansheikh/Desktop/gt3/.claude/worktrees/p3z-render/src/ui/finishScreen.js, /Users/rayyansheikh/Desktop/gt3/.claude/worktrees/p3z-render/src/ui/startScreen.js, dynamic import will not move module into another chunk.
+
+computing gzip size...
+../../../../../../../tmp/gt3-p3z-run/final-build/index.html                                2.26 kB │ gzip:  0.95 kB
+../../../../../../../tmp/gt3-p3z-run/final-build/assets/index-C4Qn9yfR.css                37.75 kB │ gzip:  7.68 kB
+../../../../../../../tmp/gt3-p3z-run/final-build/assets/soundCue-BvnkLIrz.js               1.17 kB │ gzip:  0.61 kB
+../../../../../../../tmp/gt3-p3z-run/final-build/assets/soundControl-CcRE0zW7.js           1.74 kB │ gzip:  0.86 kB
+../../../../../../../tmp/gt3-p3z-run/final-build/assets/themeToggle-DBOJ0Aoe.js            2.72 kB │ gzip:  1.26 kB
+../../../../../../../tmp/gt3-p3z-run/final-build/assets/racingLine-DWOBbAF6.js             2.74 kB │ gzip:  1.39 kB
+../../../../../../../tmp/gt3-p3z-run/final-build/assets/morph-CZ5E9uTp.js                  2.97 kB │ gzip:  1.48 kB
+../../../../../../../tmp/gt3-p3z-run/final-build/assets/startScreen-D6xB13xP.js            3.60 kB │ gzip:  1.51 kB
+../../../../../../../tmp/gt3-p3z-run/final-build/assets/hud-BTxhyBGW.js                    4.18 kB │ gzip:  1.98 kB
+../../../../../../../tmp/gt3-p3z-run/final-build/assets/carRig-Df1x1-ab.js                 4.52 kB │ gzip:  2.39 kB
+../../../../../../../tmp/gt3-p3z-run/final-build/assets/carWarmup-H3Ba-5H0.js              4.72 kB │ gzip:  2.28 kB
+../../../../../../../tmp/gt3-p3z-run/final-build/assets/trackProfile-D0iX4JQH.js           4.79 kB │ gzip:  1.82 kB
+../../../../../../../tmp/gt3-p3z-run/final-build/assets/BufferGeometryUtils-wfFgCVEH.js    4.89 kB │ gzip:  1.49 kB
+../../../../../../../tmp/gt3-p3z-run/final-build/assets/finishScreen-ZqsMDPTm.js           5.18 kB │ gzip:  2.22 kB
+../../../../../../../tmp/gt3-p3z-run/final-build/assets/player-Dfj886_P.js                 5.23 kB │ gzip:  1.95 kB
+../../../../../../../tmp/gt3-p3z-run/final-build/assets/checkpoints-BVWCM4SF.js            5.23 kB │ gzip:  2.51 kB
+../../../../../../../tmp/gt3-p3z-run/final-build/assets/theme-vATrpJ73.js                  5.52 kB │ gzip:  2.02 kB
+../../../../../../../tmp/gt3-p3z-run/final-build/assets/track-BFhF69ST.js                  6.24 kB │ gzip:  2.83 kB
+../../../../../../../tmp/gt3-p3z-run/final-build/assets/finishLine-zeNxwP0G.js             6.77 kB │ gzip:  3.10 kB
+../../../../../../../tmp/gt3-p3z-run/final-build/assets/audioManager-GUXz4owK.js          10.14 kB │ gzip:  3.67 kB
+../../../../../../../tmp/gt3-p3z-run/final-build/assets/studio-CdmgKiAn.js                14.72 kB │ gzip:  5.86 kB
+../../../../../../../tmp/gt3-p3z-run/final-build/assets/aerialCamera-Br4qWug_.js          15.23 kB │ gzip:  6.17 kB
+../../../../../../../tmp/gt3-p3z-run/final-build/assets/environment-DdpacOjo.js           38.26 kB │ gzip: 13.77 kB
+../../../../../../../tmp/gt3-p3z-run/final-build/assets/cars-CFVrsbln.js                  57.38 kB │ gzip: 17.93 kB
+../../../../../../../tmp/gt3-p3z-run/final-build/assets/sceneSetup-COnnFVPd.js            74.11 kB │ gzip: 43.01 kB
+../../../../../../../tmp/gt3-p3z-run/final-build/assets/index-Bew_flPv.js                276.70 kB │ gzip: 80.70 kB
+../../../../../../../tmp/gt3-p3z-run/final-build/assets/three.module-DMlYpxuL.js         324.33 kB │ gzip: 78.45 kB
+✓ built in 3.90s

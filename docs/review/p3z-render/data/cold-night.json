@@ -1,0 +1,149 @@
+{
+  "base": "http://127.0.0.1:5211",
+  "startedAt": "2026-10-13T15:57:54.740Z",
+  "variants": {
+    "autoNight": {
+      "phases": [
+        {
+          "label": "A1 input during GPU warm-up is ignored; first gesture after ready starts",
+          "status": "PASS",
+          "value": {
+            "wheelEventsSent": 23,
+            "pageDownSent": 4,
+            "wheelEventsHandledDuringWarmup": 23,
+            "warmupMs": 9427,
+            "warmStart": {
+              "progress": 0,
+              "active": 0,
+              "started": false,
+              "unlocked": [
+                0
+              ],
+              "locked": true,
+              "morphing": false,
+              "swapTreatment": "crossfade",
+              "scrollY": 0,
+              "theme": "day",
+              "model": [
+                "car-lexus"
+              ],
+              "fadeMaterials": 0,
+              "gateResponseVisible": false,
+              "screen": "start-screen",
+              "gl": {
+                "createProgram": 10,
+                "compileShader": 20,
+                "createTexture": 10,
+                "createBuffer": 0,
+                "bufferData": 0,
+                "texImage2D": 8,
+                "texImage3D": 2,
+                "texStorage2D": 5,
+                "texStorage3D": 0,
+                "compressedTexImage2D": 0,
+                "compressedTexImage3D": 0,
+                "texSubImage2D": 5,
+                "texSubImage3D": 0,
+                "compressedTexSubImage2D": 0,
+                "compressedTexSubImage3D": 0
+              },
+              "programs": 10,
+              "textures": 6,
+              "geometries": 0
+            },
+            "atReady": {
+              "t": 18426.29999999702,
+              "progress": 0,
+              "target": 0,
+              "started": false,
+              "unlocked": [
+                0
+              ],
+              "scrollY": 0,
+              "locked": false
+            },
+            "after": {
+              "progress": 0.005639924331523485,
+              "active": 0,
+              "started": true,
+              "unlocked": [
+                0
+              ],
+              "locked": false,
+              "morphing": false,
+              "swapTreatment": "crossfade",
+              "scrollY": 84,
+              "theme": "day",
+              "model": [
+                "car-lexus"
+              ],
+              "fadeMaterials": 0,
+              "gateResponseVisible": false,
+              "screen": "start-screen is-ready is-leaving",
+              "gl": {
+                "createProgram": 113,
+                "compileShader": 226,
+                "createTexture": 306,
+                "createBuffer": 5742,
+                "bufferData": 5742,
+                "texImage2D": 13,
+                "texImage3D": 2,
+                "texStorage2D": 296,
+                "texStorage3D": 0,
+                "compressedTexImage2D": 0,
+                "compressedTexImage3D": 0,
+                "texSubImage2D": 296,
+                "texSubImage3D": 0,
+                "compressedTexSubImage2D": 0,
+                "compressedTexSubImage3D": 0
+              },
+              "programs": 113,
+              "textures": 302,
+              "geometries": 1501
+            }
+          }
+        },
+        {
+          "label": "theme toggle before cold crossing",
+          "status": "PASS",
+          "value": {
+            "theme": "night"
+          }
+        },
+        {
+          "label": "cold first crossing: zero GL allocations/uploads",
+          "status": "PASS",
+          "value": {
+            "programs": 0,
+            "textures": 0,
+            "geometries": 0,
+            "gl": {
+              "createProgram": 0,
+              "compileShader": 0,
+              "createTexture": 0,
+              "createBuffer": 0,
+              "bufferData": 0,
+              "texImage2D": 0,
+              "texImage3D": 0,
+              "texStorage2D": 0,
+              "texStorage3D": 0,
+              "compressedTexImage2D": 0,
+              "compressedTexImage3D": 0,
+              "texSubImage2D": 0,
+              "texSubImage3D": 0,
+              "compressedTexSubImage2D": 0,
+              "compressedTexSubImage3D": 0
+            }
+          }
+        }
+      ],
+      "errors": []
+    }
+  },
+  "errors": [],
+  "browserPids": [
+    11902
+  ],
+  "endedAt": "2026-10-13T15:58:20.281Z",
+  "failed": 0
+}

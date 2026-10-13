@@ -7,6 +7,10 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>GT3: A Grand Tour</title>
     <script>
+      // Typography comparison variant (?font=sw → Switzer); set before first paint. Default: Neue Haas.
+      if (new URLSearchParams(location.search).get('font') === 'sw') document.documentElement.dataset.font = 'sw';
+    </script>
+    <script>
       // Boot input guard (SPEC §14): until scrollDrive locks the drive, scroll input made while the
       // modules load must not move the page. Removed by scrollDrive.lockScroll(); records the last
       // swallowed gesture so the post-ready unlock can wait out any in-flight momentum.

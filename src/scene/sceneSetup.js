@@ -186,10 +186,28 @@ function clampSpeed(value) {
   return Math.min(1, Math.max(0, Number.isFinite(value) ? value : 0));
 }
 
+// Keep the canvas backing at native DPR. Drawing only the top-left motion
+// viewport and scaling that region keeps the same displayed pixel density, while
+// avoiding canvas reallocation / driver synchronization at every start and stop.
+// The scissor also bounds the final pass's clear to the pixels actually drawn.
+function applyDisplayResolution(dpr, width, height) {
+  const nativeDpr = renderer.getPixelRatio();
+  const fraction = dpr / nativeDpr;
+  const y = height * (1 - fraction);
+  renderer.setViewport(0, y, width * fraction, height * fraction);
+  renderer.setScissor(0, y, width * fraction, height * fraction);
+  renderer.setScissorTest(dpr !== nativeDpr);
+  const canvas = renderer.domElement;
+  canvas.style.transformOrigin = '0 0';
+  canvas.style.transform = dpr === nativeDpr ? '' : `scale(${nativeDpr / dpr})`;
+  canvas.style.clipPath = dpr === nativeDpr ? ''
+    : `inset(0 ${100 * (1 - fraction)}% ${100 * (1 - fraction)}% 0)`;
+}
+
 function applyResolution(dpr) {
   if (!renderer || !composer || dpr === appliedResolution) return false;
 
-  renderer.setPixelRatio(dpr);
+  applyDisplayResolution(dpr, window.innerWidth, window.innerHeight);
   composer.setPixelRatio(dpr);
   composer.setSize(window.innerWidth, window.innerHeight);
   appliedResolution = dpr;
@@ -206,8 +224,9 @@ function resizeScene(width, height) {
     ? ADAPTIVE_RES.low
     : ADAPTIVE_RES.high;
 
-  renderer.setPixelRatio(pixelRatio);
+  renderer.setPixelRatio(ADAPTIVE_RES.high);
   renderer.setSize(safeWidth, safeHeight, false);
+  applyDisplayResolution(pixelRatio, safeWidth, safeHeight);
 
   camera.aspect = safeWidth / safeHeight;
   camera.updateProjectionMatrix();
@@ -249,7 +268,7 @@ function createPostProcessing() {
   composer.addPass(motionBlurPass);
 
   // The scene renders into the composer's single-sample targets, so canvas
-  // antialiasing only sees the final fullscreen triangle. Spatial SMAA treats
+  // antialiasing would only see the final fullscreen triangle. Spatial SMAA treats
   // scene silhouettes and paint before grain, without multisampling both large
   // half-float buffers. setSize() follows the existing adaptive DPR automatically.
   antialiasPass = new SMAAPass();
@@ -355,7 +374,10 @@ export function updateScene(dt) {
     timeSinceResolutionSwitchMs = 0;
   }
 
-  if (motionBlurPass) motionBlurPass.uniforms.uStrength.value = speed * 0.42;
+  // Tiny residual speed must not run the eight-tap blur at native resolution.
+  // At motion resolution (including native DPR1), retain the existing treatment.
+  if (motionBlurPass) motionBlurPass.uniforms.uStrength.value =
+    appliedResolution <= ADAPTIVE_RES.low ? speed * 0.42 : 0;
   if (premiumPass) premiumPass.uniforms.uTime.value = elapsedTime;
 
   if (sun && followedSunTarget) {
@@ -379,7 +401,9 @@ export function initScene() {
 
   renderer = new THREE.WebGLRenderer({
     canvas,
-    antialias: true,
+    // Scene edges are treated by SMAA in single-sample offscreen targets.
+    // MSAA on this fullscreen output adds backing storage and resize stalls.
+    antialias: false,
     powerPreference: 'high-performance',
   });
   renderer.outputColorSpace = THREE.SRGBColorSpace;

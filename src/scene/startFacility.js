@@ -62,7 +62,10 @@ export function buildStartFacility() {
       const u=wrap(distance/TRACK_LENGTH), x=asphaltEdgeAt(u,-1)-6;
       return [x-3,x+3].map(lateral => {
         const p=offsetPointAt(u,lateral,0);
-        p.y=groundHeightAt(p.x,p.z)+.025;
+        // Analytic ground differs from its triangulated surface by up to 3.3 cm
+        // here. The old 2.5 cm lift put lane vertices below it (grass cut-through).
+        // A shallow asphalt-course separation clears that measured discrepancy.
+        p.y=groundHeightAt(p.x,p.z)+.065;
         return p;
       });
     });

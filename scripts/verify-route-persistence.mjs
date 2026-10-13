@@ -239,8 +239,19 @@ try {
     await wait(300);
     await page.evaluate(async () => {
       const { seekTo } = await import('/src/scroll/scrollDrive.js');
-      seekTo(1, { instant: true });
+      const { TOUR_LENGTH } = await import('/src/scene/trackCurve.js');
+      seekTo(1 - 12 / TOUR_LENGTH, { instant: true });
     });
+    // V1 completes only after real driving carries the car 5 m through the line.
+    for (let i = 0; i < 40; i++) {
+      const done = await page.evaluate(async () => {
+        const { state } = await import('/src/core/state.js');
+        return state.mode === 'finish' && state.progress === 1;
+      });
+      if (done) break;
+      await page.mouse.wheel({ deltaY: 120 });
+      await wait(120);
+    }
     await page.waitForFunction(async () => {
       const { state } = await import('/src/core/state.js');
       return state.mode === 'finish' && state.progress === 1;
@@ -263,7 +274,7 @@ try {
     const restoredDom = await finishDom();
     const restored = await snapshot(page);
     assert(restored.progress === 1, `finish route position did not restore: ${restored.progress}`);
-    assert(restored.mode === 'finish' && !restored.locked, `finish restore must permit tail/reverse scroll: ${restored.mode}/${restored.locked}`);
+    assert(restored.mode === 'finish' && restored.locked, `V1 finish restore must stay locked under the notice: ${restored.mode}/${restored.locked}`);
     assert(restoredDom.finishVisible, 'finish screen not visible after finish refresh');
     assert(restoredDom.startHidden && !restoredDom.startVisible, 'start screen still visible under the finish card');
     assert(!restoredDom.soundCue, 'sound cue appeared on a finish restore');

@@ -1,6 +1,6 @@
 /** Bounded Phase 3 render evidence. Restart Vite after product edits before running. */
 import puppeteer from 'puppeteer-core';
-import { mkdir, writeFile, access } from 'node:fs/promises';
+import { mkdir, writeFile, access, rename } from 'node:fs/promises';
 import { execFileSync } from 'node:child_process';
 import { installGpuCounters } from './lib/gpu-counters.mjs';
 
@@ -8,6 +8,7 @@ const base = process.env.GT3_URL || 'http://127.0.0.1:5211';
 const out = process.env.GT3_OUT || '/tmp/gt3-p3z-run/captures';
 const trials = process.env.GT3_TRIALS === '1';
 const trialOnly = process.env.GT3_TRIAL_ONLY === '1';
+const nativeOnly = process.env.GT3_NATIVE_ONLY === '1';
 const duration = Number(process.env.GT3_DURATION || 4000);
 const wait = ms => new Promise(r => setTimeout(r, ms));
 const report = { base, startedAt: new Date().toISOString(), sha: execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(),
@@ -67,11 +68,19 @@ try {
       calls: renderer.info.render.calls, triangles: renderer.info.render.triangles,
       memory: { ...renderer.info.memory }, jsHeap: performance.memory?.usedJSHeapSize };
   });
-  const capture = async name => {
+  const capture = async (name, clip) => {
     await healthy();
     const path = `${out}/${name}.png`;
+    // Capture the current viewport first. Page.screenshot's clip coordinates
+    // belong to the scrolled document, while the WebGL canvas is fixed.
     await page.screenshot({ path });
-    report.captures.push({ name, path, at: new Date().toISOString(), settings: await settings(), camera: await page.evaluate(() => ({
+    if (clip) {
+      const dpr = await page.evaluate(() => devicePixelRatio);
+      execFileSync('sips', ['-c', String(clip.height * dpr), String(clip.width * dpr),
+        '--cropOffset', String(clip.y * dpr), String(clip.x * dpr), path, '--out', `${path}.crop.png`]);
+      await rename(`${path}.crop.png`, path);
+    }
+    report.captures.push({ name, path, clip, at: new Date().toISOString(), settings: await settings(), camera: await page.evaluate(() => ({
       position: window.__gt3.camera.position.toArray(), quaternion: window.__gt3.camera.quaternion.toArray(),
       fov: window.__gt3.camera.fov, rig: window.__gt3.scene.getObjectByName('car-rig').position.toArray(),
     })) });
@@ -99,7 +108,27 @@ try {
     const shader = p && g.renderer.getContext().getShaderSource(p.fragmentShader);
     return { hasInstanceAtlasSampling: !!shader?.includes('(vMapUv.x + vBoardColumn) / 3.0'), shader };
   });
-  if (!trialOnly) {
+  report.pitLane = await page.evaluate(async () => {
+    const THREE = await import('/node_modules/.vite/deps/three.js');
+    const g = window.__gt3, lane = g.scene.getObjectByName('parallel-pit-lane'), ground = g.scene.getObjectByName('grass-skirts-and-horizon');
+    if (!lane) return null;
+    const position = lane.geometry.attributes.position, ray = new THREE.Raycaster(), direction = new THREE.Vector3(0, -1, 0);
+    const seen = new Set(), gaps = [], started = performance.now();
+    const points = Array.from({ length: position.count }, (_, i) => new THREE.Vector3().fromBufferAttribute(position, i));
+    for (let i = 0; i < position.count; i += 3) {
+      points.push(points[i].clone().add(points[i + 1]).add(points[i + 2]).divideScalar(3));
+    }
+    for (const point of points) {
+      const key = point.toArray().join(',');
+      if (seen.has(key)) continue; seen.add(key);
+      ray.set(point.clone().add(new THREE.Vector3(0, 50, 0)), direction); ray.far = 100;
+      const hit = ray.intersectObject(ground, false)[0]; if (hit) gaps.push(point.y - hit.point.y);
+    }
+    return { points: seen.size, hits: gaps.length, belowGround: gaps.filter(v => v < 0).length,
+      minGapM: Math.min(...gaps), maxGapM: Math.max(...gaps), sampleMs: performance.now() - started };
+  });
+  console.log('PIT_LANE', JSON.stringify(report.pitLane));
+  if (!trialOnly && !nativeOnly) {
   await capture('grid-parked');
   await page.mouse.wheel({ deltaY: 20 }); await wait(1500); await seek(null);
   for (const [name, t] of [['grid', null], ['edge-corner', .123], ['runoff-barrier', .283],
@@ -140,7 +169,8 @@ try {
       return { gate: i + 1, t, progress: route.CHECKPOINT_T[i], stripeCenterErrorM: c.distanceTo(expected), postPosition: post.toArray() };
     });
   });
-  for (const [i, t] of (await page.evaluate(async () => (await import('/src/scene/trackCurve.js')).CHECKPOINT_ROUTE_T)).entries()) {
+  for (const [i, t] of (process.env.GT3_SKIP_GATES === '1' ? [] :
+    await page.evaluate(async () => (await import('/src/scene/trackCurve.js')).CHECKPOINT_ROUTE_T)).entries()) {
     await seek(t - .006); await capture(`gate-${i + 1}`);
   }
   report.inventory = await page.evaluate(() => {
@@ -208,9 +238,11 @@ try {
     report.performance.push(row); console.log('TIMING', JSON.stringify(row));
   };
   // Owner reference captures are 1600x900 DPR 1; the host's native CSS/DPR perf condition is separate.
-  const modes = trials ? (process.env.GT3_MODES || 'none,msaa2,msaa4,fxaa,smaa').split(',') : ['shipped'];
-  for (const mode of modes) {
+  const modes = trials ? (process.env.GT3_MODES || 'none,msaa2,msaa4,fxaa,smaa').split(',')
+    : process.env.GT3_AA_AB === '1' ? ['shipped', 'without-smaa'] : ['shipped'];
+  for (const mode of nativeOnly ? [] : modes) {
     if (trials) await setAA(mode);
+    else await page.evaluate(mode => { window.__gt3.passes.antialias.enabled = mode !== 'without-smaa'; }, mode);
     await seek(.123); await capture(`aa-${mode}-edge`);
     if (trials) {
       await page.evaluate(async () => {
@@ -229,8 +261,33 @@ try {
   if (trials) await setAA('none');
   if (process.env.GT3_SKIP_NATIVE !== '1') {
   await page.setViewport({ width: 1280, height: 800, deviceScaleFactor: 2 }); await wait(1000);
-  await timed('native-1280x800-dpr2-rest', false);
-  await timed('native-1280x800-adaptive-motion', true);
+  for (const mode of trials ? ['none'] : modes) {
+    if (!trials) await page.evaluate(mode => { window.__gt3.passes.antialias.enabled = mode !== 'without-smaa'; }, mode);
+    if (!nativeOnly) {
+      await timed(`${mode}-native-1280x800-dpr2-rest`, false);
+      await timed(`${mode}-native-1280x800-adaptive-motion`, true);
+    }
+    if (process.env.GT3_NATIVE_CARS === '1') {
+      await seek(.123);
+      const clip = await page.evaluate(async () => {
+        const THREE = await import('/node_modules/.vite/deps/three.js'), g = window.__gt3;
+        const p = g.scene.getObjectByName('car-rig').getWorldPosition(new THREE.Vector3()).project(g.camera);
+        return { x: Math.max(0, Math.min(innerWidth - 100, Math.floor((p.x + 1) * innerWidth / 2 - 50))),
+          y: Math.max(0, Math.min(innerHeight - 100, Math.floor((1 - p.y) * innerHeight / 2 - 60))), width: 100, height: 100 };
+      });
+      for (const [name, index] of [['lexus-dark', 0], ['bmw-bright', 3], ['lamborghini', 8]]) {
+        await page.evaluate(async index => {
+          const cars = await import('/src/scene/cars.js'), rig = await import('/src/scene/carRig.js');
+          rig.setCarModel(cars.getCarModel(index)); rig.setWheels([]);
+        }, index);
+        await wait(400); await capture(`native-${mode}-${name}`, clip);
+      }
+      await page.evaluate(async () => {
+        const cars = await import('/src/scene/cars.js'), rig = await import('/src/scene/carRig.js');
+        const { state } = await import('/src/core/state.js'); rig.setCarModel(cars.getCarModel(state.activeCarIndex));
+      });
+    }
+  }
   }
   report.pass = report.errors.length === 0;
 } catch (e) { report.pass = false; report.failure = e.stack; process.exitCode = 1; }

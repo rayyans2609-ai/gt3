@@ -52,16 +52,16 @@ export async function captureP3y(page, out, config) {
 
 export async function verifyViewport(page, out) {
   const checks=[];
-  for(const [width,height,dpr] of [[1024,640,2],[960,600,1],[1280,800,2]]) {
+  for(const [width,height,dpr] of [[1440,900,2],[1360,850,1],[1280,800,2]]) {
     await page.setViewport({width,height,deviceScaleFactor:dpr});
     await wait(1500);
     for(let i=0;i<5;i++){await page.mouse.wheel({deltaY:70});await wait(90);}
     const moving=await page.evaluate(()=>{const g=window.__gt3;return{css:[innerWidth,innerHeight],
-      dpr:devicePixelRatio,probe:g.probe(),aspect:g.camera.aspect,scissor:g.renderer.getScissorTest(),
+      dpr:devicePixelRatio,desktopGuard:document.elementFromPoint(innerWidth/2,innerHeight/2)?.textContent?.includes('built for a desktop display'),probe:g.probe(),aspect:g.camera.aspect,scissor:g.renderer.getScissorTest(),
       targets:[g.composer.renderTarget1.width,g.composer.renderTarget1.height],
       transform:g.renderer.domElement.style.transform,clip:g.renderer.domElement.style.clipPath};});
     const native=Math.min(dpr,2);
-    if(moving.probe.canvasW!==width*native || moving.probe.ratio!==native
+    if(moving.desktopGuard || moving.probe.canvasW!==width*native || moving.probe.ratio!==native
       || moving.targets[0]!==width || moving.targets[1]!==height || Math.abs(moving.aspect-width/height)>1e-8)
       throw Error(`Resize/motion viewport mismatch: ${JSON.stringify(moving)}`);
     await page.screenshot({path:`${out}/viewport-${width}-${dpr}-motion.png`});

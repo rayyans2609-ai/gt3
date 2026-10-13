@@ -1,94 +1,132 @@
-# Phase 3 performance / hitch regression — blocked checkpoint
+# Phase 3 performance regression — measured correction
 
-**BLOCKED before any complete, valid runtime repetition. Cause and fix: UNPROVEN.** The quiet-host resume reached A's native-GPU setup, then stopped on renewed paging. Product source is unchanged from `6d001ceea8f284faf622feb16835d9f7e59365d7`. No SMAA, props, resolution, geometry, camera, finish, timer, HUD or input change was made. This checkpoint is a harness and host-evidence handoff, not a performance fix or Phase 3 acceptance.
+Engineering owner **Sol @ xhigh**, assigned by user/manager. No children: coupled attribution stayed with the loaded lead; deterministic scripts ran serial repetitions. Local branch only, no push/main/other-worktree source edits. Product implementation is `f16f82b`. Owner scroll feel and Phase 3 acceptance remain **UNVERIFIED**.
 
-Engineering owner: **Sol @ xhigh**, explicitly assigned by the manager/user. The coupled attribution and harness design stayed with the loaded lead; deterministic scripts perform the mechanical repetitions. No children: serial host-bound execution would gain nothing from another worker startup/brief. xhigh fit the instrumentation/attribution design; runtime sufficiency remains unverified. No push, merge or edits to another checkout.
+## Finding and correction
 
-## Quiet-host resume — 2026-10-13 22:27–22:29 local
+SMAA adds steady GPU cost; the lean-props control stays close to B, and full-props/SMAA-off is close to A. These controls do not support props or revised curb/verge geometry as the dominant measured regression. Adaptive changes really invalidate composer/SMAA backing targets, but caching those targets reduced allocations without materially improving p99. The decisive avoidable costs were the unused multisampled output canvas and resizing its backing at every start/stop. Tiny residual speed also ran the eight-tap blur at native resolution after stopping.
 
-The owner/manager cleared the earlier competing workload. This run independently passed the two-sample gate before launching Vite, and again before launching Chrome. Port 5173 was free. Owned Vite **33608** served the `3d5c504` archive on **5212**; `lsof` confirmed cwd `/private/tmp/gt3-p3y-baseline`. Owned harness **33635** launched Chrome **33753**. No B/C/D server or browser was launched.
+The one-file correction retains the native **single-sample** canvas backing, paints and clears a motion-size viewport, clips/scales that region to the same CSS area, and retains the existing composer DPR1-in-motion / DPR2-at-rest policy. SMAA, full props and all scene geometry remain. High-resolution residual blur is suppressed; low-resolution motion blur is unchanged. Target reallocation still occurs; no target cache or extra renderer was added. At rest the canvas uses its full viewport with no scale/clip.
 
-| Observation (UTC) | Pressure | CPU idle % | Pageouts | Swapouts | Result |
-|---|---:|---:|---:|---:|---|
-| Vite gate, 19:27:31 → 19:27:42 | 1 → 1 | 71.27 → 73.40 | 374,090 → 374,090 | 19,507,594 → 19,507,594 | PASS |
-| Browser gate, 19:28:19 → 19:28:30 | 1 → 1 | 71.42 → 61.83 | 374,208 → 374,208 | 19,507,594 → 19,507,594 | PASS |
-| Startup/early-input sample, 19:29:06 | 1 | 29.36 | 377,270 | 19,693,210 | STOP: +3,062 Pageouts / +185,616 Swapouts since browser gate |
-| Last sample before TERM, 19:29:25 | 1 | 46.17 | 377,960 | 19,693,210 | +3,752 / +185,616 since browser gate |
-| After process cleanup, 19:31:09 | 1 | 52.70 | 377,999 | 19,693,210 | Informational; no relaunch |
+**Not a claim of complete hitch elimination:** ~100ms start-associated RAF gaps persisted even with no target allocations, little callback CPU/GPU work, visible Chrome and a blocking-wheel control. Their remaining cause is UNPROVEN. The patch addresses proven extra work; human scroll/trackpad feel still needs review.
 
-The last pre-TERM delta represents **14.66 MiB Pageouts / 725.06 MiB Swapouts**, using 4 KiB pages. Normal pressure and adequate CPU idle did not override the paging stop rule. These are host-wide counters during A startup/early input, not a measured SMAA or props regression. A has **no SMAA**, so this observation alone cannot attribute the host event to SMAA's targets; it also cannot establish the cause of the owner's B scrolling complaint. No new heavy launch followed degradation, as the resume instruction required.
+## Required A/B/C/D matrix (three repetitions each)
 
-**First-live-run audit, partial:** A reached readiness on Chrome **155.0.8059.40**, **Intel UHD 617 / ANGLE Metal**, **1280×800 CSS / device DPR2**. Its parked probe reported renderer DPR2 and canvas width 2560; its chain contained RenderPass + motion blur + wash, with no SMAA. Renderer memory reported 1,497 geometries / 297 textures and JS heap **234,670,919 bytes (223.80 MiB)**. The small unlock wheel reached race mode. These are setup facts, not performance distributions.
+A = `3d5c504`, lean default. B = `6d001ce`, full + SMAA. C = B with SMAA disabled by the harness only. D = B with `?props=lean`. All Chrome155 / Intel UHD617 / ANGLE Metal, CSS 1280×800 / device DPR2.
 
-The baseline's excluded `font` symlink pointed outside Vite's archive-root allow list: **six font requests returned 403**. This is an environment/harness presentation defect, not a product regression, and would invalidate visual comparison even on a quiet host. On the next export, copy the actual font directory inside the temporary export; keep only `node_modules` symlinked. Do not alter `index.html`, font assets or another checkout to solve it.
+These initial runs use the original synchronous host sampler. It can pause the **input driver**, so their full-frame timing is diagnostic. The final comparison below uses the same corrected asynchronous sampler and centred pointer for A/B/fix; improvement claims use that comparison. GPU timers and exclusive resize timing still provide causal evidence from the initial matrix.
 
-**No complete repetition was retained** (`report.runs = []`). The stop happened during the first region's wheel input. The original SIGTERM handler closed Chrome before serializing in-page telemetry, so no partial frames or trace survived; frame interception, query-result collection, full route input, checkpoint crossing and trace extraction are still UNVERIFIED. The final TargetCloseError is expected from the deliberate shutdown, not an application error. Setup stdout and the persisted browser/GPU/host report are preserved in [data/resume-host.json](data/resume-host.json), with SHA-256 provenance for raw files in `/tmp/gt3-p3y-resume/`.
-
-**Harness repairs from the audit:** a 30 s deterministic monitor now covers page startup and timing; the post-ready sample compares paging to the browser admission sample before admitting any repetition. Setup facts are persisted immediately, HTTP error URLs are retained and page/resource errors reject a config, later configs get a fresh two-sample gate, and SIGTERM/monitor stops attempt a bounded partial-telemetry/trace save before closing. These repairs passed syntax and diff checks; their browser behavior remains **UNVERIFIED**, because another heavy launch was barred. The first baseline repetition must be audited again.
-
-Owned harness/Vite identities and start times were re-checked before TERM. Chrome closed through the harness handler, and `ps` confirmed all recorded owned browser children gone. Ports **5211/5212/5173** had no listeners at cleanup. The baseline archive was deleted. Product source and `main` remain unchanged; nothing was pushed. Build/gates/cold swaps/crops remain UNVERIFIED, with no render-lifecycle product edit requiring a new cone sweep at this checkpoint.
-
-## Earlier blocked checkpoint (`d2ee6bd`)
-
-The mandatory two-sample host gate failed **5 of 6** logged attempts. Pressure remained normal (1), but Pageouts repeatedly rose inside the 10-second intervals; two attempts also missed 25% CPU idle. The one numerical pass did not clear the separate competing-workload condition: an unowned Chrome renderer/GPU remained active. An unowned Vite on 5173 serves `phase3b-aerial-camera`, confirmed with `lsof`; it was never reused or stopped.
-
-Across the logged attempts, host-wide Pageouts rose **10,103 pages** and Swapouts **262,538 pages** (4 KiB pages). These are host conditions, **not evidence that GT3 or SMAA caused the paging**. Existing renderer PID 6793 was observed at up to 72.7% CPU. The owner was asked to pause live heavy browser work; no response was received before checkpoint. No owned Vite, browser, build or monitor was launched.
-
-| Preflight (UTC, 2026-10-13) | Idle %, sample 1 → 2 | Pageouts during interval | Swapouts during interval | Numeric gate |
-|---|---:|---:|---:|---|
-| 19:09:57–19:10:09 | 37.73 → 53.12 | +63 | 0 | FAIL |
-| 19:11:26–19:11:38 | 33.66 → 47.33 | 0 | 0 | PASS; competing workload remained |
-| 19:12:45–19:12:57 | 23.75 → 40.64 | +1,575 | 0 | FAIL |
-| 19:13:42–19:13:54 | 39.17 → 57.70 | +413 | 0 | FAIL |
-| 19:15:32–19:15:43 | 39.29 → 62.62 | +320 | 0 | FAIL |
-| 19:17:24–19:17:38 | 27.39 → 23.70 | +261 | 0 | FAIL |
-
-Portable evidence: [data/host.json](data/host.json). Full process samples and the run ledger remain in `/tmp/gt3-p3y-run/`; the compact file records the raw log's SHA-256. The temporary `3d5c504` archive export was created, then deleted. No timing or crop artifacts exist from this task.
-
-## What source inspection establishes
-
-`sceneSetup.js:applyResolution()` changes both renderer and composer DPR. Three r180's `EffectComposer.setPixelRatio()` calls `setSize()`, resizing its two targets and all passes. `SMAAPass.setSize()` resizes its edge/weight targets. `RenderTarget.setSize()` disposes the GPU backing when dimensions change. Therefore DPR 2 ↔ 1 **does invalidate composer and SMAA backing targets**. The following explicit composer `setSize()` is redundant, but equal-size calls do not dispose targets again. This is a source mechanism, not measured hitch attribution.
-
-At 1280×800 CSS/DPR2, SMAA's two RGBA16F, depth-free targets have **62.5 MiB nominal color storage**, versus 15.625 MiB at DPR1. Driver residency, deletion timing and host paging causality are unmeasured. C disabling the pass also leaves its target objects participating in composer resizing, so runtime GL allocation counts must distinguish disabled-pass disposal from actual reallocation on draw.
-
-The [previous render batch](../p3z-render/NOTES.md) recorded native-rest GPU medians of 33.48 ms without SMAA and 38.07 ms with it, and one approximately 190 ms motion-transition frame in **both** conditions. Those short historical samples motivate investigation; they are not the requested repeated regression matrix. The full-props default, changed curb/verge geometry and accepted finish restoration also differ between A and B. No competing cause is eliminated by static reading.
-
-## Prepared comparison and evidence boundary
-
-New bounded harness: [`scripts/perf-p3y.mjs`](../../../scripts/perf-p3y.mjs), with [`scripts/lib/perf-host.mjs`](../../../scripts/lib/perf-host.mjs). Older `perf-*` and render capture scripts do not record the required repeated stop/start distributions and full app-frame/switch/trace correlation; the new harness reuses their Puppeteer/ANGLE/Metal approach.
-
-It defaults to **1280×800 CSS/DPR2**, the same Chrome executable and ANGLE/Metal flags, three repetitions per config. It refuses software GL, missing timer queries, wrong viewport, insufficient app/GPU samples, and a route interval that never crosses the selected checkpoint. C is a harness-only `antialias.enabled = false`; D uses `?props=lean`. No user-facing toggle was added.
-
-Each repetition seeks to four setup poses (excluded from timing): parked grid, straight t .105, full-props hairpin t .263, and .008 before gate 4. Within each region it records 1.5 s rest, two 1.2 s wheel bursts separated by 2.8 s stops, a 3 s cruise and a final 2.8 s stop. Wheel deltas are 70 with 70 ms waits plus actual CDP dispatch overhead; observed wheel-event timestamps are saved. The route poses, snapshots and inputs must be audited in the first live run before relying on the harness.
-
-Measurements are full application RAF-start intervals and app callback CPU duration; GPU timer queries surround the actual composer draw without waiting for each result. Per-frame DPR, speed, route/model, GL allocation events, switch timestamps, long tasks, heap and host paging are saved. A CDP trace on repetition 1 of each config supplies measured-window main-thread tasks/GC. Reports include p50/p95/p99, worst, >33/>50 ms per 10 s, separate phase/region distributions and switch-adjacent frames. Raw traces remain temporary; frame/input/allocation records are gzip-compressed. Host samples bracket each roughly one-minute timing run; degradation preserves and labels that run, then stops.
-
-**Harness runtime itself is UNVERIFIED.** Only syntax/diff checks ran. It has not demonstrated frame interception, timer-query validity, trace mark/category extraction, checkpoint crossing or successful process teardown on this host. First launch must classify any failure as harness/host/app before changing product code.
-
-| Config | Frame p50/p95/p99; >33/>50 per 10 s; worst | GPU | Long tasks / GC | Switches / allocations | Heap / paging |
+| Config | p50 / p95 / p99 ms | >33 / >50 per 10s | Worst ms | GPU p50 / p95 / p99 ms | Timing Pageouts / Swapouts |
 |---|---|---|---|---|---|
-| A `3d5c504`, lean default | UNVERIFIED | UNVERIFIED | UNVERIFIED | UNVERIFIED | UNVERIFIED |
-| B `6d001ce`, full + SMAA | UNVERIFIED | UNVERIFIED | UNVERIFIED | UNVERIFIED | UNVERIFIED |
-| C B, SMAA off | UNVERIFIED | UNVERIFIED | UNVERIFIED | UNVERIFIED | UNVERIFIED |
-| D B, `?props=lean` | UNVERIFIED | UNVERIFIED | UNVERIFIED | UNVERIFIED | UNVERIFIED |
-| Fixed build | Not implemented | — | — | — | — |
+| A | 18.7 / 45.0 / 81.6 | 96.0 / 9.7 | 238.5 | 11.3 / 37.7 / 41.5 | 309 / 0 |
+| B | 20.8 / 49.1 / 67.8 | 106.0 / 13.9 | 543.9 | 13.1 / 42.7 / 46.5 | 317 / 0 |
+| C | 18.2 / 43.1 / 76.3 | 106.4 / 10.5 | 187.8 | 11.2 / 36.9 / 49.0 | 0 / 0 |
+| D | 19.5 / 48.4 / 79.8 | 105.1 / 11.9 | 539.1 | 12.8 / 42.2 / 45.0 | 493 / 0 |
 
-## Resume when the host is quiet
+Excluding entire repetitions with any timing-window paging:
 
-1. Independently confirm no competing heavy workload and pass the two-sample gate. Recreate a temporary `git archive` export of A. Symlink `node_modules`, but **copy the actual font directory inside the export** to avoid the observed Vite 403s. The resume owner has already authorized work; no additional owner decision is needed to proceed when the host is admissible.
-2. Launch an owned baseline Vite on **5212**, verify listener PID and cwd with `lsof`, and run the harness from `p3y-perf` with `GT3_CONFIGS=A GT3_SOURCE_SHA=3d5c504 GT3_URL=http://127.0.0.1:5212 GT3_OUT=/tmp/gt3-p3y-run/A`. Stop/re-check only owned PIDs and delete the export.
-3. Pass preflight, launch owned Vite on **5211** from this worktree, verify root, then run `GT3_CONFIGS=B,C,D GT3_URL=http://127.0.0.1:5211 GT3_OUT=/tmp/gt3-p3y-run/BCD node scripts/perf-p3y.mjs`. Audit the first live run. Retain three uncontaminated repetitions, with trace-run overhead labelled.
-4. Compare switch-adjacent tails and GL allocations against steady motion/rest GPU cost, props and regions, trace CPU/GC, heap and host counters. If the matrix remains ambiguous, add only an intervention that separates the unresolved cause (e.g. fixed DPR1 or separately suppressing canvas/composer resizing), diagnostic-only.
-5. Implement the smallest measured correction. Do not select target caches, hysteresis, SMAA changes or props reduction on this checkpoint's evidence. Retest A/B/fix with the same procedure; preserve native rest crops for grid, hairpin edge/curb and a car, plus motion if changed. Retain at-rest quality unless measured necessity establishes a tradeoff.
-6. After any render-lifecycle/target edit, build and run gates-only checkpoints and cold Day/Night swaps sequentially under the host rules. Commit the fix and compact evidence (<5 MB) locally, then clean owned processes.
+| Config | Repetitions without timing paging | p50 / p95 / p99 ms | >33 / >50 per 10s | Worst ms |
+|---|---|---|---|---|
+| A | none | — / — / — | — / — | — |
+| B | 1 | 22.7 / 50.4 / 61.3 | 112.7 / 20.0 | 188.5 |
+| C | 1, 2, 3 | 18.2 / 43.1 / 76.3 | 106.4 / 10.5 | 187.8 |
+| D | none | — / — / — | — / — | — |
 
-No alternatives have been experimentally accepted/rejected. SMAA disable, props reduction, broad geometry changes and speculative target caching were **not implemented because the bottleneck is not proven**.
+No qualifying samples means unavailable, never zero or PASS. Nonpaging-region subsets are also in performance.json.
 
-## Checks and cleanup
+## Final matched comparison
 
-- **PASS:** `node --check` for both new scripts; `git diff --check`; protected product-source diff empty.
-- **UNVERIFIED/BLOCKED:** all requested runtime metrics, build, checkpoints, cold swaps and new native crops. No render lifecycle edit occurred, and the mandatory host gate barred a build/browser launch.
-- **Preserved:** full props, SMAA, V1 finish/Replay Route, racing line, camera, checkpoints/sweep, Day/Night warm-up, HUD/grid and all excluded files; this follows from the unchanged source tree, not a new runtime acceptance.
-- **Clean (earlier checkpoint):** no owned heavy processes started then; baseline export deleted; unowned Chrome/Vite left alone. **Resume cleanup:** owned Vite, harness and Chrome stopped; baseline deleted; `main` retained at `665d5ccbada3241d66a9e2ee99bf36cbf4079a26`; nothing pushed. Final branch/SHA are supplied by the handoff rather than embedded as a self-referential commit value.
+Frozen A and B exports with real copied fonts, a fresh browser per configuration, same asynchronous host monitor / centred pointer / input script, then fixed build E. B and E repeated twice; A is a fresh reference in addition to its original three runs.
 
-Remaining blocker: a stable, uncontended native-GPU measurement window. Owner scroll feel and visual acceptance remain human checks after a proven, measured correction.
+| Config | p50 / p95 / p99 ms | >33 / >50 per 10s | Worst ms | GPU p50 / p95 / p99 ms | Timing Pageouts / Swapouts |
+|---|---|---|---|---|---|
+| A | 17.6 / 43.4 / 80.1 | 85.5 / 12.3 | 176.9 | 10.9 / 36.8 / 40.9 | 56 / 0 |
+| B | 19.0 / 47.8 / 82.7 | 89.4 / 11.0 | 593.3 | 12.8 / 42.1 / 46.3 | 291 / 0 |
+| E | 18.9 / 35.0 / 63.2 | 81.9 / 6.5 | 163.2 | 13.4 / 33.9 / 43.5 | 137 / 0 |
+
+Against B, fixed E reduces pooled frame p95 by **26.8%**, p99 by **23.6%**, and >50ms frames per 10s by **40.9%**. GPU p95 improves from 42.1 to 33.9ms. GPU median does not improve in the pooled mix; the balance of high/low DPR frames matters. Both fixed repetitions have p95 about 35ms, but their medians vary substantially (17.7 / 29.5ms). This is a useful correction, not a precision estimate or a 60fps claim.
+
+Exclusive switch instrumentation locates the costly call: B's **renderer.setPixelRatio** median is 138.9ms (p95 163.9ms), versus 49.6ms in A. MSAA-off alone reduces that median to 27.1ms. E removes this canvas call from start/stop entirely. E's separately instrumented **composer.setPixelRatio** is 0.1ms median / 0.2ms p95; this is a different call, not a measurement of the complete switch. Allocation/upload work can occur on the following render. The median worst frame in 500ms after a low-resolution switch is B 173.0ms → E 97.2ms. Every switch timestamp and its neighbouring frames are retained in performance.json and the raw gzip telemetry.
+
+Outside 500ms switch neighbourhoods, native-DPR GPU median is A 34.6ms, B 39.9ms, E 30.6ms; motion-DPR median is 10.6 / 12.5 / 11.2ms. Thus native rest remains above one 60Hz refresh budget even after the fix. Initial controlled B/C GPU medians are 40.0 / 33.5ms native and 12.6 / 10.6ms motion. In B's traced checkpoint window, the largest main-thread GC is 5.7ms while canvas-resize calls exceed 100ms; GC does not explain that specific stall. Occasional GC outliers exist elsewhere and are retained below.
+
+Excluding entire paging repetitions:
+
+| Config | Repetitions without timing paging | p50 / p95 / p99 ms | >33 / >50 per 10s | Worst ms |
+|---|---|---|---|---|
+| A | none | — / — / — | — / — | — |
+| B | none | — / — / — | — / — | — |
+| E | none | — / — / — | — / — | — |
+
+All final repetitions have timing Pageouts, so **a fully paging-free final comparison is unavailable**. Nonpaging-region subsets are available in performance.json but cover different region mixes and cannot replace a matched clean repetition. B/E have 291/137 Pageouts (about 1.14/0.54MiB) across two repetitions, and zero timing Swapouts. This does not establish paging as the primary regression cause. The paging-free original B repetition still has 188.5ms worst frames. Startup/settling paging was allowed and is separately recorded.
+
+The two native 2560×1600 RGBA half-float SMAA targets nominally add **62.5MiB** of colour storage (15.6MiB at motion resolution), excluding depth/driver overhead. This confirms the hypothesis's storage scale, not actual GPU residency or a paging attribution. E keeps those targets. Its retained native single-sample canvas trades more low-DPR canvas pixels for avoiding the original four-sample backing and its resize stalls; actual driver residency is UNVERIFIED.
+
+## Interventions and rejected alternatives
+
+N: canvas MSAA off alone (two repetitions). G: also retain canvas backing / viewport/scissor (two). H: MSAA off + high-resolution blur suppressed. K: all three render interventions. J: K plus warm high/low target banks. I: J in visible Chrome. P: K plus an empty nonpassive wheel listener. The latter four are bounded single-repetition controls, not precision estimates.
+
+| Config | p50 / p95 / p99 ms | >33 / >50 per 10s | Worst ms | GPU p50 / p95 / p99 ms | Timing Pageouts / Swapouts |
+|---|---|---|---|---|---|
+| N | 17.3 / 35.0 / 75.6 | 49.8 / 8.2 | 228.6 | 11.2 / 33.5 / 37.2 | 380 / 0 |
+| G | 18.1 / 37.2 / 66.0 | 61.4 / 9.4 | 133.6 | 12.5 / 34.9 / 44.5 | 9 / 0 |
+| H | 17.9 / 37.0 / 72.3 | 72.1 / 10.3 | 232.9 | 12.1 / 36.4 / 46.6 | 107 / 0 |
+| K | 18.0 / 35.0 / 63.9 | 51.8 / 8.1 | 119.1 | 12.2 / 33.3 / 41.8 | 161 / 0 |
+| J | 18.6 / 37.0 / 66.2 | 57.4 / 8.6 | 129.1 | 12.3 / 36.4 / 38.1 | 162 / 0 |
+| I | 18.3 / 35.7 / 67.1 | 60.2 / 9.7 | 230.4 | 12.5 / 34.3 / 36.2 | 199 / 0 |
+| P | 17.4 / 34.1 / 61.1 | 39.3 / 6.1 | 116.5 | 11.6 / 33.0 / 35.7 | 69 / 0 |
+
+SMAA off improves steady cost but loses accepted edge treatment and leaves large stalls. Lean props remains slow with SMAA. Neither ships. Target caching changes ~96–98 storage calls to ~2 but does not improve the observed tail enough to justify residency/private-API complexity. Visible Chrome and a blocking-wheel control do not explain/remove the residual start gaps; no input listener or scheduling policy change ships. Fixed DPR1, longer blur-at-rest or long hysteresis were not selected: native rest quality remains required.
+
+## Procedure / evidence boundary
+
+Each repetition seeks (excluded from timing) to grid, straight t=.105, hairpin entry t=.263 and .008 before gate4. Wait for morph completion and ~20s unchanged Pageouts/Swapouts, at most ~90s; unsettled windows run with a label. Per region: 1.5s rest, two 1.2s wheel bursts with 2.8s stops, 3s cruise and 2.8s stop. Wheel input is 70px with 70ms waits plus recorded CDP overhead. Actual wheel timestamps, progress, car, DPR, GPU queries, GL storage calls and frame/callback intervals are retained; all reported repetitions crossed gate4. Setup seeks, settling, screenshots and trace export are excluded. Trace covers repetition1's checkpoint window only. Traced/untraced rows stay separate below.
+
+Manager's 2026-10-13 RESUME2 amendment governs: two-sample pressure1/idle≥25/no-heavy-competitor launch gate; startup paging allowed; timing paging retained and reported including/excluding it; stop on two pressure≠1 samples, two idle<15 samples outside timing, or >5s CDP/RAF collapse. One browser at a time, no other tabs, no timing screenshots. Pageouts/Swapouts are host-wide association, not app-exclusive causation. 4-KiB pages. Startup/settling counters remain in raw host JSONL; timing deltas are in every portable run.
+
+Early harness attempts were excluded: an unbounded trace included settling and could not export; a responsiveness/hook audit failed before frames; B's first launch had font403s. B dev-server fs.allow was corrected only in temporary config; A exports copied real fonts. No product patch used those failed attempts as proof. Host sampling now uses async child processes, timer instrumentation is warmed/audited before timing, and per-window telemetry persists before trace export.
+
+| Set / config / repetition | Trace CPU tasks >50ms | GC count / total / max ms | Switches / texture storage calls | Heap before → after MiB | Paging |
+|---|---|---|---|---|---|
+| legacy / A / 1 | 7 | 91 / 138.2 / 6.0 | 24 / 50 | 185.7 → 180.0 | true |
+| legacy / A / 2 | not traced | — | 24 / 50 | 179.6 → 181.7 | true |
+| legacy / A / 3 | not traced | — | 24 / 50 | 183.6 → 178.0 | true |
+| legacy / B / 1 | 7 | 74 / 96.7 / 4.4 | 24 / 96 | 227.2 → 185.6 | false |
+| legacy / B / 2 | not traced | — | 24 / 98 | 179.5 → 187.5 | true |
+| legacy / B / 3 | not traced | — | 24 / 98 | 185.4 → 181.7 | true |
+| legacy / C / 1 | 8 | 72 / 186.3 / 45.2 | 24 / 50 | 218.1 → 178.7 | false |
+| legacy / C / 2 | not traced | — | 24 / 50 | 178.5 → 182.0 | false |
+| legacy / C / 3 | not traced | — | 24 / 50 | 183.5 → 178.6 | false |
+| legacy / D / 1 | 7 | 27 / 103.9 / 19.4 | 24 / 96 | 194.1 → 183.2 | true |
+| legacy / D / 2 | not traced | — | 24 / 98 | 185.4 → 181.0 | true |
+| legacy / D / 3 | not traced | — | 24 / 98 | 179.1 → 184.7 | true |
+| interventions / N / 1 | 2 | 27 / 91.7 / 32.0 | 24 / 98 | 208.5 → 184.1 | true |
+| interventions / N / 2 | not traced | — | 24 / 98 | 178.8 → 181.4 | true |
+| interventions / G / 1 | 3 | 84 / 125.7 / 15.7 | 24 / 98 | 185.2 → 180.8 | false |
+| interventions / G / 2 | not traced | — | 24 / 98 | 180.4 → 184.2 | true |
+| interventions / H / 1 | 5 | 24 / 115.8 / 48.0 | 24 / 98 | 195.1 → 178.9 | true |
+| interventions / K / 1 | 0 | 48 / 59.6 / 6.1 | 24 / 98 | 195.1 → 184.2 | true |
+| interventions / J / 1 | 1 | 76 / 159.4 / 52.4 | 24 / 2 | 196.3 → 180.4 | true |
+| interventions / I / 1 | 0 | 47 / 48.7 / 5.2 | 24 / 2 | 189.6 → 183.8 | true |
+| interventions / P / 1 | 0 | 25 / 25.9 / 2.0 | 24 / 98 | 209.6 → 183.9 | true |
+| final / A / 1 | 8 | 25 / 167.2 / 53.9 | 24 / 50 | 216.6 → 178.6 | true |
+| final / B / 1 | 8 | 21 / 28.2 / 5.7 | 24 / 98 | 203.7 → 181.6 | true |
+| final / B / 2 | not traced | — | 24 / 98 | 182.0 → 182.2 | true |
+| final / E / 1 | 0 | 29 / 58.1 / 23.1 | 24 / 98 | 192.9 → 180.1 | true |
+| final / E / 2 | not traced | — | 24 / 98 | 180.5 → 185.7 | true |
+
+GC/long-task traces cover one checkpoint window, not the entire repetition. GC and long tasks are filtered to CrRendererMain and measured trace windows; raw events and thread metadata remain available; GPU query completeness/disjoint flags and per-phase/region metrics are in data/performance.json. All final frames have completed GPU queries and no disjoint samples. Frame-time quantiles pool measured app RAF intervals; threshold counts are normalised by their summed duration, not averaged across repetitions. GPU queries cover composer rendering, not browser compositing. No instrument-free timing control was run.
+
+Raw traces stay under /tmp/gt3-p3y-final with SHA256 in provenance.json. Representative legacy and all final frame/input/allocation telemetry is portable gzip; other raw runs remain in the hashed temporary evidence. Final instrumentation snapshots, host JSONL, root proofs and the run ledger are included in data/. Trace files are temporary and not a durable repository artifact; their compact measured summaries are committed.
+
+Reproduction: first run the two-sample host gate (`node scripts/lib/perf-host.mjs /tmp/p3y-launch`) before starting the owned Vite on 5211. Run `GT3_CONFIGS=E GT3_REPEATS=2 GT3_CENTER=1 GT3_CAPTURES=1 GT3_URL=http://127.0.0.1:5211 GT3_OUT=/tmp/p3y-fixed node scripts/perf-p3y.mjs`; the harness also gates its browser launch. For the original matrix use frozen 3d5c504/6d001ce exports, copy the real font directory, share only node_modules, set GT3_SOURCE_SHA to the served commit, and use config A or B/C/D. B/C/D use the same 6d001ce source. A symlink-font Vite launch needs a temporary fs.allow entry for the real font path; no tracked Vite/index/styles change was required. Close the browser/server between configurations. `scripts/summarize-p3y.mjs` pools report.json files with their adjacent raw telemetry.
+
+## Visual and functional verification
+
+Same-view **native** crops at grid, hairpin apex t.283 and BMW, plus B/E in-motion stills: [images](images). Crop metadata records CSS/deviceDPR, camera, probe and target formats/sizes. Decorative grain time is frozen for stills only, never timing. Motion frames are approximate same-view input states, with actual pose recorded. B/fixed grid, hairpin and car crops are pixel-identical (see pixel-comparison.json). Full motion viewport was visually inspected for full coverage. Initial numeric resize checks at sub-desktop widths exposed the expected desktop guard; supported-desktop dimensions were then rerun with an explicit guard-visibility assertion. Full viewport and resize stills remain temporary for inspection. No screenshot is a subjective owner acceptance.
+
+**PASS:** build; gates-only all nine checkpoints forward and reverse with zero crossing GL allocations/uploads; cold Day and Night first crossings with zero GL allocations/uploads; moving/rest resize checks. See [checks.json](data/checks.json), [viewport-checks.json](data/viewport-checks.json), [gates.json](data/gates.json), [cold-day.json](data/cold-day.json), [cold-night.json](data/cold-night.json). The viewport check covers CSS 1440×900/DPR2, 1360×850/DPR1 and restored 1280×800/DPR2, with camera aspect, render-target size, clipping/scissor restoration and desktop-guard absence asserted. Supported 1440×900 motion output was also visually inspected. **UNVERIFIED:** subjective scroll feel/visual acceptance, completely hitch-free input, GPU residency, and fully clean-host final timings.
+
+Protected sources (startFacility, trackCurve, styles, index, finish/timer/scroll, car/line/camera/checkpoint/theme/warm-up) have no product diff from 6d001ce. Reuse their existing acceptance boundary; no unrelated regression sweep. First-crossing resource assertions and cold swap checks cover the render lifecycle seam. All owned browsers/Vite processes are stopped and temporary exports removed; [cleanup.json](data/cleanup.json) records no listeners on 5173/5211/5212, no Chrome processes, and main unchanged at 665d5cc.
+
+Thinking-level finding: xhigh appropriate for coupled instrumentation/attribution, with meaningful harness recovery cost. Routing remains Sol execution lead plus scripts; no stronger-model escalation, children or policy rewrite.

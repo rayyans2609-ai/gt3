@@ -281,6 +281,7 @@ try {
       throw new Error(report.stop.reason);
     }
     if (report.errors.length) throw new Error('Page/resource errors invalidate this configuration; inspect report.errors');
+    if(process.env.GT3_VIEWPORT_ONLY==='1'){report.viewportChecks=await verifyViewport(page,out);break;}
     for (let rep = 1; rep <= repeats; rep++) {
       const before = await hostSample();
       const hostWindows = [];
@@ -386,7 +387,8 @@ try {
         const measured = e => windows.some(([start, end]) => e.ts >= start && e.ts <= end);
         const taskEvents = trace.filter(e => measured(e) && e.ph === 'X' && e.dur >= 50000 && main.includes(`${e.pid}:${e.tid}`)
           && /RunTask|ThreadControllerImpl::RunTask/.test(e.name));
-        const gc = trace.filter(e => measured(e) && e.ph === 'X' && /^(MinorGC|MajorGC)$/.test(e.name));
+        const gc = trace.filter(e => measured(e) && e.ph === 'X' && main.includes(`${e.pid}:${e.tid}`)
+          && /^(MinorGC|MajorGC)$/.test(e.name));
         run.trace = { path: tracePath, windows, mainThreads: main, longTasks: taskEvents.map(e => ({ name: e.name, ts: e.ts, ms: e.dur / 1000 })),
           gc: gc.map(e => ({ name: e.name, ts: e.ts, ms: e.dur / 1000, args: e.args })),
           gcMs: gc.reduce((s, e) => s + e.dur / 1000, 0), events: trace.length };

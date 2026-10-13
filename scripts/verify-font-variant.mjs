@@ -64,7 +64,7 @@ try {
         slot.querySelector('.hud-identity__name').textContent = car.displayName;
         slot.querySelector('.hud-identity__headline').textContent = car.showcase?.headline ?? '';
         const r = document.querySelector('#hud-topleft').getBoundingClientRect();
-        return { x: r.x, y: r.y, width: r.width, height: r.height };
+        return { x: r.x + window.scrollX, y: r.y + window.scrollY, width: r.width, height: r.height + 24 };
       }, i);
       await page.screenshot({ path: `${out}/${name}-identity-${i}.png`, clip: { x: box.x - 6, y: box.y - 6, width: box.width + 12, height: box.height + 12 } });
     }

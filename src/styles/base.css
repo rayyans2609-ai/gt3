@@ -38,6 +38,9 @@
 /* Switzer's ascent+descent (≈27 px at 23 px) exceeds the 1.1 name line box tuned for Neue Haas;
    the name clips overflow, so give Switzer just enough line height for accents/descenders. */
 :root[data-font='sw'] .hud-identity__name { line-height: 1.2; }
+/* Its taller metrics also overfill the fixed identity box with two-line headlines; keep each line
+   at natural height instead of letting the flex column squeeze (and clip) name and headline. */
+:root[data-font='sw'] .hud-identity__slot > * { flex-shrink: 0; }
 
 
 *,

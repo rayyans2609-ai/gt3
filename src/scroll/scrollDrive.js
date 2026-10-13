@@ -359,8 +359,9 @@ export function update(dt) {
 
   // Snap when we're within a hair of the target so the car actually comes to rest.
   if (Math.abs(target - p) < TUNE.idleEpsilon) p = target;
+  // V1 finish: the car drives through the gantry into the run-out; completion
+  // (finishScreen) locks the drive FINISH_PAST_LINE_METERS beyond the line.
   p = Math.min(DRIVE_LENGTH / TOUR_LENGTH, Math.max(0, p));
-  if (before < 1 && p >= 1) { p = 1; rawTarget = 1; syncPageTo(1); }
 
   // Signed velocity in progress-per-second, normalised so 1 is flat out.
   // Negative when scrolling back up — the drive reverses smoothly.
@@ -399,14 +400,9 @@ function updateBounded(dt) {
       bounded.addInput(dy, DRIVE_LENGTH / max, endpoint);
     }
   }
-  const before = bounded.p;
+  // V1 finish: no landing on the gantry; the car's own driving carries it through the
+  // line and finishScreen locks it in the run-out (see finishTail.js).
   bounded.step(dt);
-  // Land on the logical gantry before accepting a new scroll into the presentation tail.
-  // No leftover lap credit can launch the car beyond the line automatically.
-  if (before < TOUR_LENGTH && bounded.p >= TOUR_LENGTH) {
-    bounded.reset(TOUR_LENGTH);
-    syncPageTo(1);
-  }
 
   const presentationP = bounded.p / TOUR_LENGTH;
   const p = Math.min(1, Math.max(0, bounded.p / TOUR_LENGTH));

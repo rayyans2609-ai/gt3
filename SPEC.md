@@ -498,7 +498,7 @@ An original closed-loop circuit, broadly inspired by Spa-Francorchamps and Circu
 **Generic markers.** The evenly spaced generic distance markers are **replaced**, not supplemented.
 
 **Phase 3 MVP closure (owner, 2026-10-12).** Phase 3 ends as a deliberately restrained, working MVP; substantial environment and asset work belongs to Phase 8.
-- **Lean props are the default.** The fuller set stays reachable as a recoverable comparison for Phase 8 (`?props=full`), with no obligation to keep it.
+- **Full props are the default (owner 2026-10-13; supersedes the 2026-10-12 lean default).** Full visibly beats lean. Only specific fence/barrier runs that read as detached black blocks from the aerial camera, and genuinely useless stray objects, are removed or simplified. The lean set stays reachable as a comparison (`?props=lean`). Refined fencing/barrier design is Phase 8.
 - **Low-poly trees are removed** from the Grand Tour. Vegetation is an owner-judged Phase 8 decision; do not restore them automatically.
 - **Placeholder clutter is removed.** Visibly poor or useless roadside/ground objects are diagnosed, then removed if expendable or fixed if they are genuine render defects.
 - **Edge lines render smoothly** through corners: a defect fix, with the cause found before the representation changes.
@@ -540,10 +540,12 @@ Because identity is now hidden until discovery (§11), checkpoints must **not** 
 
 **Checkpoint readability (owner, 2026-10-12).** The nine gates are thickened cheaply, and each gets a substantial **transverse road stripe** beneath it, like a finish line but marking a checkpoint. Location, order, sweep, swaps, clearance and cold-crossing behaviour are unchanged. A full checkpoint/gateway redesign is Phase 8.
 
-**Finish tail (owner, 2026-10-12; a minimal Phase 3 UX fix, not Phase 7).** On the return gantry crossing the lap completes and the timer freezes at that crossing. The camera then **holds its finishing viewpoint** while the user may keep scrolling the car a short distance past the gantry, in the same road scene, to a composed stop **before checkpoint one**.
-- The tail is scroll-controlled presentation only: no automatic launch, new lap, car swap, checkpoint, SFX or discovery change.
-- The first gantry pass stays neutral; completion happens once.
-- Reversing out of the tail restores normal Tour view and progression without teleport, flicker or double completion.
+**Finish — historical V1 mechanics (owner, 2026-10-13; supersedes the 2026-10-12 finish tail).** The owner chose the original V1 finish over V2 (Option A's stop exactly on the gantry, with a reverse-wheel escape) and V3 (the scroll-controlled post-finish tail under a held camera, now cancelled). V1 (`d1c779d`..`8795519`): the car drives through the line on its own momentum; completion fires 5 m past the line (lap t 0.995 vs gate 0.994 on the 5006.8 m lap); the drive locks so the car halts where it stands; the completion notice fades in; Replay Route is the way back. On Option A:
+- the return gantry crossing freezes the stopwatch; completion and the drive lock follow 5 m later, inside a 30 m run-out (V1's route end past the gate) that is unreachable after completion. There is **no post-finish coast** of any length;
+- the first gantry pass stays neutral; completion happens once; no car swap, checkpoint, SFX or discovery change in the run-out;
+- scroll input is swallowed under the completion lock, forward or reverse (V1). Replay Route resets the route, timer and run-out;
+- a refresh in the completed state restores it locked and silent, with the car at the V1 completion point;
+- the newer compact completion notice ("GRAND TOUR COMPLETE" + Replay Route) is kept; Phase 7 replaces it.
 - The cinematic Grand Tour → completion hero transition remains **Phase 7**.
 
 **No legacy racing cues.** Remove in-world cues left over from the pre-V3 race that no longer serve the Tour, such as painted turn-direction chevrons on the road. This does not remove the first-use scroll-direction cue (§14, §20).
@@ -589,11 +591,11 @@ Both states are warmed, so a theme change never puts new GPU work on a crossing.
 
 Every Phase 3 HUD refinement preserves Day and Night readability.
 
-- **Identity typography (owner, 2026-10-12).** No soft halo or underglow. The headline and spec use the UI sans, not monospace, and are a little larger and stronger. A translucent backing card is a Phases 4–6 option, not Phase 3.
+- **Identity typography (owner, 2026-10-12; colour 2026-10-13).** Car name, headline and spec render **white** in Day and Night, with no soft halo, underglow or text shadow. The headline and spec use the UI sans, not monospace, and are a little larger and stronger. A translucent backing card is a Phases 4–6 option, not Phase 3.
 - **Lap timer (owner, 2026-10-12; a deliberate exception to the timer exclusion below).** One minimal Tour stopwatch, not lap competition:
   - it starts on the first meaningful user-driven travel after ready, not on load, restore or programmatic movement;
   - it counts while scroll-driven travel continues and pauses after about **1 s idle**, resuming on renewed driving;
-  - it freezes at the logical finish crossing, and the finish tail adds no time;
+  - it freezes at the gantry finish crossing, and the V1 run-out adds no time;
   - restore follows route-persistence semantics and never accrues time spent away;
   - simple weighted mono numerals with an unobtrusive provisional placement; no sectors, leaderboard, pace meter or card. Its styling is revisited in Phases 4–6.
 
@@ -773,6 +775,15 @@ A fresh implementation agent should be able to determine, from this file alone: 
      - the scroll-controlled finish tail (§18).
 
      Deferrals arising from the same review are recorded only in §31; none are authorised for Phase 3. Owner visual acceptance remains the only gate to Phase 3 acceptance, push and merge.
+   - **Final Phase 3 render/mechanics closure (owner, 2026-10-13): overrides of the 2026-10-12 list.**
+     - **Full props default**, with only specific fence/barrier runs and stray objects removed (§17). This reverses "lean props as default".
+     - **Historical V1 finish mechanics** replace the scroll-controlled finish tail, which is cancelled. The compact completion notice with Replay Route is kept (§18).
+     - Static jaggedness in road edges, curbs, grid paint, joins and car silhouettes (the Lamborghini especially) is a Phase 3 acceptance defect, diagnosed and fixed at its source. There is no temporal-shimmer work (§17, §27).
+     - Start-grid paint gets credible stagger, row spacing and slot fit for the hero car, with local corridor widening only if needed (§17–18).
+     - White top-left identity text with no halo (§20).
+     - Braking-board legibility gets a cheap fix only; otherwise Phase 8.
+
+     Status words stay distinct: requested ≠ implemented ≠ machine-verified ≠ owner-accepted.
    - **Required closure work (2026-10-09):**
      - car/road proportions with the racing surface widened coherently and infrastructure at real-world size (§15);
      - variable-width cross-section, runoff, semantic curbs and continuous edge lines (§17);
@@ -820,13 +831,14 @@ Raised during Phase 3 review, owned by later phases, and **not to be implemented
 | Full loading UX: 0–100 % progress, no early interaction, prominent Start Race | D | designed with the page/navigation flow (Phases 4–5) | §25 |
 | Authored elevation: grades, crests/compressions, banked turns, terrain-integrated road (supersedes "modest circuit elevation") | E | Phase 8 | §17, §16 |
 | Standing-start five-lamp overlay + single SCROLL TO RACE control | R | Phases 4–5 | §25 |
+| Designed completion experience replacing the interim compact notice and V1 lock (§18 *Finish*) | R | Phase 7 | §21–22 |
 | Selective Night illumination: floodlight towers, integrated fixtures, model-aware headlights, local gate/swap spill | R | Phase 8 | §13a |
 | Richer facility architecture: pit complex, landmark structures, grandstands | E | Phase 8 | §16–17 |
 | Wheel-only motion blur | E | unassigned (Phase 8 polish) | §30.9 |
 | Ten-car wheel-spin rig re-authoring | D | only if the owner reopens it | §30.9 |
 | Translucent card behind the top-left HUD; timer restyle/placement | R | Phases 4–6 (interactive UI design) | §20 |
 | Start card, loading/rest state and prominent scroll prompt redesign | R | Phases 4–5 (interactive UI design) | §25 |
-| Fuller prop set as comparison; refined fencing/barriers/tyre stacks, grandstands, pit facilities, bridge, architectural checkpoints/gateways | E | Phase 8 | §17 |
+| Prop density (full is the Phase 3 default, lean kept as comparison); refined fencing/barriers/tyre stacks, grandstands, pit facilities, bridge, architectural checkpoints/gateways | E | Phase 8 | §17 |
 | Vegetation and environment palette (low-poly trees removed in Phase 3) | E | Phase 8 | §16–17 |
 | Dynamic track width, runoff shape and materials (sand-brown is provisional) | E | Phase 8 | §17 |
 | Behind-the-car point-of-view camera mode | backlog | after Phase 8 | — |

@@ -1,4 +1,4 @@
-/** WS-B: real input, stopwatch lifecycle, presentation tail, camera/lens hold and silence.
+/** WS-B: real input, stopwatch lifecycle, restored V1 finish (run-out, completion lock) and silence.
  * Run through the canonical heavy gate with a fresh owned server. Captures are human review evidence.
  */
 import puppeteer from 'puppeteer-core';
@@ -41,9 +41,10 @@ async function snap() {
     };
   });
 }
-async function ready() {
+async function ready({ unlocked = true } = {}) {
   await page.waitForFunction(() => ['ready', 'degraded'].includes(window.__gt3?.readiness?.status), { timeout: 180000 });
-  await page.waitForFunction(async () => !(await import('/src/core/state.js')).state.scrollLocked, { timeout: 10000 });
+  // A completed (V1) restore stays locked under the finish notice.
+  if (unlocked) await page.waitForFunction(async () => !(await import('/src/core/state.js')).state.scrollLocked, { timeout: 10000 });
   await wait(250);
 }
 async function seek(p, instant = true) {
@@ -78,20 +79,19 @@ try {
   const constants = await page.evaluate(async () => {
     const r = await import('/src/scene/trackCurve.js'); const t = await import('/src/scroll/finishTail.js');
     return { length: r.TOUR_LENGTH, trackLength: r.TRACK_LENGTH, firstLine: r.FIRST_LINE_PROGRESS,
-      cp1: r.CHECKPOINT_ROUTE_T[0], tailMax: t.FINISH_TAIL_METERS };
+      cp1: r.CHECKPOINT_ROUTE_T[0], tailMax: t.FINISH_TAIL_METERS, pastLine: t.FINISH_PAST_LINE_METERS };
   });
   report.constants = constants;
   if (visualOnly) {
     await seek(1 - 12 / constants.length);
-    await until(s => s.p === 1, 100);
-    await until(s => s.tail >= constants.tailMax - 1e-5, 200);
+    await until(s => s.mode === 'finish', 100);
     await wait(1500);
     await record('refreshed timer and completion Day Night captures', async () => {
       const data = {};
       for (const theme of ['day', 'night']) {
         await page.evaluate(async t => (await import('/src/core/state.js')).set('theme', t), theme);
         await wait(1000);
-        await page.screenshot({ path: `${out}/tail-stop-${theme}.png` });
+        await page.screenshot({ path: `${out}/finish-v1-${theme}.png` });
         data[theme] = await snap();
         data[theme].timerStyle = await page.evaluate(() => {
           const s = getComputedStyle(document.querySelector('.hud-lap-timer'));
@@ -99,7 +99,7 @@ try {
         });
       }
       await page.click('.audio-launcher'); await wait(500);
-      await page.screenshot({ path: `${out}/tail-player-expanded.png` });
+      await page.screenshot({ path: `${out}/finish-v1-player-expanded.png` });
       return data;
     });
   } else {
@@ -176,72 +176,51 @@ try {
     set('theme', 'night');
   });
   await page.click('.audio-speaker'); await wait(700);
-  await record('logical finish freezes stopwatch once without scroll lock', async () => {
-    const before = await snap(); const finish = await until(s => s.p === 1, 100);
-    assert(finish.frozen && !finish.running && !finish.locked && finish.ack && finish.car === 9);
-    assert.equal(finish.mode, 'finish'); assert.equal(finish.completions, 1);
+  await record('V1 finish: line freezes stopwatch, completion past the line locks the drive', async () => {
+    const before = await snap(); const finish = await until(s => s.mode === 'finish', 100);
     const edge = await page.evaluate(() => window.__wsbFinishEdge);
-    assert.equal(edge.tail, 0); assert(edge.frozen && !edge.running); assert.equal(finish.elapsed, edge.elapsed);
-    await wait(1700); const idle = await snap(); assert.equal(idle.elapsed, finish.elapsed); assert(samePose(finish, idle));
-    await page.screenshot({ path: `${out}/gantry-finish-night.png` }); return { before, edge, finish, idle };
-  });
-  let held;
-  await record('scroll tail moves car in fixed view stops before checkpoint1 with no effects', async () => {
-    const finish = await snap(); const tail = await until(s => s.tail >= constants.tailMax - 1e-5, 200);
-    held = tail;
-    assert(tail.tail > 0 && tail.p === 1 && tail.target === 1); assert(samePose(finish, tail));
-    assert(Math.hypot(...tail.position.map((v, i) => v - finish.position[i])) > 20);
-    assert(tail.t < constants.cp1 && tail.t * constants.trackLength < constants.cp1 * constants.trackLength - 20);
-    assert(tail.ndc[2] < 1 && Math.abs(tail.ndc[0]) < .9 && Math.abs(tail.ndc[1]) < .9, `tail car left composition: ${tail.ndc}`);
-    assert.equal(tail.elapsed, finish.elapsed); assert.equal(tail.sfx, finish.sfx); assert.equal(tail.audioStarts, finish.audioStarts);
-    assert.deepEqual(tail.unlocked, finish.unlocked); assert.equal(tail.car, 9); assert(!tail.morphing && !tail.gateVisible);
-    assert.equal(tail.experience, 'tour'); assert.equal(tail.completions, 1);
-    await wheels(800, 4); await wait(1500); const stopped = await snap(); assert.equal(stopped.tail, constants.tailMax);
-    assert(samePose(tail, stopped)); assert.equal(stopped.elapsed, tail.elapsed);
-    await page.screenshot({ path: `${out}/tail-stop-night.png` });
+    assert(edge && edge.frozen && !edge.running, 'stopwatch must freeze at the gantry crossing');
+    assert.equal(finish.elapsed, edge.elapsed);
+    assert(finish.locked, 'V1 completion locks the drive');
+    assert(finish.p === 1 && finish.tail >= constants.pastLine - 1e-6 && finish.tail < constants.tailMax,
+      `V1 completion point ${finish.tail} m past the line`);
+    assert(finish.frozen && !finish.running && finish.ack && finish.car === 9);
+    assert.equal(finish.experience, 'complete'); assert.equal(finish.completions, 1);
+    assert(finish.ndc[2] < 1 && Math.abs(finish.ndc[0]) < .9 && Math.abs(finish.ndc[1]) < .9, `car left composition: ${finish.ndc}`);
+    await wait(1700); const settled = await snap();
+    assert.deepEqual(settled.position, finish.position, 'car moved after completion (coast)');
+    assert.equal(settled.elapsed, finish.elapsed);
+    await page.screenshot({ path: `${out}/finish-v1-night.png` });
     await page.evaluate(async () => (await import('/src/core/state.js')).set('theme', 'day')); await wait(1000);
-    await page.screenshot({ path: `${out}/tail-stop-day.png` }); return { finish, tail, stopped };
+    await page.screenshot({ path: `${out}/finish-v1-day.png` });
+    return { before, edge, finish, settled };
   });
-  await record('reverse retraces tail then resumes same timer no teleport or duplicate completion', async () => {
-    await page.evaluate(async () => {
-      const { state } = await import('/src/core/state.js'); const rig = window.__gt3.scene.getObjectByName('car-rig');
-      const { registerUpdate } = await import('/src/main.js');
-      window.__wsbReverse = [];
-      // Observe every completed pose with the same dt that advanced the drive.
-      // RAF's vsync timestamp can precede a delayed app callback, whereas Clock
-      // ticks performance.now(); mixing those clocks invents speed spikes.
-      window.__stopWsbReverse = registerUpdate(dt => window.__wsbReverse.push({
-        dt, now: performance.now(), p: state.progress,
-        tail: state.finishTailMeters, position: rig.position.toArray() }));
-    });
-    await wheels(-100, 2); const partial = await snap(); assert(partial.tail < held.tail && partial.tail > 0 && partial.p === 1);
-    assert(samePose(held, partial)); assert.equal(partial.elapsed, held.elapsed);
-    const reverse = await until(s => s.p < 1 - 3 / constants.length, -120);
-    assert(reverse.tail === 0 && reverse.mode === 'race' && !reverse.frozen && reverse.elapsed >= held.elapsed);
-    assert.equal(reverse.completions, 1); assert.equal(reverse.sfx, held.sfx); assert.equal(reverse.audioStarts, held.audioStarts);
-    const rows = await page.evaluate(() => { window.__stopWsbReverse(); return window.__wsbReverse; });
-    await writeFile(`${out}/reverse-frames.json`, JSON.stringify(rows, null, 2));
-    assert(rows.some(row => row.tail > 0) && rows.some(row => row.p < 1), 'reverse must exercise tail-to-lap handoff');
-    let maxJump = 0, maxSpeed = 0;
-    for (let i = 1; i < rows.length; i++) {
-      const d = Math.hypot(...rows[i].position.map((v, j) => v - rows[i - 1].position[j]));
-      assert(rows[i].dt > 0, 'reverse sample must have a positive app timestep');
-      maxJump = Math.max(maxJump, d); maxSpeed = Math.max(maxSpeed, d / rows[i].dt);
+  await record('no post-finish coast or reverse escape: input under the completion lock is swallowed', async () => {
+    const held = await snap();
+    await wheels(600, 5); await wait(1200); const forward = await snap();
+    await wheels(-600, 5); await wait(1200); const reverse = await snap();
+    for (const s of [forward, reverse]) {
+      assert.deepEqual(s.position, held.position); assert.equal(s.tail, held.tail); assert.equal(s.p, 1);
+      assert(s.locked && s.mode === 'finish'); assert.equal(s.elapsed, held.elapsed);
+      assert.equal(s.completions, 1); assert.equal(s.sfx, held.sfx); assert.equal(s.audioStarts, held.audioStarts);
+      assert(!s.morphing && !s.gateVisible);
     }
-    assert(maxJump < 15 && maxSpeed < 230, `discontinuous reverse ${maxJump}m / ${maxSpeed}mps`);
-    await until(s => s.p === 1, 150); const recross = await snap();
-    assert.equal(recross.completions, 1); assert.equal(recross.audioStarts, held.audioStarts);
-    assert(recross.frozen && !recross.running); return { partial, reverse, recross, maxJump, maxSpeed };
+    return { held, forward, reverse };
   });
-  await record('completed reload returns gantry frozen silent and replay resets timer', async () => {
-    await wheels(200, 4); await wait(1600); const before = await snap();
-    await page.reload({ waitUntil: 'domcontentloaded', timeout: 120000 }); await ready(); const restored = await snap();
-    assert.equal(restored.p, 1); assert.equal(restored.tail, 0); assert.equal(restored.elapsed, before.elapsed);
-    assert(restored.frozen && !restored.running && !restored.locked && restored.mode === 'finish' && restored.audioStarts === 0);
-    await wait(1600); assert.equal((await snap()).elapsed, before.elapsed);
+  await record('completed reload restores locked V1 state silently and Replay Route resets', async () => {
+    const before = await snap();
+    await page.reload({ waitUntil: 'domcontentloaded', timeout: 120000 }); await ready({ unlocked: false });
+    await wait(800); const restored = await snap();
+    assert.equal(restored.p, 1); assert.equal(restored.tail, constants.pastLine); assert.equal(restored.elapsed, before.elapsed);
+    assert(restored.frozen && !restored.running && restored.locked && restored.mode === 'finish' && restored.audioStarts === 0);
+    assert.equal(restored.experience, 'complete');
+    await wheels(300, 3); await wait(1300); const pushed = await snap();
+    assert.deepEqual(pushed.position, restored.position); assert.equal(pushed.elapsed, before.elapsed);
     await page.click('.finish-replay'); await wait(1300); const replay = await snap();
-    assert.equal(replay.p, 0); assert.equal(replay.elapsed, 0); assert(!replay.ack && !replay.frozen);
-    await wheels(150, 4); assert((await snap()).elapsed > 0); return { before, restored, replay };
+    assert.equal(replay.p, 0); assert.equal(replay.tail, 0); assert.equal(replay.elapsed, 0);
+    assert(!replay.ack && !replay.frozen && !replay.locked && replay.mode === 'race' && replay.car === 0);
+    await wheels(150, 4); const driven = await snap(); assert(driven.elapsed > 0 && driven.p > 0);
+    return { before, restored, pushed, replay, driven };
   });
   }
   assert.equal(report.errors.length, 0, report.errors.join(' | ')); report.pass = true;

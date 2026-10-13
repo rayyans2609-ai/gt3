@@ -102,3 +102,88 @@ Evidence: `docs/review/p3z-render/` (render/grid/props before/after crops and da
   - Playwright and Chrome DevTools MCP were not needed. The repo's Puppeteer harnesses on real ANGLE/Metal GPU already covered capture, GPU timer queries and runtime state, and a second browser stack would have competed for the 8 GB host.
   - Context7 was not needed, because three.js internals were read from the installed source.
   - The frontend-design skill was not applicable, because HUD design work is deferred.
+
+---
+
+# Addendum — acceptance corrections (2026-10-13/14)
+
+You accepted the rendering, finish, props and HUD, and accepted the Lamborghini as is. This round covers only your three items. **Not owner-accepted yet.**
+
+## A. Performance and hitching — proven cause, measured fix (Sol @ xhigh)
+
+**Cause, proven by measurement.** The canvas still requested its own **4× MSAA** buffer. It only ever held the final full-screen image: the 3D scene renders off-screen, and SMAA handles its edges. Every scroll start and stop switches resolution (DPR 2 ↔ 1), and that resize of the MSAA canvas took a median **139 ms** in the current build, versus 50 ms before this Phase 3 run. That stall is the hitch.
+
+**What was ruled out:**
+- *Full props and the new geometry:* lean props behaves like the current build, while full props with SMAA off behaves like the baseline.
+- *Garbage collection:* the largest collection was 5.7 ms in the traced window that had 100+ ms resize stalls.
+- *The SMAA buffer rebuilds:* caching them cut allocations from about 98 to 2 but barely moved the slow frames, so it was not shipped.
+
+**Fix (`f16f82b`, one file, `src/scene/sceneSetup.js`):**
+- The canvas is single-sample: MSAA is off on the output only, and SMAA stays.
+- The canvas stays at native size, with no reallocation on scroll start/stop. In motion it draws a smaller region, which is scaled to the same screen area.
+- The 8-tap motion blur no longer runs at rest resolution on tiny residual speed.
+
+The motion/rest resolution policy, **SMAA and full props are unchanged**.
+
+**Matched before/after** (Chrome 155, Intel UHD 617, ANGLE/Metal, 1280×800 at DPR 2; A = pre-run `3d5c504`, B = `6d001ce`, E = fixed):
+
+| | A baseline | B before | **E after** |
+|---|---|---|---|
+| Frame p50 / p95 / p99 | 17.6 / 43.4 / 80.1 ms | 19.0 / 47.8 / 82.7 ms | **18.9 / 35.0 / 63.2 ms** |
+| Frames > 33 ms / > 50 ms per 10 s | 85.5 / 12.3 | 89.4 / 11.0 | **81.9 / 6.5** |
+| Worst frame | 177 ms | 593 ms | **163 ms** |
+| Worst frame ≤ 0.5 s after a switch (median) | — | 173 ms | **97 ms** |
+| GPU p95 | 36.8 ms | 42.1 ms | **33.9 ms** |
+
+Against B, frame p95 drops 27%, p99 drops 24%, and frames over 50 ms drop 41%. Same-view crops at rest (grid, hairpin, BMW) are **pixel-identical** to B, so the rendering improvement is fully kept.
+
+**Tradeoff:** none visible at rest. In motion, the existing lower-resolution motion rendering is unchanged.
+
+**Remaining limits:**
+- About 100 ms gaps right as scrolling starts persist in every build, including the pre-run baseline. Their cause is unproven.
+- Native rest rendering is still above a 60 Hz frame budget on this GPU.
+- Every timed run had small host paging (≤ 1.2 MB), so a perfectly clean-host comparison was impossible on this 8 GB Mac.
+
+Scroll feel is your call.
+
+Evidence: `docs/review/p3y-perf/NOTES.md` (full matrix: A, B, SMAA-off C, lean D, and seven intervention controls) and `docs/review/p3y-perf/images/`.
+
+## B. Grid lateral spacing
+
+- **Columns:** now 7 m either side of centre (was 6 m). The gap between neighbouring boxes grows from **2.38 m to 4.38 m**.
+- **Unchanged:** slot size (9.62 × 15.42 m), 26 m row pitch, 8 m stagger, P1/P2 distance, route mapping and lap progression.
+- **Start pose:** the parked car moves with its slot and stays centred, with 1.0 m each side.
+- **Road:** the closest paint-to-asphalt edge is 8.28 m, so no widening.
+
+## C. Switzer typography variant
+
+- **Default:** `/` stays **Neue Haas Grotesk**.
+- **Variant:** `/?font=sw` switches to **Switzer** (variable, weights 100–900, regular and italic) in the display and UI roles. It combines with other options, e.g. `/?font=sw&grid=p2` or `/?font=sw&props=lean`.
+- **Unchanged:** Geist Mono (timer) and the braking-board canvas text.
+- **Applied before first paint**, so there's no flash of the wrong font.
+- **Local-only fonts.** The Switzer files are *not* committed: like the Neue Haas trial files, they live in the git-ignored `font/` folder, which this worktree has. A fresh checkout falls back to Neue Haas/Helvetica.
+- **License:** Fontshare FF EULA (`font/Switzer_Complete/License/FFL.txt`). It allows web use; committing the files is a decision for when you pick the permanent font.
+
+## D. Verification
+
+Integrated head `phase3-integration`: performance and grid were tested at `3d65541`; the font at `7bde9b3`, which adds only `?font=sw`-scoped CSS and tests. Real Chrome with ANGLE/Metal, an owned Vite server, one heavy job at a time.
+
+| Check | Result |
+|---|---|
+| Production build | PASS |
+| `verify-facility` (default full / `?grid=p2&props=lean`) | PASS: all ten slots at ±7 m, parked car to slot error 0, neutral first pass, V1 finish, locked silent refresh, Replay |
+| `verify-timer-finish` | **PASS 9/9**: the V1 finish, lock and Replay are unaffected by the render fix |
+| `verify-font-variant` (default / `?font=sw` / `?font=sw&grid=p2`) | PASS: flag set before first paint; Switzer loaded only for the variant; Geist Mono unchanged; grid query combined; all ten cars' name and headline at natural height (no clipping); 0 HTTP errors |
+| node: tour progress / finish state / lap timer | PASS |
+| Sol (`p3y-perf`) | build; all nine checkpoints in both directions with 0 crossing GL uploads; cold Day and Night first crossings; viewport/resize checks at 1440×900 DPR2, 1360×850 DPR1 and 1280×800 DPR2 |
+
+**Font fix found by verification.** Switzer's taller metrics clipped the car name, and the headline for six cars with two-line headlines, by about 2 px. Fixed only under `?font=sw`: name line height 1.2, and the identity lines keep their natural height. The Neue Haas layout is unchanged.
+
+Evidence: `docs/review/p3y-perf/` (performance matrix, crops, data) and `docs/review/p3y-final/` (grid at ±7 m for P1 and P2; start card, HUD and identity comparisons for default vs Switzer).
+
+## E. Your checks
+
+1. **Hitching:** scroll start/stop, cruise, the hairpin and a checkpoint on `/`. Is it smooth enough now?
+2. **Rendering:** unchanged from your acceptance (crops are pixel-identical).
+3. **Grid:** is the lateral spacing right at 7 m (`/` and `/?grid=p2`)?
+4. **Font:** compare `/` and `/?font=sw` across the start card, HUD, finish notice and edge controls.

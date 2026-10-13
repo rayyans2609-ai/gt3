@@ -1,36 +1,47 @@
 /** Fixed-metre grid paint and a restrained pit-wall / parallel-lane corridor. */
 import * as THREE from 'three';
 import { TRACK_LENGTH, offsetPointAt, tangentAt } from './trackCurve.js';
-import { asphaltEdgeAt } from './trackProfile.js';
+import { asphaltEdgeAt, CROSS_SECTION } from './trackProfile.js';
 import { groundHeightAt } from './environment.js';
 import { COMP } from './composition.js';
 import { FULL_PROPS } from './trackFurniture.js';
 export const GRID_BOXES = Object.freeze(Array.from({ length: 10 }, (_, i) => ({
-  distance: 18 + i * 8, lateral: i % 2 ? -6 : 6,
+  // Keep the existing P1/P2 poses (18/26 m). Five two-column rows are 26 m
+  // apart, with an 8 m stagger; the enlarged car has real space behind it.
+  distance: 18 + Math.floor(i / 2) * 26 + (i % 2) * 8, lateral: i % 2 ? -6 : 6,
   // Conservative whole-car footprint, including wing/mirrors. Paint remains
-  // metre-sized, with a one-metre envelope around the current hero candidate.
-  width: 2 * 1.412 * COMP.hero + 1.2, length: 4.6 * COMP.hero + 1.8,
+  // metre-sized, with one metre each side and 1.5 m at each end of the hero.
+  width: 2 * 1.412 * COMP.hero + 2, length: 4.6 * COMP.hero + 3,
 })));
 const wrap = t => ((t % 1) + 1) % 1;
 export function buildStartFacility() {
   const root = new THREE.Group(); root.name = 'start-finish-facility';
   const vertices = [];
   const paintQuad = (d0, d1, x0, x1) => {
-    const a = offsetPointAt(wrap(d0 / TRACK_LENGTH), x0, .042);
-    const b = offsetPointAt(wrap(d0 / TRACK_LENGTH), x1, .042);
-    const c = offsetPointAt(wrap(d1 / TRACK_LENGTH), x1, .042);
-    const d = offsetPointAt(wrap(d1 / TRACK_LENGTH), x0, .042);
-    for (const v of [a,c,b,a,d,c]) vertices.push(v.x,v.y,v.z);
+    // Long unsampled quads bridge the closing bend/grade beneath the rear rows.
+    // Follow that surface, with a small fixed depth separation from asphalt.
+    const count = Math.ceil(Math.abs(d1 - d0) / 1.1);
+    for (let i = 0; i < count; i++) {
+      const from = d0 + (d1 - d0) * i / count, to = d0 + (d1 - d0) * (i + 1) / count;
+      const y = CROSS_SECTION.asphaltY + .008;
+      const a = offsetPointAt(wrap(from / TRACK_LENGTH), x0, y);
+      const b = offsetPointAt(wrap(from / TRACK_LENGTH), x1, y);
+      const c = offsetPointAt(wrap(to / TRACK_LENGTH), x1, y);
+      const d = offsetPointAt(wrap(to / TRACK_LENGTH), x0, y);
+      for (const v of [a,c,b,a,d,c]) vertices.push(v.x,v.y,v.z);
+    }
   };
   for (const box of GRID_BOXES) {
     const front = -box.distance + box.length / 2, rear = front - box.length;
-    const line = .30;
+    const line = .38;
     const left = box.lateral + box.width / 2, right = left - box.width;
-    paintQuad(rear,front,right,right+line); paintQuad(rear,front,left-line,left);
+    // Butt the bars together; no overlapping coplanar triangles at the corners.
+    paintQuad(rear,front-line,right,right+line); paintQuad(rear,front-line,left-line,left);
     paintQuad(front-line,front,right,left);
   }
   const geometry = new THREE.BufferGeometry();
   geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices,3));
+  geometry.userData.slots = GRID_BOXES;
   geometry.computeVertexNormals();
   const paint = new THREE.Mesh(geometry,new THREE.MeshStandardMaterial({color:0xe4e0d7,roughness:.86,
     polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-2}));

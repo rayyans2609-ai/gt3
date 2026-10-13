@@ -8,6 +8,7 @@ import { TRACK_LENGTH } from './trackCurve.js';
 export const CROSS_SECTION = Object.freeze({
   asphaltY: -0.02, vergeY: -0.03, curbInnerY: -0.02, curbOuterY: 0.08,
   shoulderWidth: 1.5, edgeLineWidth: 0.25, edgeLineInset: 0.25, curbBlockLength: 2.4,
+  curbEndLength: 1.6,
 });
 export const WIDTH_CLASSES = Object.freeze(['technical', 'ordinary', 'braking', 'start-finish']);
 // Boundaries describe class centres; transitions straddle them. The wrapped
@@ -110,7 +111,8 @@ export function profileAt(t, out = {}) {
   out.curbLeft = out.curbRight = 0;
   out.curbLeftSegment = out.curbRightSegment = null;
   for (const curb of CURB_SEGMENTS) {
-    const w = envelope(u, curb, 8) * curb.width;
+    // A short closed nose, not the old eight-metre triangular spear at each end.
+    const w = envelope(u, curb, CROSS_SECTION.curbEndLength) * curb.width;
     if (w <= 0) continue;
     const key = curb.side === 1 ? 'curbLeft' : 'curbRight';
     if (w > out[key]) { out[key] = w; out[`${key}Segment`] = curb; }

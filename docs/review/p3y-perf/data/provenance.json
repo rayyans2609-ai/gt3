@@ -1,0 +1,364 @@
+[
+  {
+    "kind": "report",
+    "path": "/tmp/gt3-p3y-final/A-matrix/report.json",
+    "sha256": "1294d2a9fb59a3737cd426577b4439c1daad72c246178ea3487b250fd008bfe8",
+    "sha": "3d5c504",
+    "tree": "M scripts/lib/perf-host.mjs\n M scripts/perf-p3y.mjs\n?? scripts/lib/capture-p3y.mjs\n?? scripts/summarize-p3y.mjs"
+  },
+  {
+    "kind": "frames",
+    "path": "/tmp/gt3-p3y-final/A-matrix/A-1-frames.json.gz",
+    "sha256": "020e2cd34eeb24f307cf37f8a50752de53e811ac8b6abb0f3c751cbd1dd57049"
+  },
+  {
+    "kind": "trace",
+    "path": "/tmp/gt3-p3y-final/A-matrix/A-1-trace.json",
+    "bytes": 29515072,
+    "sha256": "42b47391a0fc2ec511bf5dd81e0bc05245e6069c1431ea24010641cc0888d7ef"
+  },
+  {
+    "kind": "frames",
+    "path": "/tmp/gt3-p3y-final/A-matrix/A-2-frames.json.gz",
+    "sha256": "e6cd797fda523be94c0708158b39ce1aab118b3f1420af85e2126a75cca65275"
+  },
+  {
+    "kind": "frames",
+    "path": "/tmp/gt3-p3y-final/A-matrix/A-3-frames.json.gz",
+    "sha256": "002a1bbba34fd8013b2c840d8f4a0a76700aee22bfe34bec045db4784e8e0448"
+  },
+  {
+    "kind": "report",
+    "path": "/tmp/gt3-p3y-final/B-valid/report.json",
+    "sha256": "56e073c77f8361c646d692c3c8a07e2073c0904531849bbb80dac72a030602fe",
+    "sha": "6d001ceea8f284faf622feb16835d9f7e59365d7",
+    "tree": "M scripts/lib/perf-host.mjs\n M scripts/perf-p3y.mjs\n?? scripts/lib/capture-p3y.mjs\n?? scripts/summarize-p3y.mjs"
+  },
+  {
+    "kind": "frames",
+    "path": "/tmp/gt3-p3y-final/B-valid/B-1-frames.json.gz",
+    "sha256": "836a02beed68ff43cd8e519ac8ca51f79bca352ce0278018ae9161da94f543fa"
+  },
+  {
+    "kind": "trace",
+    "path": "/tmp/gt3-p3y-final/B-valid/B-1-trace.json",
+    "bytes": 29750320,
+    "sha256": "5f2887e31538ae96370c0872bd11ad119370a03d893b527c8248401319293cff"
+  },
+  {
+    "kind": "frames",
+    "path": "/tmp/gt3-p3y-final/B-valid/B-2-frames.json.gz",
+    "sha256": "3d5cd922644473c8233cdc58bd5bbff568d85dfc01a0537bb20059fdc5d0a8bf"
+  },
+  {
+    "kind": "frames",
+    "path": "/tmp/gt3-p3y-final/B-valid/B-3-frames.json.gz",
+    "sha256": "dc4f196c4a145ac5c81cb2bf3ccd0326fb56ac4cf52c9a3db4b821c1f5f307f4"
+  },
+  {
+    "kind": "report",
+    "path": "/tmp/gt3-p3y-final/C-valid/report.json",
+    "sha256": "84f37a0870b1e3053c62c235179c472dfb701c54756be957aa4879eab0dfa057",
+    "sha": "6d001ceea8f284faf622feb16835d9f7e59365d7",
+    "tree": "M scripts/lib/perf-host.mjs\n M scripts/perf-p3y.mjs\n?? scripts/lib/capture-p3y.mjs\n?? scripts/summarize-p3y.mjs"
+  },
+  {
+    "kind": "frames",
+    "path": "/tmp/gt3-p3y-final/C-valid/C-1-frames.json.gz",
+    "sha256": "0503ad48d958cd54a06eb6442f06ac9db7a813f410d2bb6106d07cc741d6729d"
+  },
+  {
+    "kind": "trace",
+    "path": "/tmp/gt3-p3y-final/C-valid/C-1-trace.json",
+    "bytes": 33790454,
+    "sha256": "99dc492cc9def25f8ab8c105ceb51f3a881e54466f319423ef963010d9fce1b8"
+  },
+  {
+    "kind": "frames",
+    "path": "/tmp/gt3-p3y-final/C-valid/C-2-frames.json.gz",
+    "sha256": "f16b98f90b95a0873f16abdcc45598117e8846f440ad2491a41365404315c26c"
+  },
+  {
+    "kind": "frames",
+    "path": "/tmp/gt3-p3y-final/C-valid/C-3-frames.json.gz",
+    "sha256": "f934b4d3377ca7ec3015de138e6eacc2b0614d6787cca74b29e3bf146271705f"
+  },
+  {
+    "kind": "report",
+    "path": "/tmp/gt3-p3y-final/D-valid/report.json",
+    "sha256": "0ae3a3181df838a03f8112e81956580ad12999e8388ac461c78e100ccb7a43ba",
+    "sha": "6d001ceea8f284faf622feb16835d9f7e59365d7",
+    "tree": "M scripts/lib/perf-host.mjs\n M scripts/perf-p3y.mjs\n?? scripts/lib/capture-p3y.mjs\n?? scripts/summarize-p3y.mjs"
+  },
+  {
+    "kind": "frames",
+    "path": "/tmp/gt3-p3y-final/D-valid/D-1-frames.json.gz",
+    "sha256": "8f9d52bb18d679a5649812ed642d16ef5c0db43650b3883e1b00af1929807fb3"
+  },
+  {
+    "kind": "trace",
+    "path": "/tmp/gt3-p3y-final/D-valid/D-1-trace.json",
+    "bytes": 32192053,
+    "sha256": "bfcf08f3b2744dbec83192b74262f258d9eb7720283cc8006c921201b86e0c76"
+  },
+  {
+    "kind": "frames",
+    "path": "/tmp/gt3-p3y-final/D-valid/D-2-frames.json.gz",
+    "sha256": "ab44e3c0900a75a1e1a1b18a77068e8873c3e0511984199b9d0b95e4fb8f76d7"
+  },
+  {
+    "kind": "frames",
+    "path": "/tmp/gt3-p3y-final/D-valid/D-3-frames.json.gz",
+    "sha256": "31425c64fc5f32949beb930a2c363200da617a3a2d0039b9a099db24e5ca7d9d"
+  },
+  {
+    "kind": "report",
+    "path": "/tmp/gt3-p3y-final/N/report.json",
+    "sha256": "8f7f9470d08ee0475e1223bf46790ccc5e25cd4e1fb329f0c5554ff829d8cf93",
+    "instrumentation": {
+      "scripts/perf-p3y.mjs": "55cd4b623a8eb97733ddc33a0c561ee62db4c3a17d11dec847d60590be092115",
+      "scripts/lib/perf-host.mjs": "93ea5c391bc4aa22e01a841703a8a1f447eb0ccf680f603e11d667a2e009dcec",
+      "scripts/lib/capture-p3y.mjs": "a9e9c9038042ef9af7de0c27faafdf63dd386586d64b8304a66d9c5d819d2ed6"
+    },
+    "sha": "6d001ceea8f284faf622feb16835d9f7e59365d7",
+    "tree": "M scripts/lib/perf-host.mjs\n M scripts/perf-p3y.mjs\n?? scripts/lib/capture-p3y.mjs\n?? scripts/summarize-p3y.mjs"
+  },
+  {
+    "kind": "frames",
+    "path": "/tmp/gt3-p3y-final/N/N-1-frames.json.gz",
+    "sha256": "849f6179c4c2bdbbd01ed448bac9d113605f152f6b08244668e7ebd0d269c76d"
+  },
+  {
+    "kind": "trace",
+    "path": "/tmp/gt3-p3y-final/N/N-1-trace.json",
+    "bytes": 30371820,
+    "sha256": "9ce7b9d455581344a7cc5aa3cfe17758a8724fed2f06aeb30f9287a1880d9eb4"
+  },
+  {
+    "kind": "frames",
+    "path": "/tmp/gt3-p3y-final/N/N-2-frames.json.gz",
+    "sha256": "e9851463083867fb194cde65e623801374412f1b06f97e3f6ba9817047258b38"
+  },
+  {
+    "kind": "report",
+    "path": "/tmp/gt3-p3y-final/G/report.json",
+    "sha256": "4f92b1619dafc3576bb7e7a191b3f3ea79b527861685a46a9a4b17e2dc563d32",
+    "instrumentation": {
+      "scripts/perf-p3y.mjs": "de5fbf8e491d66e6c23b3e49082f904d73900543d209a7ed29d0e99ab6827a17",
+      "scripts/lib/perf-host.mjs": "93ea5c391bc4aa22e01a841703a8a1f447eb0ccf680f603e11d667a2e009dcec",
+      "scripts/lib/capture-p3y.mjs": "a9e9c9038042ef9af7de0c27faafdf63dd386586d64b8304a66d9c5d819d2ed6"
+    },
+    "sha": "6d001ceea8f284faf622feb16835d9f7e59365d7",
+    "tree": "M scripts/lib/perf-host.mjs\n M scripts/perf-p3y.mjs\n?? scripts/lib/capture-p3y.mjs\n?? scripts/summarize-p3y.mjs"
+  },
+  {
+    "kind": "frames",
+    "path": "/tmp/gt3-p3y-final/G/G-1-frames.json.gz",
+    "sha256": "552b88c719a1925d3c294230cc7695e8d096e4aad935f284d6ae0ff625f9b961"
+  },
+  {
+    "kind": "trace",
+    "path": "/tmp/gt3-p3y-final/G/G-1-trace.json",
+    "bytes": 27648153,
+    "sha256": "99ee8193b2803028a2e5c389238b6640053e8fd99d74a2c786a504cbdffb6d88"
+  },
+  {
+    "kind": "frames",
+    "path": "/tmp/gt3-p3y-final/G/G-2-frames.json.gz",
+    "sha256": "d8a755a75be86a8bc98e1fedc1ca342b5346e6b9454b606e02e405b7dd1668a1"
+  },
+  {
+    "kind": "report",
+    "path": "/tmp/gt3-p3y-final/H/report.json",
+    "sha256": "d88cddf70252528dbf17e59feaa119b9e055f645e62bf7665a806ba5926b8c4a",
+    "instrumentation": {
+      "scripts/perf-p3y.mjs": "fbc7c0bea3962c3be4fb127822236bc9705d617591f242a595ddbae199978e5b",
+      "scripts/lib/perf-host.mjs": "93ea5c391bc4aa22e01a841703a8a1f447eb0ccf680f603e11d667a2e009dcec",
+      "scripts/lib/capture-p3y.mjs": "a45871ca82ef7d5b3799cbe3f7bcd5b5c40928d2c4bc9139116d1f9eade59601"
+    },
+    "sha": "6d001ceea8f284faf622feb16835d9f7e59365d7",
+    "tree": "M scripts/lib/perf-host.mjs\n M scripts/perf-p3y.mjs\n?? scripts/lib/capture-p3y.mjs\n?? scripts/summarize-p3y.mjs"
+  },
+  {
+    "kind": "frames",
+    "path": "/tmp/gt3-p3y-final/H/H-1-frames.json.gz",
+    "sha256": "9e96c225277d6440f1d78b92c08b27a16f26435a9e6d3102a7ce991ec1d58983"
+  },
+  {
+    "kind": "trace",
+    "path": "/tmp/gt3-p3y-final/H/H-1-trace.json",
+    "bytes": 30064184,
+    "sha256": "5d92e95920e3847bfbbb73dabe6e66fd219d6361a70b3862f794d101afd33166"
+  },
+  {
+    "kind": "report",
+    "path": "/tmp/gt3-p3y-final/K/report.json",
+    "sha256": "966ca0a41aa9a8647d3a065f7c3e63d357ae8e353a0ee194bbe12ec1118cbc66",
+    "instrumentation": {
+      "scripts/perf-p3y.mjs": "fbc7c0bea3962c3be4fb127822236bc9705d617591f242a595ddbae199978e5b",
+      "scripts/lib/perf-host.mjs": "93ea5c391bc4aa22e01a841703a8a1f447eb0ccf680f603e11d667a2e009dcec",
+      "scripts/lib/capture-p3y.mjs": "a45871ca82ef7d5b3799cbe3f7bcd5b5c40928d2c4bc9139116d1f9eade59601"
+    },
+    "sha": "6d001ceea8f284faf622feb16835d9f7e59365d7",
+    "tree": "M scripts/lib/perf-host.mjs\n M scripts/perf-p3y.mjs\n?? scripts/lib/capture-p3y.mjs\n?? scripts/summarize-p3y.mjs"
+  },
+  {
+    "kind": "frames",
+    "path": "/tmp/gt3-p3y-final/K/K-1-frames.json.gz",
+    "sha256": "76c94e5f266459c0eda0efdb9001458d82988be09ea05eadc75da1b1c96d78d5"
+  },
+  {
+    "kind": "trace",
+    "path": "/tmp/gt3-p3y-final/K/K-1-trace.json",
+    "bytes": 30336487,
+    "sha256": "aabbe47f0ceafda5423c4432a79e014ad9009bb6f4ca436c24d161e77139b273"
+  },
+  {
+    "kind": "report",
+    "path": "/tmp/gt3-p3y-final/J/report.json",
+    "sha256": "f60338f4d2d5682fa33193a048c1c7416638da3d178b1c0d336f34ddeae7ffef",
+    "instrumentation": {
+      "scripts/perf-p3y.mjs": "3eb9bc8386bedfb605077bb3484746857eecd19c3060f1cbbdbf4bb9b154571a",
+      "scripts/lib/perf-host.mjs": "93ea5c391bc4aa22e01a841703a8a1f447eb0ccf680f603e11d667a2e009dcec",
+      "scripts/lib/capture-p3y.mjs": "a45871ca82ef7d5b3799cbe3f7bcd5b5c40928d2c4bc9139116d1f9eade59601"
+    },
+    "sha": "6d001ceea8f284faf622feb16835d9f7e59365d7",
+    "tree": "M scripts/lib/perf-host.mjs\n M scripts/perf-p3y.mjs\n?? scripts/lib/capture-p3y.mjs\n?? scripts/summarize-p3y.mjs"
+  },
+  {
+    "kind": "frames",
+    "path": "/tmp/gt3-p3y-final/J/J-1-frames.json.gz",
+    "sha256": "4073ad57ed91c1617042aef815670389f7c2e15c71da955e4514523752cded5d"
+  },
+  {
+    "kind": "trace",
+    "path": "/tmp/gt3-p3y-final/J/J-1-trace.json",
+    "bytes": 29061151,
+    "sha256": "a0739f4cc1de2e95b1e6c3c0531b15080855d5452c9bf364777defffab40ba75"
+  },
+  {
+    "kind": "report",
+    "path": "/tmp/gt3-p3y-final/I/report.json",
+    "sha256": "0817498ad8eccda2246e99a6152451846ae8807190f38c9dbd79a8c1955798c5",
+    "instrumentation": {
+      "scripts/perf-p3y.mjs": "eaf9710052d6527da4c247677059ba85048b3b98c69534cc588106691984a0cf",
+      "scripts/lib/perf-host.mjs": "93ea5c391bc4aa22e01a841703a8a1f447eb0ccf680f603e11d667a2e009dcec",
+      "scripts/lib/capture-p3y.mjs": "a45871ca82ef7d5b3799cbe3f7bcd5b5c40928d2c4bc9139116d1f9eade59601"
+    },
+    "sha": "6d001ceea8f284faf622feb16835d9f7e59365d7",
+    "tree": "M scripts/lib/perf-host.mjs\n M scripts/perf-p3y.mjs\n?? scripts/lib/capture-p3y.mjs\n?? scripts/summarize-p3y.mjs"
+  },
+  {
+    "kind": "frames",
+    "path": "/tmp/gt3-p3y-final/I/I-1-frames.json.gz",
+    "sha256": "ea2d2a3e022231067a9cd1f3843e9f63f6bdd984d8ef2755fb6db0a930e93d8f"
+  },
+  {
+    "kind": "trace",
+    "path": "/tmp/gt3-p3y-final/I/I-1-trace.json",
+    "bytes": 31217410,
+    "sha256": "5f858ba332aaa8f9c2b233e8664ef92876c78fc2b630443254105d1447ed88f3"
+  },
+  {
+    "kind": "report",
+    "path": "/tmp/gt3-p3y-final/P/report.json",
+    "sha256": "3edf4db8f729c169e5aff545cbc2eee52315fd3e26c735a6b8da722ef8962a07",
+    "instrumentation": {
+      "scripts/perf-p3y.mjs": "cc790f953083a20a5e6501fb53da39e1c41ec1c1c1212beb12ad1aa044a798a8",
+      "scripts/lib/perf-host.mjs": "93ea5c391bc4aa22e01a841703a8a1f447eb0ccf680f603e11d667a2e009dcec",
+      "scripts/lib/capture-p3y.mjs": "a45871ca82ef7d5b3799cbe3f7bcd5b5c40928d2c4bc9139116d1f9eade59601"
+    },
+    "sha": "6d001ceea8f284faf622feb16835d9f7e59365d7",
+    "tree": "M scripts/lib/perf-host.mjs\n M scripts/perf-p3y.mjs\n?? scripts/lib/capture-p3y.mjs\n?? scripts/summarize-p3y.mjs"
+  },
+  {
+    "kind": "frames",
+    "path": "/tmp/gt3-p3y-final/P/P-1-frames.json.gz",
+    "sha256": "47c30cf5ad4d91994835a9f8dd739849d5132b8a32403a352b9f76741425a819"
+  },
+  {
+    "kind": "trace",
+    "path": "/tmp/gt3-p3y-final/P/P-1-trace.json",
+    "bytes": 30265220,
+    "sha256": "6686423ad6774843fe8cba7730fd8c38dddd64e9ba255dbd2b7c60abc67d22ce"
+  },
+  {
+    "kind": "report",
+    "path": "/tmp/gt3-p3y-final/A-reference/report.json",
+    "sha256": "248b39b7f504ae50c27b7d50c2ab780fdb1ca969ddd12c11642fa84f1bd634bf",
+    "instrumentation": {
+      "scripts/perf-p3y.mjs": "6dbda5e063153101c737b3be980af32016f8e99ab00544b31b8e9f8c81820741",
+      "scripts/lib/perf-host.mjs": "93ea5c391bc4aa22e01a841703a8a1f447eb0ccf680f603e11d667a2e009dcec",
+      "scripts/lib/capture-p3y.mjs": "bf814792547f6d68ec03f2cc41be39db9bb37c26fffd8aab30d66c5f507591c5"
+    },
+    "sha": "3d5c504642d92665fb6bb1547074627715a249e1",
+    "tree": ""
+  },
+  {
+    "kind": "frames",
+    "path": "/tmp/gt3-p3y-final/A-reference/A-1-frames.json.gz",
+    "sha256": "f19f45af9d717cf5b9371394a31ab728fb3b027a993b4c5b4914aa8426760bc2"
+  },
+  {
+    "kind": "trace",
+    "path": "/tmp/gt3-p3y-final/A-reference/A-1-trace.json",
+    "bytes": 27889934,
+    "sha256": "8b8a373c25f4e17ab3700b10a7d71bbf00a4e4fc7a8892bf1e2ecab47cfead18"
+  },
+  {
+    "kind": "report",
+    "path": "/tmp/gt3-p3y-final/B-reference/report.json",
+    "sha256": "f5258c20d1b2450ee2dbad1055eb01ee024b6c125fc7e60d749f3b9a8b67f903",
+    "instrumentation": {
+      "scripts/perf-p3y.mjs": "63c0500eefd6b2829d1346d5931283406e4c2ff6349e0dbd0249cdb9325e4d82",
+      "scripts/lib/perf-host.mjs": "93ea5c391bc4aa22e01a841703a8a1f447eb0ccf680f603e11d667a2e009dcec",
+      "scripts/lib/capture-p3y.mjs": "bf814792547f6d68ec03f2cc41be39db9bb37c26fffd8aab30d66c5f507591c5"
+    },
+    "sha": "6d001ceea8f284faf622feb16835d9f7e59365d7",
+    "tree": "M scripts/lib/perf-host.mjs\n M scripts/perf-p3y.mjs\n M src/scene/sceneSetup.js\n?? scripts/lib/capture-p3y.mjs\n?? scripts/summarize-p3y.mjs"
+  },
+  {
+    "kind": "frames",
+    "path": "/tmp/gt3-p3y-final/B-reference/B-1-frames.json.gz",
+    "sha256": "281f09a2123d972136f9833867743b94b4d17f54b134fa064775a49f289fe6ce"
+  },
+  {
+    "kind": "trace",
+    "path": "/tmp/gt3-p3y-final/B-reference/B-1-trace.json",
+    "bytes": 27202054,
+    "sha256": "dd00b4a92200aec7e9116a318291d9f0fb8e15c0919fed3d46e907eb1ff55380"
+  },
+  {
+    "kind": "frames",
+    "path": "/tmp/gt3-p3y-final/B-reference/B-2-frames.json.gz",
+    "sha256": "a97bce187e8f5b55dbef75116ee61d6d508c1adf486ec1cec6133704e61be25d"
+  },
+  {
+    "kind": "report",
+    "path": "/tmp/gt3-p3y-final/E-fixed/report.json",
+    "sha256": "84a863da00dd9feac2d8f6f99e1d8c05374950c66001b17fd48a68bdadd32a21",
+    "instrumentation": {
+      "scripts/perf-p3y.mjs": "6dbda5e063153101c737b3be980af32016f8e99ab00544b31b8e9f8c81820741",
+      "scripts/lib/perf-host.mjs": "93ea5c391bc4aa22e01a841703a8a1f447eb0ccf680f603e11d667a2e009dcec",
+      "scripts/lib/capture-p3y.mjs": "bf814792547f6d68ec03f2cc41be39db9bb37c26fffd8aab30d66c5f507591c5"
+    },
+    "sha": "f16f82bece3bc5d3bf55fbeb6bb2a0f374a353d6",
+    "tree": ""
+  },
+  {
+    "kind": "frames",
+    "path": "/tmp/gt3-p3y-final/E-fixed/E-1-frames.json.gz",
+    "sha256": "b6b643080cb62b223af7bed2742c6752bbcfd7dcd47184c54982f74ce52952c1"
+  },
+  {
+    "kind": "trace",
+    "path": "/tmp/gt3-p3y-final/E-fixed/E-1-trace.json",
+    "bytes": 30296909,
+    "sha256": "0ec0d517a55f09ca252c34b1756d0b2edb3de8f59ee10fa3e06fcad9cc104815"
+  },
+  {
+    "kind": "frames",
+    "path": "/tmp/gt3-p3y-final/E-fixed/E-2-frames.json.gz",
+    "sha256": "42e5d89f6804d9db7ec1469caacc02ab287c7daa9722fbe1d8a7af82bfa9183a"
+  }
+]

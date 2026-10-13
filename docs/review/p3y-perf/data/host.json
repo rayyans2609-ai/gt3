@@ -1,0 +1,166 @@
+{
+  "status": "BLOCKED before heavy launch",
+  "rawHostLog": "/tmp/gt3-p3y-run/host.jsonl",
+  "rawSha256": "b61f3ae1bc440d973521483ef629f0363f1e4944d5d07c57e578132395eb4de2",
+  "preflights": [
+    {
+      "kind": "preflight",
+      "a": {
+        "at": "2026-10-13T19:09:57.191Z",
+        "pressure": 1,
+        "pageouts": 355678,
+        "swapouts": 19124714,
+        "user": 40.9,
+        "system": 22.16,
+        "idle": 37.73,
+        "swap": "total = 3072.00M  used = 2334.75M  free = 737.25M  (encrypted)"
+      },
+      "b": {
+        "at": "2026-10-13T19:10:09.108Z",
+        "pressure": 1,
+        "pageouts": 355741,
+        "swapouts": 19124714,
+        "user": 26.4,
+        "system": 20.83,
+        "idle": 53.12,
+        "swap": "total = 3072.00M  used = 2302.75M  free = 769.25M  (encrypted)"
+      },
+      "pass": false
+    },
+    {
+      "kind": "preflight",
+      "a": {
+        "at": "2026-10-13T19:11:26.092Z",
+        "pressure": 1,
+        "pageouts": 357934,
+        "swapouts": 19124714,
+        "user": 44.58,
+        "system": 21.75,
+        "idle": 33.66,
+        "swap": "total = 3072.00M  used = 2270.75M  free = 801.25M  (encrypted)"
+      },
+      "b": {
+        "at": "2026-10-13T19:11:38.266Z",
+        "pressure": 1,
+        "pageouts": 357934,
+        "swapouts": 19124714,
+        "user": 31.2,
+        "system": 21.64,
+        "idle": 47.33,
+        "swap": "total = 3072.00M  used = 2270.75M  free = 801.25M  (encrypted)"
+      },
+      "pass": true
+    },
+    {
+      "kind": "preflight",
+      "a": {
+        "at": "2026-10-13T19:12:45.753Z",
+        "pressure": 1,
+        "pageouts": 358670,
+        "swapouts": 19223442,
+        "user": 48.21,
+        "system": 28.3,
+        "idle": 23.75,
+        "swap": "total = 3072.00M  used = 2434.50M  free = 637.50M  (encrypted)"
+      },
+      "b": {
+        "at": "2026-10-13T19:12:57.769Z",
+        "pressure": 1,
+        "pageouts": 360245,
+        "swapouts": 19223442,
+        "user": 28.96,
+        "system": 30.4,
+        "idle": 40.64,
+        "swap": "total = 3072.00M  used = 2370.50M  free = 701.50M  (encrypted)"
+      },
+      "pass": false
+    },
+    {
+      "kind": "preflight",
+      "a": {
+        "at": "2026-10-13T19:13:42.089Z",
+        "pressure": 1,
+        "pageouts": 360246,
+        "swapouts": 19223442,
+        "user": 38.13,
+        "system": 22.69,
+        "idle": 39.17,
+        "swap": "total = 3072.00M  used = 2338.50M  free = 733.50M  (encrypted)"
+      },
+      "b": {
+        "at": "2026-10-13T19:13:54.344Z",
+        "pressure": 1,
+        "pageouts": 360659,
+        "swapouts": 19223442,
+        "user": 21.9,
+        "system": 21.82,
+        "idle": 57.7,
+        "swap": "total = 3072.00M  used = 2306.50M  free = 765.50M  (encrypted)"
+      },
+      "pass": false
+    },
+    {
+      "kind": "preflight",
+      "a": {
+        "at": "2026-10-13T19:15:32.282Z",
+        "pressure": 1,
+        "pageouts": 363013,
+        "swapouts": 19348886,
+        "user": 38.94,
+        "system": 21.75,
+        "idle": 39.29,
+        "swap": "total = 3072.00M  used = 2734.50M  free = 337.50M  (encrypted)"
+      },
+      "b": {
+        "at": "2026-10-13T19:15:43.999Z",
+        "pressure": 1,
+        "pageouts": 363333,
+        "swapouts": 19348886,
+        "user": 13.5,
+        "system": 23.87,
+        "idle": 62.62,
+        "swap": "total = 3072.00M  used = 2702.50M  free = 369.50M  (encrypted)"
+      },
+      "pass": false
+    },
+    {
+      "kind": "preflight",
+      "a": {
+        "at": "2026-10-13T19:17:24.642Z",
+        "pressure": 1,
+        "pageouts": 365520,
+        "swapouts": 19387252,
+        "user": 45.6,
+        "system": 27,
+        "idle": 27.39,
+        "swap": "total = 4096.00M  used = 2500.50M  free = 1595.50M  (encrypted)"
+      },
+      "b": {
+        "at": "2026-10-13T19:17:38.846Z",
+        "pressure": 1,
+        "pageouts": 365781,
+        "swapouts": 19387252,
+        "user": 52.85,
+        "system": 24.6,
+        "idle": 23.7,
+        "swap": "total = 4096.00M  used = 2468.50M  free = 1627.50M  (encrypted)"
+      },
+      "pass": false
+    }
+  ],
+  "pageoutsDelta": 10103,
+  "swapoutsDelta": 262538,
+  "unowned": {
+    "vite": {
+      "pid": 37617,
+      "port": 5173,
+      "cwd": "/Users/rayyansheikh/Desktop/gt3/.claude/worktrees/phase3b-aerial-camera"
+    },
+    "chrome": {
+      "pid": 92507,
+      "rendererPid": 6793,
+      "rendererObservedCpuMax": 72.7
+    }
+  },
+  "ownedHeavyProcessesStarted": []
+}

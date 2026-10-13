@@ -35,8 +35,18 @@ for(const query of queries) {
  const constants=await page.evaluate(async()=>{const r=await import('/src/scene/trackCurve.js');return {first:r.FIRST_LINE_PROGRESS,length:r.TOUR_LENGTH,grid:r.GRID_T,slot:r.GRID_SLOT};});
  const grid=await page.evaluate(async()=>{
   const r=await import('/src/scene/trackCurve.js');const rig=window.__gt3.scene.getObjectByName('car-rig');
-  const expected=r.offsetPointAt(r.GRID_T,r.GRID_LATERAL);return {error:Math.hypot(rig.position.x-expected.x,rig.position.z-expected.z),boxes:window.__gt3.scene.getObjectByName('staggered-grid-paint')?.geometry.getAttribute('position').count};
- });assert(grid.error<.05,'car is not in its grid slot');assert(grid.boxes===180,'grid is not ten merged U boxes');
+  const paint=window.__gt3.scene.getObjectByName('staggered-grid-paint');
+  const expected=r.offsetPointAt(r.GRID_T,r.GRID_LATERAL);
+  const slots=paint?.geometry.userData.slots;
+  return {error:Math.hypot(rig.position.x-expected.x,rig.position.z-expected.z),
+   vertices:paint?.geometry.getAttribute('position').count,slots,
+   parked:slots?.find(b=>b.distance===r.GRID_DISTANCE && b.lateral===r.GRID_LATERAL)};
+ });assert(grid.error<.05,'car is not in its grid slot');assert(grid.slots?.length===10 && grid.vertices>=180,'grid is not ten merged U boxes');
+ assert(grid.parked,'parked car has no matching front slot');
+ for(const side of [-6,6]) {
+  const rows=grid.slots.filter(b=>b.lateral===side);
+  for(let i=1;i<rows.length;i++)assert(rows[i].distance-rows[i-1].distance>(rows[i].length+rows[i-1].length)/2+5,'grid rows are too close');
+ }
  if(captureOnly) {
   const shots=[];
   const label=query.replace(/[^a-z0-9-]/gi,'-')||'default';

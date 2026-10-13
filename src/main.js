@@ -91,8 +91,7 @@ async function boot() {
   // resolution; today's running race is the V3 Grand Tour regardless of saved state.
   restoreExperience('tour');
   subscribe('mode', (mode) => {
-    // The Phase 3 tail remains in Tour; Phase 7 owns the completion experience.
-    if (mode === 'finish') return;
+    if (mode === 'finish') setExperience('complete');
     else if (mode === 'race' && state.experience === 'complete') setExperience('tour');
   });
 
@@ -280,7 +279,7 @@ async function boot() {
       aerialCamera.snap();
     }
     // Unlock only once any gesture begun during loading has finished (SPEC §14).
-    scrollDrive.unlockScrollWhenQuiet();
+    scrollDrive.unlockScrollWhenQuiet(); // a finish restore below re-locks (V1) and cancels it
     if (restoreFinish) {
       startScreen.dismissStartScreenForRestore(); // no gesture will come; keep it (and its sound cue) out of the finish card
       finishScreen.restoreFinishScreen();
@@ -448,7 +447,6 @@ async function boot() {
   registerUpdate(audio.updateAudio);
   registerUpdate(player.updatePlayer);
   registerUpdate(sceneSetup.updateScene);
-  registerUpdate(aerialCamera.enforceFinishHold);
 
   onResize((w, h) => {
     // Scene resize runs first. Solve/cached lookup in the debounced resize task,

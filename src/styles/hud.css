@@ -17,13 +17,15 @@ body.is-player-open #hud-bottomright { right: calc(24px + var(--player-w, 274px)
    hierarchy. One ink colour per theme (var(--fg) everywhere); hierarchy comes
    from size, weight and opacity only — no accent, no card, no background.
    Left-aligned, capped at ~34ch, tight vertical rhythm. */
-.hud-identity { width: 330px; text-align: left; }
+/* Phase 3 (owner 2026-10-13): plain white identity copy over the road scene in Day and
+   Night, no halo/shadow. Typographic design and any backing belong to Phases 4–6. */
+.hud-identity { width: 330px; text-align: left; --hud-identity-ink: #fff; text-shadow: none; }
 .hud-identity__copy { position: relative; min-height: 86px; }
 .hud-identity__slot { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: flex-start; opacity: 0; transform: translateY(4px); transition: opacity 440ms var(--ease), transform 520ms var(--ease); }
 .hud-identity__slot.is-visible { opacity: 1; transform: translateY(0); }
-.hud-identity__name { overflow: hidden; max-width: 100%; color: var(--fg); font-family: var(--font-display); font-size: 23px; font-weight: 650; letter-spacing: -0.025em; line-height: 1.1; text-overflow: ellipsis; white-space: nowrap; }
-.hud-identity__headline { overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; margin-top: 7px; max-width: 34ch; color: var(--fg); font-family: var(--font-ui); font-size: 13.5px; font-weight: 600; letter-spacing: -0.005em; line-height: 1.35; opacity: .96; }
-.hud-identity__spec { overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; margin-top: 4px; max-width: 100%; color: var(--fg); font-family: var(--font-ui); font-size: 12px; font-weight: 600; letter-spacing: 0; line-height: 1.35; opacity: .9; overflow-wrap: break-word; }
+.hud-identity__name { overflow: hidden; max-width: 100%; color: var(--hud-identity-ink); font-family: var(--font-display); font-size: 23px; font-weight: 650; letter-spacing: -0.025em; line-height: 1.1; text-overflow: ellipsis; white-space: nowrap; }
+.hud-identity__headline { overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; margin-top: 7px; max-width: 34ch; color: var(--hud-identity-ink); font-family: var(--font-ui); font-size: 13.5px; font-weight: 600; letter-spacing: -0.005em; line-height: 1.35; opacity: .96; }
+.hud-identity__spec { overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; margin-top: 4px; max-width: 100%; color: var(--hud-identity-ink); font-family: var(--font-ui); font-size: 12px; font-weight: 600; letter-spacing: 0; line-height: 1.35; opacity: .9; overflow-wrap: break-word; }
 
 .hud-route { width: 170px; height: 170px; }
 .hud-route__svg { display: block; width: 170px; height: 170px; overflow: visible; }

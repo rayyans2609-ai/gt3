@@ -1,7 +1,7 @@
 /** World-space Grand Tour camera. Route samples, not the car rig, define its rail. */
 import * as THREE from 'three';
 import { state } from '../core/state.js';
-import { curve, TRACK_LENGTH, routeTAt, pointAt } from './trackCurve.js';
+import { curve, TRACK_LENGTH, TOUR_LENGTH, routeTAt, pointAt } from './trackCurve.js';
 import { COMP } from './composition.js';
 import { pathPointAt } from './racingLine.js';
 import { buildCompositionRail } from './compositionRail.js';
@@ -39,18 +39,8 @@ export const aerial = {
 };
 
 let camera;
-let finishHeld = false;
-let heldFov = 0;
-const heldPosition = new THREE.Vector3();
-const heldQuaternion = new THREE.Quaternion();
-/** sceneSetup owns dynamic FOV; main reapplies the held lens after scene feedback. */
-export function enforceFinishHold() {
-  if (!camera || !finishHeld) return;
-  camera.position.copy(heldPosition);
-  camera.quaternion.copy(heldQuaternion);
-  if (camera.fov !== heldFov) { camera.fov = heldFov; camera.updateProjectionMatrix(); }
-  camera.updateMatrixWorld();
-}
+/** Drive position: logical progress plus the V1 finish run-out (finishTail.js). */
+const driveP = () => state.progress + state.finishTailMeters / TOUR_LENGTH;
 let lastProgress = null;
 const routeTarget = new THREE.Vector3();
 const desiredPosition = new THREE.Vector3();
@@ -108,7 +98,7 @@ function safetyOffset(testPosition) {
   camera.position.copy(testPosition);
   camera.quaternion.copy(orientation);
   camera.updateMatrixWorld();
-  pointAt(routeTAt(state.progress), car);
+  pointAt(routeTAt(driveP()), car);
   car.y += 1.2;
   projected.copy(car).project(camera);
   aerial.carNdc.x = projected.x;
@@ -128,10 +118,9 @@ function safetyOffset(testPosition) {
 
 export function snap() {
   if (!camera) return;
-  finishHeld = false;
   if (CORRIDOR) { corridorUpdate(true); return; }
   if (SECTOR) { sectorSnap(); return; }
-  routePose(routeTAt(state.progress));
+  routePose(routeTAt(driveP()));
   basePosition.copy(desiredPosition);
   safetyOffset(basePosition);
   correction.copy(wantedCorrection);
@@ -152,16 +141,6 @@ export function initAerialCamera(raceCamera) {
 
 export function update(dt) {
   if (!camera) return;
-  if (state.progress >= 1) {
-    if (!finishHeld) {
-      // Capture the actual finishing view, without snapping to a corrected endpoint pose.
-      heldPosition.copy(camera.position); heldQuaternion.copy(camera.quaternion); heldFov = camera.fov;
-      finishHeld = true;
-      lastProgress = 1;
-    }
-    return;
-  }
-  finishHeld = false;
   if (CORRIDOR) { aerial.frames++; corridorUpdate(false); return; }
   if (SECTOR) { sectorUpdate(dt); return; }
   aerial.frames++;
@@ -172,7 +151,7 @@ export function update(dt) {
     snap();
     return;
   }
-  routePose(routeTAt(state.progress));
+  routePose(routeTAt(driveP()));
   const alpha = TUNE.dampingSeconds <= 0 ? 1
     : 1 - Math.exp(-Math.max(0, dt) / TUNE.dampingSeconds);
   basePosition.lerp(desiredPosition, alpha);
@@ -261,7 +240,7 @@ function corridorPose(t) {
 function corridorUpdate(explicitSnap) {
   const instantSeek = lastProgress === null || (Math.abs(state.progress - lastProgress) > TUNE.snapProgress
     && Math.abs(state.velocity) < 0.1);
-  corridorPose(routeTAt(state.progress));
+  corridorPose(routeTAt(driveP()));
   camera.position.copy(desiredPosition);
   camera.quaternion.copy(orientation);
   camera.updateMatrixWorld();
@@ -417,7 +396,7 @@ function shiftInto(ndc, zone) {
 }
 
 function sectorFraming(dt, snapNow) {
-  const t = routeTAt(state.progress);
+  const t = routeTAt(driveP());
   // Hysteresis: engage only when the rendered framing reaches the outer zone;
   // release once the rail alone frames the car inside the inner zone again.
   testPosition.copy(basePosition).add(correction);
@@ -445,7 +424,7 @@ function sectorFraming(dt, snapNow) {
 const testPosition = new THREE.Vector3();
 
 function sectorSnap() {
-  sectorPose(routeTAt(state.progress));
+  sectorPose(routeTAt(driveP()));
   basePosition.copy(desiredPosition);
   correction.set(0, 0, 0);
   engaged = false;
@@ -464,7 +443,7 @@ function sectorUpdate(dt) {
     sectorSnap();
     return;
   }
-  sectorPose(routeTAt(state.progress));
+  sectorPose(routeTAt(driveP()));
   const alpha = COMP.dampingSeconds <= 0 ? 1
     : 1 - Math.exp(-Math.max(0, dt) / COMP.dampingSeconds);
   basePosition.lerp(desiredPosition, alpha);

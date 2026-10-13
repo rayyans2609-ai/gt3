@@ -1,7 +1,8 @@
 import { state, set, subscribe } from '../core/state.js';
 import { CARS, getCar } from '../data/cars.js';
 import { playFinish } from '../audio/audioManager.js';
-import { resetToStart } from '../scroll/scrollDrive.js';
+import { lockScroll, resetToStart, unlockScroll } from '../scroll/scrollDrive.js';
+import { FINISH_PAST_LINE_METERS } from '../scroll/finishTail.js';
 
 import { FINISH_THRESHOLD } from '../scene/trackCurve.js';
 
@@ -37,6 +38,7 @@ let visible = false;
 let runFinished = false;
 let replayHandler = null;
 let unsubscribeProgress = null;
+let unsubscribeTail = null;
 let root = null;
 let recapGrid = null;
 let recapCount = null;
@@ -174,6 +176,8 @@ function buildScreen() {
 function maybeFinish(progress = state.progress) {
   if (runFinished || state.mode !== 'race') return;
   if (!Number.isFinite(progress) || progress < FINISH_THRESHOLD) return;
+  // V1: completion fires once the car is FINISH_PAST_LINE_METERS through the gantry.
+  if (state.finishTailMeters < FINISH_PAST_LINE_METERS) return;
   showFinishScreen();
 }
 
@@ -207,10 +211,15 @@ export function initFinishScreen() {
     }
     maybeFinish(progress);
   });
+  // Logical progress holds at 1 in the run-out, so the run-out distance is the trigger.
+  unsubscribeTail = subscribe('finishTailMeters', () => maybeFinish(state.progress));
   maybeFinish();
 }
 
-/** A compact completion notice leaves the road scene and native scroll available. */
+/**
+ * V1 finish mechanics: lock the drive where the car stands (it halts at once, no coast),
+ * then fade in the compact completion notice. Replay Route is the way back.
+ */
 export function showFinishScreen() {
   if (!initialized) initFinishScreen();
   if (visible || runFinished) return;
@@ -218,6 +227,7 @@ export function showFinishScreen() {
   visible = true;
   runFinished = true;
   renderRecap();
+  lockScroll();
   set('mode', 'finish');
   root.hidden = false;
   root.setAttribute('aria-hidden', 'false');
@@ -240,6 +250,9 @@ export function restoreFinishScreen() {
   visible = true;
   runFinished = true;
   renderRecap();
+  // Persisted progress is logical (1); stand the car where V1 completion halts it.
+  set('finishTailMeters', FINISH_PAST_LINE_METERS);
+  lockScroll();
   set('mode', 'finish');
   root.hidden = false;
   root.setAttribute('aria-hidden', 'false');
@@ -247,7 +260,7 @@ export function restoreFinishScreen() {
   set('finishAcknowledged', true);
 }
 
-/** Reverse-out hides the notice; replay also resets the stopwatch and tail. */
+/** Hide the notice. Replay uses resetToStart(), which has already released scroll. */
 export function hideFinishScreen() {
   if (!root || !visible) return;
 
@@ -257,6 +270,7 @@ export function hideFinishScreen() {
   root.classList.remove('is-visible');
   root.setAttribute('aria-hidden', 'true');
   if (state.mode === 'finish') set('mode', 'race');
+  if (state.scrollLocked) unlockScroll();
 }
 
 /** Frame-loop fallback; the progress subscription also makes the trigger deterministic. */
@@ -269,6 +283,8 @@ export function update(dt) {
 // Retained only so hot-module teardown/debug tooling can release the subscription.
 export function disposeFinishScreen() {
   unsubscribeProgress?.();
+  unsubscribeTail?.();
   unsubscribeProgress = null;
+  unsubscribeTail = null;
   initialized = false;
 }

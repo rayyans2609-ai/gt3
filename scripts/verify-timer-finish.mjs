@@ -211,7 +211,7 @@ try {
     const before = await snap();
     await page.reload({ waitUntil: 'domcontentloaded', timeout: 120000 }); await ready({ unlocked: false });
     await wait(800); const restored = await snap();
-    assert.equal(restored.p, 1); assert.equal(restored.tail, constants.pastLine); assert.equal(restored.elapsed, before.elapsed);
+    assert.equal(restored.p, 1); assert(Math.abs(restored.tail - constants.pastLine) < 1e-6, `restored run-out ${restored.tail}`); assert.equal(restored.elapsed, before.elapsed);
     assert(restored.frozen && !restored.running && restored.locked && restored.mode === 'finish' && restored.audioStarts === 0);
     assert.equal(restored.experience, 'complete');
     await wheels(300, 3); await wait(1300); const pushed = await snap();

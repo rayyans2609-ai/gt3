@@ -12,6 +12,7 @@ const browser=await puppeteer.launch({executablePath:'/Applications/Google Chrom
 process.once('SIGTERM',async()=>{await browser.close();process.exit(143);});
 try {
 const captureOnly=process.env.GT3_CAPTURE_ONLY==='1';
+const geometryOnly=process.env.GT3_GEOMETRY_ONLY==='1';
 const queries=process.env.GT3_QUERIES!==undefined?process.env.GT3_QUERIES.split('|'):['', '?grid=p2&gantry=plain&props=lean'];
 for(const query of queries) {
  const page=await browser.newPage();
@@ -25,7 +26,8 @@ for(const query of queries) {
  const snap=()=>page.evaluate(async()=>{
   const {state}=await import('/src/core/state.js');const r=await import('/src/scene/trackCurve.js');
   const {isMorphing}=await import('/src/scene/morph.js');const g=window.__gt3.scene.getObjectByName('finish-line-gate');
-  return {p:state.progress,t:r.routeTAt(state.progress),active:state.activeCarIndex,unlocked:[...state.unlocked],mode:state.mode,locked:state.scrollLocked,morphing:isMorphing(),signals:g.userData.signalling,sfx:{...window.__gt3SfxLog},audio:window.__audioStarts};
+  return {p:state.progress,t:r.routeTAt(state.progress),active:state.activeCarIndex,unlocked:[...state.unlocked],mode:state.mode,locked:state.scrollLocked,
+   finishTailMeters:state.finishTailMeters,morphing:isMorphing(),signals:g.userData.signalling,sfx:{...window.__gt3SfxLog},audio:window.__audioStarts};
  });
  const seek=async p=>{
   await page.evaluate(async p=>(await import('/src/scroll/scrollDrive.js')).seekTo(p,{instant:true}),p);
@@ -89,8 +91,16 @@ for(const query of queries) {
   await seek(0);await capture('night-grid-spot');
   await page.evaluate(async()=>(await import('/src/scene/theme.js')).applyTheme('day',{instant:true}));
  }
+ if(geometryOnly) {
+  const inventory=await page.evaluate(()=>({variant:window.__gt3.scene.getObjectByName('trackside-furniture').userData.variant,
+   trees:!!window.__gt3.scene.getObjectByName('roadside-trees'),lane:!!window.__gt3.scene.getObjectByName('parallel-pit-lane')}));
+  await seek(1);const returnObservation=await snap();
+  report.variants.push({query,constants,grid,neutral,shots,inventory,geometryOnly,returnObservation});
+  await page.close();continue;
+ }
  await seek(1-2/constants.length);const approaching=await snap();assert(approaching.mode==='race' && approaching.signals,'finish approach incorrect');
  const activeBefore=approaching.active;await seek(1);const finish=await snap();
+ report.lastFinishObservation={query,constants,grid,neutral,approaching,finish};
  assert(finish.mode==='finish' && finish.locked && finish.t===0 && finish.active===activeBefore && finish.active===9,'return line completion incorrect');
  await wait(600);await page.reload({waitUntil:'domcontentloaded',timeout:180000});await ready();await wait(500);
  const restored=await snap();assert(restored.p===1 && restored.mode==='finish' && restored.audio===0,'finish refresh was not complete and silent');

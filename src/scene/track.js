@@ -213,6 +213,7 @@ function buildCurbGeometry() {
         const s0 = cuts[k], s1 = cuts[k + 1], r0 = rowAt(s0), r1 = rowAt(s1);
         const color = Math.floor((s0 + s1) / (2 * blockLength)) % 2 ? white : red;
         const outward = r0.outer.clone().sub(r0.inner).setY(0).normalize();
+        if (outward.lengthSq() === 0) outward.copy(r1.outer).sub(r1.inner).setY(0).normalize();
         writeTriangle(r0.inner, r1.inner, r0.outer, UP, color);
         writeTriangle(r0.outer, r1.inner, r1.outer, UP, color);
         writeTriangle(r0.bottom, r0.outer, r1.bottom, outward, color);

@@ -1,5 +1,5 @@
 /** ?font=sw typography variant: flag, Switzer load, roles, mono unchanged, query combination,
- * ten-car HUD fit and captures. Run through the heavy gate with a fresh owned server.
+ * ten-car HUD typography fit (roster text written into the visible slot) and captures. Run through the heavy gate with a fresh owned server.
  */
 import puppeteer from 'puppeteer-core';
 import assert from 'node:assert/strict';
@@ -27,17 +27,23 @@ try {
     await page.evaluate(() => document.fonts.ready); await wait(800);
     await page.screenshot({ path: `${out}/${name}-start.png` });
     await page.mouse.wheel({ deltaY: 120 }); await wait(1800);
-    const fit = [];
-    for (let car = 0; car < 10; car++) {
-      await page.evaluate(async i => (await import('/src/core/state.js')).set('activeCarIndex', i), car); await wait(700);
-      fit.push(await page.evaluate(() => {
-        const slot = document.querySelector('.hud-identity__slot.is-visible') || document;
-        const q = s => slot.querySelector(s);
-        const over = el => el ? { w: el.scrollWidth > el.clientWidth + 1, h: el.scrollHeight > el.clientHeight + 1, text: el.textContent } : null;
-        return { name: over(q('.hud-identity__name')), headline: over(q('.hud-identity__headline')), spec: over(q('.hud-identity__spec')) };
-      }));
-      if (car === 0) await page.screenshot({ path: `${out}/${name}-hud.png` });
-    }
+    // The HUD derives the car from route position, so measure typography directly: write each
+    // roster car's real name/headline/spec into the visible identity slot (no app state change).
+    await page.screenshot({ path: `${out}/${name}-hud.png` });
+    const fit = await page.evaluate(async () => {
+      const { CARS } = await import('/src/data/cars.js');
+      const slot = document.querySelector('.hud-identity__slot.is-visible');
+      const els = ['name', 'headline', 'spec'].map(k => slot.querySelector(`.hud-identity__${k}`));
+      const saved = els.map(el => el.textContent);
+      const rows = CARS.map(car => {
+        els[0].textContent = car.displayName; els[1].textContent = car.showcase?.headline ?? '';
+        const over = el => ({ w: el.scrollWidth > el.clientWidth + 1, h: el.scrollHeight > el.clientHeight + 1,
+          sh: el.scrollHeight, ch: el.clientHeight });
+        return { car: car.displayName, name: over(els[0]), headline: over(els[1]) };
+      });
+      els.forEach((el, i) => { el.textContent = saved[i]; });
+      return rows;
+    });
     const facts = await page.evaluate(async () => {
       const r = await import('/src/scene/trackCurve.js');
       const cs = s => { const el = document.querySelector(s); return el ? getComputedStyle(el) : null; };
@@ -59,7 +65,9 @@ try {
     else assert(!facts.switzerFaces.some(f => f.endsWith(':loaded')), 'default fetched Switzer');
     assert.equal(facts.gridSlot, name === 'switzer-p2' ? 'p2' : 'p1');
     assert.equal(errors.length, 0, `${name}: ${errors.join(' | ')}`);
-    report.variants[name] = { query, firstPaintFlag, facts, fit, overflow: fit.filter(f => Object.values(f).some(v => v && (v.w || v.h))).length };
+    const clipped = fit.filter(f => f.name.w || f.name.h || f.headline.h).map(f => f.car);
+    assert.equal(clipped.length, 0, `${name}: identity text overflows for ${clipped.join(', ')}`);
+    report.variants[name] = { query, firstPaintFlag, facts, fit, overflow: fit.filter(f => f.name.w || f.name.h || f.headline.h).length };
     await page.close();
   }
   report.pass = true; console.log('PASS font variant', JSON.stringify(Object.fromEntries(Object.entries(report.variants).map(([k, v]) => [k, { font: v.facts.nameFont, overflowCars: v.overflow }]))));

@@ -35,6 +35,9 @@
   --font-display: 'Switzer', 'Neue Haas Grotesk Display', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   --font-ui: 'Switzer', 'Neue Haas Grotesk Text', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
+/* Switzer's ascent+descent (≈27 px at 23 px) exceeds the 1.1 name line box tuned for Neue Haas;
+   the name clips overflow, so give Switzer just enough line height for accents/descenders. */
+:root[data-font='sw'] .hud-identity__name { line-height: 1.2; }
 
 
 *,

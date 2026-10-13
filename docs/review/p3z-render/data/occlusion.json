@@ -1,0 +1,230 @@
+{
+ "base": "http://127.0.0.1:5211",
+ "source": "6cce609",
+ "at": "2026-10-13T16:34:22.386Z",
+ "step": 0.01,
+ "tol": 0.05,
+ "requestedT": [
+  0.9985,
+  0.123,
+  0.17,
+  0.283,
+  0.337,
+  0.365,
+  0.63,
+  0.645,
+  0.66,
+  0.673,
+  0.7
+ ],
+ "requestedConfigs": [
+  ""
+ ],
+ "configs": {
+  "default": {
+   "summary": {
+    "config": "default",
+    "points": 11,
+    "withRoadCells": 11,
+    "minRoadCells": 5,
+    "carRayTerrainHits": 0,
+    "pointsWithHiddenRoad": 0,
+    "maxHiddenCells": 0,
+    "worstMarginM": 0,
+    "errors": [],
+    "complete": true,
+    "pass": true,
+    "failingT": []
+   },
+   "points": [
+    {
+     "requestedT": 0.9985,
+     "t": 0.9985053733271605,
+     "camPos": [
+      -141.3,
+      208.3,
+      24.3
+     ],
+     "carRay": {
+      "distanceToCar": 251.5,
+      "terrainHit": null
+     },
+     "cells": 336,
+     "roadCells": 11,
+     "hidden": 0,
+     "worstMarginM": 0
+    },
+    {
+     "requestedT": 0.123,
+     "t": 0.12614160527985382,
+     "camPos": [
+      46.2,
+      208.3,
+      -490.6
+     ],
+     "carRay": {
+      "distanceToCar": 290.3,
+      "terrainHit": null
+     },
+     "cells": 336,
+     "roadCells": 30,
+     "hidden": 0,
+     "worstMarginM": 0
+    },
+    {
+     "requestedT": 0.17,
+     "t": 0.17297324102882397,
+     "camPos": [
+      44.3,
+      208.3,
+      -673.7
+     ],
+     "carRay": {
+      "distanceToCar": 267.4,
+      "terrainHit": null
+     },
+     "cells": 336,
+     "roadCells": 29,
+     "hidden": 0,
+     "worstMarginM": 0
+    },
+    {
+     "requestedT": 0.283,
+     "t": 0.28556845038273104,
+     "camPos": [
+      -0.2,
+      208.3,
+      -1113.9
+     ],
+     "carRay": {
+      "distanceToCar": 274.4,
+      "terrainHit": null
+     },
+     "cells": 336,
+     "roadCells": 46,
+     "hidden": 0,
+     "worstMarginM": 0
+    },
+    {
+     "requestedT": 0.337,
+     "t": 0.3393750106049522,
+     "camPos": [
+      -186.1,
+      208.3,
+      -1266.2
+     ],
+     "carRay": {
+      "distanceToCar": 258.9,
+      "terrainHit": null
+     },
+     "cells": 336,
+     "roadCells": 27,
+     "hidden": 0,
+     "worstMarginM": 0
+    },
+    {
+     "requestedT": 0.365,
+     "t": 0.36727470849795574,
+     "camPos": [
+      -276.3,
+      208.3,
+      -1340
+     ],
+     "carRay": {
+      "distanceToCar": 257.8,
+      "terrainHit": null
+     },
+     "cells": 336,
+     "roadCells": 25,
+     "hidden": 0,
+     "worstMarginM": 0
+    },
+    {
+     "requestedT": 0.63,
+     "t": 0.6313254206995962,
+     "camPos": [
+      -728.1,
+      208.3,
+      -805.4
+     ],
+     "carRay": {
+      "distanceToCar": 247,
+      "terrainHit": null
+     },
+     "cells": 336,
+     "roadCells": 32,
+     "hidden": 0,
+     "worstMarginM": 0
+    },
+    {
+     "requestedT": 0.645,
+     "t": 0.646271687427991,
+     "camPos": [
+      -729.4,
+      208.3,
+      -733.4
+     ],
+     "carRay": {
+      "distanceToCar": 231.2,
+      "terrainHit": null
+     },
+     "cells": 336,
+     "roadCells": 27,
+     "hidden": 0,
+     "worstMarginM": 0
+    },
+    {
+     "requestedT": 0.66,
+     "t": 0.661217954156386,
+     "camPos": [
+      -729.4,
+      208.3,
+      -661.9
+     ],
+     "carRay": {
+      "distanceToCar": 223.8,
+      "terrainHit": null
+     },
+     "cells": 336,
+     "roadCells": 22,
+     "hidden": 0,
+     "worstMarginM": 0
+    },
+    {
+     "requestedT": 0.673,
+     "t": 0.6741713853209946,
+     "camPos": [
+      -727.9,
+      208.3,
+      -600.2
+     ],
+     "carRay": {
+      "distanceToCar": 219.1,
+      "terrainHit": null
+     },
+     "cells": 336,
+     "roadCells": 10,
+     "hidden": 0,
+     "worstMarginM": 0
+    },
+    {
+     "requestedT": 0.7,
+     "t": 0.7010746654321051,
+     "camPos": [
+      -718.9,
+      208.3,
+      -473.2
+     ],
+     "carRay": {
+      "distanceToCar": 217.4,
+      "terrainHit": null
+     },
+     "cells": 336,
+     "roadCells": 5,
+     "hidden": 0,
+     "worstMarginM": 0
+    }
+   ]
+  }
+ }
+}

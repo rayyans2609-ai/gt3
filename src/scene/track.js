@@ -115,8 +115,8 @@ function buildExteriorGeometry(runoff = false) {
   for (let i = 0; i < TRACK_SAMPLE_COUNT; i++) {
     const p = sampleProfiles[i];
     const right = p.right + p.curbRight, left = p.left + p.curbLeft;
-    const laterals = runoff ? [-p.outerRight, -right - p.shoulder, left + p.shoulder, p.outerLeft]
-      : [-right - p.shoulder, -right, left, left + p.shoulder];
+    const laterals = runoff ? [-p.outerRight, -p.vergeRight, p.vergeLeft, p.outerLeft]
+      : [-p.vergeRight, -right, left, p.vergeLeft];
     for (let j = 0; j < 4; j++) {
       pushVector(positions, sampledPoint(i, laterals[j], CROSS_SECTION.vergeY));
       pushVector(normals, sampleNormals[i]);
@@ -178,18 +178,22 @@ function buildCurbGeometry() {
   const red = new THREE.Color('#B22A2A'), white = new THREE.Color('#D8D4CC');
   const blockLength = CROSS_SECTION.curbBlockLength;
   for (const segment of CURB_SEGMENTS) {
-    const count = Math.ceil((segment.to - segment.from) * TRACK_LENGTH / TARGET_SAMPLE_STEP);
+    // Share the road/shoulder rings exactly, including the zero-width end rows.
+    // Independent curb sampling left different chords along those joins.
+    const first = Math.floor(segment.from * TRACK_SEGMENT_COUNT);
+    const last = Math.ceil(segment.to * TRACK_SEGMENT_COUNT);
+    const count = last - first;
     const rows = [];
     let distance = 0;
     for (let i = 0; i <= count; i++) {
-      const t = segment.from + (segment.to - segment.from) * i / count;
-      const p = profileAt(t), side = segment.side;
+      const index = first + i;
+      const p = sampleProfiles[index], side = segment.side;
       const edge = side > 0 ? p.left : p.right;
       const width = side > 0 ? p.curbLeft : p.curbRight;
-      const inner = offsetPointAt(t, side * edge, CROSS_SECTION.curbInnerY);
+      const inner = sampledPoint(index, side * edge, CROSS_SECTION.curbInnerY);
       const outerY = CROSS_SECTION.curbInnerY + (CROSS_SECTION.curbOuterY - CROSS_SECTION.curbInnerY) * width / segment.width;
-      const outer = offsetPointAt(t, side * (edge + width), outerY);
-      const bottom = offsetPointAt(t, side * (edge + width), CROSS_SECTION.vergeY);
+      const outer = sampledPoint(index, side * (edge + width), outerY);
+      const bottom = sampledPoint(index, side * (edge + width), CROSS_SECTION.vergeY);
       if (i) distance += inner.distanceTo(rows[i - 1].inner);
       rows.push({ s: distance, inner, outer, bottom, width });
     }
@@ -209,6 +213,7 @@ function buildCurbGeometry() {
         const s0 = cuts[k], s1 = cuts[k + 1], r0 = rowAt(s0), r1 = rowAt(s1);
         const color = Math.floor((s0 + s1) / (2 * blockLength)) % 2 ? white : red;
         const outward = r0.outer.clone().sub(r0.inner).setY(0).normalize();
+        if (outward.lengthSq() === 0) outward.copy(r1.outer).sub(r1.inner).setY(0).normalize();
         writeTriangle(r0.inner, r1.inner, r0.outer, UP, color);
         writeTriangle(r0.outer, r1.inner, r1.outer, UP, color);
         writeTriangle(r0.bottom, r0.outer, r1.bottom, outward, color);

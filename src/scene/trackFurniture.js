@@ -3,7 +3,7 @@ import * as THREE from 'three';
 import { TRACK_LENGTH, tangentAt } from './trackCurve.js';
 import { CORNERS, WIDTH_SECTIONS, outerEdgeAt } from './trackProfile.js';
 import { groundPositionAt } from './environment.js';
-export const FULL_PROPS = new URLSearchParams(globalThis.location?.search || '').get('props') === 'full';
+export const FULL_PROPS = new URLSearchParams(globalThis.location?.search || '').get('props') !== 'lean';
 const lean = !FULL_PROPS;
 // Braking classes select zones, corner entries locate the 150/100/50 sequence.
 export const BRAKING_ZONES = WIDTH_SECTIONS.filter(s => s.classIndex === 2).map(s => {
@@ -11,7 +11,9 @@ export const BRAKING_ZONES = WIDTH_SECTIONS.filter(s => s.classIndex === 2).map(
   return { id:corner.id, entry:corner.entry, side:-corner.side };
 });
 export const BARRIER_RUNS = [
-  {from:.263,to:.308,side:-1,concrete:false,fence:true},
+  // This aerial-facing catch-fence run minified into detached opaque panels.
+  // Keep its two Armco rails and posts; the useful density elsewhere survives.
+  {from:.263,to:.308,side:-1,concrete:false,fence:false},
   {from:.621,to:.648,side:1,concrete:true,fence:true},
   {from:.711,to:.748,side:-1,concrete:false,fence:false},
 ];
@@ -48,9 +50,13 @@ export function buildTrackFurniture() {
     shader.vertexShader='attribute float boardColumn;\nvarying float vBoardColumn;\n'+shader.vertexShader;
     shader.vertexShader=shader.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\nvBoardColumn = boardColumn;');
     shader.fragmentShader='varying float vBoardColumn;\n'+shader.fragmentShader;
-    shader.fragmentShader=shader.fragmentShader.replace('texture2D( map, vMapUv )','texture2D( map, vec2((vMapUv.x + vBoardColumn) / 3.0, vMapUv.y) )');
+    // onBeforeCompile runs BEFORE shader includes expand. Replacing texture2D
+    // in the unexpanded source silently left all three numbers on every board.
+    shader.fragmentShader=shader.fragmentShader.replace('#include <map_fragment>',
+      THREE.ShaderChunk.map_fragment.replace('texture2D( map, vMapUv )',
+        'texture2D( map, vec2((vMapUv.x + vBoardColumn) / 3.0, vMapUv.y) )'));
   };
-  boardMaterial.customProgramCacheKey=()=> 'braking-board-atlas-v1';
+  boardMaterial.customProgramCacheKey=()=> 'braking-board-atlas-v2';
   let index=0;root.userData.boards=[];
   for(const zone of zones) for(const [column,distance] of [150,100,50].entries()) {
     const t=zone.entry-distance/TRACK_LENGTH;
@@ -84,7 +90,9 @@ export function buildTrackFurniture() {
       }
     }
   }
-  for(const t of lean?[]:[.247,.605]) {
+  // The hairpin service-strip / marshal-block pair sat alone in the infield,
+  // away from any access junction (owner C #2). Keep the second useful post.
+  for(const t of lean?[]:[.605]) {
     const side=1,lateral=outerEdgeAt(t,side)+12;
     add(parts.marshal,t,lateral,1.5,2.8,3,2.5);
     add(parts.steel,t,lateral,3.05,3.5,.18,3.2);

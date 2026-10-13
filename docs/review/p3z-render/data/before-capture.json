@@ -1,0 +1,2107 @@
+{
+  "base": "http://127.0.0.1:5211",
+  "sha": "3d5c504642d92665fb6bb1547074627715a249e1",
+  "tree": "?? scripts/capture-p3z-render.mjs",
+  "captures": [
+    {
+      "name": "grid-parked",
+      "path": "/tmp/gt3-p3z-run/before/grid-parked.png",
+      "settings": {
+        "probe": {
+          "mode": "race",
+          "locked": false,
+          "speed01": 0,
+          "progress": 0,
+          "applied": 1,
+          "level": "high",
+          "still": 2705.7999999970198,
+          "sinceSwitch": null,
+          "canvasW": 1600,
+          "ratio": 1
+        },
+        "css": {
+          "width": 1600,
+          "height": 900
+        },
+        "devicePixelRatio": 1,
+        "contextAntialias": true,
+        "canvasSamples": 4,
+        "maxSamples": 8,
+        "halfFloatSamples": [
+          8,
+          4,
+          2
+        ],
+        "gpu": "ANGLE (Intel, ANGLE Metal Renderer: Intel(R) UHD Graphics 617, Unspecified Version)",
+        "targets": [
+          {
+            "width": 1600,
+            "height": 900,
+            "type": 1016,
+            "requestedSamples": 0,
+            "actualSamples": 0
+          },
+          {
+            "width": 1600,
+            "height": 900,
+            "type": 1016,
+            "requestedSamples": 0,
+            "actualSamples": 0
+          }
+        ],
+        "calls": 1,
+        "triangles": 1,
+        "memory": {
+          "geometries": 1501,
+          "textures": 298
+        },
+        "jsHeap": 224754262
+      },
+      "camera": {
+        "position": [
+          -144.6290592444007,
+          208.2878532625406,
+          32.32205740136035
+        ],
+        "quaternion": [
+          -0.3702543457061976,
+          -0.5383996395935492,
+          -0.28410615187685734,
+          0.701656071046874
+        ],
+        "fov": 40,
+        "rig": [
+          -6.000000082076107,
+          -0.3972196865061604,
+          18.079071082138032
+        ]
+      }
+    },
+    {
+      "name": "grid",
+      "path": "/tmp/gt3-p3z-run/before/grid.png",
+      "settings": {
+        "probe": {
+          "mode": "race",
+          "locked": false,
+          "speed01": 0,
+          "progress": 0,
+          "applied": 1,
+          "level": "high",
+          "still": 5532.600000008941,
+          "sinceSwitch": null,
+          "canvasW": 1600,
+          "ratio": 1
+        },
+        "css": {
+          "width": 1600,
+          "height": 900
+        },
+        "devicePixelRatio": 1,
+        "contextAntialias": true,
+        "canvasSamples": 4,
+        "maxSamples": 8,
+        "halfFloatSamples": [
+          8,
+          4,
+          2
+        ],
+        "gpu": "ANGLE (Intel, ANGLE Metal Renderer: Intel(R) UHD Graphics 617, Unspecified Version)",
+        "targets": [
+          {
+            "width": 1600,
+            "height": 900,
+            "type": 1016,
+            "requestedSamples": 0,
+            "actualSamples": 0
+          },
+          {
+            "width": 1600,
+            "height": 900,
+            "type": 1016,
+            "requestedSamples": 0,
+            "actualSamples": 0
+          }
+        ],
+        "calls": 1,
+        "triangles": 1,
+        "memory": {
+          "geometries": 1501,
+          "textures": 298
+        },
+        "jsHeap": 224489520
+      },
+      "camera": {
+        "position": [
+          -144.6290592444007,
+          208.2878532625406,
+          32.32205740136035
+        ],
+        "quaternion": [
+          -0.3702543457061976,
+          -0.5383996395935492,
+          -0.28410615187685734,
+          0.701656071046874
+        ],
+        "fov": 40,
+        "rig": [
+          -6.000000082076107,
+          -0.3972196865061604,
+          18.079071082138032
+        ]
+      }
+    },
+    {
+      "name": "edge-corner",
+      "path": "/tmp/gt3-p3z-run/before/edge-corner.png",
+      "settings": {
+        "probe": {
+          "mode": "race",
+          "locked": false,
+          "speed01": 0,
+          "progress": 0.12614160527985382,
+          "applied": 1,
+          "level": "high",
+          "still": 10293.29999999702,
+          "sinceSwitch": null,
+          "canvasW": 1600,
+          "ratio": 1
+        },
+        "css": {
+          "width": 1600,
+          "height": 900
+        },
+        "devicePixelRatio": 1,
+        "contextAntialias": true,
+        "canvasSamples": 4,
+        "maxSamples": 8,
+        "halfFloatSamples": [
+          8,
+          4,
+          2
+        ],
+        "gpu": "ANGLE (Intel, ANGLE Metal Renderer: Intel(R) UHD Graphics 617, Unspecified Version)",
+        "targets": [
+          {
+            "width": 1600,
+            "height": 900,
+            "type": 1016,
+            "requestedSamples": 0,
+            "actualSamples": 0
+          },
+          {
+            "width": 1600,
+            "height": 900,
+            "type": 1016,
+            "requestedSamples": 0,
+            "actualSamples": 0
+          }
+        ],
+        "calls": 1,
+        "triangles": 1,
+        "memory": {
+          "geometries": 1501,
+          "textures": 298
+        },
+        "jsHeap": 229740066
+      },
+      "camera": {
+        "position": [
+          46.20042740532611,
+          208.2878532625406,
+          -490.5572287766979
+        ],
+        "quaternion": [
+          -0.3702543457061976,
+          -0.5383996395935492,
+          -0.28410615187685734,
+          0.701656071046874
+        ],
+        "fov": 40,
+        "rig": [
+          254.75654126797372,
+          6.290483922693631,
+          -510.4076071434834
+        ]
+      }
+    },
+    {
+      "name": "runoff-barrier",
+      "path": "/tmp/gt3-p3z-run/before/runoff-barrier.png",
+      "settings": {
+        "probe": {
+          "mode": "race",
+          "locked": false,
+          "speed01": 0,
+          "progress": 0.28556845038273104,
+          "applied": 1,
+          "level": "high",
+          "still": 14253.20000000298,
+          "sinceSwitch": null,
+          "canvasW": 1600,
+          "ratio": 1
+        },
+        "css": {
+          "width": 1600,
+          "height": 900
+        },
+        "devicePixelRatio": 1,
+        "contextAntialias": true,
+        "canvasSamples": 4,
+        "maxSamples": 8,
+        "halfFloatSamples": [
+          8,
+          4,
+          2
+        ],
+        "gpu": "ANGLE (Intel, ANGLE Metal Renderer: Intel(R) UHD Graphics 617, Unspecified Version)",
+        "targets": [
+          {
+            "width": 1600,
+            "height": 900,
+            "type": 1016,
+            "requestedSamples": 0,
+            "actualSamples": 0
+          },
+          {
+            "width": 1600,
+            "height": 900,
+            "type": 1016,
+            "requestedSamples": 0,
+            "actualSamples": 0
+          }
+        ],
+        "calls": 1,
+        "triangles": 1,
+        "memory": {
+          "geometries": 1501,
+          "textures": 298
+        },
+        "jsHeap": 237838378
+      },
+      "camera": {
+        "position": [
+          -0.20268450923688874,
+          208.2878532625406,
+          -1113.9248944309954
+        ],
+        "quaternion": [
+          -0.3702543457061976,
+          -0.5383996395935492,
+          -0.28410615187685734,
+          0.701656071046874
+        ],
+        "fov": 40,
+        "rig": [
+          183.27286884709667,
+          10.903028227029715,
+          -1169.2993937106755
+        ]
+      }
+    },
+    {
+      "name": "checkpoint",
+      "path": "/tmp/gt3-p3z-run/before/checkpoint.png",
+      "settings": {
+        "probe": {
+          "mode": "race",
+          "locked": false,
+          "speed01": 0,
+          "progress": 0.1829374188477538,
+          "applied": 1,
+          "level": "high",
+          "still": 18681.89999999106,
+          "sinceSwitch": null,
+          "canvasW": 1600,
+          "ratio": 1
+        },
+        "css": {
+          "width": 1600,
+          "height": 900
+        },
+        "devicePixelRatio": 1,
+        "contextAntialias": true,
+        "canvasSamples": 4,
+        "maxSamples": 8,
+        "halfFloatSamples": [
+          8,
+          4,
+          2
+        ],
+        "gpu": "ANGLE (Intel, ANGLE Metal Renderer: Intel(R) UHD Graphics 617, Unspecified Version)",
+        "targets": [
+          {
+            "width": 1600,
+            "height": 900,
+            "type": 1016,
+            "requestedSamples": 0,
+            "actualSamples": 0
+          },
+          {
+            "width": 1600,
+            "height": 900,
+            "type": 1016,
+            "requestedSamples": 0,
+            "actualSamples": 0
+          }
+        ],
+        "calls": 1,
+        "triangles": 1,
+        "memory": {
+          "geometries": 1501,
+          "textures": 298
+        },
+        "jsHeap": 227783758
+      },
+      "camera": {
+        "position": [
+          36.23535217785306,
+          208.2878532625406,
+          -711.9490859154905
+        ],
+        "quaternion": [
+          -0.3702543457061976,
+          -0.5383996395935492,
+          -0.28410615187685734,
+          0.701656071046874
+        ],
+        "fov": 40,
+        "rig": [
+          178.8973739299269,
+          8.979467654494488,
+          -747.141153092679
+        ]
+      }
+    },
+    {
+      "name": "braking-boards",
+      "path": "/tmp/gt3-p3z-run/before/braking-boards.png",
+      "settings": {
+        "probe": {
+          "mode": "race",
+          "locked": false,
+          "speed01": 0,
+          "progress": 0.23677112300218492,
+          "applied": 1,
+          "level": "high",
+          "still": 22252,
+          "sinceSwitch": null,
+          "canvasW": 1600,
+          "ratio": 1
+        },
+        "css": {
+          "width": 1600,
+          "height": 900
+        },
+        "devicePixelRatio": 1,
+        "contextAntialias": true,
+        "canvasSamples": 4,
+        "maxSamples": 8,
+        "halfFloatSamples": [
+          8,
+          4,
+          2
+        ],
+        "gpu": "ANGLE (Intel, ANGLE Metal Renderer: Intel(R) UHD Graphics 617, Unspecified Version)",
+        "targets": [
+          {
+            "width": 1600,
+            "height": 900,
+            "type": 1016,
+            "requestedSamples": 0,
+            "actualSamples": 0
+          },
+          {
+            "width": 1600,
+            "height": 900,
+            "type": 1016,
+            "requestedSamples": 0,
+            "actualSamples": 0
+          }
+        ],
+        "calls": 1,
+        "triangles": 1,
+        "memory": {
+          "geometries": 1501,
+          "textures": 298
+        },
+        "jsHeap": 244891210
+      },
+      "camera": {
+        "position": [
+          -6.976206876763399,
+          208.2878532625406,
+          -919.8286010367337
+        ],
+        "quaternion": [
+          -0.3702543457061976,
+          -0.5383996395935492,
+          -0.28410615187685734,
+          0.701656071046874
+        ],
+        "fov": 40,
+        "rig": [
+          86.93712313619655,
+          14.828678952507413,
+          -966.6859874661844
+        ]
+      }
+    },
+    {
+      "name": "control",
+      "path": "/tmp/gt3-p3z-run/before/control.png",
+      "settings": {
+        "probe": {
+          "mode": "race",
+          "locked": false,
+          "speed01": 0,
+          "progress": 0.531683642510298,
+          "applied": 1,
+          "level": "high",
+          "still": 27236.29999998212,
+          "sinceSwitch": null,
+          "canvasW": 1600,
+          "ratio": 1
+        },
+        "css": {
+          "width": 1600,
+          "height": 900
+        },
+        "devicePixelRatio": 1,
+        "contextAntialias": true,
+        "canvasSamples": 4,
+        "maxSamples": 8,
+        "halfFloatSamples": [
+          8,
+          4,
+          2
+        ],
+        "gpu": "ANGLE (Intel, ANGLE Metal Renderer: Intel(R) UHD Graphics 617, Unspecified Version)",
+        "targets": [
+          {
+            "width": 1600,
+            "height": 900,
+            "type": 1016,
+            "requestedSamples": 0,
+            "actualSamples": 0
+          },
+          {
+            "width": 1600,
+            "height": 900,
+            "type": 1016,
+            "requestedSamples": 0,
+            "actualSamples": 0
+          }
+        ],
+        "calls": 1,
+        "triangles": 1,
+        "memory": {
+          "geometries": 1501,
+          "textures": 298
+        },
+        "jsHeap": 228893299
+      },
+      "camera": {
+        "position": [
+          -697.6277633972118,
+          208.2878532625406,
+          -1262.3600049296144
+        ],
+        "quaternion": [
+          -0.37025434570619775,
+          -0.5383996395935492,
+          -0.2841061518768574,
+          0.701656071046874
+        ],
+        "fov": 40,
+        "rig": [
+          -596.9527840764669,
+          14.873327860577383,
+          -1331.3130443298203
+        ]
+      }
+    },
+    {
+      "name": "lexus-dark",
+      "path": "/tmp/gt3-p3z-run/before/lexus-dark.png",
+      "settings": {
+        "probe": {
+          "mode": "race",
+          "locked": false,
+          "speed01": 0,
+          "progress": 0.12614160527985382,
+          "applied": 1,
+          "level": "high",
+          "still": 30966.199999973178,
+          "sinceSwitch": null,
+          "canvasW": 1600,
+          "ratio": 1
+        },
+        "css": {
+          "width": 1600,
+          "height": 900
+        },
+        "devicePixelRatio": 1,
+        "contextAntialias": true,
+        "canvasSamples": 4,
+        "maxSamples": 8,
+        "halfFloatSamples": [
+          8,
+          4,
+          2
+        ],
+        "gpu": "ANGLE (Intel, ANGLE Metal Renderer: Intel(R) UHD Graphics 617, Unspecified Version)",
+        "targets": [
+          {
+            "width": 1600,
+            "height": 900,
+            "type": 1016,
+            "requestedSamples": 0,
+            "actualSamples": 0
+          },
+          {
+            "width": 1600,
+            "height": 900,
+            "type": 1016,
+            "requestedSamples": 0,
+            "actualSamples": 0
+          }
+        ],
+        "calls": 1,
+        "triangles": 1,
+        "memory": {
+          "geometries": 1501,
+          "textures": 298
+        },
+        "jsHeap": 240479713
+      },
+      "camera": {
+        "position": [
+          46.20042740532611,
+          208.2878532625406,
+          -490.5572287766979
+        ],
+        "quaternion": [
+          -0.3702543457061976,
+          -0.5383996395935492,
+          -0.28410615187685734,
+          0.701656071046874
+        ],
+        "fov": 40,
+        "rig": [
+          254.75654126797372,
+          6.290514539995742,
+          -510.4076071434834
+        ]
+      }
+    },
+    {
+      "name": "bmw-bright",
+      "path": "/tmp/gt3-p3z-run/before/bmw-bright.png",
+      "settings": {
+        "probe": {
+          "mode": "race",
+          "locked": false,
+          "speed01": 0,
+          "progress": 0.12614160527985382,
+          "applied": 1,
+          "level": "high",
+          "still": 34186.099999949336,
+          "sinceSwitch": null,
+          "canvasW": 1600,
+          "ratio": 1
+        },
+        "css": {
+          "width": 1600,
+          "height": 900
+        },
+        "devicePixelRatio": 1,
+        "contextAntialias": true,
+        "canvasSamples": 4,
+        "maxSamples": 8,
+        "halfFloatSamples": [
+          8,
+          4,
+          2
+        ],
+        "gpu": "ANGLE (Intel, ANGLE Metal Renderer: Intel(R) UHD Graphics 617, Unspecified Version)",
+        "targets": [
+          {
+            "width": 1600,
+            "height": 900,
+            "type": 1016,
+            "requestedSamples": 0,
+            "actualSamples": 0
+          },
+          {
+            "width": 1600,
+            "height": 900,
+            "type": 1016,
+            "requestedSamples": 0,
+            "actualSamples": 0
+          }
+        ],
+        "calls": 1,
+        "triangles": 1,
+        "memory": {
+          "geometries": 1501,
+          "textures": 298
+        },
+        "jsHeap": 219717897
+      },
+      "camera": {
+        "position": [
+          46.20042740532611,
+          208.2878532625406,
+          -490.5572287766979
+        ],
+        "quaternion": [
+          -0.3702543457061976,
+          -0.5383996395935492,
+          -0.28410615187685734,
+          0.701656071046874
+        ],
+        "fov": 40,
+        "rig": [
+          254.75654126797372,
+          6.289401296301363,
+          -510.4076071434834
+        ]
+      }
+    },
+    {
+      "name": "lamborghini",
+      "path": "/tmp/gt3-p3z-run/before/lamborghini.png",
+      "settings": {
+        "probe": {
+          "mode": "race",
+          "locked": false,
+          "speed01": 0,
+          "progress": 0.12614160527985382,
+          "applied": 1,
+          "level": "high",
+          "still": 38093.699999943376,
+          "sinceSwitch": null,
+          "canvasW": 1600,
+          "ratio": 1
+        },
+        "css": {
+          "width": 1600,
+          "height": 900
+        },
+        "devicePixelRatio": 1,
+        "contextAntialias": true,
+        "canvasSamples": 4,
+        "maxSamples": 8,
+        "halfFloatSamples": [
+          8,
+          4,
+          2
+        ],
+        "gpu": "ANGLE (Intel, ANGLE Metal Renderer: Intel(R) UHD Graphics 617, Unspecified Version)",
+        "targets": [
+          {
+            "width": 1600,
+            "height": 900,
+            "type": 1016,
+            "requestedSamples": 0,
+            "actualSamples": 0
+          },
+          {
+            "width": 1600,
+            "height": 900,
+            "type": 1016,
+            "requestedSamples": 0,
+            "actualSamples": 0
+          }
+        ],
+        "calls": 1,
+        "triangles": 1,
+        "memory": {
+          "geometries": 1501,
+          "textures": 298
+        },
+        "jsHeap": 216977977
+      },
+      "camera": {
+        "position": [
+          46.20042740532611,
+          208.2878532625406,
+          -490.5572287766979
+        ],
+        "quaternion": [
+          -0.3702543457061976,
+          -0.5383996395935492,
+          -0.28410615187685734,
+          0.701656071046874
+        ],
+        "fov": 40,
+        "rig": [
+          254.75654126797372,
+          6.289360498188063,
+          -510.4076071434834
+        ]
+      }
+    },
+    {
+      "name": "night-edge-spot",
+      "path": "/tmp/gt3-p3z-run/before/night-edge-spot.png",
+      "settings": {
+        "probe": {
+          "mode": "race",
+          "locked": false,
+          "speed01": 0,
+          "progress": 0.12614160527985382,
+          "applied": 1,
+          "level": "high",
+          "still": 41554.299999952316,
+          "sinceSwitch": null,
+          "canvasW": 1600,
+          "ratio": 1
+        },
+        "css": {
+          "width": 1600,
+          "height": 900
+        },
+        "devicePixelRatio": 1,
+        "contextAntialias": true,
+        "canvasSamples": 4,
+        "maxSamples": 8,
+        "halfFloatSamples": [
+          8,
+          4,
+          2
+        ],
+        "gpu": "ANGLE (Intel, ANGLE Metal Renderer: Intel(R) UHD Graphics 617, Unspecified Version)",
+        "targets": [
+          {
+            "width": 1600,
+            "height": 900,
+            "type": 1016,
+            "requestedSamples": 0,
+            "actualSamples": 0
+          },
+          {
+            "width": 1600,
+            "height": 900,
+            "type": 1016,
+            "requestedSamples": 0,
+            "actualSamples": 0
+          }
+        ],
+        "calls": 1,
+        "triangles": 1,
+        "memory": {
+          "geometries": 1501,
+          "textures": 298
+        },
+        "jsHeap": 217750377
+      },
+      "camera": {
+        "position": [
+          46.20042740532611,
+          208.2878532625406,
+          -490.5572287766979
+        ],
+        "quaternion": [
+          -0.3702543457061976,
+          -0.5383996395935492,
+          -0.28410615187685734,
+          0.701656071046874
+        ],
+        "fov": 40,
+        "rig": [
+          254.75654126797372,
+          6.290483922693631,
+          -510.4076071434834
+        ]
+      }
+    },
+    {
+      "name": "gate-1",
+      "path": "/tmp/gt3-p3z-run/before/gate-1.png",
+      "settings": {
+        "probe": {
+          "mode": "race",
+          "locked": false,
+          "speed01": 0,
+          "progress": 0.08728131178602758,
+          "applied": 1,
+          "level": "high",
+          "still": 46509.4999999702,
+          "sinceSwitch": null,
+          "canvasW": 1600,
+          "ratio": 1
+        },
+        "css": {
+          "width": 1600,
+          "height": 900
+        },
+        "devicePixelRatio": 1,
+        "contextAntialias": true,
+        "canvasSamples": 4,
+        "maxSamples": 8,
+        "halfFloatSamples": [
+          8,
+          4,
+          2
+        ],
+        "gpu": "ANGLE (Intel, ANGLE Metal Renderer: Intel(R) UHD Graphics 617, Unspecified Version)",
+        "targets": [
+          {
+            "width": 1600,
+            "height": 900,
+            "type": 1016,
+            "requestedSamples": 0,
+            "actualSamples": 0
+          },
+          {
+            "width": 1600,
+            "height": 900,
+            "type": 1016,
+            "requestedSamples": 0,
+            "actualSamples": 0
+          }
+        ],
+        "calls": 1,
+        "triangles": 1,
+        "memory": {
+          "geometries": 1501,
+          "textures": 298
+        },
+        "jsHeap": 242558239
+      },
+      "camera": {
+        "position": [
+          -13.367706906894568,
+          208.2878532625406,
+          -329.0533412584342
+        ],
+        "quaternion": [
+          -0.3702543457061976,
+          -0.5383996395935492,
+          -0.28410615187685734,
+          0.701656071046874
+        ],
+        "fov": 40,
+        "rig": [
+          116.15983160672606,
+          3.486007918869609,
+          -379.64931982162904
+        ]
+      }
+    },
+    {
+      "name": "gate-2",
+      "path": "/tmp/gt3-p3z-run/before/gate-2.png",
+      "settings": {
+        "probe": {
+          "mode": "race",
+          "locked": false,
+          "speed01": 0,
+          "progress": 0.1769589121563959,
+          "applied": 1,
+          "level": "high",
+          "still": 51226.19999997318,
+          "sinceSwitch": null,
+          "canvasW": 1600,
+          "ratio": 1
+        },
+        "css": {
+          "width": 1600,
+          "height": 900
+        },
+        "devicePixelRatio": 1,
+        "contextAntialias": true,
+        "canvasSamples": 4,
+        "maxSamples": 8,
+        "halfFloatSamples": [
+          8,
+          4,
+          2
+        ],
+        "gpu": "ANGLE (Intel, ANGLE Metal Renderer: Intel(R) UHD Graphics 617, Unspecified Version)",
+        "targets": [
+          {
+            "width": 1600,
+            "height": 900,
+            "type": 1016,
+            "requestedSamples": 0,
+            "actualSamples": 0
+          },
+          {
+            "width": 1600,
+            "height": 900,
+            "type": 1016,
+            "requestedSamples": 0,
+            "actualSamples": 0
+          }
+        ],
+        "calls": 1,
+        "triangles": 1,
+        "memory": {
+          "geometries": 1501,
+          "textures": 298
+        },
+        "jsHeap": 223784091
+      },
+      "camera": {
+        "position": [
+          40.88229539020696,
+          208.2878532625406,
+          -688.9116307620582
+        ],
+        "quaternion": [
+          -0.3702543457061976,
+          -0.5383996395935492,
+          -0.28410615187685734,
+          0.701656071046874
+        ],
+        "fov": 40,
+        "rig": [
+          202.12854007980934,
+          7.813195130330378,
+          -727.9409654936153
+        ]
+      }
+    },
+    {
+      "name": "gate-3",
+      "path": "/tmp/gt3-p3z-run/before/gate-3.png",
+      "settings": {
+        "probe": {
+          "mode": "race",
+          "locked": false,
+          "speed01": 0,
+          "progress": 0.25169024579836985,
+          "applied": 1,
+          "level": "high",
+          "still": 55121.9999999702,
+          "sinceSwitch": null,
+          "canvasW": 1600,
+          "ratio": 1
+        },
+        "css": {
+          "width": 1600,
+          "height": 900
+        },
+        "devicePixelRatio": 1,
+        "contextAntialias": true,
+        "canvasSamples": 4,
+        "maxSamples": 8,
+        "halfFloatSamples": [
+          8,
+          4,
+          2
+        ],
+        "gpu": "ANGLE (Intel, ANGLE Metal Renderer: Intel(R) UHD Graphics 617, Unspecified Version)",
+        "targets": [
+          {
+            "width": 1600,
+            "height": 900,
+            "type": 1016,
+            "requestedSamples": 0,
+            "actualSamples": 0
+          },
+          {
+            "width": 1600,
+            "height": 900,
+            "type": 1016,
+            "requestedSamples": 0,
+            "actualSamples": 0
+          }
+        ],
+        "calls": 1,
+        "triangles": 1,
+        "memory": {
+          "geometries": 1501,
+          "textures": 298
+        },
+        "jsHeap": 236891295
+      },
+      "camera": {
+        "position": [
+          -11.781411361206324,
+          208.2878532625406,
+          -978.2309302511746
+        ],
+        "quaternion": [
+          -0.3702543457061976,
+          -0.5383996395935492,
+          -0.28410615187685734,
+          0.701656071046874
+        ],
+        "fov": 40,
+        "rig": [
+          129.77338229984736,
+          14.127118559625453,
+          -1028.2232468384552
+        ]
+      }
+    },
+    {
+      "name": "gate-4",
+      "path": "/tmp/gt3-p3z-run/before/gate-4.png",
+      "settings": {
+        "probe": {
+          "mode": "race",
+          "locked": false,
+          "speed01": 0,
+          "progress": 0.3862066463539223,
+          "applied": 1,
+          "level": "high",
+          "still": 60353.29999998212,
+          "sinceSwitch": null,
+          "canvasW": 1600,
+          "ratio": 1
+        },
+        "css": {
+          "width": 1600,
+          "height": 900
+        },
+        "devicePixelRatio": 1,
+        "contextAntialias": true,
+        "canvasSamples": 4,
+        "maxSamples": 8,
+        "halfFloatSamples": [
+          8,
+          4,
+          2
+        ],
+        "gpu": "ANGLE (Intel, ANGLE Metal Renderer: Intel(R) UHD Graphics 617, Unspecified Version)",
+        "targets": [
+          {
+            "width": 1600,
+            "height": 900,
+            "type": 1016,
+            "requestedSamples": 0,
+            "actualSamples": 0
+          },
+          {
+            "width": 1600,
+            "height": 900,
+            "type": 1016,
+            "requestedSamples": 0,
+            "actualSamples": 0
+          }
+        ],
+        "calls": 1,
+        "triangles": 1,
+        "memory": {
+          "geometries": 1501,
+          "textures": 298
+        },
+        "jsHeap": 234439855
+      },
+      "camera": {
+        "position": [
+          -343.54734097755227,
+          208.2878532625406,
+          -1382.312082974435
+        ],
+        "quaternion": [
+          -0.3702543457061976,
+          -0.5383996395935492,
+          -0.28410615187685734,
+          0.701656071046874
+        ],
+        "fov": 40,
+        "rig": [
+          -206.39223218977867,
+          2.3114869517917644,
+          -1446.3550371848044
+        ]
+      }
+    },
+    {
+      "name": "gate-5",
+      "path": "/tmp/gt3-p3z-run/before/gate-5.png",
+      "settings": {
+        "probe": {
+          "mode": "race",
+          "locked": false,
+          "speed01": 0,
+          "progress": 0.4908305134526856,
+          "applied": 1,
+          "level": "high",
+          "still": 64216.89999999106,
+          "sinceSwitch": null,
+          "canvasW": 1600,
+          "ratio": 1
+        },
+        "css": {
+          "width": 1600,
+          "height": 900
+        },
+        "devicePixelRatio": 1,
+        "contextAntialias": true,
+        "canvasSamples": 4,
+        "maxSamples": 8,
+        "halfFloatSamples": [
+          8,
+          4,
+          2
+        ],
+        "gpu": "ANGLE (Intel, ANGLE Metal Renderer: Intel(R) UHD Graphics 617, Unspecified Version)",
+        "targets": [
+          {
+            "width": 1600,
+            "height": 900,
+            "type": 1016,
+            "requestedSamples": 0,
+            "actualSamples": 0
+          },
+          {
+            "width": 1600,
+            "height": 900,
+            "type": 1016,
+            "requestedSamples": 0,
+            "actualSamples": 0
+          }
+        ],
+        "calls": 1,
+        "triangles": 1,
+        "memory": {
+          "geometries": 1501,
+          "textures": 298
+        },
+        "jsHeap": 246221222
+      },
+      "camera": {
+        "position": [
+          -669.6582683251489,
+          208.2878532625406,
+          -1428.965368274418
+        ],
+        "quaternion": [
+          -0.37025434570619775,
+          -0.5383996395935492,
+          -0.2841061518768574,
+          0.701656071046874
+        ],
+        "fov": 40,
+        "rig": [
+          -604.9396589150404,
+          10.878497377357652,
+          -1536.1133314514047
+        ]
+      }
+    },
+    {
+      "name": "gate-6",
+      "path": "/tmp/gt3-p3z-run/before/gate-6.png",
+      "settings": {
+        "probe": {
+          "mode": "race",
+          "locked": false,
+          "speed01": 0,
+          "progress": 0.5805081138230541,
+          "applied": 1,
+          "level": "high",
+          "still": 69375.89999997616,
+          "sinceSwitch": null,
+          "canvasW": 1600,
+          "ratio": 1
+        },
+        "css": {
+          "width": 1600,
+          "height": 900
+        },
+        "devicePixelRatio": 1,
+        "contextAntialias": true,
+        "canvasSamples": 4,
+        "maxSamples": 8,
+        "halfFloatSamples": [
+          8,
+          4,
+          2
+        ],
+        "gpu": "ANGLE (Intel, ANGLE Metal Renderer: Intel(R) UHD Graphics 617, Unspecified Version)",
+        "targets": [
+          {
+            "width": 1600,
+            "height": 900,
+            "type": 1016,
+            "requestedSamples": 0,
+            "actualSamples": 0
+          },
+          {
+            "width": 1600,
+            "height": 900,
+            "type": 1016,
+            "requestedSamples": 0,
+            "actualSamples": 0
+          }
+        ],
+        "calls": 1,
+        "triangles": 1,
+        "memory": {
+          "geometries": 1501,
+          "textures": 298
+        },
+        "jsHeap": 227802026
+      },
+      "camera": {
+        "position": [
+          -719.4259193083668,
+          208.2878532625406,
+          -1049.5411674498098
+        ],
+        "quaternion": [
+          -0.37025434570619775,
+          -0.5383996395935492,
+          -0.2841061518768574,
+          0.701656071046874
+        ],
+        "fov": 40,
+        "rig": [
+          -583.551464120699,
+          13.905464489636056,
+          -1086.3471669843266
+        ]
+      }
+    },
+    {
+      "name": "gate-7",
+      "path": "/tmp/gt3-p3z-run/before/gate-7.png",
+      "settings": {
+        "probe": {
+          "mode": "race",
+          "locked": false,
+          "speed01": 0,
+          "progress": 0.6751678031028875,
+          "applied": 1,
+          "level": "high",
+          "still": 73214.79999993742,
+          "sinceSwitch": null,
+          "canvasW": 1600,
+          "ratio": 1
+        },
+        "css": {
+          "width": 1600,
+          "height": 900
+        },
+        "devicePixelRatio": 1,
+        "contextAntialias": true,
+        "canvasSamples": 4,
+        "maxSamples": 8,
+        "halfFloatSamples": [
+          8,
+          4,
+          2
+        ],
+        "gpu": "ANGLE (Intel, ANGLE Metal Renderer: Intel(R) UHD Graphics 617, Unspecified Version)",
+        "targets": [
+          {
+            "width": 1600,
+            "height": 900,
+            "type": 1016,
+            "requestedSamples": 0,
+            "actualSamples": 0
+          },
+          {
+            "width": 1600,
+            "height": 900,
+            "type": 1016,
+            "requestedSamples": 0,
+            "actualSamples": 0
+          }
+        ],
+        "calls": 1,
+        "triangles": 1,
+        "memory": {
+          "geometries": 1501,
+          "textures": 298
+        },
+        "jsHeap": 223139913
+      },
+      "camera": {
+        "position": [
+          -727.676149834128,
+          208.2878532625406,
+          -595.4587993149867
+        ],
+        "quaternion": [
+          -0.37025434570619775,
+          -0.5383996395935492,
+          -0.2841061518768574,
+          0.701656071046874
+        ],
+        "fov": 40,
+        "rig": [
+          -638.3324587703006,
+          10.53100268504383,
+          -629.9058096206816
+        ]
+      }
+    },
+    {
+      "name": "gate-8",
+      "path": "/tmp/gt3-p3z-run/before/gate-8.png",
+      "settings": {
+        "probe": {
+          "mode": "race",
+          "locked": false,
+          "speed01": 0,
+          "progress": 0.7698274923827211,
+          "applied": 1,
+          "level": "high",
+          "still": 78947.29999992251,
+          "sinceSwitch": null,
+          "canvasW": 1600,
+          "ratio": 1
+        },
+        "css": {
+          "width": 1600,
+          "height": 900
+        },
+        "devicePixelRatio": 1,
+        "contextAntialias": true,
+        "canvasSamples": 4,
+        "maxSamples": 8,
+        "halfFloatSamples": [
+          8,
+          4,
+          2
+        ],
+        "gpu": "ANGLE (Intel, ANGLE Metal Renderer: Intel(R) UHD Graphics 617, Unspecified Version)",
+        "targets": [
+          {
+            "width": 1600,
+            "height": 900,
+            "type": 1016,
+            "requestedSamples": 0,
+            "actualSamples": 0
+          },
+          {
+            "width": 1600,
+            "height": 900,
+            "type": 1016,
+            "requestedSamples": 0,
+            "actualSamples": 0
+          }
+        ],
+        "calls": 1,
+        "triangles": 1,
+        "memory": {
+          "geometries": 1501,
+          "textures": 298
+        },
+        "jsHeap": 236516232
+      },
+      "camera": {
+        "position": [
+          -658.0118923330893,
+          208.2878532625406,
+          -155.55942055591692
+        ],
+        "quaternion": [
+          -0.37025434570619775,
+          -0.5383996395935492,
+          -0.2841061518768574,
+          0.701656071046874
+        ],
+        "fov": 40,
+        "rig": [
+          -514.6003630978746,
+          6.751229944181808,
+          -196.339675112769
+        ]
+      }
+    },
+    {
+      "name": "gate-9",
+      "path": "/tmp/gt3-p3z-run/before/gate-9.png",
+      "settings": {
+        "probe": {
+          "mode": "race",
+          "locked": false,
+          "speed01": 0,
+          "progress": 0.8545230038436247,
+          "applied": 1,
+          "level": "high",
+          "still": 82347.09999993443,
+          "sinceSwitch": null,
+          "canvasW": 1600,
+          "ratio": 1
+        },
+        "css": {
+          "width": 1600,
+          "height": 900
+        },
+        "devicePixelRatio": 1,
+        "contextAntialias": true,
+        "canvasSamples": 4,
+        "maxSamples": 8,
+        "halfFloatSamples": [
+          8,
+          4,
+          2
+        ],
+        "gpu": "ANGLE (Intel, ANGLE Metal Renderer: Intel(R) UHD Graphics 617, Unspecified Version)",
+        "targets": [
+          {
+            "width": 1600,
+            "height": 900,
+            "type": 1016,
+            "requestedSamples": 0,
+            "actualSamples": 0
+          },
+          {
+            "width": 1600,
+            "height": 900,
+            "type": 1016,
+            "requestedSamples": 0,
+            "actualSamples": 0
+          }
+        ],
+        "calls": 1,
+        "triangles": 1,
+        "memory": {
+          "geometries": 1501,
+          "textures": 298
+        },
+        "jsHeap": 188725270
+      },
+      "camera": {
+        "position": [
+          -525.4672413673277,
+          208.2878532625406,
+          173.02542696681365
+        ],
+        "quaternion": [
+          -0.3702543457061976,
+          -0.5383996395935492,
+          -0.2841061518768573,
+          0.701656071046874
+        ],
+        "fov": 40,
+        "rig": [
+          -430.15327504320453,
+          3.968299870354533,
+          210.2586634167211
+        ]
+      }
+    },
+    {
+      "name": "aa-none-edge",
+      "path": "/tmp/gt3-p3z-run/before/aa-none-edge.png",
+      "settings": {
+        "probe": {
+          "mode": "race",
+          "locked": false,
+          "speed01": 0,
+          "progress": 0.12614160527985382,
+          "applied": 1,
+          "level": "high",
+          "still": 86692.9999999553,
+          "sinceSwitch": null,
+          "canvasW": 1600,
+          "ratio": 1
+        },
+        "css": {
+          "width": 1600,
+          "height": 900
+        },
+        "devicePixelRatio": 1,
+        "contextAntialias": true,
+        "canvasSamples": 4,
+        "maxSamples": 8,
+        "halfFloatSamples": [
+          8,
+          4,
+          2
+        ],
+        "gpu": "ANGLE (Intel, ANGLE Metal Renderer: Intel(R) UHD Graphics 617, Unspecified Version)",
+        "targets": [
+          {
+            "width": 1600,
+            "height": 900,
+            "type": 1016,
+            "requestedSamples": 0,
+            "actualSamples": 0
+          },
+          {
+            "width": 1600,
+            "height": 900,
+            "type": 1016,
+            "requestedSamples": 0,
+            "actualSamples": 0
+          }
+        ],
+        "calls": 1,
+        "triangles": 1,
+        "memory": {
+          "geometries": 1501,
+          "textures": 298
+        },
+        "jsHeap": 187871090
+      },
+      "camera": {
+        "position": [
+          46.20042740532611,
+          208.2878532625406,
+          -490.5572287766979
+        ],
+        "quaternion": [
+          -0.3702543457061976,
+          -0.5383996395935492,
+          -0.28410615187685734,
+          0.701656071046874
+        ],
+        "fov": 40,
+        "rig": [
+          254.75654126797372,
+          6.290483922693631,
+          -510.4076071434834
+        ]
+      }
+    },
+    {
+      "name": "aa-none-lamborghini",
+      "path": "/tmp/gt3-p3z-run/before/aa-none-lamborghini.png",
+      "settings": {
+        "probe": {
+          "mode": "race",
+          "locked": false,
+          "speed01": 0,
+          "progress": 0.12614160527985382,
+          "applied": 1,
+          "level": "high",
+          "still": 90421.39999997616,
+          "sinceSwitch": null,
+          "canvasW": 1600,
+          "ratio": 1
+        },
+        "css": {
+          "width": 1600,
+          "height": 900
+        },
+        "devicePixelRatio": 1,
+        "contextAntialias": true,
+        "canvasSamples": 4,
+        "maxSamples": 8,
+        "halfFloatSamples": [
+          8,
+          4,
+          2
+        ],
+        "gpu": "ANGLE (Intel, ANGLE Metal Renderer: Intel(R) UHD Graphics 617, Unspecified Version)",
+        "targets": [
+          {
+            "width": 1600,
+            "height": 900,
+            "type": 1016,
+            "requestedSamples": 0,
+            "actualSamples": 0
+          },
+          {
+            "width": 1600,
+            "height": 900,
+            "type": 1016,
+            "requestedSamples": 0,
+            "actualSamples": 0
+          }
+        ],
+        "calls": 1,
+        "triangles": 1,
+        "memory": {
+          "geometries": 1501,
+          "textures": 298
+        },
+        "jsHeap": 188302205
+      },
+      "camera": {
+        "position": [
+          46.20042740532611,
+          208.2878532625406,
+          -490.5572287766979
+        ],
+        "quaternion": [
+          -0.3702543457061976,
+          -0.5383996395935492,
+          -0.28410615187685734,
+          0.701656071046874
+        ],
+        "fov": 40,
+        "rig": [
+          254.75654126797372,
+          6.289360498188063,
+          -510.4076071434834
+        ]
+      }
+    }
+  ],
+  "errors": [],
+  "performance": [
+    {
+      "label": "none-1600x900-dpr1-rest",
+      "motion": false,
+      "gpu": {
+        "n": 226,
+        "p50": 13.731333,
+        "p95": 14.944249,
+        "max": 16.1545,
+        "over100": 0
+      },
+      "raf": {
+        "n": 227,
+        "p50": 23.700000002980232,
+        "p95": 44.5,
+        "max": 92.29999999701977,
+        "over100": 0
+      },
+      "cpu": {
+        "n": 228,
+        "p50": 19.600000008940697,
+        "p95": 39.099999994039536,
+        "max": 55.8999999910593,
+        "over100": 0
+      },
+      "timerQuery": true,
+      "ratioRange": [
+        1
+      ],
+      "progressRange": [
+        0.12614160527985382,
+        0.12614160527985382
+      ],
+      "settings": {
+        "probe": {
+          "mode": "race",
+          "locked": false,
+          "speed01": 0,
+          "progress": 0.12614160527985382,
+          "applied": 1,
+          "level": "high",
+          "still": 97844.09999997914,
+          "sinceSwitch": null,
+          "canvasW": 1600,
+          "ratio": 1
+        },
+        "css": {
+          "width": 1600,
+          "height": 900
+        },
+        "devicePixelRatio": 1,
+        "contextAntialias": true,
+        "canvasSamples": 4,
+        "maxSamples": 8,
+        "halfFloatSamples": [
+          8,
+          4,
+          2
+        ],
+        "gpu": "ANGLE (Intel, ANGLE Metal Renderer: Intel(R) UHD Graphics 617, Unspecified Version)",
+        "targets": [
+          {
+            "width": 1600,
+            "height": 900,
+            "type": 1016,
+            "requestedSamples": 0,
+            "actualSamples": 0
+          },
+          {
+            "width": 1600,
+            "height": 900,
+            "type": 1016,
+            "requestedSamples": 0,
+            "actualSamples": 0
+          }
+        ],
+        "calls": 1,
+        "triangles": 1,
+        "memory": {
+          "geometries": 1501,
+          "textures": 298
+        },
+        "jsHeap": 188256682
+      }
+    },
+    {
+      "label": "none-1600x900-dpr1-motion",
+      "motion": true,
+      "gpu": {
+        "n": 196,
+        "p50": 14.287166,
+        "p95": 15.442749,
+        "max": 16.719499,
+        "over100": 0
+      },
+      "raf": {
+        "n": 197,
+        "p50": 28.399999991059303,
+        "p95": 50.70000000298023,
+        "max": 181.09999999403954,
+        "over100": 1
+      },
+      "cpu": {
+        "n": 198,
+        "p50": 15.100000008940697,
+        "p95": 28.399999991059303,
+        "max": 38,
+        "over100": 0
+      },
+      "timerQuery": true,
+      "ratioRange": [
+        1
+      ],
+      "progressRange": [
+        0.10820608520578015,
+        0.24313736688031665
+      ],
+      "settings": {
+        "probe": {
+          "mode": "race",
+          "locked": false,
+          "speed01": 0.4306770649564358,
+          "progress": 0.24313736688031665,
+          "applied": 1,
+          "level": "high",
+          "still": 0,
+          "sinceSwitch": null,
+          "canvasW": 1600,
+          "ratio": 1
+        },
+        "css": {
+          "width": 1600,
+          "height": 900
+        },
+        "devicePixelRatio": 1,
+        "contextAntialias": true,
+        "canvasSamples": 4,
+        "maxSamples": 8,
+        "halfFloatSamples": [
+          8,
+          4,
+          2
+        ],
+        "gpu": "ANGLE (Intel, ANGLE Metal Renderer: Intel(R) UHD Graphics 617, Unspecified Version)",
+        "targets": [
+          {
+            "width": 1600,
+            "height": 900,
+            "type": 1016,
+            "requestedSamples": 0,
+            "actualSamples": 0
+          },
+          {
+            "width": 1600,
+            "height": 900,
+            "type": 1016,
+            "requestedSamples": 0,
+            "actualSamples": 0
+          }
+        ],
+        "calls": 1,
+        "triangles": 1,
+        "memory": {
+          "geometries": 1501,
+          "textures": 298
+        },
+        "jsHeap": 189344539
+      }
+    }
+  ],
+  "gpu": {
+    "devices": [
+      {
+        "vendorId": 32902,
+        "deviceId": 34752,
+        "vendorString": "Google Inc. (Intel)",
+        "deviceString": "ANGLE (Intel, ANGLE Metal Renderer: Intel(R) UHD Graphics 617, Version 14.8.4 (Build 23J319))",
+        "driverVendor": "Intel",
+        "driverVersion": "14.8.4"
+      }
+    ],
+    "auxAttributes": {
+      "amdSwitchable": false,
+      "canSupportThreadedTextureMailbox": false,
+      "directRenderingVersion": "",
+      "displayType": "ANGLE_METAL",
+      "glExtensions": "GL_AMD_performance_monitor GL_ANGLE_base_vertex_base_instance_shader_builtin GL_ANGLE_blob_cache GL_ANGLE_client_arrays GL_ANGLE_clip_cull_distance GL_ANGLE_depth_texture GL_ANGLE_framebuffer_blit GL_ANGLE_framebuffer_multisample GL_ANGLE_get_serialized_context_string GL_ANGLE_get_tex_level_parameter GL_ANGLE_instanced_arrays GL_ANGLE_memory_size GL_ANGLE_pack_reverse_row_order GL_ANGLE_polygon_mode GL_ANGLE_program_binary_readiness_query GL_ANGLE_program_cache_control GL_ANGLE_provoking_vertex GL_ANGLE_renderability_validation GL_ANGLE_request_extension GL_ANGLE_rgbx_internal_format GL_ANGLE_robust_client_memory GL_ANGLE_shader_pixel_local_storage GL_ANGLE_shader_pixel_local_storage_coherent GL_ANGLE_stencil_texturing GL_ANGLE_texture_compression_dxt3 GL_ANGLE_texture_compression_dxt5 GL_ANGLE_texture_multisample GL_ANGLE_translated_shader_source GL_APPLE_clip_distance GL_ARM_rgba8 GL_CHROMIUM_bind_generates_resource GL_CHROMIUM_bind_uniform_location GL_CHROMIUM_copy_texture GL_CHROMIUM_lose_context GL_EXT_base_instance GL_EXT_blend_func_extended GL_EXT_blend_minmax GL_EXT_clip_control GL_EXT_color_buffer_float GL_EXT_color_buffer_half_float GL_EXT_compressed_ETC1_RGB8_sub_texture GL_EXT_conservative_depth GL_EXT_debug_label GL_EXT_debug_marker GL_EXT_depth_clamp GL_EXT_discard_framebuffer GL_EXT_disjoint_timer_query GL_EXT_draw_buffers GL_EXT_draw_buffers_indexed GL_EXT_draw_elements_base_vertex GL_EXT_float_blend GL_EXT_frag_depth GL_EXT_instanced_arrays GL_EXT_map_buffer_range GL_EXT_occlusion_query_boolean GL_EXT_polygon_offset_clamp GL_EXT_read_format_bgra GL_EXT_render_snorm GL_EXT_robustness GL_EXT_sRGB GL_EXT_shader_texture_lod GL_EXT_texture_compression_bptc GL_EXT_texture_compression_dxt1 GL_EXT_texture_compression_rgtc GL_EXT_texture_compression_s3tc_srgb GL_EXT_texture_filter_anisotropic GL_EXT_texture_format_BGRA8888 GL_EXT_texture_mirror_clamp_to_edge GL_EXT_texture_norm16 GL_EXT_texture_rg GL_EXT_texture_shadow_lod GL_EXT_texture_storage GL_KHR_debug GL_KHR_parallel_shader_compile GL_KHR_robustness GL_MESA_framebuffer_flip_y GL_NV_fence GL_NV_framebuffer_blit GL_NV_pixel_buffer_object GL_NV_shader_noperspective_interpolation GL_OES_EGL_image GL_OES_EGL_sync GL_OES_compressed_ETC1_RGB8_texture GL_OES_depth24 GL_OES_depth32 GL_OES_depth_texture GL_OES_draw_buffers_indexed GL_OES_draw_elements_base_vertex GL_OES_element_index_uint GL_OES_fbo_render_mipmap GL_OES_get_program_binary GL_OES_mapbuffer GL_OES_packed_depth_stencil GL_OES_required_internalformat GL_OES_rgb8_rgba8 GL_OES_sample_variables GL_OES_shader_multisample_interpolation GL_OES_standard_derivatives GL_OES_surfaceless_context GL_OES_texture_3D GL_OES_texture_float GL_OES_texture_float_linear GL_OES_texture_half_float GL_OES_texture_half_float_linear GL_OES_texture_npot GL_OES_texture_stencil8 GL_OES_vertex_array_object ",
+      "glImplementationParts": "(gl=egl-angle,angle=metal)",
+      "glRenderer": "ANGLE (Intel, ANGLE Metal Renderer: Intel(R) UHD Graphics 617, Version 14.8.4 (Build 23J319))",
+      "glResetNotificationStrategy": 33362,
+      "glVendor": "Google Inc. (Intel)",
+      "glVersion": "OpenGL ES 3.0 (ANGLE 2.1.28853 git hash: 170484eea03a)",
+      "glWsExtensions": "",
+      "glWsVendor": "",
+      "glWsVersion": "",
+      "inProcessGpu": false,
+      "initializationTime": 0.134393,
+      "isAsan": false,
+      "isClangCoverage": false,
+      "jpegDecodeAcceleratorSupported": false,
+      "maxMsaaSamples": "8",
+      "optimus": false,
+      "passthroughCmdDecoder": true,
+      "pixelShaderVersion": "3.00",
+      "processCrashCount": 0,
+      "sandboxed": false,
+      "skiaBackendType": "GraphiteDawnMetal",
+      "subpixelFontRendering": true,
+      "targetCpuBits": 64,
+      "vertexShaderVersion": "3.00",
+      "visibilityCallbackCallCount": 0
+    }
+  },
+  "browser": "Chrome/155.0.8059.40",
+  "baselineSettings": {
+    "probe": {
+      "mode": "race",
+      "locked": false,
+      "speed01": 0,
+      "progress": 0,
+      "applied": 1,
+      "level": "high",
+      "still": 148.09999999403954,
+      "sinceSwitch": null,
+      "canvasW": 1600,
+      "ratio": 1
+    },
+    "css": {
+      "width": 1600,
+      "height": 900
+    },
+    "devicePixelRatio": 1,
+    "contextAntialias": true,
+    "canvasSamples": 4,
+    "maxSamples": 8,
+    "halfFloatSamples": [
+      8,
+      4,
+      2
+    ],
+    "gpu": "ANGLE (Intel, ANGLE Metal Renderer: Intel(R) UHD Graphics 617, Unspecified Version)",
+    "targets": [
+      {
+        "width": 1600,
+        "height": 900,
+        "type": 1016,
+        "requestedSamples": 0,
+        "actualSamples": 0
+      },
+      {
+        "width": 1600,
+        "height": 900,
+        "type": 1016,
+        "requestedSamples": 0,
+        "actualSamples": 0
+      }
+    ],
+    "calls": 1,
+    "triangles": 1,
+    "memory": {
+      "geometries": 1501,
+      "textures": 298
+    },
+    "jsHeap": 211466158
+  },
+  "checkpoints": [
+    {
+      "gate": 1,
+      "t": 0.09,
+      "progress": 0.09325981847738549,
+      "stripeCenterErrorM": 3.1115780168873325e-06,
+      "postPosition": [
+        152.85198974609375,
+        7.826475620269775,
+        -379.6091003417969
+      ]
+    },
+    {
+      "gate": 2,
+      "t": 0.18,
+      "progress": 0.1829374188477538,
+      "stripeCenterErrorM": 7.24035295359392e-06,
+      "postPosition": [
+        190.63644409179688,
+        12.799660682678223,
+        -762.7194213867188
+      ]
+    },
+    {
+      "gate": 3,
+      "t": 0.255,
+      "progress": 0.25766875248972754,
+      "stripeCenterErrorM": 2.8452545380277785e-05,
+      "postPosition": [
+        166.8753662109375,
+        17.521095275878906,
+        -1036.8302001953125
+      ]
+    },
+    {
+      "gate": 4,
+      "t": 0.39,
+      "progress": 0.39218515304528045,
+      "stripeCenterErrorM": 2.01903118643628e-06,
+      "postPosition": [
+        -230.23040771484375,
+        6.619945526123047,
+        -1471.2176513671875
+      ]
+    },
+    {
+      "gate": 5,
+      "t": 0.495,
+      "progress": 0.49680902014404366,
+      "stripeCenterErrorM": 2.811467535917031e-05,
+      "postPosition": [
+        -622.9130249023438,
+        15.327781677246094,
+        -1504.86669921875
+      ]
+    },
+    {
+      "gate": 6,
+      "t": 0.585,
+      "progress": 0.586486620514412,
+      "stripeCenterErrorM": 1.1532045001922796e-05,
+      "postPosition": [
+        -599.1906127929688,
+        17.60812759399414,
+        -1055.4456787109375
+      ]
+    },
+    {
+      "gate": 7,
+      "t": 0.68,
+      "progress": 0.6811463097942456,
+      "stripeCenterErrorM": 6.907379200326535e-06,
+      "postPosition": [
+        -650.963134765625,
+        14.137344360351562,
+        -599.1624755859375
+      ]
+    },
+    {
+      "gate": 8,
+      "t": 0.775,
+      "progress": 0.7758059990740788,
+      "stripeCenterErrorM": 9.926916755305912e-06,
+      "postPosition": [
+        -531.865234375,
+        10.471380233764648,
+        -165.35289001464844
+      ]
+    },
+    {
+      "gate": 9,
+      "t": 0.86,
+      "progress": 0.8605015105349823,
+      "stripeCenterErrorM": 3.838463896950562e-06,
+      "postPosition": [
+        -420.76702880859375,
+        7.7998046875,
+        243.1949005126953
+      ]
+    }
+  ],
+  "inventory": {
+    "trees": false,
+    "variant": "full",
+    "furniture": [
+      {
+        "name": "braking-150-100-50",
+        "instances": 9
+      },
+      {
+        "name": "furniture-concrete",
+        "instances": 34
+      },
+      {
+        "name": "furniture-steel",
+        "instances": 505
+      },
+      {
+        "name": "furniture-service",
+        "instances": 10
+      },
+      {
+        "name": "furniture-marshal",
+        "instances": 2
+      },
+      {
+        "name": "furniture-catch-fencing",
+        "instances": 91
+      }
+    ],
+    "boards": [
+      {
+        "zone": "hairpin",
+        "distance": 150,
+        "t": 0.2240408622758997,
+        "lateral": -22.41114956088421
+      },
+      {
+        "zone": "hairpin",
+        "distance": 100,
+        "t": 0.23402724151726648,
+        "lateral": -23.704925305464183
+      },
+      {
+        "zone": "hairpin",
+        "distance": 50,
+        "t": 0.24401362075863325,
+        "lateral": -23.790515841000747
+      },
+      {
+        "zone": "slowdown-1-in",
+        "distance": 150,
+        "t": 0.5850408622758997,
+        "lateral": 21.23651855951456
+      },
+      {
+        "zone": "slowdown-1-in",
+        "distance": 100,
+        "t": 0.5950272415172665,
+        "lateral": 22.22819151819106
+      },
+      {
+        "zone": "slowdown-1-in",
+        "distance": 50,
+        "t": 0.6050136207586332,
+        "lateral": 23
+      },
+      {
+        "zone": "slowdown-2-in",
+        "distance": 150,
+        "t": 0.6760408622758997,
+        "lateral": -23.047593270708727
+      },
+      {
+        "zone": "slowdown-2-in",
+        "distance": 100,
+        "t": 0.6860272415172665,
+        "lateral": -21.2
+      },
+      {
+        "zone": "slowdown-2-in",
+        "distance": 50,
+        "t": 0.6960136207586332,
+        "lateral": -21.623745283273152
+      }
+    ],
+    "glCalls": {
+      "createProgram": 110,
+      "compileShader": 220,
+      "createTexture": 302,
+      "createBuffer": 5742,
+      "bufferData": 5742,
+      "texImage2D": 11,
+      "texImage3D": 2,
+      "texStorage2D": 294,
+      "texStorage3D": 0,
+      "compressedTexImage2D": 0,
+      "compressedTexImage3D": 0,
+      "texSubImage2D": 294,
+      "texSubImage3D": 0,
+      "compressedTexSubImage2D": 0,
+      "compressedTexSubImage3D": 0
+    }
+  },
+  "pass": false,
+  "failure": "Error: Host monitor requested heavy-work stop; preserve partial evidence.\n    at healthy (file:///Users/rayyansheikh/Desktop/gt3/.claude/worktrees/p3z-render/scripts/capture-p3z-render.mjs:28:9)\n    at async seek (file:///Users/rayyansheikh/Desktop/gt3/.claude/worktrees/p3z-render/scripts/capture-p3z-render.mjs:41:5)\n    at async file:///Users/rayyansheikh/Desktop/gt3/.claude/worktrees/p3z-render/scripts/capture-p3z-render.mjs:189:5"
+}

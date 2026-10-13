@@ -1,0 +1,276 @@
+{
+  "sha": "6cce609e260bc33c3c823e1e1d7ffd9e163f85d3",
+  "tree": "M scripts/verify-facility.mjs\n?? docs/review/p3z-render/",
+  "base": "http://127.0.0.1:5211",
+  "variants": [
+    {
+      "query": "",
+      "constants": {
+        "first": 0.0035822181070169286,
+        "length": 5024.8196682221,
+        "grid": 0.996404903473108,
+        "slot": "p1"
+      },
+      "grid": {
+        "error": 0,
+        "vertices": 1740,
+        "slots": [
+          {
+            "distance": 18,
+            "lateral": 6,
+            "width": 9.6248,
+            "length": 15.42
+          },
+          {
+            "distance": 26,
+            "lateral": -6,
+            "width": 9.6248,
+            "length": 15.42
+          },
+          {
+            "distance": 44,
+            "lateral": 6,
+            "width": 9.6248,
+            "length": 15.42
+          },
+          {
+            "distance": 52,
+            "lateral": -6,
+            "width": 9.6248,
+            "length": 15.42
+          },
+          {
+            "distance": 70,
+            "lateral": 6,
+            "width": 9.6248,
+            "length": 15.42
+          },
+          {
+            "distance": 78,
+            "lateral": -6,
+            "width": 9.6248,
+            "length": 15.42
+          },
+          {
+            "distance": 96,
+            "lateral": 6,
+            "width": 9.6248,
+            "length": 15.42
+          },
+          {
+            "distance": 104,
+            "lateral": -6,
+            "width": 9.6248,
+            "length": 15.42
+          },
+          {
+            "distance": 122,
+            "lateral": 6,
+            "width": 9.6248,
+            "length": 15.42
+          },
+          {
+            "distance": 130,
+            "lateral": -6,
+            "width": 9.6248,
+            "length": 15.42
+          }
+        ],
+        "parked": {
+          "distance": 18,
+          "lateral": 6,
+          "width": 9.6248,
+          "length": 15.42
+        }
+      },
+      "neutral": {
+        "p": 0.0036319711362810523,
+        "t": 4.9931896206834026e-05,
+        "active": 0,
+        "unlocked": [
+          0
+        ],
+        "mode": "race",
+        "locked": false,
+        "finishTailMeters": 0,
+        "morphing": false,
+        "signals": false,
+        "sfx": {},
+        "audio": 0
+      },
+      "shots": [
+        "/tmp/gt3-p3z-run/facility-geometry/p1-day-grid-gantry.png",
+        "/tmp/gt3-p3z-run/facility-geometry/p1-day-braking-boards.png",
+        "/tmp/gt3-p3z-run/facility-geometry/p1-day-barrier.png",
+        "/tmp/gt3-p3z-run/facility-geometry/p1-night-grid-spot.png"
+      ],
+      "inventory": {
+        "variant": "full",
+        "trees": false,
+        "lane": true
+      },
+      "geometryOnly": true,
+      "returnObservation": {
+        "p": 1,
+        "t": 0,
+        "active": 9,
+        "unlocked": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "mode": "finish",
+        "locked": false,
+        "finishTailMeters": 0,
+        "morphing": false,
+        "signals": true,
+        "sfx": {
+          "checkpointCross": 3,
+          "audible": 0
+        },
+        "audio": 0
+      }
+    },
+    {
+      "query": "?grid=p2&props=lean",
+      "constants": {
+        "first": 0.005166090127203941,
+        "length": 5032.8196682221,
+        "grid": 0.9948070827944893,
+        "slot": "p2"
+      },
+      "grid": {
+        "error": 0,
+        "vertices": 1740,
+        "slots": [
+          {
+            "distance": 18,
+            "lateral": 6,
+            "width": 9.6248,
+            "length": 15.42
+          },
+          {
+            "distance": 26,
+            "lateral": -6,
+            "width": 9.6248,
+            "length": 15.42
+          },
+          {
+            "distance": 44,
+            "lateral": 6,
+            "width": 9.6248,
+            "length": 15.42
+          },
+          {
+            "distance": 52,
+            "lateral": -6,
+            "width": 9.6248,
+            "length": 15.42
+          },
+          {
+            "distance": 70,
+            "lateral": 6,
+            "width": 9.6248,
+            "length": 15.42
+          },
+          {
+            "distance": 78,
+            "lateral": -6,
+            "width": 9.6248,
+            "length": 15.42
+          },
+          {
+            "distance": 96,
+            "lateral": 6,
+            "width": 9.6248,
+            "length": 15.42
+          },
+          {
+            "distance": 104,
+            "lateral": -6,
+            "width": 9.6248,
+            "length": 15.42
+          },
+          {
+            "distance": 122,
+            "lateral": 6,
+            "width": 9.6248,
+            "length": 15.42
+          },
+          {
+            "distance": 130,
+            "lateral": -6,
+            "width": 9.6248,
+            "length": 15.42
+          }
+        ],
+        "parked": {
+          "distance": 26,
+          "lateral": -6,
+          "width": 9.6248,
+          "length": 15.42
+        }
+      },
+      "neutral": {
+        "p": 0.005215764070734748,
+        "t": 4.9931896206834026e-05,
+        "active": 0,
+        "unlocked": [
+          0
+        ],
+        "mode": "race",
+        "locked": false,
+        "finishTailMeters": 0,
+        "morphing": false,
+        "signals": false,
+        "sfx": {},
+        "audio": 0
+      },
+      "shots": [
+        "/tmp/gt3-p3z-run/facility-geometry/p2-day-grid-gantry.png"
+      ],
+      "inventory": {
+        "variant": "lean",
+        "trees": false,
+        "lane": false
+      },
+      "geometryOnly": true,
+      "returnObservation": {
+        "p": 1,
+        "t": 0,
+        "active": 9,
+        "unlocked": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "mode": "finish",
+        "locked": false,
+        "finishTailMeters": 0,
+        "morphing": false,
+        "signals": true,
+        "sfx": {
+          "checkpointCross": 1,
+          "audible": 0
+        },
+        "audio": 0
+      }
+    }
+  ],
+  "errors": [],
+  "pass": true
+}

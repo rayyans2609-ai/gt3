@@ -12,6 +12,7 @@ const browser=await puppeteer.launch({executablePath:'/Applications/Google Chrom
 process.once('SIGTERM',async()=>{await browser.close();process.exit(143);});
 try {
 const captureOnly=process.env.GT3_CAPTURE_ONLY==='1';
+const geometryOnly=process.env.GT3_GEOMETRY_ONLY==='1';
 const queries=process.env.GT3_QUERIES!==undefined?process.env.GT3_QUERIES.split('|'):['', '?grid=p2&gantry=plain&props=lean'];
 for(const query of queries) {
  const page=await browser.newPage();
@@ -25,7 +26,8 @@ for(const query of queries) {
  const snap=()=>page.evaluate(async()=>{
   const {state}=await import('/src/core/state.js');const r=await import('/src/scene/trackCurve.js');
   const {isMorphing}=await import('/src/scene/morph.js');const g=window.__gt3.scene.getObjectByName('finish-line-gate');
-  return {p:state.progress,t:r.routeTAt(state.progress),active:state.activeCarIndex,unlocked:[...state.unlocked],mode:state.mode,locked:state.scrollLocked,morphing:isMorphing(),signals:g.userData.signalling,sfx:{...window.__gt3SfxLog},audio:window.__audioStarts};
+  return {p:state.progress,t:r.routeTAt(state.progress),active:state.activeCarIndex,unlocked:[...state.unlocked],mode:state.mode,locked:state.scrollLocked,
+   finishTailMeters:state.finishTailMeters,morphing:isMorphing(),signals:g.userData.signalling,sfx:{...window.__gt3SfxLog},audio:window.__audioStarts};
  });
  const seek=async p=>{
   await page.evaluate(async p=>(await import('/src/scroll/scrollDrive.js')).seekTo(p,{instant:true}),p);
@@ -35,8 +37,18 @@ for(const query of queries) {
  const constants=await page.evaluate(async()=>{const r=await import('/src/scene/trackCurve.js');return {first:r.FIRST_LINE_PROGRESS,length:r.TOUR_LENGTH,grid:r.GRID_T,slot:r.GRID_SLOT};});
  const grid=await page.evaluate(async()=>{
   const r=await import('/src/scene/trackCurve.js');const rig=window.__gt3.scene.getObjectByName('car-rig');
-  const expected=r.offsetPointAt(r.GRID_T,r.GRID_LATERAL);return {error:Math.hypot(rig.position.x-expected.x,rig.position.z-expected.z),boxes:window.__gt3.scene.getObjectByName('staggered-grid-paint')?.geometry.getAttribute('position').count};
- });assert(grid.error<.05,'car is not in its grid slot');assert(grid.boxes===180,'grid is not ten merged U boxes');
+  const paint=window.__gt3.scene.getObjectByName('staggered-grid-paint');
+  const expected=r.offsetPointAt(r.GRID_T,r.GRID_LATERAL);
+  const slots=paint?.geometry.userData.slots;
+  return {error:Math.hypot(rig.position.x-expected.x,rig.position.z-expected.z),
+   vertices:paint?.geometry.getAttribute('position').count,slots,
+   parked:slots?.find(b=>b.distance===r.GRID_DISTANCE && b.lateral===r.GRID_LATERAL)};
+ });assert(grid.error<.05,'car is not in its grid slot');assert(grid.slots?.length===10 && grid.vertices>=180,'grid is not ten merged U boxes');
+ assert(grid.parked,'parked car has no matching front slot');
+ for(const side of [-6,6]) {
+  const rows=grid.slots.filter(b=>b.lateral===side);
+  for(let i=1;i<rows.length;i++)assert(rows[i].distance-rows[i-1].distance>(rows[i].length+rows[i-1].length)/2+5,'grid rows are too close');
+ }
  if(captureOnly) {
   const shots=[];
   const label=query.replace(/[^a-z0-9-]/gi,'-')||'default';
@@ -79,8 +91,16 @@ for(const query of queries) {
   await seek(0);await capture('night-grid-spot');
   await page.evaluate(async()=>(await import('/src/scene/theme.js')).applyTheme('day',{instant:true}));
  }
+ if(geometryOnly) {
+  const inventory=await page.evaluate(()=>({variant:window.__gt3.scene.getObjectByName('trackside-furniture').userData.variant,
+   trees:!!window.__gt3.scene.getObjectByName('roadside-trees'),lane:!!window.__gt3.scene.getObjectByName('parallel-pit-lane')}));
+  await seek(1);const returnObservation=await snap();
+  report.variants.push({query,constants,grid,neutral,shots,inventory,geometryOnly,returnObservation});
+  await page.close();continue;
+ }
  await seek(1-2/constants.length);const approaching=await snap();assert(approaching.mode==='race' && approaching.signals,'finish approach incorrect');
  const activeBefore=approaching.active;await seek(1);const finish=await snap();
+ report.lastFinishObservation={query,constants,grid,neutral,approaching,finish};
  assert(finish.mode==='finish' && finish.locked && finish.t===0 && finish.active===activeBefore && finish.active===9,'return line completion incorrect');
  await wait(600);await page.reload({waitUntil:'domcontentloaded',timeout:180000});await ready();await wait(500);
  const restored=await snap();assert(restored.p===1 && restored.mode==='finish' && restored.audio===0,'finish refresh was not complete and silent');

@@ -42,6 +42,12 @@ const recordPhase = async (name, work) => {
   }
 };
 const report = { base, lean, renderer: softwareGL ? 'SwiftShader fallback' : 'ANGLE/Metal', phases, errors };
+report.browserPid = browser.process().pid;
+process.once('SIGTERM', async () => {
+  report.hostStopped = true;
+  await writeFile(`${root}/verification.json`, JSON.stringify(report, null, 2));
+  await browser.close(); process.exit(143);
+});
 
 try {
   const ready = await recordPhase('startup', async () => {
@@ -137,6 +143,14 @@ try {
     }
     report.gpuCrossings = crossings;
   });
+  if (process.env.GT3_GATES_ONLY === '1') {
+    Object.assign(report, { gatesOnly: true, thresholds, errors,
+      failed: phases.filter(p => p.status === 'FAIL').length + errors.length });
+    await writeFile(`${root}/verification.json`, JSON.stringify(report, null, 2));
+    console.log(JSON.stringify(report, null, 2));
+    await browser.close();
+    process.exit(report.failed ? 1 : 0);
+  }
 
 
   const forward = [];

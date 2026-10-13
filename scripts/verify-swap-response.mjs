@@ -26,6 +26,11 @@ const launchBrowser = () => puppeteer.launch({
   defaultViewport: { width: 1600, height: 900 },
 });
 report.browserPids = [];
+process.once('SIGTERM', async () => {
+  report.hostStopped = true;
+  await writeFile(`${outDir}/report.json`, JSON.stringify(report, null, 2));
+  await browser?.close(); process.exit(143);
+});
 
 async function variant(name, query) {
   browser = await launchBrowser();
@@ -219,6 +224,9 @@ async function variant(name, query) {
       if (name.startsWith('auto')) assert(after.swapTreatment === (after.theme === 'night' ? 'pulse' : 'crossfade'), 'wrong theme-selected treatment');
       return checkResourceDelta(before, after, 'cold first crossing');
     });
+    // Scene/post-processing changes need this cold proof in each theme, without
+    // replaying the unchanged reversal/retarget/UI suite on an 8 GB host.
+    if (process.env.GT3_COLD_ONLY === '1') return;
 
     for (const theme of ['day', 'night']) {
       await page.evaluate(async t => (await import('/src/scene/theme.js')).applyTheme(t, { instant: true }), theme);

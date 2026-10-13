@@ -1,0 +1,9 @@
+{
+  "sha": "6cce609e260bc33c3c823e1e1d7ffd9e163f85d3",
+  "tree": "?? docs/review/p3z-render/",
+  "base": "http://127.0.0.1:5211",
+  "variants": [],
+  "errors": [],
+  "pass": false,
+  "failure": "Error: return line completion incorrect\n    at assert (file:///Users/rayyansheikh/Desktop/gt3/.claude/worktrees/p3z-render/scripts/verify-facility.mjs:7:38)\n    at file:///Users/rayyansheikh/Desktop/gt3/.claude/worktrees/p3z-render/scripts/verify-facility.mjs:94:2"
+}

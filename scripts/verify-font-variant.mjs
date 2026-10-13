@@ -56,6 +56,18 @@ try {
         gridSlot: r.GRID_SLOT, gridLateral: r.GRID_LATERAL,
       };
     });
+    report.variants[name] = { query, firstPaintFlag, facts, fit };
+    for (const [i, car] of fit.entries()) {
+      const box = await page.evaluate(async i => {
+        const { CARS } = await import('/src/data/cars.js'); const car = CARS[i];
+        const slot = document.querySelector('.hud-identity__slot.is-visible');
+        slot.querySelector('.hud-identity__name').textContent = car.displayName;
+        slot.querySelector('.hud-identity__headline').textContent = car.showcase?.headline ?? '';
+        const r = document.querySelector('#hud-topleft').getBoundingClientRect();
+        return { x: r.x, y: r.y, width: r.width, height: r.height };
+      }, i);
+      await page.screenshot({ path: `${out}/${name}-identity-${i}.png`, clip: { x: box.x - 6, y: box.y - 6, width: box.width + 12, height: box.height + 12 } });
+    }
     const sw = name !== 'default';
     assert.equal(firstPaintFlag, sw ? 'sw' : null, `${name}: flag not set before first paint`);
     assert.equal(facts.flag, sw ? 'sw' : null);

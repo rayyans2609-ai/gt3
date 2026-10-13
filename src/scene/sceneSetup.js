@@ -10,6 +10,7 @@ import * as THREE from 'three';
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
+import { SMAAPass } from 'three/addons/postprocessing/SMAAPass.js';
 import { state } from '../core/state.js';
 import { TUNE as aerialTuning } from './aerialCamera.js';
 import { COMP } from './composition.js';
@@ -68,6 +69,7 @@ export let ambient;
 export let rimLight;
 
 let motionBlurPass;
+let antialiasPass;
 let premiumPass;
 let followedSunTarget;
 let lastProjectedFov = aerialTuning.fov;
@@ -246,6 +248,13 @@ function createPostProcessing() {
   motionBlurPass = new ShaderPass(RADIAL_MOTION_BLUR_SHADER);
   composer.addPass(motionBlurPass);
 
+  // The scene renders into the composer's single-sample targets, so canvas
+  // antialiasing only sees the final fullscreen triangle. Spatial SMAA treats
+  // scene silhouettes and paint before grain, without multisampling both large
+  // half-float buffers. setSize() follows the existing adaptive DPR automatically.
+  antialiasPass = new SMAAPass();
+  composer.addPass(antialiasPass);
+
   premiumPass = new ShaderPass(PREMIUM_WASH_SHADER);
   composer.addPass(premiumPass);
 }
@@ -355,7 +364,7 @@ export function updateScene(dt) {
   }
 }
 
-/** Render the race scene through the three-pass post-processing chain. */
+/** Render the race scene through the composed spatial-AA chain. */
 export function render(dt) {
   if (!composer) return;
   composer.render(dt);
@@ -401,7 +410,7 @@ export function initScene() {
   }
   // TEMPORARY (perf pass): runtime handles so the profiler can A/B cost centres.
   window.__gt3 = { scene, camera, renderer, composer,
-    passes: { motionBlur: motionBlurPass, wash: premiumPass }, resizeScene,
+    passes: { motionBlur: motionBlurPass, antialias: antialiasPass, wash: premiumPass }, resizeScene,
     probe: () => ({ mode: state.mode, locked: state.scrollLocked, speed01: state.speed01,
       progress: state.progress, applied: appliedResolution, level: activeResolutionLevel,
       still: stillTimeMs, sinceSwitch: timeSinceResolutionSwitchMs,

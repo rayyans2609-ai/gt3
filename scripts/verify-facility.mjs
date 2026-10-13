@@ -1,4 +1,4 @@
-/** Option A line semantics, reverse-out, silent finish refresh and representative captures. */
+/** Option A line semantics, V1 finish lock (2026-10-13), silent finish refresh, Replay and representative captures. */
 import puppeteer from 'puppeteer-core';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { execFileSync } from 'node:child_process';
@@ -29,6 +29,8 @@ for(const query of queries) {
   return {p:state.progress,t:r.routeTAt(state.progress),active:state.activeCarIndex,unlocked:[...state.unlocked],mode:state.mode,locked:state.scrollLocked,
    finishTailMeters:state.finishTailMeters,morphing:isMorphing(),signals:g.userData.signalling,sfx:{...window.__gt3SfxLog},audio:window.__audioStarts};
  });
+ // V1 finish: completion needs real driving 5 m through the line, not a programmatic seek to it.
+ const driveToFinish=async()=>{for(let i=0;i<40&&(await snap()).mode!=='finish';i++){await page.mouse.wheel({deltaY:120});await wait(120);}await wait(400);};
  const seek=async p=>{
   await page.evaluate(async p=>(await import('/src/scroll/scrollDrive.js')).seekTo(p,{instant:true}),p);
   await page.waitForFunction(async()=>!(await import('/src/scene/morph.js')).isMorphing(),{timeout:15000});await wait(350);
@@ -99,19 +101,21 @@ for(const query of queries) {
   await page.close();continue;
  }
  await seek(1-2/constants.length);const approaching=await snap();assert(approaching.mode==='race' && approaching.signals,'finish approach incorrect');
- const activeBefore=approaching.active;await seek(1);const finish=await snap();
+ const activeBefore=approaching.active;await driveToFinish();const finish=await snap();
  report.lastFinishObservation={query,constants,grid,neutral,approaching,finish};
- assert(finish.mode==='finish' && finish.locked && finish.t===0 && finish.active===activeBefore && finish.active===9,'return line completion incorrect');
+ assert(finish.mode==='finish' && finish.locked && finish.p===1 && finish.finishTailMeters>=5 && finish.finishTailMeters<30 && finish.active===activeBefore && finish.active===9,'return line completion incorrect');
  await wait(600);await page.reload({waitUntil:'domcontentloaded',timeout:180000});await ready();await wait(500);
- const restored=await snap();assert(restored.p===1 && restored.mode==='finish' && restored.audio===0,'finish refresh was not complete and silent');
+ const restored=await snap();assert(restored.p===1 && restored.mode==='finish' && restored.locked && restored.audio===0,'finish refresh was not complete and silent');
  await page.mouse.wheel({deltaY:-120});await wait(500);const reversed=await snap();
- assert(reversed.p<1 && reversed.mode==='race' && !reversed.locked && reversed.active===9,'finish reverse-out failed');
- await seek(1);assert((await snap()).mode==='finish','finish did not re-arm');
+ assert(reversed.p===1 && reversed.mode==='finish' && reversed.locked && reversed.active===9,'V1 completion lock let reverse input through');
+ await page.click('.finish-replay');await wait(1200);const replay=await snap();
+ assert(replay.p===0 && replay.mode==='race' && !replay.locked && replay.finishTailMeters===0,'Replay Route did not reset');
+ await seek(1-2/constants.length);await driveToFinish();assert((await snap()).mode==='finish','finish did not re-arm');
  const inventory=await page.evaluate(()=>{
   const gt3=window.__gt3;const result={drawCalls:gt3.renderer.info.render.calls,triangles:gt3.renderer.info.render.triangles,geometries:gt3.renderer.info.memory.geometries,furniture:[]};
   gt3.scene.getObjectByName('trackside-furniture').traverse(o=>{if(o.isMesh)result.furniture.push({name:o.name,instances:o.count,triangles:(o.geometry.index?.count||o.geometry.getAttribute('position').count)/3*(o.count||1)});});
   return result;
- });report.variants.push({query,constants,grid,neutral,approaching,finish,restored,reversed,shots,inventory});
+ });report.variants.push({query,constants,grid,neutral,approaching,finish,restored,reversed,replay,shots,inventory});
  await page.close();
 }
 assert(report.errors.length===0,`browser errors: ${report.errors.join(' | ')}`);

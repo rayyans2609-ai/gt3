@@ -323,7 +323,14 @@ async function variant(name, query) {
     }
 
     await record('replay returns to Lexus and keeps discoveries', async () => {
-      await seek(1);
+      // V1 finish: drive the last metres through the line; a seek to the line does not complete.
+      const tourLength = await page.evaluate(async () => (await import('/src/scene/trackCurve.js')).TOUR_LENGTH);
+      await seek(1 - 2 / tourLength);
+      for (let i = 0; i < 40; i++) {
+        const done = await page.evaluate(async () => (await import('/src/core/state.js')).state.mode === 'finish');
+        if (done) break;
+        await page.mouse.wheel({ deltaY: 120 }); await wait(120);
+      }
       await page.waitForSelector('.finish-replay', { visible: true, timeout: 20000 });
       await settle();
       const beforeReplay = await read();

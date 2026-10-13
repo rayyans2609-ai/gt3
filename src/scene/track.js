@@ -115,8 +115,8 @@ function buildExteriorGeometry(runoff = false) {
   for (let i = 0; i < TRACK_SAMPLE_COUNT; i++) {
     const p = sampleProfiles[i];
     const right = p.right + p.curbRight, left = p.left + p.curbLeft;
-    const laterals = runoff ? [-p.outerRight, -right - p.shoulder, left + p.shoulder, p.outerLeft]
-      : [-right - p.shoulder, -right, left, left + p.shoulder];
+    const laterals = runoff ? [-p.outerRight, -p.vergeRight, p.vergeLeft, p.outerLeft]
+      : [-p.vergeRight, -right, left, p.vergeLeft];
     for (let j = 0; j < 4; j++) {
       pushVector(positions, sampledPoint(i, laterals[j], CROSS_SECTION.vergeY));
       pushVector(normals, sampleNormals[i]);

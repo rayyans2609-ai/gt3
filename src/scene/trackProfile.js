@@ -8,7 +8,7 @@ import { TRACK_LENGTH } from './trackCurve.js';
 export const CROSS_SECTION = Object.freeze({
   asphaltY: -0.02, vergeY: -0.03, curbInnerY: -0.02, curbOuterY: 0.08,
   shoulderWidth: 1.5, edgeLineWidth: 0.25, edgeLineInset: 0.25, curbBlockLength: 2.4,
-  curbEndLength: 1.6,
+  curbEndLength: 2.4,
 });
 export const WIDTH_CLASSES = Object.freeze(['technical', 'ordinary', 'braking', 'start-finish']);
 // Boundaries describe class centres; transitions straddle them. The wrapped
@@ -109,8 +109,14 @@ export function profileAt(t, out = {}) {
   out.t = u; out.widthClass = WIDTH_CLASSES[section.classIndex];
   out.left = left; out.right = right;
   out.curbLeft = out.curbRight = 0;
+  let vergeCurbLeft = 0, vergeCurbRight = 0;
   out.curbLeftSegment = out.curbRightSegment = null;
   for (const curb of CURB_SEGMENTS) {
+    // Retain the existing smooth exterior/terrain contour. The physical curb
+    // can end crisply inside that verge without pulling a tooth into the ground.
+    const reserve = envelope(u, curb, 8) * curb.width;
+    if (curb.side === 1) vergeCurbLeft = Math.max(vergeCurbLeft, reserve);
+    else vergeCurbRight = Math.max(vergeCurbRight, reserve);
     // A short closed nose, not the old eight-metre triangular spear at each end.
     const w = envelope(u, curb, CROSS_SECTION.curbEndLength) * curb.width;
     if (w <= 0) continue;
@@ -123,8 +129,10 @@ export function profileAt(t, out = {}) {
     out[key] = Math.max(out[key], envelope(u, region, 45) * region.width);
   }
   out.shoulder = CROSS_SECTION.shoulderWidth;
-  out.outerLeft = left + out.curbLeft + out.shoulder + out.runoffLeft;
-  out.outerRight = right + out.curbRight + out.shoulder + out.runoffRight;
+  out.vergeLeft = left + vergeCurbLeft + out.shoulder;
+  out.vergeRight = right + vergeCurbRight + out.shoulder;
+  out.outerLeft = out.vergeLeft + out.runoffLeft;
+  out.outerRight = out.vergeRight + out.runoffRight;
   return out;
 }
 /** Signed edge offsets; infrastructure consumers never need global width. */

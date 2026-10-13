@@ -173,3 +173,21 @@
   font-weight: 100 900;
   font-display: swap;
 }
+
+/* Switzer (Fontshare FF EULA) — trial comparison variant, selected with ?font=sw (owner
+   2026-10-13). Local-only like the Neue Haas trial files: font/ is not committed, so the
+   variant needs font/Switzer_Complete on the serving machine. Fetched only when used. */
+@font-face {
+  font-family: 'Switzer';
+  src: url('../../font/Switzer_Complete/Fonts/WEB/fonts/Switzer-Variable.woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Switzer';
+  src: url('../../font/Switzer_Complete/Fonts/WEB/fonts/Switzer-VariableItalic.woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: italic;
+  font-display: swap;
+}

@@ -8,7 +8,8 @@ import { FULL_PROPS } from './trackFurniture.js';
 export const GRID_BOXES = Object.freeze(Array.from({ length: 10 }, (_, i) => ({
   // Keep the existing P1/P2 poses (18/26 m). Five two-column rows are 26 m
   // apart, with an 8 m stagger; the enlarged car has real space behind it.
-  distance: 18 + Math.floor(i / 2) * 26 + (i % 2) * 8, lateral: i % 2 ? -6 : 6,
+  // Columns sit 7 m either side of centre (owner 2026-10-13: modestly wider).
+  distance: 18 + Math.floor(i / 2) * 26 + (i % 2) * 8, lateral: i % 2 ? -7 : 7,
   // Conservative whole-car footprint, including wing/mirrors. Paint remains
   // metre-sized, with one metre each side and 1.5 m at each end of the hero.
   width: 2 * 1.412 * COMP.hero + 2, length: 4.6 * COMP.hero + 3,

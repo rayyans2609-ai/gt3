@@ -29,6 +29,13 @@
   --brand-lamborghini: #795033;
   --brand-porsche: #25211f;
 }
+/* ?font=sw: Switzer replaces Neue Haas in the display and UI roles only (index.html sets the
+   attribute before first paint). Monospace stays Geist Mono. Default remains Neue Haas. */
+:root[data-font='sw'] {
+  --font-display: 'Switzer', 'Neue Haas Grotesk Display', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --font-ui: 'Switzer', 'Neue Haas Grotesk Text', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
 
 *,
 *::before,

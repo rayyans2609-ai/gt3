@@ -212,7 +212,7 @@ export const FINISH_T = 0;
 export const FINISH_THRESHOLD = 1;
 export const GRID_SLOT = new URLSearchParams(globalThis.location?.search || '').get('grid') === 'p2' ? 'p2' : 'p1';
 export const GRID_DISTANCE = GRID_SLOT === 'p2' ? 26 : 18;
-export const GRID_LATERAL = GRID_SLOT === 'p2' ? -6 : 6;
+export const GRID_LATERAL = GRID_SLOT === 'p2' ? -7 : 7;
 export const GRID_GAP = GRID_DISTANCE / TRACK_LENGTH;
 export const TOUR_LENGTH = TRACK_LENGTH + GRID_DISTANCE;
 export const GRID_T = 1 - GRID_GAP;

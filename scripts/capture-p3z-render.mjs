@@ -65,6 +65,7 @@ try {
       devicePixelRatio, contextAntialias: gl.getContextAttributes().antialias, canvasSamples,
       maxSamples: gl.getParameter(gl.MAX_SAMPLES), halfFloatSamples: [...gl.getInternalformatParameter(gl.RENDERBUFFER, gl.RGBA16F, gl.SAMPLES)],
       gpu: debug && gl.getParameter(debug.UNMASKED_RENDERER_WEBGL), targets,
+      passes: g.composer.passes.map(p => ({ type: p.constructor.name, enabled: p.enabled })),
       calls: renderer.info.render.calls, triangles: renderer.info.render.triangles,
       memory: { ...renderer.info.memory }, jsHeap: performance.memory?.usedJSHeapSize };
   });

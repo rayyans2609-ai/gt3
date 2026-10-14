@@ -17,9 +17,9 @@ for(const path of paths){
   const starts=input.filter((e,i)=>!i||e.t-input[i-1].t>500);
   const stops=input.filter((e,i)=>!input[i+1]||input[i+1].t-e.t>500);
   for(const [type,events] of [['start',starts],['stop',stops]])for(const e of events){
-   const near=frames.filter(f=>f.t>=e.t&&f.t<=e.t+500),first=near.slice(0,10);
-   const prior=frames.filter(f=>f.t<e.t).at(-1),moved=near.find(f=>prior&&Math.abs(f.progress-prior.progress)>1e-8);
-   transitions.push({rep:run.rep,type,t:e.t,phase:e.phase,worst:Math.max(...near.map(f=>f.dt??0)),cpu:Math.max(...near.map(f=>f.cpu)),gpu:Math.max(0,...near.map(f=>f.gpu).filter(Number.isFinite)),firstFrameMs:near[0]?near[0].t-(e.event??e.t):null,inputToMovementMs:type==='start'&&moved?moved.t-(e.event??e.t):null,first10:first.map(f=>({t:f.t,dt:f.dt,raf:f.raf,cpu:f.cpu,gpu:f.gpu,dpr:f.dpr,progress:f.progress,allocations:f.allocations,passes:f.passes,calls:f.calls}))});
+   const begin=e.event??e.t; const near=frames.filter(f=>f.t>=begin&&f.t<=begin+500),first=near.slice(0,10);
+   const prior=frames.filter(f=>f.t<begin).at(-1),moved=near.find(f=>f.rendered&&prior&&Math.abs(f.progress-prior.progress)>1e-8);
+   transitions.push({rep:run.rep,type,t:e.t,phase:e.phase,worst:Math.max(...near.map(f=>f.dt??0)),cpu:Math.max(...near.map(f=>f.cpu)),gpu:Math.max(0,...near.map(f=>f.gpu).filter(Number.isFinite)),firstFrameMs:near.find(f=>f.rendered)?near.find(f=>f.rendered).t-begin:null,inputToMovementMs:type==='start'&&moved?moved.t-(e.event??e.t):null,first10:first.map(f=>({t:f.t,dt:f.dt,raf:f.raf,cpu:f.cpu,gpu:f.gpu,dpr:f.dpr,progress:f.progress,allocations:f.allocations,passes:f.passes,calls:f.calls}))});
   }
   runs.push({...run,worstFrames:undefined,switches:undefined,byPhase:undefined,byRegion:undefined,metrics:metrics(frames),inputDeliveryMs:dist(input.map(e=>e.t-e.event)),inputIntervals:dist(input.slice(1).map((e,i)=>e.t-input[i].t).filter(v=>v<500)),glSlow:data.gl.filter(e=>e.ms>2),programs:data.gl.filter(e=>/createProgram|compileShader|linkProgram/.test(e.method)),sync:data.gl.filter(e=>/^(finish|readPixels|fenceSync|clientWaitSync|waitSync)$/.test(e.method)),switches:data.switches});
  }

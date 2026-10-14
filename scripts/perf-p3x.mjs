@@ -17,6 +17,7 @@ const repeats = +(process.env.GT3_REPEATS || 3);
 const dpr = +(process.env.GT3_DPR || 2);
 const diagnostic = ''; // product alternatives are applied only by this harness
 const passGpu = process.env.GT3_PASS_GPU === '1';
+const gestureInput=process.env.GT3_INPUT==='gesture';
 const regions=(process.env.GT3_REGIONS||'grid,straight,hairpin,checkpoint').split(',');
 if(!regions.length||regions.some(r=>!['grid','straight','hairpin','checkpoint'].includes(r)))throw Error('Invalid regions');
 if (!['', 'viewport', 'canvas-no-msaa', 'blur', 'viewport-blur', 'viewport-cache-blur'].includes(diagnostic)) throw new Error('Invalid diagnostic');
@@ -30,7 +31,7 @@ const q = (values, percentile) => {
 const distribution = values => ({ n: values.length, p50: q(values, .5), p95: q(values, .95),
   p99: q(values, .99), worst: values.length ? Math.max(...values) : null });
 const report = { base, dpr, diagnostic, settleMaxMs:+(process.env.GT3_SETTLE_MAX || 45000), headful:process.env.GT3_HEADFUL==='1', blockingWheel:process.env.GT3_BLOCKING_WHEEL==='1', centered:process.env.GT3_CENTER==='1', css: [1280, 800], started: new Date().toISOString(),
-  harnessRevision: 'p3x-attribution-v1', passGpu, regions,
+  harnessRevision: 'p3x-attribution-v1', passGpu, regions, gestureInput,
   hostRule: '2026-10-13 manager amendment: paging measured; two-sample pressure/idle hard stop',
   sha: process.env.GT3_SOURCE_SHA || execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(),
   tree: execFileSync('git', ['status', '--porcelain'], { encoding: 'utf8' }).trim(), runs: [], errors: [] };
@@ -115,12 +116,14 @@ try {
   const cdp = await browser.target().createCDPSession();
   report.gpu = (await cdp.send('SystemInfo.getInfo')).gpu;
   page = (await browser.pages())[0];
+  const inputCdp=await page.createCDPSession();
   page.on('pageerror', error => report.errors.push(error.message));
   page.on('console', message => { if (message.type() === 'error') report.errors.push(message.text()); });
   page.on('response', response => {
     if (response.status() >= 400) report.errors.push(`HTTP ${response.status()}: ${response.url()}`);
   });
   await page.evaluateOnNewDocument(diagnostic => {
+    performance.setResourceTimingBufferSize(2000);
     // Wrap the real application RAF, including updates before composer.render().
     const raf = window.requestAnimationFrame.bind(window);
     window.__perfRafNames = {};
@@ -137,7 +140,7 @@ try {
       f.cpu = performance.now() - now;
       const probe = g.probe();
       Object.assign(f, { dpr: probe.applied, speed: probe.speed01, progress: probe.progress,
-        car: g.scene.getObjectByName('car-mount')?.children[0]?.name });
+        output:{transform:g.renderer.domElement.style.transform,clip:g.renderer.domElement.style.clipPath,scissor:g.renderer.getScissorTest()}, programs:g.renderer.info.programs?.length, car: g.scene.getObjectByName('car-mount')?.children[0]?.name });
       f.rendered=Object.keys(f.passes).length>0;
       f.drawDt=f.rendered&&p.lastDraw?now-p.lastDraw:null;
       if(f.rendered)p.lastDraw=now;
@@ -181,8 +184,11 @@ try {
       if (innerWidth !== 1280 || innerHeight !== 800 || devicePixelRatio !== dpr)
         throw new Error('Viewport or DPR mismatch');
       if (config === 'C') g.passes.antialias.enabled = false;
-      if (config === 'M') g.passes.motionBlur.enabled = false;
-      const sceneSetup = await import('/src/scene/sceneSetup.js');
+      if (config === 'M' || config === 'F') g.passes.motionBlur.enabled = false;
+      const urls=performance.getEntriesByType('resource').map(e=>e.name).filter(url=>new URL(url).pathname==='/src/scene/sceneSetup.js');
+      let sceneSetup;
+      for(const url of urls) { const candidate=await import(url); if(candidate.renderer===g.renderer) {sceneSetup=candidate;break;} }
+      if(!sceneSetup)throw Error('Cannot identify the live sceneSetup module; diagnostic refused');
       if (['F','L','R'].includes(config)) {
         const fixed = config === 'F' ? 2 : config === 'R' ? 1.5 : 1;
         sceneSetup.ADAPTIVE_RES.high = fixed;
@@ -289,9 +295,10 @@ try {
     await page.evaluate(() => {window.__perf.recording=true;window.__perf.phase='instrumentation-warmup';});
     await wait(800);
     const audit = await page.evaluate(() => {const p=window.__perf;p.recording=false;
-      return {frames:p.frames.length,gpu:p.frames.filter(f=>Number.isFinite(f.gpu)).length,names:window.__perfRafNames};});
+      return {frames:p.frames.length,gpu:p.frames.filter(f=>Number.isFinite(f.gpu)).length,names:window.__perfRafNames,probe:window.__gt3.probe(),dprs:[...new Set(p.frames.map(f=>f.dpr))]};});
     console.log('HOOK_AUDIT', JSON.stringify(audit));
     if (audit.frames<5 || (config !== 'W' && audit.gpu<3)) throw new Error('RAF/GPU hook invalid');
+    if(['F','L','R'].includes(config)) {const fixed=config==='F'?2:config==='R'?1.5:1;if(audit.probe.applied!==fixed)throw Error('Fixed resolution diagnostic did not apply');}
     report.hookAudit=audit;
     report.setups ??= [];
     report.setups.push({ config, ...setup });
@@ -337,8 +344,14 @@ try {
           await wait(2500);
         }
         await page.evaluate(region => { window.__perf.phase = `${region}:cruise`; }, region);
-        const end = Date.now() + 12000;
-        while (Date.now() < end) { const remaining=end-Date.now(); await page.mouse.wheel({ deltaY: remaining<8000 && remaining>5000 ? -70 : 70 }); await wait(70); }
+        if(gestureInput) {
+          // Browser-owned high-cadence input avoids serial dispatch ACK delays in the driver.
+          for(const yDistance of [-2800,2100,-3500])await inputCdp.send('Input.synthesizeScrollGesture',
+            {x:640,y:400,yDistance,speed:700,preventFling:true,gestureSourceType:'mouse',interactionMarkerName:`p3x-${region}`});
+        } else {
+          const end = Date.now() + 12000;
+          while (Date.now() < end) { const remaining=end-Date.now(); await page.mouse.wheel({ deltaY: remaining<8000 && remaining>5000 ? -70 : 70 }); await wait(70); }
+        }
         await page.evaluate(region => { window.__perf.phase = `${region}:stop`; }, region);
         await wait(2500);
         await page.evaluate(region => { performance.mark(`p3y-end:${region}`); window.__perf.recording = false; }, region);
@@ -374,6 +387,8 @@ try {
       const after = await hostSample();
       await appendFile(`${out}/host.jsonl`, `${JSON.stringify({ kind: 'run', config, rep, before, after })}\n`);
       await writeFile(`${out}/${config}-${rep}-frames.json.gz`, gzipSync(JSON.stringify(data)));
+      if(config==='V'&&data.frames.some(f=>f.output.transform||f.output.clip||f.output.scissor))throw Error('Stable canvas control changed display state');
+      if(['F','L','R'].includes(config)&&(data.switches.length||new Set(data.frames.map(f=>f.dpr)).size!==1))throw Error('Fixed resolution control switched; invalid run');
       const frames = data.frames.filter(f => f.dt !== null);
       if (frames.length < 100 || config !== 'W' && frames.filter(f => Number.isFinite(f.gpu)).length < frames.filter(f => Object.keys(f.passes).length).length * .8)
         throw new Error('Insufficient application frame/GPU samples; harness result is invalid');
@@ -411,7 +426,12 @@ try {
           && /RunTask|ThreadControllerImpl::RunTask/.test(e.name));
         const gc = trace.filter(e => measured(e) && e.ph === 'X' && main.includes(`${e.pid}:${e.tid}`)
           && /^(MinorGC|MajorGC)$/.test(e.name));
-        run.trace = { path: tracePath, windows, mainThreads: main, longTasks: taskEvents.map(e => ({ name: e.name, ts: e.ts, ms: e.dur / 1000 })),
+        const present=trace.filter(e=>e.name==='AnimationFrame::Presentation'&&measured(e)).map(e=>e.ts/1000).sort((a,b)=>a-b);
+        const backpressure=trace.filter(e=>e.name==='CALayerTreeCoordinator::ApplyBackpressure'&&e.ph==='X'&&measured(e));
+        run.trace = { path: tracePath, windows, mainThreads: main,
+          presentation:distribution(present.slice(1).map((t,i)=>t-present[i])),
+          frameTrackers:trace.filter(e=>e.name==='FrameSequenceTrackerV3'&&e.ph==='b'&&measured(e)).map(e=>e.args),
+          backpressure:{time:distribution(backpressure.map(e=>e.dur/1000)),cpu:distribution(backpressure.map(e=>(e.tdur??0)/1000)),events:backpressure.map(e=>({ts:e.ts,ms:e.dur/1000,cpuMs:(e.tdur??0)/1000}))}, longTasks: taskEvents.map(e => ({ name: e.name, ts: e.ts, ms: e.dur / 1000, cpuMs:(e.tdur??0)/1000, args:e.args })),
           gc: gc.map(e => ({ name: e.name, ts: e.ts, ms: e.dur / 1000, args: e.args })),
           gcMs: gc.reduce((s, e) => s + e.dur / 1000, 0), events: trace.length };
       }

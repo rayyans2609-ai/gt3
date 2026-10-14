@@ -3,7 +3,7 @@
  * first-Tour-entry sound cue, and their composition with the edge-row controls.
  *
  * Usage: node scripts/verify-hud.mjs [baseUrl] [outDir]
- * Defaults: baseUrl http://127.0.0.1:5194/  outDir /Users/rayyansheikh/Desktop/gt3-review-2026-10-04/w5/
+ * Defaults: baseUrl http://127.0.0.1:5194/  outDir local/evidence/verify-hud/
  * Same Chrome launch as verify-checkpoints.mjs / verify-controls.mjs (puppeteer-core,
  * real GPU unless GT3_SOFTWARE_GL=1). One browser, one page at a time; each scenario
  * opens a fresh tab (fresh sessionStorage) and closes it. Prints a JSON summary and
@@ -20,7 +20,7 @@ import { resolve } from 'node:path';
 import { execFileSync } from 'node:child_process';
 
 const base = (process.argv[2] || 'http://127.0.0.1:5194/').replace(/\/?$/, '/');
-const outDir = (process.argv[3] || '/Users/rayyansheikh/Desktop/gt3-review-2026-10-04/w5/').replace(/\/?$/, '/');
+const outDir = (process.argv[3] || new URL('../local/evidence/verify-hud/', import.meta.url).pathname).replace(/\/?$/, '/');
 const softwareGL = process.env.GT3_SOFTWARE_GL === '1';
 await mkdir(outDir, { recursive: true });
 

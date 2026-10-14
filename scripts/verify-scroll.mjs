@@ -6,7 +6,7 @@
  *
  * Usage (Vite already running, e.g. port 5193):
  *   GT3_URL=http://127.0.0.1:5193 GT3_PREFLIGHT=<session preflight> HEAVY_OWNER=w3 \
- *   GT3_OUT=/Users/rayyansheikh/.claude/jobs/d1cd9f0a/tmp/w3 node scripts/verify-scroll.mjs
+ *   node scripts/verify-scroll.mjs
  * Env: GT3_MODES=default,cap,pace (subset), GT3_QUERY="comp=b&gate=quiet" extra params for every URL,
  *      GT3_HEADLESS=1 (default headed is closer to a real user; headless is acceptable for proxies),
  *      GT3_SOUND=1 to click the speaker (sound-on pass) before the scenarios.
@@ -20,7 +20,7 @@ import { join } from 'node:path';
 import assert from 'node:assert/strict';
 
 const base = process.env.GT3_URL || 'http://127.0.0.1:5193';
-const out = process.env.GT3_OUT || '/Users/rayyansheikh/.claude/jobs/d1cd9f0a/tmp/w3';
+const out = process.env.GT3_OUT || new URL('../local/evidence/verify-scroll/', import.meta.url).pathname;
 const modes = (process.env.GT3_MODES || 'default,cap,pace').split(',');
 const extra = (process.env.GT3_QUERY || '').replace(/^[?&]/, '');
 const headless = process.env.GT3_HEADLESS === '1';

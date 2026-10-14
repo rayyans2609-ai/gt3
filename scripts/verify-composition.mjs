@@ -33,7 +33,7 @@ const cameraCandidates = ['leg1', 'glide', 'hold', 'wide', 'soft'];
 const cams = (process.env.GT3_CAMS || 'leg1').split(',').filter(Boolean);
 if (cams.some(cam => !cameraCandidates.includes(cam))) throw new Error(`GT3_CAMS must use ${cameraCandidates.join(',')}`);
 const captureDir = process.env.GT3_CAPTURE_DIR
-  || '/Users/rayyansheikh/Desktop/gt3-review-2026-10-04/w2';
+  || new URL('../local/evidence/verify-composition/', import.meta.url).pathname;
 const capture = process.env.GT3_NO_CAPTURE !== '1';
 // 10-frame chicane sequences are recorded for these comps only (disk budget).
 const seqComps = (process.env.GT3_SEQ_COMPS || 'base,b').split(',');

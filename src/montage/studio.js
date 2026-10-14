@@ -39,7 +39,7 @@ export const MONTAGE_RES = {
   // is no still moment where sharpness is being judged -- so it renders at a
   // fixed reduced ratio rather than adapting. Measured: dpr2 = 66.4ms/frame
   // (15fps ceiling), dpr1 = 27.0ms (37fps). Raise `scale` only with a fresh
-  // measurement from scripts/perf-montage.mjs.
+  // measurement (historical results in BUILD_LOG.md).
   scale: 1.0,
   max: 2,
 };
@@ -712,7 +712,10 @@ function onKeyDown(event) {
   }
 }
 
-/** Create the one shared studio scene. Repeated calls return the same objects. */
+/**
+ * Create the one shared studio scene (and its second WebGL renderer). Repeated calls return the
+ * same objects. Not called at boot: playMontage() and prewarmMontage() call it on first use.
+ */
 export function initStudio() {
   if (initialized) {
     return {
@@ -744,7 +747,7 @@ export function initStudio() {
   initialized = true;
 
   // Read-only profiling hook, mirroring window.__gt3 for the race renderer. The montage
-  // owns a SECOND WebGL context, so scripts/perf-montage.mjs has to reach it separately.
+  // owns a second WebGL context, which requires separate profiling when reused later.
   window.__gt3montage = { renderer: studioRenderer, scene: studioScene,
     camera: studioCamera, turntable };
 

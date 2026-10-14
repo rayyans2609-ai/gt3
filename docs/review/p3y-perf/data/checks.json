@@ -1,0 +1,27 @@
+[
+  {
+    "label": "build",
+    "code": 0,
+    "hardStop": false
+  },
+  {
+    "label": "E-fixed",
+    "code": 0,
+    "hardStop": false
+  },
+  {
+    "label": "gates",
+    "code": 0,
+    "hardStop": false
+  },
+  {
+    "label": "cold-autoDay",
+    "code": 0,
+    "hardStop": false
+  },
+  {
+    "label": "cold-autoNight",
+    "code": 0,
+    "hardStop": false
+  }
+]

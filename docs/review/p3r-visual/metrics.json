@@ -1,0 +1,2537 @@
+{
+  "reference": "ec9b697c795460c0d2a6ae70d20cc12edd1a1075",
+  "productSource": "84c2f8309cff7cd59f8f2ca66c061dda47fe0d19",
+  "viewport": [
+    1600,
+    900
+  ],
+  "heroMetric": "4.6 m nose-to-tail projected screen length (x and y/aspect) / frame width; 501 route samples, not a literal horizontal body bounding box",
+  "acceptance": "NEEDS OWNER REVIEW; no winner selected",
+  "defaultCamera": {
+    "reference": "ec9b697",
+    "samples": 1800,
+    "exactEquality": true,
+    "maxPositionQuaternionComponentDifference": 0,
+    "serializedPosesSha256": "7616a0d115c15f1b808819458f1bbef1929c4927c5d3362f157b0451d55918cb"
+  },
+  "compatibility": {
+    "oldQueriesExact": 25,
+    "defaultMeshBuffersExact": 4,
+    "defaultRigPosesExact": 600
+  },
+  "matchedBGlideHeroRangePct": [
+    1.878,
+    3.318
+  ],
+  "candidates": {
+    "r1": {
+      "values": {
+        "distance": 240,
+        "pitch": 55.64,
+        "fov": 40,
+        "hero": 2.28,
+        "halfWidth": 8,
+        "racingLineM": 3.934,
+        "fogScale": 4.444,
+        "shadowScale": 2
+      },
+      "roadWidthM": 16,
+      "heroRangePctNode": [
+        2.406,
+        3.859
+      ],
+      "roadInHeroWidths": {
+        "roadInMedianHeroWidths": 3.52,
+        "roadInWidestHeroWidths": 2.49
+      },
+      "cornerTravel": {
+        "hairpin": {
+          "tRange": [
+            0.263,
+            0.302
+          ],
+          "cameraToCarPathLength": 0.915,
+          "cameraPathM": 172.616,
+          "carPathM": 188.655,
+          "cameraNetDisplacementM": 146.272,
+          "carNetDisplacementM": 158.55,
+          "carSpatialExtentXZ": [
+            70.278,
+            151.224
+          ],
+          "peakCameraSpeedToPeakCarSpeed": 1.019,
+          "cameraHeadingSweepDeg": 0,
+          "carHeadingNetDeg": -105.88,
+          "carHeadingSweepDeg": 105.97
+        },
+        "chicane": {
+          "tRange": [
+            0.328,
+            0.376
+          ],
+          "cameraToCarPathLength": 0.839,
+          "cameraPathM": 199.696,
+          "carPathM": 238.004,
+          "cameraNetDisplacementM": 199.179,
+          "carNetDisplacementM": 234.167,
+          "carSpatialExtentXZ": [
+            174.015,
+            156.685
+          ],
+          "peakCameraSpeedToPeakCarSpeed": 0.84,
+          "cameraHeadingSweepDeg": 0,
+          "carHeadingNetDeg": 0.29,
+          "carHeadingSweepDeg": 70.02
+        }
+      },
+      "frame": {
+        "maxReachNdc": 0.688,
+        "maxX": 0.688,
+        "maxY": 0.645,
+        "pctOverEngageZone": 0,
+        "pctOverHardZone": 0,
+        "pctOverFrame": 0,
+        "perModelMaxReachNdc": {
+          "lexus": 0.684,
+          "nissan": 0.683,
+          "audi": 0.688,
+          "bmw": 0.683,
+          "mercedes": 0.683,
+          "ferrari": 0.685,
+          "mclaren": 0.683,
+          "aston": 0.688,
+          "lamborghini": 0.686,
+          "porsche": 0.683
+        },
+        "railClampActiveFraction": 0.111328125
+      },
+      "world": {
+        "marginM": 1000,
+        "requiredWorldSizeChangeM": 0,
+        "exposedRays": 0,
+        "minBoundaryGapM": 798.574,
+        "beyondCameraFar": 0
+      },
+      "gates": {
+        "beamLengthM": 20.9,
+        "minPostClearanceM": 5.274,
+        "finishPostClearanceM": 5.097,
+        "widestModel": "audi",
+        "maxOffsetMinPostClearanceM": 2.44,
+        "maxOffsetFinishClearanceM": 2.304
+      },
+      "rail": {
+        "converged": true,
+        "continuedSolverMaxDifferenceM": 0.0032072330094171007
+      },
+      "guard": {
+        "first": {
+          "infeasibleAttempts": 1,
+          "framesWithoutRethrow": 200
+        },
+        "resize": {
+          "infeasibleAttempts": 1,
+          "framesWithoutRethrow": 200
+        }
+      },
+      "pivot": {
+        "pass": true,
+        "samples": 180,
+        "routePositions": [
+          0.02,
+          0.1,
+          0.25,
+          0.275,
+          0.279,
+          0.283,
+          0.287,
+          0.291,
+          0.355,
+          0.361,
+          0.365,
+          0.369,
+          0.375,
+          0.4,
+          0.55,
+          0.7,
+          0.85,
+          0.97
+        ],
+        "maxAbsContactErrorCm": 0.84,
+        "minContactErrorCm": -0.36,
+        "maxContactErrorCm": 0.84,
+        "cacheBefore": {
+          "builds": 10,
+          "buildMs": 246.7999999821186
+        },
+        "cacheAfter": {
+          "builds": 10,
+          "buildMs": 246.7999999821186
+        },
+        "BMWCurbTyres": [
+          {
+            "t": 0.283,
+            "tyres": 2
+          }
+        ],
+        "errors": [],
+        "limitation": "authored bob/roll removed by existing pivot harness"
+      },
+      "raw": {
+        "math": {
+          "path": "/tmp/gt3-p3r-visual/r1-math.json",
+          "sha256": "f8b4229ff2d6e0e7d6e040ef6ec8b97c2b167552f8237d5a644e4d2a23e66deb"
+        },
+        "rail": {
+          "path": "/tmp/gt3-p3r-visual/r1-rail.json",
+          "sha256": "150d658c75c294df25ad06e10dcde57584085d53a78d6998b6af88574ea719a4"
+        },
+        "pivot": {
+          "path": "/tmp/gt3-p3r-visual/r1-pivot.json",
+          "sha256": "b4a3d80d5742a009c6849fb8a4903b22c2e3f6f99f4345229cb8e1e2a1eedc57"
+        },
+        "composition": {
+          "path": "/tmp/gt3-p3r-visual/composition-r1/composition-verification.json",
+          "sha256": "6715ee22776a9d78f03f6af525571d7c525fac17435926c3830e6598b86fd97f"
+        },
+        "occlusion": {
+          "path": "/tmp/gt3-p3r-visual/occlusion-r1/occlusion.json",
+          "sha256": "92411073094ae9b019d8eb08bd2a96308836d786a8204da5715a3f142625359d"
+        },
+        "reusedComposition": {
+          "path": "/tmp/gt3-p3r-visual/r1-composition-before-pose-fix.json",
+          "sha256": "865cb285074f062d6c9a6a2f4f386fcf41b9bb5e2f933e605b2b018e68a2f90e"
+        }
+      },
+      "composition": {
+        "url": "http://127.0.0.1:5199/?look=r1&gate=quiet",
+        "cam": "glide",
+        "points": [
+          {
+            "label": "start-straight",
+            "t": 0.02,
+            "yawDeg": 74.99999999999999,
+            "pitchDeg": 55.64000000000001,
+            "camera": [
+              -108.45210647638478,
+              207.8401332625406,
+              -62.100258995219576
+            ],
+            "quaternion": [
+              -0.3702543457061976,
+              -0.5383996395935492,
+              -0.28410615187685734,
+              0.701656071046874
+            ],
+            "carNdc": {
+              "minX": -0.09521915116755236,
+              "maxX": -0.0198724701368584,
+              "minY": -0.30156886556236373,
+              "maxY": -0.20938337043221733
+            },
+            "carWidthPctOfFrame": 3.767334051534698,
+            "roadCoverage": 0.08950617283950617,
+            "exposedEdgeRays": 0,
+            "edgeSweepIncluded": true,
+            "carLengthPctOfFrame": 3.388145506436128,
+            "shadowBoxM": 120,
+            "outsideShadowFrac": 0.24614197530864199,
+            "roadOutsideShadowCells": 12,
+            "skyFrac": 0,
+            "borderMaxHitM": 408.8396434446867,
+            "fogNear": 688.8888888888889,
+            "fogFar": 3066.666666666667,
+            "cameraFar": 3000,
+            "cameraHeightM": 207.8401332625406,
+            "lateralM": 0.11010883688926737,
+            "worstFootprintExtentM": 3.5321276828418386,
+            "roadEdgeGapM": 4.467872317158161,
+            "maxOffsetRoadEdgeGapM": 0.6438311540474295,
+            "gatePostGapM": 6.447872317158161,
+            "finishPostGapM": 6.167872317158162,
+            "correctionActive": false,
+            "snapCount": 2,
+            "hero": 2.28,
+            "shadowScale": 2.2804268731076767,
+            "railHolds": [],
+            "unavailableHolds": []
+          },
+          {
+            "label": "hairpin-entry",
+            "t": 0.265,
+            "yawDeg": 74.99999999999999,
+            "pitchDeg": 55.64000000000001,
+            "camera": [
+              -3.8397225229148546,
+              207.8401332625406,
+              -1043.2584503061007
+            ],
+            "quaternion": [
+              -0.3702543457061976,
+              -0.5383996395935492,
+              -0.28410615187685734,
+              0.701656071046874
+            ],
+            "carNdc": {
+              "minX": -0.020369592808334704,
+              "maxX": 0.05084569759877683,
+              "minY": 0.43822938974061565,
+              "maxY": 0.5410276950096298
+            },
+            "carWidthPctOfFrame": 3.5607645203555762,
+            "roadCoverage": 0.08564814814814815,
+            "exposedEdgeRays": 0,
+            "edgeSweepIncluded": true,
+            "carLengthPctOfFrame": 2.6357303038579047,
+            "shadowBoxM": 120,
+            "outsideShadowFrac": 0.2523148148148148,
+            "roadOutsideShadowCells": 32,
+            "skyFrac": 0,
+            "borderMaxHitM": 383.2424976274919,
+            "fogNear": 688.8888888888889,
+            "fogFar": 3066.666666666667,
+            "cameraFar": 3000,
+            "cameraHeightM": 207.8401332625406,
+            "lateralM": 2.0508323860168476,
+            "worstFootprintExtentM": 5.70865327409059,
+            "roadEdgeGapM": 2.29134672590941,
+            "maxOffsetRoadEdgeGapM": 0.40802911192625757,
+            "gatePostGapM": 4.27134672590941,
+            "finishPostGapM": 3.991346725909411,
+            "correctionActive": false,
+            "snapCount": 3,
+            "hero": 2.28,
+            "shadowScale": 2.28,
+            "railHolds": [],
+            "unavailableHolds": []
+          },
+          {
+            "label": "hairpin-apex",
+            "t": 0.283,
+            "yawDeg": 74.99999999999999,
+            "pitchDeg": 55.64000000000001,
+            "camera": [
+              5.4113912371884965,
+              207.8401332625406,
+              -1115.4291362909914
+            ],
+            "quaternion": [
+              -0.3702543457061976,
+              -0.5383996395935492,
+              -0.28410615187685734,
+              0.701656071046874
+            ],
+            "carNdc": {
+              "minX": -0.07189988369232807,
+              "maxX": -0.0020628499811106917,
+              "minY": 0.46251397422760215,
+              "maxY": 0.5543916566809323
+            },
+            "carWidthPctOfFrame": 3.4918516855608686,
+            "roadCoverage": 0.09259259259259259,
+            "exposedEdgeRays": 0,
+            "edgeSweepIncluded": true,
+            "carLengthPctOfFrame": 2.975596908115725,
+            "shadowBoxM": 120,
+            "outsideShadowFrac": 0.27314814814814814,
+            "roadOutsideShadowCells": 38,
+            "skyFrac": 0,
+            "borderMaxHitM": 387.3276411781446,
+            "fogNear": 688.8888888888889,
+            "fogFar": 3066.666666666667,
+            "cameraFar": 3000,
+            "cameraHeightM": 207.8401332625406,
+            "lateralM": 6.124273620605474,
+            "worstFootprintExtentM": 9.529730920257592,
+            "roadEdgeGapM": -1.5297309202575917,
+            "maxOffsetRoadEdgeGapM": 0.6603927003478836,
+            "gatePostGapM": 0.4502690797424087,
+            "finishPostGapM": 0.17026907974240935,
+            "correctionActive": false,
+            "snapCount": 4,
+            "hero": 2.28,
+            "shadowScale": 2.28,
+            "railHolds": [],
+            "unavailableHolds": []
+          }
+        ],
+        "gates": [
+          {
+            "t": 0.39,
+            "roadEdgeGapM": 4.4635951030962,
+            "gatePostGapM": 6.4435951030962,
+            "finishPostGapM": 6.163595103096201,
+            "carNdc": {
+              "minX": -0.1911843886494927,
+              "maxX": -0.12498475324420635,
+              "minY": -0.0491515668395693,
+              "maxY": 0.08830804535773813
+            },
+            "exposedEdgeRays": null,
+            "edgeSweepIncluded": false
+          },
+          {
+            "t": 0.994,
+            "roadEdgeGapM": 3.3973562695549884,
+            "gatePostGapM": 5.377356269554989,
+            "finishPostGapM": 5.097356269554989,
+            "carNdc": {
+              "minX": 0.13424997004148764,
+              "maxX": 0.20487220863871525,
+              "minY": 0.011842291567354567,
+              "maxY": 0.09807085589163583
+            },
+            "exposedEdgeRays": null,
+            "edgeSweepIncluded": false
+          }
+        ],
+        "reversibility": [
+          {
+            "t": 0.283,
+            "railDeterministic": true,
+            "progressFromBelow": 0.2829999129988753,
+            "progressFromAbove": 0.28300008750511463,
+            "settledPositionDiffM": 0.0006530998491614487,
+            "settledQuaternionDiff": 0
+          },
+          {
+            "t": 0.352,
+            "railDeterministic": true,
+            "progressFromBelow": 0.35199991831564864,
+            "progressFromAbove": 0.3520000834509079,
+            "settledPositionDiffM": 0.0006892785120742056,
+            "settledQuaternionDiff": 0
+          }
+        ],
+        "motion": [
+          {
+            "name": "fwd-hairpin-chicane",
+            "corners": {
+              "hairpin": {
+                "frames": 148,
+                "cameraPathM": 170.3160650878315,
+                "carPathM": 186.16620070503092,
+                "cameraToCarPathLength": 0.9148602938816321,
+                "cameraHeadingSweepDeg": 0,
+                "carHeadingSweepDeg": 105.06167193584147
+              },
+              "chicane": {
+                "frames": 202,
+                "cameraPathM": 150.0457863948386,
+                "carPathM": 179.57380611741888,
+                "cameraToCarPathLength": 0.8355661086602316,
+                "cameraHeadingSweepDeg": 9.159997482614935e-13,
+                "carHeadingSweepDeg": 51.53123486092436
+              }
+            },
+            "frames": 504,
+            "smooth": {
+              "camera": {
+                "peakSpeedMs": 121.65686343992061,
+                "p99AccMs2": 3035.7851727911275,
+                "p99JerkMs3": 228375.1979402242,
+                "reversals": 0
+              },
+              "car": {
+                "peakSpeedMs": 129.40929885876278,
+                "p99AccMs2": 3040.9890210674334,
+                "p99JerkMs3": 260164.59833843584,
+                "reversals": 0
+              }
+            },
+            "cameraToCarTranslation": 0.880364828089999,
+            "correctionActivePct": 0,
+            "ndcX": [
+              -0.12164682907406646,
+              0.06120372922531469
+            ],
+            "ndcY": [
+              0.11274138908300782,
+              0.532784748414789
+            ],
+            "snapsDuringMotion": 0,
+            "maxProgressJump": 0.000768867604945267,
+            "frameMsP50": 16.70000000001164,
+            "frameMsP95": 50
+          },
+          {
+            "name": "back-chicane-hairpin",
+            "corners": {
+              "hairpin": {
+                "frames": 167,
+                "cameraPathM": 138.46183472852107,
+                "carPathM": 150.67232278515024,
+                "cameraToCarPathLength": 0.918959979968978,
+                "cameraHeadingSweepDeg": 0,
+                "carHeadingSweepDeg": 91.22606085090707
+              },
+              "chicane": {
+                "frames": 178,
+                "cameraPathM": 199.25853172963141,
+                "carPathM": 237.47885328265505,
+                "cameraToCarPathLength": 0.8390580002189392,
+                "cameraHeadingSweepDeg": 5.08888749034163e-13,
+                "carHeadingSweepDeg": 69.88712091169072
+              }
+            },
+            "frames": 478,
+            "smooth": {
+              "camera": {
+                "peakSpeedMs": 115.8177325304338,
+                "p99AccMs2": 2958.3036774380757,
+                "p99JerkMs3": 271857.90269824583,
+                "reversals": 0
+              },
+              "car": {
+                "peakSpeedMs": 136.09290274866308,
+                "p99AccMs2": 3310.7515814742837,
+                "p99JerkMs3": 283410.7445798013,
+                "reversals": 0
+              }
+            },
+            "cameraToCarTranslation": 0.8800357405457422,
+            "correctionActivePct": 0,
+            "ndcX": [
+              -0.15926113668745775,
+              0.06120132128454026
+            ],
+            "ndcY": [
+              0.06133297698897287,
+              0.5324545381449691
+            ],
+            "snapsDuringMotion": 0,
+            "maxProgressJump": 0.0007332151142963039,
+            "frameMsP50": 16.80000000000291,
+            "frameMsP95": 50
+          }
+        ],
+        "seamPositionDiffM": 0,
+        "resize": {
+          "16:9": 585.6,
+          "4:3": 604.2
+        },
+        "resizeFrames": [
+          {
+            "name": "to-4:3",
+            "frames": 93,
+            "maxFrameMs": 900,
+            "p50FrameMs": 16.69999999999709,
+            "aspect": 1.3333333333333333,
+            "rail": {
+              "aspect": 1.3333333333333333,
+              "holdState": "none",
+              "unavailableHolds": []
+            }
+          },
+          {
+            "name": "to-16:9",
+            "frames": 124,
+            "maxFrameMs": 50,
+            "p50FrameMs": 16.69999999999709,
+            "aspect": 1.7777777777777777,
+            "rail": {
+              "aspect": 1.7777777777777777,
+              "holdState": "none",
+              "unavailableHolds": []
+            }
+          }
+        ],
+        "routeHero": {
+          "samples": 501,
+          "metric": "4.6m nose-to-tail projected length / frame width",
+          "minPct": 2.405511389196294,
+          "maxPct": 3.8590689815494335
+        },
+        "errors": [],
+        "readiness": {
+          "status": "ready",
+          "fallback": null
+        },
+        "edgeGrid": [
+          [
+            48,
+            27
+          ],
+          3
+        ],
+        "reusedEvidence": {
+          "path": "/tmp/gt3-p3r-visual/r1-composition-before-pose-fix.json",
+          "scopes": [
+            "points",
+            "gates",
+            "motion"
+          ]
+        }
+      },
+      "occlusion": {
+        "summary": {
+          "config": "look=r1",
+          "points": 15,
+          "withRoadCells": 15,
+          "minRoadCells": 3,
+          "carRayTerrainHits": 0,
+          "pointsWithHiddenRoad": 0,
+          "maxHiddenCells": 0,
+          "worstMarginM": 0,
+          "errors": [],
+          "complete": true,
+          "pass": true,
+          "failingT": []
+        },
+        "points": [
+          {
+            "requestedT": 0.02,
+            "t": 0.02,
+            "camPos": [
+              -108.5,
+              207.8,
+              -62.1
+            ],
+            "carRay": {
+              "distanceToCar": 236.6,
+              "terrainHit": null
+            },
+            "cells": 336,
+            "roadCells": 6,
+            "hidden": 0,
+            "worstMarginM": 0
+          },
+          {
+            "requestedT": 0.1,
+            "t": 0.1,
+            "camPos": [
+              8.1,
+              207.8,
+              -394.2
+            ],
+            "carRay": {
+              "distanceToCar": 269.4,
+              "terrainHit": null
+            },
+            "cells": 336,
+            "roadCells": 13,
+            "hidden": 0,
+            "worstMarginM": 0
+          },
+          {
+            "requestedT": 0.18,
+            "t": 0.18,
+            "camPos": [
+              36.4,
+              207.8,
+              -712
+            ],
+            "carRay": {
+              "distanceToCar": 247.2,
+              "terrainHit": null
+            },
+            "cells": 336,
+            "roadCells": 15,
+            "hidden": 0,
+            "worstMarginM": 0
+          },
+          {
+            "requestedT": 0.265,
+            "t": 0.265,
+            "camPos": [
+              -3.8,
+              207.8,
+              -1043.3
+            ],
+            "carRay": {
+              "distanceToCar": 271.5,
+              "terrainHit": null
+            },
+            "cells": 336,
+            "roadCells": 20,
+            "hidden": 0,
+            "worstMarginM": 0
+          },
+          {
+            "requestedT": 0.283,
+            "t": 0.283,
+            "camPos": [
+              5.4,
+              207.8,
+              -1115.4
+            ],
+            "carRay": {
+              "distanceToCar": 276.1,
+              "terrainHit": null
+            },
+            "cells": 336,
+            "roadCells": 25,
+            "hidden": 0,
+            "worstMarginM": 0
+          },
+          {
+            "requestedT": 0.3,
+            "t": 0.3,
+            "camPos": [
+              -54.1,
+              207.8,
+              -1164.3
+            ],
+            "carRay": {
+              "distanceToCar": 282.6,
+              "terrainHit": null
+            },
+            "cells": 336,
+            "roadCells": 18,
+            "hidden": 0,
+            "worstMarginM": 0
+          },
+          {
+            "requestedT": 0.335,
+            "t": 0.335,
+            "camPos": [
+              -180.4,
+              207.8,
+              -1260.4
+            ],
+            "carRay": {
+              "distanceToCar": 258,
+              "terrainHit": null
+            },
+            "cells": 336,
+            "roadCells": 12,
+            "hidden": 0,
+            "worstMarginM": 0
+          },
+          {
+            "requestedT": 0.352,
+            "t": 0.352,
+            "camPos": [
+              -232.6,
+              207.8,
+              -1307.1
+            ],
+            "carRay": {
+              "distanceToCar": 258.5,
+              "terrainHit": null
+            },
+            "cells": 336,
+            "roadCells": 16,
+            "hidden": 0,
+            "worstMarginM": 0
+          },
+          {
+            "requestedT": 0.365,
+            "t": 0.365,
+            "camPos": [
+              -276.3,
+              207.8,
+              -1340
+            ],
+            "carRay": {
+              "distanceToCar": 263.3,
+              "terrainHit": null
+            },
+            "cells": 336,
+            "roadCells": 13,
+            "hidden": 0,
+            "worstMarginM": 0
+          },
+          {
+            "requestedT": 0.465,
+            "t": 0.465,
+            "camPos": [
+              -640,
+              207.8,
+              -1504.7
+            ],
+            "carRay": {
+              "distanceToCar": 252,
+              "terrainHit": null
+            },
+            "cells": 336,
+            "roadCells": 10,
+            "hidden": 0,
+            "worstMarginM": 0
+          },
+          {
+            "requestedT": 0.63,
+            "t": 0.63,
+            "camPos": [
+              -728.1,
+              207.8,
+              -805.4
+            ],
+            "carRay": {
+              "distanceToCar": 248.5,
+              "terrainHit": null
+            },
+            "cells": 336,
+            "roadCells": 16,
+            "hidden": 0,
+            "worstMarginM": 0
+          },
+          {
+            "requestedT": 0.68,
+            "t": 0.68,
+            "camPos": [
+              -726.3,
+              207.8,
+              -567.1
+            ],
+            "carRay": {
+              "distanceToCar": 219.7,
+              "terrainHit": null
+            },
+            "cells": 336,
+            "roadCells": 3,
+            "hidden": 0,
+            "worstMarginM": 0
+          },
+          {
+            "requestedT": 0.7,
+            "t": 0.7,
+            "camPos": [
+              -718.9,
+              207.8,
+              -473.2
+            ],
+            "carRay": {
+              "distanceToCar": 218.6,
+              "terrainHit": null
+            },
+            "cells": 336,
+            "roadCells": 3,
+            "hidden": 0,
+            "worstMarginM": 0
+          },
+          {
+            "requestedT": 0.85,
+            "t": 0.85,
+            "camPos": [
+              -541.2,
+              207.8,
+              163.6
+            ],
+            "carRay": {
+              "distanceToCar": 227.7,
+              "terrainHit": null
+            },
+            "cells": 336,
+            "roadCells": 20,
+            "hidden": 0,
+            "worstMarginM": 0
+          },
+          {
+            "requestedT": 0.97,
+            "t": 0.9700000000000001,
+            "camPos": [
+              -191.3,
+              207.8,
+              125.5
+            ],
+            "carRay": {
+              "distanceToCar": 285.5,
+              "terrainHit": null
+            },
+            "cells": 336,
+            "roadCells": 3,
+            "hidden": 0,
+            "worstMarginM": 0
+          }
+        ]
+      },
+      "supportEnvelope": {
+        "look": "r1",
+        "minOrdinary": 1.0405405586818919,
+        "minSupport": 0.9930137795029581,
+        "maxCurbOutside": 1.606986220497042
+      }
+    },
+    "r2": {
+      "values": {
+        "distance": 218,
+        "pitch": 54.6,
+        "fov": 38,
+        "hero": 2.09,
+        "halfWidth": 7.5,
+        "racingLineM": 3.763,
+        "fogScale": 4.037,
+        "shadowScale": 2
+      },
+      "roadWidthM": 15.0,
+      "heroRangePctNode": [
+        2.543,
+        4.109
+      ],
+      "roadInHeroWidths": {
+        "roadInMedianHeroWidths": 3.6,
+        "roadInWidestHeroWidths": 2.54
+      },
+      "cornerTravel": {
+        "hairpin": {
+          "tRange": [
+            0.263,
+            0.302
+          ],
+          "cameraToCarPathLength": 0.93,
+          "cameraPathM": 175.77,
+          "carPathM": 188.989,
+          "cameraNetDisplacementM": 145.957,
+          "carNetDisplacementM": 158.634,
+          "carSpatialExtentXZ": [
+            70.465,
+            151.299
+          ],
+          "peakCameraSpeedToPeakCarSpeed": 1.066,
+          "cameraHeadingSweepDeg": 0,
+          "carHeadingNetDeg": -106.17,
+          "carHeadingSweepDeg": 106.25
+        },
+        "chicane": {
+          "tRange": [
+            0.328,
+            0.376
+          ],
+          "cameraToCarPathLength": 0.839,
+          "cameraPathM": 199.688,
+          "carPathM": 238.109,
+          "cameraNetDisplacementM": 199.213,
+          "carNetDisplacementM": 234.23,
+          "carSpatialExtentXZ": [
+            173.944,
+            156.857
+          ],
+          "peakCameraSpeedToPeakCarSpeed": 0.839,
+          "cameraHeadingSweepDeg": 0,
+          "carHeadingNetDeg": 0.25,
+          "carHeadingSweepDeg": 70.33
+        }
+      },
+      "frame": {
+        "maxReachNdc": 0.687,
+        "maxX": 0.687,
+        "maxY": 0.641,
+        "pctOverEngageZone": 0,
+        "pctOverHardZone": 0,
+        "pctOverFrame": 0,
+        "perModelMaxReachNdc": {
+          "lexus": 0.683,
+          "nissan": 0.682,
+          "audi": 0.687,
+          "bmw": 0.682,
+          "mercedes": 0.682,
+          "ferrari": 0.684,
+          "mclaren": 0.682,
+          "aston": 0.687,
+          "lamborghini": 0.685,
+          "porsche": 0.682
+        },
+        "railClampActiveFraction": 0.14453125
+      },
+      "world": {
+        "marginM": 1000,
+        "requiredWorldSizeChangeM": 0,
+        "exposedRays": 0,
+        "minBoundaryGapM": 822.393,
+        "beyondCameraFar": 0
+      },
+      "gates": {
+        "beamLengthM": 19.9,
+        "minPostClearanceM": 5.13,
+        "finishPostClearanceM": 4.938,
+        "widestModel": "audi",
+        "maxOffsetMinPostClearanceM": 2.419,
+        "maxOffsetFinishClearanceM": 2.266
+      },
+      "rail": {
+        "converged": true,
+        "continuedSolverMaxDifferenceM": 0.0036401511333699526
+      },
+      "guard": {
+        "first": {
+          "infeasibleAttempts": 1,
+          "framesWithoutRethrow": 200
+        },
+        "resize": {
+          "infeasibleAttempts": 1,
+          "framesWithoutRethrow": 200
+        }
+      },
+      "pivot": {
+        "pass": true,
+        "samples": 180,
+        "routePositions": [
+          0.02,
+          0.1,
+          0.25,
+          0.275,
+          0.279,
+          0.283,
+          0.287,
+          0.291,
+          0.355,
+          0.361,
+          0.365,
+          0.369,
+          0.375,
+          0.4,
+          0.55,
+          0.7,
+          0.85,
+          0.97
+        ],
+        "maxAbsContactErrorCm": 0.75,
+        "minContactErrorCm": -0.33,
+        "maxContactErrorCm": 0.75,
+        "cacheBefore": {
+          "builds": 10,
+          "buildMs": 148.2000000178814
+        },
+        "cacheAfter": {
+          "builds": 10,
+          "buildMs": 148.2000000178814
+        },
+        "BMWCurbTyres": [
+          {
+            "t": 0.283,
+            "tyres": 2
+          }
+        ],
+        "errors": [],
+        "limitation": "authored bob/roll removed by existing pivot harness"
+      },
+      "raw": {
+        "math": {
+          "path": "/tmp/gt3-p3r-visual/r2-math.json",
+          "sha256": "866d588d046d6f2e09cb50f6d3cf03493660fb9a27083fb14d93af5eba456e52"
+        },
+        "rail": {
+          "path": "/tmp/gt3-p3r-visual/r2-rail.json",
+          "sha256": "100d0e375edfae8984c2ff90be599866ae6db4ff8cb6a9c02741ab4de3daf295"
+        },
+        "pivot": {
+          "path": "/tmp/gt3-p3r-visual/pivot-r2/hero-pivot.json",
+          "sha256": "de4c33210b3b21bdac7cdd602ccf1ff31c0d2773e1b0e96b98987566de29c544"
+        },
+        "composition": {
+          "path": "/tmp/gt3-p3r-visual/composition-r2/composition-verification.json",
+          "sha256": "588314124b83082c27d39e847a373f37bf448fbc3bdd77c5ca436c8c4967f345"
+        },
+        "occlusion": {
+          "path": "/tmp/gt3-p3r-visual/occlusion-r2/occlusion.json",
+          "sha256": "36c6b90525b0adbf0dc46a6559044af6ce2d55e48b51f837370382120124f39e"
+        }
+      },
+      "composition": {
+        "url": "http://127.0.0.1:5199/?look=r2&gate=quiet",
+        "cam": "glide",
+        "points": [
+          {
+            "label": "start-straight",
+            "t": 0.02,
+            "yawDeg": 74.99999999999999,
+            "pitchDeg": 54.600000000000016,
+            "camera": [
+              -100.10791312839865,
+              187.21360028030054,
+              -64.32212152481435
+            ],
+            "quaternion": [
+              -0.36387115607321807,
+              -0.5409558963928014,
+              -0.2792081582020846,
+              0.7049874497671573
+            ],
+            "carNdc": {
+              "minX": -0.10758545783229954,
+              "maxX": -0.02687882872840029,
+              "minY": -0.3395845318545679,
+              "maxY": -0.2409597575999136
+            },
+            "carWidthPctOfFrame": 4.035331455194963,
+            "roadCoverage": 0.09821428571428571,
+            "exposedEdgeRays": 0,
+            "edgeSweepIncluded": true,
+            "sceneRayGrid": [
+              24,
+              14
+            ],
+            "carLengthPctOfFrame": 3.621010814714339,
+            "shadowBoxM": 120,
+            "outsideShadowFrac": 0.17746913580246915,
+            "roadOutsideShadowCells": 1,
+            "skyFrac": 0,
+            "borderMaxHitM": 364.2504010332516,
+            "fogNear": 625.7407407407408,
+            "fogFar": 2785.5555555555557,
+            "cameraFar": 3000,
+            "cameraHeightM": 187.21360028030054,
+            "lateralM": 0.1053214958310131,
+            "worstFootprintExtentM": 3.2412813402579568,
+            "roadEdgeGapM": 4.258718659742043,
+            "maxOffsetRoadEdgeGapM": 0.6009401555730562,
+            "gatePostGapM": 6.238718659742044,
+            "finishPostGapM": 5.958718659742044,
+            "correctionActive": false,
+            "snapCount": 2,
+            "hero": 2.09,
+            "shadowScale": 2.090330127313117,
+            "railHolds": [],
+            "unavailableHolds": []
+          },
+          {
+            "label": "hairpin-entry",
+            "t": 0.265,
+            "yawDeg": 75.00000000000001,
+            "pitchDeg": 54.6,
+            "camera": [
+              12.51693109548411,
+              187.21360028030054,
+              -1047.6413265942429
+            ],
+            "quaternion": [
+              -0.36387115607321807,
+              -0.5409558963928015,
+              -0.27920815820208467,
+              0.7049874497671572
+            ],
+            "carNdc": {
+              "minX": -0.01996440042792136,
+              "maxX": 0.056349740805265724,
+              "minY": 0.4371304082502101,
+              "maxY": 0.5466895550216686
+            },
+            "carWidthPctOfFrame": 3.8157070616593542,
+            "roadCoverage": 0.09523809523809523,
+            "exposedEdgeRays": 0,
+            "edgeSweepIncluded": true,
+            "sceneRayGrid": [
+              24,
+              14
+            ],
+            "carLengthPctOfFrame": 2.814335399174635,
+            "shadowBoxM": 120,
+            "outsideShadowFrac": 0.1087962962962963,
+            "roadOutsideShadowCells": 7,
+            "skyFrac": 0,
+            "borderMaxHitM": 338.93259937585447,
+            "fogNear": 625.7407407407408,
+            "fogFar": 2785.5555555555557,
+            "cameraFar": 3000,
+            "cameraHeightM": 187.21360028030054,
+            "lateralM": 1.9616657829285544,
+            "worstFootprintExtentM": 5.304367117314895,
+            "roadEdgeGapM": 2.1956328826851053,
+            "maxOffsetRoadEdgeGapM": 0.39419866561365957,
+            "gatePostGapM": 4.175632882685106,
+            "finishPostGapM": 3.8956328826851063,
+            "correctionActive": false,
+            "snapCount": 3,
+            "hero": 2.09,
+            "shadowScale": 2.09,
+            "railHolds": [],
+            "unavailableHolds": []
+          },
+          {
+            "label": "hairpin-apex",
+            "t": 0.283,
+            "yawDeg": 75.00000000000001,
+            "pitchDeg": 54.6,
+            "camera": [
+              24.496593303546504,
+              187.21360028030054,
+              -1120.5425448970686
+            ],
+            "quaternion": [
+              -0.36387115607321807,
+              -0.5409558963928015,
+              -0.27920815820208467,
+              0.7049874497671572
+            ],
+            "carNdc": {
+              "minX": -0.0813040096891457,
+              "maxX": -0.006032847451595399,
+              "minY": 0.44204425909813233,
+              "maxY": 0.5405743202809822
+            },
+            "carWidthPctOfFrame": 3.763558111877515,
+            "roadCoverage": 0.09821428571428571,
+            "exposedEdgeRays": 0,
+            "edgeSweepIncluded": true,
+            "sceneRayGrid": [
+              24,
+              14
+            ],
+            "carLengthPctOfFrame": 3.2038553574357227,
+            "shadowBoxM": 120,
+            "outsideShadowFrac": 0.12654320987654322,
+            "roadOutsideShadowCells": 4,
+            "skyFrac": 0,
+            "borderMaxHitM": 342.97278742651815,
+            "fogNear": 625.7407407407408,
+            "fogFar": 2785.5555555555557,
+            "cameraFar": 3000,
+            "cameraHeightM": 187.21360028030054,
+            "lateralM": 5.795541324615457,
+            "worstFootprintExtentM": 8.916807716128622,
+            "roadEdgeGapM": -1.4168077161286217,
+            "maxOffsetRoadEdgeGapM": 0.615633608486835,
+            "gatePostGapM": 0.5631922838713788,
+            "finishPostGapM": 0.2831922838713794,
+            "correctionActive": false,
+            "snapCount": 4,
+            "hero": 2.09,
+            "shadowScale": 2.09,
+            "railHolds": [],
+            "unavailableHolds": []
+          }
+        ],
+        "gates": [
+          {
+            "t": 0.39,
+            "roadEdgeGapM": 4.261522708886042,
+            "gatePostGapM": 6.241522708886042,
+            "finishPostGapM": 5.961522708886043,
+            "carNdc": {
+              "minX": -0.2209536566631286,
+              "maxX": -0.14991091999233472,
+              "minY": -0.052294376463265416,
+              "maxY": 0.09301391886546434
+            },
+            "exposedEdgeRays": null,
+            "edgeSweepIncluded": false
+          },
+          {
+            "t": 0.994,
+            "roadEdgeGapM": 3.2379230013370144,
+            "gatePostGapM": 5.217923001337015,
+            "finishPostGapM": 4.9379230013370154,
+            "carNdc": {
+              "minX": 0.16193536077940174,
+              "maxX": 0.2369851990621242,
+              "minY": 0.013150325485016462,
+              "maxY": 0.10436171781780454
+            },
+            "exposedEdgeRays": null,
+            "edgeSweepIncluded": false
+          }
+        ],
+        "reversibility": [
+          {
+            "t": 0.283,
+            "railDeterministic": true,
+            "progressFromBelow": 0.282999913831221,
+            "progressFromAbove": 0.28300008441866276,
+            "settledPositionDiffM": 0.0006384666220709794,
+            "settledQuaternionDiff": 0
+          },
+          {
+            "t": 0.352,
+            "railDeterministic": true,
+            "progressFromBelow": 0.3519999163290888,
+            "progressFromAbove": 0.35200008290727025,
+            "settledPositionDiffM": 0.0006934631655165018,
+            "settledQuaternionDiff": 0
+          }
+        ],
+        "motion": [
+          {
+            "name": "fwd-curb-hairpin",
+            "corners": {
+              "hairpin": {
+                "frames": 154,
+                "cameraPathM": 95.88420901474994,
+                "carPathM": 109.55478710766322,
+                "cameraToCarPathLength": 0.8752169717651979,
+                "cameraHeadingSweepDeg": 0,
+                "carHeadingSweepDeg": 71.5745766442711
+              },
+              "chicane": {
+                "frames": 0,
+                "cameraPathM": 0,
+                "carPathM": 0,
+                "cameraToCarPathLength": null,
+                "cameraHeadingSweepDeg": 0,
+                "carHeadingSweepDeg": 0
+              }
+            },
+            "frames": 154,
+            "smooth": {
+              "camera": {
+                "peakSpeedMs": 107.12717309262347,
+                "p99AccMs2": 2549.9790112796413,
+                "p99JerkMs3": 240801.38785567734,
+                "reversals": 0
+              },
+              "car": {
+                "peakSpeedMs": 120.76170746468772,
+                "p99AccMs2": 3222.9323326713093,
+                "p99JerkMs3": 267260.39655712823,
+                "reversals": 0
+              }
+            },
+            "cameraToCarTranslation": 0.8752169717651979,
+            "correctionActivePct": 0,
+            "ndcX": [
+              -0.097361917147418,
+              0.01688201050076311
+            ],
+            "ndcY": [
+              0.4800924129372335,
+              0.5153766245412759
+            ],
+            "snapsDuringMotion": 0,
+            "maxProgressJump": 0.0007126851707206505,
+            "frameMsP50": 16.700000000004366,
+            "frameMsP95": 50
+          },
+          {
+            "name": "back-curb-hairpin",
+            "corners": {
+              "hairpin": {
+                "frames": 104,
+                "cameraPathM": 93.98518976104619,
+                "carPathM": 109.0897144030692,
+                "cameraToCarPathLength": 0.8615403411341405,
+                "cameraHeadingSweepDeg": 0,
+                "carHeadingSweepDeg": 72.66804348028305
+              },
+              "chicane": {
+                "frames": 0,
+                "cameraPathM": 0,
+                "carPathM": 0,
+                "cameraToCarPathLength": null,
+                "cameraHeadingSweepDeg": 0,
+                "carHeadingSweepDeg": 0
+              }
+            },
+            "frames": 104,
+            "smooth": {
+              "camera": {
+                "peakSpeedMs": 64.41292689201612,
+                "p99AccMs2": 1535.678196154123,
+                "p99JerkMs3": 179892.76502645275,
+                "reversals": 0
+              },
+              "car": {
+                "peakSpeedMs": 77.45275850446082,
+                "p99AccMs2": 1929.3787386090466,
+                "p99JerkMs3": 227078.62860799104,
+                "reversals": 0
+              }
+            },
+            "cameraToCarTranslation": 0.8615403411341405,
+            "correctionActivePct": 0,
+            "ndcX": [
+              -0.09673836056081259,
+              0.022508887890993323
+            ],
+            "ndcY": [
+              0.4801470152392063,
+              0.5096350615560864
+            ],
+            "snapsDuringMotion": 0,
+            "maxProgressJump": 0.0007051258116214099,
+            "frameMsP50": 16.70000000001164,
+            "frameMsP95": 66.69999999999709
+          }
+        ],
+        "seamPositionDiffM": 0,
+        "resize": {
+          "16:9": 3124.1,
+          "4:3": 2375.6
+        },
+        "resizeFrames": [
+          {
+            "name": "to-4:3",
+            "frames": 3,
+            "maxFrameMs": 183.40000000000873,
+            "p50FrameMs": 66.60000000000582,
+            "aspect": 1.3333333333333333,
+            "rail": {
+              "aspect": 1.3333333333333333,
+              "holdState": "none",
+              "unavailableHolds": []
+            }
+          },
+          {
+            "name": "to-16:9",
+            "frames": 65,
+            "maxFrameMs": 166.59999999999127,
+            "p50FrameMs": 33.30000000000291,
+            "aspect": 1.7777777777777777,
+            "rail": {
+              "aspect": 1.7777777777777777,
+              "holdState": "none",
+              "unavailableHolds": []
+            }
+          }
+        ],
+        "routeHero": {
+          "samples": 501,
+          "metric": "4.6m nose-to-tail projected length / frame width",
+          "minPct": 2.542803725103444,
+          "maxPct": 4.109040870540579
+        },
+        "errors": [],
+        "readiness": {
+          "status": "ready",
+          "fallback": null
+        },
+        "edgeGrid": [
+          [
+            24,
+            14
+          ],
+          3
+        ]
+      },
+      "occlusion": {
+        "summary": {
+          "config": "look=r2",
+          "points": 15,
+          "withRoadCells": 15,
+          "minRoadCells": 2,
+          "carRayTerrainHits": 0,
+          "pointsWithHiddenRoad": 0,
+          "maxHiddenCells": 0,
+          "worstMarginM": 0,
+          "errors": [],
+          "complete": true,
+          "pass": true,
+          "failingT": []
+        },
+        "points": [
+          {
+            "requestedT": 0.02,
+            "t": 0.02,
+            "camPos": [
+              -100.1,
+              187.2,
+              -64.3
+            ],
+            "carRay": {
+              "distanceToCar": 214.4,
+              "terrainHit": null
+            },
+            "cells": 336,
+            "roadCells": 8,
+            "hidden": 0,
+            "worstMarginM": 0
+          },
+          {
+            "requestedT": 0.1,
+            "t": 0.1,
+            "camPos": [
+              18.6,
+              187.2,
+              -397
+            ],
+            "carRay": {
+              "distanceToCar": 246.9,
+              "terrainHit": null
+            },
+            "cells": 336,
+            "roadCells": 14,
+            "hidden": 0,
+            "worstMarginM": 0
+          },
+          {
+            "requestedT": 0.18,
+            "t": 0.18,
+            "camPos": [
+              45.7,
+              187.2,
+              -714.5
+            ],
+            "carRay": {
+              "distanceToCar": 224.9,
+              "terrainHit": null
+            },
+            "cells": 336,
+            "roadCells": 19,
+            "hidden": 0,
+            "worstMarginM": 0
+          },
+          {
+            "requestedT": 0.265,
+            "t": 0.265,
+            "camPos": [
+              12.5,
+              187.2,
+              -1047.6
+            ],
+            "carRay": {
+              "distanceToCar": 245,
+              "terrainHit": null
+            },
+            "cells": 336,
+            "roadCells": 20,
+            "hidden": 0,
+            "worstMarginM": 0
+          },
+          {
+            "requestedT": 0.283,
+            "t": 0.283,
+            "camPos": [
+              24.5,
+              187.2,
+              -1120.5
+            ],
+            "carRay": {
+              "distanceToCar": 247.8,
+              "terrainHit": null
+            },
+            "cells": 336,
+            "roadCells": 26,
+            "hidden": 0,
+            "worstMarginM": 0
+          },
+          {
+            "requestedT": 0.3,
+            "t": 0.3,
+            "camPos": [
+              -35.8,
+              187.2,
+              -1169.2
+            ],
+            "carRay": {
+              "distanceToCar": 254.6,
+              "terrainHit": null
+            },
+            "cells": 336,
+            "roadCells": 18,
+            "hidden": 0,
+            "worstMarginM": 0
+          },
+          {
+            "requestedT": 0.335,
+            "t": 0.335,
+            "camPos": [
+              -171.9,
+              187.2,
+              -1262.7
+            ],
+            "carRay": {
+              "distanceToCar": 236.3,
+              "terrainHit": null
+            },
+            "cells": 336,
+            "roadCells": 14,
+            "hidden": 0,
+            "worstMarginM": 0
+          },
+          {
+            "requestedT": 0.352,
+            "t": 0.352,
+            "camPos": [
+              -224,
+              187.2,
+              -1309.5
+            ],
+            "carRay": {
+              "distanceToCar": 236.8,
+              "terrainHit": null
+            },
+            "cells": 336,
+            "roadCells": 15,
+            "hidden": 0,
+            "worstMarginM": 0
+          },
+          {
+            "requestedT": 0.365,
+            "t": 0.365,
+            "camPos": [
+              -267.5,
+              187.2,
+              -1342.4
+            ],
+            "carRay": {
+              "distanceToCar": 241.7,
+              "terrainHit": null
+            },
+            "cells": 336,
+            "roadCells": 17,
+            "hidden": 0,
+            "worstMarginM": 0
+          },
+          {
+            "requestedT": 0.465,
+            "t": 0.465,
+            "camPos": [
+              -637.5,
+              187.2,
+              -1519.5
+            ],
+            "carRay": {
+              "distanceToCar": 228,
+              "terrainHit": null
+            },
+            "cells": 336,
+            "roadCells": 11,
+            "hidden": 0,
+            "worstMarginM": 0
+          },
+          {
+            "requestedT": 0.63,
+            "t": 0.63,
+            "camPos": [
+              -719.3,
+              187.2,
+              -807.8
+            ],
+            "carRay": {
+              "distanceToCar": 226.9,
+              "terrainHit": null
+            },
+            "cells": 336,
+            "roadCells": 17,
+            "hidden": 0,
+            "worstMarginM": 0
+          },
+          {
+            "requestedT": 0.68,
+            "t": 0.68,
+            "camPos": [
+              -717.3,
+              187.2,
+              -569.6
+            ],
+            "carRay": {
+              "distanceToCar": 197.1,
+              "terrainHit": null
+            },
+            "cells": 336,
+            "roadCells": 5,
+            "hidden": 0,
+            "worstMarginM": 0
+          },
+          {
+            "requestedT": 0.7,
+            "t": 0.7,
+            "camPos": [
+              -711.5,
+              187.2,
+              -475.2
+            ],
+            "carRay": {
+              "distanceToCar": 196.8,
+              "terrainHit": null
+            },
+            "cells": 336,
+            "roadCells": 2,
+            "hidden": 0,
+            "worstMarginM": 0
+          },
+          {
+            "requestedT": 0.85,
+            "t": 0.85,
+            "camPos": [
+              -539.4,
+              187.2,
+              163.2
+            ],
+            "carRay": {
+              "distanceToCar": 208.8,
+              "terrainHit": null
+            },
+            "cells": 336,
+            "roadCells": 25,
+            "hidden": 0,
+            "worstMarginM": 0
+          },
+          {
+            "requestedT": 0.97,
+            "t": 0.9700000000000001,
+            "camPos": [
+              -180.7,
+              187.2,
+              123.5
+            ],
+            "carRay": {
+              "distanceToCar": 263.5,
+              "terrainHit": null
+            },
+            "cells": 336,
+            "roadCells": 4,
+            "hidden": 0,
+            "worstMarginM": 0
+          }
+        ]
+      },
+      "supportEnvelope": {
+        "look": "r2",
+        "minOrdinary": 0.9808274193578637,
+        "minSupport": 0.9808274193578637,
+        "maxCurbOutside": 1.4788601044862197
+      }
+    },
+    "r3": {
+      "values": {
+        "distance": 240,
+        "pitch": 57.2,
+        "fov": 40,
+        "hero": 2.47,
+        "halfWidth": 8.6,
+        "racingLineM": 4.105,
+        "fogScale": 4.444,
+        "shadowScale": 2
+      },
+      "roadWidthM": 17.2,
+      "heroRangePctNode": [
+        2.67,
+        4.137
+      ],
+      "roadInHeroWidths": {
+        "roadInMedianHeroWidths": 3.49,
+        "roadInWidestHeroWidths": 2.47
+      },
+      "cornerTravel": {
+        "hairpin": {
+          "tRange": [
+            0.263,
+            0.302
+          ],
+          "cameraToCarPathLength": 0.923,
+          "cameraPathM": 173.872,
+          "carPathM": 188.282,
+          "cameraNetDisplacementM": 146.186,
+          "carNetDisplacementM": 158.466,
+          "carSpatialExtentXZ": [
+            70.075,
+            151.15
+          ],
+          "peakCameraSpeedToPeakCarSpeed": 1.038,
+          "cameraHeadingSweepDeg": 0,
+          "carHeadingNetDeg": -105.59,
+          "carHeadingSweepDeg": 105.68
+        },
+        "chicane": {
+          "tRange": [
+            0.328,
+            0.376
+          ],
+          "cameraToCarPathLength": 0.842,
+          "cameraPathM": 199.653,
+          "carPathM": 237.081,
+          "cameraNetDisplacementM": 199.143,
+          "carNetDisplacementM": 234.086,
+          "carSpatialExtentXZ": [
+            174.107,
+            156.461
+          ],
+          "peakCameraSpeedToPeakCarSpeed": 0.839,
+          "cameraHeadingSweepDeg": 0,
+          "carHeadingNetDeg": 1.16,
+          "carHeadingSweepDeg": 80.06
+        }
+      },
+      "frame": {
+        "maxReachNdc": 0.685,
+        "maxX": 0.685,
+        "maxY": 0.641,
+        "pctOverEngageZone": 0,
+        "pctOverHardZone": 0,
+        "pctOverFrame": 0,
+        "perModelMaxReachNdc": {
+          "lexus": 0.681,
+          "nissan": 0.68,
+          "audi": 0.685,
+          "bmw": 0.68,
+          "mercedes": 0.68,
+          "ferrari": 0.682,
+          "mclaren": 0.68,
+          "aston": 0.685,
+          "lamborghini": 0.683,
+          "porsche": 0.68
+        },
+        "railClampActiveFraction": 0.11328125
+      },
+      "world": {
+        "marginM": 1000,
+        "requiredWorldSizeChangeM": 0,
+        "exposedRays": 0,
+        "minBoundaryGapM": 804.551,
+        "beyondCameraFar": 0
+      },
+      "gates": {
+        "beamLengthM": 22.1,
+        "minPostClearanceM": 5.516,
+        "finishPostClearanceM": 5.356,
+        "widestModel": "audi",
+        "maxOffsetMinPostClearanceM": 2.558,
+        "maxOffsetFinishClearanceM": 2.441
+      },
+      "rail": {
+        "converged": true,
+        "continuedSolverMaxDifferenceM": 0.003512920979591247
+      },
+      "guard": {
+        "first": {
+          "infeasibleAttempts": 1,
+          "framesWithoutRethrow": 200
+        },
+        "resize": {
+          "infeasibleAttempts": 1,
+          "framesWithoutRethrow": 200
+        }
+      },
+      "pivot": {
+        "pass": true,
+        "samples": 180,
+        "routePositions": [
+          0.02,
+          0.1,
+          0.25,
+          0.275,
+          0.279,
+          0.283,
+          0.287,
+          0.291,
+          0.355,
+          0.361,
+          0.365,
+          0.369,
+          0.375,
+          0.4,
+          0.55,
+          0.7,
+          0.85,
+          0.97
+        ],
+        "maxAbsContactErrorCm": 0.93,
+        "minContactErrorCm": -0.4,
+        "maxContactErrorCm": 0.93,
+        "cacheBefore": {
+          "builds": 10,
+          "buildMs": 148.69999998807907
+        },
+        "cacheAfter": {
+          "builds": 10,
+          "buildMs": 148.69999998807907
+        },
+        "BMWCurbTyres": [
+          {
+            "t": 0.283,
+            "tyres": 2
+          },
+          {
+            "t": 0.365,
+            "tyres": 2
+          }
+        ],
+        "errors": [],
+        "limitation": "authored bob/roll removed by existing pivot harness"
+      },
+      "raw": {
+        "math": {
+          "path": "/tmp/gt3-p3r-visual/r3-math.json",
+          "sha256": "179410a95ff34fbac01f1a4816613de136e81cbf84fcdcc6656f3251db408f10"
+        },
+        "rail": {
+          "path": "/tmp/gt3-p3r-visual/r3-rail.json",
+          "sha256": "a207802dfc97a4f91328b4876550028468c9d5ba196bf7710e5c064d4e7e627f"
+        },
+        "pivot": {
+          "path": "/tmp/gt3-p3r-visual/pivot-r3/hero-pivot.json",
+          "sha256": "a876d4bc70b1699bb1a0d51f7240e8b19c5002a21908dae0ae5edc72b0dd1718"
+        },
+        "composition": {
+          "path": "/tmp/gt3-p3r-visual/composition-r3/composition-verification.json",
+          "sha256": "fe91ac08ec28c77575331d735e35ce63710b4aab16f4e9603a0aebcadc2b993c"
+        },
+        "occlusion": {
+          "path": "/tmp/gt3-p3r-visual/occlusion-r3/occlusion.json",
+          "sha256": "eba0834c236b92dd54275aa2398b6681931cef605f23c39199e6050a32cb3ac2"
+        }
+      },
+      "composition": {
+        "url": "http://127.0.0.1:5199/?look=r3&gate=quiet",
+        "cam": "glide",
+        "points": [
+          {
+            "label": "start-straight",
+            "t": 0.02,
+            "yawDeg": 74.99999999999999,
+            "pitchDeg": 57.199999999999996,
+            "camera": [
+              -103.27245524516806,
+              211.65680565043994,
+              -63.48678173442454
+            ],
+            "quaternion": [
+              -0.3797717844673978,
+              -0.5344821707668659,
+              -0.2914091394947632,
+              0.6965507262746259
+            ],
+            "carNdc": {
+              "minX": -0.09815079206888201,
+              "maxX": -0.016750442758451327,
+              "minY": -0.30560568641152,
+              "maxY": -0.2059166859782495
+            },
+            "carWidthPctOfFrame": 4.070017465521534,
+            "roadCoverage": 0.09821428571428571,
+            "exposedEdgeRays": 0,
+            "edgeSweepIncluded": true,
+            "sceneRayGrid": [
+              24,
+              14
+            ],
+            "carLengthPctOfFrame": 3.661254313820043,
+            "shadowBoxM": 120,
+            "outsideShadowFrac": 0.24074074074074073,
+            "roadOutsideShadowCells": 4,
+            "skyFrac": 0,
+            "borderMaxHitM": 401.6246042762288,
+            "fogNear": 688.8888888888889,
+            "fogFar": 3066.666666666667,
+            "cameraFar": 3000,
+            "cameraHeightM": 211.65680565043994,
+            "lateralM": 0.11489617794752162,
+            "worstFootprintExtentM": 3.8231358529177766,
+            "roadEdgeGapM": 4.7768641470822235,
+            "maxOffsetRoadEdgeGapM": 0.786560325029745,
+            "gatePostGapM": 6.756864147082224,
+            "finishPostGapM": 6.476864147082225,
+            "correctionActive": false,
+            "snapCount": 2,
+            "hero": 2.47,
+            "shadowScale": 2.4702333812931756,
+            "railHolds": [],
+            "unavailableHolds": []
+          },
+          {
+            "label": "hairpin-apex",
+            "t": 0.283,
+            "yawDeg": 74.99999999999999,
+            "pitchDeg": 57.199999999999996,
+            "camera": [
+              13.86082220999242,
+              211.65680565043994,
+              -1117.6930695048193
+            ],
+            "quaternion": [
+              -0.3797717844673978,
+              -0.5344821707668659,
+              -0.2914091394947632,
+              0.6965507262746259
+            ],
+            "carNdc": {
+              "minX": -0.0755552192592532,
+              "maxX": 0.0010653627401733718,
+              "minY": 0.4398806215419154,
+              "maxY": 0.5421745325637252
+            },
+            "carWidthPctOfFrame": 3.831029099971328,
+            "roadCoverage": 0.10119047619047619,
+            "exposedEdgeRays": 0,
+            "edgeSweepIncluded": true,
+            "sceneRayGrid": [
+              24,
+              14
+            ],
+            "carLengthPctOfFrame": 3.2621422930236994,
+            "shadowBoxM": 120,
+            "outsideShadowFrac": 0.25385802469135804,
+            "roadOutsideShadowCells": 12,
+            "skyFrac": 0,
+            "borderMaxHitM": 380.87367382676877,
+            "fogNear": 688.8888888888889,
+            "fogFar": 3066.666666666667,
+            "cameraFar": 3000,
+            "cameraHeightM": 211.65680565043994,
+            "lateralM": 6.552836105346673,
+            "worstFootprintExtentM": 10.24285709518221,
+            "roadEdgeGapM": -1.64285709518221,
+            "maxOffsetRoadEdgeGapM": 0.804779010164463,
+            "gatePostGapM": 0.3371429048177905,
+            "finishPostGapM": 0.05714290481779116,
+            "correctionActive": false,
+            "snapCount": 3,
+            "hero": 2.47,
+            "shadowScale": 2.47,
+            "railHolds": [],
+            "unavailableHolds": []
+          },
+          {
+            "label": "chicane-out",
+            "t": 0.365,
+            "yawDeg": 74.99999999999997,
+            "pitchDeg": 57.199999999999996,
+            "camera": [
+              -271.0398763279462,
+              211.65680565043994,
+              -1341.4020041411773
+            ],
+            "quaternion": [
+              -0.3797717844673977,
+              -0.5344821707668659,
+              -0.2914091394947632,
+              0.6965507262746259
+            ],
+            "carNdc": {
+              "minX": -0.14875435154997504,
+              "maxX": -0.07061595685270708,
+              "minY": 0.12080382224842562,
+              "maxY": 0.2523481979709926
+            },
+            "carWidthPctOfFrame": 3.9069197348633984,
+            "roadCoverage": 0.08333333333333333,
+            "exposedEdgeRays": 0,
+            "edgeSweepIncluded": true,
+            "sceneRayGrid": [
+              24,
+              14
+            ],
+            "carLengthPctOfFrame": 3.2501377625667494,
+            "shadowBoxM": 120,
+            "outsideShadowFrac": 0.22453703703703703,
+            "roadOutsideShadowCells": 3,
+            "skyFrac": 0,
+            "borderMaxHitM": 397.80183107670604,
+            "fogNear": 688.8888888888889,
+            "fogFar": 3066.666666666667,
+            "cameraFar": 3000,
+            "cameraHeightM": 211.65680565043994,
+            "lateralM": 6.550376625061066,
+            "worstFootprintExtentM": 10.23596962649091,
+            "roadEdgeGapM": -1.63596962649091,
+            "maxOffsetRoadEdgeGapM": 0.809206998570156,
+            "gatePostGapM": 0.3440303735090904,
+            "finishPostGapM": 0.06403037350909102,
+            "correctionActive": false,
+            "snapCount": 4,
+            "hero": 2.47,
+            "shadowScale": 2.47,
+            "railHolds": [],
+            "unavailableHolds": []
+          }
+        ],
+        "gates": [
+          {
+            "t": 0.39,
+            "roadEdgeGapM": 4.76488469554962,
+            "gatePostGapM": 6.7448846955496204,
+            "finishPostGapM": 6.464884695549621,
+            "carNdc": {
+              "minX": -0.19408661768000798,
+              "maxX": -0.1224199897534594,
+              "minY": -0.0537225980776899,
+              "maxY": 0.09646843247198764
+            },
+            "exposedEdgeRays": null,
+            "edgeSweepIncluded": false
+          },
+          {
+            "t": 0.994,
+            "roadEdgeGapM": 3.65634049974277,
+            "gatePostGapM": 5.63634049974277,
+            "finishPostGapM": 5.356340499742771,
+            "carNdc": {
+              "minX": 0.13174801500154193,
+              "maxX": 0.20836775550254186,
+              "minY": 0.011765706294313704,
+              "maxY": 0.10557489664558621
+            },
+            "exposedEdgeRays": null,
+            "edgeSweepIncluded": false
+          }
+        ],
+        "reversibility": [
+          {
+            "t": 0.283,
+            "railDeterministic": true,
+            "progressFromBelow": 0.28299991017052856,
+            "progressFromAbove": 0.2830000859377952,
+            "settledPositionDiffM": 0.0006576603492843793,
+            "settledQuaternionDiff": 0
+          },
+          {
+            "t": 0.352,
+            "railDeterministic": true,
+            "progressFromBelow": 0.35199991264195724,
+            "progressFromAbove": 0.35200008844523045,
+            "settledPositionDiffM": 0.0007331678834928176,
+            "settledQuaternionDiff": 0
+          }
+        ],
+        "motion": [
+          {
+            "name": "fwd-curb-hairpin",
+            "corners": {
+              "hairpin": {
+                "frames": 154,
+                "cameraPathM": 95.8628568847806,
+                "carPathM": 108.96825755877616,
+                "cameraToCarPathLength": 0.8797319424243646,
+                "cameraHeadingSweepDeg": 0,
+                "carHeadingSweepDeg": 71.10081266429474
+              },
+              "chicane": {
+                "frames": 0,
+                "cameraPathM": 0,
+                "carPathM": 0,
+                "cameraToCarPathLength": null,
+                "cameraHeadingSweepDeg": 0,
+                "carHeadingSweepDeg": 0
+              }
+            },
+            "frames": 154,
+            "smooth": {
+              "camera": {
+                "peakSpeedMs": 103.29261450886867,
+                "p99AccMs2": 3402.2017548505337,
+                "p99JerkMs3": 296558.7113330871,
+                "reversals": 0
+              },
+              "car": {
+                "peakSpeedMs": 125.43000575556222,
+                "p99AccMs2": 4133.553625858217,
+                "p99JerkMs3": 344907.91030711925,
+                "reversals": 0
+              }
+            },
+            "cameraToCarTranslation": 0.8797319424243646,
+            "correctionActivePct": 0,
+            "ndcX": [
+              -0.08298892128451883,
+              0.013689034991235116
+            ],
+            "ndcY": [
+              0.479554952578799,
+              0.5159281635170885
+            ],
+            "snapsDuringMotion": 0,
+            "maxProgressJump": 0.0007050063126565753,
+            "frameMsP50": 16.69999999999709,
+            "frameMsP95": 50
+          },
+          {
+            "name": "back-curb-hairpin",
+            "corners": {
+              "hairpin": {
+                "frames": 151,
+                "cameraPathM": 93.93779385791933,
+                "carPathM": 108.7065261298129,
+                "cameraToCarPathLength": 0.8641412544610491,
+                "cameraHeadingSweepDeg": 0,
+                "carHeadingSweepDeg": 72.33042694383386
+              },
+              "chicane": {
+                "frames": 0,
+                "cameraPathM": 0,
+                "carPathM": 0,
+                "cameraToCarPathLength": null,
+                "cameraHeadingSweepDeg": 0,
+                "carHeadingSweepDeg": 0
+              }
+            },
+            "frames": 151,
+            "smooth": {
+              "camera": {
+                "peakSpeedMs": 71.5689048832473,
+                "p99AccMs2": 2438.0785273004294,
+                "p99JerkMs3": 197391.99701817386,
+                "reversals": 0
+              },
+              "car": {
+                "peakSpeedMs": 80.75798594599962,
+                "p99AccMs2": 2662.8837265868524,
+                "p99JerkMs3": 231200.83368367545,
+                "reversals": 0
+              }
+            },
+            "cameraToCarTranslation": 0.8641412544610491,
+            "correctionActivePct": 0,
+            "ndcX": [
+              -0.08245380516937202,
+              0.018416239990781166
+            ],
+            "ndcY": [
+              0.47962502977261684,
+              0.5099538432134647
+            ],
+            "snapsDuringMotion": 0,
+            "maxProgressJump": 0.0007638989484945458,
+            "frameMsP50": 16.69999999999709,
+            "frameMsP95": 50
+          }
+        ],
+        "seamPositionDiffM": 0,
+        "resize": {
+          "16:9": 884.7,
+          "4:3": 660.1
+        },
+        "resizeFrames": [
+          {
+            "name": "to-4:3",
+            "frames": 70,
+            "maxFrameMs": 1216.699999999997,
+            "p50FrameMs": 16.69999999999709,
+            "aspect": 1.3333333333333333,
+            "rail": {
+              "aspect": 1.3333333333333333,
+              "holdState": "none",
+              "unavailableHolds": []
+            }
+          },
+          {
+            "name": "to-16:9",
+            "frames": 127,
+            "maxFrameMs": 50,
+            "p50FrameMs": 16.69999999999709,
+            "aspect": 1.7777777777777777,
+            "rail": {
+              "aspect": 1.7777777777777777,
+              "holdState": "none",
+              "unavailableHolds": []
+            }
+          }
+        ],
+        "routeHero": {
+          "samples": 501,
+          "metric": "4.6m nose-to-tail projected length / frame width",
+          "minPct": 2.670272989659765,
+          "maxPct": 4.1374803229348585
+        },
+        "errors": [],
+        "readiness": {
+          "status": "ready",
+          "fallback": null
+        },
+        "edgeGrid": [
+          [
+            24,
+            14
+          ],
+          3
+        ]
+      },
+      "occlusion": {
+        "summary": {
+          "config": "look=r3",
+          "points": 15,
+          "withRoadCells": 15,
+          "minRoadCells": 3,
+          "carRayTerrainHits": 0,
+          "pointsWithHiddenRoad": 0,
+          "maxHiddenCells": 0,
+          "worstMarginM": 0,
+          "errors": [],
+          "complete": true,
+          "pass": true,
+          "failingT": []
+        },
+        "points": [
+          {
+            "requestedT": 0.02,
+            "t": 0.02,
+            "camPos": [
+              -103.3,
+              211.7,
+              -63.5
+            ],
+            "carRay": {
+              "distanceToCar": 237.4,
+              "terrainHit": null
+            },
+            "cells": 336,
+            "roadCells": 6,
+            "hidden": 0,
+            "worstMarginM": 0
+          },
+          {
+            "requestedT": 0.1,
+            "t": 0.1,
+            "camPos": [
+              13.8,
+              211.7,
+              -395.7
+            ],
+            "carRay": {
+              "distanceToCar": 268.5,
+              "terrainHit": null
+            },
+            "cells": 336,
+            "roadCells": 13,
+            "hidden": 0,
+            "worstMarginM": 0
+          },
+          {
+            "requestedT": 0.18,
+            "t": 0.18,
+            "camPos": [
+              41.8,
+              211.7,
+              -713.4
+            ],
+            "carRay": {
+              "distanceToCar": 247,
+              "terrainHit": null
+            },
+            "cells": 336,
+            "roadCells": 19,
+            "hidden": 0,
+            "worstMarginM": 0
+          },
+          {
+            "requestedT": 0.265,
+            "t": 0.265,
+            "camPos": [
+              3.6,
+              211.7,
+              -1045.2
+            ],
+            "carRay": {
+              "distanceToCar": 268.9,
+              "terrainHit": null
+            },
+            "cells": 336,
+            "roadCells": 20,
+            "hidden": 0,
+            "worstMarginM": 0
+          },
+          {
+            "requestedT": 0.283,
+            "t": 0.283,
+            "camPos": [
+              13.9,
+              211.7,
+              -1117.7
+            ],
+            "carRay": {
+              "distanceToCar": 272.5,
+              "terrainHit": null
+            },
+            "cells": 336,
+            "roadCells": 28,
+            "hidden": 0,
+            "worstMarginM": 0
+          },
+          {
+            "requestedT": 0.3,
+            "t": 0.3,
+            "camPos": [
+              -46.1,
+              211.7,
+              -1166.4
+            ],
+            "carRay": {
+              "distanceToCar": 279.4,
+              "terrainHit": null
+            },
+            "cells": 336,
+            "roadCells": 19,
+            "hidden": 0,
+            "worstMarginM": 0
+          },
+          {
+            "requestedT": 0.335,
+            "t": 0.335,
+            "camPos": [
+              -175.3,
+              211.7,
+              -1261.8
+            ],
+            "carRay": {
+              "distanceToCar": 257.9,
+              "terrainHit": null
+            },
+            "cells": 336,
+            "roadCells": 12,
+            "hidden": 0,
+            "worstMarginM": 0
+          },
+          {
+            "requestedT": 0.352,
+            "t": 0.352,
+            "camPos": [
+              -227.4,
+              211.7,
+              -1308.5
+            ],
+            "carRay": {
+              "distanceToCar": 258.4,
+              "terrainHit": null
+            },
+            "cells": 336,
+            "roadCells": 17,
+            "hidden": 0,
+            "worstMarginM": 0
+          },
+          {
+            "requestedT": 0.365,
+            "t": 0.365,
+            "camPos": [
+              -271,
+              211.7,
+              -1341.4
+            ],
+            "carRay": {
+              "distanceToCar": 260.5,
+              "terrainHit": null
+            },
+            "cells": 336,
+            "roadCells": 14,
+            "hidden": 0,
+            "worstMarginM": 0
+          },
+          {
+            "requestedT": 0.465,
+            "t": 0.465,
+            "camPos": [
+              -634.6,
+              211.7,
+              -1507.4
+            ],
+            "carRay": {
+              "distanceToCar": 251.6,
+              "terrainHit": null
+            },
+            "cells": 336,
+            "roadCells": 11,
+            "hidden": 0,
+            "worstMarginM": 0
+          },
+          {
+            "requestedT": 0.63,
+            "t": 0.63,
+            "camPos": [
+              -722.9,
+              211.7,
+              -806.8
+            ],
+            "carRay": {
+              "distanceToCar": 248.1,
+              "terrainHit": null
+            },
+            "cells": 336,
+            "roadCells": 17,
+            "hidden": 0,
+            "worstMarginM": 0
+          },
+          {
+            "requestedT": 0.68,
+            "t": 0.68,
+            "camPos": [
+              -721.1,
+              211.7,
+              -568.5
+            ],
+            "carRay": {
+              "distanceToCar": 220.8,
+              "terrainHit": null
+            },
+            "cells": 336,
+            "roadCells": 3,
+            "hidden": 0,
+            "worstMarginM": 0
+          },
+          {
+            "requestedT": 0.7,
+            "t": 0.7,
+            "camPos": [
+              -713.6,
+              211.7,
+              -474.6
+            ],
+            "carRay": {
+              "distanceToCar": 219.8,
+              "terrainHit": null
+            },
+            "cells": 336,
+            "roadCells": 4,
+            "hidden": 0,
+            "worstMarginM": 0
+          },
+          {
+            "requestedT": 0.85,
+            "t": 0.85,
+            "camPos": [
+              -537.3,
+              211.7,
+              162.5
+            ],
+            "carRay": {
+              "distanceToCar": 229.6,
+              "terrainHit": null
+            },
+            "cells": 336,
+            "roadCells": 20,
+            "hidden": 0,
+            "worstMarginM": 0
+          },
+          {
+            "requestedT": 0.97,
+            "t": 0.9700000000000001,
+            "camPos": [
+              -186.1,
+              211.7,
+              124.2
+            ],
+            "carRay": {
+              "distanceToCar": 284.8,
+              "terrainHit": null
+            },
+            "cells": 336,
+            "roadCells": 4,
+            "hidden": 0,
+            "worstMarginM": 0
+          }
+        ]
+      },
+      "supportEnvelope": {
+        "look": "r3",
+        "minOrdinary": 1.1990941623738829,
+        "minSupport": 0.8061135566725395,
+        "maxCurbOutside": 1.7938864433274606
+      }
+    }
+  },
+  "productTree": "9880fb90adab4e22fa06d3362be530d2e684247e",
+  "captures": [
+    {
+      "path": "r1_hairpin-apex_day.png",
+      "bytes": 1339391,
+      "sha256": "d81f0a77db3fa9b0b304b0bfaa9f5ccaecf273547ec0eaf1810ee26fd5fb3977"
+    },
+    {
+      "path": "r1_hairpin-entry_day.png",
+      "bytes": 1364388,
+      "sha256": "556fd74b5f749679a670f5c0a196a4c4dfd3690bf637f2524c168331c905ad69"
+    },
+    {
+      "path": "r1_start-straight_day.png",
+      "bytes": 1346053,
+      "sha256": "f7f15e871005623f950293b5a9336e7d652f69eec361480b99368a41dc496eb3"
+    },
+    {
+      "path": "r2_hairpin-apex_day.png",
+      "bytes": 1319742,
+      "sha256": "1440b93ff63c1446dfc84d21e96fd1790e774fde8feda63518e8b6aedf9e0d6b"
+    },
+    {
+      "path": "r2_hairpin-entry_day.png",
+      "bytes": 1369120,
+      "sha256": "f993337b1bae36a601e77a51e3268c2bacf0bbc6e0df24ce62a247fc47eb4daa"
+    },
+    {
+      "path": "r2_start-straight_day.png",
+      "bytes": 1326199,
+      "sha256": "fc662a21aefac25703809cb0efba16f6428d9fcbc372e441020728ccbb6ff131"
+    },
+    {
+      "path": "r3_chicane-out_day.png",
+      "bytes": 1349781,
+      "sha256": "a5a282465f4174fedff82e122ba2b884736b574c7bd3017f07d49ef3090d0568"
+    },
+    {
+      "path": "r3_hairpin-apex_day.png",
+      "bytes": 1354796,
+      "sha256": "73b136b54aa3dfc813d8308395b12ee4660f2b96844da14365676e1dbe9f1e51"
+    },
+    {
+      "path": "r3_start-straight_day.png",
+      "bytes": 1343053,
+      "sha256": "8de1e272b71c49c6c53fe51714001b248e8ae95e2fc82f9e953028774f43835f"
+    }
+  ]
+}

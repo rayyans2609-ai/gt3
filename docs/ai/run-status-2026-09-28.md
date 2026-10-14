@@ -1,0 +1,218 @@
+# GT3 autonomous run 2026-09-28 — handoff
+
+Stopped at a clean checkpoint (Astra checkpoint 2 recommendation) because the host was
+at load average ~550–620 from ~05:00, making builds ~100× slower and Chrome DevTools
+unresponsive. Nothing is merged to `main` (still `62024bb`). Measured evidence is in
+`BUILD_LOG.md` (last section).
+
+## Branches / worktrees
+| Branch | Head | Content | Worktree |
+|---|---|---|---|
+| `worktree-phase3b-aerial-camera` | `ce61556` | Phase 3b camera + typography — **for the user's visual review** | shares `.claude/worktrees/phase3b-aerial-camera` (now checked out on `phase3-integration`) |
+| `typography-slice` | `bd08be1` | typography only (its vite fs.allow hunk is dropped on merge, `b089595`) | `.claude/worktrees/typography-slice` |
+| `phase3c-checkpoints` | `80926d4` | 3c on top of `ac76a9d` | `.claude/worktrees/phase3c-checkpoints` |
+| `phase3-integration` | this commit | 3b (`ce61556`) + 3c + verifier fix + BUILD_LOG + this doc | `.claude/worktrees/phase3b-aerial-camera` |
+
+Worktrees need a real `font/` copy (gitignored) and a `node_modules` symlink; both present.
+
+## Status
+- **Phase 3b** — technically complete; **awaiting human visual review.** Do not mark accepted.
+- **Typography slice** — done, verified (fonts load, 22 files bundled, no Google requests).
+- **Phase 3c** — implemented (Sol high); build + direct state sweep + session checks pass.
+  **Browser verification not yet run** (host overload).
+- **Phase 3d** (sparse HUD) — not started; brief ready (see below). Start only after 3c is
+  browser-verified.
+
+## Next exact actions (when the host is healthy)
+0. DONE `76b9309` (Terra, 07:50): items 1 and 2 below are fixed; syntax-checked only — the host
+   load rose again (~248) before build/browser runs. Start at item 3.
+1. (done) Fix `scripts/verify-checkpoints.mjs` swap-timing test (line ~175): it can cancel the swap it
+   measures (Audi→Nissan→Audi before midpoint). Settle fully, assert a swap occurs, exclude
+   screenshots from timing, report ≥250 ms stalls instead of filtering them. (Terra/Luna.)
+2. (done) Morph: reattach the particle object when a morph starts — preload's `setCarModel()` removes
+   it, so the first swap lacks its particle mask. Small, pre-existing. (Terra.)
+3. On `phase3-integration`: run `verify-checkpoints.mjs`, `verify-aerial.mjs branch|motion|
+   focused`, captures of gates (Day/Night) and a mid-swap frame.
+4. Then Phase 3d via the Terra brief.
+
+## Briefs (job scratch — copy lives only for this job)
+Phase 3d: sparse HUD per SPEC §20, Terra medium; branch from the verified integration head;
+no back-to-Hub control until the Hub exists; legacy approach card stays idle (it would reveal
+car identity before discovery).
+
+## Model routing used
+Opus 5.5 manager; GPT-6 Sol high (3b camera, 3b fix 1, 3c); GPT-6 Sol medium (3b fix 2,
+interrupted by Codex usage limit — finished by Opus from its WIP); GPT-5.6 Terra medium
+(typography); GPT-6 Luna medium (camera parameter sweep); GPT-6 Astra high (checkpoints 1, 2).
+
+## Decisions that need the user
+1. Camera framing/feel (visual acceptance of 3b), including whether to tune toward one of the
+   sweep configurations (A current 40°/52°/54 m … F 55°/45°/44 m).
+2. Gate appearance and swap feel (after captures exist).
+3. Approval to merge Phase 3 work to `main` after verification.
+
+## Update 2026-09-28 ~09:50 (continuation run)
+- Doctrine: `733317d` (model-routing.md §9 hierarchical delegation; Master Context pointer).
+- Astra (manager-assigned): harness browser-cleanup fix `804a36c`; 3b review retained A-current
+  (40/52/54, preferred) and C-wider (50/47/46); no default change; no camera-motion defect.
+  Captures: ~/Desktop/gt3-review-2026-09-28/3b-astra/.
+- Host root cause (manager, from vm_stat): memory exhaustion → swap thrash on an 8 GB
+  i5-8210Y (≈67 MB free pages, 162 M cumulative swapouts, idle CPUs, load 100–800). Contributors:
+  VS Code, multiple Claude app/daemon processes, FileProvider, plus GT3 Vite + headless Chrome
+  + concurrent Codex CLIs. Rule for this host: one locally-heavy GT3 job at a time; browser jobs
+  only at 1-min load < 8; no parallel Codex jobs while a browser runs.
+- 3c browser run (Luna): route-state sweeps fwd 40 / bwd 39 PASS, no interruptions PASS;
+  oscillation + aerial settle FAILED on harness design → Terra `bfe5e30` (harness only).
+  Re-run pending (load).
+- 3d: Terra implementing on `phase3d-hud` (from `804a36c`), build-only; Luna browser brief to follow.
+
+## Host concurrency cap (user rule, 2026-09-28)
+On this 8 GB i5-8210Y: at most 1–2 active top-level tasks including sub-agents; one heavy task
+(browser, build, Codex/Sol/Terra, memory-intensive) at a time; two only if both are light or one
+is mostly waiting. Serialize when in doubt. If memory pressure, swap, load or system CPU climbs,
+drop to one heavy task immediately. Browser pre-flight uses several signals (no other heavy job,
+paging/swap deltas ~0, system CPU low / idle CPU substantial), not load average alone.
+
+## FINAL correction 2026-09-28 ~12:30 (supersedes earlier "3c PASS" summaries)
+
+A partial `verify-checkpoints.mjs` run against final HEAD `036d4d4` (killed mid-run before its
+output was checked; recovered from `/tmp/gt3-3c/verification.json`, timestamp 11:17) gives the
+real picture, corrected from the manager's earlier mis-summary:
+
+**PASS:** startup; route metadata; forward sweep (40 stops); backward sweep (39 stops, discovery
+never shrinks); **real-wheel gate reversals — genuinely PASSED this time** (gate 0.255: 6
+crossings, indices [2,3]; gate 0.68: 8 crossings, indices [6,7]) — the `036d4d4` harness fix
+(giving each burst its own time budget) is confirmed working; reload restores all 10 discoveries;
+Replay preserves all 10 discoveries; Day/Night gate captures (6 images); zero console errors.
+
+**FAIL (unclassified — harness vs app not yet determined):**
+- "instant seeks": seeking far forward (t=0.91) left `morphing: true` with two car models
+  attached (`car-mclaren`, `car-porsche`) instead of settled — either the harness didn't wait
+  long enough for the morph to finish after an instant (non-animated) seek, or morph retargeting
+  has a real edge case on a large instant jump. NOT reproduced/isolated. Needs a dedicated,
+  patient re-check (wait on `isMorphing()===false` with a generous timeout) before calling it
+  app or harness.
+- "frame and swap diagnostics": `Waiting failed: 30000ms exceeded` — could be host CPU
+  starvation (this session's dominant condition) rather than an app defect. NOT isolated.
+
+**NEVER VERIFIED (not blocked-this-instant — genuinely never directly checked across two
+attempts):** first-swap vs later-swap particle attachment. The dedicated particle script
+(`particles.mjs`) was written into the brief but never executed — the run failed at the swap
+diagnostics step first, and the fully-corrected final rerun never got past the host CPU gate at
+all (8/8 retries failed, ~50 min, system CPU 70-80%/idle 6-22% with zero GT3 load — this is
+CPU/kernel saturation, not memory/swap pressure; swap usage decreased over that run).
+
+**3d HUD:** never browser-verified (host-blocked before any Vite/Chrome launch in the pass that
+targeted it). Implementation reviewed only statically.
+
+**Aerial regression on final HEAD `036d4d4`:** never re-run (last successful `motion` run was
+against `ce61556`, before 3c/3d landed).
+
+Earlier "3c PASS" / "3b+3c technically complete" language in this doc and in chat overstated
+confidence — treat this section as authoritative over anything above it.
+
+## Phase 3 acceptance sequence completed 2026-09-28 ~13:23 (supersedes the "FINAL correction" section above)
+
+Host recovered (idle 60-93%, sys 4-23%, pageouts/swapouts flat). One combined browser session
+(`/tmp/gt3-final2/results.json`) resolved every previously-open item with direct runtime evidence:
+
+1. **instant-seek-far: PASS.** Root cause was the harness (`seek()`'s fixed 1050ms settle vs
+   morph's 850ms nominal duration -- thin margin that this session's chronic host CPU
+   starvation could exceed), not the app. Fixed narrowly in `c28cd41`: `seek()` now waits on
+   `isMorphing()===false` instead of a blind delay. Confirmed: instant seek to t=0.91 settles
+   cleanly (single model `car-porsche`, `morphing:false`).
+2. **First-swap particles: PASS.** Fresh context, genuinely-first swap: 19/94 sampled frames
+   showed particles attached to `car-mount`, opacity to 0.85, correct final car.
+3. **Later-swap particles: PASS.** Fresh context past gate 1: 18/95 frames, same pattern,
+   confirming the earlier particle-reattachment fix holds on subsequent swaps too.
+4. **3d HUD: PASS.** All 11 DOM presence/absence checks matched the KEEP/REMOVE list exactly;
+   zero console errors; car name updates across a crossing. One apparent F-key failure was
+   isolated with a follow-up micro-script and traced to the combined script's own insufficient
+   settle time before its baseline, not a real regression -- re-measured in isolation:
+   `locked` never true, no `#showcase-layer`, camera delta 0.00135 world units (car is 4.6
+   units long) after pressing F.
+5. **Camera regression (light/technical): no regression signal.** 6 settled route points,
+   FOV constant, no stuck morphs, no errors. `aerialCamera.js` remains byte-identical to the
+   3b head, so this only needed to rule out side effects from 3c/3d -- it did.
+
+Codex/Astra hit a usage-limit mid-run for its independent confirmatory pass (resets ~1:42 PM);
+the manager (Sonnet 5, acting in the manager role) completed the final synthesis directly from
+the concrete evidence above rather than block the stopping point on a quota reset.
+
+**Remaining, honestly:** route marker's own SVG x/y coordinates were not directly sampled
+(only `state.progress` advancing + map-SVG presence confirmed); gate Day/Night captures are
+from an earlier session, not re-captured against this exact head. Neither is believed to
+indicate a defect. **3b framing (A vs C), hero scale, motion feel, and gate/HUD visual
+appearance remain human-review-only, as they always were.**
+
+Phase 3 is now technically complete and runtime-verified. `main` untouched at `62024bb`.
+Branch head: `c28cd41`.
+
+## Astra independent review + gap closure 2026-09-28 ~13:55
+
+Astra's confirmatory pass completed (its earlier attempt had hit a Codex usage limit; retried
+after reset). Verdict: no blocking code defect, but pushed back correctly on "every item
+resolved" being too broad, and asked for one narrow closeable gap: direct evidence the HUD
+route marker's own DOM coordinates move (not just `state.progress`), and that the *visible*
+identity slot (not just mutated text anywhere in the DOM) matches `activeCarIndex`.
+
+Closed with a targeted two-point check: marker `transform` went from `translate(86.48 47.33)`
+at t=0.05 (Lexus, index 0) to `translate(45.74 128.88)` at t=0.5 (Ferrari, index 5) -- both
+finite, ~91 units apart. Visible slot text matched the expected car's `displayName` exactly at
+both points. Zero console errors. Gap closed with direct evidence.
+
+Astra also noted, correctly, two things the earlier report should not have implied:
+- Particle-attachment sampling does not substitute for the earlier-failed frame-pacing/swap
+  timing diagnostic (that was never re-run against this head; it is a separate, still-open
+  performance measurement, not currently believed to indicate a defect but not proven clean).
+- The camera's 6-point settled sample is a integration smoke check, not a full motion-regression
+  sweep; the *earlier* full sweep (against unchanged camera code) remains the actual regression
+  evidence, not this pass on its own.
+
+New minor finding (non-blocking, inherited, NOT fixed in this pass -- out of scope for this
+acceptance check): inactive HUD identity slots are hidden via CSS opacity only, not
+`aria-hidden`, so stale car names remain exposed to assistive technology. Flagged for a future
+small a11y pass, not acted on here.
+
+**Corrected final framing:** Phase 3 implementation is complete; the specific runtime items
+this session set out to resolve (instant-seek-far, first/later-swap particles, 3d HUD
+DOM+F-key+name-update, route marker) are all directly evidenced. Frame-pacing/swap-timing
+performance and a fresh full camera motion sweep against this exact head remain unmeasured
+(not suspected broken -- simply not re-run). Human visual acceptance (3b framing, gate/HUD
+appearance) remains entirely outstanding, as always.
+
+## Non-visual gap-closing pass 2026-09-28 ~14:30 (commit f6e55d9)
+
+Closed the three remaining non-visual gaps Astra flagged, in order:
+
+1. **Frame-pacing/swap-timing diagnostic re-run.** Static inspection found no fixable harness
+   defect (the morph-start wait is already condition-based, `isMorphing()===true` with a 30s
+   timeout, not a fixed delay). Ran an isolated extraction of just this phase (not the full 3c
+   suite) 4 times against a healthy host (pre-flight passing every time: idle 62-73%, sys
+   19-25%, pageouts/swapouts flat): 2 clean passes with good numbers (idle p50=16.7ms/
+   p95=33.4ms, swap p50=16.8ms/p95=50.1ms, 0 frames >=250ms in either window; morphs completed
+   correctly both times), 2 failures at different steps despite identical code and a
+   pre-flight-healthy host. A targeted follow-up probe of the simplest failing operation
+   (`seekTo(0.2, {instant:false})`) converged cleanly in ~2.5s with fully normal
+   progress/speed01 behavior when it succeeded. **Classified as environmental (intermittent
+   host/CDP-level latency not captured by CPU/memory sampling), not an app or harness logic
+   defect** -- consistent with earlier session-wide evidence of the same pattern affecting even
+   trivial Bash commands. No harness or app code changed as a result (none was proven
+   necessary). Scratch diagnostic script was not committed (deleted after use).
+2. **Full aerial-camera sweep on `38c86fd`.** `scripts/verify-aerial.mjs branch` (205 settled
+   samples) and `motion` (8 real-wheel sequences, normal + 4x CPU throttle) both ran clean:
+   0 correction-active samples/frames, 0 snaps, 0 out-of-frame, yaw/pitch constant at 75/52,
+   reversibility diffs at micron scale, seam diff 0, F-key confirmed inert with **0** camera
+   pose diff (tighter than the earlier isolated 0.00135 measurement), montage correctly never
+   plays (coins retired), Day/Night toggle works, zero errors. No regression from 3c/3d
+   integration -- confirms the camera code (already known byte-identical) also behaves
+   identically end-to-end with the rest of Phase 3 now integrated.
+3. **HUD identity-slot a11y fix.** `src/ui/hud.js`: inactive cross-fade slot now gets
+   `aria-hidden="true"`, active gets `"false"`, synced through the existing swap logic. No
+   visual/timing change. Verified: `node --check` clean; a targeted DOM check confirms exactly
+   one visible slot at all times, correct aria-hidden on both slots before and after a real
+   checkpoint-driven identity change (Lexus -> Nissan), zero console errors. Commit `f6e55d9`.
+
+**Phase 3 non-visual/technical acceptance is now complete.** Only human visual review remains:
+3b framing (A vs C, hero scale, motion feel), gate appearance, HUD appearance in Day/Night.
+Branch head: `f6e55d9`. `main` untouched at `62024bb`.

@@ -1,0 +1,600 @@
+[
+ {
+  "comp": "b",
+  "cam": "soft",
+  "aspect": 1.7777777777777777,
+  "settings": {
+   "distance": 320,
+   "cornerWeight": 3,
+   "frontier": true
+  },
+  "cornerRatios": [
+   0.5274686637347055,
+   0.5588206650030931
+  ],
+  "motionProxy": {
+   "speed": 68.88240968306002,
+   "acceleration": 49.188666964107604,
+   "jerk": 89.10693999748304
+  },
+  "stopped": {
+   "beta": 0.0001,
+   "speedWeight": 0.05,
+   "cornerWeight": 3,
+   "iterations": 6550,
+   "restarts": 3,
+   "errorBoundM": 0.04377323283256292,
+   "converged": true
+  },
+  "longer": null,
+  "maxDifferenceM": null,
+  "buildMs": 2399.458154,
+  "longerBuildMs": null,
+  "independenceChecked": false,
+  "effectiveParameters": {
+   "distance": 320,
+   "speedWeight": 0.05,
+   "cornerWeight": 3,
+   "cornerEaseM": 40
+  }
+ },
+ {
+  "comp": "b",
+  "cam": "soft",
+  "aspect": 1.7777777777777777,
+  "settings": {
+   "distance": 320,
+   "cornerWeight": 10,
+   "frontier": true
+  },
+  "cornerRatios": [
+   0.2606354738648513,
+   0.27977385996443194
+  ],
+  "motionProxy": {
+   "speed": 104.9061545437071,
+   "acceleration": 132.790467320725,
+   "jerk": 286.5752654415874
+  },
+  "stopped": {
+   "beta": 0.0001,
+   "speedWeight": 0.05,
+   "cornerWeight": 10,
+   "iterations": 7450,
+   "restarts": 3,
+   "errorBoundM": 0.046406182644317735,
+   "converged": true
+  },
+  "longer": null,
+  "maxDifferenceM": null,
+  "buildMs": 1785.458545,
+  "longerBuildMs": null,
+  "independenceChecked": false,
+  "effectiveParameters": {
+   "distance": 320,
+   "speedWeight": 0.05,
+   "cornerWeight": 10,
+   "cornerEaseM": 40
+  }
+ },
+ {
+  "comp": "b",
+  "cam": "soft",
+  "aspect": 1.7777777777777777,
+  "settings": {
+   "distance": 360,
+   "cornerWeight": 10,
+   "frontier": true
+  },
+  "cornerRatios": [
+   0.2541106625468151,
+   0.2750057773829587
+  ],
+  "motionProxy": {
+   "speed": 101.75531129244312,
+   "acceleration": 128.9507228794284,
+   "jerk": 278.42740211980254
+  },
+  "stopped": {
+   "beta": 0.0001,
+   "speedWeight": 0.05,
+   "cornerWeight": 10,
+   "iterations": 7550,
+   "restarts": 3,
+   "errorBoundM": 0.04493566423173378,
+   "converged": true
+  },
+  "longer": null,
+  "maxDifferenceM": null,
+  "buildMs": 1281.679791,
+  "longerBuildMs": null,
+  "independenceChecked": false,
+  "effectiveParameters": {
+   "distance": 360,
+   "speedWeight": 0.05,
+   "cornerWeight": 10,
+   "cornerEaseM": 40
+  }
+ },
+ {
+  "comp": "b",
+  "cam": "soft",
+  "aspect": 1.7777777777777777,
+  "settings": {
+   "distance": 400,
+   "cornerWeight": 10,
+   "frontier": true
+  },
+  "cornerRatios": [
+   0.24951296854991767,
+   0.27045093213277493
+  ],
+  "motionProxy": {
+   "speed": 98.87352237185118,
+   "acceleration": 125.42418062319904,
+   "jerk": 270.92752573109675
+  },
+  "stopped": {
+   "beta": 0.0001,
+   "speedWeight": 0.05,
+   "cornerWeight": 10,
+   "iterations": 6550,
+   "restarts": 4,
+   "errorBoundM": 0.049826484274815015,
+   "converged": true
+  },
+  "longer": null,
+  "maxDifferenceM": null,
+  "buildMs": 3767.110712,
+  "longerBuildMs": null,
+  "independenceChecked": false,
+  "effectiveParameters": {
+   "distance": 400,
+   "speedWeight": 0.05,
+   "cornerWeight": 10,
+   "cornerEaseM": 40
+  }
+ },
+ {
+  "comp": "b",
+  "cam": "soft",
+  "aspect": 1.7777777777777777,
+  "settings": {
+   "distance": 400,
+   "cornerWeight": 30,
+   "frontier": true
+  },
+  "cornerRatios": [
+   0.108151213906716,
+   0.1173739537015341
+  ],
+  "motionProxy": {
+   "speed": 121.34479976037575,
+   "acceleration": 204.65500474509142,
+   "jerk": 569.1630752683467
+  },
+  "stopped": {
+   "beta": 0.0001,
+   "speedWeight": 0.05,
+   "cornerWeight": 30,
+   "iterations": 7300,
+   "restarts": 4,
+   "errorBoundM": 0.047921133091143785,
+   "converged": true
+  },
+  "longer": null,
+  "maxDifferenceM": null,
+  "buildMs": 1565.24116,
+  "longerBuildMs": null,
+  "independenceChecked": false,
+  "effectiveParameters": {
+   "distance": 400,
+   "speedWeight": 0.05,
+   "cornerWeight": 30,
+   "cornerEaseM": 40
+  }
+ },
+ {
+  "comp": "b",
+  "cam": "soft",
+  "aspect": 1.7777777777777777,
+  "settings": {
+   "distance": 400,
+   "cornerWeight": 1,
+   "frontier": true
+  },
+  "cornerRatios": [
+   0.7759744823050618,
+   0.8089396602044767
+  ],
+  "motionProxy": {
+   "speed": 47.59300297657868,
+   "acceleration": 26.046306153169997,
+   "jerk": 49.587922701605734
+  },
+  "stopped": {
+   "beta": 0.0001,
+   "speedWeight": 0.05,
+   "cornerWeight": 1,
+   "iterations": 6050,
+   "restarts": 3,
+   "errorBoundM": 0.048840651037178516,
+   "converged": true
+  },
+  "longer": null,
+  "maxDifferenceM": null,
+  "buildMs": 1258.634394,
+  "longerBuildMs": null,
+  "independenceChecked": false,
+  "effectiveParameters": {
+   "distance": 400,
+   "speedWeight": 0.05,
+   "cornerWeight": 1,
+   "cornerEaseM": 40
+  }
+ },
+ {
+  "comp": "b",
+  "cam": "soft",
+  "aspect": 1.7777777777777777,
+  "settings": {
+   "distance": 360,
+   "cornerWeight": 10,
+   "speedWeight": 0.1,
+   "frontier": true
+  },
+  "cornerRatios": [
+   0.20800054447186653,
+   0.22091626072341328
+  ],
+  "motionProxy": {
+   "speed": 97.99679866077334,
+   "acceleration": 142.64037088797534,
+   "jerk": 357.4690035132338
+  },
+  "stopped": {
+   "beta": 0.0001,
+   "speedWeight": 0.1,
+   "cornerWeight": 10,
+   "iterations": 6750,
+   "restarts": 4,
+   "errorBoundM": 0.04668753103247219,
+   "converged": true
+  },
+  "longer": null,
+  "maxDifferenceM": null,
+  "buildMs": 8095.95373,
+  "longerBuildMs": null,
+  "independenceChecked": false,
+  "effectiveParameters": {
+   "distance": 360,
+   "speedWeight": 0.1,
+   "cornerWeight": 10,
+   "cornerEaseM": 40
+  }
+ },
+ {
+  "comp": "b",
+  "cam": "soft",
+  "aspect": 1.7777777777777777,
+  "settings": {
+   "distance": 400,
+   "cornerWeight": 10,
+   "speedWeight": 0.1,
+   "frontier": true
+  },
+  "cornerRatios": [
+   0.2036621806389252,
+   0.21596779781163547
+  ],
+  "motionProxy": {
+   "speed": 94.9859798431099,
+   "acceleration": 138.1768956571072,
+   "jerk": 346.63084190869546
+  },
+  "stopped": {
+   "beta": 0.0001,
+   "speedWeight": 0.1,
+   "cornerWeight": 10,
+   "iterations": 7150,
+   "restarts": 3,
+   "errorBoundM": 0.04885731818293271,
+   "converged": true
+  },
+  "longer": null,
+  "maxDifferenceM": null,
+  "buildMs": 3738.1892159999998,
+  "longerBuildMs": null,
+  "independenceChecked": false,
+  "effectiveParameters": {
+   "distance": 400,
+   "speedWeight": 0.1,
+   "cornerWeight": 10,
+   "cornerEaseM": 40
+  }
+ },
+ {
+  "comp": "b",
+  "cam": "soft",
+  "aspect": 1.7777777777777777,
+  "settings": {
+   "distance": 360,
+   "cornerWeight": 10,
+   "speedWeight": 0.2,
+   "frontier": true
+  },
+  "cornerRatios": [
+   0.18014182244060287,
+   0.19891382396011476
+  ],
+  "motionProxy": {
+   "speed": 94.32513769781596,
+   "acceleration": 161.10290777093343,
+   "jerk": 474.5114786417423
+  },
+  "stopped": {
+   "beta": 0.0001,
+   "speedWeight": 0.2,
+   "cornerWeight": 10,
+   "iterations": 7250,
+   "restarts": 4,
+   "errorBoundM": 0.04728397692430563,
+   "converged": true
+  },
+  "longer": null,
+  "maxDifferenceM": null,
+  "buildMs": 4046.3518500000005,
+  "longerBuildMs": null,
+  "independenceChecked": false,
+  "effectiveParameters": {
+   "distance": 360,
+   "speedWeight": 0.2,
+   "cornerWeight": 10,
+   "cornerEaseM": 40
+  }
+ },
+ {
+  "comp": "b",
+  "cam": "soft",
+  "aspect": 1.7777777777777777,
+  "settings": {
+   "distance": 400,
+   "cornerWeight": 10,
+   "speedWeight": 0.2,
+   "frontier": true
+  },
+  "cornerRatios": [
+   0.17041568401756235,
+   0.18032347531939955
+  ],
+  "motionProxy": {
+   "speed": 87.31745469946081,
+   "acceleration": 149.22033248613818,
+   "jerk": 439.93631595508026
+  },
+  "stopped": {
+   "beta": 0.0001,
+   "speedWeight": 0.2,
+   "cornerWeight": 10,
+   "iterations": 8350,
+   "restarts": 3,
+   "errorBoundM": 0.049591571708327,
+   "converged": true
+  },
+  "longer": null,
+  "maxDifferenceM": null,
+  "buildMs": 3882.6439230000005,
+  "longerBuildMs": null,
+  "independenceChecked": false,
+  "effectiveParameters": {
+   "distance": 400,
+   "speedWeight": 0.2,
+   "cornerWeight": 10,
+   "cornerEaseM": 40
+  }
+ },
+ {
+  "comp": "b",
+  "cam": "soft",
+  "aspect": 1.7777777777777777,
+  "settings": {
+   "distance": 400,
+   "cornerWeight": 10,
+   "speedWeight": 0.5,
+   "frontier": true
+  },
+  "cornerRatios": [
+   0.14635344326106625,
+   0.16182846211377053
+  ],
+  "motionProxy": {
+   "speed": 80.06928156482192,
+   "acceleration": 168.75471089727665,
+   "jerk": 642.9933765620601
+  },
+  "stopped": {
+   "beta": 0.0001,
+   "speedWeight": 0.5,
+   "cornerWeight": 10,
+   "iterations": 9650,
+   "restarts": 3,
+   "errorBoundM": 0.04848228512093671,
+   "converged": true
+  },
+  "longer": null,
+  "maxDifferenceM": null,
+  "buildMs": 4381.738315,
+  "longerBuildMs": null,
+  "independenceChecked": false,
+  "effectiveParameters": {
+   "distance": 400,
+   "speedWeight": 0.5,
+   "cornerWeight": 10,
+   "cornerEaseM": 40
+  }
+ },
+ {
+  "comp": "b",
+  "cam": "soft",
+  "aspect": 1.7777777777777777,
+  "settings": {
+   "distance": 400,
+   "cornerWeight": 10,
+   "speedWeight": 0.05,
+   "cornerEaseM": 80,
+   "frontier": true
+  },
+  "cornerRatios": [
+   0.331322732386476,
+   0.3518664450573378
+  ],
+  "motionProxy": {
+   "speed": 76.38509433925898,
+   "acceleration": 69.32643816041897,
+   "jerk": 410.6546303932911
+  },
+  "stopped": {
+   "beta": 0.0001,
+   "speedWeight": 0.05,
+   "cornerWeight": 10,
+   "iterations": 7150,
+   "restarts": 4,
+   "errorBoundM": 0.049729115204183175,
+   "converged": true
+  },
+  "longer": null,
+  "maxDifferenceM": null,
+  "buildMs": 2279.2513449999997,
+  "longerBuildMs": null,
+  "independenceChecked": false,
+  "effectiveParameters": {
+   "distance": 400,
+   "speedWeight": 0.05,
+   "cornerWeight": 10,
+   "cornerEaseM": 80
+  }
+ },
+ {
+  "comp": "b",
+  "cam": "soft",
+  "aspect": 1.7777777777777777,
+  "settings": {
+   "distance": 400,
+   "cornerWeight": 10,
+   "speedWeight": 0.05,
+   "cornerEaseM": 120,
+   "frontier": true
+  },
+  "cornerRatios": [
+   0.37789705594179634,
+   0.3986276340138071
+  ],
+  "motionProxy": {
+   "speed": 77.22347167634615,
+   "acceleration": 55.37063797780947,
+   "jerk": 173.11904215983753
+  },
+  "stopped": {
+   "beta": 0.0001,
+   "speedWeight": 0.05,
+   "cornerWeight": 10,
+   "iterations": 7850,
+   "restarts": 3,
+   "errorBoundM": 0.04638833046443351,
+   "converged": true
+  },
+  "longer": null,
+  "maxDifferenceM": null,
+  "buildMs": 1943.308673,
+  "longerBuildMs": null,
+  "independenceChecked": false,
+  "effectiveParameters": {
+   "distance": 400,
+   "speedWeight": 0.05,
+   "cornerWeight": 10,
+   "cornerEaseM": 120
+  }
+ },
+ {
+  "comp": "b",
+  "cam": "soft",
+  "aspect": 1.7777777777777777,
+  "settings": {
+   "distance": 400,
+   "cornerWeight": 10,
+   "speedWeight": 0.05,
+   "cornerEaseM": 200,
+   "frontier": true
+  },
+  "cornerRatios": [
+   0.4347678320579974,
+   0.45598183137634873
+  ],
+  "motionProxy": {
+   "speed": 75.02710919848226,
+   "acceleration": 36.84712630681978,
+   "jerk": 115.16902058823568
+  },
+  "stopped": {
+   "beta": 0.0001,
+   "speedWeight": 0.05,
+   "cornerWeight": 10,
+   "iterations": 7050,
+   "restarts": 4,
+   "errorBoundM": 0.04949757032636759,
+   "converged": true
+  },
+  "longer": null,
+  "maxDifferenceM": null,
+  "buildMs": 1154.806799,
+  "longerBuildMs": null,
+  "independenceChecked": false,
+  "effectiveParameters": {
+   "distance": 400,
+   "speedWeight": 0.05,
+   "cornerWeight": 10,
+   "cornerEaseM": 200
+  }
+ },
+ {
+  "comp": "b",
+  "cam": "soft",
+  "aspect": 1.7777777777777777,
+  "settings": {
+   "distance": 400,
+   "cornerWeight": 10,
+   "speedWeight": 0.1,
+   "cornerEaseM": 120,
+   "frontier": true
+  },
+  "cornerRatios": [
+   0.31070484036343976,
+   0.3422530005422218
+  ],
+  "motionProxy": {
+   "speed": 76.51045183801831,
+   "acceleration": 62.92334179098657,
+   "jerk": 214.5797077238993
+  },
+  "stopped": {
+   "beta": 0.0001,
+   "speedWeight": 0.1,
+   "cornerWeight": 10,
+   "iterations": 7050,
+   "restarts": 4,
+   "errorBoundM": 0.046767084717485544,
+   "converged": true
+  },
+  "longer": null,
+  "maxDifferenceM": null,
+  "buildMs": 1061.406298,
+  "longerBuildMs": null,
+  "independenceChecked": false,
+  "effectiveParameters": {
+   "distance": 400,
+   "speedWeight": 0.1,
+   "cornerWeight": 10,
+   "cornerEaseM": 120
+  }
+ }
+]

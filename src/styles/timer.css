@@ -1,0 +1,15 @@
+/* Provisional simple stopwatch, independent of manager-owned HUD typography. */
+.hud-lap-timer {
+  position: absolute;
+  left: 30px;
+  bottom: 30px;
+  color: #f7f6f2;
+  -webkit-text-stroke: 1px #121517;
+  paint-order: stroke fill;
+  font: 600 23px/1 var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -.04em;
+  pointer-events: none;
+}
+
+:root[data-theme="night"] .hud-lap-timer { color: var(--accent); }

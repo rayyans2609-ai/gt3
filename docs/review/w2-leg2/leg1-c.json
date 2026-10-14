@@ -1,0 +1,147 @@
+{
+ "comp": "c",
+ "aspect": 1.778,
+ "values": {
+  "distance": 140,
+  "pitch": 52,
+  "fov": 32,
+  "hero": 1.8,
+  "halfWidth": 6,
+  "racingLineM": 1.922,
+  "fogScale": 2.593,
+  "shadowScale": 2
+ },
+ "footprints": [
+  {
+   "id": "lexus",
+   "width": 1.966,
+   "height": 1.525
+  },
+  {
+   "id": "nissan",
+   "width": 1.95,
+   "height": 1.295
+  },
+  {
+   "id": "audi",
+   "width": 2.822,
+   "height": 1.348
+  },
+  {
+   "id": "bmw",
+   "width": 1.996,
+   "height": 1.263
+  },
+  {
+   "id": "mercedes",
+   "width": 1.823,
+   "height": 1.443
+  },
+  {
+   "id": "ferrari",
+   "width": 2.187,
+   "height": 1.422
+  },
+  {
+   "id": "mclaren",
+   "width": 2.045,
+   "height": 1.156
+  },
+  {
+   "id": "aston",
+   "width": 1.984,
+   "height": 2.131
+  },
+  {
+   "id": "lamborghini",
+   "width": 2.173,
+   "height": 1.54
+  },
+  {
+   "id": "porsche",
+   "width": 1.977,
+   "height": 1.209
+  }
+ ],
+ "racingLine": {
+  "maxLateralM": 1.921,
+  "maxRateMPerM": 0.0569,
+  "maxPathYawVsRoadDeg": 3.27,
+  "maxHeadingVsPathTangentDeg": 0.136,
+  "minEdgeGapM": 1.537,
+  "perModelMinEdgeGapM": {
+   "lexus": 2.307,
+   "nissan": 2.322,
+   "audi": 1.537,
+   "bmw": 2.28,
+   "mercedes": 2.436,
+   "ferrari": 2.109,
+   "mclaren": 2.236,
+   "aston": 2.292,
+   "lamborghini": 2.121,
+   "porsche": 2.298
+  }
+ },
+ "gates": {
+  "beamLengthM": 16.9,
+  "minPostClearanceM": 4.903,
+  "finishPostClearanceM": 4.603,
+  "widestModel": "audi"
+ },
+ "framingSettled": {
+  "maxReachNdc": 0.609,
+  "maxX": 0.609,
+  "maxY": 0.581,
+  "pctOverEngageZone": 0,
+  "pctOverHardZone": 0,
+  "railClampActiveFraction": 0.431640625
+ },
+ "seamPositionDiffM": 0,
+ "reversibilityPositionDiffM": 0,
+ "cornerTest": {
+  "hairpin": {
+   "tRange": [
+    0.263,
+    0.302
+   ],
+   "cameraToCarPathLength": 0.858,
+   "cameraPathM": 165.617,
+   "carPathM": 192.919,
+   "cameraNetDisplacementM": 143.223,
+   "carNetDisplacementM": 159.539,
+   "carSpatialExtentXZ": [
+    72.699,
+    152.101
+   ],
+   "peakCameraSpeedToPeakCarSpeed": 0.915,
+   "cameraHeadingSweepDeg": 0,
+   "carHeadingNetDeg": -109.28,
+   "carHeadingSweepDeg": 109.29
+  },
+  "chicane": {
+   "tRange": [
+    0.328,
+    0.376
+   ],
+   "cameraToCarPathLength": 0.946,
+   "cameraPathM": 226.246,
+   "carPathM": 239.267,
+   "cameraNetDisplacementM": 226.244,
+   "carNetDisplacementM": 234.909,
+   "carSpatialExtentXZ": [
+    173.183,
+    158.703
+   ],
+   "peakCameraSpeedToPeakCarSpeed": 0.952,
+   "cameraHeadingSweepDeg": 0,
+   "carHeadingNetDeg": -0.11,
+   "carHeadingSweepDeg": 73.67
+  }
+ },
+ "presentation": {
+  "carLengthPctOfFrameWidth": 5.8,
+  "roadInMedianHeroWidths": 3.34,
+  "roadInWidestHeroWidths": 2.36,
+  "frameWidthAtTargetM": 142.7
+ }
+}

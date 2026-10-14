@@ -1,25 +1,31 @@
-/** A restrained, real-circuit finish gate and painted checker strip. */
+import { buildStartFacility } from './startFacility.js';
+/** A bounded racing gantry, approach signals and the painted checker strip. */
 import * as THREE from 'three';
+import { gateSpanAt, profileAt } from './trackProfile.js';
+import { state } from '../core/state.js';
 import { groundHeightAt } from './environment.js';
 import {
   FINISH_T,
-  TRACK,
-  TRACK_LENGTH,
+  TRACK_LENGTH, TOUR_LENGTH, FINISH_THRESHOLD,
   offsetPointAt,
   pointAt,
   tangentAt,
 } from './trackCurve.js';
 
 const UP = new THREE.Vector3(0, 1, 0);
-const POST_RADIUS = 0.16;
-const POST_LATERAL = TRACK.halfWidth + TRACK.curbWidth + 0.72;
-const BANNER_HEIGHT = 1.55;
-const CLEARANCE = 7.1;
+const TRUSS_DEPTH = 2.4;
+const FINISH_SPAN = gateSpanAt(FINISH_T, 1.25);
+const POST_LEFT = FINISH_SPAN.left, POST_RIGHT = FINISH_SPAN.right;
+const BANNER_HEIGHT = 1.2;
+const CLEARANCE = 10.5;
+const APPROACH_T = 120 / TOUR_LENGTH;
 const STRIP_LENGTH = 2.0;
-const STRIP_COLUMNS = 14;
+const STRIP_CELL_M = 1;
 const STRIP_ROWS = 2;
 
 let finishRoot = null;
+let lampMaterial = null;
+let signalLevel = 0;
 
 function checkerTexture() {
   const columns = 14;
@@ -67,13 +73,17 @@ function buildPaintedStrip(root) {
     const t0 = (FINISH_T + fromDistance / TRACK_LENGTH + 1) % 1;
     const t1 = (FINISH_T + toDistance / TRACK_LENGTH + 1) % 1;
 
-    for (let column = 0; column < STRIP_COLUMNS; column += 1) {
-      const x0 = -TRACK.halfWidth + (column / STRIP_COLUMNS) * TRACK.halfWidth * 2;
-      const x1 = -TRACK.halfWidth + ((column + 1) / STRIP_COLUMNS) * TRACK.halfWidth * 2;
+    const p0 = profileAt(t0), p1 = profileAt(t1);
+    const columns = Math.ceil(Math.max(p0.left + p0.right, p1.left + p1.right) / STRIP_CELL_M);
+    for (let column = 0; column < columns; column += 1) {
+      const x0 = -p0.right + Math.min(column * STRIP_CELL_M, p0.left + p0.right);
+      const x1 = -p0.right + Math.min((column + 1) * STRIP_CELL_M, p0.left + p0.right);
+      const y0 = -p1.right + Math.min(column * STRIP_CELL_M, p1.left + p1.right);
+      const y1 = -p1.right + Math.min((column + 1) * STRIP_CELL_M, p1.left + p1.right);
       const a = root.worldToLocal(offsetPointAt(t0, x0, 0.045, new THREE.Vector3()));
       const b = root.worldToLocal(offsetPointAt(t0, x1, 0.045, new THREE.Vector3()));
-      const c = root.worldToLocal(offsetPointAt(t1, x1, 0.045, new THREE.Vector3()));
-      const d = root.worldToLocal(offsetPointAt(t1, x0, 0.045, new THREE.Vector3()));
+      const c = root.worldToLocal(offsetPointAt(t1, y1, 0.045, new THREE.Vector3()));
+      const d = root.worldToLocal(offsetPointAt(t1, y0, 0.045, new THREE.Vector3()));
       const color = (row + column) % 2 === 0 ? light : dark;
       addTriangle(positions, colors, a, c, b, color);
       addTriangle(positions, colors, a, d, c, color);
@@ -101,87 +111,143 @@ function buildPaintedStrip(root) {
   );
   strip.name = 'start-finish-painted-strip';
   strip.receiveShadow = true;
+  strip.frustumCulled = false; // Draw/upload at boot, even with a restored route.
   strip.renderOrder = 2;
   root.add(strip);
 }
 
-function addPost(root, lateral, groundY, postTop, material) {
-  const height = postTop - groundY;
-  const post = new THREE.Mesh(
-    new THREE.CylinderGeometry(POST_RADIUS, POST_RADIUS * 1.08, height, 10),
-    material,
-  );
-  post.name = lateral < 0 ? 'finish-gate-post-left' : 'finish-gate-post-right';
-  post.position.set(lateral, groundY + height * 0.5, 0);
-  post.castShadow = true;
-  post.receiveShadow = true;
-  root.add(post);
+// Reuse one unit box for all scaled uprights, rails and diagonal braces.
+function structure(root, ground, bottom, top, material) {
+  const matrix = new THREE.Object3D();
+  const parts = [];
+  const add = (x, y, z, sx, sy, sz, angle = 0) => {
+    matrix.position.set(x, y, z);
+    matrix.scale.set(sx, sy, sz);
+    matrix.rotation.set(0, 0, angle);
+    matrix.updateMatrix();
+    parts.push(matrix.matrix.clone());
+  };
+  for (let side = 0; side < 2; side++) {
+    const x = side ? POST_LEFT : -POST_RIGHT;
+    const height = top - ground[side];
+    add(x, ground[side] + height / 2, 0, 0.9, height, 1.35);
+    add(x, ground[side] + 0.15, 0, 1.6, 0.3, 1.9);
+  }
+  const span = FINISH_SPAN.width;
+  const trussHeight = top - bottom;
+  for (const z of [-TRUSS_DEPTH / 2, TRUSS_DEPTH / 2]) {
+    for (const y of [bottom, top]) add(FINISH_SPAN.center, y, z, span + 0.9, 0.24, 0.24);
+    const cells = 10;
+    const width = span / cells;
+    for (let i = 0; i < cells; i++) {
+      const dx = width;
+      const dy = (i % 2 ? -1 : 1) * trussHeight;
+      add(-POST_RIGHT + (i + 0.5) * width, (bottom + top) / 2, z,
+        Math.hypot(dx, dy), 0.17, 0.17, Math.atan2(dy, dx));
+    }
+  }
+  for (const x of [-POST_RIGHT, FINISH_SPAN.center, POST_LEFT]) {
+    for (const y of [bottom, top]) add(x, y, 0, 0.22, 0.22, TRUSS_DEPTH);
+  }
+  const frame = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 1, 1), material, parts.length);
+  frame.name = 'finish-gantry-truss';
+  parts.forEach((part, i) => frame.setMatrixAt(i, part));
+  frame.instanceMatrix.needsUpdate = true;
+  frame.frustumCulled = false;
+  frame.castShadow = true;
+  frame.receiveShadow = true;
+  root.add(frame);
+}
+
+function signals(root, height) {
+  const housingMaterial = new THREE.MeshStandardMaterial({
+    color: 0x202629, roughness: 0.7, metalness: 0.3,
+  });
+  lampMaterial = new THREE.MeshStandardMaterial({
+    color: 0x08150c, emissive: 0x68df8a, emissiveIntensity: 0,
+    roughness: 0.35, metalness: 0.1,
+  });
+  // Five hooded lamp pods on each face: readable from either camera/reverse travel.
+  const housings = new THREE.InstancedMesh(new THREE.BoxGeometry(1.5, 1.5, 0.8), housingMaterial, 10);
+  const lenses = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.56, 0.56, 0.07, 16), lampMaterial, 10);
+  housings.name = 'finish-signal-pods';
+  lenses.name = 'finish-signal-lamps';
+  const instance = new THREE.Object3D();
+  for (let face = 0; face < 2; face++) for (let i = 0; i < 5; i++) {
+    const sign = face ? 1 : -1;
+    const index = face * 5 + i;
+    instance.position.set(FINISH_SPAN.center + (i - 2) * 2.1, height, sign * (TRUSS_DEPTH / 2 + 0.24));
+    instance.rotation.set(0, 0, 0);
+    instance.updateMatrix();
+    housings.setMatrixAt(index, instance.matrix);
+    instance.position.z += sign * 0.43;
+    instance.rotation.x = Math.PI / 2;
+    instance.updateMatrix();
+    lenses.setMatrixAt(index, instance.matrix);
+  }
+  for (const mesh of [housings, lenses]) {
+    mesh.instanceMatrix.needsUpdate = true;
+    mesh.frustumCulled = false; // All programs/buffers are exercised by boot draws.
+    root.add(mesh);
+  }
 }
 
 export function buildFinishLine() {
   if (finishRoot) return finishRoot;
-
   const center = pointAt(FINISH_T, new THREE.Vector3());
   const forward = tangentAt(FINISH_T, new THREE.Vector3()).setY(0).normalize();
-  const right = offsetPointAt(FINISH_T, 1, 0, new THREE.Vector3())
-    .sub(center)
-    .setY(0)
-    .normalize();
-
+  const right = offsetPointAt(FINISH_T, 1, 0, new THREE.Vector3()).sub(center).setY(0).normalize();
   finishRoot = new THREE.Group();
-  finishRoot.name = 'finish-line-gate';
+  finishRoot.name = 'finish-line-gate'; // Preserve the existing diagnostic handle.
   finishRoot.position.set(center.x, 0, center.z);
-  finishRoot.quaternion.setFromRotationMatrix(
-    new THREE.Matrix4().makeBasis(right, UP, forward),
-  );
+  finishRoot.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(right, UP, forward));
   finishRoot.updateMatrixWorld(true);
 
-  const leftWorld = offsetPointAt(FINISH_T, -POST_LATERAL, 0, new THREE.Vector3());
-  const rightWorld = offsetPointAt(FINISH_T, POST_LATERAL, 0, new THREE.Vector3());
-  const leftGround = groundHeightAt(leftWorld.x, leftWorld.z);
-  const rightGround = groundHeightAt(rightWorld.x, rightWorld.z);
-  const highestGround = Math.max(leftGround, rightGround);
-  const bannerBottom = highestGround + CLEARANCE;
-  const bannerTop = bannerBottom + BANNER_HEIGHT;
-  const postTop = bannerTop + 0.18;
-
-  const metal = new THREE.MeshStandardMaterial({
-    color: '#777A79',
-    roughness: 0.64,
-    metalness: 0.42,
+  const ground = [-POST_RIGHT, POST_LEFT].map(lateral => {
+    const p = offsetPointAt(FINISH_T, lateral, 0, new THREE.Vector3());
+    return groundHeightAt(p.x, p.z);
   });
-  addPost(finishRoot, -POST_LATERAL, leftGround, postTop, metal);
-  addPost(finishRoot, POST_LATERAL, rightGround, postTop, metal);
+  const bottom = Math.max(...ground) + CLEARANCE;
+  const top = bottom + 2.4;
+  const metal = new THREE.MeshStandardMaterial({ color: 0x949b9e, roughness: 0.58, metalness: 0.55 });
+  structure(finishRoot, ground, bottom, top, metal);
+  signals(finishRoot, (bottom + top) / 2);
 
-  const banner = new THREE.Mesh(
-    new THREE.PlaneGeometry(POST_LATERAL * 2, BANNER_HEIGHT),
-    new THREE.MeshStandardMaterial({
-      map: checkerTexture(),
-      color: 0xffffff,
-      roughness: 0.88,
-      metalness: 0,
-      side: THREE.DoubleSide,
-    }),
-  );
+  const banner = new THREE.Mesh(new THREE.PlaneGeometry(FINISH_SPAN.width - 0.55, BANNER_HEIGHT),
+    new THREE.MeshStandardMaterial({ map: checkerTexture(), color: 0xffffff,
+      roughness: 0.88, metalness: 0, side: THREE.DoubleSide }));
   banner.name = 'finish-gate-checkered-banner';
-  banner.position.set(0, bannerBottom + BANNER_HEIGHT * 0.5, 0);
-  banner.castShadow = true;
+  banner.position.set(FINISH_SPAN.center, bottom - BANNER_HEIGHT / 2, 0);
+  banner.frustumCulled = false;
   finishRoot.add(banner);
-
-  // Two hair-thin rails keep the banner reading as a taut physical sheet without
-  // introducing signage, a chunky frame or game-like ornament.
-  const railGeometry = new THREE.BoxGeometry(POST_LATERAL * 2 + 0.16, 0.075, 0.075);
-  for (const y of [bannerBottom, bannerTop]) {
-    const rail = new THREE.Mesh(railGeometry, metal);
-    rail.position.set(0, y, 0);
-    rail.castShadow = true;
-    finishRoot.add(rail);
-  }
-
   buildPaintedStrip(finishRoot);
+  if (new URLSearchParams(location.search).get('gantry') !== 'plain') {
+    const flags = new THREE.InstancedMesh(new THREE.PlaneGeometry(2.4, 1.4),
+      new THREE.MeshStandardMaterial({color:0xd4d2c9,roughness:.9,side:THREE.DoubleSide}), 2);
+    const o = new THREE.Object3D();
+    for (let i=0;i<2;i++) {
+      o.position.set(i ? POST_LEFT : -POST_RIGHT, top + .7, 0);
+      o.updateMatrix();flags.setMatrixAt(i,o.matrix);
+    }
+    flags.name='gantry-static-flags';flags.frustumCulled=false;flags.instanceMatrix.needsUpdate=true;finishRoot.add(flags);
+  }
+  // Facility paint/lanes are authored in world coordinates.
   finishRoot.updateMatrixWorld(true);
+  const facility = buildStartFacility();
+  facility.applyMatrix4(finishRoot.matrixWorld.clone().invert());
+  finishRoot.add(facility);
+  finishRoot.updateMatrixWorld(true);
+  update(0);
   return finishRoot;
 }
 
-/** Static architecture; retained for the main loop's uniform scene-module contract. */
-export function update(_dt) {}
+/** Static infrastructure; only the already-resident lamp emissive uniform changes. */
+export function update(dt) {
+  if (!lampMaterial) return;
+  const approaching = state.progress >= FINISH_THRESHOLD - APPROACH_T;
+  // Simple 150 ms intensity ramp; reversing out and replay both return lamps off.
+  const target = approaching ? (state.theme === 'night' ? 1.8 : 1.2) : 0;
+  signalLevel += (target - signalLevel) * (1 - Math.exp(-Math.max(0, dt) / 0.15));
+  lampMaterial.emissiveIntensity = signalLevel;
+  finishRoot.userData.signalling = approaching;
+}

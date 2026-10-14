@@ -14,11 +14,18 @@ import { CARS } from '../data/cars.js';
 export const CANONICAL_LENGTH = 4.6;
 
 const EXPECTED_CAR_COUNT = 10;
-const DRACO_DECODER_PATH =
-  'https://www.gstatic.com/draco/versioned/decoders/1.5.7/';
-const WHEEL_NAME = /wheel|tyre|tire|rim/i;
-const NON_WHEEL_NAME = /brake|caliper|disc|rotor|arch|well/i;
+// Self-hosted copy of three's bundled glTF Draco decoder (examples/jsm/libs/draco/gltf,
+// three r180). Loading it from a CDN made every model decode depend on the internet:
+// offline, all ten cars fell back to placeholders.
+const DRACO_DECODER_PATH = '/draco/gltf/';
+// Underscores/digits delimit glTF names; alphabetic substrings (trim, primitive,
+// wheelhouse) do not. Plurals cover material-only tyres/rims on merged models.
+const WHEEL_NAME = /(?:^|[^a-z])(?:wheels?|tyres?|tires?|rims?)(?=$|[^a-z])/i;
+const NON_WHEEL_NAME = /brake|caliper|disc|rotor|arch|well|steering|wheel[\s_-]*house/i;
 const EPSILON = 1e-7;
+// Do not move a sound model for sub-5 mm authoring noise. This keeps the seven
+// already-level roster entries byte-for-byte on their existing transform path.
+const WHEEL_CONTACT_TOLERANCE = 0.005;
 
 const _box = new THREE.Box3();
 const _size = new THREE.Vector3();
@@ -26,6 +33,8 @@ const _centre = new THREE.Vector3();
 const _vertex = new THREE.Vector3();
 const _instanceMatrix = new THREE.Matrix4();
 const _vertexMatrix = new THREE.Matrix4();
+const _pitchAxis = new THREE.Vector3(1, 0, 0);
+const _pitchQuaternion = new THREE.Quaternion();
 
 let loadedCars = null;
 let completedCount = 0;
@@ -96,6 +105,104 @@ function validBounds(box) {
   box.getSize(_size);
   return Number.isFinite(_size.x) && Number.isFinite(_size.y) &&
     Number.isFinite(_size.z) && _size.x > EPSILON && _size.z > EPSILON;
+}
+
+function hasWheelName(object) {
+  const name = object?.name || '';
+  return WHEEL_NAME.test(name) && !NON_WHEEL_NAME.test(name);
+}
+
+function hasWheelMaterial(object) {
+  const materials = Array.isArray(object.material) ? object.material : [object.material];
+  return materials.some(material => hasWheelName(material));
+}
+
+// Most models label a parent WHEEL_/TYRE_ node rather than its mesh. The three
+// merged-geometry models only retain the tyre identity in their material name.
+function isWheelMesh(object, root, allowMaterialFallback) {
+  let wheelNode = false;
+  for (let node = object; node && node !== root.parent; node = node.parent) {
+    if (NON_WHEEL_NAME.test(node.name || '')) return false;
+    if (hasWheelName(node)) wheelNode = true;
+  }
+  return wheelNode || (allowMaterialFallback && hasWheelMaterial(object));
+}
+
+/** Lowest tyre/rim vertices at the front and rear axle in canonical space. */
+function measureWheelContacts(root, midpointZ) {
+  let frontY = Infinity;
+  let rearY = Infinity;
+  let frontZ = 0;
+  let rearZ = 0;
+  let hasWheelNodes = false;
+  root.traverse(object => {
+    if (object.isMesh && isWheelMesh(object, root, false)) hasWheelNodes = true;
+  });
+
+  root.updateWorldMatrix(true, true);
+  root.traverse((object) => {
+    if (!object.isMesh || !isWheelMesh(object, root, !hasWheelNodes)) return;
+    const position = object.geometry?.getAttribute('position');
+    if (!position?.count) return;
+
+    const instanceCount = object.isInstancedMesh ? object.count : 1;
+    for (let instance = 0; instance < instanceCount; instance++) {
+      if (object.isInstancedMesh) {
+        object.getMatrixAt(instance, _instanceMatrix);
+        _vertexMatrix.multiplyMatrices(object.matrixWorld, _instanceMatrix);
+      } else {
+        _vertexMatrix.copy(object.matrixWorld);
+      }
+
+      for (let index = 0; index < position.count; index++) {
+        _vertex.fromBufferAttribute(position, index).applyMatrix4(_vertexMatrix);
+        if (_vertex.z <= midpointZ) {
+          if (_vertex.y < frontY) {
+            frontY = _vertex.y;
+            frontZ = _vertex.z;
+          }
+        } else if (_vertex.y < rearY) {
+          rearY = _vertex.y;
+          rearZ = _vertex.z;
+        }
+      }
+    }
+  });
+
+  if (!Number.isFinite(frontY) || !Number.isFinite(rearY) ||
+      Math.abs(frontZ - rearZ) <= EPSILON) {
+    return null;
+  }
+
+  return { frontY, rearY, frontZ, rearZ, lowestY: Math.min(frontY, rearY) };
+}
+
+function levelWheelContacts(group, midpointZ) {
+  const before = measureWheelContacts(group, midpointZ);
+  if (!before || Math.abs(before.frontY - before.rearY) <= WHEEL_CONTACT_TOLERANCE) {
+    return { before, after: before, pitchRadians: 0, applied: false };
+  }
+
+  let after = before;
+  let pitchRadians = 0;
+  // A tyre's lowest vertex can switch during the tiny rotation. Re-measure and
+  // converge on that actual contact, rather than assuming a fixed source vertex.
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const difference = after.frontY - after.rearY;
+    if (Math.abs(difference) <= EPSILON) break;
+    let correction = Math.atan2(difference, after.frontZ - after.rearZ);
+    if (correction > Math.PI / 2) correction -= Math.PI;
+    if (correction <= -Math.PI / 2) correction += Math.PI;
+    _pitchQuaternion.setFromAxisAngle(_pitchAxis, correction);
+    group.quaternion.premultiply(_pitchQuaternion);
+    group.updateWorldMatrix(true, true);
+    pitchRadians += correction;
+    // The old axle divider remains valid for these sub-degree corrections and
+    // avoids turning the correction into a source-orientation heuristic.
+    after = measureWheelContacts(group, midpointZ);
+    if (!after) throw new Error('Wheel contacts became unavailable while levelling a model.');
+  }
+  return { before, after, pitchRadians, applied: true };
 }
 
 /**
@@ -204,7 +311,18 @@ function normaliseScene(scene, car) {
 
   _box.setFromObject(group, true);
   _box.getCenter(_centre);
-  group.position.set(-_centre.x, -_box.min.y, -_centre.z);
+  const wheelLevel = levelWheelContacts(group, _centre.z);
+
+  _box.setFromObject(group, true);
+  _box.getCenter(_centre);
+  // The levelled cars are grounded from their tyres, not an arbitrary splitter
+  // or diffuser vertex. Unlevelled cars retain their exact old transform path;
+  // their wheel minimum equals the whole-model minimum (checked by the node
+  // verifier), which makes the two ground references equivalent.
+  const groundY = wheelLevel.applied && wheelLevel.after
+    ? wheelLevel.after.lowestY
+    : _box.min.y;
+  group.position.set(-_centre.x, -groundY, -_centre.z);
   group.updateWorldMatrix(true, true);
 
   cloneMaterialInstances(group);
@@ -215,6 +333,8 @@ function normaliseScene(scene, car) {
     flipApplied,
     negativeHalfVolume: halfVolumes.negativeZ,
     positiveHalfVolume: halfVolumes.positiveZ,
+    wheelPitchDegrees: THREE.MathUtils.radToDeg(wheelLevel.pitchRadians),
+    wheelLevelled: wheelLevel.applied,
   };
 
   console.info(
@@ -259,8 +379,14 @@ function createPlaceholder(car, error) {
   return group;
 }
 
+// The roster is loaded from the offline Tour-resolution set (textures <= 512 px,
+// built by `node scripts/compress-models.mjs --tour`). Tour, morph, montage and
+// Showcase all clone from this single roster; the full-resolution originals in
+// /models/*.glb are not loaded at runtime.
+const TOUR_MODEL_BASE = '/models/tour/';
+
 function modelUrl(modelFile) {
-  return modelFile.startsWith('/') ? modelFile : `/models/${modelFile}`;
+  return modelFile.startsWith('/') ? modelFile : `${TOUR_MODEL_BASE}${modelFile}`;
 }
 
 async function loadOne(loader, car) {
@@ -292,7 +418,10 @@ async function beginPreload() {
   // It does not emit Meshopt or KTX2/Basis data, so those decoders are not needed.
 
   try {
-    loadedCars = await Promise.all(CARS.map((car) => loadOne(loader, car)));
+    const models = await Promise.all(CARS.map((car) => loadOne(loader, car)));
+    // A timed-out preload may already have installed a stable placeholder roster.
+    // Do not replace it behind a running warm-up or an active drive.
+    loadedCars ??= models;
     return loadedCars;
   } finally {
     dracoLoader.dispose();
@@ -350,6 +479,15 @@ export function getCarModel(index) {
   return loadedCars[index];
 }
 
+/** Recovery for a rejected or timed-out roster preload. The drive keeps ten models. */
+export function recoverCars(error) {
+  if (!loadedCars) {
+    loadedCars = CARS.map(car => createPlaceholder(car, error));
+    console.error('[cars] Preload did not finish; using placeholder roster.', error);
+  }
+  return loadedCars;
+}
+
 export function cloneCarModel(index) {
   const source = getCarModel(index);
   let hasSkinnedMesh = false;
@@ -377,3 +515,6 @@ export function findWheels(carGroup) {
 // Importing this module starts the shared preload, while preloadCars(callback)
 // lets UI code subscribe to the same in-flight operation for progress reporting.
 export const carsReady = preloadCars();
+// The bootstrap attaches recovery after its other module imports complete. Keep
+// an early rejection from surfacing as an unhandled promise in that interval.
+void carsReady.catch(() => {});

@@ -1,0 +1,98 @@
+{
+ "mode": "resize",
+ "failed": {
+  "zone": {
+   "x": 0.76,
+   "y": 0.74
+  },
+  "aspect": 1.7777777777777777,
+  "requestedAspect": 1.6,
+  "clampActiveFraction": 0.0087890625,
+  "holds": [],
+  "unavailableHolds": [],
+  "holdState": "soft",
+  "buildMs": 752.687987,
+  "solver": {
+   "beta": 0.0001,
+   "speedWeight": 0.05,
+   "cornerWeight": 10,
+   "iterations": 7850,
+   "restarts": 3,
+   "errorBoundM": 0.04638833046443351,
+   "converged": true
+  },
+  "denseCheck": {
+   "samples": 4096,
+   "maxResidualM": -5.6734779719960695
+  },
+  "buildAttempts": 2,
+  "cacheHit": false,
+  "attemptMs": 6.396540000000073,
+  "fallback": "last-good",
+  "error": "W2 camera framing corridor is infeasible"
+ },
+ "recovered": {
+  "zone": {
+   "x": 0.76,
+   "y": 0.74
+  },
+  "aspect": 1.5,
+  "requestedAspect": 1.5,
+  "clampActiveFraction": 0.0224609375,
+  "holds": [],
+  "unavailableHolds": [],
+  "holdState": "soft",
+  "buildMs": 591.660823,
+  "solver": {
+   "beta": 0.0001,
+   "speedWeight": 0.05,
+   "cornerWeight": 10,
+   "iterations": 6550,
+   "restarts": 4,
+   "errorBoundM": 0.0452290767653387,
+   "converged": true
+  },
+  "denseCheck": {
+   "samples": 4096,
+   "maxResidualM": -4.708323212783685
+  },
+  "buildAttempts": 3,
+  "cacheHit": false,
+  "attemptMs": 591.7165669999999,
+  "fallback": null,
+  "error": null
+ },
+ "revisited": {
+  "zone": {
+   "x": 0.76,
+   "y": 0.74
+  },
+  "aspect": 1.7777777777777777,
+  "requestedAspect": 1.7777777777777777,
+  "clampActiveFraction": 0.0087890625,
+  "holds": [],
+  "unavailableHolds": [],
+  "holdState": "soft",
+  "buildMs": 752.687987,
+  "solver": {
+   "beta": 0.0001,
+   "speedWeight": 0.05,
+   "cornerWeight": 10,
+   "iterations": 7850,
+   "restarts": 3,
+   "errorBoundM": 0.04638833046443351,
+   "converged": true
+  },
+  "denseCheck": {
+   "samples": 4096,
+   "maxResidualM": -5.6734779719960695
+  },
+  "buildAttempts": 3,
+  "cacheHit": true,
+  "attemptMs": 0.009976999999935288,
+  "fallback": null,
+  "error": null
+ },
+ "framesWithoutRethrow": 200,
+ "infeasibleAttempts": 1
+}

@@ -1,7 +1,6 @@
-/** Capture settled legacy camera frames across the loop, skipping coin montages. */
+/** Capture settled camera frames across the current Grand Tour loop. */
 // Usage: GT3_URL=http://localhost:5174 node scripts/shot-circuit.mjs
 import puppeteer from 'puppeteer-core';
-import { TRACK_LENGTH } from '../src/scene/trackCurve.js';
 
 const base = process.env.GT3_URL || 'http://localhost:5173';
 const stops = [0, 0.2, 0.4, 0.6, 0.8, 0.99];
@@ -15,6 +14,7 @@ const browser = await puppeteer.launch({
   ],
   defaultViewport: { width: 1600, height: 900 },
 });
+async function run() {
 const page = await browser.newPage();
 const errors = [];
 page.on('pageerror', (e) => errors.push(e.message));
@@ -32,24 +32,24 @@ for (const at of stops) {
     window.scrollTo(0, target * max);
   }, at);
   let actual = 0;
-  let montage = false;
   for (let i = 0; i < 200; i++) {
     await new Promise((resolve) => setTimeout(resolve, 200));
-    ({ actual, montage } = await page.evaluate((length) => ({
-      actual: Number((document.querySelector('.hud-telemetry__number')?.textContent || '')
-        .replace(/[^0-9]/g, '')) / length,
-      montage: !!document.querySelector('#montage-layer.is-active'),
-    }), TRACK_LENGTH));
-    if (montage) { await page.keyboard.press('Escape'); continue; }
+    actual = await page.evaluate(() => window.__gt3.probe().progress);
     if (Math.abs(actual - at) < 0.001) break;
   }
-  if (montage || Math.abs(actual - at) >= 0.001) {
-    throw new Error(`Route did not settle at ${at}: actual ${actual}, montage ${montage}`);
+  if (Math.abs(actual - at) >= 0.001) {
+    throw new Error(`Route did not settle at ${at}: actual ${actual}`);
   }
   await new Promise((resolve) => setTimeout(resolve, 500));
-  const path = `/tmp/gt3-legacy-${String(at).replace('.', 'p')}.png`;
+  const path = `/tmp/gt3-circuit-${String(at).replace('.', 'p')}.png`;
   await page.screenshot({ path });
-  console.log('shot', path, 'actual', actual, 'montage', montage);
+  console.log('shot', path, 'actual', actual);
 }
 console.log('errors', JSON.stringify(errors));
-await browser.close();
+}
+
+try {
+  await run();
+} finally {
+  await browser.close();
+}

@@ -5,13 +5,33 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#0b0b0c" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500;1,600&amp;family=DM+Mono:wght@300;400;500&amp;family=DM+Sans:wght@200;300;400;500&amp;display=swap"
-      rel="stylesheet"
-    />
     <title>GT3: A Grand Tour</title>
+    <script>
+      // Typography comparison variant (?font=sw → Switzer); set before first paint. Default: Neue Haas.
+      if (new URLSearchParams(location.search).get('font') === 'sw') document.documentElement.dataset.font = 'sw';
+    </script>
+    <script>
+      // Boot input guard (SPEC §14): until scrollDrive locks the drive, scroll input made while the
+      // modules load must not move the page. Removed by scrollDrive.lockScroll(); records the last
+      // swallowed gesture so the post-ready unlock can wait out any in-flight momentum.
+      (function () {
+        if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+        var keys = { ArrowUp: 1, ArrowDown: 1, PageUp: 1, PageDown: 1, Home: 1, End: 1, ' ': 1, Spacebar: 1 };
+        var guard = { lastInputAt: 0 };
+        function swallow(e) { guard.lastInputAt = performance.now(); e.preventDefault(); }
+        function swallowKey(e) { if (keys[e.key]) swallow(e); }
+        var opts = { passive: false };
+        window.addEventListener('wheel', swallow, opts);
+        window.addEventListener('touchmove', swallow, opts);
+        window.addEventListener('keydown', swallowKey, opts);
+        guard.detach = function () {
+          window.removeEventListener('wheel', swallow, opts);
+          window.removeEventListener('touchmove', swallow, opts);
+          window.removeEventListener('keydown', swallowKey, opts);
+        };
+        window.__gt3BootGuard = guard;
+      })();
+    </script>
   </head>
   <body>
     <canvas id="scene"></canvas>
@@ -23,13 +43,8 @@
         <div id="hud-topright"></div>
         <div id="hud-bottomleft"></div>
         <div id="hud-bottomright"></div>
-        <div id="hud-routemap"></div>
-        <div id="hud-approach"></div>
       </div>
-      <div id="spec-panel"></div>
       <div id="montage-layer"></div>
-      <div id="fullscreen-card"></div>
-      <div id="showcase-layer"></div>
       <div id="finish-screen"></div>
       <div id="audio-layer"></div>
       <div id="small-screen-note">This experience is built for a desktop display.</div>

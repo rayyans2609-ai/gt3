@@ -8,7 +8,8 @@ const MUSIC_VOICE_GAIN = MUSIC_BASE_GAIN * 0.35;
 const IDLE_GAIN = 0.15;
 
 const RACE_FILES = Object.freeze({
-  coin: 'coin.mp3',
+  // Checkpoint crossing one-shot (SPEC §18). The file predates gates; only its name is legacy.
+  checkpointCross: 'coin.mp3',
   coinApproach: 'coin_approach.mp3',
   engineStart: 'engine_start.mp3',
   finish: 'finish.mp3',
@@ -421,10 +422,17 @@ export function startAudio() {
   return startPromise;
 }
 
-export function playCoin() {
+/** Short, restrained crossing sound for a checkpoint gate (SPEC §18). Never initializes audio. */
+export function playCheckpointCross() {
+  if (import.meta.env.DEV && globalThis.window) {
+    // Harness evidence only (scripts/verify-preready-input.mjs): calls and whether audio could sound.
+    const log = (window.__gt3SfxLog ??= { checkpointCross: 0, audible: 0 });
+    log.checkpointCross += 1;
+    if (raceStarted && context?.state === 'running') log.audible += 1;
+  }
   stopCoinApproachLoop();
   coinProximity = 0;
-  playOneShot(raceBuffers.coin, sfxBus);
+  playOneShot(raceBuffers.checkpointCross, sfxBus);
 }
 
 export function setCoinApproach(proximity) {

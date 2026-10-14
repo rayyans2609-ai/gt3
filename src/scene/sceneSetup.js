@@ -2,7 +2,7 @@
  * Renderer, race camera, atmosphere, lighting and restrained speed feedback.
  *
  * This module owns the race camera's projection, but deliberately does not position
- * it. carRig.js attaches and frames it. main.js owns the only animation loop and
+ * it. aerialCamera.js owns its world-space pose. main.js owns the only animation loop and
  * calls updateScene() and render().
  */
 
@@ -10,11 +10,12 @@ import * as THREE from 'three';
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
+import { SMAAPass } from 'three/addons/postprocessing/SMAAPass.js';
 import { state } from '../core/state.js';
+import { TUNE as aerialTuning } from './aerialCamera.js';
+import { COMP } from './composition.js';
 import { onResize } from '../main.js';
 
-const BASE_FOV = 52;
-const FOV_RANGE = 7;
 const FOV_DAMPING = 0.06;
 const FOV_PROJECTION_EPSILON = 0.01;
 const DEBUG = location.hash === '#debug';
@@ -23,9 +24,13 @@ const _sunTargetPosition = new THREE.Vector3();
 
 // Intel UHD 617, 1280x800 CSS @ DPR 2: GPU cost scales nearly linearly with pixels:
 // DPR 2.00: 4.1 MPix / 40.4 ms; 1.50: 2.3 / 25.3; 1.25: 1.6 / 19.1; 1.00: 1.0 / 12.9.
+// Owner-approved Phase 3 default (2026-10-14): one fixed render resolution with SMAA, no
+// idle/motion switching. Dynamic DPR switching measured as the dominant start/stop hitch source.
+// Setting high and low to the same value makes the switching path inert by construction.
+export const RENDER_DPR = 1;
 export const ADAPTIVE_RES = {
-  high: Math.min(window.devicePixelRatio || 1, 2), // at rest: full sharpness
-  low: 1.0, // in motion: smooth
+  high: RENDER_DPR, // fixed; the former native-at-rest policy is retired
+  low: RENDER_DPR, // fixed; no motion switching
   enterLowAt: 0.02, // state.speed01 above this => motion
   returnHighBelow: 0.008,
   settleMs: 420, // how long motion must be absent before going sharp again
@@ -41,9 +46,11 @@ export const ADAPTIVE_RES = {
 // shadows of coins and roadside objects further than 26 units ahead, which popped in
 // as the car approached. Not a trade worth making. Do not "optimise" these again
 // without an A/B screenshot at a coin.
+// W2: a wider candidate camera scales the box (not the map) so the shadow edge stays
+// out of frame; base keeps 60.
 export const SHADOW_TUNE = {
   mapSize: 2048,
-  extent: 60,
+  extent: 60 * COMP.shadowScale,
   near: 0.5,
   far: 260,
   normalBias: 0.02,
@@ -66,9 +73,10 @@ export let ambient;
 export let rimLight;
 
 let motionBlurPass;
+let antialiasPass;
 let premiumPass;
 let followedSunTarget;
-let lastProjectedFov = BASE_FOV;
+let lastProjectedFov = aerialTuning.fov;
 let elapsedTime = 0;
 let initialized = false;
 let appliedResolution;
@@ -182,10 +190,28 @@ function clampSpeed(value) {
   return Math.min(1, Math.max(0, Number.isFinite(value) ? value : 0));
 }
 
+// Keep the canvas backing at native DPR. Drawing only the top-left motion
+// viewport and scaling that region keeps the same displayed pixel density, while
+// avoiding canvas reallocation / driver synchronization at every start and stop.
+// The scissor also bounds the final pass's clear to the pixels actually drawn.
+function applyDisplayResolution(dpr, width, height) {
+  const nativeDpr = renderer.getPixelRatio();
+  const fraction = dpr / nativeDpr;
+  const y = height * (1 - fraction);
+  renderer.setViewport(0, y, width * fraction, height * fraction);
+  renderer.setScissor(0, y, width * fraction, height * fraction);
+  renderer.setScissorTest(dpr !== nativeDpr);
+  const canvas = renderer.domElement;
+  canvas.style.transformOrigin = '0 0';
+  canvas.style.transform = dpr === nativeDpr ? '' : `scale(${nativeDpr / dpr})`;
+  canvas.style.clipPath = dpr === nativeDpr ? ''
+    : `inset(0 ${100 * (1 - fraction)}% ${100 * (1 - fraction)}% 0)`;
+}
+
 function applyResolution(dpr) {
   if (!renderer || !composer || dpr === appliedResolution) return false;
 
-  renderer.setPixelRatio(dpr);
+  applyDisplayResolution(dpr, window.innerWidth, window.innerHeight);
   composer.setPixelRatio(dpr);
   composer.setSize(window.innerWidth, window.innerHeight);
   appliedResolution = dpr;
@@ -197,13 +223,14 @@ function resizeScene(width, height) {
 
   const safeWidth = Math.max(1, width);
   const safeHeight = Math.max(1, height);
-  ADAPTIVE_RES.high = Math.min(window.devicePixelRatio || 1, 2);
+  ADAPTIVE_RES.high = RENDER_DPR;
   const pixelRatio = activeResolutionLevel === 'low'
     ? ADAPTIVE_RES.low
     : ADAPTIVE_RES.high;
 
-  renderer.setPixelRatio(pixelRatio);
+  renderer.setPixelRatio(ADAPTIVE_RES.high);
   renderer.setSize(safeWidth, safeHeight, false);
+  applyDisplayResolution(pixelRatio, safeWidth, safeHeight);
 
   camera.aspect = safeWidth / safeHeight;
   camera.updateProjectionMatrix();
@@ -244,6 +271,13 @@ function createPostProcessing() {
   motionBlurPass = new ShaderPass(RADIAL_MOTION_BLUR_SHADER);
   composer.addPass(motionBlurPass);
 
+  // The scene renders into the composer's single-sample targets, so canvas
+  // antialiasing would only see the final fullscreen triangle. Spatial SMAA treats
+  // scene silhouettes and paint before grain, without multisampling both large
+  // half-float buffers. setSize() follows the existing adaptive DPR automatically.
+  antialiasPass = new SMAAPass();
+  composer.addPass(antialiasPass);
+
   premiumPass = new ShaderPass(PREMIUM_WASH_SHADER);
   composer.addPass(premiumPass);
 }
@@ -261,8 +295,10 @@ export function setAtmosphere({ fogColor, fogNear, fogFar, background } = {}) {
   if (!scene) return;
 
   scene.fog.color.copy(atmosphere.fogColor);
-  scene.fog.near = atmosphere.fogNear;
-  scene.fog.far = atmosphere.fogFar;
+  // W2: fog distances scale with the candidate camera distance (1 for base) so the
+  // wider view keeps today's fog-to-subject relationship. Terrain margin is unchanged.
+  scene.fog.near = atmosphere.fogNear * COMP.fogScale;
+  scene.fog.far = atmosphere.fogFar * COMP.fogScale;
 
   if (scene.background?.isColor) scene.background.copy(atmosphere.background);
   else scene.background = atmosphere.background.clone();
@@ -299,7 +335,7 @@ export function updateCameraFov(dt) {
   if (!camera) return;
 
   const safeDt = Number.isFinite(dt) ? Math.max(0, dt) : 0;
-  const targetFov = BASE_FOV + clampSpeed(state.speed01) * FOV_RANGE;
+  const targetFov = aerialTuning.fov + clampSpeed(state.speed01) * aerialTuning.speedFovRange;
   const damping = 1 - Math.pow(1 - FOV_DAMPING, safeDt * 60);
 
   camera.fov += (targetFov - camera.fov) * damping;
@@ -342,7 +378,10 @@ export function updateScene(dt) {
     timeSinceResolutionSwitchMs = 0;
   }
 
-  if (motionBlurPass) motionBlurPass.uniforms.uStrength.value = speed * 0.42;
+  // Tiny residual speed must not run the eight-tap blur at native resolution.
+  // At motion resolution (including native DPR1), retain the existing treatment.
+  if (motionBlurPass) motionBlurPass.uniforms.uStrength.value =
+    appliedResolution <= ADAPTIVE_RES.low ? speed * 0.42 : 0;
   if (premiumPass) premiumPass.uniforms.uTime.value = elapsedTime;
 
   if (sun && followedSunTarget) {
@@ -351,7 +390,7 @@ export function updateScene(dt) {
   }
 }
 
-/** Render the race scene through the three-pass post-processing chain. */
+/** Render the race scene through the composed spatial-AA chain. */
 export function render(dt) {
   if (!composer) return;
   composer.render(dt);
@@ -366,7 +405,9 @@ export function initScene() {
 
   renderer = new THREE.WebGLRenderer({
     canvas,
-    antialias: true,
+    // Scene edges are treated by SMAA in single-sample offscreen targets.
+    // MSAA on this fullscreen output adds backing storage and resize stalls.
+    antialias: false,
     powerPreference: 'high-performance',
   });
   renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -383,8 +424,8 @@ export function initScene() {
     atmosphere.fogFar,
   );
 
-  // Position and rotation intentionally remain at THREE's defaults. carRig owns both.
-  camera = new THREE.PerspectiveCamera(BASE_FOV, 1, 0.5, 3000);
+  // aerialCamera.js places this independent world-space camera.
+  camera = new THREE.PerspectiveCamera(aerialTuning.fov, 1, 0.5, 3000);
   lastProjectedFov = camera.fov;
 
   createLightingRig();
@@ -397,7 +438,7 @@ export function initScene() {
   }
   // TEMPORARY (perf pass): runtime handles so the profiler can A/B cost centres.
   window.__gt3 = { scene, camera, renderer, composer,
-    passes: { motionBlur: motionBlurPass, wash: premiumPass }, resizeScene,
+    passes: { motionBlur: motionBlurPass, antialias: antialiasPass, wash: premiumPass }, resizeScene,
     probe: () => ({ mode: state.mode, locked: state.scrollLocked, speed01: state.speed01,
       progress: state.progress, applied: appliedResolution, level: activeResolutionLevel,
       still: stillTimeMs, sinceSwitch: timeSinceResolutionSwitchMs,

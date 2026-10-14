@@ -1,0 +1,704 @@
+{
+  "base": "http://127.0.0.1:5201",
+  "lean": false,
+  "renderer": "ANGLE/Metal",
+  "phases": [
+    {
+      "name": "startup",
+      "status": "PASS"
+    },
+    {
+      "name": "route metadata",
+      "status": "PASS"
+    },
+    {
+      "name": "all nine gates: zero GL allocations/uploads forward and reverse",
+      "status": "PASS"
+    },
+    {
+      "name": "forward and backward discovery sweeps",
+      "status": "PASS"
+    },
+    {
+      "name": "real-wheel gate reversals",
+      "status": "PASS"
+    },
+    {
+      "name": "instant seeks",
+      "status": "PASS"
+    },
+    {
+      "name": "reload and discovery restoration",
+      "status": "PASS"
+    },
+    {
+      "name": "replay preserves discoveries",
+      "status": "PASS"
+    },
+    {
+      "name": "frame and swap diagnostics",
+      "status": "PASS"
+    },
+    {
+      "name": "day and night captures",
+      "status": "PASS"
+    },
+    {
+      "name": "console errors",
+      "status": "PASS"
+    }
+  ],
+  "errors": [],
+  "browserPid": 5311,
+  "gpuCrossings": [
+    {
+      "gate": 0.09325981847738549,
+      "direction": 1,
+      "gl": {
+        "createProgram": 0,
+        "compileShader": 0,
+        "createTexture": 0,
+        "createBuffer": 0,
+        "bufferData": 0,
+        "texImage2D": 0,
+        "texImage3D": 0,
+        "texStorage2D": 0,
+        "texStorage3D": 0,
+        "compressedTexImage2D": 0,
+        "compressedTexImage3D": 0,
+        "texSubImage2D": 0,
+        "texSubImage3D": 0,
+        "compressedTexSubImage2D": 0,
+        "compressedTexSubImage3D": 0
+      }
+    },
+    {
+      "gate": 0.1829374188477538,
+      "direction": 1,
+      "gl": {
+        "createProgram": 0,
+        "compileShader": 0,
+        "createTexture": 0,
+        "createBuffer": 0,
+        "bufferData": 0,
+        "texImage2D": 0,
+        "texImage3D": 0,
+        "texStorage2D": 0,
+        "texStorage3D": 0,
+        "compressedTexImage2D": 0,
+        "compressedTexImage3D": 0,
+        "texSubImage2D": 0,
+        "texSubImage3D": 0,
+        "compressedTexSubImage2D": 0,
+        "compressedTexSubImage3D": 0
+      }
+    },
+    {
+      "gate": 0.25766875248972754,
+      "direction": 1,
+      "gl": {
+        "createProgram": 0,
+        "compileShader": 0,
+        "createTexture": 0,
+        "createBuffer": 0,
+        "bufferData": 0,
+        "texImage2D": 0,
+        "texImage3D": 0,
+        "texStorage2D": 0,
+        "texStorage3D": 0,
+        "compressedTexImage2D": 0,
+        "compressedTexImage3D": 0,
+        "texSubImage2D": 0,
+        "texSubImage3D": 0,
+        "compressedTexSubImage2D": 0,
+        "compressedTexSubImage3D": 0
+      }
+    },
+    {
+      "gate": 0.39218515304528045,
+      "direction": 1,
+      "gl": {
+        "createProgram": 0,
+        "compileShader": 0,
+        "createTexture": 0,
+        "createBuffer": 0,
+        "bufferData": 0,
+        "texImage2D": 0,
+        "texImage3D": 0,
+        "texStorage2D": 0,
+        "texStorage3D": 0,
+        "compressedTexImage2D": 0,
+        "compressedTexImage3D": 0,
+        "texSubImage2D": 0,
+        "texSubImage3D": 0,
+        "compressedTexSubImage2D": 0,
+        "compressedTexSubImage3D": 0
+      }
+    },
+    {
+      "gate": 0.49680902014404366,
+      "direction": 1,
+      "gl": {
+        "createProgram": 0,
+        "compileShader": 0,
+        "createTexture": 0,
+        "createBuffer": 0,
+        "bufferData": 0,
+        "texImage2D": 0,
+        "texImage3D": 0,
+        "texStorage2D": 0,
+        "texStorage3D": 0,
+        "compressedTexImage2D": 0,
+        "compressedTexImage3D": 0,
+        "texSubImage2D": 0,
+        "texSubImage3D": 0,
+        "compressedTexSubImage2D": 0,
+        "compressedTexSubImage3D": 0
+      }
+    },
+    {
+      "gate": 0.586486620514412,
+      "direction": 1,
+      "gl": {
+        "createProgram": 0,
+        "compileShader": 0,
+        "createTexture": 0,
+        "createBuffer": 0,
+        "bufferData": 0,
+        "texImage2D": 0,
+        "texImage3D": 0,
+        "texStorage2D": 0,
+        "texStorage3D": 0,
+        "compressedTexImage2D": 0,
+        "compressedTexImage3D": 0,
+        "texSubImage2D": 0,
+        "texSubImage3D": 0,
+        "compressedTexSubImage2D": 0,
+        "compressedTexSubImage3D": 0
+      }
+    },
+    {
+      "gate": 0.6811463097942456,
+      "direction": 1,
+      "gl": {
+        "createProgram": 0,
+        "compileShader": 0,
+        "createTexture": 0,
+        "createBuffer": 0,
+        "bufferData": 0,
+        "texImage2D": 0,
+        "texImage3D": 0,
+        "texStorage2D": 0,
+        "texStorage3D": 0,
+        "compressedTexImage2D": 0,
+        "compressedTexImage3D": 0,
+        "texSubImage2D": 0,
+        "texSubImage3D": 0,
+        "compressedTexSubImage2D": 0,
+        "compressedTexSubImage3D": 0
+      }
+    },
+    {
+      "gate": 0.7758059990740788,
+      "direction": 1,
+      "gl": {
+        "createProgram": 0,
+        "compileShader": 0,
+        "createTexture": 0,
+        "createBuffer": 0,
+        "bufferData": 0,
+        "texImage2D": 0,
+        "texImage3D": 0,
+        "texStorage2D": 0,
+        "texStorage3D": 0,
+        "compressedTexImage2D": 0,
+        "compressedTexImage3D": 0,
+        "texSubImage2D": 0,
+        "texSubImage3D": 0,
+        "compressedTexSubImage2D": 0,
+        "compressedTexSubImage3D": 0
+      }
+    },
+    {
+      "gate": 0.8605015105349823,
+      "direction": 1,
+      "gl": {
+        "createProgram": 0,
+        "compileShader": 0,
+        "createTexture": 0,
+        "createBuffer": 0,
+        "bufferData": 0,
+        "texImage2D": 0,
+        "texImage3D": 0,
+        "texStorage2D": 0,
+        "texStorage3D": 0,
+        "compressedTexImage2D": 0,
+        "compressedTexImage3D": 0,
+        "texSubImage2D": 0,
+        "texSubImage3D": 0,
+        "compressedTexSubImage2D": 0,
+        "compressedTexSubImage3D": 0
+      }
+    },
+    {
+      "gate": 0.8605015105349823,
+      "direction": -1,
+      "gl": {
+        "createProgram": 0,
+        "compileShader": 0,
+        "createTexture": 0,
+        "createBuffer": 0,
+        "bufferData": 0,
+        "texImage2D": 0,
+        "texImage3D": 0,
+        "texStorage2D": 0,
+        "texStorage3D": 0,
+        "compressedTexImage2D": 0,
+        "compressedTexImage3D": 0,
+        "texSubImage2D": 0,
+        "texSubImage3D": 0,
+        "compressedTexSubImage2D": 0,
+        "compressedTexSubImage3D": 0
+      }
+    },
+    {
+      "gate": 0.7758059990740788,
+      "direction": -1,
+      "gl": {
+        "createProgram": 0,
+        "compileShader": 0,
+        "createTexture": 0,
+        "createBuffer": 0,
+        "bufferData": 0,
+        "texImage2D": 0,
+        "texImage3D": 0,
+        "texStorage2D": 0,
+        "texStorage3D": 0,
+        "compressedTexImage2D": 0,
+        "compressedTexImage3D": 0,
+        "texSubImage2D": 0,
+        "texSubImage3D": 0,
+        "compressedTexSubImage2D": 0,
+        "compressedTexSubImage3D": 0
+      }
+    },
+    {
+      "gate": 0.6811463097942456,
+      "direction": -1,
+      "gl": {
+        "createProgram": 0,
+        "compileShader": 0,
+        "createTexture": 0,
+        "createBuffer": 0,
+        "bufferData": 0,
+        "texImage2D": 0,
+        "texImage3D": 0,
+        "texStorage2D": 0,
+        "texStorage3D": 0,
+        "compressedTexImage2D": 0,
+        "compressedTexImage3D": 0,
+        "texSubImage2D": 0,
+        "texSubImage3D": 0,
+        "compressedTexSubImage2D": 0,
+        "compressedTexSubImage3D": 0
+      }
+    },
+    {
+      "gate": 0.586486620514412,
+      "direction": -1,
+      "gl": {
+        "createProgram": 0,
+        "compileShader": 0,
+        "createTexture": 0,
+        "createBuffer": 0,
+        "bufferData": 0,
+        "texImage2D": 0,
+        "texImage3D": 0,
+        "texStorage2D": 0,
+        "texStorage3D": 0,
+        "compressedTexImage2D": 0,
+        "compressedTexImage3D": 0,
+        "texSubImage2D": 0,
+        "texSubImage3D": 0,
+        "compressedTexSubImage2D": 0,
+        "compressedTexSubImage3D": 0
+      }
+    },
+    {
+      "gate": 0.49680902014404366,
+      "direction": -1,
+      "gl": {
+        "createProgram": 0,
+        "compileShader": 0,
+        "createTexture": 0,
+        "createBuffer": 0,
+        "bufferData": 0,
+        "texImage2D": 0,
+        "texImage3D": 0,
+        "texStorage2D": 0,
+        "texStorage3D": 0,
+        "compressedTexImage2D": 0,
+        "compressedTexImage3D": 0,
+        "texSubImage2D": 0,
+        "texSubImage3D": 0,
+        "compressedTexSubImage2D": 0,
+        "compressedTexSubImage3D": 0
+      }
+    },
+    {
+      "gate": 0.39218515304528045,
+      "direction": -1,
+      "gl": {
+        "createProgram": 0,
+        "compileShader": 0,
+        "createTexture": 0,
+        "createBuffer": 0,
+        "bufferData": 0,
+        "texImage2D": 0,
+        "texImage3D": 0,
+        "texStorage2D": 0,
+        "texStorage3D": 0,
+        "compressedTexImage2D": 0,
+        "compressedTexImage3D": 0,
+        "texSubImage2D": 0,
+        "texSubImage3D": 0,
+        "compressedTexSubImage2D": 0,
+        "compressedTexSubImage3D": 0
+      }
+    },
+    {
+      "gate": 0.25766875248972754,
+      "direction": -1,
+      "gl": {
+        "createProgram": 0,
+        "compileShader": 0,
+        "createTexture": 0,
+        "createBuffer": 0,
+        "bufferData": 0,
+        "texImage2D": 0,
+        "texImage3D": 0,
+        "texStorage2D": 0,
+        "texStorage3D": 0,
+        "compressedTexImage2D": 0,
+        "compressedTexImage3D": 0,
+        "texSubImage2D": 0,
+        "texSubImage3D": 0,
+        "compressedTexSubImage2D": 0,
+        "compressedTexSubImage3D": 0
+      }
+    },
+    {
+      "gate": 0.1829374188477538,
+      "direction": -1,
+      "gl": {
+        "createProgram": 0,
+        "compileShader": 0,
+        "createTexture": 0,
+        "createBuffer": 0,
+        "bufferData": 0,
+        "texImage2D": 0,
+        "texImage3D": 0,
+        "texStorage2D": 0,
+        "texStorage3D": 0,
+        "compressedTexImage2D": 0,
+        "compressedTexImage3D": 0,
+        "texSubImage2D": 0,
+        "texSubImage3D": 0,
+        "compressedTexSubImage2D": 0,
+        "compressedTexSubImage3D": 0
+      }
+    },
+    {
+      "gate": 0.09325981847738549,
+      "direction": -1,
+      "gl": {
+        "createProgram": 0,
+        "compileShader": 0,
+        "createTexture": 0,
+        "createBuffer": 0,
+        "bufferData": 0,
+        "texImage2D": 0,
+        "texImage3D": 0,
+        "texStorage2D": 0,
+        "texStorage3D": 0,
+        "compressedTexImage2D": 0,
+        "compressedTexImage3D": 0,
+        "texSubImage2D": 0,
+        "texSubImage3D": 0,
+        "compressedTexSubImage2D": 0,
+        "compressedTexSubImage3D": 0
+      }
+    }
+  ],
+  "routeLengthM": 5006.8196682221,
+  "thresholds": [
+    0.09325981847738549,
+    0.1829374188477538,
+    0.25766875248972754,
+    0.39218515304528045,
+    0.49680902014404366,
+    0.586486620514412,
+    0.6811463097942456,
+    0.7758059990740788,
+    0.8605015105349823
+  ],
+  "forwardStops": 40,
+  "backwardStops": 39,
+  "forwardFinal": {
+    "progress": 1,
+    "active": 9,
+    "unlocked": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9
+    ],
+    "model": [
+      "car-porsche"
+    ],
+    "morphing": false,
+    "locked": false,
+    "mode": "race",
+    "montage": false,
+    "spec": false,
+    "showcase": false,
+    "card": false
+  },
+  "backwardFinal": {
+    "progress": 8.547764052423948e-7,
+    "active": 0,
+    "unlocked": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9
+    ],
+    "model": [
+      "car-lexus"
+    ],
+    "morphing": false,
+    "locked": false,
+    "mode": "race",
+    "montage": false,
+    "spec": false,
+    "showcase": false,
+    "card": false
+  },
+  "replayed": {
+    "progress": 0,
+    "active": 0,
+    "unlocked": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9
+    ],
+    "model": [
+      "car-lexus"
+    ],
+    "morphing": false,
+    "locked": false,
+    "mode": "race",
+    "montage": false,
+    "spec": false,
+    "showcase": false,
+    "card": false
+  },
+  "oscillation": [
+    {
+      "gate": 0.25766875248972754,
+      "crossings": 8,
+      "observedIndices": [
+        2,
+        3
+      ],
+      "settled": {
+        "progress": 0.25466875248972753,
+        "active": 2,
+        "unlocked": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "model": [
+          "car-audi"
+        ],
+        "morphing": false,
+        "locked": false,
+        "mode": "race",
+        "montage": false,
+        "spec": false,
+        "showcase": false,
+        "card": false
+      }
+    },
+    {
+      "gate": 0.6811463097942456,
+      "crossings": 8,
+      "observedIndices": [
+        6,
+        7
+      ],
+      "settled": {
+        "progress": 0.6781454683394539,
+        "active": 6,
+        "unlocked": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "model": [
+          "car-mclaren"
+        ],
+        "morphing": false,
+        "locked": false,
+        "mode": "race",
+        "montage": false,
+        "spec": false,
+        "showcase": false,
+        "card": false
+      }
+    }
+  ],
+  "instantSeek": {
+    "far": {
+      "progress": 0.9099999999999999,
+      "active": 9,
+      "unlocked": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "model": [
+        "car-porsche"
+      ],
+      "morphing": false,
+      "locked": false,
+      "mode": "race",
+      "montage": false,
+      "spec": false,
+      "showcase": false,
+      "card": false
+    },
+    "back": {
+      "progress": 0.04,
+      "active": 0,
+      "unlocked": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "model": [
+        "car-lexus"
+      ],
+      "morphing": false,
+      "locked": false,
+      "mode": "race",
+      "montage": false,
+      "spec": false,
+      "showcase": false,
+      "card": false
+    }
+  },
+  "restored": {
+    "progress": 0.04,
+    "active": 0,
+    "unlocked": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9
+    ],
+    "model": [
+      "car-lexus"
+    ],
+    "morphing": false,
+    "locked": false,
+    "mode": "race",
+    "montage": false,
+    "spec": false,
+    "showcase": false,
+    "card": false
+  },
+  "frameMs": {
+    "idle": {
+      "frames": 95,
+      "p50": 16.700000000000728,
+      "p95": 16.799999999999272,
+      "longFrames": {
+        "count": 0,
+        "ms": []
+      }
+    },
+    "swap": {
+      "frames": 68,
+      "p50": 16.69999999999709,
+      "p95": 33.299999999995634,
+      "longFrames": {
+        "count": 0,
+        "ms": []
+      }
+    }
+  },
+  "captures": [
+    "/Users/rayyansheikh/.claude/jobs/75511459/tmp/verify4/B/day-gate-1.png",
+    "/Users/rayyansheikh/.claude/jobs/75511459/tmp/verify4/B/day-gate-5.png",
+    "/Users/rayyansheikh/.claude/jobs/75511459/tmp/verify4/B/day-gate-9.png",
+    "/Users/rayyansheikh/.claude/jobs/75511459/tmp/verify4/B/night-gate-1.png",
+    "/Users/rayyansheikh/.claude/jobs/75511459/tmp/verify4/B/night-gate-5.png",
+    "/Users/rayyansheikh/.claude/jobs/75511459/tmp/verify4/B/night-gate-9.png"
+  ],
+  "failed": 0
+}

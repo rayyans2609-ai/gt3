@@ -1,0 +1,18 @@
+{
+ "comp": "b",
+ "cam": "leg1",
+ "zone": {
+  "x": 1,
+  "y": 1
+ },
+ "aspect": 1.7777777777777777,
+ "method": "401 samples per core span; convex sphere-constraint intersection; mean arc-sampled target height; binary distance search",
+ "hairpin": {
+  "stationaryAt140FullViewport": false,
+  "minDistanceFullViewportM": 173.01
+ },
+ "chicane": {
+  "stationaryAt140FullViewport": false,
+  "minDistanceFullViewportM": 200.02
+ }
+}

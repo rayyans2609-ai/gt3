@@ -1,0 +1,67 @@
+
+> build
+> vite build
+
+vite v7.3.6 building client environment for production...
+transforming...
+✓ 67 modules transformed.
+rendering chunks...
+[plugin vite:reporter]
+(!) /Users/rayyansheikh/Desktop/gt3/.claude/worktrees/p3y-perf/src/scroll/scrollDrive.js is dynamically imported by /Users/rayyansheikh/Desktop/gt3/.claude/worktrees/p3y-perf/src/main.js but also statically imported by /Users/rayyansheikh/Desktop/gt3/.claude/worktrees/p3y-perf/src/core/experience.js, /Users/rayyansheikh/Desktop/gt3/.claude/worktrees/p3y-perf/src/montage/studio.js, /Users/rayyansheikh/Desktop/gt3/.claude/worktrees/p3y-perf/src/ui/finishScreen.js, /Users/rayyansheikh/Desktop/gt3/.claude/worktrees/p3y-perf/src/ui/startScreen.js, dynamic import will not move module into another chunk.
+
+computing gzip size...
+dist/index.html                                                   2.26 kB │ gzip:  0.95 kB
+dist/assets/NeueHaasGrotDisp-55Roman-Trial-Csn10bND.otf          72.95 kB
+dist/assets/NeueHaasGrotDisp-15XXThin-Trial-C3euxRTN.otf         72.99 kB
+dist/assets/NeueHaasGrotDisp-35Thin-Trial-mPB0lOTX.otf           73.05 kB
+dist/assets/NeueHaasGrotDisp-45Light-Trial-DDHwbvKI.otf          73.22 kB
+dist/assets/NeueHaasGrotText-55Roman-Trial-B7SLBs7q.otf          73.26 kB
+dist/assets/NeueHaasGrotDisp-65Medium-Trial-EMQLh5qS.otf         73.42 kB
+dist/assets/NeueHaasGrotDisp-95Black-Trial-k0yQb4Pp.otf          73.50 kB
+dist/assets/NeueHaasGrotDisp-75Bold-Trial-Brcq4zn4.otf           73.61 kB
+dist/assets/NeueHaasGrotDisp-46LightItalic-Trial-5RStNL6D.otf    73.72 kB
+dist/assets/NeueHaasGrotDisp-56Italic-Trial-D1O67csw.otf         73.77 kB
+dist/assets/NeueHaasGrotDisp-36ThinItalic-Trial-pcwAhWVd.otf     73.84 kB
+dist/assets/NeueHaasGrotDisp-16XXThinItalic-Trial-ZyEbwB1b.otf   73.94 kB
+dist/assets/NeueHaasGrotText-65Medium-Trial-CNmtnFZx.otf         73.97 kB
+dist/assets/NeueHaasGrotText-75Bold-Trial-CeoHGm5l.otf           73.98 kB
+dist/assets/NeueHaasGrotDisp-96BlackItalic-Trial-DfiVWkwJ.otf    74.12 kB
+dist/assets/NeueHaasGrotDisp-66MediumItalic-Trial-BEob0EHu.otf   74.15 kB
+dist/assets/NeueHaasGrotText-56Italic-Trial-DJXkn_jY.otf         74.23 kB
+dist/assets/NeueHaasGrotDisp-76BoldItalic-Trial-BKKf5bYl.otf     74.31 kB
+dist/assets/NeueHaasGrotText-76BoldItalic-Trial-Bh1-IfEF.otf     74.46 kB
+dist/assets/NeueHaasGrotText-66MediumItalic-Trial-BNojKcVi.otf   74.59 kB
+dist/assets/GeistMono-VariableFont_wght-BNd8yvN3.ttf            173.20 kB
+dist/assets/GeistMono-Italic-VariableFont_wght-C_QwmNXM.ttf     183.48 kB
+dist/assets/index-CW6rmRRy.css                                   36.68 kB │ gzip:  7.89 kB
+dist/assets/soundCue-FsriMBkN.js                                  1.17 kB │ gzip:  0.62 kB
+dist/assets/soundControl-ir8xX44-.js                              1.74 kB │ gzip:  0.86 kB
+dist/assets/themeToggle-hTDeqEXY.js                               2.72 kB │ gzip:  1.26 kB
+dist/assets/racingLine-BF3hUoLE.js                                2.74 kB │ gzip:  1.39 kB
+dist/assets/morph-CzFesCx2.js                                     2.97 kB │ gzip:  1.49 kB
+dist/assets/startScreen-CrwplBMz.js                               3.60 kB │ gzip:  1.51 kB
+dist/assets/hud-BJCVmeNL.js                                       4.18 kB │ gzip:  1.98 kB
+dist/assets/carRig-DEp2xBck.js                                    4.52 kB │ gzip:  2.39 kB
+dist/assets/carWarmup-CljhVGRM.js                                 4.72 kB │ gzip:  2.28 kB
+dist/assets/trackProfile-CiykUHIH.js                              4.79 kB │ gzip:  1.82 kB
+dist/assets/BufferGeometryUtils-D-GrirQy.js                       4.89 kB │ gzip:  1.49 kB
+dist/assets/player-CSITJLho.js                                    5.23 kB │ gzip:  1.95 kB
+dist/assets/checkpoints-BgLBJquZ.js                               5.23 kB │ gzip:  2.51 kB
+dist/assets/finishScreen-7aYdQner.js                              5.34 kB │ gzip:  2.29 kB
+dist/assets/theme-CGQRTI34.js                                     5.52 kB │ gzip:  2.02 kB
+dist/assets/track-OBowK5DW.js                                     6.24 kB │ gzip:  2.83 kB
+dist/assets/finishLine-BK0mrzuM.js                                6.77 kB │ gzip:  3.10 kB
+dist/assets/audioManager-DaLlsdCq.js                             10.14 kB │ gzip:  3.67 kB
+dist/assets/studio-DFijg6EX.js                                   14.72 kB │ gzip:  5.87 kB
+dist/assets/aerialCamera-DGrFgeTB.js                             14.94 kB │ gzip:  6.09 kB
+dist/assets/environment-BarFKF_i.js                              38.26 kB │ gzip: 13.78 kB
+dist/assets/cars-BfiLUQzY.js                                     57.38 kB │ gzip: 17.93 kB
+dist/assets/sceneSetup-BznOuChq.js                               74.46 kB │ gzip: 43.17 kB
+dist/assets/index-COUZkyey.js                                   276.67 kB │ gzip: 80.69 kB
+dist/assets/three.module-D2tKVYdF.js                            324.33 kB │ gzip: 78.45 kB
+✓ built in 3.84s
+npm notice
+npm notice New major version of npm available! 11.12.1 -> 12.2.0
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.0
+npm notice To update run: npm install -g npm@12.2.0
+npm notice

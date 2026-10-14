@@ -2,7 +2,7 @@
  * trackCurve.js — the route. (SPEC §4, §6)
  *
  * OWNED BY THE MANAGER. This is the geometric contract every other scene module
- * builds against: the asphalt ribbon, the curbs, the coins, the environment
+ * builds against: the asphalt ribbon, the curbs, the checkpoints, the environment
  * dressing, the car rig and the finish gate all read from here.
  *
  * The route is not authored as raw XYZ points — hand-placed points make it far too
@@ -11,23 +11,13 @@
  * length, a turn angle and an elevation change. Heading is integrated along the
  * sequence to produce the control points, which guarantees C1-smooth transitions and
  * makes the route trivially tunable — change a turn from 55 to 70 degrees and
- * everything downstream (curbs, coins, dressing) follows.
+ * everything downstream (curbs, checkpoints, dressing) follows.
  *
  * World convention: Y is up. The route starts at the origin heading -Z.
  * One world unit ~= one metre. A GT3 car is ~4.6 units long.
  */
 
 import * as THREE from 'three';
-
-// ---------------------------------------------------------------------------
-// Track dimensions
-// ---------------------------------------------------------------------------
-export const TRACK = {
-  halfWidth: 7.0,        // asphalt is 14 units wide — two GT3s abreast, comfortably
-  curbWidth: 1.15,       // red/white rumble strip, thin by default
-  curbWidthWide: 2.6,    // thickened block through corners and accent points
-  shoulderWidth: 3.0,    // dark run-off between curb and grass
-};
 
 /**
  * The route, as a driver would call it.
@@ -116,8 +106,7 @@ export const TRACK_LENGTH = curve.getLength();
 // ---------------------------------------------------------------------------
 // Curvature — sampled once, read every frame.
 // ---------------------------------------------------------------------------
-// Drives: camera corner-lean (§5), car body roll (§7), and where the curbs thicken
-// into blocks (§6). Signed: positive = turning right, negative = turning left.
+// Drives camera/car motion only; the authored profile owns widths and curbs. Signed: positive = turning right, negative = turning left.
 
 const CURVATURE_SAMPLES = 800;
 const curvatureTable = new Float32Array(CURVATURE_SAMPLES + 1);
@@ -185,7 +174,7 @@ export function tangentAt(t, out = new THREE.Vector3()) {
 }
 
 /**
- * A point offset laterally from the centreline. `lateral` is metres to the right of
+ * A point offset laterally from the centreline. `lateral` is metres to the left of
  * the direction of travel; `height` is metres above the surface. This is how curbs,
  * markings, roadside dressing and the finish gate are all placed.
  */
@@ -202,34 +191,39 @@ export function distanceToT(distance) {
 }
 
 // ---------------------------------------------------------------------------
-// Coin placement (SPEC §8) — ten coins, one per car, index-matched to src/data/cars.js
+// Checkpoint thresholds (SPEC §18) — cars 1–9, index-matched to the roster.
 // ---------------------------------------------------------------------------
-// Deliberately paced rather than evenly divided: the first comes early enough to
-// teach the mechanic before the user doubts it, the middle ones sit on the exits of
-// corners where the car is already the focus, and the last lands with enough run-out
-// left that its montage does not collide with the finish line.
-
-export const COIN_T = [
-  0.070, // 1  Lexus     — early, on the opening straight, teaches the mechanic
-  0.155, // 2  Nissan    — exit of turn 1
-  0.245, // 3  Audi      — through the left-hand esses
-  0.330, // 4  BMW       — on the uphill chute
-  0.415, // 5  Mercedes  — exit of the big right-hander
-  0.505, // 6  Ferrari   — out of the hairpin, the halfway beat
-  0.590, // 7  McLaren   — between the chicane apexes
-  0.680, // 8  Aston     — down the back straight
-  0.775, // 9  Lamborghini — over the crest
-  0.870, // 10 Porsche   — the final kink, with room to breathe before the flag
+// Positions favour straight or corner-exit road. Third-to-fourth spacing is a
+// deliberate long run across the technical sequence rather than a gate in a bend.
+export const CHECKPOINT_ROUTE_T = [
+  0.090, // Nissan      — breathing chute after turn 1
+  0.180, // Audi        — uphill chute after the tightening left
+  0.255, // BMW         — back chute after the big right
+  0.390, // Mercedes    — exit chute after the chicane
+  0.495, // Ferrari     — crest into long acceleration 1
+  0.585, // McLaren     — long acceleration 1
+  0.680, // Aston       — long acceleration 2 after slowdown 1
+  0.775, // Lamborghini — long acceleration 3 after slowdown 2
+  0.860, // Porsche     — closing chute after broad left
 ];
 
-/** Height of a coin's centre above the asphalt. Large and unmistakable at 45°. */
-export const COIN_HEIGHT = 4.2;
-
-/** How close in t the rig must get before a coin fires. ~9 world units of travel. */
-export const COIN_TRIGGER_T = 9 / TRACK_LENGTH;
-
-/** How far out the approach cue begins — 15% of the gap to the coin (SPEC §14). */
-export const COIN_APPROACH_T = 0.062;
-
 /** Where the finish gate stands. */
-export const FINISH_T = 0.994;
+export const FINISH_T = 0;
+export const FINISH_THRESHOLD = 1;
+export const GRID_SLOT = new URLSearchParams(globalThis.location?.search || '').get('grid') === 'p2' ? 'p2' : 'p1';
+export const GRID_DISTANCE = GRID_SLOT === 'p2' ? 26 : 18;
+export const GRID_LATERAL = GRID_SLOT === 'p2' ? -7 : 7;
+export const GRID_GAP = GRID_DISTANCE / TRACK_LENGTH;
+export const TOUR_LENGTH = TRACK_LENGTH + GRID_DISTANCE;
+export const GRID_T = 1 - GRID_GAP;
+export const FIRST_LINE_PROGRESS = GRID_DISTANCE / TOUR_LENGTH;
+export const ROUTE_MAPPING = 'grid-v1';
+const wrapRoute = t => ((t % 1) + 1) % 1;
+/** Tour progress -> wrapped lap geometry. No geometry API silently consumes p. */
+export function routeTAt(p) { return wrapRoute(GRID_T + p * (1 + GRID_GAP)); }
+/** Lap t -> progress on the main lap (the neutral opening approach is separate). */
+export function progressAtRouteT(t) { return (wrapRoute(t) + GRID_GAP) / (1 + GRID_GAP); }
+export const CHECKPOINT_T = CHECKPOINT_ROUTE_T.map(progressAtRouteT);
+
+/** Last 140 m of checkpoint approach, in Tour progress. */
+export const CHECKPOINT_APPROACH_T = 140 / TOUR_LENGTH;

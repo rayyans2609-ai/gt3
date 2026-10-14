@@ -1,8 +1,8 @@
+@import './fonts.css';
 @import './tokens.css';
 @import './hud.css';
 @import './montage.css';
 @import './showcase.css';
-@import './fullscreen.css';
 @import './screens.css';
 @import './player.css';
 
@@ -15,9 +15,9 @@
   --track-yellow: #e8c33a;
   --green: #1e3a2a;
   --ease: cubic-bezier(.22, .61, .36, 1);
-  --font-display: 'Cormorant Garamond', Georgia, serif;
-  --font-ui: 'DM Sans', system-ui, sans-serif;
-  --font-mono: 'DM Mono', ui-monospace, monospace;
+  --font-display: 'Neue Haas Grotesk Display', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --font-ui: 'Neue Haas Grotesk Text', 'Neue Haas Grotesk Display', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --font-mono: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
   --brand-lexus: #541f29;
   --brand-nissan: #293d52;
   --brand-audi: #3c4247;
@@ -29,6 +29,19 @@
   --brand-lamborghini: #795033;
   --brand-porsche: #25211f;
 }
+/* ?font=sw: Switzer replaces Neue Haas in the display and UI roles only (index.html sets the
+   attribute before first paint). Monospace stays Geist Mono. Default remains Neue Haas. */
+:root[data-font='sw'] {
+  --font-display: 'Switzer', 'Neue Haas Grotesk Display', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --font-ui: 'Switzer', 'Neue Haas Grotesk Text', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+/* Switzer's ascent+descent (≈27 px at 23 px) exceeds the 1.1 name line box tuned for Neue Haas;
+   the name clips overflow, so give Switzer just enough line height for accents/descenders. */
+:root[data-font='sw'] .hud-identity__name { line-height: 1.2; }
+/* Its taller metrics also overfill the fixed identity box with two-line headlines; keep each line
+   at natural height instead of letting the flex column squeeze (and clip) name and headline. */
+:root[data-font='sw'] .hud-identity__slot > * { flex-shrink: 0; }
+
 
 *,
 *::before,

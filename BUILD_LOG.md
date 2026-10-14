@@ -1,5 +1,12 @@
 # BUILD LOG — GT3: A Grand Tour
 
+This is an append-only implementation and measurement history. The early status table,
+legacy CLI examples, coin/montage QA commands, and pre-Phase-3 runtime descriptions below
+describe their dates, not the current application or current delegation route. For current
+product truth use `SPEC.md`; for current implementation status use `GT3_MASTER_CONTEXT.md`
+and the latest entries here. Current Codex jobs use `scripts/codex-route.sh` with explicit
+model and reasoning effort (`docs/ai/codex-cli-invocation.md`).
+
 Manager: Claude Opus 5. Executor: Codex CLI (gpt-5.6-sol) via `codex exec`.
 NOTE: `codex-executor` MCP server failed to connect (CONNECTION_CLOSED);
 delegation runs through the `codex` CLI in Bash instead. Same quota, same split.
@@ -562,3 +569,215 @@ assertion in a harness must do the same or it is testing nothing.
    limitation, not a code defect). The `is-imageless` path handles it. Do NOT
    fabricate substitutes.
    Everything else in the queue is closed as of 31a4050.
+
+---
+
+## Phase 3b / typography / 3c — autonomous run 2026-09-28 (branch `phase3-integration`)
+
+Status: **not merged to main.** Phase 3b camera awaits the user's visual review; 3c browser
+verification is still open (see below). Branches: `worktree-phase3b-aerial-camera` (3b +
+typography, `ce61556`), `typography-slice` (`bd08be1`), `phase3c-checkpoints` (`80926d4`),
+`phase3-integration` (3b + 3c + harness fix, `aaff775`+).
+
+### 3b route-led aerial camera (`src/scene/aerialCamera.js`)
+- Framing target = weighted mean of 5 wrapped route samples around progress (spread 45 m),
+  never the car transform. One fixed world yaw (75°) and pitch (52°); FOV 40, distance 54 m;
+  speed-linked FOV disabled (range 0). Uncorrected damped base pose (0.18 s) + a separate,
+  capped (12 m), decaying last-resort correction when the car leaves NDC 0.76 × 0.72.
+  Snap only when progress jumps > 0.008 with |velocity| < 0.1 (instant seek / replay).
+- carRig.js no longer owns the camera: boom, camera lean/slide and cursor tilt removed.
+- Measured (settled, 205 samples): yaw/pitch constant; car NDC within ±0.30 x / ±0.42 y;
+  projected car length 4.8–7.4 % of frame width (aspect-correct); clearance 40.6–44.9 m;
+  0 correction-active samples; forward/backward settle difference ≤ 42 µm; loop seam 0.
+- Measured (motion, real wheel input, normal + 4× CPU throttle, 8 sequences): 0
+  correction-active frames, 0 snaps in motion, 0 out-of-frame frames, max |NDC| 0.42/0.51.
+- Finding worth keeping: a fixed +t look-ahead (12 m) — not damping — made reverse travel
+  push the car to the frame edge (59 % correction-active backward frames at 12 m vs 0 % at
+  0 m). The first safety design (testing a pose that already included the correction) formed
+  a limit cycle; testing the uncorrected base pose fixed it.
+- A 6-config FOV/pitch/distance sweep showed only modest differences: the empty flat terrain
+  limits perceived depth more than camera parameters (Phase 8 dependency). Framing choice is
+  a pending user decision.
+- GPU median at t=0.02: 32.7 ms branch vs 30.8 ms baseline (different pixels; not attributed).
+
+### Typography slice
+Local `@font-face` (`src/styles/fonts.css`): Neue Haas Grotesk Display (100–900) and Text
+(400/500/700), Geist Mono (variable). Tokens switched in `base.css`; Google Fonts links
+removed. 22 font files bundled; all three families load. Worktrees need a real `font/`
+copy (a symlink outside the root is refused by Vite's fs guard) — no config change needed.
+
+### 3c checkpoints / route + discovery state
+9 instanced neutral gates at CHECKPOINT_T (451–4306 m; 676 m gap skips the technical
+section). Route car = number of gates ≤ progress (both directions); morph retargets without
+queueing or scroll lock; `unlocked` is monotonic, starts with Lexus, persisted in session
+(sorted valid indices); replay preserves discoveries; route position NOT persisted (Phase 4) — superseded 2026-10-04: route-position restore is Phase 3 (user decision; implemented by W7, 56328db).
+coins.js deleted; no chime/spec panel/montage on crossing; approach sound follows the next
+gate. Verified: build; direct forward/reverse state sweep; session serialization.
+**Open:** `scripts/verify-checkpoints.mjs` browser assertions, frame pacing and captures did
+not run — the host was at load average ~550–620 and Chrome would not answer DevTools.
+
+### Known limits
+- Host overload 05:00–06:30 (load ~600, builds 100× slower) blocked browser verification.
+- Legacy HUD approach card idled (would reveal identity); HUD redesign is Phase 3d.
+- Replay-snap check in verify-aerial is a test artifact (t=1 and t=0 are the same pose).
+
+## Phase 3 integration cleanup — 2026-09-28
+
+Phase 3's technical acceptance and remaining human visual review are recorded in
+`docs/ai/run-status-2026-09-28.md` (latest sections supersede its early handoff). The
+branch has not been merged to `main`.
+
+The current Tour uses the closed-loop circuit, aerial rail camera, nine silent checkpoint
+gates, reversible route-car swaps, monotonic session discovery and the sparse HUD. The old
+in-Tour coin/montage/Showcase behavior is retired. `2fabd47` repaired progress reads in
+`shot-circuit.mjs` and `perf-gpu.mjs`. This cleanup then removed browser scripts whose
+assertions only applied to the retired Tour behavior (legacy acceptance/QA, coin montage
+performance, in-Tour Showcase, old HUD parallax and montage scroll-lock probes). The
+Phase 3 verifiers (`verify-aerial.mjs`, `verify-checkpoints.mjs`, `verify-circuit.mjs`) and
+current circuit/performance tools remain. `perf-ab.mjs` now names its checkpoint-free
+band correctly. The old camera-comparison experiment was removed because its legacy
+camera override conflicted with the active aerial camera's per-frame update.
+
+`src/ui/specPanel.js`, `src/ui/fullscreenCard.js` and their unused CSS were orphaned
+after the Phase 3 HUD cleanup: neither module was imported by the live app and their
+DOM roots were absent. The separate Showcase and montage modules remain for later
+phases; no Phase 4 work was started. Historical measurements above remain valid for the
+versions they measured, but the deleted scripts are no longer runnable at this head.
+
+## Phase 3 reopened for re-evaluation — 2026-09-28 (session end)
+
+The user's real-browser walkthrough of `phase3-integration` (`61ce7b1`) did not accept the
+Phase 3 result as-is. **This branch's next work is a Phase 3 Grand Tour re-evaluation and
+finalization pass, not Phase 4, and not continued acceptance of the current result.** Do not
+resume from the "awaiting visual sign-off" framing above without first reconstructing the
+user's critique in the next session and classifying each point by phase ownership.
+
+- **3b aerial camera** — technically implemented and automated-verified (see above), but
+  **not product-accepted** after the user's live review. Framing/motion feel need
+  re-evaluation against real, direct use, not only against the automated harness's numbers.
+- **3c checkpoints/progression** — technically implemented and automated-verified, but the
+  user observed **checkpoint/model-swap hitching on first pass** during live use. This was
+  not caught by the automated frame-pacing measurements recorded above (which showed 0 frames
+  ≥250 ms); treat that as a gap in what the harness measures, not proof the hitch isn't real.
+  Needs direct re-investigation in the live app, not just re-running the existing harness.
+- **3d sparse HUD** — the code is implemented and merged into this branch (`a603268`,
+  `41f2a62`; DOM/aria-hidden/F-key behavior automated-verified, see above), but it was **not
+  part of what the user actually walked through and judged** in this review pass. Confirm this
+  explicitly with the user before assuming either "already reviewed" or "needs rebuilding."
+- **Scroll/driving feel** — reopened. `src/scroll/scrollDrive.js` was deliberately untouched
+  through all of Phase 3b/3c/3d, but the user found the current input mapping **not
+  sufficiently bounded or predictable** in actual use. This is new scope for the next session,
+  not a regression introduced by Phase 3 — investigate `scrollDrive.js`'s current tuning
+  against the user's specific complaint before changing anything.
+
+`SPEC.md` is deliberately **not** rewritten yet. The next session reconstructs the user's
+critique in full, classifies every point by which phase owns it, and updates canonical
+`SPEC.md` before any implementation resumes. `docs/ai/run-status-2026-09-28.md`'s "technically
+complete" framing is superseded by this section for product-acceptance purposes; its
+verification numbers remain accurate technical evidence, just not sufficient for acceptance.
+
+Branch `phase3-integration` (`61ce7b1`) is not merged to `main` (`62024bb`, untouched).
+
+## Phase 3 finalization status — 2026-09-29/30 sprint + 2026-10-04 run
+
+Not merged to `main`. Phase 3 stays open until the user's live review (SPEC §30.9).
+
+**Done and verified (2026-09-29/30):**
+- First-crossing swap hitch (SPEC §19): all ten cars are warmed through the real render path before the Tour unlocks (`1864cbe`). Preload/warm-up failures recover instead of stranding the start screen (`c81fcfd`).
+- The roster loads 512-px-texture GLBs from `public/models/tour/` (`058aa70`, `d03a42e`). Static texture memory went 817 → 288 MiB, and swap from renderer creation to all-cars-ready is about 40 % of the full-resolution build's.
+- Verified at `cfd777f`: build PASS, `verify-load-recovery` 9/9, `verify-checkpoints` 10/10, `verify-swap-response` 22/22, zero GL allocations or uploads at crossings.
+- Gate traversal response: a default sweep and a `?gate=quiet` variant. Both await user review.
+
+**Known regressions, still unmeasured after W4c:**
+- Time-to-ready went from 9–12 s (`602c462`) to 28–32 s at W4, measured headed. In those runs the models resolved at 6–9 s and the warm-up took 268 frames, with a p99 frame of 630–850 ms.
+- A 100–216 ms frame right after the start screen dismisses.
+- Higher memory use during warm-up.
+- The user has **not** accepted a ~30 s startup (2026-10-04). Measure first, then fix anything that needs no tradeoff.
+- Static hypotheses, not yet measured:
+  - Warm-up runs in series after all ten models decode.
+  - Warm-up renders one fixed batch per frame, and synchronous program link or texture upload dominates its tail.
+  - The DRACO decoder is fetched from gstatic at runtime.
+- Harness: `scripts/measure-startup.mjs` (`378d883`), not yet run end to end.
+
+**2026-10-04 run:**
+- `main` (the routing revision, Autonomous Mode and OpenCode tooling) was merged into this branch (`2fe0940`).
+- The startup measurement (W4b-verify-B) was **blocked by the host**: the data volume was 100 % full (263 MiB free), swap was at 4.2/4.8 GB, and hostmon stopped twice on swap bursts while only an idle Vite server belonged to GT3. **Free disk space before any further browser work.**
+- W2 composition candidates (camera, road width, hero-car scale, racing line, chevron removal, gate-beam fix) were implemented statically as patches against `2fe0940`. They are not yet applied or run in a browser.
+- W2's pure-node checks found a design gap. Through the hairpin and chicane, the camera moves 0.85–0.95 as far as the car (current camera 0.92–0.98), because at 140 m / FOV 32 the safe zone (about ±25 m) is smaller than the hairpin. SPEC §15's "the camera barely moves" is not yet met. This goes to Sol for a minimum-motion rail.
+- SPEC §30.6 (grass covering the road): the skirt geometry it describes no longer exists. `environment.js` builds one triangulated ground with "no crossing skirts or lower plane" since 3a. Runtime confirmation is pending in the final regression (`verify-circuit` occlusion sweep).
+- User decisions (2026-10-04):
+  - Route-position restore across refresh (§24–25) is Phase 3.
+  - Showcase and the montage must load full-resolution models; the Tour keeps its 512-px roster.
+  - No Phase 4 until the user approves Phase 3.
+
+**2026-10-04 run 2 — W8 deferral:** keeping Showcase/montage at full texture quality (Tour stays 512-px) is deferred to Phase 6. Neither surface is reachable in Phase 3, and a loader with no Phase 3 consumer would be speculative. The requirement stays binding through the 2026-10-04 user decision, now recorded as SPEC §30 item 10. (Correction: SPEC §27, line 514 covers render resolution only, not texture resolution.) The deferral itself awaits owner confirmation. Current discrepancy: `showcase.js` and `montage/studio.js` clone from the Tour-512 roster. **Not verified in Phase 3.**
+
+**2026-10-04/05 runs 2–4 — Phase 3 status at wrap-up (NOT accepted; user review gate pending):**
+- Integrated on `phase3-integration`: W3 scroll candidates `?scroll=cap|pace` (9047c9c); W5a edge-row controls (Muse; merge a06be07); W5b HUD map/car info/sound cue (4fafd79); W7 route-position restore (Terra; merge c4fafb1); W4b startup work (1cd1d29 boot marks, b198095 lazy studio renderer, 2b524c8 early preload, 11fffac warm-up 12 ms/frame budget); W2 composition/camera candidates `?comp=a|b|c` × `?cam=glide|hold|wide|soft` (Sol legs 2–3; merges f837c64, 6567ad3), independently reviewed by Cloud Opus (`p3-cloud-review-w2` @2dc91e8: found a non-convex solver defect, fixed in 9008b7d). The no-query default camera is bit-exact to the pre-W2 camera.
+- Browser-verified (VERIFY-1 @f837c64, W6A partial @a1ca1be): build; load recovery 9/9 (incl. warm-up throw/timeout with 11fffac); checkpoints; swap response (0 GL allocations at crossings); controls; HUD; scroll (default/cap/pace, sound on/off); route persistence (exact silent restore, URL query kept, new session starts at 0); first crossing zero allocations.
+- Startup (solo, 3 rounds, mostly memory-affected): ready median 25.3 s at 4dfc2c9 vs 13.2 s at 602c462; the gap is GPU warm-up. 11fffac (budget) is NOT yet solo-measured.
+- §14 spacing: gates are +8.3 % mean distance vs the retired coins (−11.8 %…+42 %); +30–50 % time is reached only under `?scroll=cap|pace` (+54 % at light input). Meeting §14 therefore depends on the pace decision.
+- Found: the DRACO decoder loads from gstatic (`src/scene/cars.js:17-18`); with no internet the cars fall back to placeholders. Self-hosting is a no-tradeoff fix — next action.
+- Not yet run: W2 browser matrix numbers on the final head (partial JSON in the review folder), aspect/resize/fallback checks, §15 hero-pivot check, §30.6 occlusion sweep, verify-aerial, final solo startup, Cloud Opus final audit.
+
+**2026-10-05 final candidate — evidence summary (Phase 3 awaiting user review; NOT accepted):**
+- Since the wrap-up entry above: self-hosted Draco decoder (4b3bf90); offline load verified (`verify-offline.mjs`, ready with zero placeholder cars); wheel-contact levelling for nose-up models (Terra 804de24, merge ea95055: mclaren −0.84°, nissan −0.32°, lexus +0.16°; 7 others byte-identical).
+- W6A (final regression, da67f54 + later fixes): scroll (default/cap/pace), route persistence (+ candidate query preserved across refresh), first crossing 0 GL allocations, §30.6 occlusion sweep (`verify-occlusion.mjs`: 0 terrain hits camera→car at 101 t for default, b/soft, b/wide), verify-aerial (yaw/pitch constant), §15 hero pivot (uniform scale; wheel contact at the 2 cm asphalt offset after the fix, browser-confirmed at base scale) — all PASS.
+- W6B (W2 browser matrix): 16/16 comp×cam rows ready, 0 snaps/reversals/seam error, all-ten framed at 4 aspects (b), exact seek/resize restoration, dev fallback contained. UX costs for `?cam=` modes: first-seen window aspect rebuild 0.75–3 s stall; hold/wide inter-corner pan ≈3× car speed; soft hero barely visible at Night; wide hero <1.5 % frame width. 4 unexplained page-loss/load-stall flakes under heavy host load (all re-ran clean).
+- Final solo startup (8/9 contexts clean): ready median 14.5 s at ea95055 vs 16.5 s at 4dfc2c9 (pre warm-up budget) vs 8.8 s at 602c462 (pre warm-up); 0 post-dismiss frames >100 ms in every context; `gt3:warmup` 8.2 s is the remaining cost of the smooth first crossing; whether it is acceptable is an open owner decision. Earlier 25–30 s figures were host memory pressure.
+- Review package: `~/Desktop/gt3-review-2026-10-04/README.md`.
+
+**2026-10-05 final candidate (after Cloud Opus audit at 8b59a7b; Phase 3 awaiting owner review — NOT accepted):**
+- Audit reconciliation: F9 finish-state refresh fixed (5ec3867) and harness-covered (c545211); F7 `compileAsync` warm-up preparation (ad9c746) and N1 node-ancestry wheel classifier (2a19233) merged at 360294a; F5/N8 docs corrected (1fce0ed: SPEC §30 items 10–11, ARCHITECTURE, BUILD_LOG citation); N12 label removed.
+- W6C at 360294a (lean verification): build, wheel-ground, default-camera invariance, smoke, offline, load recovery 9/9, first crossing 0 GL allocations (6 contexts; clean windows max 50–83 ms, none >100 ms), checkpoints 10/10, swap response, route persistence incl. finish refresh, hero pivot all compositions (F2 closed), §30.6 occlusion 0 hits on the lean set (default, a×5, b×6 incl. 16:10/4:3; c/soft) — all PASS. Skipped by lean policy: c×{leg1,glide,hold,wide} occlusion.
+- Startup: clean solo 14.5 s at ea95055 vs 8.8 s at 602c462; final-head pair (host-contaminated) 28.3 s with `compileAsync` vs 25.4 s without — no measured gain; keep-or-revert of ad9c746 is an owner decision (revert attempt was not applied).
+- Review package: docs/review/phase3-final-review.md (local copy with captures: ~/Desktop/gt3-review-2026-10-04/README.md).
+
+## Phase 3 live review 2 — 2026-10-06 (owner decisions; NOT accepted)
+
+The owner reviewed the final machine-verified candidate (`19dace5`/`290baba`, `src/` = `360294a`) live. **Phase 3 is not accepted.** This entry records decisions only. SPEC §30.9 is the closure register, and §31 indexes the later-phase items. No implementation took place in this session.
+- **Confirmed (do not re-open without regression evidence):** `?scroll=cap` pacing; first-crossing hitch visually resolved; checkpoint gates over coins; existing typography retained; full-quality Showcase stays a Phase 6 requirement (settles the W8 deferral).
+- **Defects found:**
+  - **Crossing SFX missing.** Cause, confirmed statically: `playCoin()` has no caller since coins were retired, under SPEC §18's former "silent" wording, which the owner meant as "no ceremony".
+  - **Scroll registers as driving input before the experience is ready.**
+- **Rejected / reopened:**
+  - Neither gate effect works: sweep and `?gate=quiet` both rejected. Next is a refined effect, likely subtle illumination/emissive.
+  - The swap treatment is reopened: crossfade vs the restored pulse vs a light-based treatment.
+  - The finish is not recognizable enough. Next is a bounded 3D gantry with traffic lights and possibly a checkered flag.
+- **Camera/scale:** the earlier default was too close and the current framing too distant, with car detail illegible. A coordinated visual-design pass is required before acceptance. Provisional direction:
+  - start from `cam=glide`, with +5–10 % downward pitch;
+  - about 10–30 % more hero prominence at roughly the same distance;
+  - B over C, with slightly more weaving and curb use at one or two tight corners.
+  - None of these is an approved value.
+- **HUD:**
+  - consolidate car info into the top-left with a unified colour;
+  - minimap arrow and a yellow completed-section trail;
+  - a clearer, more substantial moon crescent (owner correction: not necessarily thinner);
+  - remove the redundant direction / "Scroll to Race" instructions.
+- **Still open from the 10-05 package:** 512-px textures; startup 14.5 s and the `compileAsync` revert; visual retirement of §30.6.
+- **Process note:** `phase3-integration` does not yet contain `main`'s routing commits `aa75b78`, `eb3ef32` and `665d5cc` (efficiency doctrine, Astra advisory-only, right-sized verification). Bring them in by merging `main` into this branch before routed implementation work, with owner OK. Until then, the canonical routing text is `main`'s `docs/ai/`.
+
+## Phase 3 refinement run — 2026-10-06/07 (Autonomous Mode; NOT accepted, owner review pending)
+
+Implements the SPEC §30.9 closure work. Review package: `docs/review/phase3-refinement-review.md`.
+- **Crossing SFX** (`ec9b697`): `checkpoints.onCrossing` → `audio.playCheckpointCross()` on forward crossings (`coin.mp3`; the old `playCoin()` had no caller).
+- **No input before ready** (`ec9b697`, harness `aab4ab7`/`c96bd8a`): the drive lock used to run after ~20 awaited imports, so loading-time scroll moved the page, started the Tour and (legacy law) banked distance. Fix: an inline boot guard in `index.html` plus a 250 ms quiet-gated unlock. `scroll=cap` is now the no-query default; `?scroll=legacy` is kept for comparison.
+- **HUD** (Muse `a27a814`; trail write-cache `445d950`; spec wrap `b272c58`/`bf9e53b`): consolidated top-left block, map arrow, completed-route trail, filled moon, "Scroll to race" + a one-time "Scroll up to reverse".
+- **Gates / swap / finish** (Sol `c69aafc`): edge illumination is the default (`?gate=sweep|quiet` kept); `?swap=pulse` restored without particles; finish gantry with five signals per face, green over the final 120 m. Zero GL work at crossings.
+- **Visual candidates** (Sol `0f37c8b`): `?look=r1|r2|r3`, curb contact with tyres seated ≤ 0.93 cm. Camera still travels 84–93 % of car travel.
+- **Wheels: deferred.** `cars.js:503` selects spin meshes by name only, and road-wheel names sit on ancestors, so the spin set is empty for all 10 cars. 9 cars have off-axle, instanced or merged wheel geometry (Mercedes 1.24 m off-axis), so a name fix would orbit or wobble. A safe fix needs per-car pivot/instance re-authoring. Diagnostic check `scripts/check-wheel-spin.mjs` is on branch `p3r-wheels` (`051fccd`), not merged.
+- **Runtime trap (new): a long-running Vite dev server invalidates harnesses that import modules into the page.** After source edits, Vite serves the app's modules with `?t=` HMR URLs, while a harness doing `import('/src/…')` gets a *second* module instance. `seekTo` then drives nothing and crossings never happen. The first post-merge batch showed 3 false regressions this way; on a fresh server all passed. **Restart the dev server after merges/edits and before module-importing harnesses, and keep the tree frozen while they run.**
+- **Verification (final tree):** see the review package §8.
+
+## Phase 3 final closure — 2026-10-13/14 (Autonomous Mode; NOT accepted, owner review pending)
+
+Review package: `docs/review/phase3-final-render-review.md` (§A–§F).
+- **Rendering** (Sol `p3z-render`): the composer's scene targets had 0 samples, so canvas MSAA never touched the 3D scene; added SMAA, and fixed real curb/verge/pit-lane geometry defects at their source. Grid rows 16 → 26 m, columns later 6 → 7 m.
+- **Finish**: restored historical V1 (completion 5 m past the line, drive locked, no coast); V2/V3 differences in the review doc §2.
+- **Hitching** (Sol `p3y-perf`, `p3x-perf`): resizing the 4× MSAA canvas on each DPR switch cost a median 139 ms (vs 50 ms before). Fixed by a single-sample native canvas; ~100 ms start gaps persisted in every build including the pre-run baseline (cause unproven). Opt-in 30 fps pacing and lean props did not fix it.
+- **Owner decision (2026-10-14): fixed DPR1 + SMAA is the Tour default** (`RENDER_DPR`, `1f58a1a`): start windows with a >50 ms worst draw 24/24 → 1/24 (headless), softer image accepted. Evidence `docs/review/p3x-perf/`; regression record `docs/review/p3x-perf/REGRESSION-1f58a1a.md`.
+- **Runtime traps (new):** (1) GT3 startup alone pages the 8 GB host (hundreds of MB swapped); a stop-on-any-paging rule makes measurement impossible, so paging is recorded as a variable. (2) `scripts/with-verification-server.sh` lacks the executable bit: invoke with `bash`. (3) A baseline worktree whose `font/` is a symlink outside Vite's allowed root returns 403 for fonts and fails the console-error phase. (4) `verify-checkpoints.mjs` (full) failed 2 legacy phases once in 3 runs on the same commit; not reproduced.
+
+## Phase 3 — HUMAN-ACCEPTED (owner, 2026-10-14)
+
+The owner accepted the Phase 3 MVP: fixed DPR1 + SMAA performance/quality tradeoff, geometry, camera, grid, checkpoints, HUD, props and the historical V1 finish mechanics. Published on `phase3-integration` and merged to `main` with history preserved; tag `phase3-accepted-2026-10-14`. Phases 4–8 are separate and not started. Known publication caveat: `font/` (Neue Haas trial, Geist Mono, Switzer) is git-ignored, so a fresh clone falls back to system fonts.

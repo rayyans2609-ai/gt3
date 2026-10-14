@@ -1,3 +1,4 @@
+import { buildTrackFurniture, FULL_PROPS } from './trackFurniture.js';
 /**
  * environment.js — grass, sky and sparse circuit dressing. (SPEC §6, §11, §14)
  *
@@ -7,12 +8,12 @@
  */
 
 import * as THREE from 'three';
+import { asphaltEdgeAt, outerEdgeAt } from './trackProfile.js';
 import poly2tri from 'poly2tri/dist/poly2tri.js';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { scene } from './sceneSetup.js';
 import * as trackSurface from './track.js';
 import {
-  TRACK,
   TRACK_LENGTH,
   curvatureAt,
   offsetPointAt,
@@ -176,20 +177,13 @@ function terrainDisplacement(x, z, distanceFromAsphalt) {
   return terrainNoise(x, z) * 5.2 * detailFade + landform * landformFade;
 }
 
-const groundRoute = (() => {
-  const left = trackSurface?.trackEdges?.left;
-  const right = trackSurface?.trackEdges?.right;
-  if (Array.isArray(left) && Array.isArray(right) && left.length === right.length) {
-    return left.map((edge, index) => edge.clone().add(right[index]).multiplyScalar(0.5));
-  }
-
-  const samples = Math.max(800, Math.ceil(TRACK_LENGTH / 2));
-  return Array.from({ length: samples + 1 }, (_, index) => {
-    const point = pointAt(index / samples, new THREE.Vector3());
-    point.y -= 0.03;
-    return point;
-  });
-})();
+// The centreline cannot be inferred from asymmetric outer edges. Preserve the
+// existing height field's route reference and only adapt its attachment clearance.
+const groundSampleCount = trackSurface.TRACK_SAMPLE_COUNT - 1;
+const groundRoute = Array.from({ length: groundSampleCount + 1 }, (_, i) => {
+  const p = pointAt(i / groundSampleCount, new THREE.Vector3());
+  p.y -= .03; return p;
+});
 
 // A static bounding-volume tree over the sampled route. Height and clearance
 // queries use exact segment projections; the tree only removes distant work.
@@ -221,6 +215,7 @@ const routeTree = buildRouteTree(Array.from({ length: groundRoute.length - 1 }, 
 function routeProjection(x, z) {
   let closestDistanceSq = Infinity;
   let closestBaseY = groundRoute[0]?.y ?? -0.03;
+  let closestT = 0, closestSide = 1;
   function boxDistanceSq(node) {
     const dx = Math.max(node.minX - x, 0, x - node.maxX);
     const dz = Math.max(node.minZ - z, 0, z - node.maxZ);
@@ -244,6 +239,8 @@ function routeProjection(x, z) {
         if (distanceSq < closestDistanceSq) {
           closestDistanceSq = distanceSq;
           closestBaseY = THREE.MathUtils.lerp(a.y, b.y, along);
+          closestT = (i + along) / groundSampleCount;
+          closestSide = offsetX * dz - offsetZ * dx >= 0 ? 1 : -1;
         }
       }
       return;
@@ -257,7 +254,7 @@ function routeProjection(x, z) {
     }
   }
   visit(routeTree);
-  return { distance: Math.sqrt(closestDistanceSq), baseY: closestBaseY };
+  return { distance: Math.sqrt(closestDistanceSq), baseY: closestBaseY, t: closestT, side: closestSide };
 }
 
 // The nearest section changes abruptly along an infield bisector. Blend only
@@ -280,7 +277,8 @@ for (const point of baseHeightSamples) {
 }
 
 function blendedRouteBase(x, z, nearest) {
-  const mix = THREE.MathUtils.smoothstep(nearest.distance, 15, 40);
+  const exterior = Math.abs(outerEdgeAt(nearest.t, nearest.side));
+  const mix = THREE.MathUtils.smoothstep(nearest.distance, Math.max(15, exterior), Math.max(40, exterior + 25));
   if (mix === 0) return nearest.baseY;
   let totalWeight = 0;
   let weightedY = 0;
@@ -311,7 +309,7 @@ function blendedRouteBase(x, z, nearest) {
 export function groundHeightAt(x, z) {
   const projection = routeProjection(x, z);
   return blendedRouteBase(x, z, projection)
-    + terrainDisplacement(x, z, Math.max(0, projection.distance - TRACK.halfWidth));
+    + terrainDisplacement(x, z, Math.max(0, projection.distance - Math.abs(asphaltEdgeAt(projection.t, projection.side))));
 }
 
 // ---------------------------------------------------------------------------
@@ -443,12 +441,12 @@ function buildGrassGeometry(dressingPoints = []) {
   // Road-following seed rows prevent gaps in the lattice beside concave bends.
   // These are points in the same constrained triangulation, not separate strips.
   const roadSamples = Math.ceil(TRACK_LENGTH / 8);
-  const shoulderOffset = TRACK.halfWidth + TRACK.curbWidth + TRACK.shoulderWidth;
   for (let i = 0; i < roadSamples; i++) {
     const t = i / roadSamples;
     for (const side of [-1, 1]) for (const offset of [8, 16, 24, 32, 40]) {
-      const p = offsetPointAt(t, side * (shoulderOffset + offset), 0, new THREE.Vector3());
-      if (routeProjection(p.x, p.z).distance < shoulderOffset + 5) continue;
+      const p = offsetPointAt(t, outerEdgeAt(t, side) + side * offset, 0, new THREE.Vector3());
+      const nearest = routeProjection(p.x, p.z);
+      if (nearest.distance < Math.abs(outerEdgeAt(nearest.t, nearest.side)) + 5) continue;
       if (nearbySeed(p.x, p.z, 5)) continue;
       addPoint({ x: p.x, z: p.z }, true);
     }
@@ -468,8 +466,7 @@ function buildGrassGeometry(dressingPoints = []) {
       if (x <= rectangle[0].x || x >= rectangle[1].x
         || z <= rectangle[0].z || z >= rectangle[2].z) continue;
       const projection = routeProjection(x, z);
-      const distanceFromShoulder = projection.distance
-        - TRACK.halfWidth - TRACK.curbWidth - TRACK.shoulderWidth;
+      const distanceFromShoulder = projection.distance - Math.abs(outerEdgeAt(projection.t, projection.side));
       if (distanceFromShoulder < 7) continue;
       if (nearbySeed(x, z, 8)) continue;
       if (projection.distance >= 500 && ((row % 2) || (column % 2))) continue;
@@ -565,14 +562,15 @@ function finishInstances(mesh) {
   return mesh;
 }
 
-function groundPositionAt(t, lateral, out = new THREE.Vector3(), footprint = 0) {
+export function groundPositionAt(t, lateral, out = new THREE.Vector3(), footprint = 0, clearance = ASPHALT_CLEARANCE) {
   // A point can sit beside one section and on top of another. Walk outward
   // until the entire instance clears the nearest section of the complete loop.
   const sign = Math.sign(lateral) || 1;
   for (let attempt = 0; attempt < 80; attempt++) {
     offsetPointAt(t, lateral + sign * attempt * 8, 0, out);
-    if (routeProjection(out.x, out.z).distance
-      >= TRACK.halfWidth + ASPHALT_CLEARANCE + footprint) break;
+    const nearest = routeProjection(out.x, out.z);
+    if (nearest.distance >= Math.max(Math.abs(asphaltEdgeAt(nearest.t, nearest.side)) + clearance,
+      Math.abs(outerEdgeAt(nearest.t, nearest.side)) + 2) + footprint) break;
   }
   out.y = groundHeightAt(out.x, out.z);
   return out;
@@ -584,102 +582,21 @@ function yawForTangent(t) {
   return Math.atan2(-tangent.z, tangent.x);
 }
 
-function buildTreeInstances(random) {
-  const indexedTrunk = new THREE.CylinderGeometry(0.42, 0.58, 2.2, 5, 1);
-  const trunk = paintGeometry(
-    indexedTrunk.toNonIndexed().translate(0, 1.1, 0),
-    '#8A765E',
-  );
-  indexedTrunk.dispose();
-  const canopy = paintGeometry(
-    new THREE.IcosahedronGeometry(2.8, 0).scale(1, 1.28, 1).translate(0, 4.8, 0),
-    '#5D8965',
-  );
-  const geometry = mergeGeometries([trunk, canopy], false);
-  if (!geometry.getAttribute('normal')) geometry.computeVertexNormals();
-  geometry.normalizeNormals();
-  trunk.dispose();
-  canopy.dispose();
-
-  const material = new THREE.MeshStandardMaterial({
-    color: 0xffffff,
-    roughness: 1,
-    metalness: 0,
-    flatShading: false,
-    vertexColors: true,
-  });
-  const count = 140;
-  const mesh = new THREE.InstancedMesh(geometry, material, count);
-  mesh.name = 'roadside-trees';
-  const matrix = new THREE.Matrix4();
-  const quaternion = new THREE.Quaternion();
+// Preserve the accepted terrain attachment seeds and the seeded random stream
+// for surviving tyre stacks. No tree geometry/material/instances are created.
+function formerTreeFoundations(random) {
+  const points = [];
   const position = new THREE.Vector3();
-  const scale = new THREE.Vector3();
-  // Instance colours are subtle multipliers over the already-green canopy albedo.
-  // Keeping them near white preserves the trunk colour and visible sun modeling.
-  const treeColors = [new THREE.Color('#D2E0D2'), new THREE.Color('#FFFFFF')];
-
-  for (let i = 0; i < count; i++) {
-    const t = THREE.MathUtils.clamp((i + 0.2 + random() * 0.6) / count, 0.002, 0.998);
+  for (let i = 0; i < 140; i++) {
+    const t = THREE.MathUtils.clamp((i + 0.2 + random() * 0.6) / 140, 0.002, 0.998);
     const side = random() < 0.5 ? -1 : 1;
-    const distanceFromEdge = 30 + random() * 150;
-    const lateral = side * (TRACK.halfWidth + distanceFromEdge);
-    const uniformScale = 0.8 + random() * 0.8;
-    groundPositionAt(t, lateral, position, 4.5 * uniformScale);
-    scale.setScalar(uniformScale);
-    quaternion.setFromAxisAngle(UP, random() * Math.PI * 2);
-    matrix.compose(position, quaternion, scale);
-    mesh.setMatrixAt(i, matrix);
-    mesh.setColorAt(i, treeColors[random() < 0.52 ? 0 : 1]);
+    const lateral = asphaltEdgeAt(t, side) + side * (30 + random() * 150);
+    const scale = 0.8 + random() * 0.8;
+    groundPositionAt(t, lateral, position, 4.5 * scale);
+    points.push({ x: position.x, z: position.z });
+    random(); random(); // former yaw and instance tint
   }
-
-  return finishInstances(mesh);
-}
-
-function buildMarkerInstances() {
-  const post = paintGeometry(
-    new THREE.BoxGeometry(0.24, 2.8, 0.24).translate(0, 1.4, 0),
-    '#D0CEC3',
-  );
-  const board = paintGeometry(
-    new THREE.BoxGeometry(1.8, 0.82, 0.18).translate(0, 2.9, 0),
-    '#B8B7AF',
-  );
-  const geometry = mergeGeometries([post, board], false);
-  post.dispose();
-  board.dispose();
-  const material = new THREE.MeshStandardMaterial({
-    color: 0xffffff,
-    roughness: 0.92,
-    metalness: 0,
-    flatShading: true,
-    vertexColors: true,
-  });
-  const count = 24;
-  const mesh = new THREE.InstancedMesh(geometry, material, count);
-  mesh.name = 'distance-markers';
-  const matrix = new THREE.Matrix4();
-  const quaternion = new THREE.Quaternion();
-  const position = new THREE.Vector3();
-  const scale = new THREE.Vector3(1, 1, 1);
-
-  for (let i = 0; i < count; i++) {
-    const t = Math.min(0.985, (i + 0.7) / count);
-    const bend = curvatureAt(t);
-    const side = Math.abs(bend) > 0.08 ? Math.sign(bend) : (i % 2 ? -1 : 1);
-    // The nominal post is twelve metres beyond the run-off zone. The final centre
-    // offset also protects the global 22 m asphalt clearance including board depth.
-    const distanceFromEdge = Math.max(
-      ASPHALT_CLEARANCE + 1.1,
-      TRACK.curbWidth + TRACK.shoulderWidth + 12,
-    );
-    groundPositionAt(t, side * (TRACK.halfWidth + distanceFromEdge), position, 1.5);
-    quaternion.setFromAxisAngle(UP, yawForTangent(t));
-    matrix.compose(position, quaternion, scale);
-    mesh.setMatrixAt(i, matrix);
-  }
-
-  return finishInstances(mesh);
+  return points;
 }
 
 function sharpCornerPeaks() {
@@ -734,9 +651,8 @@ function buildTireInstances(random) {
       const centred = stack - (stackCount - 1) * 0.5;
       placements.push({
         t: THREE.MathUtils.clamp(corner.t + centred * (4.2 / TRACK_LENGTH), 0, 1),
-        lateral: outside * (
-          TRACK.halfWidth + ASPHALT_CLEARANCE + 2.1 + (stack % 2) * 2.15
-        ),
+        lateral: asphaltEdgeAt(corner.t + centred * (4.2 / TRACK_LENGTH), outside)
+          + outside * (ASPHALT_CLEARANCE + 2.1 + (stack % 2) * 2.15),
         scale: 0.88 + random() * 0.22,
         yaw: random() * Math.PI * 2,
       });
@@ -823,7 +739,7 @@ function buildGrandstandInstances(random) {
   locations.forEach(({ t, side }, index) => {
     const distanceFromEdge = 110 + random() * 50;
     const size = 0.9 + random() * 0.16;
-    groundPositionAt(t, side * (TRACK.halfWidth + distanceFromEdge), position, 23 * size);
+    groundPositionAt(t, asphaltEdgeAt(t, side) + side * distanceFromEdge, position, 23 * size);
     quaternion.setFromAxisAngle(UP, yawForTangent(t));
     scale.set(size, size, size);
     matrix.compose(position, quaternion, scale);
@@ -863,19 +779,24 @@ export function buildEnvironment() {
   backgroundLayer.add(sky);
 
   const random = seededRandom();
-  const trees = buildTreeInstances(random);
-  const markers = buildMarkerInstances();
+  const formerTreePoints = formerTreeFoundations(random);
+  const furniture = buildTrackFurniture();
+  const furnitureMeshes = furniture.children;
   const tireStacks = buildTireInstances(random);
-  const grandstands = buildGrandstandInstances(random);
-  const dressing = [trees, markers, tireStacks, grandstands];
-  const dressingPoints = [];
+  const grandstands = FULL_PROPS ? buildGrandstandInstances(random) : null;
+  const dressing = [...furnitureMeshes, tireStacks, ...(grandstands ? [grandstands] : [])];
+  const dressingPoints = formerTreePoints;
+  const dressingSeeds = new Set();
   const instanceMatrix = new THREE.Matrix4();
   for (const mesh of dressing) for (let i = 0; i < mesh.count; i++) {
     mesh.getMatrixAt(i, instanceMatrix);
-    dressingPoints.push({
-      x: instanceMatrix.elements[12],
-      z: instanceMatrix.elements[14],
-    });
+    const x = instanceMatrix.elements[12], z = instanceMatrix.elements[14];
+    // Rails, posts and roofs can share a foundation. poly2tri requires distinct
+    // XZ seeds; keep one terrain attachment point per foundation.
+    const key = `${x.toFixed(4)},${z.toFixed(4)}`;
+    if (dressingSeeds.has(key)) continue;
+    dressingSeeds.add(key);
+    dressingPoints.push({ x, z });
   }
   const grass = new THREE.Mesh(buildGrassGeometry(dressingPoints), grassMaterial);
   grass.name = 'grass-skirts-and-horizon';
@@ -883,12 +804,13 @@ export function buildEnvironment() {
   root.add(grass);
   // Only the effectively infinite sky receives cursor parallax. Moving a grounded
   // grandstand with this layer would lift it away from its sampled terrain height.
-  root.add(backgroundLayer, trees, markers, tireStacks, grandstands);
+  root.add(backgroundLayer, furniture, tireStacks);
+  if (grandstands) root.add(grandstands);
 
   if (!dressingCountLogged) {
-    const dressingTriangles = [trees, markers, tireStacks, grandstands]
+    const dressingTriangles = dressing
       .reduce((total, mesh) => total + triangleCount(mesh.geometry) * mesh.count, 0);
-    const dressingInstances = trees.count + markers.count + tireStacks.count + grandstands.count;
+    const dressingInstances = dressing.reduce((sum,mesh)=>sum+mesh.count,0);
     console.info(
       `GT3 environment dressing: ${dressingInstances} instances, ${dressingTriangles} triangles`,
     );

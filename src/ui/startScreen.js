@@ -1,7 +1,5 @@
 import { state } from '../core/state.js';
 import { onFirstScroll } from '../scroll/scrollDrive.js';
-import { preloadCars } from '../scene/cars.js';
-import { preloadAudio } from '../audio/audioManager.js';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
 const DISMISS_DURATION = 1300;
@@ -13,10 +11,11 @@ let root = null;
 let progressFill = null;
 let progressValue = null;
 let progressLabel = null;
-let modelProgress = 0;
-let audioProgress = 0;
-let modelTotal = 10;
-let audioTotal = 6;
+let progress = 0;
+let readiness = 'loading';
+let dismissComplete = false;
+let restoredSilently = false;
+const dismissCompleteHandlers = [];
 
 function element(tag, className, text) {
   const node = document.createElement(tag);
@@ -56,25 +55,26 @@ function makeIdentityMark() {
   return svg;
 }
 
-function combinedProgress() {
-  const models = Math.round(modelProgress * modelTotal);
-  const audio = Math.round(audioProgress * audioTotal);
-  return (models + audio) / Math.max(1, modelTotal + audioTotal);
-}
-
 function renderProgress() {
   if (!progressFill || !progressValue || !progressLabel) return;
 
-  const progress = Math.min(1, Math.max(0, combinedProgress()));
   const percent = Math.round(progress * 100);
   progressFill.style.transform = `scaleX(${progress.toFixed(4)})`;
   progressValue.textContent = `${String(percent).padStart(2, '0')}%`;
   progressValue.setAttribute('aria-valuenow', String(percent));
 
-  if (progress >= 1) {
-    root.classList.add('is-ready');
-    progressLabel.textContent = 'Route ready';
-  }
+  root.dataset.readiness = readiness;
+  root.classList.toggle('is-ready', readiness === 'ready' || readiness === 'degraded');
+  progressLabel.textContent = readiness === 'failed' ? 'Route unavailable'
+      : readiness === 'ready' || readiness === 'degraded' ? 'Route ready' : 'Preparing the grid';
+  if (root.classList.contains('is-ready') && state.started) dismissStartScreen();
+}
+
+/** Main owns the one readiness decision used by this screen and the scroll lock. */
+export function setLoadState(next) {
+  progress = Math.min(1, Math.max(0, Number(next.progress) || 0));
+  readiness = next.status;
+  renderProgress();
 }
 
 function buildScreen() {
@@ -84,12 +84,11 @@ function buildScreen() {
   root.setAttribute('aria-hidden', 'false');
 
   const panel = element('section', 'start-screen__panel');
-  const eyebrow = element('p', 'start-screen__eyebrow', 'Ten machines · one continuous route');
   const title = element('h1', 'start-screen__title', 'GT3: A Grand Tour');
   const explanation = element(
     'p',
     'start-screen__explanation',
-    'Collect each coin to unlock a new GT3 machine and transform the car beneath you.',
+    'Cross each checkpoint to discover a new GT3 machine as the route unfolds.',
   );
 
   const loading = element('div', 'start-loading');
@@ -97,7 +96,7 @@ function buildScreen() {
   progressLabel = element('span', 'start-loading__label', 'Preparing the grid');
   progressValue = element('span', 'start-loading__value', '00%');
   progressValue.setAttribute('role', 'progressbar');
-  progressValue.setAttribute('aria-label', 'Car model and audio loading progress');
+  progressValue.setAttribute('aria-label', 'Car model, audio, and graphics preparation progress');
   progressValue.setAttribute('aria-valuemin', '0');
   progressValue.setAttribute('aria-valuemax', '100');
   progressValue.setAttribute('aria-valuenow', '0');
@@ -108,10 +107,10 @@ function buildScreen() {
   loadingTrack.append(progressFill);
   loading.append(loadingMeta, loadingTrack);
 
-  panel.append(eyebrow, makeIdentityMark(), title, explanation, loading);
+  panel.append(makeIdentityMark(), title, explanation, loading);
 
   const prompt = element('div', 'start-prompt');
-  const promptLabel = element('span', 'start-prompt__label', 'Scroll to Race');
+  const promptLabel = element('span', 'start-prompt__label', 'Scroll to race');
   const cue = element('span', 'start-prompt__cue');
   cue.setAttribute('aria-hidden', 'true');
   cue.append(element('span', 'start-prompt__line'));
@@ -120,43 +119,51 @@ function buildScreen() {
   root.replaceChildren(panel, prompt);
 }
 
-function beginPreload() {
-  const models = preloadCars((loaded, total, fraction) => {
-    modelTotal = Math.max(1, Number(total) || 10);
-    modelProgress = Number.isFinite(fraction) ? fraction : loaded / modelTotal;
-    renderProgress();
-  });
-
-  const audio = preloadAudio((fraction, loaded, total) => {
-    audioTotal = Math.max(1, Number(total) || 6);
-    audioProgress = Number.isFinite(fraction) ? fraction : loaded / audioTotal;
-    renderProgress();
-  });
-
-  void Promise.allSettled([models, audio]).then(() => {
-    modelProgress = 1;
-    audioProgress = 1;
-    renderProgress();
-  });
+/**
+ * Run `fn` once, when the start screen has actually finished leaving (the moment
+ * `root.hidden` is set) -- not at dismissal start and not on a fixed delay. Late
+ * registrations after completion run immediately.
+ */
+export function onDismissComplete(fn) {
+  if (restoredSilently) return;
+  if (dismissComplete) fn();
+  else dismissCompleteHandlers.push(fn);
 }
 
 /** Fade the introduction away once. The live canvas is never replaced. */
 export function dismissStartScreen() {
   if (dismissed) return;
-  dismissed = true;
-
   if (!root) root = document.getElementById('start-screen');
-  if (!root) return;
+  if (!root?.classList.contains('is-ready')) return;
+  dismissed = true;
 
   root.classList.add('is-leaving');
   root.setAttribute('aria-hidden', 'true');
   window.clearTimeout(dismissTimer);
   dismissTimer = window.setTimeout(() => {
     if (root) root.hidden = true;
+    dismissComplete = true;
+    for (const fn of dismissCompleteHandlers.splice(0)) fn();
   }, DISMISS_DURATION);
 }
 
-/** Populate the existing start-screen root and begin shared asset preloading. */
+/**
+ * Refresh-restore into the finished state: remove the introduction at once, with no gesture, fade
+ * or dismissal-complete handlers (so the first-Tour-entry sound cue never appears). Idempotent.
+ */
+export function dismissStartScreenForRestore() {
+  if (!root) root = document.getElementById('start-screen');
+  if (!root || restoredSilently) return;
+  restoredSilently = true;
+  dismissed = true;
+  window.clearTimeout(dismissTimer);
+  dismissCompleteHandlers.length = 0;
+  root.classList.add('is-leaving');
+  root.setAttribute('aria-hidden', 'true');
+  root.hidden = true;
+}
+
+/** Populate the existing start-screen root. Main owns asset preloading. */
 export function initStartScreen() {
   if (initialized) return;
 
@@ -165,7 +172,7 @@ export function initStartScreen() {
 
   initialized = true;
   buildScreen();
-  beginPreload();
+  renderProgress();
 
   onFirstScroll(() => {
     dismissStartScreen();

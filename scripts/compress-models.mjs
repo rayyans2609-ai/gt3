@@ -24,6 +24,8 @@ const scriptDirectory = dirname(fileURLToPath(import.meta.url));
 const projectRoot = resolve(scriptDirectory, '..');
 const sourceModelsDirectory = join(projectRoot, 'models');
 const outputModelsDirectory = join(projectRoot, 'public', 'models');
+const tourModelsDirectory = join(outputModelsDirectory, 'tour');
+const TOUR_TEXTURE_LIMIT = 512;
 const sourceAudiosDirectory = join(projectRoot, 'audios');
 const outputAudiosDirectory = join(projectRoot, 'public', 'audios');
 const voicesDirectory = join(outputAudiosDirectory, 'voices');
@@ -216,7 +218,34 @@ async function writeReport(modelNames, fallbackNames) {
   await writeFile(reportPath, report);
 }
 
+// `--tour`: build only public/models/tour/*.glb (512 px textures) from the
+// source GLBs. Does not touch public/models/*.glb, ASSETS_REPORT.md or audio.
+async function mainTour() {
+  const modelNames = await listFiles(sourceModelsDirectory, '.glb');
+  if (modelNames.length !== 10) {
+    throw new Error(`Expected 10 source GLBs, found ${modelNames.length}.`);
+  }
+  await mkdir(tourModelsDirectory, { recursive: true });
+  await mkdir(npmCacheDirectory, { recursive: true });
+  // Fail fast if the pinned CLI is unavailable (network/cache).
+  await run('npx', ['--yes', `@gltf-transform/cli@${CLI_VERSION}`, '--version']);
+
+  for (const modelName of modelNames) {
+    const sourcePath = join(sourceModelsDirectory, modelName);
+    const outputPath = join(tourModelsDirectory, modelName);
+    console.log(`\nTour ${modelName} (textures <= ${TOUR_TEXTURE_LIMIT}px)...`);
+    await optimizeModel(sourcePath, outputPath, TOUR_TEXTURE_LIMIT);
+    const sourceBytes = (await stat(sourcePath)).size;
+    const outputBytes = (await stat(outputPath)).size;
+    console.log(`${modelName}: ${formatMB(sourceBytes)} MB -> ${formatMB(outputBytes)} MB`);
+  }
+}
+
 async function main() {
+  if (process.argv.slice(2).includes('--tour')) {
+    await mainTour();
+    return;
+  }
   const allModelNames = await listFiles(sourceModelsDirectory, '.glb');
   const requestedNames = process.argv.slice(2).map((value) => basename(value));
   const modelNames = requestedNames.length ? requestedNames : allModelNames;

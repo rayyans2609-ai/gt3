@@ -1,0 +1,420 @@
+{
+ "comp": "b",
+ "cam": "wide",
+ "aspect": 1.333,
+ "values": {
+  "distance": 440,
+  "pitch": 52,
+  "fov": 48,
+  "hero": 1.9,
+  "halfWidth": 7,
+  "racingLineM": 3.421,
+  "fogScale": 8.148,
+  "shadowScale": 2
+ },
+ "footprints": [
+  {
+   "id": "lexus",
+   "width": 1.966,
+   "height": 1.525
+  },
+  {
+   "id": "nissan",
+   "width": 1.95,
+   "height": 1.295
+  },
+  {
+   "id": "audi",
+   "width": 2.822,
+   "height": 1.348
+  },
+  {
+   "id": "bmw",
+   "width": 1.996,
+   "height": 1.263
+  },
+  {
+   "id": "mercedes",
+   "width": 1.823,
+   "height": 1.443
+  },
+  {
+   "id": "ferrari",
+   "width": 2.187,
+   "height": 1.422
+  },
+  {
+   "id": "mclaren",
+   "width": 2.045,
+   "height": 1.156
+  },
+  {
+   "id": "aston",
+   "width": 1.984,
+   "height": 2.131
+  },
+  {
+   "id": "lamborghini",
+   "width": 2.173,
+   "height": 1.54
+  },
+  {
+   "id": "porsche",
+   "width": 1.977,
+   "height": 1.209
+  }
+ ],
+ "racingLine": {
+  "maxLateralM": 3.421,
+  "maxRateMPerM": 0.1012,
+  "maxPathYawVsRoadDeg": 5.81,
+  "maxHeadingVsPathTangentDeg": 0.138,
+  "minEdgeGapM": 0.743,
+  "perModelMinEdgeGapM": {
+   "lexus": 1.536,
+   "nissan": 1.578,
+   "audi": 0.743,
+   "bmw": 1.537,
+   "mercedes": 1.681,
+   "ferrari": 1.338,
+   "mclaren": 1.502,
+   "aston": 1.451,
+   "lamborghini": 1.338,
+   "porsche": 1.561
+  }
+ },
+ "gates": {
+  "beamLengthM": 18.9,
+  "minPostClearanceM": 5.04,
+  "finishPostClearanceM": 4.83,
+  "widestModel": "audi",
+  "maxOffsetMinPostClearanceM": 2.576,
+  "maxOffsetFinishClearanceM": 2.401
+ },
+ "framingSettled": {
+  "maxReachNdc": 0.725,
+  "maxX": 0.725,
+  "maxY": 0.504,
+  "pctOverEngageZone": 0,
+  "pctOverHardZone": 0,
+  "pctOverFrame": 0,
+  "perModelMaxReachNdc": {
+   "lexus": 0.723,
+   "nissan": 0.722,
+   "audi": 0.725,
+   "bmw": 0.722,
+   "mercedes": 0.722,
+   "ferrari": 0.723,
+   "mclaren": 0.722,
+   "aston": 0.725,
+   "lamborghini": 0.723,
+   "porsche": 0.722
+  },
+  "railClampActiveFraction": 0.0087890625
+ },
+ "seamPositionDiffM": 0,
+ "reversibilityPositionDiffM": 0,
+ "cornerTest": {
+  "hairpin": {
+   "tRange": [
+    0.263,
+    0.302
+   ],
+   "cameraToCarPathLength": 0,
+   "cameraPathM": 0,
+   "carPathM": 190.546,
+   "cameraNetDisplacementM": 0,
+   "carNetDisplacementM": 158.802,
+   "carSpatialExtentXZ": [
+    71.326,
+    151.448
+   ],
+   "peakCameraSpeedToPeakCarSpeed": 0,
+   "cameraHeadingSweepDeg": 0,
+   "carHeadingNetDeg": -106.75,
+   "carHeadingSweepDeg": 106.81
+  },
+  "chicane": {
+   "tRange": [
+    0.328,
+    0.376
+   ],
+   "cameraToCarPathLength": 0,
+   "cameraPathM": 0,
+   "carPathM": 238.321,
+   "cameraNetDisplacementM": 0,
+   "carNetDisplacementM": 234.355,
+   "carSpatialExtentXZ": [
+    173.803,
+    157.2
+   ],
+   "peakCameraSpeedToPeakCarSpeed": 0,
+   "cameraHeadingSweepDeg": 0,
+   "carHeadingNetDeg": 0.19,
+   "carHeadingSweepDeg": 70.95
+  }
+ },
+ "feasibility": {
+  "hairpin": {
+   "groundExtentRightForwardM": [
+    160.256,
+    51.97
+   ],
+   "stationaryFeasible": true,
+   "conservativeMinStationaryDistanceM": 182.9
+  },
+  "chicane": {
+   "groundExtentRightForwardM": [
+    199.774,
+    124.941
+   ],
+   "stationaryFeasible": true,
+   "conservativeMinStationaryDistanceM": 212.1
+  },
+  "complex": {
+   "groundExtentRightForwardM": [
+    429.568,
+    286.61
+   ],
+   "stationaryFeasible": false,
+   "conservativeMinStationaryDistanceM": 456.3
+  },
+  "safeGroundHalfExtentAtTargetM": [
+   189.297,
+   172.27
+  ]
+ },
+ "motionProxy": {
+  "routeSpeedMps": 50,
+  "sampleStepM": 0.5,
+  "cameraSpeedPeakMps": 232.51,
+  "accelerationPeakMps2": 410.51,
+  "jerkPeakMps3": 4230.19,
+  "speedPeakT": 0.31496,
+  "accelerationPeakT": 0.32514,
+  "jerkPeakT": 0.30427,
+  "updatePoseDiffM": 0,
+  "snapsDuringContinuousUpdates": 0
+ },
+ "worldExtent": {
+  "marginM": 1000,
+  "requiredWorldSizeChangeM": 0,
+  "exposedRays": 0,
+  "minBoundaryGapM": 563.793,
+  "beyondCameraFar": 0,
+  "representative": [
+   {
+    "t": 0.02,
+    "exposed": 0,
+    "minBoundaryGapM": 698.699,
+    "maxCornerRayM": 944.87
+   },
+   {
+    "t": 0.265,
+    "exposed": 0,
+    "minBoundaryGapM": 597.713,
+    "maxCornerRayM": 944.87
+   },
+   {
+    "t": 0.283,
+    "exposed": 0,
+    "minBoundaryGapM": 597.713,
+    "maxCornerRayM": 944.87
+   },
+   {
+    "t": 0.3,
+    "exposed": 0,
+    "minBoundaryGapM": 597.713,
+    "maxCornerRayM": 944.87
+   },
+   {
+    "t": 0.335,
+    "exposed": 0,
+    "minBoundaryGapM": 716.677,
+    "maxCornerRayM": 944.87
+   },
+   {
+    "t": 0.352,
+    "exposed": 0,
+    "minBoundaryGapM": 716.677,
+    "maxCornerRayM": 944.87
+   },
+   {
+    "t": 0.37,
+    "exposed": 0,
+    "minBoundaryGapM": 716.677,
+    "maxCornerRayM": 944.87
+   },
+   {
+    "t": 0.465,
+    "exposed": 0,
+    "minBoundaryGapM": 613.52,
+    "maxCornerRayM": 944.87
+   },
+   {
+    "t": 0.09,
+    "exposed": 0,
+    "minBoundaryGapM": 600.723,
+    "maxCornerRayM": 944.87
+   },
+   {
+    "t": 0.18,
+    "exposed": 0,
+    "minBoundaryGapM": 563.793,
+    "maxCornerRayM": 944.87
+   },
+   {
+    "t": 0.255,
+    "exposed": 0,
+    "minBoundaryGapM": 597.262,
+    "maxCornerRayM": 944.87
+   },
+   {
+    "t": 0.39,
+    "exposed": 0,
+    "minBoundaryGapM": 709.783,
+    "maxCornerRayM": 944.87
+   },
+   {
+    "t": 0.495,
+    "exposed": 0,
+    "minBoundaryGapM": 671.425,
+    "maxCornerRayM": 944.87
+   },
+   {
+    "t": 0.585,
+    "exposed": 0,
+    "minBoundaryGapM": 817.361,
+    "maxCornerRayM": 944.87
+   },
+   {
+    "t": 0.68,
+    "exposed": 0,
+    "minBoundaryGapM": 816.938,
+    "maxCornerRayM": 944.87
+   },
+   {
+    "t": 0.775,
+    "exposed": 0,
+    "minBoundaryGapM": 893.547,
+    "maxCornerRayM": 944.87
+   },
+   {
+    "t": 0.86,
+    "exposed": 0,
+    "minBoundaryGapM": 895.928,
+    "maxCornerRayM": 944.87
+   },
+   {
+    "t": 0.994,
+    "exposed": 0,
+    "minBoundaryGapM": 743.955,
+    "maxCornerRayM": 944.87
+   }
+  ]
+ },
+ "railInitMs": 2520.7,
+ "railHolds": [
+  {
+   "name": "hairpin",
+   "groundAnchor": [
+    -1078.5816429295357,
+    415.68734775797265
+   ]
+  },
+  {
+   "name": "chicane",
+   "groundAnchor": [
+    -1350.994502855702,
+    223.30587967480557
+   ]
+  }
+ ],
+ "unavailableHolds": [],
+ "presentation": {
+  "carLengthPctOfFrameWidth": 1.67,
+  "projectedCarLengthPctRange": [
+   1.23,
+   1.8
+  ],
+  "roadInMedianHeroWidths": 3.69,
+  "roadInWidestHeroWidths": 2.61,
+  "roadCoverageMedian": 0.037,
+  "roadCoverageMax": 0.0625,
+  "roadCoveragePoints": [
+   {
+    "t": 0.02,
+    "fraction": 0.0363
+   },
+   {
+    "t": 0.265,
+    "fraction": 0.037
+   },
+   {
+    "t": 0.283,
+    "fraction": 0.037
+   },
+   {
+    "t": 0.3,
+    "fraction": 0.037
+   },
+   {
+    "t": 0.335,
+    "fraction": 0.0332
+   },
+   {
+    "t": 0.352,
+    "fraction": 0.0332
+   },
+   {
+    "t": 0.37,
+    "fraction": 0.0332
+   },
+   {
+    "t": 0.465,
+    "fraction": 0.0625
+   },
+   {
+    "t": 0.09,
+    "fraction": 0.0386
+   },
+   {
+    "t": 0.18,
+    "fraction": 0.0347
+   },
+   {
+    "t": 0.255,
+    "fraction": 0.0386
+   },
+   {
+    "t": 0.39,
+    "fraction": 0.0417
+   },
+   {
+    "t": 0.495,
+    "fraction": 0.0471
+   },
+   {
+    "t": 0.585,
+    "fraction": 0.0293
+   },
+   {
+    "t": 0.68,
+    "fraction": 0.034
+   },
+   {
+    "t": 0.775,
+    "fraction": 0.0309
+   },
+   {
+    "t": 0.86,
+    "fraction": 0.0586
+   },
+   {
+    "t": 0.994,
+    "fraction": 0.034
+   }
+  ],
+  "frameWidthAtTargetM": 522.4
+ }
+}

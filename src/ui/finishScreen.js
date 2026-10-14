@@ -2,8 +2,9 @@ import { state, set, subscribe } from '../core/state.js';
 import { CARS, getCar } from '../data/cars.js';
 import { playFinish } from '../audio/audioManager.js';
 import { lockScroll, resetToStart, unlockScroll } from '../scroll/scrollDrive.js';
+import { FINISH_PAST_LINE_METERS } from '../scroll/finishTail.js';
 
-const FINISH_THRESHOLD = 0.995;
+import { FINISH_THRESHOLD } from '../scene/trackCurve.js';
 
 const CREDIT_GROUPS = Object.freeze([
   {
@@ -35,9 +36,9 @@ const CREDIT_GROUPS = Object.freeze([
 let initialized = false;
 let visible = false;
 let runFinished = false;
-let finishSoundPlayed = false;
 let replayHandler = null;
 let unsubscribeProgress = null;
+let unsubscribeTail = null;
 let root = null;
 let recapGrid = null;
 let recapCount = null;
@@ -121,15 +122,12 @@ function renderRecap() {
 function replayRoute() {
   if (!runFinished) return;
 
-  if (state.unlocked instanceof Set) state.unlocked.clear();
-  set('unlocked', new Set());
   set('activeCarIndex', 0);
   set('mode', 'race');
   resetToStart();
   hideFinishScreen();
 
   runFinished = false;
-  finishSoundPlayed = false;
 
   if (typeof replayHandler === 'function') {
     try {
@@ -141,14 +139,14 @@ function replayRoute() {
 }
 
 function buildScreen() {
-  root.className = 'finish-screen';
+  root.className = 'finish-screen finish-screen--tail';
   root.hidden = false;
   root.setAttribute('aria-hidden', 'true');
-  root.setAttribute('aria-label', 'Route finish and car discovery recap');
+  root.setAttribute('aria-label', 'Grand Tour complete');
 
   const panel = element('section', 'finish-screen__panel');
   const header = element('header', 'finish-screen__header');
-  const eyebrow = element('p', 'finish-screen__eyebrow', 'Route complete · final classification');
+  const eyebrow = element('p', 'finish-screen__eyebrow', 'GRAND TOUR COMPLETE');
   const closing = element('h2', 'finish-screen__closing', 'The circuit falls quiet. The machines remain.');
   const rule = element('span', 'finish-screen__rule');
   header.append(eyebrow, closing, rule);
@@ -178,7 +176,14 @@ function buildScreen() {
 function maybeFinish(progress = state.progress) {
   if (runFinished || state.mode !== 'race') return;
   if (!Number.isFinite(progress) || progress < FINISH_THRESHOLD) return;
+  // V1: completion fires once the car is FINISH_PAST_LINE_METERS through the gantry.
+  if (state.finishTailMeters < FINISH_PAST_LINE_METERS) return;
   showFinishScreen();
+}
+
+/** Whether a restored route position belongs to the completed-route state. */
+export function isFinishProgress(progress) {
+  return Number.isFinite(progress) && progress >= FINISH_THRESHOLD;
 }
 
 /** Supply integration-owned coin and model resets without coupling this screen to them. */
@@ -199,11 +204,22 @@ export function initFinishScreen() {
   initialized = true;
   buildScreen();
   renderRecap();
-  unsubscribeProgress = subscribe('progress', maybeFinish);
+  unsubscribeProgress = subscribe('progress', progress => {
+    if (runFinished && progress < FINISH_THRESHOLD) {
+      hideFinishScreen();
+      runFinished = false;
+    }
+    maybeFinish(progress);
+  });
+  // Logical progress holds at 1 in the run-out, so the run-out distance is the trigger.
+  unsubscribeTail = subscribe('finishTailMeters', () => maybeFinish(state.progress));
   maybeFinish();
 }
 
-/** Reveal the in-world scorecard with a slow, single eased entrance. */
+/**
+ * V1 finish mechanics: lock the drive where the car stands (it halts at once, no coast),
+ * then fade in the compact completion notice. Replay Route is the way back.
+ */
 export function showFinishScreen() {
   if (!initialized) initFinishScreen();
   if (visible || runFinished) return;
@@ -220,17 +236,37 @@ export function showFinishScreen() {
     if (visible && root) root.classList.add('is-visible');
   });
 
-  if (!finishSoundPlayed) {
-    finishSoundPlayed = true;
+  if (!state.finishAcknowledged) {
+    set('finishAcknowledged', true);
     playFinish();
   }
 }
 
-/** Hide the scorecard. Replay uses resetToStart(), which has already released scroll. */
+/** Reconstruct the completed-route UI after refresh without replaying finish audio. */
+export function restoreFinishScreen() {
+  if (!initialized) initFinishScreen();
+  if (visible || runFinished) return;
+
+  visible = true;
+  runFinished = true;
+  renderRecap();
+  // Persisted progress is logical (1); stand the car where V1 completion halts it.
+  set('finishTailMeters', FINISH_PAST_LINE_METERS);
+  lockScroll();
+  set('mode', 'finish');
+  root.hidden = false;
+  root.setAttribute('aria-hidden', 'false');
+  root.classList.add('is-visible');
+  set('finishAcknowledged', true);
+}
+
+/** Hide the notice. Replay uses resetToStart(), which has already released scroll. */
 export function hideFinishScreen() {
   if (!root || !visible) return;
 
   visible = false;
+  // Re-arm only after progress leaves the endpoint. Hiding while still at p=1
+  // must not reopen the card on the frame before a reverse glide starts.
   root.classList.remove('is-visible');
   root.setAttribute('aria-hidden', 'true');
   if (state.mode === 'finish') set('mode', 'race');
@@ -247,6 +283,8 @@ export function update(dt) {
 // Retained only so hot-module teardown/debug tooling can release the subscription.
 export function disposeFinishScreen() {
   unsubscribeProgress?.();
+  unsubscribeTail?.();
   unsubscribeProgress = null;
+  unsubscribeTail = null;
   initialized = false;
 }

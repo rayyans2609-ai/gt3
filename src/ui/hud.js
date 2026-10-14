@@ -1,142 +1,97 @@
 /**
- * Persistent race instrumentation.
+ * Sparse Grand Tour HUD.
  *
- * The frame loop is owned by main.js. This module only reflects central state and
- * accepts the coin-approach cue through setApproach(), keeping scene/UI ownership
- * deliberately separate.
+ * The frame loop is owned by main.js. This module only reflects route position
+ * and active-car state; the marker uses an SVG transform attribute so it never
+ * causes layout work while the route is moving.
+ *
+ * Top-left is one consolidated car-identity block (name + headline + spec in a
+ * single two-slot crossfade). Top-right is the circuit map with a directional
+ * arrow and a completed-route trail. Bottom-left stays empty (a later phase's
+ * spinning-car home).
  */
 
-import { state, subscribe } from '../core/state.js';
-import { CARS, getCar } from '../data/cars.js';
-import { COIN_T, TRACK_LENGTH, pointAt } from '../scene/trackCurve.js';
+import * as THREE from 'three';
+import { state } from '../core/state.js';
+import { formatLapTime } from '../core/lapTimer.js';
+import { getCar } from '../data/cars.js';
+import { CHECKPOINT_ROUTE_T, GRID_T, GRID_GAP, routeTAt, pointAt } from '../scene/trackCurve.js';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
-const MAP_SIZE = 160;
-const MAP_PADDING = 10;
-const MAP_SAMPLES = 140;
-const HUD_CURSOR_SMOOTHING = 0.002;
-const HUD_CURSOR_MAX_X = 4;
-const HUD_CURSOR_MAX_Y = 3;
-const DIRECTION_DEAD_ZONE = 0.035;
+// Keep in step with .hud-route in hud.css (170 px, ~15 % over the original 148).
+const MAP_SIZE = 170;
+const MAP_PADDING = 9;
+const MAP_SAMPLES = 160;
+// Completed-route trail: strongest right behind the car, easing over this lap
+// fraction back to a quiet base opacity.
+const TRAIL_FADE_SPAN = 0.22;
+const TRAIL_BASE_OPACITY = 0.38;
+// Route-tangent probe for the minimap arrow (forward tangent always).
+const TANGENT_EPSILON = 0.002;
 
+let timerElement;
+let writtenTimer = '';
 let initialized = false;
 let identitySlots = [];
 let visibleIdentitySlot = 0;
 let renderedCarIndex = -1;
-let unlockedValue = null;
-let distanceValue = null;
-let speedFill = null;
-let routeCarMarker = null;
-let routeCoinMarkers = [];
-let routeProject = null;
-let routePoint = null;
-const routeProjection = { x: 0, y: 0 };
-let approachRoot = null;
-let approachName = null;
-let approachFill = null;
-let directionRoot = null;
-
-let displayedSpeed = 0;
-let displayedApproach = 0;
-let approach = null;
-let writtenDistance = -1;
-let writtenSpeed = -1;
+let routeProject;
+let routePointA;
+let routePointB;
+const routeWorldA = new THREE.Vector3();
+const routeWorldB = new THREE.Vector3();
+let routeMarker;
+let trailSegs = [];
+const trailState = []; // last written per-segment state: 'h' (hidden) or opacity string
+let lastTrailProgress = NaN;
 let writtenRouteX = NaN;
 let writtenRouteY = NaN;
-let writtenApproach = -1;
-let cursorTargetX = 0;
-let cursorTargetY = 0;
-let displayedCursorX = 0;
-let displayedCursorY = 0;
-let writtenCursorX = 0;
-let writtenCursorY = 0;
-let writtenDirection = null;
+let writtenRouteAngle = NaN;
+let identityMeasureId = 0;
 
-function makeElement(tag, className, text) {
-  const element = document.createElement(tag);
-  if (className) element.className = className;
-  if (text !== undefined) element.textContent = text;
-  return element;
+function element(tag, className, text) {
+  const node = document.createElement(tag);
+  if (className) node.className = className;
+  if (text !== undefined) node.textContent = text;
+  return node;
 }
 
-function makeSvgElement(tag, attributes = {}) {
-  const element = document.createElementNS(SVG_NS, tag);
-  for (const [name, value] of Object.entries(attributes)) {
-    element.setAttribute(name, String(value));
-  }
-  return element;
+function svgElement(tag, attributes = {}) {
+  const node = document.createElementNS(SVG_NS, tag);
+  for (const [name, value] of Object.entries(attributes)) node.setAttribute(name, String(value));
+  return node;
 }
 
+/**
+ * Top-left consolidated identity block. Each of the two crossfade slots holds
+ * the car name plus the car info (editorial headline + one factual line built
+ * only from existing roster data), so name and info always swap in the same
+ * pass. "(BoP-dependent)" compresses to "· BoP", which keeps the qualifier;
+ * nothing is invented or rounded.
+ */
 function buildIdentity(root) {
-  const accent = makeElement('span', 'hud-identity__accent');
-  const copy = makeElement('div', 'hud-identity__copy');
-
+  const copy = element('div', 'hud-identity__copy');
   for (let i = 0; i < 2; i++) {
-    const slot = makeElement('div', `hud-identity__slot${i === 0 ? ' is-visible' : ''}`);
-    const manufacturer = makeElement('div', 'hud-label hud-identity__manufacturer');
-    const name = makeElement('div', 'hud-identity__name');
-    slot.append(manufacturer, name);
+    const slot = element('div', `hud-identity__slot${i === 0 ? ' is-visible' : ''}`);
+    // The inactive slot is only hidden via opacity (the cross-fade needs both slots
+    // painted at once), so assistive tech needs aria-hidden kept in sync separately.
+    slot.setAttribute('aria-hidden', i === 0 ? 'false' : 'true');
+    const name = element('div', 'hud-identity__name');
+    const headline = element('div', 'hud-identity__headline');
+    const spec = element('div', 'hud-identity__spec');
+    slot.append(name, headline, spec);
     copy.append(slot);
-    identitySlots.push({ slot, manufacturer, name });
+    identitySlots.push({ slot, name, headline, spec });
   }
-
-  root.classList.add('hud-corner', 'hud-identity');
-  root.append(accent, copy);
-  root._brandAccent = accent;
+  root.classList.add('hud-identity');
+  root.append(copy);
 }
 
-function buildUnlocked(root) {
-  const label = makeElement('div', 'hud-label', 'Cars unlocked');
-  unlockedValue = makeElement('div', 'hud-unlocked__value', `00 / ${String(CARS.length).padStart(2, '0')}`);
-  root.classList.add('hud-corner', 'hud-unlocked');
-  root.append(label, unlockedValue);
-}
-
-function buildTelemetry(root) {
-  const distance = makeElement('div', 'hud-telemetry__distance');
-  const distanceLabel = makeElement('span', 'hud-label', 'Distance');
-  distanceValue = makeElement('span', 'hud-telemetry__number', '0000 M');
-  distance.append(distanceLabel, distanceValue);
-
-  const speed = makeElement('div', 'hud-telemetry__speed');
-  const speedLabel = makeElement('span', 'hud-label', 'Speed');
-  const speedTrack = makeElement('span', 'hud-speedbar');
-  speedFill = makeElement('span', 'hud-speedbar__fill');
-  speedTrack.append(speedFill);
-  speed.append(speedLabel, speedTrack);
-
-  const direction = makeElement('div', 'hud-direction is-primer');
-  direction.setAttribute('aria-label', 'Scroll down to drive forward. Scroll up to reverse.');
-  const directionLabel = makeElement('div', 'hud-label', 'Scroll');
-  const directionModes = makeElement('div', 'hud-direction__modes');
-  const reverse = makeElement('div', 'hud-direction__mode hud-direction__mode--reverse');
-  reverse.append(makeElement('span', 'hud-direction__arrow', '↑'), makeElement('span', 'hud-label', 'Rev'));
-  const forward = makeElement('div', 'hud-direction__mode hud-direction__mode--forward');
-  forward.append(makeElement('span', 'hud-direction__arrow', '↓'), makeElement('span', 'hud-label', 'Fwd'));
-  directionModes.append(reverse, forward);
-  direction.append(directionLabel, directionModes);
-  directionRoot = direction;
-  writtenDirection = 'primer';
-
-  root.classList.add('hud-corner', 'hud-telemetry');
-  root.append(distance, speed, direction);
-}
-
-function updateDirectionIndicator() {
-  const velocity = Number(state.velocity) || 0;
-  const direction = !state.started
-    ? 'primer'
-    : velocity > DIRECTION_DEAD_ZONE
-      ? 'forward'
-      : velocity < -DIRECTION_DEAD_ZONE
-        ? 'reverse'
-        : 'idle';
-
-  if (direction === writtenDirection) return;
-
-  directionRoot.classList.remove('is-primer', 'is-idle', 'is-forward', 'is-reverse');
-  directionRoot.classList.add(`is-${direction}`);
-  writtenDirection = direction;
+function specLine(car) {
+  const power = car.engine.power;
+  const bop = /\s*\(BoP-dependent\)/.test(power);
+  const figure = power.replace(/\s*\(BoP-dependent\)/, '');
+  return `${car.engine.configuration} · ${figure}${bop ? ' · BoP' : ''}`;
 }
 
 function buildRouteMap(root) {
@@ -145,7 +100,6 @@ function buildRouteMap(root) {
   let maxX = -Infinity;
   let minZ = Infinity;
   let maxZ = -Infinity;
-
   for (let i = 0; i <= MAP_SAMPLES; i++) {
     const point = pointAt(i / MAP_SAMPLES);
     points.push({ x: point.x, z: point.z });
@@ -154,217 +108,152 @@ function buildRouteMap(root) {
     minZ = Math.min(minZ, point.z);
     maxZ = Math.max(maxZ, point.z);
   }
-
-  const spanX = Math.max(1, maxX - minX);
-  const spanZ = Math.max(1, maxZ - minZ);
-  const scale = (MAP_SIZE - MAP_PADDING * 2) / Math.max(spanX, spanZ);
-  const usedWidth = spanX * scale;
-  const usedHeight = spanZ * scale;
-  const offsetX = (MAP_SIZE - usedWidth) * 0.5;
-  const offsetY = (MAP_SIZE - usedHeight) * 0.5;
-
-  routeProject = (point, target = { x: 0, y: 0 }) => {
+  const scale = (MAP_SIZE - MAP_PADDING * 2) / Math.max(maxX - minX, maxZ - minZ, 1);
+  const offsetX = (MAP_SIZE - (maxX - minX) * scale) * 0.5;
+  const offsetY = (MAP_SIZE - (maxZ - minZ) * scale) * 0.5;
+  routeProject = (point, target) => {
     target.x = offsetX + (point.x - minX) * scale;
     target.y = offsetY + (maxZ - point.z) * scale;
     return target;
   };
 
-  const svg = makeSvgElement('svg', {
-    class: 'hud-route__svg',
-    viewBox: `0 0 ${MAP_SIZE} ${MAP_SIZE}`,
-    role: 'img',
-    'aria-label': 'Circuit route and collectible positions',
+  const svg = svgElement('svg', {
+    class: 'hud-route__svg', viewBox: `0 0 ${MAP_SIZE} ${MAP_SIZE}`,
+    role: 'img', 'aria-label': 'Circuit route and checkpoint positions',
   });
-  const pathData = points.map((point, index) => {
-    const projected = routeProject(point);
+  const d = points.map((point, index) => {
+    const projected = routeProject(point, { x: 0, y: 0 });
     return `${index === 0 ? 'M' : 'L'}${projected.x.toFixed(2)} ${projected.y.toFixed(2)}`;
   }).join(' ');
-  svg.append(makeSvgElement('path', { class: 'hud-route__path', d: pathData }));
-
-  routeCoinMarkers = COIN_T.map((t, index) => {
-    const projected = routeProject(pointAt(t));
-    const marker = makeSvgElement('circle', {
-      class: 'hud-route__coin',
-      cx: projected.x.toFixed(2),
-      cy: projected.y.toFixed(2),
-      r: 2,
-      'data-index': index,
+  svg.append(svgElement('path', { class: 'hud-route__path', d }));
+  // Completed-route trail: one short segment per map sample, drawn over the
+  // base route at the same stroke width. Per-frame work only touches inline
+  // opacity/visibility, and only when progress actually changed.
+  const done = svgElement('g', { class: 'hud-route__done' });
+  for (let i = 0; i < MAP_SAMPLES; i++) {
+    const a = routeProject(points[i], { x: 0, y: 0 });
+    const b = routeProject(points[i + 1], { x: 0, y: 0 });
+    const seg = svgElement('path', {
+      class: 'hud-route__done-seg',
+      d: `M${a.x.toFixed(2)} ${a.y.toFixed(2)}L${b.x.toFixed(2)} ${b.y.toFixed(2)}`,
     });
-    svg.append(marker);
-    return marker;
-  });
-
-  routePoint = pointAt(state.progress);
-  const initial = routeProject(routePoint);
-  routeCarMarker = makeSvgElement('circle', {
-    class: 'hud-route__car',
-    cx: initial.x.toFixed(2),
-    cy: initial.y.toFixed(2),
-    r: 2.8,
-  });
-  svg.append(routeCarMarker);
-
-  const label = makeElement('div', 'hud-label hud-route__label', 'Route');
-  root.classList.add('hud-corner', 'hud-route');
-  root.append(label, svg);
-}
-
-function buildApproach(root) {
-  const label = makeElement('div', 'hud-label', 'Incoming');
-  approachName = makeElement('div', 'hud-approach__name');
-  const track = makeElement('div', 'hud-approach__track');
-  approachFill = makeElement('span', 'hud-approach__fill');
-  track.append(approachFill);
-  root.classList.add('hud-approach');
-  root.setAttribute('aria-hidden', 'true');
-  root.append(label, approachName, track);
-  approachRoot = root;
+    seg.style.visibility = 'hidden';
+    done.append(seg);
+    trailSegs.push(seg);
+  }
+  svg.append(done);
+  for (const t of CHECKPOINT_ROUTE_T) {
+    const projected = routeProject(pointAt(t), { x: 0, y: 0 });
+    svg.append(svgElement('circle', { class: 'hud-route__checkpoint', cx: projected.x.toFixed(2), cy: projected.y.toFixed(2), r: 1.35 }));
+  }
+  // Direction arrow: a small filled chevron (~8 px long in map units) pointing
+  // along the route's forward tangent. It lives in a <g> so position and
+  // rotation compose in one transform attribute update per frame.
+  routeMarker = svgElement('g', { class: 'hud-route__marker' });
+  routeMarker.append(svgElement('path', { class: 'hud-route__marker-shape', d: 'M0 -4.6L3.1 3.6L0 1.7L-3.1 3.6Z' }));
+  svg.append(routeMarker);
+  root.classList.add('hud-route');
+  root.append(svg);
 }
 
 function setIdentity(index, immediate = false) {
+  const start = `gt3:hudIdentity:start:${++identityMeasureId}`;
+  const end = `gt3:hudIdentity:end:${identityMeasureId}`;
+  performance.mark(start);
   const car = getCar(index);
-  const nextSlotIndex = immediate ? visibleIdentitySlot : 1 - visibleIdentitySlot;
-  const next = identitySlots[nextSlotIndex];
-  next.manufacturer.textContent = car.manufacturer;
-  next.name.textContent = car.model;
-
+  const nextIndex = immediate ? visibleIdentitySlot : 1 - visibleIdentitySlot;
+  identitySlots[nextIndex].name.textContent = car.displayName;
+  // Car info is written in the same pass as the name (never waits on morph
+  // completion, which does not fire on cancellation), so retargets/reversals
+  // stay in step — and both live in the same slot, so they fade as one block.
+  identitySlots[nextIndex].headline.textContent = car.showcase.headline;
+  identitySlots[nextIndex].spec.textContent = specLine(car);
   if (!immediate) {
     identitySlots[visibleIdentitySlot].slot.classList.remove('is-visible');
-    next.slot.classList.add('is-visible');
-    visibleIdentitySlot = nextSlotIndex;
+    identitySlots[visibleIdentitySlot].slot.setAttribute('aria-hidden', 'true');
+    identitySlots[nextIndex].slot.classList.add('is-visible');
+    identitySlots[nextIndex].slot.setAttribute('aria-hidden', 'false');
+    visibleIdentitySlot = nextIndex;
   }
-
-  const identityRoot = document.querySelector('#hud-topleft');
-  if (identityRoot?._brandAccent) identityRoot._brandAccent.style.backgroundColor = car.brandColor;
   renderedCarIndex = car.index;
+  performance.mark(end);
+  performance.measure('gt3:hudIdentity', start, end);
+  performance.clearMarks(start);
+  performance.clearMarks(end);
 }
 
-function updateUnlocks() {
-  const unlocked = state.unlocked instanceof Set ? state.unlocked : new Set();
-  unlockedValue.textContent = `${String(unlocked.size).padStart(2, '0')} / ${String(CARS.length).padStart(2, '0')}`;
-  for (let i = 0; i < routeCoinMarkers.length; i++) {
-    routeCoinMarkers[i].classList.toggle('is-unlocked', unlocked.has(i));
+function smoothstep01(x) {
+  const clamped = x < 0 ? 0 : x > 1 ? 1 : x;
+  return clamped * clamped * (3 - 2 * clamped);
+}
+
+function updateTrail(progress) {
+  if (progress === lastTrailProgress) return;
+  lastTrailProgress = progress;
+  const count = trailSegs.length;
+  for (let i = 0; i < count; i++) {
+    const segEnd = (i + 1) / count;
+    // Most recent visit of this lap segment along the unwrapped Tour.
+    const end = GRID_T + progress * (1 + GRID_GAP);
+    const visit = segEnd + Math.floor(end - segEnd);
+    const behind = visit < GRID_T ? -1 : (end - visit) / (1 + GRID_GAP);
+    // Strongest right behind the car, easing to the quiet base further back. Only segments whose
+    // state changed are written (most sit hidden or at the base opacity), keeping DOM writes per
+    // frame to the few segments near the car.
+    const state = behind < 0 ? 'h'
+      : (TRAIL_BASE_OPACITY + (1 - TRAIL_BASE_OPACITY)
+        * smoothstep01(1 - behind / TRAIL_FADE_SPAN)).toFixed(2);
+    if (trailState[i] === state) continue;
+    const seg = trailSegs[i];
+    if (state === 'h') seg.style.visibility = 'hidden';
+    else {
+      seg.style.opacity = state;
+      if (trailState[i] === 'h' || trailState[i] === undefined) seg.style.visibility = 'visible';
+    }
+    trailState[i] = state;
   }
 }
 
-/** Populate the existing HUD roots. Safe to call more than once. */
 export function initHUD() {
   if (initialized) return;
-
   const topLeft = document.querySelector('#hud-topleft');
   const topRight = document.querySelector('#hud-topright');
   const bottomLeft = document.querySelector('#hud-bottomleft');
-  const routeMap = document.querySelector('#hud-routemap');
-  const approachBadge = document.querySelector('#hud-approach');
-  if (!topLeft || !topRight || !bottomLeft || !routeMap || !approachBadge) {
-    throw new Error('[hud] Required HUD roots are missing from the document.');
-  }
-
+  if (!topLeft || !topRight || !bottomLeft) throw new Error('[hud] Required HUD roots are missing.');
   buildIdentity(topLeft);
-  buildUnlocked(topRight);
-  buildTelemetry(bottomLeft);
-  buildRouteMap(routeMap);
-  buildApproach(approachBadge);
-
+  buildRouteMap(topRight);
+  timerElement = element('div', 'hud-lap-timer', formatLapTime(state.lapElapsedMs));
+  timerElement.setAttribute('aria-label', 'Tour elapsed time');
+  document.querySelector('#hud').append(timerElement);
+  routePointA = { x: 0, y: 0 };
+  routePointB = { x: 0, y: 0 };
   initialized = true;
   setIdentity(state.activeCarIndex, true);
-  updateUnlocks();
-  subscribe('unlocked', updateUnlocks);
-  setApproach(approach);
 }
 
-/** Receive the scene-owned nearest-coin cue without importing the coin module. */
-export function setApproach(value) {
-  if (value === null || value === undefined) {
-    approach = null;
-    if (approachRoot) {
-      approachRoot.classList.remove('is-visible');
-      approachRoot.setAttribute('aria-hidden', 'true');
-    }
-    return;
-  }
-
-  const index = Math.max(0, Math.min(CARS.length - 1, Math.trunc(Number(value.index) || 0)));
-  const proximity = Math.max(0, Math.min(1, Number(value.proximity) || 0));
-  if (approach) {
-    approach.index = index;
-    approach.proximity = proximity;
-  } else {
-    approach = { index, proximity };
-  }
-
-  if (approachRoot) {
-    approachName.textContent = getCar(index).displayName;
-    approachRoot.classList.add('is-visible');
-    approachRoot.setAttribute('aria-hidden', 'false');
-  }
-}
-
-/** Receive normalized cursor coordinates for the HUD's subtle fixed-overlay drift. */
-export function setCursor(x, y) {
-  cursorTargetX = Math.max(-1, Math.min(1, Number(x) || 0));
-  cursorTargetY = Math.max(-1, Math.min(1, Number(y) || 0));
-}
-
-/** Reflect current state. Called by main.js's single animation loop. */
-export function update(dt) {
+export function update() {
   if (!initialized) return;
-
-  const safeDt = Number.isFinite(dt) ? Math.max(0, Math.min(dt, 0.1)) : 0;
-  const cursorDamping = 1 - Math.pow(HUD_CURSOR_SMOOTHING, safeDt);
-  displayedCursorX += (cursorTargetX - displayedCursorX) * cursorDamping;
-  displayedCursorY += (cursorTargetY - displayedCursorY) * cursorDamping;
-
-  // The fixed HUD drifts slightly with the cursor, opposite the world, so it reads as
-  // the closest instrument layer without competing with the scene's stronger parallax.
-  // The vars are inherited, so one write on the root drives every panel; hud.css maps
-  // them onto `translate` (never `transform`, which the reveals already own).
-  if (Math.abs(displayedCursorX - writtenCursorX) > 0.001 ||
-      Math.abs(displayedCursorY - writtenCursorY) > 0.001) {
-    writtenCursorX = displayedCursorX;
-    writtenCursorY = displayedCursorY;
-    const root = document.documentElement.style;
-    root.setProperty('--hud-parallax-x', `${(displayedCursorX * HUD_CURSOR_MAX_X).toFixed(2)}px`);
-    root.setProperty('--hud-parallax-y', `${(displayedCursorY * HUD_CURSOR_MAX_Y).toFixed(2)}px`);
-  }
-
+  const timerText = formatLapTime(state.lapElapsedMs);
+  if (timerText !== writtenTimer) { timerElement.textContent = timerText; writtenTimer = timerText; }
   if (state.activeCarIndex !== renderedCarIndex) setIdentity(state.activeCarIndex);
-
-  // Direction only changes after a meaningful signed-velocity transition; the CSS
-  // owns the eased visual response, so this costs no DOM work on steady frames.
-  updateDirectionIndicator();
-
-  const metres = Math.max(0, Math.round(Math.max(0, Math.min(1, state.progress)) * TRACK_LENGTH));
-  if (metres !== writtenDistance) {
-    writtenDistance = metres;
-    distanceValue.textContent = `${String(metres).padStart(4, '0')} M`;
+  routeProject(pointAt(routeTAt(state.progress), routeWorldA), routePointA);
+  let ahead = routeTAt(state.progress) + TANGENT_EPSILON;
+  if (ahead > 1) ahead -= 1;
+  routeProject(pointAt(ahead, routeWorldB), routePointB);
+  const x = Math.round(routePointA.x * 100) / 100;
+  const y = Math.round(routePointA.y * 100) / 100;
+  const dx = routePointB.x - routePointA.x;
+  const dy = routePointB.y - routePointA.y;
+  let angle = writtenRouteAngle;
+  if (dx * dx + dy * dy > 1e-10) {
+    // The chevron is drawn pointing up (-Y), so the map angle needs +90°.
+    angle = Math.round((Math.atan2(dy, dx) * 180 / Math.PI + 90) * 2) / 2;
   }
-
-  const speedTarget = Math.max(0, Math.min(1, Number(state.speed01) || 0));
-  displayedSpeed += (speedTarget - displayedSpeed) * (1 - Math.exp(-safeDt * 7));
-  const speedStep = Math.round(displayedSpeed * 200) / 200;
-  if (speedStep !== writtenSpeed) {
-    writtenSpeed = speedStep;
-    speedFill.style.transform = `scaleX(${displayedSpeed.toFixed(4)})`;
+  if (x !== writtenRouteX || y !== writtenRouteY || angle !== writtenRouteAngle) {
+    writtenRouteX = x;
+    writtenRouteY = y;
+    writtenRouteAngle = angle;
+    routeMarker.setAttribute('transform', `translate(${x} ${y}) rotate(${angle})`);
   }
-
-  routeProject(pointAt(state.progress, routePoint), routeProjection);
-  const routeX = Math.round(routeProjection.x * 100);
-  const routeY = Math.round(routeProjection.y * 100);
-  if (routeX !== writtenRouteX) {
-    writtenRouteX = routeX;
-    routeCarMarker.setAttribute('cx', String(routeX / 100));
-  }
-  if (routeY !== writtenRouteY) {
-    writtenRouteY = routeY;
-    routeCarMarker.setAttribute('cy', String(routeY / 100));
-  }
-
-  const approachTarget = approach ? approach.proximity : 0;
-  displayedApproach += (approachTarget - displayedApproach) * (1 - Math.exp(-safeDt * 9));
-  const approachStep = Math.round(displayedApproach * 200) / 200;
-  if (approachStep !== writtenApproach) {
-    writtenApproach = approachStep;
-    approachFill.style.transform = `scaleX(${displayedApproach.toFixed(4)})`;
-  }
+  updateTrail(state.progress);
 }

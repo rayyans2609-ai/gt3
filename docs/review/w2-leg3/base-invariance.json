@@ -1,0 +1,7 @@
+{
+ "reference": "0967653",
+ "samples": 1800,
+ "exactEquality": true,
+ "maxPositionQuaternionComponentDifference": 0,
+ "serializedPosesSha256": "7616a0d115c15f1b808819458f1bbef1929c4927c5d3362f157b0451d55918cb"
+}

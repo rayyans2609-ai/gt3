@@ -61,7 +61,6 @@
   bottom: -1px;
 }
 
-.start-screen__eyebrow,
 .start-loading__label,
 .start-prompt__label {
   font-family: var(--font-ui);
@@ -70,10 +69,6 @@
   letter-spacing: 0.14em;
   line-height: 1.3;
   text-transform: uppercase;
-}
-
-.start-screen__eyebrow {
-  color: rgba(237, 233, 227, 0.52);
 }
 
 .start-mark {
@@ -180,19 +175,21 @@
 
 .start-prompt {
   position: absolute;
-  right: 52px;
-  bottom: 46px;
+  left: 50%;
+  right: auto;
+  bottom: 40px;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 14px;
   color: rgba(237, 233, 227, 0.68);
+  transform: translateX(-50%);
 }
 
 .start-prompt__cue {
   position: relative;
   display: block;
-  width: 1px;
+  width: 2px;
   height: 34px;
   overflow: hidden;
   background: rgba(237, 233, 227, 0.14);
@@ -203,7 +200,7 @@
   top: -16px;
   left: 0;
   display: block;
-  width: 1px;
+  width: 2px;
   height: 16px;
   background: var(--gold);
   animation: start-cue-drift 3.4s var(--ease) infinite;

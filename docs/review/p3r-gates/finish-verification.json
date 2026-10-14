@@ -1,0 +1,162 @@
+{
+  "base": "http://127.0.0.1:5200",
+  "captures": [
+    "docs/review/p3r-gates/finish-default-day.png",
+    "docs/review/p3r-gates/finish-default-night.png",
+    "docs/review/p3r-gates/finish-glide-day.png",
+    "docs/review/p3r-gates/finish-glide-night.png"
+  ],
+  "checks": [
+    {
+      "camera": "default",
+      "theme": "day",
+      "off": 0,
+      "on": 1.199894240732704,
+      "reverse": 0.00010533707414564984,
+      "trussInstances": 34,
+      "lampCount": 10,
+      "gl": {
+        "createProgram": 0,
+        "compileShader": 0,
+        "createTexture": 0,
+        "createBuffer": 0,
+        "bufferData": 0,
+        "texImage2D": 0,
+        "texImage3D": 0,
+        "texStorage2D": 0,
+        "texStorage3D": 0,
+        "compressedTexImage2D": 0,
+        "compressedTexImage3D": 0,
+        "texSubImage2D": 0,
+        "texSubImage3D": 0,
+        "compressedTexSubImage2D": 0,
+        "compressedTexSubImage3D": 0
+      }
+    },
+    {
+      "camera": "default",
+      "theme": "night",
+      "off": 3.4335248410486686e-9,
+      "on": 1.7998400868981412,
+      "reverse": 0.00014722527275060673,
+      "trussInstances": 34,
+      "lampCount": 10,
+      "gl": {
+        "createProgram": 0,
+        "compileShader": 0,
+        "createTexture": 0,
+        "createBuffer": 0,
+        "bufferData": 0,
+        "texImage2D": 0,
+        "texImage3D": 0,
+        "texStorage2D": 0,
+        "texStorage3D": 0,
+        "compressedTexImage2D": 0,
+        "compressedTexImage3D": 0,
+        "texSubImage2D": 0,
+        "texSubImage3D": 0,
+        "compressedTexSubImage2D": 0,
+        "compressedTexSubImage3D": 0
+      }
+    },
+    {
+      "camera": "glide",
+      "theme": "day",
+      "off": 0,
+      "on": 1.1999047505936535,
+      "reverse": 0.00009392520569064324,
+      "trussInstances": 34,
+      "lampCount": 10,
+      "gl": {
+        "createProgram": 0,
+        "compileShader": 0,
+        "createTexture": 0,
+        "createBuffer": 0,
+        "bufferData": 0,
+        "texImage2D": 0,
+        "texImage3D": 0,
+        "texStorage2D": 0,
+        "texStorage3D": 0,
+        "compressedTexImage2D": 0,
+        "compressedTexImage3D": 0,
+        "texSubImage2D": 0,
+        "texSubImage3D": 0,
+        "compressedTexSubImage2D": 0,
+        "compressedTexSubImage3D": 0
+      }
+    },
+    {
+      "camera": "glide",
+      "theme": "night",
+      "off": 1.8906500789571894e-9,
+      "on": 1.7998441910534277,
+      "reverse": 0.00014306473520322982,
+      "trussInstances": 34,
+      "lampCount": 10,
+      "gl": {
+        "createProgram": 0,
+        "compileShader": 0,
+        "createTexture": 0,
+        "createBuffer": 0,
+        "bufferData": 0,
+        "texImage2D": 0,
+        "texImage3D": 0,
+        "texStorage2D": 0,
+        "texStorage3D": 0,
+        "compressedTexImage2D": 0,
+        "compressedTexImage3D": 0,
+        "texSubImage2D": 0,
+        "texSubImage3D": 0,
+        "compressedTexSubImage2D": 0,
+        "compressedTexSubImage3D": 0
+      }
+    }
+  ],
+  "gateComparisons": [
+    {
+      "treatment": "sweep",
+      "midVisible": true,
+      "afterVisible": false,
+      "gl": {
+        "createProgram": 0,
+        "compileShader": 0,
+        "createTexture": 0,
+        "createBuffer": 0,
+        "bufferData": 0,
+        "texImage2D": 0,
+        "texImage3D": 0,
+        "texStorage2D": 0,
+        "texStorage3D": 0,
+        "compressedTexImage2D": 0,
+        "compressedTexImage3D": 0,
+        "texSubImage2D": 0,
+        "texSubImage3D": 0,
+        "compressedTexSubImage2D": 0,
+        "compressedTexSubImage3D": 0
+      }
+    },
+    {
+      "treatment": "quiet",
+      "midVisible": false,
+      "afterVisible": false,
+      "gl": {
+        "createProgram": 0,
+        "compileShader": 0,
+        "createTexture": 0,
+        "createBuffer": 0,
+        "bufferData": 0,
+        "texImage2D": 0,
+        "texImage3D": 0,
+        "texStorage2D": 0,
+        "texStorage3D": 0,
+        "compressedTexImage2D": 0,
+        "compressedTexImage3D": 0,
+        "texSubImage2D": 0,
+        "texSubImage3D": 0,
+        "compressedTexSubImage2D": 0,
+        "compressedTexSubImage3D": 0
+      }
+    }
+  ],
+  "errors": []
+}

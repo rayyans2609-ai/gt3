@@ -1,0 +1,15 @@
+{
+  "recordedAt": "2026-10-13T22:36:31.100047+00:00",
+  "ports": [
+    5173,
+    5211,
+    5212
+  ],
+  "listeners": "",
+  "lsofExit": 1,
+  "chromeProcesses": [],
+  "remainingTemporaryExports": [],
+  "branch": "p3y-perf",
+  "implementationSha": "f16f82b",
+  "mainSha": "665d5ccbada3241d66a9e2ee99bf36cbf4079a26"
+}

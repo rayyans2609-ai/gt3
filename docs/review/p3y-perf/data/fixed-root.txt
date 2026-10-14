@@ -1,0 +1,5 @@
+2952
+Wed Oct 14 01:19:32 2026     /usr/local/bin/node node_modules/vite/bin/vite.js --host 127.0.0.1 --port 5211 --strictPort --config /tmp/gt3-p3y-final/vite-perf.config.mjs
+
+COMMAND  PID         USER   FD   TYPE DEVICE SIZE/OFF     NODE NAME
+node    2952 rayyansheikh  cwd    DIR    1,5      864 78644332 /Users/rayyansheikh/Desktop/gt3/.claude/worktrees/p3y-perf

@@ -1,0 +1,155 @@
+[
+  {
+    "width": 1440,
+    "height": 900,
+    "dpr": 2,
+    "moving": {
+      "css": [
+        1440,
+        900
+      ],
+      "dpr": 2,
+      "desktopGuard": false,
+      "probe": {
+        "mode": "race",
+        "locked": false,
+        "speed01": 0.338175426838109,
+        "progress": 0.013903751575072001,
+        "applied": 1,
+        "level": "low",
+        "still": 0,
+        "sinceSwitch": 677.4999999850988,
+        "canvasW": 2880,
+        "ratio": 2
+      },
+      "aspect": 1.6,
+      "scissor": true,
+      "targets": [
+        1440,
+        900
+      ],
+      "transform": "scale(2)",
+      "clip": "inset(0px 50% 50% 0px)"
+    },
+    "rest": {
+      "probe": {
+        "mode": "race",
+        "locked": false,
+        "speed01": 0,
+        "progress": 0.017698479379456466,
+        "applied": 2,
+        "level": "high",
+        "still": 1866.9000000059605,
+        "sinceSwitch": 1432.2999999970198,
+        "canvasW": 2880,
+        "ratio": 2
+      },
+      "scissor": false,
+      "targetWidth": 2880,
+      "transform": "",
+      "clip": ""
+    }
+  },
+  {
+    "width": 1360,
+    "height": 850,
+    "dpr": 1,
+    "moving": {
+      "css": [
+        1360,
+        850
+      ],
+      "dpr": 1,
+      "desktopGuard": false,
+      "probe": {
+        "mode": "race",
+        "locked": false,
+        "speed01": 0.3967844615161442,
+        "progress": 0.03091077284943123,
+        "applied": 1,
+        "level": "high",
+        "still": 0,
+        "sinceSwitch": 3611.8999999910593,
+        "canvasW": 1360,
+        "ratio": 1
+      },
+      "aspect": 1.6,
+      "scissor": false,
+      "targets": [
+        1360,
+        850
+      ],
+      "transform": "",
+      "clip": ""
+    },
+    "rest": {
+      "probe": {
+        "mode": "race",
+        "locked": false,
+        "speed01": 0,
+        "progress": 0.035306876474504166,
+        "applied": 1,
+        "level": "high",
+        "still": 2199.7999999970198,
+        "sinceSwitch": 7213.199999988079,
+        "canvasW": 1360,
+        "ratio": 1
+      },
+      "scissor": false,
+      "targetWidth": 1360,
+      "transform": "",
+      "clip": ""
+    }
+  },
+  {
+    "width": 1280,
+    "height": 800,
+    "dpr": 2,
+    "moving": {
+      "css": [
+        1280,
+        800
+      ],
+      "dpr": 2,
+      "desktopGuard": false,
+      "probe": {
+        "mode": "race",
+        "locked": false,
+        "speed01": 0.3976632364747154,
+        "progress": 0.04842786921635461,
+        "applied": 1,
+        "level": "low",
+        "still": 0,
+        "sinceSwitch": 603.2999999970198,
+        "canvasW": 2560,
+        "ratio": 2
+      },
+      "aspect": 1.6,
+      "scissor": true,
+      "targets": [
+        1280,
+        800
+      ],
+      "transform": "scale(2)",
+      "clip": "inset(0px 50% 50% 0px)"
+    },
+    "rest": {
+      "probe": {
+        "mode": "race",
+        "locked": false,
+        "speed01": 0,
+        "progress": 0.054015297162175534,
+        "applied": 2,
+        "level": "high",
+        "still": 1666.800000011921,
+        "sinceSwitch": 1233.800000011921,
+        "canvasW": 2560,
+        "ratio": 2
+      },
+      "scissor": false,
+      "targetWidth": 2560,
+      "transform": "",
+      "clip": ""
+    }
+  }
+]

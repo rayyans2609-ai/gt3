@@ -1,0 +1,37 @@
+[
+  {
+    "path": "/tmp/gt3-p3y-final/A-matrix/host.jsonl",
+    "bytes": 754811,
+    "sha256": "41e8f455104552c9c1e2e29f6b09cb49ce1460600395fe60bd831b7257ab8822"
+  },
+  {
+    "path": "/tmp/gt3-p3y-final/B-valid/host.jsonl",
+    "bytes": 774987,
+    "sha256": "784a50d675f0eec560434656a1570a487911dc23909ac2f3cb900e143d078d5f"
+  },
+  {
+    "path": "/tmp/gt3-p3y-final/C-valid/host.jsonl",
+    "bytes": 729761,
+    "sha256": "5da0bd6be9cfa8444f9771c05dda5e18ef28bc9a61a3dc431a1c2635d24a3ff7"
+  },
+  {
+    "path": "/tmp/gt3-p3y-final/D-valid/host.jsonl",
+    "bytes": 772462,
+    "sha256": "a2d2aa2608d89d497450e496cbe4c374174599d67cfb45e782517f04c1bd6ba2"
+  },
+  {
+    "path": "/tmp/gt3-p3y-final/A-reference/host.jsonl",
+    "bytes": 299064,
+    "sha256": "4a6cbe48be9c56e4c447e3833271b2b3cd0f46c13e695e3fff1fc7f4b574d981"
+  },
+  {
+    "path": "/tmp/gt3-p3y-final/B-reference/host.jsonl",
+    "bytes": 544116,
+    "sha256": "e78ec3e04e500c6b6fe79e5dcd7a125814226b74dc5fecb94b9eeac8b946dd59"
+  },
+  {
+    "path": "/tmp/gt3-p3y-final/E-fixed/host.jsonl",
+    "bytes": 516679,
+    "sha256": "deb7a40ad0ed7159730cdc687ccbcd3c79df76c71ae335057389c19d21627169"
+  }
+]

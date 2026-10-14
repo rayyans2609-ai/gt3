@@ -1,0 +1,1484 @@
+{
+  "base": "http://127.0.0.1:5211",
+  "sha": "3d5c504642d92665fb6bb1547074627715a249e1",
+  "tree": "?? scripts/capture-p3z-render.mjs",
+  "captures": [
+    {
+      "name": "aa-msaa2-edge",
+      "path": "/tmp/gt3-p3z-run/trials/aa-msaa2-edge.png",
+      "settings": {
+        "probe": {
+          "mode": "race",
+          "locked": false,
+          "speed01": 0,
+          "progress": 0.12614160527985382,
+          "applied": 1,
+          "level": "high",
+          "still": 5647.4000000059605,
+          "sinceSwitch": null,
+          "canvasW": 1600,
+          "ratio": 1
+        },
+        "css": {
+          "width": 1600,
+          "height": 900
+        },
+        "devicePixelRatio": 1,
+        "contextAntialias": true,
+        "canvasSamples": 4,
+        "maxSamples": 8,
+        "halfFloatSamples": [
+          8,
+          4,
+          2
+        ],
+        "gpu": "ANGLE (Intel, ANGLE Metal Renderer: Intel(R) UHD Graphics 617, Unspecified Version)",
+        "targets": [
+          {
+            "width": 1600,
+            "height": 900,
+            "type": 1016,
+            "requestedSamples": 2,
+            "actualSamples": 2
+          },
+          {
+            "width": 1600,
+            "height": 900,
+            "type": 1016,
+            "requestedSamples": 2,
+            "actualSamples": 2
+          }
+        ],
+        "calls": 1,
+        "triangles": 1,
+        "memory": {
+          "geometries": 1501,
+          "textures": 298
+        },
+        "jsHeap": 192453526
+      },
+      "camera": {
+        "position": [
+          46.20042740532611,
+          208.2878532625406,
+          -490.5572287766979
+        ],
+        "quaternion": [
+          -0.3702543457061976,
+          -0.5383996395935492,
+          -0.28410615187685734,
+          0.701656071046874
+        ],
+        "fov": 40,
+        "rig": [
+          254.75654126797372,
+          6.290483922693631,
+          -510.4076071434834
+        ]
+      }
+    },
+    {
+      "name": "aa-msaa2-lamborghini",
+      "path": "/tmp/gt3-p3z-run/trials/aa-msaa2-lamborghini.png",
+      "settings": {
+        "probe": {
+          "mode": "race",
+          "locked": false,
+          "speed01": 0,
+          "progress": 0.12614160527985382,
+          "applied": 1,
+          "level": "high",
+          "still": 9403.400000020862,
+          "sinceSwitch": null,
+          "canvasW": 1600,
+          "ratio": 1
+        },
+        "css": {
+          "width": 1600,
+          "height": 900
+        },
+        "devicePixelRatio": 1,
+        "contextAntialias": true,
+        "canvasSamples": 4,
+        "maxSamples": 8,
+        "halfFloatSamples": [
+          8,
+          4,
+          2
+        ],
+        "gpu": "ANGLE (Intel, ANGLE Metal Renderer: Intel(R) UHD Graphics 617, Unspecified Version)",
+        "targets": [
+          {
+            "width": 1600,
+            "height": 900,
+            "type": 1016,
+            "requestedSamples": 2,
+            "actualSamples": 2
+          },
+          {
+            "width": 1600,
+            "height": 900,
+            "type": 1016,
+            "requestedSamples": 2,
+            "actualSamples": 2
+          }
+        ],
+        "calls": 1,
+        "triangles": 1,
+        "memory": {
+          "geometries": 1501,
+          "textures": 298
+        },
+        "jsHeap": 210453381
+      },
+      "camera": {
+        "position": [
+          46.20042740532611,
+          208.2878532625406,
+          -490.5572287766979
+        ],
+        "quaternion": [
+          -0.3702543457061976,
+          -0.5383996395935492,
+          -0.28410615187685734,
+          0.701656071046874
+        ],
+        "fov": 40,
+        "rig": [
+          254.75654126797372,
+          6.289360498188063,
+          -510.4076071434834
+        ]
+      }
+    }
+  ],
+  "errors": [],
+  "performance": [
+    {
+      "label": "msaa2-1600x900-dpr1-rest",
+      "motion": false,
+      "gpu": {
+        "n": 69,
+        "p50": 23.35025,
+        "p95": 24.727417,
+        "max": 24.954249,
+        "over100": 0
+      },
+      "raf": {
+        "n": 74,
+        "p50": 26.700000002980232,
+        "p95": 28.600000008940697,
+        "max": 29.200000002980232,
+        "over100": 0
+      },
+      "cpu": {
+        "n": 75,
+        "p50": 6.4000000059604645,
+        "p95": 8.100000008940697,
+        "max": 8.399999991059303,
+        "over100": 0
+      },
+      "timerQuery": true,
+      "draws": {
+        "calls": 323,
+        "triangles": 764246
+      },
+      "ratioRange": [
+        1
+      ],
+      "progressRange": [
+        0.12614160527985382,
+        0.12614160527985382
+      ],
+      "settings": {
+        "probe": {
+          "mode": "race",
+          "locked": false,
+          "speed01": 0,
+          "progress": 0.12614160527985382,
+          "applied": 1,
+          "level": "high",
+          "still": 12540.10000000894,
+          "sinceSwitch": null,
+          "canvasW": 1600,
+          "ratio": 1
+        },
+        "css": {
+          "width": 1600,
+          "height": 900
+        },
+        "devicePixelRatio": 1,
+        "contextAntialias": true,
+        "canvasSamples": 4,
+        "maxSamples": 8,
+        "halfFloatSamples": [
+          8,
+          4,
+          2
+        ],
+        "gpu": "ANGLE (Intel, ANGLE Metal Renderer: Intel(R) UHD Graphics 617, Unspecified Version)",
+        "targets": [
+          {
+            "width": 1600,
+            "height": 900,
+            "type": 1016,
+            "requestedSamples": 2,
+            "actualSamples": 2
+          },
+          {
+            "width": 1600,
+            "height": 900,
+            "type": 1016,
+            "requestedSamples": 2,
+            "actualSamples": 2
+          }
+        ],
+        "calls": 323,
+        "triangles": 764246,
+        "memory": {
+          "geometries": 1501,
+          "textures": 298
+        },
+        "jsHeap": 208386790
+      }
+    },
+    {
+      "label": "msaa2-1600x900-dpr1-motion",
+      "motion": true,
+      "gpu": {
+        "n": 54,
+        "p50": 23.983,
+        "p95": 24.756083,
+        "max": 24.917082,
+        "over100": 0
+      },
+      "raf": {
+        "n": 56,
+        "p50": 33.20000000298023,
+        "p95": 85.09999999403954,
+        "max": 98.8999999910593,
+        "over100": 0
+      },
+      "cpu": {
+        "n": 57,
+        "p50": 10,
+        "p95": 18,
+        "max": 19.200000002980232,
+        "over100": 0
+      },
+      "timerQuery": true,
+      "draws": {
+        "calls": 323,
+        "triangles": 764246
+      },
+      "ratioRange": [
+        1
+      ],
+      "progressRange": [
+        0.10820608520578015,
+        0.1487673735812654
+      ],
+      "settings": {
+        "probe": {
+          "mode": "race",
+          "locked": false,
+          "speed01": 0.4325329802389361,
+          "progress": 0.14977110997837828,
+          "applied": 1,
+          "level": "high",
+          "still": 0,
+          "sinceSwitch": null,
+          "canvasW": 1600,
+          "ratio": 1
+        },
+        "css": {
+          "width": 1600,
+          "height": 900
+        },
+        "devicePixelRatio": 1,
+        "contextAntialias": true,
+        "canvasSamples": 4,
+        "maxSamples": 8,
+        "halfFloatSamples": [
+          8,
+          4,
+          2
+        ],
+        "gpu": "ANGLE (Intel, ANGLE Metal Renderer: Intel(R) UHD Graphics 617, Unspecified Version)",
+        "targets": [
+          {
+            "width": 1600,
+            "height": 900,
+            "type": 1016,
+            "requestedSamples": 2,
+            "actualSamples": 2
+          },
+          {
+            "width": 1600,
+            "height": 900,
+            "type": 1016,
+            "requestedSamples": 2,
+            "actualSamples": 2
+          }
+        ],
+        "calls": 1,
+        "triangles": 1,
+        "memory": {
+          "geometries": 1501,
+          "textures": 298
+        },
+        "jsHeap": 204302711
+      }
+    }
+  ],
+  "gpu": {
+    "devices": [
+      {
+        "vendorId": 32902,
+        "deviceId": 34752,
+        "vendorString": "Google Inc. (Intel)",
+        "deviceString": "ANGLE (Intel, ANGLE Metal Renderer: Intel(R) UHD Graphics 617, Version 14.8.4 (Build 23J319))",
+        "driverVendor": "Intel",
+        "driverVersion": "14.8.4"
+      }
+    ],
+    "auxAttributes": {
+      "amdSwitchable": false,
+      "canSupportThreadedTextureMailbox": false,
+      "directRenderingVersion": "",
+      "displayType": "ANGLE_METAL",
+      "glExtensions": "GL_AMD_performance_monitor GL_ANGLE_base_vertex_base_instance_shader_builtin GL_ANGLE_blob_cache GL_ANGLE_client_arrays GL_ANGLE_clip_cull_distance GL_ANGLE_depth_texture GL_ANGLE_framebuffer_blit GL_ANGLE_framebuffer_multisample GL_ANGLE_get_serialized_context_string GL_ANGLE_get_tex_level_parameter GL_ANGLE_instanced_arrays GL_ANGLE_memory_size GL_ANGLE_pack_reverse_row_order GL_ANGLE_polygon_mode GL_ANGLE_program_binary_readiness_query GL_ANGLE_program_cache_control GL_ANGLE_provoking_vertex GL_ANGLE_renderability_validation GL_ANGLE_request_extension GL_ANGLE_rgbx_internal_format GL_ANGLE_robust_client_memory GL_ANGLE_shader_pixel_local_storage GL_ANGLE_shader_pixel_local_storage_coherent GL_ANGLE_stencil_texturing GL_ANGLE_texture_compression_dxt3 GL_ANGLE_texture_compression_dxt5 GL_ANGLE_texture_multisample GL_ANGLE_translated_shader_source GL_APPLE_clip_distance GL_ARM_rgba8 GL_CHROMIUM_bind_generates_resource GL_CHROMIUM_bind_uniform_location GL_CHROMIUM_copy_texture GL_CHROMIUM_lose_context GL_EXT_base_instance GL_EXT_blend_func_extended GL_EXT_blend_minmax GL_EXT_clip_control GL_EXT_color_buffer_float GL_EXT_color_buffer_half_float GL_EXT_compressed_ETC1_RGB8_sub_texture GL_EXT_conservative_depth GL_EXT_debug_label GL_EXT_debug_marker GL_EXT_depth_clamp GL_EXT_discard_framebuffer GL_EXT_disjoint_timer_query GL_EXT_draw_buffers GL_EXT_draw_buffers_indexed GL_EXT_draw_elements_base_vertex GL_EXT_float_blend GL_EXT_frag_depth GL_EXT_instanced_arrays GL_EXT_map_buffer_range GL_EXT_occlusion_query_boolean GL_EXT_polygon_offset_clamp GL_EXT_read_format_bgra GL_EXT_render_snorm GL_EXT_robustness GL_EXT_sRGB GL_EXT_shader_texture_lod GL_EXT_texture_compression_bptc GL_EXT_texture_compression_dxt1 GL_EXT_texture_compression_rgtc GL_EXT_texture_compression_s3tc_srgb GL_EXT_texture_filter_anisotropic GL_EXT_texture_format_BGRA8888 GL_EXT_texture_mirror_clamp_to_edge GL_EXT_texture_norm16 GL_EXT_texture_rg GL_EXT_texture_shadow_lod GL_EXT_texture_storage GL_KHR_debug GL_KHR_parallel_shader_compile GL_KHR_robustness GL_MESA_framebuffer_flip_y GL_NV_fence GL_NV_framebuffer_blit GL_NV_pixel_buffer_object GL_NV_shader_noperspective_interpolation GL_OES_EGL_image GL_OES_EGL_sync GL_OES_compressed_ETC1_RGB8_texture GL_OES_depth24 GL_OES_depth32 GL_OES_depth_texture GL_OES_draw_buffers_indexed GL_OES_draw_elements_base_vertex GL_OES_element_index_uint GL_OES_fbo_render_mipmap GL_OES_get_program_binary GL_OES_mapbuffer GL_OES_packed_depth_stencil GL_OES_required_internalformat GL_OES_rgb8_rgba8 GL_OES_sample_variables GL_OES_shader_multisample_interpolation GL_OES_standard_derivatives GL_OES_surfaceless_context GL_OES_texture_3D GL_OES_texture_float GL_OES_texture_float_linear GL_OES_texture_half_float GL_OES_texture_half_float_linear GL_OES_texture_npot GL_OES_texture_stencil8 GL_OES_vertex_array_object ",
+      "glImplementationParts": "(gl=egl-angle,angle=metal)",
+      "glRenderer": "ANGLE (Intel, ANGLE Metal Renderer: Intel(R) UHD Graphics 617, Version 14.8.4 (Build 23J319))",
+      "glResetNotificationStrategy": 33362,
+      "glVendor": "Google Inc. (Intel)",
+      "glVersion": "OpenGL ES 3.0 (ANGLE 2.1.28853 git hash: 170484eea03a)",
+      "glWsExtensions": "",
+      "glWsVendor": "",
+      "glWsVersion": "",
+      "inProcessGpu": false,
+      "initializationTime": 0.139782,
+      "isAsan": false,
+      "isClangCoverage": false,
+      "jpegDecodeAcceleratorSupported": false,
+      "maxMsaaSamples": "8",
+      "optimus": false,
+      "passthroughCmdDecoder": true,
+      "pixelShaderVersion": "3.00",
+      "processCrashCount": 0,
+      "sandboxed": false,
+      "skiaBackendType": "GraphiteDawnMetal",
+      "subpixelFontRendering": true,
+      "targetCpuBits": 64,
+      "vertexShaderVersion": "3.00",
+      "visibilityCallbackCallCount": 0
+    }
+  },
+  "browser": "Chrome/155.0.8059.40",
+  "baselineSettings": {
+    "probe": {
+      "mode": "race",
+      "locked": false,
+      "speed01": 0,
+      "progress": 0,
+      "applied": 1,
+      "level": "high",
+      "still": 74.5,
+      "sinceSwitch": null,
+      "canvasW": 1600,
+      "ratio": 1
+    },
+    "css": {
+      "width": 1600,
+      "height": 900
+    },
+    "devicePixelRatio": 1,
+    "contextAntialias": true,
+    "canvasSamples": 4,
+    "maxSamples": 8,
+    "halfFloatSamples": [
+      8,
+      4,
+      2
+    ],
+    "gpu": "ANGLE (Intel, ANGLE Metal Renderer: Intel(R) UHD Graphics 617, Unspecified Version)",
+    "targets": [
+      {
+        "width": 1600,
+        "height": 900,
+        "type": 1016,
+        "requestedSamples": 0,
+        "actualSamples": 0
+      },
+      {
+        "width": 1600,
+        "height": 900,
+        "type": 1016,
+        "requestedSamples": 0,
+        "actualSamples": 0
+      }
+    ],
+    "calls": 1,
+    "triangles": 1,
+    "memory": {
+      "geometries": 1501,
+      "textures": 298
+    },
+    "jsHeap": 199584807
+  },
+  "modelFacts": [
+    {
+      "index": 0,
+      "meshes": 224,
+      "triangles": 323594,
+      "missingNormals": 0,
+      "materials": [
+        {
+          "name": "cockpit_lr",
+          "roughness": 0.5,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "int_occlusion_inst",
+          "roughness": 0.30000000000000004,
+          "metalness": 1,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "int_plastic",
+          "roughness": 0.957705,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "int_carbon",
+          "roughness": 0.5,
+          "metalness": 1,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "int_leather1",
+          "roughness": 0.5,
+          "metalness": 1,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "int_electronics",
+          "roughness": 0.957705,
+          "metalness": 1,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "int_leather2",
+          "roughness": 0.957705,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "RACELOGIC_MONITOR",
+          "roughness": 0.957705,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "int_decals",
+          "roughness": 0.957705,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "int_glass",
+          "roughness": 0.19999999999999996,
+          "metalness": 1,
+          "flatShading": false,
+          "normalMap": false,
+          "map": false
+        },
+        {
+          "name": "int_windows",
+          "roughness": 0.957705,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "int_windshield",
+          "roughness": 0.957705,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "int_chrome",
+          "roughness": 0.957705,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": false
+        },
+        {
+          "name": "int_steer",
+          "roughness": 0.957705,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "INT_STEER_LEATHER",
+          "roughness": 1,
+          "metalness": 1,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "int_steer_carbon",
+          "roughness": 0.957705,
+          "metalness": 1,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "int_net",
+          "roughness": 0.957705,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "belt_schroth",
+          "roughness": 0.957705,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "INT_LCD",
+          "roughness": 0.957705,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "INT_LCD_0",
+          "roughness": 0.04229499999999997,
+          "metalness": 1,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "lexgt3_display",
+          "roughness": 0.957705,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "mirror",
+          "roughness": 0,
+          "metalness": 1,
+          "flatShading": false,
+          "normalMap": false,
+          "map": false
+        },
+        {
+          "name": "dash_2_a",
+          "roughness": 0.957705,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "DASH_2",
+          "roughness": 0.957705,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "ext_disc",
+          "roughness": 0.957705,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "ext_rim_decals",
+          "roughness": 0.957705,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "ext_rim",
+          "roughness": 0.30000000000000004,
+          "metalness": 1,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "EXT_Tyre",
+          "roughness": 0.5,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "RIM_BLUR",
+          "roughness": 0.957705,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "LEX_RIM1",
+          "roughness": 0.957705,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "ext_mechanics",
+          "roughness": 0.957705,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "ext_decals",
+          "roughness": 0.957705,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "EXT_Tyre_0",
+          "roughness": 0.957705,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "ext_mechanics_0",
+          "roughness": 0.957705,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "ext_mechanics_1",
+          "roughness": 0.19999999999999996,
+          "metalness": 1,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "ext_banner",
+          "roughness": 0.957705,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "ext_logo",
+          "roughness": 0.30000000000000004,
+          "metalness": 1,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "ext_emissive_light_front",
+          "roughness": 0.19999999999999996,
+          "metalness": 1,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "ext_windows",
+          "roughness": 0.957705,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "ext_glass_emissive_front",
+          "roughness": 0.957705,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": false
+        },
+        {
+          "name": "ext_glass_emissive_rear_0",
+          "roughness": 0,
+          "metalness": 1,
+          "flatShading": false,
+          "normalMap": false,
+          "map": false
+        },
+        {
+          "name": "ext_grid",
+          "roughness": 0.30000000000000004,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "ext_carpaint_inst",
+          "roughness": 0.09999999999999998,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "Material_60",
+          "roughness": 0.957705,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "LED_Panel",
+          "roughness": 0.957705,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": true,
+          "map": true
+        },
+        {
+          "name": "2019numberplate",
+          "roughness": 0.957705,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "2018numberplate",
+          "roughness": 0.957705,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "2018numberplate_0",
+          "roughness": 0.957705,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        }
+      ]
+    },
+    {
+      "index": 3,
+      "meshes": 213,
+      "triangles": 1290024,
+      "missingNormals": 0,
+      "materials": [
+        {
+          "name": "material",
+          "roughness": 0.30000000000000004,
+          "metalness": 1,
+          "flatShading": false,
+          "normalMap": false,
+          "map": false
+        },
+        {
+          "name": "body",
+          "roughness": 0.9,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "black_m",
+          "roughness": 0.79,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": false
+        },
+        {
+          "name": "material_3",
+          "roughness": 0,
+          "metalness": 1,
+          "flatShading": false,
+          "normalMap": false,
+          "map": false
+        },
+        {
+          "name": "chrome",
+          "roughness": 0,
+          "metalness": 1,
+          "flatShading": false,
+          "normalMap": false,
+          "map": false
+        },
+        {
+          "name": "carbon",
+          "roughness": 0.79,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "interior1",
+          "roughness": 0.79,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": false
+        },
+        {
+          "name": "decals",
+          "roughness": 0,
+          "metalness": 1,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "silver",
+          "roughness": 0.20999999999999996,
+          "metalness": 1,
+          "flatShading": false,
+          "normalMap": false,
+          "map": false
+        },
+        {
+          "name": "interior",
+          "roughness": 0.4,
+          "metalness": 1,
+          "flatShading": false,
+          "normalMap": false,
+          "map": false
+        },
+        {
+          "name": "d_glass",
+          "roughness": 0,
+          "metalness": 1,
+          "flatShading": false,
+          "normalMap": false,
+          "map": false
+        },
+        {
+          "name": "black",
+          "roughness": 0.79,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": false
+        },
+        {
+          "name": "tire",
+          "roughness": 1,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": false
+        },
+        {
+          "name": "carbon_brakedisc",
+          "roughness": 0.9,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "r_glass",
+          "roughness": 0.79,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": false
+        },
+        {
+          "name": "glass",
+          "roughness": 0,
+          "metalness": 1,
+          "flatShading": false,
+          "normalMap": false,
+          "map": false
+        },
+        {
+          "name": "logo",
+          "roughness": 0.9,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "nblue",
+          "roughness": 0.78,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": false
+        },
+        {
+          "name": "blue",
+          "roughness": 0.78,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": false
+        },
+        {
+          "name": "cluster",
+          "roughness": 0.9,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "radio",
+          "roughness": 0.9,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        }
+      ]
+    },
+    {
+      "index": 8,
+      "meshes": 61,
+      "triangles": 321153,
+      "missingNormals": 0,
+      "materials": [
+        {
+          "name": "AUX_LIGHT.005",
+          "roughness": 0.19999999999999996,
+          "metalness": 1,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "EXT_Grid_2.005",
+          "roughness": 0.717157,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": true,
+          "map": true
+        },
+        {
+          "name": "EXT_Grid.005",
+          "roughness": 0.717157,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "METAL_FUEL.005",
+          "roughness": 0.826795,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "EXT_Mechanics.005",
+          "roughness": 0.755051,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": true,
+          "map": true
+        },
+        {
+          "name": "EXT_Details.005",
+          "roughness": 0.776393,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": true,
+          "map": true
+        },
+        {
+          "name": "EXT_Banner.005",
+          "roughness": 0.552786,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "EXT_Carpaint_Inst.007",
+          "roughness": 0.30000000000000004,
+          "metalness": 0.9,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "EXT_Glass_Emissive_Rear.005",
+          "roughness": 0.552786,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "EXT_Glass_Emissive_Front.005",
+          "roughness": 0,
+          "metalness": 1,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "EXT_Windows.005",
+          "roughness": 0,
+          "metalness": 1,
+          "flatShading": false,
+          "normalMap": false,
+          "map": false
+        },
+        {
+          "name": "EXT_Emissive_Light_Rear.005",
+          "roughness": 0.683772,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": true,
+          "map": true
+        },
+        {
+          "name": "EXT_Emissive_Light_Front.005",
+          "roughness": 0.31622799999999995,
+          "metalness": 1,
+          "flatShading": false,
+          "normalMap": true,
+          "map": true
+        },
+        {
+          "name": "INT_Glass.001",
+          "roughness": 0.9,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": false
+        },
+        {
+          "name": "INT_Windshield.001",
+          "roughness": 0,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": false
+        },
+        {
+          "name": "INT_WELDING.003",
+          "roughness": 0.8,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": true,
+          "map": false
+        },
+        {
+          "name": "INT_Stitching.001",
+          "roughness": 0.826795,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "INT_Carbon_Kevlar.003",
+          "roughness": 0.8,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "INT_CAB_BORRACHA.005",
+          "roughness": 0.19999999999999996,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": false
+        },
+        {
+          "name": "INT_DECALS.003",
+          "roughness": 0.776393,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "INT_ELECTRONICS.005",
+          "roughness": 0.776393,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "INT_Occlusion_Inst.005",
+          "roughness": 0.19999999999999996,
+          "metalness": 1,
+          "flatShading": false,
+          "normalMap": false,
+          "map": false
+        },
+        {
+          "name": "DASH_PANEL_ALCANTRA.005",
+          "roughness": 0.9,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "INT_Racelogic.003",
+          "roughness": 0.223607,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": true,
+          "map": true
+        },
+        {
+          "name": "DISPLAY.003",
+          "roughness": 0.858579,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "DISPLAY_SAS.001",
+          "roughness": 0.858579,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "BORRACHA_DOORS.005",
+          "roughness": 0.826795,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": true,
+          "map": false
+        },
+        {
+          "name": "INT_CABLES.005",
+          "roughness": 0.19999999999999996,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "INT_CARBON_BAGE.003",
+          "roughness": 0.8,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "INT_CARBON_BLACK.005",
+          "roughness": 0.8,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "INT_MANG.003",
+          "roughness": 0.8,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "INT_MANG2.001",
+          "roughness": 0.8,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": false
+        },
+        {
+          "name": "INT_METAL_GRAY.003",
+          "roughness": 0.826795,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": false
+        },
+        {
+          "name": "INT_PLASTIC_GRAY.003",
+          "roughness": 0.8,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": false
+        },
+        {
+          "name": "INT_PLATE_AZUL.005",
+          "roughness": 0.826795,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "INT_METAL_GRAY_GRAY.003",
+          "roughness": 0.858579,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "METAL_BLACK.005",
+          "roughness": 0.858579,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "MIRROR.005",
+          "roughness": 0,
+          "metalness": 1,
+          "flatShading": false,
+          "normalMap": false,
+          "map": false
+        },
+        {
+          "name": "LED_RACELOGIC.001",
+          "roughness": 0.9,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "INT_SAS.001",
+          "roughness": 0.17320500000000005,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": true,
+          "map": true
+        },
+        {
+          "name": "SPARCO_FOAM.003",
+          "roughness": 0.9,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "SEAT_ALCANTARA.005",
+          "roughness": 0.858579,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "INT_CHROME.001",
+          "roughness": 0.30000000000000004,
+          "metalness": 1,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "STEER_ALCANTARA.003",
+          "roughness": 0.5,
+          "metalness": 1,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "INT_Steer.003",
+          "roughness": 0.30000000000000004,
+          "metalness": 1,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "INT_Steer_Carbon.003",
+          "roughness": 0.17320500000000005,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "INT_LED.001",
+          "roughness": 0.452277,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": true,
+          "map": true
+        },
+        {
+          "name": "PHISICS_DASH.001",
+          "roughness": 0.968377,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": false
+        },
+        {
+          "name": "MI_Tyre_Flex_Dry_L.005",
+          "roughness": 0.30000000000000004,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": true,
+          "map": true
+        },
+        {
+          "name": "EXT_RIM_BLUR.003",
+          "roughness": 0.826795,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": true,
+          "map": false
+        },
+        {
+          "name": "EXT_RIM.005",
+          "roughness": 0.24494899999999997,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "BELT_OMP.003",
+          "roughness": 0.745049,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": true,
+          "map": true
+        },
+        {
+          "name": "INT_NET.003",
+          "roughness": 0.264575,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": true,
+          "map": true
+        },
+        {
+          "name": "EXT_Disc.003",
+          "roughness": 0.223607,
+          "metalness": 1,
+          "flatShading": false,
+          "normalMap": true,
+          "map": true
+        },
+        {
+          "name": "EXT_CALIPER.003",
+          "roughness": 0.826795,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "RADIATOR.005",
+          "roughness": 0.717157,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "EXALTS.005",
+          "roughness": 0.7,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": true,
+          "map": true
+        },
+        {
+          "name": "CHASIS_KEVLAR.005",
+          "roughness": 0.826795,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        },
+        {
+          "name": "WorldGridMaterial.005",
+          "roughness": 0.755051,
+          "metalness": 0,
+          "flatShading": false,
+          "normalMap": false,
+          "map": true
+        }
+      ]
+    }
+  ],
+  "boardShader": {
+    "hasInstanceAtlasSampling": false
+  },
+  "pass": false,
+  "failure": "TypeError: Failed to resolve module specifier \"three\". Relative references must start with either \"/\", \"./\", or \"../\".\n    at #evaluate (file:///Users/rayyansheikh/Desktop/gt3/node_modules/puppeteer-core/lib/puppeteer/cdp/ExecutionContext.js:402:19)\n    at async ExecutionContext.evaluate (file:///Users/rayyansheikh/Desktop/gt3/node_modules/puppeteer-core/lib/puppeteer/cdp/ExecutionContext.js:288:16)\n    at async IsolatedWorld.evaluate (file:///Users/rayyansheikh/Desktop/gt3/node_modules/puppeteer-core/lib/puppeteer/cdp/IsolatedWorld.js:104:16)\n    at async CdpFrame.evaluate (file:///Users/rayyansheikh/Desktop/gt3/node_modules/puppeteer-core/lib/puppeteer/api/Frame.js:364:20)\n    at async CdpPage.evaluate (file:///Users/rayyansheikh/Desktop/gt3/node_modules/puppeteer-core/lib/puppeteer/api/Page.js:832:20)\n    at async file:///Users/rayyansheikh/Desktop/gt3/.claude/worktrees/p3z-render/scripts/capture-p3z-render.mjs:217:17"
+}

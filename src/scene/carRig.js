@@ -1,56 +1,16 @@
-/**
- * carRig.js — the camera rig hierarchy. (SPEC §4, §5, §7)
- *
- * OWNED BY THE MANAGER. This is the thing that makes the whole illusion work, so the
- * hierarchy is worth stating explicitly:
- *
- *   rig            — repositioned to curve.getPointAt(t), oriented to the tangent.
- *                    Its -Z axis is the direction of travel. Everything else is a child,
- *                    so everything else inherits "moving forward along the track".
- *     carMount     — holds the loaded car model. Only ever rotates (body roll into the
- *                    corner) and bobs a few centimetres. Never translates along the track.
- *       <car>      — swapped by morph.js. Models face -Z, nose to tail 4.6 units.
- *     shadow       — soft contact blob, pinned to the surface under the car.
- *     boom         — the camera arm. Holds the corner lean and the cursor parallax so
- *                    neither of those can contaminate the car's own transform.
- *       camera     — at a FIXED local offset. This is why the car stays locked in the
- *                    same screen position while the world streams past it.
- *
- * The camera is never repositioned per frame. It is parented once and left alone; all
- * apparent camera movement is the rig moving underneath it, plus a few degrees of lean.
- */
+import { tourPathPointAt, tourPathTangentAt } from './tourPath.js';
+/** Route-bound car, body motion, wheels and contact shadow. The race camera is independent. */
 
 import * as THREE from 'three';
 import { state } from '../core/state.js';
-import { pointAt, tangentAt, curvatureAt } from './trackCurve.js';
+import { surfaceOffsetAt, CROSS_SECTION } from './trackProfile.js';
+import { COMP } from './composition.js';
+import { pathCurvatureAt, curbUseAt } from './racingLine.js';
+import { pointAt, tangentAt, offsetPointAt, routeTAt, TRACK_LENGTH, TOUR_LENGTH } from './trackCurve.js';
 
-// ---------------------------------------------------------------------------
-// Framing. Derived, not guessed — see the note on CAMERA_OFFSET.
-// ---------------------------------------------------------------------------
-//
-// Two angles matter here and they are NOT the same angle, which is the thing that
-// makes this framing hard to tune by eye:
-//
-//   1. the angle from the camera DOWN TO THE CAR   — this is the "45 degree bird's-eye"
-//      the spec asks for. The offset below sits 23.2 units from the car at 41.6 deg.
-//   2. the angle the camera is AIMED at            — set by the look target. Aiming
-//      lower than 45 deg would put the car dead centre and show almost no track ahead.
-//
-// Aiming at 27 deg while sitting at 41.6 deg puts the car 14.6 deg below frame centre.
-// At FOV 52 (half-angle 26 deg) that lands it at ~0.78 of screen height — the lower
-// third — while opening up a long read of the track ahead.
-//
-// The 27 deg aim is also what makes a horizon possible at all: the top of the frame
-// then sits 1 deg BELOW horizontal, which is ground ~880 units away. That is far past
-// the fog far plane, so the top of frame resolves into atmospheric haze rather than a
-// hard edge of grass. Aiming any steeper (the literal 45 deg) puts the top of frame on
-// ground only ~190 units out, and no amount of sky work can be seen past it.
-//
-// Car size check: 2 * 20.4 * tan(26 deg) = 19.9 units of visible height; a GT3 seen
-// from 41.6 deg presents ~4.0 units, so the car covers ~17% of viewport height — mid
-// band for the 15-25% the spec asks for, measured from a render rather than assumed.
-const CAMERA_OFFSET = new THREE.Vector3(0, 13.55, 15.27); // +Z is behind, -Z is forward
-const CAMERA_LOOK_LOCAL = new THREE.Vector3(0, 0.9, -9.55);
+// W2 hero scale: uniform, about the mount origin, which is the models' ground plane
+// (cars.js normaliseScene grounds every car at y=0), so tyres stay seated.
+const HERO = COMP.hero;
 
 const TUNE = {
   // Body roll: the car leans INTO the turn, like weight transfer. Degrees at full lock.
@@ -58,19 +18,6 @@ const TUNE = {
   // Roll only develops when actually moving — a stationary car does not lean.
   bodyRollSpeedFloor: 0.12,
   bodyRollDamping: 0.055,
-
-  // Camera corner lean (SPEC §5 "corner drift"): a small extra tilt on the sharpest
-  // turns that eases out as the track straightens. Kept subtle — the 45 deg framing stays.
-  camLeanDeg: 2.6,
-  // The camera also slides slightly to the OUTSIDE of the turn, which reads as the car
-  // drifting across the frame rather than the camera swinging.
-  camLateral: 1.5,
-  camLeanDamping: 0.04,
-
-  // Cursor parallax (SPEC §11): a few degrees, no more. The scene breathing.
-  cursorYawDeg: 2.2,
-  cursorPitchDeg: 1.4,
-  cursorDamping: 0.035,
 
   // Gentle idle bob, in metres. Barely there.
   bobAmplitude: 0.035,
@@ -85,24 +32,106 @@ const TUNE = {
 // ---------------------------------------------------------------------------
 export const rig = new THREE.Group();
 export const carMount = new THREE.Group();
-export const boom = new THREE.Group();
 
 rig.name = 'car-rig';
 carMount.name = 'car-mount';
-boom.name = 'camera-boom';
 
 let shadowMesh = null;
 let wheels = [];          // meshes rotated for the spin blur, supplied by cars.js
-let attachedCamera = null;
+let contacts = [];
+const contactCache = new WeakMap();
+export const curbContactCacheStats = { builds: 0, buildMs: 0 };
+
+// Candidate-only ground support. Cache four tyre contact vertices once per model,
+// in normalized mount space; do not change the existing wheel-spin classifier.
+function tyreContacts(model) {
+  if (contactCache.has(model)) return contactCache.get(model);
+  const started = performance.now();
+  model.updateWorldMatrix(true, true);
+  const inverse = model.parent ? model.parent.matrixWorld.clone().invert() : new THREE.Matrix4();
+  const v = new THREE.Vector3(), matrix = new THREE.Matrix4(), instance = new THREE.Matrix4();
+  const quadrants = {}, treadBins = {};
+  const wheelName = s => /wheel|tyre|tire|rim/i.test(s || '') && !/brake|caliper|disc|rotor|arch|well|steering/i.test(s || '');
+  model.traverse(o => {
+    if (!o.isMesh) return;
+    let isWheel = false;
+    for (let a = o; a && a !== model.parent; a = a.parent) if (wheelName(a.name)) isWheel = true;
+    const mats = Array.isArray(o.material) ? o.material : [o.material];
+    if (!isWheel && !mats.some(m => wheelName(m?.name))) return;
+    const p = o.geometry.getAttribute('position');
+    for (let k = 0; k < (o.isInstancedMesh ? o.count : 1); k++) {
+      matrix.copy(o.matrixWorld);
+      if (o.isInstancedMesh) { o.getMatrixAt(k, instance); matrix.multiply(instance); }
+      matrix.premultiply(inverse);
+      for (let i = 0; i < p.count; i++) {
+        v.fromBufferAttribute(p, i).applyMatrix4(matrix);
+        const q = `${v.x >= 0 ? 'R' : 'L'}${v.z <= 0 ? 'F' : 'B'}`;
+        if (!quadrants[q] || v.y < quadrants[q].y) quadrants[q] = v.clone();
+        // Lowest vertex in 2 cm lateral bins retains the tread's contact width;
+        // one arbitrary bottom vertex misses the raised half of a straddling tyre.
+        const bin = `${q}:${Math.round(v.x / 0.02)}`;
+        if (!treadBins[bin] || v.y < treadBins[bin].y) treadBins[bin] = v.clone();
+      }
+    }
+  });
+  const result = Object.entries(quadrants).map(([q, lowest]) => Object.entries(treadBins)
+    .filter(([bin, p]) => bin.startsWith(q + ':') && p.y <= lowest.y + 0.025).map(([, p]) => p));
+  contactCache.set(model, result);
+  curbContactCacheStats.builds++;
+  curbContactCacheStats.buildMs += performance.now() - started;
+  return result;
+}
+
+/** Prepare during loading, so no vertex traversal lands on the first swap. */
+export function prepareCurbContacts(models) {
+  if (COMP.look) for (const model of models) tyreContacts(model);
+}
+
+const contactWorld = new THREE.Vector3(), surfaceCenter = new THREE.Vector3();
+const surfaceTan = new THREE.Vector3(), surfaceLeft = new THREE.Vector3();
+const supportEuler = new THREE.Euler(), supportRotation = new THREE.Quaternion();
+
+function seatOnSurface(t) {
+  const weight = THREE.MathUtils.smoothstep(curbUseAt(t), 0, 0.1);
+  if (contacts.length !== 4) return;
+  // Fit delta-y = a*x + b*z + c to four real tread contacts against the
+  // local surface. A path tangent alone misses the grade under a yawed axle.
+  // Away from deliberate curb use, one floor vertex per tyre is sufficient;
+  // straddling a curb still needs the cached tread width.
+  const rows = contacts.map(tread => (weight ? tread : [tread.reduce((a, b) => b.y < a.y ? b : a)]).map(p => {
+    contactWorld.copy(p).multiplyScalar(HERO).applyQuaternion(rig.quaternion).add(rig.position);
+    let u = t;
+    for (let i = 0; i < 3; i++) {
+      pointAt(u, surfaceCenter); tangentAt(u, surfaceTan).setY(0).normalize();
+      // Tyres can straddle the neutral/return line on this closed circuit.
+      u = (u + contactWorld.clone().sub(surfaceCenter).dot(surfaceTan) / TRACK_LENGTH + 1) % 1;
+    }
+    pointAt(u, surfaceCenter);
+    offsetPointAt(u, 1, 0, surfaceLeft).sub(surfaceCenter).setY(0).normalize();
+    const lateral = contactWorld.clone().sub(surfaceCenter).dot(surfaceLeft);
+    const curbY = CROSS_SECTION.asphaltY
+      + (surfaceOffsetAt(u, lateral) - CROSS_SECTION.asphaltY) * weight;
+    return [p.x * HERO, p.z * HERO, 1, surfaceCenter.y + curbY - contactWorld.y];
+  }).reduce((a, b) => b[3] > a[3] ? b : a));
+  const matrix = Array.from({ length: 3 }, (_, i) => Array.from({ length: 4 }, (_, j) =>
+    rows.reduce((sum, row) => sum + row[i] * row[j], 0)));
+  for (let i = 0; i < 3; i++) {
+    const divisor = matrix[i][i];
+    if (Math.abs(divisor) < 1e-10) return;
+    for (let j = i; j < 4; j++) matrix[i][j] /= divisor;
+    for (let k = 0; k < 3; k++) if (k !== i) {
+      const factor = matrix[k][i];
+      for (let j = i; j < 4; j++) matrix[k][j] -= factor * matrix[i][j];
+    }
+  }
+  supportEuler.set(-Math.atan(matrix[1][3]), 0, Math.atan(matrix[0][3]));
+  supportRotation.setFromEuler(supportEuler);
+  rig.quaternion.multiply(supportRotation);
+  rig.position.y += matrix[2][3];
+}
 
 // Smoothed values, so nothing in here can snap.
 let bodyRoll = 0;
-let camLean = 0;
-let camLateral = 0;
-let cursorX = 0;
-let cursorY = 0;
-let cursorTargetX = 0;
-let cursorTargetY = 0;
 let bobPhase = 0;
 
 const _pos = new THREE.Vector3();
@@ -157,27 +186,12 @@ function buildContactShadow() {
 // Setup
 // ---------------------------------------------------------------------------
 
-/**
- * Build the hierarchy and parent the camera into it.
- * @param {THREE.Camera} camera the camera created by sceneSetup
- * @returns {THREE.Group} the rig, to be added to the scene
- */
-export function initCarRig(camera) {
-  attachedCamera = camera;
-
-  camera.position.copy(CAMERA_OFFSET);
-  // Aim at a point ahead of the car. Derived rather than hard-coded so that moving
-  // CAMERA_OFFSET or CAMERA_LOOK_LOCAL keeps the framing correct.
-  const dir = _target.copy(CAMERA_LOOK_LOCAL).sub(CAMERA_OFFSET);
-  camera.rotation.set(-Math.atan2(-dir.y, -dir.z), 0, 0, 'YXZ');
-
-  boom.add(camera);
+/** Build the independent car hierarchy and return its route-bound root. */
+export function initCarRig() {
   rig.add(carMount);
-  rig.add(boom);
-
+  carMount.scale.setScalar(HERO);
   shadowMesh = buildContactShadow();
   rig.add(shadowMesh);
-
   return rig;
 }
 
@@ -187,6 +201,7 @@ export function setCarModel(object3D) {
     carMount.remove(carMount.children[i]);
   }
   if (object3D) carMount.add(object3D);
+  if (COMP.look) contacts = object3D ? tyreContacts(object3D) : [];
 }
 
 /** Register the wheel meshes of the current car so they can be spun. */
@@ -194,37 +209,31 @@ export function setWheels(meshes) {
   wheels = Array.isArray(meshes) ? meshes : [];
 }
 
-/** Cursor parallax input, -1..1 on each axis. Called by the cursor module. */
-export function setCursor(x, y) {
-  cursorTargetX = THREE.MathUtils.clamp(x, -1, 1);
-  cursorTargetY = THREE.MathUtils.clamp(y, -1, 1);
-}
-
-/** The camera's world position — the montage needs it to hand off cleanly. */
-export function getCameraWorldPosition(out = new THREE.Vector3()) {
-  return attachedCamera ? attachedCamera.getWorldPosition(out) : out.set(0, 0, 0);
-}
-
 // ---------------------------------------------------------------------------
 // Frame update
 // ---------------------------------------------------------------------------
 
 export function update(dt) {
-  const t = state.progress;
+  const presentationP = state.progress + state.finishTailMeters / TOUR_LENGTH;
+  const t = routeTAt(presentationP);
 
-  // --- travel: position and orientation on the spline -----------------------
-  pointAt(t, _pos);
-  tangentAt(t, _tan);
+  // --- travel: position and orientation on the driven path ------------------
+  // Centreline unless a racing line is active; heading follows the path's own tangent.
+  tourPathPointAt(presentationP, _pos);
+  tourPathTangentAt(presentationP, _tan);
   rig.position.copy(_pos);
+  // The real asphalt vertices are 2 cm below the spline, not at spline y.
+  if (COMP.look) rig.position.y += CROSS_SECTION.asphaltY;
 
   // Matrix4.lookAt sets +Z to (eye - target). Aiming it at a point AHEAD therefore
   // puts -Z along the direction of travel, which is the direction the models face.
   _target.copy(_pos).add(_tan);
   _m.lookAt(_pos, _target, _up);
   rig.quaternion.setFromRotationMatrix(_m);
+  if (COMP.look) seatOnSurface(t);
 
   // --- corner signals ------------------------------------------------------
-  const curvature = curvatureAt(t);
+  const curvature = pathCurvatureAt(t);
   const speed = state.speed01;
   const moving = Math.min(1, speed / TUNE.bodyRollSpeedFloor);
 
@@ -233,33 +242,18 @@ export function update(dt) {
   const rollTarget = -curvature * THREE.MathUtils.degToRad(TUNE.bodyRollDeg) * moving;
   bodyRoll += (rollTarget - bodyRoll) * damp(TUNE.bodyRollDamping, dt);
 
-  // Camera leans the same way but less, and drifts to the outside of the turn.
-  const leanTarget = -curvature * THREE.MathUtils.degToRad(TUNE.camLeanDeg) * moving;
-  const lateralTarget = curvature * TUNE.camLateral * moving;
-  camLean += (leanTarget - camLean) * damp(TUNE.camLeanDamping, dt);
-  camLateral += (lateralTarget - camLateral) * damp(TUNE.camLeanDamping, dt);
-
-  // --- cursor parallax -----------------------------------------------------
-  cursorX += (cursorTargetX - cursorX) * damp(TUNE.cursorDamping, dt);
-  cursorY += (cursorTargetY - cursorY) * damp(TUNE.cursorDamping, dt);
-
   // --- apply ---------------------------------------------------------------
   bobPhase += dt * TUNE.bobSpeed;
-  carMount.rotation.set(0, 0, bodyRoll);
-  carMount.position.y = Math.sin(bobPhase) * TUNE.bobAmplitude * (0.4 + moving * 0.6);
-
-  boom.rotation.set(
-    cursorY * THREE.MathUtils.degToRad(TUNE.cursorPitchDeg),
-    cursorX * THREE.MathUtils.degToRad(TUNE.cursorYawDeg),
-    camLean,
-    'YXZ',
-  );
-  boom.position.x = camLateral;
+  // The supplied models have no suspension-only body rig. Rolling/bobbing the
+  // whole model also moves the tyres off the road. Review looks keep real tyre
+  // seating; the legacy comp URLs retain the old motion for comparison.
+  carMount.rotation.set(0, 0, COMP.look ? 0 : bodyRoll);
+  carMount.position.y = COMP.look ? 0 : Math.sin(bobPhase) * TUNE.bobAmplitude * HERO * (0.4 + moving * 0.6);
 
   // The contact shadow stays flat on the surface and does not inherit the body roll,
   // so it never peels off the asphalt on a corner.
   if (shadowMesh) {
-    shadowMesh.scale.setScalar(1 + speed * 0.06);
+    shadowMesh.scale.setScalar(HERO * (1 + speed * 0.06));
     shadowMesh.material.opacity = 0.85 - speed * 0.12;
   }
 
@@ -271,4 +265,3 @@ export function update(dt) {
 }
 
 export const rigTuning = TUNE;
-export { CAMERA_OFFSET, CAMERA_LOOK_LOCAL };

@@ -25,7 +25,9 @@ const _sunTargetPosition = new THREE.Vector3();
 // Intel UHD 617, 1280x800 CSS @ DPR 2: GPU cost scales nearly linearly with pixels:
 // DPR 2.00: 4.1 MPix / 40.4 ms; 1.50: 2.3 / 25.3; 1.25: 1.6 / 19.1; 1.00: 1.0 / 12.9.
 export const ADAPTIVE_RES = {
-  high: Math.min(window.devicePixelRatio || 1, 2), // at rest: full sharpness
+  high: new URLSearchParams(window.location.search).get('res') === 'dpr1'
+    ? 1 // owner evaluation (?res=dpr1): fixed DPR1, no switching
+    : Math.min(window.devicePixelRatio || 1, 2), // at rest: full sharpness
   low: 1.0, // in motion: smooth
   enterLowAt: 0.02, // state.speed01 above this => motion
   returnHighBelow: 0.008,
@@ -83,6 +85,9 @@ let timeSinceResolutionSwitchMs = Infinity;
 // Keep the accepted default until the owner chooses a delivery/quality tradeoff.
 const TOUR_DRAW_INTERVAL_MS = new URLSearchParams(window.location.search).get('pace') === '30'
   ? 1000 / 30 : 0;
+// Owner evaluation only (?res=dpr1): the measured fixed-resolution control, rendering at DPR1
+// with SMAA and no resolution switching. The default keeps native rest and DPR1 in motion.
+const FIXED_DPR1 = new URLSearchParams(window.location.search).get('res') === 'dpr1';
 let lastTourDrawAt = -Infinity;
 let resolutionDrawPending = true;
 
@@ -226,7 +231,7 @@ function resizeScene(width, height) {
 
   const safeWidth = Math.max(1, width);
   const safeHeight = Math.max(1, height);
-  ADAPTIVE_RES.high = Math.min(window.devicePixelRatio || 1, 2);
+  ADAPTIVE_RES.high = FIXED_DPR1 ? 1 : Math.min(window.devicePixelRatio || 1, 2);
   const pixelRatio = activeResolutionLevel === 'low'
     ? ADAPTIVE_RES.low
     : ADAPTIVE_RES.high;

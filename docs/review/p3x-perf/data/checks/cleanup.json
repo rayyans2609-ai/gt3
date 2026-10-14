@@ -1,0 +1,18 @@
+{
+  "at": "2026-10-14T12:14:34.481Z",
+  "ownedVitePid": 78323,
+  "ownedSamplerPid": 56439,
+  "stopped": {
+    "exit": 1,
+    "output": ""
+  },
+  "port5211": {
+    "exit": 1,
+    "output": ""
+  },
+  "port5212": {
+    "exit": 1,
+    "output": ""
+  },
+  "ownedChrome": []
+}

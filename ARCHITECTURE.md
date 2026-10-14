@@ -119,7 +119,9 @@ text/HUD/player UI. One fixed canvas behind it, one shared `WebGLRenderer`.
 - **Sanctioned exception:** `montage/studio.js` keeps its own renderer, used ONLY inside the
   Showcase manual-unlock flow (SPEC §11), never in Grand Tour. No other second renderer —
   in particular the finish hero sequence reuses the Grand Tour scene/camera (SPEC §21, §27).
-- **Adaptive resolution** [keep]: lower dpr while scrolling, full dpr at rest (~420 ms
+- **Adaptive resolution** [retired for the Grand Tour, 2026-10-14]: the Tour now renders at a fixed
+  DPR1 with SMAA and no idle/motion switching (SPEC §27); the switching code remains but is inert
+  (`ADAPTIVE_RES.high == low == RENDER_DPR`). Originally: lower dpr while scrolling, full dpr at rest (~420 ms
   settle). Landing push-in and Grand Tour use it; Showcase, montage and the completion hero
   render at full quality.
 - **Landing→Hub** is a field scene (themed background + Lexus); the Hub itself is mostly DOM

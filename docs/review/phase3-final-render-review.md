@@ -48,7 +48,7 @@ This is the bounded final Phase 3 run, done per `GT3_PHASE3_FINAL_RENDER_HANDOFF
 
 ## 3. Your checklist (subjective only)
 
-1. **Edges:** road edges, curbs and grid paint at the parked grid and the hairpin. Are they clean enough now? (SMAA costs about +4.6 ms GPU at rest at native Retina and about +1.6 ms in motion.)
+1. **Edges:** road edges, curbs and grid paint at the parked grid and the hairpin. Are they clean enough now? (SMAA cost figures measured at native Retina on the intermediate build; the shipped default renders at DPR1, see §F.)
 2. **Lamborghini** next to another car. Is the remaining small glossy-detail roughness acceptable for Phase 3, or a Phase 6/8 asset item?
 3. **Grid:** do the stagger, spacing and slot fit around the car read as a credible grid (P1 default, and `?grid=p2`)?
 4. **Full props** at the hairpin and elsewhere: is the selective removal right, or is anything else still a "black block"?
@@ -89,7 +89,7 @@ Tested code: `phase3-integration` at `ea72eda` (facility, persistence, build) an
 | `verify-route-persistence` | PASS 6/6 | Default/pace restore, fresh context, finish-state refresh, old-session migration, console |
 | `check-finish-state`, `check-lap-timer`, `check-tour-progress` (node) | PASS | V1 state machine, timer clock, Option A mapping |
 | Sol batch (`p3z-render`, reused) | PASS | 9 checkpoints × 2 directions (18 crossings, 0 GL uploads); cold Day and Night first crossing; §30.6 occlusion at 11 targeted points; pit-lane/terrain ray checks; static curb/profile; build. Reused because the finish changes only act at p ≥ 1 (the camera run-out offset is 0 elsewhere). |
-| Performance (Sol, same source, SMAA only toggled) | Measured | GPU p50 at native DPR2: rest 33.5 → 38.1 ms (+4.6); adaptive motion 10.2 → 11.8 ms (+1.6). SMAA adds about 62.5 MiB of screen targets at DPR2. No new GPU stall. The host paged around browser launches before and during the run, so perfect memory stability is **not** proven. Trackpad feel is your check. |
+| Performance (Sol, intermediate build, SMAA only toggled; superseded by §F) | Measured | GPU p50 at native DPR2: rest 33.5 → 38.1 ms (+4.6); adaptive motion 10.2 → 11.8 ms (+1.6). SMAA adds about 62.5 MiB of screen targets at DPR2. No new GPU stall. The host paged around browser launches before and during the run, so perfect memory stability is **not** proven. Trackpad feel is your check. |
 
 Evidence: `docs/review/p3z-render/` (render/grid/props before/after crops and data) and `docs/review/p3z-final/` (`finish-v1-day.png`, `finish-v1-night.png`, `timer-day.png`, `timer-night.png` showing the white HUD).
 
@@ -110,6 +110,8 @@ Evidence: `docs/review/p3z-render/` (render/grid/props before/after crops and da
 You accepted the rendering, finish, props and HUD, and accepted the Lamborghini as is. This round covers only your three items. **Not owner-accepted yet.**
 
 ## A. Performance and hitching — proven cause, measured fix (Sol @ xhigh)
+
+> **Superseded in part by §F.** This section describes the *intermediate* build `6064a30` (native resolution at rest, DPR1 in motion). The owner later rejected that default as still hitching and chose **fixed DPR1 + SMAA**. The native-resolution figures and "no visible tradeoff at rest" claims below are history, not the shipped behaviour.
 
 **Cause, proven by measurement.** The canvas still requested its own **4× MSAA** buffer. It only ever held the final full-screen image: the 3D scene renders off-screen, and SMAA handles its edges. Every scroll start and stop switches resolution (DPR 2 ↔ 1), and that resize of the MSAA canvas took a median **139 ms** in the current build, versus 50 ms before this Phase 3 run. That stall is the hitch.
 
@@ -137,7 +139,7 @@ The motion/rest resolution policy, **SMAA and full props are unchanged**.
 
 Against B, frame p95 drops 27%, p99 drops 24%, and frames over 50 ms drop 41%. Same-view crops at rest (grid, hairpin, BMW) are **pixel-identical** to B, so the rendering improvement is fully kept.
 
-**Tradeoff:** none visible at rest. In motion, the existing lower-resolution motion rendering is unchanged.
+**Tradeoff (intermediate build only):** none visible at rest. *The shipped default now differs: see §F, where the resting image is softer by design.*
 
 **Remaining limits:**
 - About 100 ms gaps right as scrolling starts persist in every build, including the pre-run baseline. Their cause is unproven.
@@ -184,6 +186,20 @@ Evidence: `docs/review/p3y-perf/` (performance matrix, crops, data) and `docs/re
 ## E. Your checks
 
 1. **Hitching:** scroll start/stop, cruise, the hairpin and a checkpoint on `/`. Is it smooth enough now?
-2. **Rendering:** unchanged from your acceptance (crops are pixel-identical).
+2. **Rendering:** **not** unchanged: the adopted fixed DPR1 default renders softer than the build you accepted for sharpness (§F). Check that the softness is acceptable on edges, curbs, grid paint and cars.
 3. **Grid:** is the lateral spacing right at 7 m (`/` and `/?grid=p2`)?
 4. **Font:** compare `/` and `/?font=sw` across the start card, HUD, finish notice and edge controls.
+
+## F. Owner decision — fixed DPR1 + SMAA adopted as the Phase 3 default (2026-10-14)
+
+**Decision.** The owner manually compared fixed DPR1, DPR1.25 and DPR1.5 (each with SMAA) against the previous adaptive default and chose **fixed DPR1 + SMAA** as the Phase 3 default. In substance: a much smoother experience with a slightly softer image, accepted. This is an explicit owner-approved performance/quality tradeoff.
+
+**What changed in code.** In `src/scene/sceneSetup.js`: a new exported constant `RENDER_DPR = 1`; `ADAPTIVE_RES.high` and `ADAPTIVE_RES.low` are both set to it, and `resizeScene` sets `high` to it, so dynamic idle/motion resolution switching is inert by construction. SMAA, the single-sample canvas (no canvas MSAA), full props, geometry, finish, checkpoints, HUD, grid and Switzer (`?font=sw`, Neue Haas default) are unchanged. Commit: `1f58a1a`.
+
+**What the image looks like.** Rest and motion both render at one buffer pixel per CSS pixel (a 1280x800 buffer in a 1280x800 window) and are scaled up on a DPR2 display, so the image is softer than the previous native-resolution rest rendering. Measured earlier on this branch, start/stop and sustained scrolling hitches were substantially reduced versus the adaptive default; the owner judged this by hand.
+
+**Evidence.** Earlier comparisons are preserved on branch `p3x-perf` (not merged) and copied into `docs/review/p3x-perf/` (matrix, transition windows, crops). The adaptive default measured a start-window worst-frame median of about 142 ms with 24 of 24 starts over 50 ms; fixed DPR1 + SMAA measured about 35 ms with 1 of 24 over 50 ms (headless measurement; physical feel is the owner's judgment). Continuous-scroll outliers still exist.
+
+**Still open / not claimed.** Hitching is reduced, not eliminated. The `?pace=30` experimental pacing was not adopted and is not in the default. Checkpoint-specific hitching was not investigated to a conclusion and is deferred unless it reappears under this configuration. No physical trackpad acceptance is claimed. Phase 3 final acceptance remains the owner's.
+
+**Verification.** Regression checks on the adopted default are recorded in the batch report at `docs/review/p3x-perf/REGRESSION-1f58a1a.md` (written by the manager after the run). Refer to that file for results.

@@ -30,7 +30,7 @@ Landing, Hub, dedicated Showcase, manual unlock, and the completion hero transit
 - The montage/studio system (`src/montage/`) — retained for future manual unlock only (§11); no longer called by Grand Tour checkpoints.
 - The narration audio (`audios/voices/voice_01…10`) and per-car copy already authored in `src/data/cars.js`.
 - The explicit-gesture WebAudio lifecycle in `src/audio/audioManager.js` (no scroll-based init).
-- The accepted performance findings in `BUILD_LOG.md` (§27 below) — adaptive resolution while scrolling, non-passive-listener cost, fill-rate-first attribution.
+- The accepted performance findings in `BUILD_LOG.md` (§27 below) — adaptive resolution while scrolling (**retired for the Grand Tour on 2026-10-14**: fixed DPR1 + SMAA, see §27), non-passive-listener cost, fill-rate-first attribution.
 - The DOM-overlay-over-fixed-canvas split, single RAF loop, and central `state.js` pub/sub pattern (module boundaries will change; the pattern doesn't need to).
 
 ### 1b. What is explicitly replaced
@@ -705,6 +705,7 @@ Primary user-facing metric: **scroll feel**, not raw FPS. Use measure → attrib
 
 - **Fill rate, not geometry, was the real bottleneck.** GPU-timer measurement showed cost ~linear in pixel count (~9.8 ms/megapixel); at dpr 2 the GPU alone capped the race scene at 25 fps before any CPU work. Do not assume geometry/shadow reduction is the fix without measuring fill rate first.
 - **Adaptive render resolution** (lower dpr while scrolling, full dpr at rest, ~420 ms settle) is an accepted, user-approved tradeoff — motion blur/streaking mask the softness while moving. Showcase/hero-inspection states must render at full quality; this is why the current code forces full resolution for Showcase/montage/fullcard.
+- **Grand Tour default is now a fixed render resolution (owner, 2026-10-14).** The Tour renders at DPR1 with SMAA and **no idle/motion switching** (`RENDER_DPR` in `src/scene/sceneSetup.js`). Dynamic switching measured as the dominant start/stop hitch source (a median 139 ms canvas resize at each switch before the canvas was made single-sample, and ~100 ms start gaps that persisted after it). The owner compared fixed DPR1, 1.25 and 1.5 by hand, preferred the substantially smoother DPR1 despite a softer image, and accepted that tradeoff. The bullet above is retained as history. **Phase 6 note:** `src/ui/showcase.js` (not wired into the current build) draws with the *shared* renderer directly, without post-processing, so it would inherit the fixed DPR1 and the single-sample canvas (no MSAA, no SMAA); a full-quality Showcase must set its own resolution and anti-aliasing. The montage studio has its own renderer and is unaffected. Evidence: `docs/review/p3x-perf/`, `docs/review/p3y-perf/`.
 - **Non-passive wheel/touchmove listeners measurably damage scroll feel independent of frame rate** — merely registering them disables Chrome's threaded scrolling for the whole page. Attach them only while scroll must be actively suppressed (e.g. during a locked/transition state), not globally.
 - **A second WebGLRenderer is expensive and easy to lose track of.** The montage's separate `studio.js` renderer sat outside the adaptive-resolution system entirely and was, measured, the single largest remaining cost (~15.6 s montage × 10 at a 25 fps ceiling before its own fixed-resolution fix). Do not introduce another separate renderer for the completion hero sequence (§21) — reuse shared scene/camera infrastructure.
 - **Car orientation relies on a verified per-model table**, not geometry heuristics (`src/scene/cars.js` logs each car's applied flip from "the verified orientation table") — preserve this approach for any new car-facing code.
@@ -845,6 +846,7 @@ Raised during Phase 3 review, owned by later phases, and **not to be implemented
 | Sponsor/gateway-style checkpoint structures (no real branding) | backlog | Phase 8 study | §18 |
 | Environment comparison: OMA white, gray/night, white with light/shadow variations, green as baseline | E | Phase 8 | §16 |
 | Full-quality Showcase models (Tour stays 512-px) | R | Phase 6 | §30.10 |
+| Showcase draws with the shared renderer: give it its own full resolution and anti-aliasing (the Tour now runs fixed DPR1, no canvas MSAA) | R | Phase 6 | §27 |
 | UI/UX craft uplift (hierarchy, interactions, transitions, modelling/lighting, delight) | R | every phase | §23 |
 | Custom site-wide cursor | dropped | — | §28 |
 

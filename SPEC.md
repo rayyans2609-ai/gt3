@@ -109,14 +109,16 @@ Shipped location: `public/audios/playlist/track_1.mp3 … track_6.mp3`. The six 
 
 | GT3 alias | Original source filename (pre-move) | Cover file |
 |---|---|---|
-| `track_1` | `Cult Member - one(name this track_1).mp3` | `track_1.png` |
-| `track_2` | `Vegyn - The Path Less Traveled(name this track_2).mp3` | `track_2.jpeg` |
-| `track_3` | `blije - through the windshield(name this track_3).mp3` | `track_3.jpeg` |
-| `track_4` | `Vegyn - Mystery or Misery(name this track_4).mp3` | `track_4.jpeg` |
-| `track_5` | `Cult Member - U Weren't Here I Really Miss You(name this track_5).mp3` | `track_5.jpeg` |
-| `track_6` | `Cult Member - Fantastic Life(name this track_6).mp3` | `track_6.jpeg` |
+| `track_1` | `Cult Member - U Weren't Here I Really Miss You(name this track_5).mp3` | `track_1.jpeg` |
+| `track_2` | `Cult Member - Fantastic Life(name this track_6).mp3` | `track_2.jpeg` |
+| `track_3` | `Vegyn - Mystery or Misery(name this track_4).mp3` | `track_3.jpeg` |
+| `track_4` | `blije - through the windshield(name this track_3).mp3` | `track_4.jpeg` |
+| `track_5` | `Vegyn - The Path Less Traveled(name this track_2).mp3` | `track_5.jpeg` |
+| `track_6` | `Cult Member - one(name this track_1).mp3` | `track_6.png` |
 
-All six `(name this track_X)` markers are present, unique, and cover `track_1`–`track_6` exactly once — **the explicit-marker mapping is authoritative and valid**; the fallback numeric/alphabetical rule in the brief is not needed. Playback sequence: `track_1 → track_2 → track_3 → track_4 → track_5 → track_6 → track_1`, looping indefinitely while music is active, auto-advancing on track end.
+**Reordered 2026-10-14 (owner request).** The tracks, covers and bytes are unchanged; only the numbering changed. The `(name this track_X)` marker in each original filename is the pre-reorder number, so it no longer equals the GT3 alias, and the table above is the authoritative mapping. Old→new: 5→1, 6→2, 4→3, 3→4, 2→5, 1→6. A session saved before this change restores `trackIndex` against the new order.
+
+All six original `(name this track_X)` markers are present, unique, and cover the six tracks exactly once; the table above is the authoritative mapping. Playback sequence: `track_1 → track_2 → track_3 → track_4 → track_5 → track_6 → track_1`, looping indefinitely while music is active, auto-advancing on track end.
 
 Real artist/title names must never appear in the GT3 UI — only `track_1…track_6`. Only the six audio files count as tracks; cover images are never treated as playlist entries. The playlist/player system is **net-new** (§1b). The music engine was implemented in Phase 2a **inside `src/audio/audioManager.js`**, with the alias table in `src/data/playlist.js`. The player/speaker UI is Phase 2b, and per-track covers are Phase 5.
 

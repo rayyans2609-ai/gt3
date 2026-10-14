@@ -1,0 +1,27 @@
+[
+  {
+    "dir": "gates",
+    "path": "verification.json",
+    "sha256": "8f70e8216f767374c4bdeae4386d5ef79a5181426d4a3a2d257ee4c5d68cafa4"
+  },
+  {
+    "dir": "cold-day",
+    "path": "report.json",
+    "sha256": "91c03563f7e98a27a6423b4f0e34e70e925e3e3c3aa296a412e8c7c6967d714a"
+  },
+  {
+    "dir": "cold-night",
+    "path": "report.json",
+    "sha256": "a76af104af20e9b2567addfec6b2c45712570c2f30f364b2711021fabd9b346b"
+  },
+  {
+    "dir": "viewport",
+    "path": "viewport-checks.json",
+    "sha256": "0c425cd8ae30d8f43cf6be72b141bb5053f53bb31b1b996e881755e5c4a2e99b"
+  },
+  {
+    "dir": "default-viewport",
+    "path": "viewport-checks.json",
+    "sha256": "40b43bbf2e8a7a3ca3f8dea3c1faf523f34c426bf7a805e093565c6e1515b8e5"
+  }
+]

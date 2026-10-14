@@ -1,0 +1,65 @@
+PREFLIGHT {"kind":"preflight","a":{"at":"2026-10-14T12:06:20.391Z","pressure":1,"pageouts":482106,"swapouts":22691124,"user":18.35,"system":29.43,"idle":52.21,"swap":"total = 3072.00M  used = 2208.00M  free = 864.00M  (encrypted)"},"b":{"at":"2026-10-14T12:06:31.211Z","pressure":1,"pageouts":482106,"swapouts":22691124,"user":7.69,"system":22.26,"idle":70.4,"swap":"total = 3072.00M  used = 2176.00M  free = 896.00M  (encrypted)"},"pass":true,"competing":[]}
+
+> build
+> vite build
+
+vite v7.3.6 building client environment for production...
+transforming...
+✓ 67 modules transformed.
+rendering chunks...
+[plugin vite:reporter] 
+(!) /Users/rayyansheikh/Desktop/gt3/.claude/worktrees/p3x-perf/src/scroll/scrollDrive.js is dynamically imported by /Users/rayyansheikh/Desktop/gt3/.claude/worktrees/p3x-perf/src/main.js but also statically imported by /Users/rayyansheikh/Desktop/gt3/.claude/worktrees/p3x-perf/src/core/experience.js, /Users/rayyansheikh/Desktop/gt3/.claude/worktrees/p3x-perf/src/montage/studio.js, /Users/rayyansheikh/Desktop/gt3/.claude/worktrees/p3x-perf/src/ui/finishScreen.js, /Users/rayyansheikh/Desktop/gt3/.claude/worktrees/p3x-perf/src/ui/startScreen.js, dynamic import will not move module into another chunk.
+
+computing gzip size...
+dist/index.html                                                   2.51 kB │ gzip:  1.08 kB
+dist/assets/Switzer-VariableItalic-LLLHtZ_1.woff2                33.41 kB
+dist/assets/Switzer-Variable-7Oa6q7Y4.woff2                      43.22 kB
+dist/assets/NeueHaasGrotDisp-55Roman-Trial-Csn10bND.otf          72.95 kB
+dist/assets/NeueHaasGrotDisp-15XXThin-Trial-C3euxRTN.otf         72.99 kB
+dist/assets/NeueHaasGrotDisp-35Thin-Trial-mPB0lOTX.otf           73.05 kB
+dist/assets/NeueHaasGrotDisp-45Light-Trial-DDHwbvKI.otf          73.22 kB
+dist/assets/NeueHaasGrotText-55Roman-Trial-B7SLBs7q.otf          73.26 kB
+dist/assets/NeueHaasGrotDisp-65Medium-Trial-EMQLh5qS.otf         73.42 kB
+dist/assets/NeueHaasGrotDisp-95Black-Trial-k0yQb4Pp.otf          73.50 kB
+dist/assets/NeueHaasGrotDisp-75Bold-Trial-Brcq4zn4.otf           73.61 kB
+dist/assets/NeueHaasGrotDisp-46LightItalic-Trial-5RStNL6D.otf    73.72 kB
+dist/assets/NeueHaasGrotDisp-56Italic-Trial-D1O67csw.otf         73.77 kB
+dist/assets/NeueHaasGrotDisp-36ThinItalic-Trial-pcwAhWVd.otf     73.84 kB
+dist/assets/NeueHaasGrotDisp-16XXThinItalic-Trial-ZyEbwB1b.otf   73.94 kB
+dist/assets/NeueHaasGrotText-65Medium-Trial-CNmtnFZx.otf         73.97 kB
+dist/assets/NeueHaasGrotText-75Bold-Trial-CeoHGm5l.otf           73.98 kB
+dist/assets/NeueHaasGrotDisp-96BlackItalic-Trial-DfiVWkwJ.otf    74.12 kB
+dist/assets/NeueHaasGrotDisp-66MediumItalic-Trial-BEob0EHu.otf   74.15 kB
+dist/assets/NeueHaasGrotText-56Italic-Trial-DJXkn_jY.otf         74.23 kB
+dist/assets/NeueHaasGrotDisp-76BoldItalic-Trial-BKKf5bYl.otf     74.31 kB
+dist/assets/NeueHaasGrotText-76BoldItalic-Trial-Bh1-IfEF.otf     74.46 kB
+dist/assets/NeueHaasGrotText-66MediumItalic-Trial-BNojKcVi.otf   74.59 kB
+dist/assets/GeistMono-VariableFont_wght-BNd8yvN3.ttf            173.20 kB
+dist/assets/GeistMono-Italic-VariableFont_wght-C_QwmNXM.ttf     183.48 kB
+dist/assets/index-DGPEqr7A.css                                   37.32 kB │ gzip:  8.00 kB
+dist/assets/soundCue-CBhfHAAA.js                                  1.17 kB │ gzip:  0.62 kB
+dist/assets/soundControl-rvYr3J9s.js                              1.74 kB │ gzip:  0.86 kB
+dist/assets/themeToggle-BLmQ80uA.js                               2.72 kB │ gzip:  1.26 kB
+dist/assets/racingLine-0RfGYs15.js                                2.74 kB │ gzip:  1.39 kB
+dist/assets/morph-BLUZJ4NM.js                                     2.97 kB │ gzip:  1.49 kB
+dist/assets/startScreen-BJ8cjhcf.js                               3.60 kB │ gzip:  1.51 kB
+dist/assets/hud-Q-Z0yaxV.js                                       4.18 kB │ gzip:  1.98 kB
+dist/assets/carRig-C_fbLK13.js                                    4.52 kB │ gzip:  2.39 kB
+dist/assets/carWarmup-zmo_P42w.js                                 4.72 kB │ gzip:  2.29 kB
+dist/assets/trackProfile-DbDxkEPa.js                              4.79 kB │ gzip:  1.82 kB
+dist/assets/BufferGeometryUtils-D1WEIs4a.js                       4.89 kB │ gzip:  1.49 kB
+dist/assets/player-CaGemuhg.js                                    5.23 kB │ gzip:  1.95 kB
+dist/assets/checkpoints-BbJm92dL.js                               5.23 kB │ gzip:  2.51 kB
+dist/assets/finishScreen-DbzVtWTy.js                              5.34 kB │ gzip:  2.29 kB
+dist/assets/theme-DtwCIudM.js                                     5.52 kB │ gzip:  2.02 kB
+dist/assets/track-MLKTuc0j.js                                     6.24 kB │ gzip:  2.83 kB
+dist/assets/finishLine-DFIy-AaN.js                                6.77 kB │ gzip:  3.10 kB
+dist/assets/audioManager-BvB-BJbj.js                             10.14 kB │ gzip:  3.67 kB
+dist/assets/studio-cd5SS0bZ.js                                   14.72 kB │ gzip:  5.87 kB
+dist/assets/aerialCamera-DnT2vpyg.js                             14.94 kB │ gzip:  6.08 kB
+dist/assets/environment-DUqh5MM0.js                              38.26 kB │ gzip: 13.77 kB
+dist/assets/cars-49sty48F.js                                     57.38 kB │ gzip: 17.93 kB
+dist/assets/sceneSetup-B-Vhx6it.js                               74.68 kB │ gzip: 43.27 kB
+dist/assets/index-_xRl5SZv.js                                   276.67 kB │ gzip: 80.68 kB
+dist/assets/three.module-DqDGzmyA.js                            324.33 kB │ gzip: 78.45 kB
+✓ built in 6.17s

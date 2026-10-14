@@ -1,0 +1,142 @@
+{
+  "base": "6064a3057887053c0c5e31c009bbb7da312b1a24",
+  "records": [
+    {
+      "config": "B",
+      "rep": 1,
+      "path": "/tmp/gt3-p3x/native-B/B-1-frames.json.gz",
+      "sha256": "343078726817b7892d9db22ea8f86bd8c70649ddd6f5f73808cabf5ce1ce9967",
+      "trace": {
+        "path": "/tmp/gt3-p3x/native-B/B-1-trace.json",
+        "sha256": "bc35b7a3264fd54da1d08e91299f33f8bece9683d3de546fd5b463fcc9facc5a"
+      }
+    },
+    {
+      "config": "B",
+      "rep": 2,
+      "path": "/tmp/gt3-p3x/native-B/B-2-frames.json.gz",
+      "sha256": "7b7abb5004e4732b81206c91b8ad0c2a49819b58717fe12493835ec49ef5eef8",
+      "trace": null
+    },
+    {
+      "config": "C",
+      "rep": 1,
+      "path": "/tmp/gt3-p3x/native-C/C-1-frames.json.gz",
+      "sha256": "b425fa26ef877d3e1823bdcb1f8dab9ac99ffdcfeeb9583fbf83e423e01411a3",
+      "trace": {
+        "path": "/tmp/gt3-p3x/native-C/C-1-trace.json",
+        "sha256": "a965fd9aac2f90f85567399244da446893556148f6ca099417adaea5eeb22946"
+      }
+    },
+    {
+      "config": "C",
+      "rep": 2,
+      "path": "/tmp/gt3-p3x/native-C/C-2-frames.json.gz",
+      "sha256": "19f387763d450363243a936a84dbb30462a9c3f46c1ecab8bc0542cc4681fbb6",
+      "trace": null
+    },
+    {
+      "config": "L",
+      "rep": 1,
+      "path": "/tmp/gt3-p3x/native-L/L-1-frames.json.gz",
+      "sha256": "eccf7e3bed8643debeb398b84a57bb3a8b3a6f9200430c01826e5a1b5ba1ec14",
+      "trace": {
+        "path": "/tmp/gt3-p3x/native-L/L-1-trace.json",
+        "sha256": "8a7d4624fb1df6c616848726ca48cb75f987768977af1d294ed34e17574273e8"
+      }
+    },
+    {
+      "config": "L",
+      "rep": 2,
+      "path": "/tmp/gt3-p3x/native-L/L-2-frames.json.gz",
+      "sha256": "3d6a82f5f3bdb40310cebcfcf06322e42ef1fa73491b649ea928a7202d3eef06",
+      "trace": null
+    },
+    {
+      "config": "M",
+      "rep": 1,
+      "path": "/tmp/gt3-p3x/native-M/M-1-frames.json.gz",
+      "sha256": "bf79c1632756f721f3d4ef55ebbc4982577350fd466b1163c80cf37a12fbf35c",
+      "trace": {
+        "path": "/tmp/gt3-p3x/native-M/M-1-trace.json",
+        "sha256": "fbe6292e26422de06cdb19e909ede44156a45f65ef99a639a0d8ed4fdac9d524"
+      }
+    },
+    {
+      "config": "M",
+      "rep": 2,
+      "path": "/tmp/gt3-p3x/native-M/M-2-frames.json.gz",
+      "sha256": "bf6e3beaad4faacc8a2a2f0e2d84a945e07e875be242e91dfc1a11fcbaaf073c",
+      "trace": null
+    },
+    {
+      "config": "E",
+      "rep": 1,
+      "path": "/tmp/gt3-p3x/native-E/E-1-frames.json.gz",
+      "sha256": "c541663ad926f6f199d8b4fdbb4222acdf5b3aa91c1a20e9d770f3809ee680ca",
+      "trace": {
+        "path": "/tmp/gt3-p3x/native-E/E-1-trace.json",
+        "sha256": "e6c84a44076c8cc6f1b2bd94cacfe5ba5547ef12c6bfc4f987e405020445c89b"
+      }
+    },
+    {
+      "config": "E",
+      "rep": 2,
+      "path": "/tmp/gt3-p3x/native-E/E-2-frames.json.gz",
+      "sha256": "296ded4699e2954a4a90df9f1dbcc4cfca2fd732bc3d7866fd3b358974aea4de",
+      "trace": null
+    },
+    {
+      "config": "untraced-native-E",
+      "rep": 1,
+      "path": "/tmp/gt3-p3x/extra-E/E-1-frames.json.gz",
+      "sha256": "516025a8be92fb1c133f0ab3d7fbe7f74ae713759d554a7cf2f06ac72003e957"
+    },
+    {
+      "config": "fixed1-plus30-grid",
+      "rep": 1,
+      "path": "/tmp/gt3-p3x/combo-L/L-1-frames.json.gz",
+      "sha256": "5ea6ffc5a5df60dc6a052df545a00d752eac6c94672e7e478449db9aaf745682"
+    },
+    {
+      "config": "fixed1-plus30-grid",
+      "rep": 2,
+      "path": "/tmp/gt3-p3x/combo-L/L-2-frames.json.gz",
+      "sha256": "63910489b8680027062ac7ad8131b47c563e855d8bd400211afbe00f5135d7c3"
+    },
+    {
+      "path": "/tmp/gt3-p3x/pilot-B/B-1-trace.json",
+      "sha256": "3c7e2ae28a9833f7b8d6e23b27a26ea48c83b805d4dd864bb478d1b5b6234a84"
+    },
+    {
+      "path": "/tmp/gt3-p3x/matrix-B/crops.json",
+      "sha256": "29ad81a622f82585466d5e4e81e51e92324497c0af5f9b86de2855f3598c2b25"
+    },
+    {
+      "path": "/tmp/gt3-p3x/native-E/crops.json",
+      "sha256": "afbcfaea044108240a17abbf45c5f5e0fb09c6f8626013fe48b5605ce8d50cc0"
+    },
+    {
+      "role": "baseline PNG before RGB deduplication",
+      "name": "grid",
+      "source": "/tmp/gt3-p3x/matrix-B/crops/B-grid.png",
+      "sha256": "5198289b1327cb056ddd8c90bcdc5b8e6c7a4fdaa90d12d54fd83c14dde47282",
+      "retainedRgbAlias": "images/E-grid.png"
+    },
+    {
+      "role": "baseline PNG before RGB deduplication",
+      "name": "hairpin",
+      "source": "/tmp/gt3-p3x/matrix-B/crops/B-hairpin.png",
+      "sha256": "d2448fa9a099b6d3ac1732b8bf853fbba9f2e052f27a3fdd6eba1ad1e3170106",
+      "retainedRgbAlias": "images/E-hairpin.png"
+    },
+    {
+      "role": "baseline PNG before RGB deduplication",
+      "name": "car",
+      "source": "/tmp/gt3-p3x/matrix-B/crops/B-car.png",
+      "sha256": "bf4d0d2bce7d255a92e02933a76a63e2b0d30afa4e9fd99b6f4631bb5521f4a7",
+      "retainedRgbAlias": "images/E-car.png"
+    }
+  ],
+  "generated": "2026-10-14T12:11:22.157Z"
+}

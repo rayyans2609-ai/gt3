@@ -62,12 +62,7 @@ async function stop(reason) {
     try {
       if (page && !page.isClosed()) {
         const partial = await Promise.race([page.evaluate(() => {
-          if (config === 'V') {
-        g.renderer.setViewport(0,0,innerWidth,innerHeight);
-        g.renderer.setScissorTest(false);
-        g.renderer.setViewport=()=>{}; g.renderer.setScissor=()=>{}; g.renderer.setScissorTest=()=>{};
-      }
-      const p = window.__perf;
+          const p = window.__perf;
           if (!p) return null;
           p.recording = false;
           return { frames: p.frames, gl: p.gl, switches: p.switches,
@@ -210,9 +205,16 @@ try {
       if (['U','V'].includes(config)) {
         // Isolate CSS display switches without changing target dimensions or DPR policy.
         const style = g.renderer.domElement.style;
-                for (const name of ['transform','clipPath']) {
+        for (const name of ['transform','clipPath']) {
           Object.defineProperty(style,name,{get:()=>'',set:()=>{}});
         }
+      }
+      if (config === 'V') {
+        g.renderer.setViewport(0,0,innerWidth,innerHeight);
+        g.renderer.setScissorTest(false);
+        g.renderer.setViewport=()=>{};
+        g.renderer.setScissor=()=>{};
+        g.renderer.setScissorTest=()=>{};
       }
 
       const p = window.__perf = { frames: [], gl: [], switches: [], longTasks: [], input: [], pending: [], recording: false,
@@ -300,6 +302,18 @@ try {
     if (audit.frames<5 || (config !== 'W' && audit.gpu<3)) throw new Error('RAF/GPU hook invalid');
     if(['F','L','R'].includes(config)) {const fixed=config==='F'?2:config==='R'?1.5:1;if(audit.probe.applied!==fixed)throw Error('Fixed resolution diagnostic did not apply');}
     report.hookAudit=audit;
+    if(config==='V') {
+      await page.mouse.wheel({deltaY:70}); await wait(350);
+      report.motionAudit=await page.evaluate(()=>{const g=window.__gt3;return {
+        probe:g.probe(),viewport:g.renderer.getViewport({copy:v=>v.toArray()}),
+        transform:g.renderer.domElement.style.transform,clip:g.renderer.domElement.style.clipPath,
+        scissor:g.renderer.getScissorTest()};});
+      const a=report.motionAudit;
+      if(a.probe.applied!==1||a.scissor||a.transform||a.clip||a.viewport.join(',')!=='0,0,1280,800')
+        throw Error(`Stable canvas moving audit failed: ${JSON.stringify(a)}`);
+      console.log('MOTION_AUDIT',JSON.stringify(a));
+      await wait(2500);
+    }
     report.setups ??= [];
     report.setups.push({ config, ...setup });
     await persist();

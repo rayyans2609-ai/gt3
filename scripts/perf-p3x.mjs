@@ -31,7 +31,7 @@ const q = (values, percentile) => {
 const distribution = values => ({ n: values.length, p50: q(values, .5), p95: q(values, .95),
   p99: q(values, .99), worst: values.length ? Math.max(...values) : null });
 const report = { base, dpr, diagnostic, settleMaxMs:+(process.env.GT3_SETTLE_MAX || 45000), headful:process.env.GT3_HEADFUL==='1', blockingWheel:process.env.GT3_BLOCKING_WHEEL==='1', centered:process.env.GT3_CENTER==='1', css: [1280, 800], started: new Date().toISOString(),
-  harnessRevision: 'p3x-attribution-v1', passGpu, regions, gestureInput,
+  harnessRevision: 'p3x-attribution-v2', passGpu, regions, gestureInput, inputPlan:gestureInput?{speed:350,burstDistance:-420,cruiseDistances:[-1400,1050,-1750]}:{wheelDelta:70,waitMs:70},
   hostRule: '2026-10-13 manager amendment: paging measured; two-sample pressure/idle hard stop',
   sha: process.env.GT3_SOURCE_SHA || execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(),
   tree: execFileSync('git', ['status', '--porcelain'], { encoding: 'utf8' }).trim(), runs: [], errors: [] };
@@ -66,7 +66,7 @@ async function stop(reason) {
           if (!p) return null;
           p.recording = false;
           return { frames: p.frames, gl: p.gl, switches: p.switches,
-            input: p.input, longTasks: p.longTasks, disjoint: p.disjoint, rafNames:window.__perfRafNames,last:p.last,stalled:p.stalled };
+            input: p.input, transitions:p.transitions, longTasks: p.longTasks, disjoint: p.disjoint, rafNames:window.__perfRafNames,last:p.last,stalled:p.stalled };
         }), wait(3000).then(() => null)]);
         if (partial) {
           report.stop.partial = `${out}/interrupted-frames.json.gz`;
@@ -134,7 +134,7 @@ try {
       callback(timestamp);
       f.cpu = performance.now() - now;
       const probe = g.probe();
-      Object.assign(f, { dpr: probe.applied, speed: probe.speed01, progress: probe.progress,
+      Object.assign(f, { mode:probe.mode,locked:probe.locked,dpr: probe.applied, speed: probe.speed01, progress: probe.progress,
         output:{transform:g.renderer.domElement.style.transform,clip:g.renderer.domElement.style.clipPath,scissor:g.renderer.getScissorTest()}, programs:g.renderer.info.programs?.length, car: g.scene.getObjectByName('car-mount')?.children[0]?.name });
       f.rendered=Object.keys(f.passes).length>0;
       f.drawDt=f.rendered&&p.lastDraw?now-p.lastDraw:null;
@@ -276,7 +276,7 @@ try {
       const drive = await import('/src/scroll/scrollDrive.js');
       const camera = await import('/src/scene/aerialCamera.js');
       window.__perfSeek = t => { drive.seekTo(t == null ? 0 : route.progressAtRouteT(t), { instant: true }); camera.snap(); };
-      window.addEventListener('wheel', e => { if (p.recording) {p.input.push({ t: performance.now(), event:e.timeStamp, delta: e.deltaY, phase:p.phase }); performance.mark('p3x-wheel');} }, { passive: true });
+      window.addEventListener('wheel', e => { if (p.recording) {p.input.push({ t: performance.now(), event:e.timeStamp, delta: e.deltaY, phase:p.phase, segment:p.segment }); performance.mark('p3x-wheel');} }, { passive: true });
       return { gpu, css: [innerWidth, innerHeight], dpr: devicePixelRatio, probe: g.probe(),
         contextAntialias: gl.getContextAttributes().antialias, canvasSamples: gl.getParameter(gl.SAMPLES),
         passes: g.composer.passes.map(x => ({ type: x.constructor.name, enabled: x.enabled })),
@@ -351,22 +351,35 @@ try {
         await page.evaluate(region => { const p = window.__perf; p.recording = true; p.last = null; p.lastDraw=null; p.phase = `${region}:rest`; performance.mark(`p3y-start:${region}`); }, region);
         await wait(1500);
         for (let burst = 0; burst < 2; burst++) {
-          await page.evaluate(region => { window.__perf.phase = `${region}:burst`; }, region);
-          const end = Date.now() + 1200;
-          while (Date.now() < end) { await page.mouse.wheel({ deltaY: 70 }); await wait(70); }
-          await page.evaluate(region => { window.__perf.phase = `${region}:stop`; }, region);
+          await page.evaluate(({region,burst}) => { const p=window.__perf;
+            p.phase = `${region}:burst`; p.segment=`${region}:burst-${burst}`;
+            p.transitions.push({type:'start',t:performance.now(),phase:p.phase,segment:p.segment});
+          }, {region,burst});
+          if(gestureInput) await inputCdp.send('Input.synthesizeScrollGesture',
+            {x:640,y:400,yDistance:-420,speed:350,preventFling:true,gestureSourceType:'mouse',interactionMarkerName:`p3x-${region}-burst${burst}`});
+          else {
+            const end = Date.now() + 1200;
+            while (Date.now() < end) { await page.mouse.wheel({ deltaY: 70 }); await wait(70); }
+          }
+          await page.evaluate(region => { const p=window.__perf; p.phase = `${region}:stop`;
+            p.transitions.push({type:'stop',t:performance.now(),phase:p.phase,segment:p.segment});
+          }, region);
           await wait(2500);
         }
-        await page.evaluate(region => { window.__perf.phase = `${region}:cruise`; }, region);
+        await page.evaluate(region => { const p=window.__perf; p.phase = `${region}:cruise`;p.segment=`${region}:cruise`;
+          p.transitions.push({type:'start',t:performance.now(),phase:p.phase,segment:p.segment});
+        }, region);
         if(gestureInput) {
           // Browser-owned high-cadence input avoids serial dispatch ACK delays in the driver.
-          for(const yDistance of [-2800,2100,-3500])await inputCdp.send('Input.synthesizeScrollGesture',
-            {x:640,y:400,yDistance,speed:700,preventFling:true,gestureSourceType:'mouse',interactionMarkerName:`p3x-${region}`});
+          for(const yDistance of [-1400,1050,-1750])await inputCdp.send('Input.synthesizeScrollGesture',
+            {x:640,y:400,yDistance,speed:350,preventFling:true,gestureSourceType:'mouse',interactionMarkerName:`p3x-${region}`});
         } else {
           const end = Date.now() + 12000;
           while (Date.now() < end) { const remaining=end-Date.now(); await page.mouse.wheel({ deltaY: remaining<8000 && remaining>5000 ? -70 : 70 }); await wait(70); }
         }
-        await page.evaluate(region => { window.__perf.phase = `${region}:stop`; }, region);
+        await page.evaluate(region => { const p=window.__perf;p.phase = `${region}:stop`;
+          p.transitions.push({type:'stop',t:performance.now(),phase:p.phase,segment:p.segment});
+        }, region);
         await wait(2500);
         await page.evaluate(region => { performance.mark(`p3y-end:${region}`); window.__perf.recording = false; }, region);
         measuredWindow = false;
@@ -376,7 +389,7 @@ try {
           ...pagingDelta(windowBefore, windowAfter) });
         await appendFile(`${out}/windows.jsonl`, `${JSON.stringify({ config, rep, ...hostWindows.at(-1) })}\n`);
         const partial = await page.evaluate(() => {
-          const p = window.__perf; return {frames:p.frames,gl:p.gl,switches:p.switches,input:p.input,
+          const p = window.__perf; return {frames:p.frames,gl:p.gl,switches:p.switches,input:p.input,transitions:p.transitions,
             longTasks:p.longTasks,heapAfter:performance.memory?.usedJSHeapSize,disjoint:p.disjoint};
         });
         await writeFile(`${out}/${config}-${rep}-partial.json.gz`, gzipSync(JSON.stringify(partial)));
@@ -394,7 +407,7 @@ try {
           if(gl.getParameter(ext.GPU_DISJOINT_EXT))p.disjoint++;else {const ms=gl.getQueryParameter(query,gl.QUERY_RESULT)/1e6;if(name){frame.gpu=(frame.gpu??0)+ms;frame.passes[name].gpu=ms;}else frame.gpu=ms;}
           gl.deleteQuery(query);
         }
-        return { frames: p.frames, gl: p.gl, switches: p.switches, input: p.input, longTasks: p.longTasks,
+        return { frames: p.frames, gl: p.gl, switches: p.switches, input: p.input, transitions:p.transitions, longTasks: p.longTasks,
           heapAfter: performance.memory?.usedJSHeapSize, disjoint: p.disjoint,
           probe: window.__gt3.probe(), memory: { ...window.__gt3.renderer.info.memory } };
       });
@@ -403,6 +416,8 @@ try {
       await writeFile(`${out}/${config}-${rep}-frames.json.gz`, gzipSync(JSON.stringify(data)));
       if(config==='V'&&data.frames.some(f=>f.output.transform||f.output.clip||f.output.scissor))throw Error('Stable canvas control changed display state');
       if(['F','L','R'].includes(config)&&(data.switches.length||new Set(data.frames.map(f=>f.dpr)).size!==1))throw Error('Fixed resolution control switched; invalid run');
+      if(gestureInput&&data.frames.some(f=>f.mode!=='race'||f.locked))throw Error('Native input workload left unlocked Tour');
+      if(gestureInput&&data.input.length<30)throw Error('Native gesture did not produce enough observed wheel input');
       const frames = data.frames.filter(f => f.dt !== null);
       if (frames.length < 100 || config !== 'W' && frames.filter(f => Number.isFinite(f.gpu)).length < frames.filter(f => Object.keys(f.passes).length).length * .8)
         throw new Error('Insufficient application frame/GPU samples; harness result is invalid');

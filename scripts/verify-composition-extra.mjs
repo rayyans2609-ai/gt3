@@ -31,7 +31,7 @@ const comp = process.env.GT3_EXTRA_COMP || 'b';
 const checks = (process.env.GT3_EXTRA || 'aspects,resize,fallback,joins').split(',').filter(Boolean);
 const cams = (process.env.GT3_EXTRA_CAMS || 'glide,hold,wide,soft').split(',').filter(Boolean);
 const resizeCams = (process.env.GT3_RESIZE_CAMS || 'wide,hold,soft').split(',').filter(Boolean);
-const captureDir = process.env.GT3_CAPTURE_DIR || '/Users/rayyansheikh/Desktop/gt3-review-2026-10-04/w2';
+const captureDir = process.env.GT3_CAPTURE_DIR || new URL('../local/evidence/verify-composition/', import.meta.url).pathname;
 const progressFile = process.env.GT3_PROGRESS || `${captureDir}/w6b-progress.jsonl`;
 const root = process.env.GT3_WORK_DIR || '/tmp/gt3-w2';
 await mkdir(root, { recursive: true });

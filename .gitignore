@@ -3,3 +3,7 @@ dist/
 .DS_Store
 *.local
 font/
+
+# Local-only GT3 workspace (see CLAUDE.md "Workspace boundary")
+local/
+.claude/worktrees/

@@ -31,7 +31,7 @@ const pageUrl = pageParams ? `${base.replace(/\/$/, '')}/?${pageParams}` : base;
 const wheelDeltaAbs = Number(process.env.GT3_WHEEL_DELTA || 2);
 const wheelBurst = Math.max(1, Number(process.env.GT3_WHEEL_BURST || 4));
 if (!(wheelDeltaAbs > 0)) throw new Error('GT3_WHEEL_DELTA must be > 0');
-const outputDir = process.env.GT3_OUT || '/Users/rayyansheikh/.claude/jobs/60022478/tmp/w1';
+const outputDir = process.env.GT3_OUT || new URL('../local/evidence/diag-swap-hitch/', import.meta.url).pathname;
 const workRoot = process.env.GT3_WORK || '/tmp/gt3-w1';
 const contexts = Math.max(1, Number(process.env.GT3_CONTEXTS || 3));
 const headless = process.env.GT3_HEADLESS === '1';

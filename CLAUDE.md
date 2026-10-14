@@ -29,3 +29,11 @@ Routing and Autonomous Mode are **binding execution instructions**, not backgrou
 - `docs/ai/routing-evidence.md`: log material model work here (§15).
 
 Never run a bare `codex exec` or `opencode run`, and never rely on a global or default model. Launch routed jobs from a dedicated worktree, not the main checkout.
+
+## Workspace boundary
+
+- `~/Desktop/gt3` is the canonical entry point. Start every GT3 session with it as the selected project/working directory.
+- Create GT3 files inside this repository by default: tracked source/docs in their established directories, tracked review evidence in `docs/review/`, and local-only material (owner handoffs, raw captures, screenshots, briefs, benchmark sandboxes, scratch output) under the git-ignored `local/` (`local/handoffs/`, `local/evidence/`, `local/benchmarks/`, `local/tmp/`). Worktrees go in `.claude/worktrees/`. Script defaults must stay repo-relative, never `~/Desktop/...` or a job temp dir.
+- External files may be read or imported when needed. Modifying or deleting anything outside this repository needs explicit owner authorization.
+- Starting from the repo root does not authorize changing `main`. Respect dedicated worktrees and do routine work on a branch.
+- `font/` (licensed, local-only) is git-ignored and required for builds. Never delete it. Copy it into a new worktree when a build there needs it.

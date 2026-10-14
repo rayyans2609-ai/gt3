@@ -18,6 +18,7 @@ const dpr = +(process.env.GT3_DPR || 2);
 const diagnostic = ''; // product alternatives are applied only by this harness
 const passGpu = process.env.GT3_PASS_GPU === '1';
 const gestureInput=process.env.GT3_INPUT==='gesture';
+const lightTrace=process.env.GT3_TRACE_LIGHT==='1';
 const regions=(process.env.GT3_REGIONS||'grid,straight,hairpin,checkpoint').split(',');
 if(!regions.length||regions.some(r=>!['grid','straight','hairpin','checkpoint'].includes(r)))throw Error('Invalid regions');
 if (!['', 'viewport', 'canvas-no-msaa', 'blur', 'viewport-blur', 'viewport-cache-blur'].includes(diagnostic)) throw new Error('Invalid diagnostic');
@@ -31,7 +32,7 @@ const q = (values, percentile) => {
 const distribution = values => ({ n: values.length, p50: q(values, .5), p95: q(values, .95),
   p99: q(values, .99), worst: values.length ? Math.max(...values) : null });
 const report = { base, dpr, diagnostic, settleMaxMs:+(process.env.GT3_SETTLE_MAX || 45000), headful:process.env.GT3_HEADFUL==='1', blockingWheel:process.env.GT3_BLOCKING_WHEEL==='1', centered:process.env.GT3_CENTER==='1', css: [1280, 800], started: new Date().toISOString(),
-  harnessRevision: 'p3x-attribution-v2', passGpu, regions, gestureInput, inputPlan:gestureInput?{speed:350,burstDistance:-420,cruiseDistances:[-1400,1050,-1750]}:{wheelDelta:70,waitMs:70},
+  harnessRevision: 'p3x-attribution-v3', passGpu, regions, gestureInput, lightTrace, inputPlan:gestureInput?{speed:350,burstDistance:-420,cruiseDistances:[-1400,1050,-1750]}:{wheelDelta:70,waitMs:70},
   hostRule: '2026-10-13 manager amendment: paging measured; two-sample pressure/idle hard stop',
   sha: process.env.GT3_SOURCE_SHA || execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(),
   tree: execFileSync('git', ['status', '--porcelain'], { encoding: 'utf8' }).trim(), runs: [], errors: [] };
@@ -224,6 +225,7 @@ try {
       }).observe({ type: 'longtask', buffered: false });
       const original = g.composer.render.bind(g.composer);
       g.composer.render = dt => {
+        if(p.paused) return;
         if (!p.recording || !p.current || config === 'W') return original(dt);
         while (p.pending.length && gl.getQueryParameter(p.pending[0].query, gl.QUERY_RESULT_AVAILABLE)) {
           const { query, frame, name } = p.pending.shift();
@@ -333,7 +335,7 @@ try {
       const heapBefore = await page.evaluate(() => performance.memory?.usedJSHeapSize);
       await page.evaluate(() => {
         const p = window.__perf; p.frames = []; p.gl = []; p.switches = []; p.input = []; p.longTasks = [];
-        p.last = null; p.disjoint = 0; p.recording = false; p.transitions=[];
+        p.last = null; p.disjoint = 0; p.recording = false; p.transitions=[];p.paused=false;
       });
       // Seeks between regions are setup, excluded from timing. All travel inside regions is wheel input.
       for (const [region, t] of [['grid', null], ['straight', .105], ['hairpin', .263], ['checkpoint', setup.gates[3] - .008]].filter(([r])=>regions.includes(r))) {
@@ -343,8 +345,9 @@ try {
         const settled = await settleHost(out, `${config}-${rep}-${region}`, () => {}, +(process.env.GT3_SETTLE_MAX || 45000));
         const windowBefore = await hostSample();
         if (rep === 1 && region === regions.at(-1)) {
-          await page.tracing.start({ path: tracePath, categories: ['toplevel', 'devtools.timeline',
-            'blink.user_timing', 'input', 'latencyInfo', 'cc', 'gpu', 'viz', 'benchmark', 'disabled-by-default-devtools.timeline', 'disabled-by-default-v8.gc'] });
+          await page.tracing.start({ path: tracePath, categories: lightTrace
+            ? ['toplevel','devtools.timeline','blink.user_timing','disabled-by-default-v8.gc']
+            : ['toplevel', 'devtools.timeline', 'blink.user_timing', 'input', 'latencyInfo', 'cc', 'gpu', 'viz', 'benchmark', 'disabled-by-default-devtools.timeline', 'disabled-by-default-v8.gc'] });
           traceRunning = true;
         }
         measuredWindow = true;
@@ -396,9 +399,11 @@ try {
         if (stopped) throw new Error('Host stop requested');
       }
       // Serialize telemetry before exporting the bounded trace; export cannot lose a valid run.
+      await page.evaluate(()=>{window.__perf.paused=true;});
+      await wait(500); // drain already-submitted GPU work before harvesting query results
       if (rep === 1) {
         console.log('TRACE_EXPORT', config, rep);
-        await page.tracing.stop(); traceRunning = false;
+        await Promise.race([page.tracing.stop(),wait(45000).then(()=>{throw Error('Trace export exceeded45sec');})]); traceRunning = false;
       }
       const data = await page.evaluate(() => {
         const p = window.__perf, gl=window.__gt3.renderer.getContext(), ext=gl.getExtension('EXT_disjoint_timer_query_webgl2');
@@ -418,6 +423,12 @@ try {
       if(['F','L','R'].includes(config)&&(data.switches.length||new Set(data.frames.map(f=>f.dpr)).size!==1))throw Error('Fixed resolution control switched; invalid run');
       if(gestureInput&&data.frames.some(f=>f.mode!=='race'||f.locked))throw Error('Native input workload left unlocked Tour');
       if(gestureInput&&data.input.length<30)throw Error('Native gesture did not produce enough observed wheel input');
+      if(gestureInput) for(const region of regions) {
+        const events=data.input.filter(e=>e.phase.startsWith(`${region}:`));
+        const signed=events.reduce((s,e)=>s+e.delta,0),absolute=events.reduce((s,e)=>s+Math.abs(e.delta),0);
+        if(Math.abs(signed-2940/dpr)>1||Math.abs(absolute-5040/dpr)>1)
+          throw Error(`Native input distance mismatch ${region}: ${signed}/${absolute}`);
+      }
       const frames = data.frames.filter(f => f.dt !== null);
       if (frames.length < 100 || config !== 'W' && frames.filter(f => Number.isFinite(f.gpu)).length < frames.filter(f => Object.keys(f.passes).length).length * .8)
         throw new Error('Insufficient application frame/GPU samples; harness result is invalid');
@@ -471,7 +482,10 @@ try {
         paging: run.paging, timingPaging: run.timingPaging, totalPaging: pagingDelta(before, after) }));
 
     }
-    if (process.env.GT3_CAPTURES === '1') report.captures = await captureP3y(page, out, config);
+    if (process.env.GT3_CAPTURES === '1') {
+      await page.evaluate(()=>{window.__perf.paused=false;});
+      report.captures = await captureP3y(page, out, config);
+    }
     if(config==='B' && process.env.GT3_VIEWPORT_CHECK==='1')report.viewportChecks=await verifyViewport(page,out);
   }
 } catch (error) { report.errors.push(error.stack); throw error; }

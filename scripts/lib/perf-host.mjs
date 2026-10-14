@@ -44,11 +44,11 @@ export function hostDegraded(before, after, measured = false) {
 export const pagingDelta = (before, after) => ({
   pageouts: after.pageouts - before.pageouts, swapouts: after.swapouts - before.swapouts,
 });
-export async function settleHost(out, context, onSample = () => {}) {
+export async function settleHost(out, context, onSample = () => {}, maxMs = 90000) {
   const start = Date.now(); let previous = await hostSample(), stableSince = Date.now();
   const first = previous;
-  while (Date.now() - start < 90000) {
-    await wait(Math.min(5000, Math.max(1, 90000 - (Date.now() - start))));
+  while (Date.now() - start < maxMs) {
+    await wait(Math.min(5000, Math.max(1, maxMs - (Date.now() - start))));
     const sample = await hostSample();
     await onSample(sample);
     if (sample.pageouts !== previous.pageouts || sample.swapouts !== previous.swapouts) stableSince = Date.now();

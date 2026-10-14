@@ -1,5 +1,7 @@
 # GT3 Phase 3 — final render / mechanics closure: owner review (2026-10-13)
 
+> **HUMAN-ACCEPTED by the owner on 2026-10-14**, including the fixed DPR1 + SMAA performance/quality tradeoff (§F). The "not owner-accepted" wording below is the historical state at the time each section was written.
+
 This is the bounded final Phase 3 run, done per `GT3_PHASE3_FINAL_RENDER_HANDOFF_20261013`. It is **implemented and machine-verified (§5), not owner-accepted.** Your visual review is the only remaining gate before acceptance cleanup, push and merge. Nothing is pushed, and `main` is untouched.
 
 ## How to review

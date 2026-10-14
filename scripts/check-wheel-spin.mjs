@@ -148,6 +148,8 @@ const draco = await loadDraco();
 let empty = 0;
 let excluded = 0;
 let unsafe = 0;
+let steeringTotal = 0;
+let steeringViolations = 0;
 for (const car of CARS) {
   const scene = await loadHierarchy(await readFile(new URL(
     `../public/models/tour/${car.modelFile}`, import.meta.url,
@@ -160,28 +162,46 @@ for (const car of CARS) {
   assert(Number.isFinite(scale) && scale > 0, `${car.id}: invalid model bounds`);
   const selected = findWheels(scene);
   if (!selected.length) empty++;
+  // The two independent selections: the runtime spin set (findWheels, leaf
+  // names only) and the contact candidates (ancestry, or material when the
+  // model has no wheel-named nodes at all).
+  let hasWheelNodes = false;
+  scene.traverse(mesh => { if (mesh.isMesh && isWheelMesh(mesh, scene, false)) hasWheelNodes = true; });
+  const contactCandidates = [];
+  scene.traverse(mesh => {
+    if (mesh.isMesh && isWheelMesh(mesh, scene, !hasWheelNodes)) contactCandidates.push(mesh);
+  });
   const badLabels = selected.filter(mesh => labels(mesh, scene).some(name => EXCLUDED.test(name)));
   excluded += badLabels.length;
   const badAxes = selected.filter(mesh => axisOffsets(mesh).some(offset => offset * scale > AXIS_TOLERANCE));
   unsafe += badAxes.length;
-  let hasWheelNodes = false;
-  scene.traverse(mesh => { if (mesh.isMesh && isWheelMesh(mesh, scene, false)) hasWheelNodes = true; });
-  const candidates = [];
+  // Positive steering proof: a car with no selection cannot show that steering
+  // was skipped, so require every steering mesh on every car to be absent from
+  // both the spin set and the contact candidates.
+  const steering = [];
   scene.traverse(mesh => {
-    if (mesh.isMesh && isWheelMesh(mesh, scene, !hasWheelNodes)) candidates.push(mesh);
+    if (mesh.isMesh && labels(mesh, scene).some(name => /steer/i.test(name))) steering.push(mesh);
   });
-  const offCentre = candidates.filter(mesh => axisOffsets(mesh).some(offset => offset * scale > AXIS_TOLERANCE));
-  const instanced = candidates.filter(mesh => mesh.isInstancedMesh && mesh.count > 1);
+  steeringTotal += steering.length;
+  const steeringSelected = selected.filter(mesh => steering.includes(mesh));
+  const steeringCandidates = contactCandidates.filter(mesh => steering.includes(mesh));
+  steeringViolations += steeringSelected.length + steeringCandidates.length;
+  const offCentre = contactCandidates.filter(
+    mesh => axisOffsets(mesh).some(offset => offset * scale > AXIS_TOLERANCE));
+  const instanced = contactCandidates.filter(mesh => mesh.isInstancedMesh && mesh.count > 1);
   const example = offCentre[0];
   const detail = example ? ` example=${example.name || '(unnamed)'} material=${[example.material].flat().map(m => m.name).join(',')}` +
     ` axis-offset=${(Math.max(...axisOffsets(example)) * scale).toFixed(3)}m` : '';
   console.log(`${selected.length && !badLabels.length && !badAxes.length ? 'PASS' : 'FAIL'} ${car.id}` +
-    ` spin=${selected.length} contact-candidates=${candidates.length}` +
+    ` spin=${selected.length} contact-candidates=${contactCandidates.length}` +
     ` off-centre=${offCentre.length} multi-instance=${instanced.length}${detail}`);
 }
+console.log(`${steeringTotal ? 'INFO' : 'FAIL'} steering meshes present in models: ${steeringTotal}`);
+console.log(`${steeringViolations ? 'FAIL' : 'PASS'} steering meshes excluded from spin and contact sets: ` +
+  `${steeringViolations} violations of ${steeringTotal} steering meshes`);
 console.log(`${empty ? 'FAIL' : 'PASS'} non-empty spin set: ${CARS.length - empty}/${CARS.length} cars`);
 console.log(`${excluded ? 'FAIL' : 'PASS'} selected steering/brake/body-label exclusions: ${excluded} violations` +
   (empty ? ' (empty sets; no positive selection proof)' : ''));
 console.log(`${unsafe || empty ? 'FAIL' : 'PASS'} selected spin axis within 5mm of each bounds centre:` +
   ` ${unsafe} violations; ${empty} cars unavailable`);
-process.exitCode = empty || excluded || unsafe ? 1 : 0;
+process.exitCode = empty || excluded || unsafe || steeringViolations ? 1 : 0;

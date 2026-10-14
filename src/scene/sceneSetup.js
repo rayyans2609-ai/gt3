@@ -24,9 +24,13 @@ const _sunTargetPosition = new THREE.Vector3();
 
 // Intel UHD 617, 1280x800 CSS @ DPR 2: GPU cost scales nearly linearly with pixels:
 // DPR 2.00: 4.1 MPix / 40.4 ms; 1.50: 2.3 / 25.3; 1.25: 1.6 / 19.1; 1.00: 1.0 / 12.9.
+// Owner-approved Phase 3 default (2026-10-14): one fixed render resolution with SMAA, no
+// idle/motion switching. Dynamic DPR switching measured as the dominant start/stop hitch source.
+// Setting high and low to the same value makes the switching path inert by construction.
+export const RENDER_DPR = 1;
 export const ADAPTIVE_RES = {
-  high: Math.min(window.devicePixelRatio || 1, 2), // at rest: full sharpness
-  low: 1.0, // in motion: smooth
+  high: RENDER_DPR, // fixed; the former native-at-rest policy is retired
+  low: RENDER_DPR, // fixed; no motion switching
   enterLowAt: 0.02, // state.speed01 above this => motion
   returnHighBelow: 0.008,
   settleMs: 420, // how long motion must be absent before going sharp again
@@ -219,7 +223,7 @@ function resizeScene(width, height) {
 
   const safeWidth = Math.max(1, width);
   const safeHeight = Math.max(1, height);
-  ADAPTIVE_RES.high = Math.min(window.devicePixelRatio || 1, 2);
+  ADAPTIVE_RES.high = RENDER_DPR;
   const pixelRatio = activeResolutionLevel === 'low'
     ? ADAPTIVE_RES.low
     : ADAPTIVE_RES.high;

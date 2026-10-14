@@ -79,6 +79,11 @@ let appliedResolution;
 let activeResolutionLevel = 'high';
 let stillTimeMs = 0;
 let timeSinceResolutionSwitchMs = Infinity;
+// On the measured 8 GB/UHD617 host, 60 draws/s overfills the GPU/presentation
+// pipeline. Keep updates at RAF cadence and target 30 Tour draws/s.
+const TOUR_DRAW_INTERVAL_MS = 1000 / 30;
+let lastTourDrawAt = -Infinity;
+let resolutionDrawPending = true;
 
 /**
  * Mutable exposure handle for theme.js. Assign to `.value` to update the
@@ -211,6 +216,7 @@ function applyResolution(dpr) {
   composer.setPixelRatio(dpr);
   composer.setSize(window.innerWidth, window.innerHeight);
   appliedResolution = dpr;
+  resolutionDrawPending = true;
   return true;
 }
 
@@ -235,6 +241,7 @@ function resizeScene(width, height) {
   composer.setPixelRatio(pixelRatio);
   composer.setSize(safeWidth, safeHeight);
   appliedResolution = pixelRatio;
+  resolutionDrawPending = true;
 }
 
 function createLightingRig() {
@@ -387,9 +394,18 @@ export function updateScene(dt) {
 }
 
 /** Render the race scene through the composed spatial-AA chain. */
-export function render(dt) {
+export function render(dt, rafTime) {
   if (!composer) return;
+  // Warm-up and explicit render(0) calls must exercise every requested draw.
+  // Other modes retain their render lifecycle; only unlocked Tour draws are paced.
+  if (Number.isFinite(rafTime) && state.mode === 'race' && !state.scrollLocked) {
+    // Display scale and matching target pixels must change in the same frame.
+    if (!resolutionDrawPending && rafTime - lastTourDrawAt < TOUR_DRAW_INTERVAL_MS - 1) return;
+    // A late frame starts a new interval, without a short catch-up draw.
+    lastTourDrawAt = rafTime;
+  } else lastTourDrawAt = -Infinity;
   composer.render(dt);
+  resolutionDrawPending = false;
 }
 
 /** Create the singleton race renderer foundation. */

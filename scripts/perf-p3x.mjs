@@ -23,7 +23,7 @@ const regions=(process.env.GT3_REGIONS||'grid,straight,hairpin,checkpoint').spli
 if(!regions.length||regions.some(r=>!['grid','straight','hairpin','checkpoint'].includes(r)))throw Error('Invalid regions');
 if (!['', 'viewport', 'canvas-no-msaa', 'blur', 'viewport-blur', 'viewport-cache-blur'].includes(diagnostic)) throw new Error('Invalid diagnostic');
 if (configs.length !== 1) throw new Error('One config per browser launch; close between configs');
-if (!configs.every(c => ['B', 'C', 'F', 'L', 'M', 'R', 'S', 'T', 'U', 'V', 'W', 'X'].includes(c)) || !Number.isInteger(repeats) || repeats < 1
+if (!configs.every(c => ['B', 'C', 'E', 'F', 'L', 'M', 'R', 'S', 'T', 'U', 'V', 'W', 'X'].includes(c)) || !Number.isInteger(repeats) || repeats < 1
   || ![1, 2].includes(dpr)) throw new Error('Invalid configs, repeats or DPR');
 const q = (values, percentile) => {
   const a = values.filter(Number.isFinite).sort((a, b) => a - b);
@@ -42,6 +42,19 @@ const instrumentation = Object.fromEntries(await Promise.all(['scripts/perf-p3x.
 })));
 report.instrumentation=Object.fromEntries(Object.entries(instrumentation).map(([p,v])=>[p,v.sha256]));
 await writeFile(`${out}/instrumentation.json.gz`,gzipSync(JSON.stringify(instrumentation)));
+if(gestureInput&&lightTrace) {
+  const start=Date.now();let stable=0;
+  while(stable<2) {
+    const raw=execFileSync('pmset',['-g','therm'],{encoding:'utf8'});
+    const speed=+(raw.match(/CPU_Speed_Limit\s*=\s*(\d+)/)?.[1]??NaN);
+    const row={kind:'cool-start',at:new Date().toISOString(),speed};
+    await appendFile(`${out}/host.jsonl`,JSON.stringify(row)+'\n');
+    stable=speed===100?stable+1:0;
+    if(stable===2)break;
+    if(Date.now()-start>180000)throw Error('CPU speed limit did not recover within180s; no browser launch');
+    await wait(10000);
+  }
+}
 let admitted = await preflight(out);
 const browser = await puppeteer.launch({ executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
   headless: process.env.GT3_HEADFUL === '1' ? false : 'new', pipe: true, timeout: 180000, protocolTimeout: 180000,
@@ -419,6 +432,7 @@ try {
       const after = await hostSample();
       await appendFile(`${out}/host.jsonl`, `${JSON.stringify({ kind: 'run', config, rep, before, after })}\n`);
       await writeFile(`${out}/${config}-${rep}-frames.json.gz`, gzipSync(JSON.stringify(data)));
+      if(config==='E'&&data.switches.some(s=>!data.frames.find(f=>f.t===s.t)?.rendered))throw Error('Resolution switch skipped its matching draw');
       if(config==='V'&&data.frames.some(f=>f.output.transform||f.output.clip||f.output.scissor))throw Error('Stable canvas control changed display state');
       if(['F','L','R'].includes(config)&&(data.switches.length||new Set(data.frames.map(f=>f.dpr)).size!==1))throw Error('Fixed resolution control switched; invalid run');
       if(gestureInput&&data.frames.some(f=>f.mode!=='race'||f.locked))throw Error('Native input workload left unlocked Tour');

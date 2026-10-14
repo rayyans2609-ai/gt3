@@ -454,7 +454,7 @@ async function boot() {
     if (COMP.camera === 'corridor') aerialCamera.prepareCompositionRail(Math.max(1, w) / Math.max(1, h));
   });
 
-  function frame() {
+  function frame(rafTime) {
     const dt = clock.tick();
     for (const update of updates) update(dt, state);
 
@@ -466,7 +466,7 @@ async function boot() {
           settle('gpu', 'ready');
         }
       } else if (studio.isMontagePlaying()) studio.renderMontage();
-      else sceneSetup.render(dt);
+      else sceneSetup.render(dt, rafTime);
     } catch (error) {
       if (readiness.gpu === 'pending' && gpuWarmup) {
         console.error('[gt3] GPU warm-up failed', error);

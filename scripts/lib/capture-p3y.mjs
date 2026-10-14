@@ -18,6 +18,7 @@ export async function captureP3y(page, out, config) {
         wash.__captureRender = true;
       }
     });
+    await wait(100); // allow a paced draw to apply the frozen grain before capture
     if (motion) { await page.mouse.wheel({ deltaY: 180 }); await wait(200); }
     const data = await page.evaluate(name => {
       const g = window.__gt3;

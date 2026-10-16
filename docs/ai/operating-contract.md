@@ -185,6 +185,8 @@ Keep resources free for the owner's own use: when the owner is actively working 
 - During heavy work, a deterministic shell loop owned by the run samples every 1–2 min. **Degrade** when pressure leaves normal, paging rises, idle < 15 % or system CPU > 65 % for two samples, or responsiveness collapses. Degrading means: stop spawning, checkpoint, drop to one task, clean owned stale processes, re-run pre-flight. Never retry in a loop, and never add stronger models in parallel under pressure.
 - **Extended overload:** keep doing light work; otherwise wait. No cache purges or daemon manipulation.
 
+Host-check diagnostics: unavailable measurements are `null` with an explicit `unavailable` explanation; missing required identity, health or process inventory refuses preflight (exit 75). Preflight JSON includes the matched-process inventory used for its decision; retain that JSON with run evidence. Agent counting remains a command-pattern approximation: Claude `bg-spare` helpers are excluded, but idle and unrelated CLI sessions can still count, and a Codex launcher/native-child pair can count twice. `app-server` remains excluded, so native Codex desktop manager accounting is **unverified**; do not interpret the count as an exact session census. Limits and memory-pressure gates are unchanged. Focused synthetic checks: `node --test scripts/host-check.test.mjs` (no model or host sampling).
+
 ### 6.5 M4 calibration (bounded, provisional → measured)
 Cheap, representative GT3 workloads, each at concurrency 1 and then 2 (3 only if 2 is clean):
 - `npm run build`;

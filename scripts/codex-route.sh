@@ -103,5 +103,6 @@ fi
 
 route_guard codex "$model" "$sandbox"
 
+route_log codex "$model" "$sandbox"
 exec codex exec "${sandbox_args[@]}" --skip-git-repo-check --disable multi_agent \
   -m "$model" -c "model_reasoning_effort=\"$effort\"" "$prompt" < /dev/null

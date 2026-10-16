@@ -76,4 +76,5 @@ fi
 
 route_guard opencode "$route" full
 
+route_log opencode "$route" full
 exec opencode run --standalone --auto -m "$model" "$prompt" < /dev/null

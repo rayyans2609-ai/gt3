@@ -11,8 +11,8 @@
 #   2. Checkout: any mode that can write must run in a linked worktree on a non-main
 #      branch. read-only may run anywhere (no worktree ceremony for inspection).
 #   3. Roster: GT3_CONFIG=sol-led allows only the seven Sol-led models.
-#   4. Run provenance: if GT3_RUN is set, GT3_EPOCH and GT3_TASK must be set too, and the
-#      launch is appended to local/runs/<run>/launches.log in the main checkout.
+#   4. Run provenance: if GT3_RUN is set, GT3_EPOCH and GT3_TASK must be set too. The wrapper
+#      then calls route_log just before exec, so only real launches are logged.
 # Exports GT3_ROLE (worker unless GT3_LAUNCH_ROLE=manager) for the child.
 
 route_guard_die() { echo "$ROUTE_GUARD_NAME: $*" >&2; exit 2; }
@@ -54,17 +54,22 @@ route_guard() {
   if [[ -n "${GT3_RUN:-}" ]]; then
     [[ -n "${GT3_EPOCH:-}" && -n "${GT3_TASK:-}" ]] || route_guard_die "GT3_RUN is set but GT3_EPOCH/GT3_TASK are missing"
     [[ "$GT3_RUN" =~ ^[A-Za-z0-9._-]+$ ]] || route_guard_die "GT3_RUN must be [A-Za-z0-9._-]"
-    local root log
-    if root=$(cd "$(git rev-parse --git-common-dir 2>/dev/null)/.." 2>/dev/null && pwd -P); then
-      log="$root/local/runs/$GT3_RUN/launches.log"
-      mkdir -p "${log%/*}"
-      # pid survives the wrapper's exec; start time guards against PID reuse.
-      printf '%s pid=%s start=%s run=%s epoch=%s task=%s provider=%s model=%s mode=%s cwd=%s\n' \
-        "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$$" "$(ps -o lstart= -p $$ | tr ' ' _)" "$GT3_RUN" "$GT3_EPOCH" \
-        "$GT3_TASK" "$provider" "$model" "$mode" "$(pwd -P)" >> "$log"
-    fi
   fi
 
   export GT3_ROLE="${GT3_LAUNCH_ROLE:-worker}"
   [[ "$GT3_ROLE" == worker || "$GT3_ROLE" == manager ]] || route_guard_die "GT3_LAUNCH_ROLE must be worker or manager"
+}
+
+# route_log <provider> <model> <mode> — call immediately before exec, after every refusal
+# check, so only real launches reach local/runs/<run>/launches.log.
+route_log() {
+  [[ -n "${GT3_RUN:-}" ]] || return 0
+  local root log
+  root=$(cd "$(git rev-parse --git-common-dir 2>/dev/null)/.." 2>/dev/null && pwd -P) || return 0
+  log="$root/local/runs/$GT3_RUN/launches.log"
+  mkdir -p "${log%/*}"
+  # pid survives the wrapper's exec; start time guards against PID reuse.
+  printf '%s pid=%s start=%s run=%s epoch=%s task=%s provider=%s model=%s mode=%s cwd=%s\n' \
+    "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$$" "$(ps -o lstart= -p $$ | tr ' ' _)" "$GT3_RUN" "$GT3_EPOCH" \
+    "$GT3_TASK" "$1" "$2" "$3" "$(pwd -P)" >> "$log"
 }

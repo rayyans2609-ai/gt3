@@ -849,6 +849,7 @@ Raised during Phase 3 review, owned by later phases, and **not to be implemented
 | Environment comparison: OMA white, gray/night, white with light/shadow variations, green as baseline | E | Phase 8 | §16 |
 | Full-quality Showcase models (Tour stays 512-px) | R | Phase 6 | §30.10 |
 | Showcase draws with the shared renderer: give it its own full resolution and anti-aliasing (the Tour now runs fixed DPR1, no canvas MSAA) | R | Phase 6 | §27 |
+| Grand Tour rendering-quality profiles: `?version=locked` keeps the accepted fixed DPR1 + SMAA baseline; `?version=unlocked` is higher quality, initially intended for the M4, with final DPR and settings set by later measurement and owner review. Selected explicitly, never by host or manager; unrelated to locked/unlocked car identities. Not implemented (owner, 2026-10-16) | R | bounded rendering enhancement, when the owner opens it | §27 |
 | UI/UX craft uplift (hierarchy, interactions, transitions, modelling/lighting, delight) | R | every phase | §23 |
 | Custom site-wide cursor | dropped | — | §28 |
 

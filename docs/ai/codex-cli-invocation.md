@@ -2,27 +2,43 @@
 
 Execution-specific layer only. Role/escalation/reasoning-*policy* doctrine lives in [`docs/ai/model-routing.md`](./model-routing.md) — do not duplicate it here. OpenCode free-route execution (Muse, DeepSeek, Bunny) is in [`docs/ai/opencode-invocation.md`](./opencode-invocation.md).
 
-**Status:** model catalog re-verified 2026-10-04 against a locally installed `codex-cli 0.160.0` (catalog `fetched_at` 2026-10-04); config/wrapper behavior below was verified on `0.157.1` (2026-09-26/27). Re-verify against `codex doctor` / `codex --version` / `~/.codex/models_cache.json` at the start of a new working session rather than trusting this file indefinitely — see "This file drifts" below. `scripts/codex-route.sh` itself was verified end-to-end by a live routed job on 2026-09-27 (see "Live-run verification").
+**Status (2026-10-16, M4):** `codex-cli 0.163.0` (npm, `~/.npm-global/bin/codex`), ChatGPT login. Catalog `fetched_at` 2026-10-16 lists the same routing slugs and effort levels as below. The ChatGPT desktop app bundles its **own** Codex (0.162.0-alpha.17.2), so a desktop-app manager and its wrapper-launched workers can run different Codex versions: record both via `node scripts/host-check.mjs identity`. The Intel is unverified (owner check in `operating-contract.md` §11). Earlier status: model catalog re-verified 2026-10-04 against a locally installed `codex-cli 0.160.0` (catalog `fetched_at` 2026-10-04); config/wrapper behavior below was verified on `0.157.1` (2026-09-26/27). Re-verify against `codex doctor` / `codex --version` / `~/.codex/models_cache.json` at the start of a new working session rather than trusting this file indefinitely — see "This file drifts" below. `scripts/codex-route.sh` itself was verified end-to-end by a live routed job on 2026-09-27 (see "Live-run verification").
 
 ## Required invocation path: `scripts/codex-route.sh`
 
 Every GT3 Codex delegation should go through this wrapper, not a bare `codex exec` call. It makes explicit model + reasoning effort a hard requirement instead of a documentation convention someone has to remember:
 
 ```
-scripts/codex-route.sh -m <model> -r <reasoning-effort> "<prompt>"
-scripts/codex-route.sh -m <model> -r <reasoning-effort> @path/to/brief.md
+scripts/codex-route.sh -m <model> -r <reasoning-effort> [-s read-only|workspace|full] "<prompt>"
+scripts/codex-route.sh -m <model> -r <reasoning-effort> [-s read-only|workspace|full] @path/to/brief.md
 ```
 
 It exits with an error and does **not** invoke Codex if `-m` or `-r` is missing, empty, or `-r` isn't one of the recognized levels. See "Default-fallback protection" below for why this exists.
 
-Internally it runs:
+Internally it runs (default `-s full`):
 
 ```
-codex exec --dangerously-bypass-approvals-and-sandbox --skip-git-repo-check \
+codex exec --dangerously-bypass-approvals-and-sandbox --skip-git-repo-check --disable multi_agent \
   -m <model> -c model_reasoning_effort="<effort>" "<prompt>" < /dev/null
 ```
 
-which was the verified-correct raw syntax on 0.157.1 if you ever need to bypass the wrapper for a one-off interactive case — but the wrapper is the canonical path for routed jobs.
+### Sandbox modes and guards (2026-10-16)
+
+| `-s` | Codex flags | Behaviour (verified on the M4) |
+|---|---|---|
+| `read-only` | `--sandbox read-only -c approval_policy="never"` | Live Luna run: header `sandbox: read-only`, `approval: never`; a shell write failed with "operation not permitted". May run from any checkout. |
+| `workspace` | `--sandbox workspace-write -c approval_policy="never"` | Probed with `codex sandbox -P :workspace` (no model): writes inside the worktree and `/tmp` succeed; writes to the main checkout or home are denied; **no network** (DNS fails); **localhost bind denied** (no Vite/browser); **git commit fails** in a linked worktree (its git dir lives in the main `.git`). Reads are unrestricted, including `~/.codex`. A `writable_roots` override did not enable commits in that probe. Use for editing-only workers; the manager commits. |
+| `full` (default) | `--dangerously-bypass-approvals-and-sandbox` | Proven Phase 1–3 path; needed for builds, Vite and browsers. |
+
+- `--disable multi_agent` is always passed: Codex's native multi-agent feature (stable, on by default in 0.163.0) would let a worker spawn unaccounted sub-agents.
+- `ultra` ("maximum reasoning with automatic task delegation") is refused unless `GT3_LAUNCH_ROLE=manager`.
+- `scripts/lib/route-guard.sh` also refuses writing modes in the main checkout or on `main`, refuses `OPENAI_API_KEY`/`OPENAI_BASE_URL`/`OPENAI_API_BASE`, enforces the Sol-led roster under `GT3_CONFIG=sol-led`, and logs launches under `GT3_RUN` (`operating-contract.md` §5).
+
+### Native Codex manager and remote surfaces
+
+A Sol-led manager is an interactive Codex session the owner opens (CLI or ChatGPT desktop project), not a wrapper launch: `codex -m gpt-6.1-sol -c model_reasoning_effort="high" --disable multi_agent`. iPhone control is through the ChatGPT app after pairing in the ChatGPT desktop app (*Settings → Connections → Control this Mac or PC*). The CLI's `codex remote-control` / `codex app-server daemon … remote-control` subcommands are marked experimental and are not the supported mobile path. Note: `codex remote-control` with no subcommand runs a foreground server. Only inspect it with `--help`. See `operating-contract.md` §9.
+
+The raw syntax above was verified on 0.157.1 if you ever need to bypass the wrapper for a one-off interactive case, but the wrapper is the canonical path for routed jobs.
 
 ## Verified current model slugs
 
@@ -73,7 +89,7 @@ Only one item remains: which reasoning-effort value wins for a *bare* `codex exe
 
 Operating notes from that run:
 
-- **Codex works unsandboxed in its launch directory.** Launch routed jobs from a dedicated worktree on the job's branch, never from the user's main checkout, so its commits and branch changes cannot touch the working copy. A symlinked `node_modules` is fine; list it in `.git/info/exclude`, because `.gitignore`'s `node_modules/` pattern only matches directories.
+- **Codex works unsandboxed in its launch directory** (in `full` mode). Launch routed jobs from a dedicated worktree on the job's branch, never from the user's main checkout, so its commits and branch changes cannot touch the working copy. A symlinked `node_modules` is fine; list it in `.git/info/exclude`, because `.gitignore`'s `node_modules/` pattern only matches directories.
 - **Codex's own verification can be incomplete.** In its execution window it could not finish `npm run build` or get past the headless loading screen, and it reported that honestly. The manager re-ran the build and browser checks. Treat worker-reported verification gaps as manager work, per the acceptance ladder in `model-routing.md` §5.
 
 The `codex-executor` MCP server continues to fail with `CONNECTION_CLOSED` (as of 2026-09-26; still failing 2026-10-04) — routed jobs go through the `codex` CLI via Bash (or `scripts/codex-route.sh`), which draws on the same quota as the MCP path would.

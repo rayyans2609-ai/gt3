@@ -9,14 +9,14 @@ A running record of **material** model work. It feeds `model-routing.md` §15, w
 **Columns**
 - **Date**
 - **Task**: short description
-- **Type**: implement / debug / UI / refactor / test / tooling / retrieval / review / liveness / lead
+- **Type**: implement / debug / UI / refactor / test / tooling / retrieval / review / liveness / lead / **manage** (a manager's own performance over a run: tasks briefed, children's first-pass acceptance, rework, integration defects, owner interventions, coordination overhead; `model-routing.md` §11b)
 - **Model @ effort**: effort for Codex models; the actual level for Claude
 - **Outcome**: accepted / partial / failed / abandoned
 - **1st-pass accepted?**: Y/N
 - **Escalated to**: — or the model
 - **Rework (owner)**: — or what was redone and by whom
 - **Verified/integrated by**
-- **Notes**: route or quota impact, thinking-level verdict (under / ok / over), and for Bunny: accurate? missed context? actually reduced another worker's load?
+- **Notes**: configuration (opus-led / sol-led) and host profile (`intel-8gb` / `m4-16gb`) for rows from 2026-10-16 on; route or quota impact, thinking-level verdict (under / ok / over), and for Bunny: accurate? missed context? actually reduced another worker's load?
 
 | Date | Task | Type | Model @ effort | Outcome | 1st-pass | Escalated to | Rework (owner) | Verified by | Notes |
 |---|---|---|---|---|---|---|---|---|---|
@@ -60,6 +60,7 @@ A running record of **material** model work. It feeds `model-routing.md` §15, w
 | 2026-10-14 | P3X remaining start/stop and sustained-scroll hitch blocker | debug + tooling + experiment | gpt-6.1-sol @ xhigh (explicit owner assignment) | partial (blocker remains; opt-in pacing candidate only) | N | — | Sol: live-module control audit, fixed native gestures, bounded trace export after host stop; rejected pacing as default after draw-tail comparison | Sol: B/C/L/M/E two full-route repetitions, untraced confirmation, grid-only fixed1+30 pair, build, gates-only, cold Day/Night, default/paced viewport, exact native rest RGB comparison | No children: tightly coupled attribution retained by assigned lead; mechanical runs serial scripts under8GB gate. Confirmed CALayer backpressure and over-budget native GPU; fixed1 suppresses most start gaps but has spatial tradeoff/outliers. Original default/SMAA/full props retained; no push/merge. Host paging/CPU-limit variation prevents clean causal speed ranking; failed verbose trace attempt preserved. About3h bounded task; token/dollar data not exposed. Evidence: docs/review/p3x-perf/NOTES.md. |
 | 2026-10-14 | Bounded code change: generalise the fixed-resolution query flag to ?res=dpr1/dpr125/dpr150 (src/scene/sceneSetup.js) | implement | Muse Spark 1.3 (free, opencode/muse-spark-1.3-contributor-free) | accepted | Y | — | — | Opus (diff review; Vite probe of all four buffer sizes) | First Muse use on this phase. Tight brief, one file, no browser; correct first pass, one diff, honest about skipped build. Also appended a bounded doc section to the review (facts supplied; two imprecise phrases corrected by Opus). Route listed and healthy; opencode background service left running by the tool. |
 | 2026-10-14 | Regression batches on the fixed-DPR1 default (build, facility, timer/finish, cold swap, font, resolution probe) + checkpoint A/B (baseline vs integrated x2) | test | gpt-6-luna @ high | accepted (as evidence) | N | — | Opus: first brief left GATES_ONLY ambiguous so Luna ran the full legacy script, exposing an intermittent legacy-phase failure; A/B rerun with exact commands | Opus | The exposure was useful: 1 of 3 full runs failed two legacy phases, not reproduced (record in docs/review/p3x-perf/REGRESSION-1f58a1a.md). Faithful reporting, clean teardown. |
+| 2026-10-16 | Two-Mac / dual-manager operating-system review and implementation (Stage A review; Stage B contract, wrappers, claude-route, host-check, gt3-run, pilot kit) | Anchor (architecture + tooling) | Opus @ high (session) | implemented (owner adoption pending) | Y | — | Opus: own fixes found by its tests (provenance JSON quoting, post-exec PID identity, bundle size, transferred-state reclaim gap) | Opus: stub refusal tests, live probes (Haiku/Sonnet/Opus read-only, Haiku edit-mode denials + TERM cancel, Luna read-only sandbox), two-clone handoff simulation | Anchor justified: cross-cutting operating contract needing full review context. No workers: briefing would exceed doing. One accidental foreground `codex remote-control` probe was stopped with no persistent change. Config opus-led, host m4-16gb. Thinking: ok. |
 
 ## Emerging patterns
 

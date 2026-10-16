@@ -4,6 +4,8 @@ Execution layer for **Cloud Opus** (Claude Opus 5.5 in a Claude Code cloud sessi
 
 **Role (owner direction, 2026-10-06).** Independent senior specialist/reviewer. It is advisory: the manager decides, and the owner accepts. It is used only when independent senior analysis has decision value (`model-routing.md` §5, `autonomous-mode.md` §3), never as a routine or cadence review. Cloud sessions have no local runtime, browser or GPU. They must never claim visual, browser or performance observations they did not produce.
 
+**Not a worker route.** Cloud Opus needs a pushed branch and has no local runtime, so it is not the Opus specialist route under a Sol-led manager. That route is `scripts/claude-route.sh` (`claude-cli-invocation.md`). Pushes need explicit owner approval (`operating-contract.md` §8.1).
+
 ## Source-of-truth rule (mandatory)
 
 A cloud session sees only what is on `origin`. Before every launch:

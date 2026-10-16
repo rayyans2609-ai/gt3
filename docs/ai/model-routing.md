@@ -2,18 +2,19 @@
 
 This is the canonical, repo-portable source of truth for AI model routing, delegation, context, review and quota on GT3. It survives new Claude sessions, different machines, Codex used directly, future agents/managers, and loss/reset of any single agent's private memory.
 
-Unattended multi-hour execution is governed by [`autonomous-mode.md`](./autonomous-mode.md). It **extends** this file for unattended operation and never replaces it: same routing philosophy, plus host, continuity, supervision and handoff rules.
+GT3 runs under one of **two manager configurations**, Opus-led (§11) and Sol-led (§11b), on either of two first-class Macs. The shared operating contract (hosts and resource limits, seat/epoch authority, run records, handoffs, worker isolation, evidence provenance, cross-host Git, iPhone remote control) is [`operating-contract.md`](./operating-contract.md). Unattended multi-hour execution is governed by [`autonomous-mode.md`](./autonomous-mode.md). Both **extend** this file and never replace it. This file owns model roles, economics, effort and delegation.
 
 Execution-specific detail lives separately, and this file does not duplicate it:
 
 - [`codex-cli-invocation.md`](./codex-cli-invocation.md): Codex models (Luna, Terra, Sol, Astra), verified slugs, reasoning-effort values, invocation. Route through `scripts/codex-route.sh`.
 - [`opencode-invocation.md`](./opencode-invocation.md): OpenCode free routes (Muse, DeepSeek, Bunny, MiMo), exact model IDs, credential isolation, route health. Route through `scripts/opencode-route.sh`.
+- [`claude-cli-invocation.md`](./claude-cli-invocation.md): headless Claude workers (Opus, Sonnet, Haiku) with explicit model, effort and permission mode, on the owner's subscription. Route through `scripts/claude-route.sh`.
 - [`cloud-opus-invocation.md`](./cloud-opus-invocation.md): Cloud Opus (independent senior reviewer in a Claude cloud session), the push-and-SHA-confirm rule, launcher `scripts/cloud-opus-launch.exp`.
 - [`routing-evidence.md`](./routing-evidence.md): the running record of material model work that §15 learns from.
 
 **Two layers.** Part I is general principle, written to transfer beyond GT3. Part II is the current GT3 model map, which is evidence-based and revisable. When a model name changes, Part II changes; Part I should not need to.
 
-**Status:** current evidence-based default, not permanent doctrine. Roles change only when measured GT3 work shows better (§15). Agents must not rewrite this mid-run because they prefer something else; propose changes in the handoff instead. Last revised 2026-10-05: efficiency-doctrine migration (scarcity-adjusted routing, net-leverage delegation, least-privilege context, risk-based review, Sol as execution lead, Muse/DeepSeek/Bunny lanes), then right-sized verification (§5), which replaced default-exhaustive verification after Phase 3 closure.
+**Status:** current evidence-based default, not permanent doctrine. Roles change only when measured GT3 work shows better (§15). Agents must not rewrite this mid-run because they prefer something else; propose changes in the handoff instead. Revised 2026-10-05: efficiency-doctrine migration (scarcity-adjusted routing, net-leverage delegation, least-privilege context, risk-based review, Sol as execution lead, Muse/DeepSeek/Bunny lanes), then right-sized verification (§5), which replaced default-exhaustive verification after Phase 3 closure. Revised 2026-10-16 (owner-approved operating-system review): two selectable manager configurations, the Sol-led seven-model roster (§11b), per-call Claude effort for headless workers (§12), and configuration-dependent delegation (§13).
 
 ---
 
@@ -110,7 +111,7 @@ These are defaults, not bureaucracy. Judgment and failure signals override them.
 
 ## 7. Parallelism must be earned
 
-Available concurrency is not a throughput target. Parallelize only genuinely independent work: clean file ownership, minimal shared state, independently verifiable outputs, cheap merging, coordination cost below the time saved, and host capacity to spare (`autonomous-mode.md` §6 applies to all heavy GT3 work). Consolidate under one owner when workers need constant shared state, their decisions interlock, context must be repeated, or integration risk dominates.
+Available concurrency is not a throughput target. Parallelize only genuinely independent work: clean file ownership, minimal shared state, independently verifiable outputs, cheap merging, coordination cost below the time saved, and host capacity to spare (`operating-contract.md` §6 applies to all heavy GT3 work on either Mac). Consolidate under one owner when workers need constant shared state, their decisions interlock, context must be repeated, or integration risk dominates.
 
 ## 8. Deterministic tooling and persistent knowledge
 
@@ -130,6 +131,8 @@ Escalate to the user, never to a bigger model, when a decision materially change
 
 ## 10. Scarcity and quota
 
+**Economics depend on the configuration.** Quota is per provider account, not per Mac (`operating-contract.md` §11). The paragraphs below describe the **Opus-led** configuration. Under **Sol-led**, see §11b: the manager runs on Codex, so Codex capacity protects management continuity, while Claude capacity buys specialist work (Opus Anchor Tasks, Sonnet, Haiku) and is still priced as scarce.
+
 **Claude is the scarcest resource.** Claude-side worker usage (Sonnet, Opus worker instances) competes directly with the Opus manager's ability to keep operating, so every Sonnet task carries an opportunity cost against future Opus capacity. Terra or a free worker can rationally beat Sonnet even where Sonnet is somewhat stronger in isolation. That prices Sonnet correctly without banning it. **Codex** is metered but normally available. Use Sol and Terra normally when they fit. Astra is the exception (§11). **Free OpenCode routes** (Muse, DeepSeek, Bunny) are **normal capacity, not emergency fallback**. Using them well reduces premium burn before conservation is ever needed. Don't choose a weaker worker merely to save quota when rework would cost more.
 
 **Free-route health.** The preference holds only while the exact route is healthy, available and genuinely free. A provider/route failure is not a capability failure: re-check the live catalog (`opencode-invocation.md`), don't loop on a broken route, and fall through per §14. Never silently substitute a paid sibling, and never spend or top up without explicit user approval.
@@ -144,7 +147,9 @@ Escalate to the user, never to a bigger model, when a decision materially change
 
 **Keep a reserve.** Never plan to consume 100 % of frontier quota. Hold some back for integration problems, recovery, blockers, final managerial decisions and continuation/handoff. The reserve is a judgment call, not a fixed percentage, until evidence supports thresholds. Session-level economics the user states (for example a short Claude-heavy window before a reset) are session overrides and are never written into canonical docs.
 
-## 11. Roles (current)
+## 11. Roles — Configuration A: Opus-led
+
+*The established GT3 map. It keeps every specialist lane below. The Sol-led configuration is §11b.*
 
 | Model | Role |
 |---|---|
@@ -177,7 +182,7 @@ For substantial engineering batches Sol may act as **execution lead** under Opus
 - Each child gets a clear interface, its own files and acceptance criteria. No overlapping edits.
 - Parallelism stays modest, and Sol avoids recursive delegation.
 - Sol reports child outcomes upward (model, effort, accepted/rework/escalated) so they reach `routing-evidence.md`.
-- Blockers escalate per §6. Host limits (`autonomous-mode.md` §6), verification policy (§5) and Opus Anchor boundaries still apply.
+- Blockers escalate per §6. Host limits (`operating-contract.md` §6), verification policy (§5) and Opus Anchor boundaries still apply.
 
 *Sol-as-lead is new on GT3: its first runs are tracked in `routing-evidence.md` before the pattern is trusted further.*
 
@@ -220,6 +225,30 @@ Astra is token-hungry and expensive. It is an **independent senior supervisory/e
 
 **How it works.** Astra receives a compact evidence packet (§4) and challenges, diagnoses, reframes or recommends, unconstrained by any decomposition that already failed. It may use read-only evidence workers (§13). **The current manager decides and executes.** That is Opus, or Sol while Sol-manager mode holds. Astra may also **challenge or supervise Sol-manager mode** on a strong trigger, for example a consequential scope, architecture or recovery call Sol faces while Opus is unavailable (`autonomous-mode.md` §4). It advises there too, and the conservative-option rule still governs. For a globally interwoven problem where Opus + Sol decomposition keeps failing, Astra's job is to produce a better global frame and plan, not to take over the work. Before invoking it on such a problem, there should be evidence that Opus has run a serious plan, Sol has worked the hard engineering, and the failure is not just missing evidence, a bad brief, too little reasoning, a provider failure or unclear acceptance. Pick Astra only when its cost is likely below continued failed attempts. If its guidance fails, identify the blocker (missing evidence, environment, architecture, product ambiguity, human judgment) and acquire new information before another expensive run.
 
+## 11b. Roles — Configuration B: Sol-led
+
+GPT-6.1 Sol is the **native manager in Codex**. This is not Sol as execution lead under Opus (§11), and not the temporary continuity manager (§13). The owner selects it (`operating-contract.md` §2). Its default roster is **exactly seven models**. Astra, DeepSeek, Bunny and MiMo are **not** in it: their evidence is preserved and they remain Opus-led lanes. `scripts/lib/route-guard.sh` enforces the roster when `GT3_CONFIG=sol-led`.
+
+| Model | Role under Sol-led | Route (status 2026-10-16, M4) |
+|---|---|---|
+| **GPT-6.1 Sol** | manager: decomposition, allocation, delegation, engineering coordination, integration, evidence assessment, quota and resource choices, scheduling, checkpointing, recovery, handoff. Also does tightly coupled engineering itself | native Codex session; `gpt-6.1-sol` listed |
+| **Claude Opus 5.5** | highest-tier specialist: Anchor Tasks, highest-difficulty engineering, complex integration, high-consequence architecture, unresolved contradictions | `claude-route.sh -m claude-opus-5-5`: INVOCATION VERIFIED |
+| **Claude Sonnet 5.5** | demanding, clearly bounded implementation or debugging where it has an expected advantage over Muse/Terra | `claude-route.sh -m claude-sonnet-5-5`: INVOCATION VERIFIED |
+| **Muse Spark 1.3** | free bounded implementation capacity | `opencode-route.sh -m opencode/muse-spark-1.3-contributor-free`: listed; free-route health applies (§10) |
+| **GPT-5.6 Terra** | reliable Codex-native bounded engineering and tooling | `codex-route.sh -m gpt-5.6-terra` |
+| **GPT-6 Luna** | mechanical execution and verification, browser/harness runs | `codex-route.sh -m gpt-6-luna`: INVOCATION VERIFIED (read-only) |
+| **Claude Haiku 5.5** | lightweight Claude-side mechanical tasks (retrieval, summarizing, simple checks) when Claude-side context or tools help | `claude-route.sh -m claude-haiku-5-5`: INVOCATION VERIFIED |
+
+**Economics under Sol-led.** Codex carries the manager, so protect Codex trajectory for management continuity. Prefer Terra and Luna, which are native and low overhead, and Muse, which is free, for bounded work. Claude routes are a scarce specialist budget: Opus for work that genuinely needs it, Sonnet only with a positive task-specific reason, and Haiku when Claude-side tooling or context is the point rather than for volume Luna handles. Luna and Haiku are complementary: Luna for Codex-side harness runs, Haiku for small Claude-side reads and summaries. Neither is a watchdog; completion detection is a script (§8). Quota modes (§10) apply by analogy: if Codex trajectory is unsafe, Sol checkpoints and may hand the seat to Opus. If Claude is exhausted, Claude routes are BLOCKED and Sol continues on Codex and Muse.
+
+**Opus under Sol is a worker.** A Sol manager may delegate bounded, substantial work to Opus **without transferring management**. The packet states scope, permission mode, worktree, acceptance criteria and reporting contract (`done / evidence / unverified / blocked`). Opus does not decompose or dispatch unrelated work and does not assume authority. `claude-route.sh` marks it `GT3 ROLE: worker` and denies the Agent tool and route launches. If the problem turns out to need project-wide management, Opus **reports** that, and the owner decides whether to move the seat (`operating-contract.md` §4).
+
+**Sol managing Sol.** A Sol manager may launch a separate Sol worker through `codex-route.sh` when context separation is worth it. Native Codex multi-agent stays disabled (`--disable multi_agent`) so every worker is accounted for, rostered and host-counted. No recursive Sol chains: workers never launch managers.
+
+**Minimum viable Sol-led roster.** Sol + Terra + Luna. If an optional route is down (Muse provider, Claude quota, a missing model), Sol-led keeps operating within the verified subset, marks the route BLOCKED, and stops only the tasks that need it.
+
+**Evaluating Sol as manager** is separate from evaluating Sol as engineer. Record `manage` rows in `routing-evidence.md`: tasks briefed, children's first-pass acceptance, rework, integration defects, owner interventions, wall-clock and coordination overhead, and whether Opus specialist calls were needed. Compare against an Opus-led baseline of comparable difficulty and verification. One run is an anecdote.
+
 ## 12. Reasoning effort (separate from model choice)
 
 Use the lowest level likely to complete the role reliably, raising it for uncertainty, context load, coordination burden, consequence or rework risk. Never maximize it by default.
@@ -247,7 +276,7 @@ Inside Autonomous Mode, prefer these levels. This is an experiment, not doctrine
 
 `ultra` is valid only where the verified Codex catalog lists it: currently every routed Codex model except Luna (`codex-cli-invocation.md`). `scripts/codex-route.sh` accepts `ultra` for any model, so the catalog, not the script, is the check.
 
-Claude-side levels (Opus, Sonnet) cannot be set per call on an ad-hoc subagent. A subagent inherits the session's level unless it uses an agent definition (`.claude/agents/*.md`), and GT3 has none yet. Record the **actual** level, not the intended one.
+Claude-side levels: an **in-session** subagent (Agent tool) inherits the session's level unless it uses an agent definition (`.claude/agents/*.md`), and GT3 has none yet. A **headless** Claude worker launched through `scripts/claude-route.sh` sets its level per call (`--effort`, required). Defaults there: Opus `high` (`xhigh` for genuinely intricate Anchor work), Sonnet `high`, Haiku `low`/`medium`. Record the **actual** level, not the intended one.
 
 Every routed job passes its model explicitly, and every Codex job also passes reasoning effort explicitly (`codex-cli-invocation.md` §"Default-fallback protection"). Never rely on a global or default model or effort.
 
@@ -255,16 +284,18 @@ Every routed job passes its model explicitly, and every Codex job also passes re
 
 Who may hand work to whom. This governs *who spawns*. §11 governs *which model fits*, and §3 governs *whether to delegate at all*.
 
-- **Opus (primary manager)** may invoke any appropriate worker, and may invoke Astra on a §11 trigger. **Sol, while in Sol-manager mode,** may also invoke Astra on a §11 trigger.
-- **Sol** (as execution lead, or as any Sol worker) may delegate to Muse / DeepSeek / Terra / Bunny / Luna through the same wrappers, from its own worktree. Sol does not spend Claude capacity. A subtask that genuinely needs Sonnet or Opus goes back up to the manager.
+- **The seat holder manages.** Only the session holding the run's seat dispatches and integrates (`operating-contract.md` §1, §4).
+- **Opus-led:** Opus (manager) may invoke any appropriate worker, and may invoke Astra on a §11 trigger. **Sol, while temporary continuity manager,** may also invoke Astra on a §11 trigger.
+- **Opus-led, Sol as lead or worker:** Sol may delegate to Muse / DeepSeek / Terra / Bunny / Luna through the same wrappers, from its own worktree. In this configuration Sol does not spend Claude capacity: a subtask that genuinely needs Sonnet or Opus goes back up to the manager.
+- **Sol-led:** Sol (manager) may invoke any §11b roster model through the wrappers, including Opus, Sonnet and Haiku via `claude-route.sh`. It never invokes Astra, DeepSeek, Bunny or MiMo (roster). Claude workers it launches do not delegate further.
 - **Muse / DeepSeek / Terra** may use Bunny or Luna. **Bunny and Luna** delegate to no one. **Astra** is advisory and dispatches no execution work. It may only use read-only evidence workers (below).
 - **Workers never self-escalate.** Hitting a lane boundary or a model/tool/route limit means checkpoint and report upward (done, evidence, what blocks it). Only a parent reassigns or escalates (§6).
 - **Opus worker instances are workers**, not the manager: bounded scope, no manager authority, report upward. Use one for an Anchor Task that benefits from context separation, or for Sol-level work while Codex is unavailable.
 - **Support/evidence workers attached to a review or decision** (for example Bunny or Luna gathering facts) are **read-only by default**: no tracked-file edits, commits or heavy local jobs unless the manager schedules them.
-- Children of any worker share the local-machine budget (`autonomous-mode.md` §6). Delegation never gets around it. Routed Codex and OpenCode jobs run from dedicated worktrees, never the user's main checkout.
+- Children of any worker share the local-machine budget (`operating-contract.md` §6). Delegation never gets around it: host accounting is host-wide and spawner-blind, and Codex native multi-agent is disabled for routed workers. Writing workers run from dedicated worktrees, never the user's main checkout (enforced by the wrappers). Read-only workers may run anywhere.
 - A parent that delegates collects its children's material results into its own upward report, so tracking (§15) survives depth.
 
-**Manager continuity (Opus → Sol).** Opus is primary manager while available. If Opus nears quota/tool exhaustion (not context pressure, which compaction handles) and meaningful in-scope work remains, Sol may become **temporary continuity manager** on the Codex side (`high`/`xhigh` minimum, `max`/`ultra` under heavy coordination). It still routes by this file's scarcity-adjusted rules and does not recreate Claude-style management in another model family. Failover is not normal architecture. **Sol, not Astra, is the manager failover path.** Astra may challenge or supervise Sol-manager mode on a §11 trigger, but it never assumes management. Procedure: `autonomous-mode.md` §4.
+**Manager continuity (Opus → Sol), Opus-led only.** This is emergency failover inside the Opus-led configuration. It is distinct from the owner **selecting** Sol-led (§11b) or deliberately **switching** managers, both of which use the handoff in `operating-contract.md` §4. Opus is primary manager while available. If Opus nears quota/tool exhaustion (not context pressure, which compaction handles) and meaningful in-scope work remains, Sol may become **temporary continuity manager** on the Codex side (`high`/`xhigh` minimum, `max`/`ultra` under heavy coordination). It still routes by this file's scarcity-adjusted rules and does not recreate Claude-style management in another model family. Failover is not normal architecture. **Sol, not Astra, is the manager failover path.** Astra may challenge or supervise Sol-manager mode on a §11 trigger, but it never assumes management. Procedure: `autonomous-mode.md` §4, using the run record's seat and epoch (`operating-contract.md` §4.5).
 
 ## 14. Compact routing tree
 
@@ -287,6 +318,13 @@ TASK
    recovery, scope drift, consequential reroute, globally
    interwoven failure of Opus + Sol decomposition?             → Astra (independent judgment; manager decides)
 ```
+
+**Sol-led substitution (§11b).** The same tree applies, with the roster swapped:
+- "why is this broken?" goes to Terra (bounded) or Sol, not DeepSeek;
+- fact retrieval goes to Luna or Haiku, not Bunny;
+- "exceptionally Sonnet-suited" is unchanged;
+- the Opus branch becomes an **Opus specialist worker**, whose project-wide decisions stay with the Sol seat;
+- the Astra branch becomes Opus specialist analysis (the manager still decides).
 
 Examples: an obvious rename goes to Luna. A contained CSS/component change or contained audio bug goes to Muse. A subtle bounded regression goes to DeepSeek, and to Sol if one serious attempt fails. A tiny native patch where OpenCode overhead is silly goes to Terra. A Grand Tour camera/render/perf issue goes to Sol. A multi-part engineering batch goes to Sol as lead, delegating only the separable pieces. A project-wide architecture tradeoff is Opus, possibly as an Anchor Task. Conflicting Sol investigations that Opus cannot reconcile are an Astra judgment.
 

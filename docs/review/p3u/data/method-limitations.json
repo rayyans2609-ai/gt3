@@ -1,0 +1,16 @@
+{
+ "excluded": [
+  "initial trace interrupted when Chrome session closed; original cause not proven",
+  "screen-saver/hidden startup tabs and input acknowledgement stalls; foreground/display watchdog added",
+  "raw node_modules diagnostic imports, then first-use Vite dependency reload; browser import bridge and prewarm added",
+  "Chrome component offscreen.html caused Vite HMR; profiles moved under nested Vite-ignored node_modules cache",
+  "first full-texture pressure rejection was a guard bug treating the first warning as two; corrected",
+  "first Night prototype stopped on two real warning samples after dependency reload doubled bootstrap residency; stable prewarm retry completed"
+ ],
+ "acceptance": "Only completed, provenance-stamped result windows contribute to the frontier. Partial scene-only intervals at DPR1/1.5 remain explicitly identified.",
+ "unverified": [
+  "exact isolated GPU-busy per-pass hardware attribution on Metal",
+  "ten-minute combined unlocked prototype",
+  "owner aesthetic and trackpad/shimmer acceptance"
+ ]
+}

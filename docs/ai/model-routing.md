@@ -261,9 +261,9 @@ Use the lowest level likely to complete the role reliably, raising it for uncert
 | **Astra** | explicit selection **required** (low catalog default); usage itself stays exceptional |
 | **OpenCode workers** | the explicit model ID is the whole routing decision; no per-call reasoning variant in current policy |
 
-### Autonomous Mode preferred levels — EXPERIMENT
+### Autonomous Mode preferred levels
 
-Inside Autonomous Mode, prefer these levels. This is an experiment, not doctrine. Findings are recorded per `autonomous-mode.md` §13.
+Inside Autonomous Mode, prefer these levels. They are defaults, not doctrine; refine them from actual efforts and verdicts in `routing-evidence.md` rows.
 
 | Model | Preferred levels |
 |---|---|
@@ -295,7 +295,7 @@ Who may hand work to whom. This governs *who spawns*. §11 governs *which model 
 - Children of any worker share the local-machine budget (`operating-contract.md` §6). Delegation never gets around it: host accounting is host-wide and spawner-blind, and Codex native multi-agent is disabled for routed workers. Writing workers run from dedicated worktrees, never the user's main checkout (enforced by the wrappers). Read-only workers may run anywhere.
 - A parent that delegates collects its children's material results into its own upward report, so tracking (§15) survives depth.
 
-**Manager continuity (Opus → Sol), Opus-led only.** This is emergency failover inside the Opus-led configuration. It is distinct from the owner **selecting** Sol-led (§11b) or deliberately **switching** managers, both of which use the handoff in `operating-contract.md` §4. Opus is primary manager while available. If Opus nears quota/tool exhaustion (not context pressure, which compaction handles) and meaningful in-scope work remains, Sol may become **temporary continuity manager** on the Codex side (`high`/`xhigh` minimum, `max`/`ultra` under heavy coordination). It still routes by this file's scarcity-adjusted rules and does not recreate Claude-style management in another model family. Failover is not normal architecture. **Sol, not Astra, is the manager failover path.** Astra may challenge or supervise Sol-manager mode on a §11 trigger, but it never assumes management. Procedure: `autonomous-mode.md` §4, using the run record's seat and epoch (`operating-contract.md` §4.5).
+**Manager continuity (failover).** Either configuration may name a same-host failover successor in an Autonomous invocation (`autonomous-mode.md` §4): Sol under Opus-led, or Opus under Sol-led. It is distinct from the owner **selecting** a configuration or deliberately **switching** managers, which use the handoff in `operating-contract.md` §4. The text below describes the Opus-led case. If Opus nears quota/tool exhaustion (not context pressure, which compaction handles) and meaningful in-scope work remains, Sol may become **temporary continuity manager** on the Codex side (`high`/`xhigh` minimum, `max`/`ultra` under heavy coordination). It still routes by this file's scarcity-adjusted rules and does not recreate Claude-style management in another model family. Failover is not normal architecture. **Sol, not Astra, is the manager failover path.** Astra may challenge or supervise Sol-manager mode on a §11 trigger, but it never assumes management. Procedure: `autonomous-mode.md` §4, using the run record's seat and epoch (`operating-contract.md` §4.5).
 
 ## 14. Compact routing tree
 

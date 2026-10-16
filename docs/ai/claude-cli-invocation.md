@@ -16,6 +16,7 @@ scripts/claude-route.sh -m <model> -r <effort> -s <mode> @path/to/brief.md
 | `-m` | `claude-opus-5-5`, `claude-sonnet-5-5`, `claude-haiku-5-5` | Full IDs only; aliases are refused. |
 | `-r` | `low` `medium` `high` `xhigh` `max` | Passed as `--effort`. Unlike in-session subagents, headless workers **can** set effort per call. |
 | `-s` | `read-only`, `edit`, `auto` | Required. See modes below. |
+| `-R`, `-T` | run id, task id | Optional. Same as `GT3_RUN`/`GT3_TASK`. With a run, the seat guard requires the record to be active on this host, and epoch/configuration come from it. Prefer the flags: a command that starts with the wrapper path matches the Codex project `allow` rule. |
 
 The wrapper refuses to run, before any model call, if:
 - a flag is missing or invalid;
@@ -56,6 +57,10 @@ The disallow list (Agent tool, push, merge, rebase, reset, checkout of main, `co
 ## Quota
 
 Workers draw on the **same Claude subscription** as any interactive Claude Code session on that account, on either Mac. Every Claude worker spends the same scarce pool an Opus manager would (`model-routing.md` §10). On a usage-limit error, mark the route BLOCKED with its reset time; do not retry.
+
+## Opus as manager (Claude Code)
+
+The Opus-led manager is an ordinary Claude Code session, not this route. Project permissions in `.claude/settings.json` let it run the GT3 routes, `gt3-run.sh`, `host-check` and `git worktree add` without prompts. Push, merge, rebase and destructive git ask the owner; force pushes are denied. Verified headless 2026-10-16: the allow-list ran in manual mode with prompts off; push and merge were denied as ask, and force push as deny. Headless workers launched through this route also load those project settings, but the route's own `--disallowedTools` wins over any project allow.
 
 ## Not covered
 

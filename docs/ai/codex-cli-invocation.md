@@ -34,9 +34,22 @@ codex exec --dangerously-bypass-approvals-and-sandbox --skip-git-repo-check --di
 - `ultra` ("maximum reasoning with automatic task delegation") is refused unless `GT3_LAUNCH_ROLE=manager`.
 - `scripts/lib/route-guard.sh` also refuses writing modes in the main checkout or on `main`, refuses `OPENAI_API_KEY`/`OPENAI_BASE_URL`/`OPENAI_API_BASE`, enforces the Sol-led roster under `GT3_CONFIG=sol-led`, and logs launches under `GT3_RUN` (`operating-contract.md` §5).
 
-### Native Codex manager and remote surfaces
+### Native Codex manager (Sol-led)
 
-A Sol-led manager is an interactive Codex session the owner opens (CLI or ChatGPT desktop project), not a wrapper launch: `codex -m gpt-6.1-sol -c model_reasoning_effort="high" --disable multi_agent`. iPhone control is through the ChatGPT app after pairing in the ChatGPT desktop app (*Settings → Connections → Control this Mac or PC*). The CLI's `codex remote-control` / `codex app-server daemon … remote-control` subcommands are marked experimental and are not the supported mobile path. Note: `codex remote-control` with no subcommand runs a foreground server. Only inspect it with `--help`. See `operating-contract.md` §9.
+A Sol-led manager is an interactive Codex session (or `codex exec` for unattended runs) that the owner starts. It is not a wrapper launch. The launch lines are in the manager card (`operating-contract.md`). Summary:
+- orient with `-s read-only` in the main checkout;
+- engineer with `-C <abs worktree>` in the default `workspace-write` sandbox, with per-invocation trust `-c 'projects."<abs worktree>".trust_level="trusted"'` so the project rules load;
+- run unattended by adding `-c approval_policy="never"`.
+
+Always pass `-m gpt-6.1-sol`, an explicit effort and `--disable multi_agent`.
+
+**Project execpolicy** (`.codex/rules/gt3.rules`, verified live 2026-10-16 on `codex-cli 0.163.0`):
+- `allow` runs a command **outside** the sandbox without prompting. A worker launched that way is not confined by the manager's sandbox: a full-mode worker bound localhost. Commands that match no rule stay sandboxed (a bare `sysctl` was denied in the same session).
+- `prompt` is rejected under `approval_policy=never`.
+- Check rule decisions offline with `codex execpolicy check -r .codex/rules/gt3.rules -- <command tokens>`.
+- **Matching pitfalls (found in V2):** rules match the parsed command's leading tokens. A leading `VAR=value` assignment, or an inline argument with nested escaped quotes, stops the match, and the command runs sandboxed; the GT3 wrappers then fail closed on the seat guard. Use the wrappers' `-R <run> -T <task>` flags and `@brief-file` prompts.
+
+**Phone and desktop app.** iPhone control goes through the ChatGPT app for **desktop-app** Codex sessions after pairing (*Settings → Connections → Control this Mac or PC*). Phone access to Terminal sessions is unverified. The desktop app can't take `--disable multi_agent` from a brief, so record that rather than assert it. The CLI's `codex remote-control` / `app-server … remote-control` subcommands are experimental and not the supported path. `codex remote-control` with no subcommand runs a foreground server, so inspect it with `--help` only. See `operating-contract.md` §9.
 
 The raw syntax above was verified on 0.157.1 if you ever need to bypass the wrapper for a one-off interactive case, but the wrapper is the canonical path for routed jobs.
 

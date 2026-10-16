@@ -24,7 +24,7 @@ Any clear phrasing invokes the mode when the active task is clear: "Enter GT3 Au
 
 ```
 Enter GT3 Autonomous Mode. Objective: <desired end state>.
-Configuration: opus-led|sol-led   Branch: <branch/worktree>  Commits: yes|no  Push: yes|no  main: forbidden
+Configuration: opus-led|sol-led   Failover: none|opus|sol   Branch: <branch/worktree>  Commits: yes|no  Push: yes|no  main: forbidden
 Exclusions: …   Human-review boundaries: …   Horizon: …
 ```
 
@@ -33,6 +33,7 @@ If invoked mid-task, infer the objective and boundaries from the conversation an
 | Field | Default |
 |---|---|
 | Configuration | the harness you are running in (Claude Code → opus-led, Codex → sol-led) |
+| Failover | none |
 | Branch | Current branch if not `main`; else a new worktree branch named for the objective |
 | Commits / Push | yes / no |
 | `main` | forbidden (no commit, merge, rebase, push) |
@@ -65,32 +66,25 @@ While the user is away, an independent model view can stand in for the user's ju
 
 **Final acceptance is conditional.** When evidence is strong, integration was straightforward, no contradictions occurred, blast radius is low and manager confidence is high, the manager accepts directly. Independent final review (Astra included) happens only when the run's actual risk warrants it, and it audits evidence sufficiency rather than replaying the checks. A final regression is a risk-based integration check (`model-routing.md` §5), not a replay of everything tested earlier in the run. The **human-verification sweep** is a cheap manager pass, not a model review. Before handoff, inspect every NEEDS HUMAN VERIFICATION item, drop bogus or redundant ones and anything automation already settled, and keep only genuine subjective judgment.
 
-## 4. Manager continuity: Opus → Sol (Opus-led emergency failover)
+## 4. Manager continuity (both configurations)
 
-This section covers only **unplanned** continuity inside an Opus-led run on one host. A deliberate switch in either direction, a host transfer, or a Sol-led run uses the ordinary handoff in `operating-contract.md` §4.
+**One manager at a time.** The run record's seat and epoch are the authority (`operating-contract.md` §3–§4). Every change of manager is the ordinary `release` → `claim`.
 
-If Opus nears quota/tool exhaustion (a usage warning, rate-limit notice, or known reset window) while meaningful in-scope work remains **and Codex is available**, Sol (`high`/`xhigh`; higher per `model-routing.md` §12 under heavy coordination) may become **temporary continuity manager**. This is failover, not normal architecture. Context pressure alone is not a trigger, because compaction handles it.
+**Failover successor.** The invocation may name one (`Failover: sol` under Opus-led, `Failover: opus` under Sol-led). When the seat holder nears quota or tool exhaustion (a usage warning, rate-limit notice or known reset window, but not context pressure, which compaction handles) and meaningful in-scope work remains:
+1. It quiesces its workers: they finish, checkpoint, or are listed as transferred.
+2. It writes the continuation packet into the record: done criteria, branch/head, task states with accepted/unaccepted marked, key evidence, quota/host state, risks, exact next actions, the absolute deadline.
+3. It runs `release`.
+4. It starts the successor on the same host with the record as its brief:
+   - **Sol:** `codex exec` with the Sol-led manager flags from the manager card plus `-c approval_policy="never"`, detached;
+   - **Opus:** a Claude Code session started with the brief.
 
-**One manager at a time.** The run record's seat and epoch (`operating-contract.md` §3–§4) are the authority, replacing the former PID-in-ledger lock. Transitions go through `scripts/gt3-run.sh release` / `claim`, serialized on the host. Nobody dispatches while the record names another seat. A returning Opus that finds Sol active writes `handback requested` under *Next step* and dispatches nothing. This is same-host only. Across hosts there is no automatic failover (`operating-contract.md` §4.3).
+The successor `claim`s before doing anything. If no claim appears, the run stays released: a safe pause.
 
-**Continuation packet.** Opus can be cut off without warning, so the ledger always holds what the *next manager actually needs*, updated on the events in §11:
+**Successor authority.** It is temporary and inside the same objective, scope and safety rules. It routes with its own configuration's roster (`model-routing.md` §11/§11b). On any scope-sensitive or consequential call, it takes the conservative option (checkpoint, or record it as blocked) and leaves it for the original manager or the owner.
 
-- objective and done criteria
-- branch/head, relevant working-tree state, meaningful commits
-- active and completed tasks with their owners, and which work is accepted or unaccepted
-- important evidence
-- material quota/reset state and important host/process state (owned PIDs)
-- unresolved risks, exclusions, exact next actions
+**Handback.** A returning manager reads the record first. If the successor holds the seat, it records `handback requested` and dispatches nothing. The successor checks at task boundaries, writes a short run-over into the record, runs `release` and exits. The returning manager confirms with `status` and claims. If the holder died without releasing, the returning manager verifies its PID is gone, notes it, and the owner confirms before a forced claim.
 
-No transcripts. If Opus is cut off before handing over, no failover happens and the ledger is the handoff.
-
-**Entering Sol-manager mode.** Opus quiesces its own workers first: each finishes or checkpoints, and anything still running is listed as transferred. Opus runs `gt3-run.sh release <run> opus@<host>` and launches Sol with the packet as its brief via `GT3_LAUNCH_ROLE=manager scripts/codex-route.sh` from the run's worktree, detached so it survives the Claude session. The brief includes the absolute run deadline, and Sol stops at it. Sol acknowledges by running `gt3-run.sh claim <run> sol@<host>`. If no claim appears within a few minutes, Opus re-claims (if still able), or the run simply stops released, which is a safe pause. Sol secures Claude-side state first, then continues bounded work. Its pool is Codex-side (Terra, Luna) plus the free OpenCode workers (Muse, DeepSeek, Bunny). Claude workers are assumed unavailable. Astra never replaces the manager. On a strong trigger (`model-routing.md` §11), for example a consequential scope, architecture or recovery call, Sol may invoke Astra to challenge or supervise its decision. Astra advises, and the conservative-option rule below still governs. **Sol manages with the same scarcity-adjusted, net-leverage routing**, not a copy of Claude-style management in another model family: it can do coupled work itself and delegates only separable work. The Sol-manager process counts as an active agent under the host profile's limits (`operating-contract.md` §6.3). On the Intel that leaves room for at most one heavy worker beneath it.
-
-**Sol-manager authority.** Temporary. Scope and safety rules are unchanged. Sol may not widen scope, touch `main`, push unless the invocation allows it, or start work outside the run plan. **On any scope-sensitive or consequential decision, take the conservative option** (checkpoint, or record it as blocked) and leave it for Opus or the user.
-
-**Handback.** A returning Opus reads the record before doing anything. If Sol holds the seat, Opus records `handback requested` and dispatches nothing. Sol checks the record at each task boundary. It stops creating work, checkpoints or finishes current bounded work quickly, writes a concise run-over into the record (work done, evidence, commits, active tasks, host/process state, quota events, unresolved items, next action), runs `gt3-run.sh release`, and exits. Opus consumes the run-over without redoing established work, confirms Sol and its workers have exited or been explicitly transferred (`gt3-run.sh status`), and claims. If Sol died without releasing, the record stays active under Sol: Opus verifies the Sol PID is gone (owned-PID identity check), notes it in the record, and the owner confirms before Opus forces the claim. If Opus never returns within the run, Sol writes the handoff (§12) and records the failover.
-
-If Codex is also unavailable, there is no continuity manager: checkpoint, update the packet, and stop cleanly (§9).
+No successor named, both providers exhausted, or a different host: checkpoint, release, stop (§9). There is no cross-host automatic failover.
 
 ## 5. Quota trajectory and limits
 
@@ -202,7 +196,7 @@ Depth scales with the run. Keep implemented ≠ verified ≠ accepted separate i
 
 **Failure- or recovery-heavy run** adds: failure classification · recovery attempts · rerouting · manager failovers · material reviews/interventions and any overrides · quota/host issues and cleanup.
 
-Include in any tier when present: process lessons/improvement candidates, Thinking-Level Findings (§13), and the `routing-evidence.md` rows recorded. Don't drop important state to be brief, and don't pad a simple run with empty sections.
+Include in any tier when present: process lessons/improvement candidates and the `routing-evidence.md` rows recorded. Don't drop important state to be brief, and don't pad a simple run with empty sections.
 
 ## 13. Learning and promotion
 
@@ -218,6 +212,4 @@ Do not mutate canonical doctrine during a run unless explicitly authorized. Afte
 | Measured run evidence | `BUILD_LOG.md` |
 | Product/runtime constraint | `SPEC.md` |
 
-**Thinking-level experiment (`model-routing.md` §12).** For the next 2–3 Autonomous Mode runs, record the thinking level for *material* tasks only, in the `routing-evidence.md` row: whether it was underpowered / appropriate / excessive, and its effect on quality, retries/rework and quota. Summarize in a short **Thinking-Level Findings** line in the handoff. No per-command telemetry. After 2–3 runs, recommend refinements from that evidence.
-
-*Experiment status: 0 of 3 runs recorded.* Update this line when a run's findings are reviewed.
+**Thinking levels.** Record the actual effort in each material `routing-evidence.md` row, with a short verdict (under / ok / over) when it is evident. The former mandatory 3-run experiment was retired on 2026-10-16 with no runs recorded; refine levels from accumulated rows instead.

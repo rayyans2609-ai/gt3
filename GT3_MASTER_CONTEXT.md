@@ -43,7 +43,7 @@ When sources disagree, in order:
 - `docs/ai/operating-contract.md`: two first-class Macs, seat/epoch manager authority, handoffs, worker isolation, evidence provenance, cross-host Git, iPhone remote control.
 - `docs/ai/autonomous-mode.md`: unattended runs.
 
-Read all three at session start, before assigning work. GT3 is developed on **two first-class Macs** (Intel MacBook Air i5/8 GB, M4 MacBook Air 16 GB). Neither is permanently primary. It runs under **either** native manager: Opus in Claude Code, or GPT-6.1 Sol in Codex, chosen and switched by the owner.
+Managers read these by need (tiered reading in `CLAUDE.md`/`AGENTS.md`). GT3 is developed on **two first-class Macs** (Intel MacBook Air i5/8 GB, M4 MacBook Air 16 GB). Neither is permanently primary. It runs under **either** native manager: Opus in Claude Code, or GPT-6.1 Sol in Codex, chosen and switched by the owner.
 
 ## Important project paths
 

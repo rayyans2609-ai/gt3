@@ -2,7 +2,7 @@
 
 Execution-specific layer only. Which worker gets which task (Muse, DeepSeek, Bunny, MiMo) lives in [`docs/ai/model-routing.md`](./model-routing.md) — do not duplicate it here. Codex execution is in [`codex-cli-invocation.md`](./codex-cli-invocation.md).
 
-**Status:** verified 2026-10-04 against a locally installed `opencode v2.0.22` (`~/.opencode/bin/opencode`, macOS). The route IDs below were also used throughout the GT3 model benchmark (2026-10-03/04). Re-verify at the start of a session that depends on them — see "This file drifts".
+**Status (2026-10-16, M4):** `opencode v2.0.30`. `opencode auth list` reports **no authenticated integrations**, so Token Harbor routes (DeepSeek, MiMo) are **unavailable on the M4** until the owner logs in there. The live catalog lists `opencode/muse-spark-1.3-contributor-free`, `opencode/space-bunny-free`, `opencode/mimo-v2.6-flash-free` and a Zen `opencode/deepseek-v4.1-flash-free`. The Zen DeepSeek ID is untested and **not** an approved substitute. Route availability is per host (`operating-contract.md` §10.3). Earlier status: verified 2026-10-04 against a locally installed `opencode v2.0.22` (`~/.opencode/bin/opencode`, macOS). The route IDs below were also used throughout the GT3 model benchmark (2026-10-03/04). Re-verify at the start of a session that depends on them — see "This file drifts".
 
 ## Required invocation path: `scripts/opencode-route.sh`
 
@@ -73,7 +73,7 @@ script -q /dev/null opencode models | grep -E 'muse-spark-1.3-contributor-free|s
 
 ## Dedicated worktree rule
 
-Like Codex jobs, routed OpenCode jobs run with auto-approved edits and commands in their launch directory. Launch them from a manager-created worktree on the job's branch, never the user's main checkout. The host limits in `autonomous-mode.md` §6 (one heavy local job at a time on this 8 GB Mac) apply to OpenCode workers too: inference is remote, but their builds, browsers and tests run locally.
+Like Codex jobs, routed OpenCode jobs run with auto-approved edits and commands in their launch directory. Launch them from a manager-created worktree on the job's branch, never the user's main checkout. `scripts/lib/route-guard.sh` **enforces** this: it refuses the main checkout and branch `main`. Under `GT3_CONFIG=sol-led`, only Muse is allowed. The host limits in `operating-contract.md` §6 apply to OpenCode workers too: inference is remote, but their builds, browsers and tests run locally and count host-wide.
 
 ## This file drifts
 

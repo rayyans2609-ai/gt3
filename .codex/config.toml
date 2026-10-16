@@ -1,2 +1,4 @@
-[mcp_servers.codex-executor]
-command = "codex"
+# GT3 project Codex layer. Loaded only when the owner trusts this project in Codex.
+# Project execpolicy rules live in .codex/rules/ (docs/ai/operating-contract.md §5.1).
+# The former [mcp_servers.codex-executor] entry was removed 2026-10-16: it never connected
+# (CONNECTION_CLOSED since 2026-09-26) and would start once the project layer is trusted.

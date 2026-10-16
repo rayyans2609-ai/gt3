@@ -37,9 +37,11 @@ usage() {
 }
 
 model="" effort="" mode=""
-while getopts ":m:r:s:" opt; do
+while getopts ":m:r:s:R:T:" opt; do
   case "$opt" in
     m) model="$OPTARG" ;;
+    R) export GT3_RUN="$OPTARG" ;;
+    T) export GT3_TASK="$OPTARG" ;;
     r) effort="$OPTARG" ;;
     s) mode="$OPTARG" ;;
     *) usage ;;

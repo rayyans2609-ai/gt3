@@ -34,9 +34,11 @@ usage() {
 
 model=""
 
-while getopts ":m:" opt; do
+while getopts ":m:R:T:" opt; do
   case "$opt" in
     m) model="$OPTARG" ;;
+    R) export GT3_RUN="$OPTARG" ;;
+    T) export GT3_TASK="$OPTARG" ;;
     *) usage ;;
   esac
 done

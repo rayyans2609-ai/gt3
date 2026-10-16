@@ -16,6 +16,9 @@
 #      host can dispatch for a run.
 #   4. Roster: configuration sol-led allows only the seven Sol-led models.
 #   5. The wrapper calls route_log just before exec, so only real launches are logged.
+# Run and task may be given as GT3_RUN/GT3_TASK or as wrapper flags -R <run> -T <task>. Prefer
+# the flags: a command that starts with the wrapper path matches the project execpolicy
+# allow rule, while a leading VAR=value assignment does not (and would run sandboxed).
 # Exports GT3_ROLE (worker unless GT3_LAUNCH_ROLE=manager) for the child.
 
 route_guard_die() { echo "$ROUTE_GUARD_NAME: $*" >&2; exit 2; }

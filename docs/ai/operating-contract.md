@@ -112,7 +112,7 @@ A worktree keeps branches apart. It does not stop a privileged process from writ
 | Wrapper | Mode | Enforced by | Allows | Use for |
 |---|---|---|---|---|
 | `codex-route.sh -s read-only` | Codex read-only sandbox | OS seatbelt | reads (including the home directory) | review, evidence, inspection; any checkout |
-| `codex-route.sh -s workspace` | Codex workspace-write | OS seatbelt | writes inside the worktree and `/tmp`. No network, no localhost bind, **no git commit in a linked worktree** (verified 2026-10-16) | editing-only workers; the manager reviews and commits the diff |
+| `codex-route.sh -s workspace` | Codex workspace-write | OS seatbelt | writes inside the worktree, `/tmp` and `$TMPDIR`. No network, no localhost bind, **no `git add`/`git commit` in a linked worktree** (the index lock lives in the main `.git`) (live Luna worker verified 2026-10-16) | editing-only workers; the manager reviews and commits the diff |
 | `codex-route.sh` (default `full`) | approvals + sandbox bypassed | — | everything the user can do, including network and push credentials | builds, Vite, browsers; proven Phase 1–3 path. Requires a worktree |
 | `claude-route.sh -s read-only` | `--tools Read,Grep,Glob` | Claude Code tool set | reads only | specialist analysis or review; any checkout |
 | `claude-route.sh -s edit` | `acceptEdits` + Bash allowlist, prompts denied | Claude Code permissions | edits inside the worktree, `git status/diff/log/show`, `node --check`, `npm run build` (verified 2026-10-16: `/tmp` write, outside write, `git push` and subagent all refused) | bounded implementation; the manager commits |
@@ -133,7 +133,7 @@ Launch detached (`nohup <wrapper> … > log 2>&1 &`). Record the PID and, **afte
 
 ### 5.4 Provenance and stale results
 - Every worker commit carries a trailer `GT3-Run: <run>/e<epoch>/<task>`. Manager commits of worker diffs add it on the worker's behalf.
-- `gt3-run.sh status` flags commits since the checkpoint whose epoch differs from the current one.
+- `gt3-run.sh status` flags commits since the checkpoint whose epoch differs from the current one (WARN), and commits with no trailer (NOTE: confirm their origin).
 - **A foreign-epoch result is never auto-merged and never auto-discarded.** The current manager revalidates it: `git diff <its base>..<current>` over its dependency cone, then re-runs its targeted evidence only if the cone changed (`model-routing.md` §5 evidence reuse).
 - **Integration (merge into the objective branch) is a seat-only act.** No worker acquires the right to integrate, merge or push because it produced a result.
 
@@ -299,10 +299,10 @@ Vocabulary: PROPOSED · DOCUMENTED · IMPLEMENTED · STATICALLY VERIFIED · INVO
 | `claude-route.sh` Opus / Sonnet / Haiku | INVOCATION VERIFIED · HOST VALIDATED (M4). Intel UNVERIFIED |
 | `claude-route.sh -s edit` permission contract, TERM cancel | INVOCATION VERIFIED (M4, Haiku) |
 | `codex-route.sh -s read-only` + `--disable multi_agent` | INVOCATION VERIFIED (M4, Luna low) |
-| Codex workspace-write limits | VERIFIED via `codex sandbox -P :workspace` (M4). No live `-s workspace` model run |
+| `codex-route.sh -s workspace` worker → manager-owned commit | INVOCATION VERIFIED · HOST VALIDATED (M4, Luna low, 2026-10-16): in-worktree edits allowed; main-checkout, home and repo-root writes, `git add`/`commit`, push and network denied; manager committed the diff with its `GT3-Run` trailer |
 | `host-check.mjs` identity / status / preflight | IMPLEMENTED · HOST VALIDATED (M4). Intel UNVERIFIED |
 | `with-verification-server.sh` port + provenance | IMPLEMENTED · HOST VALIDATED (M4, two concurrent servers) |
-| `gt3-run.sh` claim / release / checkpoint / import | IMPLEMENTED · STATICALLY VERIFIED (simulated two-clone handoffs on M4: Sol→Opus→Sol, cross-host bundle, stale-host refusal, stale-bundle refusal, live-worker refusal) |
+| `gt3-run.sh` claim / release / checkpoint / import | IMPLEMENTED · STATICALLY VERIFIED: simulated handoffs (Sol→Opus→Sol, live-worker refusal), plus a 26-check round trip between **independent** full clones (record byte-identical, note on tip, epoch and state, all commits, blobs and trailers present, fsck clean, stale-host and stale-bundle refusals, missing-base refusal), 2026-10-16 |
 | Same-host manager handoff with real managers | DOCUMENTED. HANDOFF VERIFIED pending the pilot |
 | Cross-host handoff with real Macs | DOCUMENTED. Needs the Intel and an owner transfer |
 | Native Sol manager delegating to workers | DOCUMENTED. Pilot prepared (`local/handoffs/GT3_SOL_PILOT/`) |

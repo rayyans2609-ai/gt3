@@ -56,6 +56,8 @@ status)
   if [[ -n "$have" && -n "$want" ]] && git cat-file -e "$want" 2>/dev/null; then
     foreign=$(git log --format='%h %(trailers:key=GT3-Run,valueonly,separator=%x2C)' "$want..$b" 2>/dev/null | awk -v e="e$epoch" 'NF>1 && $2 !~ "/"e"/" {print}')
     [[ -n "$foreign" ]] && { echo "WARN commits since checkpoint from another epoch (revalidate before adopting):"; echo "$foreign"; warn=1; }
+    unattributed=$(git log --format='%h %s%x09%(trailers:key=GT3-Run,valueonly,separator=%x2C)' "$want..$b" 2>/dev/null | awk -F'\t' '$2=="" {print $1}')
+    [[ -n "$unattributed" ]] && { echo "NOTE commits since checkpoint without a GT3-Run trailer (confirm their origin before relying on them):"; echo "$unattributed"; }
   fi
   lw=$(live_workers); [[ -n "$lw" ]] && { echo "INFO live workers launched under this run:"; echo "$lw"; }
   exit $warn ;;

@@ -1,0 +1,10 @@
+#!/bin/sh
+# GT3 defense-in-depth (docs/ai/operating-contract.md §5.1): no commits on main without an
+# explicit, owner-approved override. Not a security boundary (--no-verify bypasses it); the
+# primary protections are the harness permission rules and server-side branch protection.
+branch=$(git symbolic-ref --quiet --short HEAD 2>/dev/null)
+if [ "$branch" = main ] && [ "${GT3_ALLOW_MAIN:-}" != 1 ]; then
+  echo "pre-commit: refusing a commit on main. Work on a non-main branch/worktree; owner-approved main commits set GT3_ALLOW_MAIN=1." >&2
+  exit 1
+fi
+exit 0

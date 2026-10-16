@@ -9,7 +9,7 @@ const normal = { pressure: 1, pageouts: 50, swapouts: 10, idle: 80, system: 10, 
 const inventory = classifyWorkloads(row(100, 'claude'));
 const gate = (cls = 'agent', overrides = {}) => preflight(cls, {
   identify: async () => m4, sample: async () => ({ ...normal }),
-  inventory: async () => inventory, pause: async ms => assert.equal(ms, 10000), ...overrides,
+  inventory: async () => inventory, pause: async ms => assert.equal(ms, 10000), workers: async () => null, ...overrides,
 });
 
 test('excludes only the Claude bg-spare subcommand, including versioned paths and whitespace', () => {
@@ -36,9 +36,11 @@ test('known limitation: native Codex app-server is excluded, not proven to count
   assert.equal(classifyWorkloads(row(100, '/Applications/Codex.app/Contents/Resources/codex app-server')).agents.length, 0);
 });
 
-test('known limitation: Codex launcher and native child remain separate matched PIDs', () => {
-  const ps = `${row(100, 'node /Users/example/.npm-global/bin/codex')}\n101 100 1024 /vendor/bin/codex`;
-  assert.deepEqual(classifyWorkloads(ps).agents.map(p => [p.pid, p.ppid]), [[100, 1], [101, 100]]);
+test('Codex launcher and its native child count as one session (D4)', () => {
+  const ps = `${row(100, 'node /Users/example/.npm-global/bin/codex exec task')}\n101 100 1024 /vendor/bin/codex exec task`;
+  assert.deepEqual(classifyWorkloads(ps).agents.map(p => [p.pid, p.ppid]), [[100, 1]]);
+  const two = `${row(100, 'codex exec a')}\n${row(200, 'codex exec b')}`;
+  assert.equal(classifyWorkloads(two).agents.length, 2, 'independent sessions still both count');
 });
 
 test('failed, empty or malformed process inventory is unavailable, not zero agents', async () => {
@@ -112,15 +114,31 @@ test('normal pressure allows agent preflight; warning or critical in either samp
   }
 });
 
-test('six-agent boundary unchanged; preflight preserves the exact matched inventory', async () => {
-  for (const n of [5, 6]) {
+test('host-wide census at the limit warns but does not refuse (S0 replay, D4)', async () => {
+  for (const n of [5, 6, 9]) {
     const w = classifyWorkloads(snapshot(Array(n).fill('claude -p task')));
     const result = await gate('agent', { inventory: async () => w });
-    assert.equal(result.pass, n === 5);
+    assert.equal(result.pass, true);
     assert.equal(result.counts.agents, n);
     assert.deepEqual(result.workloads.agents, w.agents);
-    if (n === 6) assert.ok(result.reasons.includes('agent processes 6 >= soft limit 6'));
+    assert.equal(result.warnings.length, n >= 6 ? 1 : 0);
   }
+});
+
+test('run-own live workers enforce the agent limit (manager + new launch included)', async () => {
+  for (const [own, pass] of [[0, true], [4, true], [5, false]]) {
+    const result = await gate('agent', { workers: async () => own });
+    assert.equal(result.pass, pass, `own=${own}`);
+    assert.equal(result.counts.runWorkers, own);
+    if (!pass) assert.ok(result.reasons.some(r => r.startsWith('run workers 5')));
+  }
+});
+
+test('advisory census never masks real blocks: pressure 2 still refuses agent launches', async () => {
+  const result = await gate('agent', { sample: async () => ({ ...normal, pressure: 2 }),
+    inventory: async () => classifyWorkloads(snapshot(Array(9).fill('claude -p task'))) });
+  assert.equal(result.pass, false);
+  assert.ok(result.reasons.includes('memory pressure not normal'));
 });
 
 test('inventory evidence retains command suffixes beyond the former truncation', async () => {

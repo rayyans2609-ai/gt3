@@ -16,6 +16,7 @@
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import { pathToFileURL } from 'node:url';
+import { readFileSync } from 'node:fs';
 import { hostSample, wait } from './lib/perf-host.mjs';
 
 const run = async (cmd, args, opts = {}) => {
@@ -84,8 +85,26 @@ export function classifyWorkloads(ps) {
       && !/app-server|exec-server|remote-control|bg-pty-host|pid-update-loop|Helpers\/disclaimer| mcp( |$)|chrome-native-host|auth status/.test(c))
       out.agents.push(r);
   }
+  // A launcher and its native child (e.g. the npm `codex` node shim and the vendor binary)
+  // are one session: count a matched agent only if its parent is not also a matched agent.
+  const agentPids = new Set(out.agents.map(r => r.pid));
+  out.agents = out.agents.filter(r => !agentPids.has(r.ppid));
   return out;
 }
+
+/** Live workers launched under one run (exact: launches.log pid + start time still match). */
+export async function runWorkers(runId, command = run, root = repoRoot()) {
+  if (!runId) return null;
+  let log;
+  try { log = readFileSync(`${root}/local/runs/${runId}/launches.log`, 'utf8'); } catch { return 0; }
+  let live = 0;
+  for (const m of log.matchAll(/ pid=(\d+) start=(\S+) /g)) {
+    const now = (await command('ps', ['-o', 'lstart=', '-p', m[1]]))?.replace(/ /g, '_');
+    if (now && now === m[2].replace(/_+$/, '')) live++;
+  }
+  return live;
+}
+const repoRoot = () => new URL('..', import.meta.url).pathname.replace(/\/$/, '').replace(/\/\.claude\/worktrees\/[^/]+$/, '');
 
 export async function workloads(command = run) {
   const run = command;
@@ -132,7 +151,8 @@ async function status() {
     counts: { ...otherCounts, agentProcesses: agents }, workloads: w };
 }
 
-export async function preflight(cls, { identify = identity, sample = hostSample, inventory = workloads, pause = wait } = {}) {
+export async function preflight(cls, { identify = identity, sample = hostSample, inventory = workloads, pause = wait,
+  workers = () => runWorkers(process.env.GT3_RUN) } = {}) {
   if (!['heavy', 'heavy2', 'browser', 'perf', 'agent'].includes(cls)) throw new Error(`unknown class '${cls}'`);
   const id = await identify();
   const L = PROFILES[id.profile];
@@ -142,7 +162,7 @@ export async function preflight(cls, { identify = identity, sample = hostSample,
   const heavyNow = c.heavy;
   const delta = key => a[key] == null || b[key] == null ? null : b[key] - a[key];
   const paging = { pageouts: delta('pageouts'), swapouts: delta('swapouts') };
-  const reasons = [];
+  const reasons = [], warnings = [];
   const missingIdentity = ['arch', 'cpu', 'ramGB'].filter(key => id[key] == null || id[key] === '');
   if (missingIdentity.length) reasons.push(`host identity unavailable: ${missingIdentity.join(', ')}`);
   if (w.unavailable) reasons.push(w.unavailable);
@@ -152,7 +172,13 @@ export async function preflight(cls, { identify = identity, sample = hostSample,
   if (cls !== 'agent' && (paging.pageouts > 0 || paging.swapouts > 0)) reasons.push(`paging rising ${JSON.stringify(paging)}`);
   if (cls !== 'agent' && [a, b].some(s => s.idle != null && s.idle < 25)) reasons.push('CPU idle < 25 %');
   if ([a, b].some(s => s.system != null && s.system >= 50)) reasons.push('system CPU >= 50 %');
-  if (cls === 'agent' && c.agents != null && c.agents >= L.agents) reasons.push(`agent processes ${c.agents} >= soft limit ${L.agents}`);
+  // Host-wide agent census is approximate (idle and unrelated sessions match): advisory only.
+  // The enforced limit is this run's own live workers + its manager + the new launch.
+  const own = cls === 'agent' ? await workers() : null;
+  if (cls === 'agent' && c.agents != null && c.agents >= L.agents)
+    warnings.push(`host-wide agent processes ${c.agents} >= soft limit ${L.agents} (approximate census; advisory)`);
+  if (cls === 'agent' && own != null && own + 2 > L.agents)
+    reasons.push(`run workers ${own} + manager + new launch > agent limit ${L.agents}`);
   if (cls === 'heavy' && heavyNow >= L.heavy) reasons.push(`heavy workloads ${heavyNow} >= ${L.heavy}`);
   if (cls === 'heavy2') {
     if (!L.heavy2) reasons.push('profile does not allow a second heavy workload');
@@ -164,8 +190,9 @@ export async function preflight(cls, { identify = identity, sample = hostSample,
     reasons.push(`browser sessions ${c.browsers}, heavy ${heavyNow}: GPU/browser slot busy`);
   if (cls === 'perf' && (heavyNow > 0 || c.builds > 0)) reasons.push('performance runs need an exclusive host (no other heavy GT3 work)');
   const pass = reasons.length === 0;
-  return { pass, cls, profile: id.profile, provisional: !L.measured, reasons, paging,
-    at: new Date().toISOString(), identity: id, a, b, counts: { heavy: heavyNow, browsers: c.browsers, agents: c.agents }, workloads: w };
+  return { pass, cls, profile: id.profile, provisional: !L.measured, reasons, warnings, paging,
+    at: new Date().toISOString(), identity: id, a, b,
+    counts: { heavy: heavyNow, browsers: c.browsers, agents: c.agents, runWorkers: own }, workloads: w };
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {

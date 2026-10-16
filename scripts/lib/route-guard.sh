@@ -10,9 +10,12 @@
 #      silently move a subscription route onto paid API billing or a third party.
 #   2. Checkout: any mode that can write must run in a linked worktree on a non-main
 #      branch. read-only may run anywhere (no worktree ceremony for inspection).
-#   3. Roster: GT3_CONFIG=sol-led allows only the seven Sol-led models.
-#   4. Run provenance: if GT3_RUN is set, GT3_EPOCH and GT3_TASK must be set too. The wrapper
-#      then calls route_log just before exec, so only real launches are logged.
+#   3. Seat: if GT3_RUN is set, local/runs/<run>/run.md must be active under a seat on this
+#      host; epoch and configuration are taken from the record (a conflicting GT3_EPOCH or
+#      GT3_CONFIG in the environment is refused). GT3_TASK is required. Only the seat holder's
+#      host can dispatch for a run.
+#   4. Roster: configuration sol-led allows only the seven Sol-led models.
+#   5. The wrapper calls route_log just before exec, so only real launches are logged.
 # Exports GT3_ROLE (worker unless GT3_LAUNCH_ROLE=manager) for the child.
 
 route_guard_die() { echo "$ROUTE_GUARD_NAME: $*" >&2; exit 2; }
@@ -41,6 +44,24 @@ route_guard() {
     [[ "$branch" == main ]] && route_guard_die "refusing mode '$mode' on branch main"
   fi
 
+  if [[ -n "${GT3_RUN:-}" ]]; then
+    [[ "$GT3_RUN" =~ ^[A-Za-z0-9._-]+$ ]] || route_guard_die "GT3_RUN must be [A-Za-z0-9._-]"
+    [[ -n "${GT3_TASK:-}" ]] || route_guard_die "GT3_RUN is set but GT3_TASK is missing"
+    local root rec field_state field_seat field_epoch field_config host
+    root=$(cd "$(git rev-parse --git-common-dir 2>/dev/null)/.." 2>/dev/null && pwd -P) || route_guard_die "GT3_RUN needs the GT3 repository"
+    rec="$root/local/runs/$GT3_RUN/run.md"
+    [[ -f "$rec" ]] || route_guard_die "no run record $rec (claim the run first: scripts/gt3-run.sh claim)"
+    field_state=$(sed -n 's/^state: //p' "$rec" | head -1); field_seat=$(sed -n 's/^seat: //p' "$rec" | head -1)
+    field_epoch=$(sed -n 's/^epoch: //p' "$rec" | head -1); field_config=$(sed -n 's/^config: //p' "$rec" | head -1)
+    if [[ -n "${GT3_HOST:-}" ]]; then host=$GT3_HOST; else
+      case "$(uname -m)/$(sysctl -n hw.memsize 2>/dev/null)" in arm64/17179869184) host=m4 ;; x86_64/8589934592) host=intel ;; *) host=other ;; esac; fi
+    [[ "$field_state" == active ]] || route_guard_die "run $GT3_RUN is '$field_state', not active: only an active seat dispatches"
+    [[ "${field_seat#*@}" == "$host" ]] || route_guard_die "run $GT3_RUN is held by $field_seat, not a seat on this host ($host)"
+    [[ -z "${GT3_EPOCH:-}" || "$GT3_EPOCH" == "$field_epoch" ]] || route_guard_die "GT3_EPOCH=$GT3_EPOCH but the record is at epoch $field_epoch (stale manager?)"
+    [[ -z "${GT3_CONFIG:-}" || "$GT3_CONFIG" == "$field_config" ]] || route_guard_die "GT3_CONFIG=$GT3_CONFIG but the record says $field_config"
+    export GT3_EPOCH="$field_epoch" GT3_CONFIG="$field_config"
+  fi
+
   if [[ "${GT3_CONFIG:-}" == sol-led ]]; then
     case "$model" in
       gpt-6.1-sol|gpt-5.6-terra|gpt-6-luna|opencode/muse-spark-1.3-contributor-free|\
@@ -49,11 +70,6 @@ route_guard() {
     esac
   elif [[ -n "${GT3_CONFIG:-}" && "${GT3_CONFIG}" != opus-led ]]; then
     route_guard_die "unknown GT3_CONFIG '${GT3_CONFIG}' (opus-led | sol-led)"
-  fi
-
-  if [[ -n "${GT3_RUN:-}" ]]; then
-    [[ -n "${GT3_EPOCH:-}" && -n "${GT3_TASK:-}" ]] || route_guard_die "GT3_RUN is set but GT3_EPOCH/GT3_TASK are missing"
-    [[ "$GT3_RUN" =~ ^[A-Za-z0-9._-]+$ ]] || route_guard_die "GT3_RUN must be [A-Za-z0-9._-]"
   fi
 
   export GT3_ROLE="${GT3_LAUNCH_ROLE:-worker}"

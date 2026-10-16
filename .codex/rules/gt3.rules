@@ -1,0 +1,30 @@
+# GT3 project execpolicy for a sandboxed Codex manager (docs/ai/operating-contract.md §5.1).
+# Loaded only when this project's .codex/ layer is trusted. Prefix matching: these rules guard
+# against routine friction and honest mistakes; they are not a security boundary.
+#
+# allow  = run outside the sandbox without prompting (GT3 operations that carry their own guards)
+# prompt = owner approval each time (denied when approval policy is never)
+# forbidden = never
+
+# Guarded GT3 operations: worker routes (billing/roster/seat/checkout guards), run record, host check.
+prefix_rule(pattern = ["scripts/codex-route.sh"], decision = "allow", justification = "guarded worker route")
+prefix_rule(pattern = ["scripts/claude-route.sh"], decision = "allow", justification = "guarded worker route")
+prefix_rule(pattern = ["scripts/opencode-route.sh"], decision = "allow", justification = "guarded worker route")
+prefix_rule(pattern = ["scripts/gt3-run.sh"], decision = "allow", justification = "run record; never pushes")
+prefix_rule(pattern = ["node", "scripts/host-check.mjs"], decision = "allow", justification = "host identity is hidden inside the sandbox")
+# Worktree creation and manager commits (a linked worktree's index lock lives in the main .git).
+prefix_rule(pattern = ["git", "worktree", "add"], decision = "allow", justification = "objective worktrees")
+prefix_rule(pattern = ["git", "add"], decision = "allow", justification = "manager integration in a worktree")
+prefix_rule(pattern = ["git", "commit"], decision = "allow", justification = "manager integration; pre-commit refuses main")
+
+# Owner-approved operations (explicit integration approvals stay possible).
+prefix_rule(pattern = ["git", "push"], decision = "prompt", justification = "push needs explicit owner approval")
+prefix_rule(pattern = ["git", ["merge", "rebase", "cherry-pick"]], decision = "prompt", justification = "integration is owner-approved")
+prefix_rule(pattern = ["git", "reset", "--hard"], decision = "prompt", justification = "destructive")
+prefix_rule(pattern = ["git", "clean"], decision = "prompt", justification = "destructive")
+prefix_rule(pattern = ["git", "branch", ["-D", "--delete", "-d"]], decision = "prompt", justification = "branch deletion")
+prefix_rule(pattern = ["git", ["checkout", "switch"], "main"], decision = "prompt", justification = "engineering happens off main")
+prefix_rule(pattern = ["git", "worktree", "remove"], decision = "prompt", justification = "may discard work")
+
+# Never.
+prefix_rule(pattern = ["git", "push", ["--force", "-f", "--force-with-lease", "--mirror", "--delete"]], decision = "forbidden", justification = "history rewrite or remote deletion")

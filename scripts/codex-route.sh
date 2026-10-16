@@ -95,12 +95,13 @@ if [[ "$prompt" == @* ]]; then
   prompt="$(cat "$brief_path")"
 fi
 
-route_guard codex "$model" "$sandbox"
-
-if [[ "$effort" == ultra && "$GT3_ROLE" != manager ]]; then
+# Refuse before route_guard so a refused job is never logged as a launch.
+if [[ "$effort" == ultra && "${GT3_LAUNCH_ROLE:-worker}" != manager ]]; then
   echo "codex-route: 'ultra' delegates automatically and bypasses host accounting; refused for workers" >&2
   exit 2
 fi
+
+route_guard codex "$model" "$sandbox"
 
 exec codex exec "${sandbox_args[@]}" --skip-git-repo-check --disable multi_agent \
   -m "$model" -c "model_reasoning_effort=\"$effort\"" "$prompt" < /dev/null

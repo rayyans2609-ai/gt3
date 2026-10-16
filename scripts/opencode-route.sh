@@ -11,7 +11,9 @@
 #   scripts/opencode-route.sh -m <provider/model> @path/to/brief.md
 #
 # Run it from a manager-created dedicated worktree, never the main checkout:
-# --auto approves the worker's file edits and commands in the launch directory.
+# --auto approves the worker's file edits and commands in the launch directory, so
+# scripts/lib/route-guard.sh refuses the main checkout and branch main
+# (docs/ai/operating-contract.md §5).
 #
 # Model selection is a manager decision — see docs/ai/model-routing.md. This
 # script only enforces that the decision was made and that it stays free on
@@ -19,6 +21,8 @@
 # uses its own credential store.
 
 set -euo pipefail
+ROUTE_GUARD_NAME=opencode-route
+source "$(dirname "${BASH_SOURCE[0]}")/lib/route-guard.sh"
 
 usage() {
   echo "Usage: $0 -m <provider/model> <prompt|@brief-file>" >&2
@@ -69,5 +73,7 @@ if [[ "$prompt" == @* ]]; then
   fi
   prompt="$(cat "$brief_path")"
 fi
+
+route_guard opencode "$route" full
 
 exec opencode run --standalone --auto -m "$model" "$prompt" < /dev/null

@@ -5,7 +5,7 @@ import { execFileSync } from 'node:child_process';
 import * as THREE from 'three';
 
 const current = await readFile(new URL('../src/scene/carWarmup.js', import.meta.url), 'utf8');
-const baseline = execFileSync('git', ['show', '8b59a7b:src/scene/carWarmup.js'], { encoding: 'utf8' });
+const baseline = execFileSync('git', ['show', 'ebad49e:src/scene/carWarmup.js'], { encoding: 'utf8' });
 
 function fixture(source, options = {}) {
   let now = 0;
@@ -128,12 +128,18 @@ function fixture(source, options = {}) {
     trace.push(visible.sort());
   }
   const code = source.replace(/^import .*;\n/gm, '').replace(/\bexport /g, '');
+  // SETTINGS/UNLOCKED describe the locked profile: this check guards the accepted locked
+  // scheduler. (carEnvironment was added to carWarmup.js after this check was written, which
+  // left it throwing ReferenceError: SETTINGS is not defined.) The baseline commit predates
+  // those imports and simply ignores the extra arguments.
   const create = new Function('THREE', 'CARS', 'getCarModel', 'carMount', 'rig',
     'render', 'scene', 'renderer', 'camera', 'composer', 'beginWarmFade',
-    'warmCheckpointResponse', 'performance', 'console', `${code}\nreturn createCarWarmup;`)(
+    'warmCheckpointResponse', 'performance', 'console', 'SETTINGS', 'UNLOCKED',
+    'prepareCarEnvironment', `${code}\nreturn createCarWarmup;`)(
     THREE, cars, index => cars[index], carMount, rig, render, scene, renderer,
     new THREE.PerspectiveCamera(), composer, beginWarmFade, () => () => {},
     { now: () => now }, { warn: (...args) => warnings.push(args) },
+    { carEnvironment: false }, false, () => {},
   );
   const warmup = create(fraction => progress.push(fraction), null, { throwAtDraw: options.throwAtDraw });
   function restored() {
@@ -170,6 +176,9 @@ await old.pump();
 const healthy = fixture(current, { expectPrepared: true });
 await healthy.pump();
 assert.deepEqual(healthy.trace, old.trace, 'original draw order/state changed');
+// Locked-path regression guard for p3u W5: the compile/upload/draw sequence and its timing
+// must be identical to the commit this check compares against.
+assert.deepEqual(healthy.operations, old.operations, 'locked scheduling changed');
 for (const resource of ['programs', 'textures', 'geometries']) {
   assert.deepEqual([...healthy[resource]].sort(), [...old[resource]].sort(), resource);
 }

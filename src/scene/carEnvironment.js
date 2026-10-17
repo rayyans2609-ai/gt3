@@ -1,10 +1,22 @@
 /** Unlocked outdoor reflection source. Never assigned to scene.environment. */
 import * as THREE from 'three';
-import { SETTINGS, REFLECTION } from '../core/renderProfile.js';
+import { SETTINGS, REFLECTION, CAR_SPECULAR, NIGHT_CAR_TOE } from '../core/renderProfile.js';
 
 let target;
 let strength = SETTINGS.themes?.day.reflection[REFLECTION] ?? 0;
 const materials = new Set();
+const review = {
+  specular: { value: CAR_SPECULAR },
+  toe: { value: 0 },
+  exposure: { value: 0.13 },
+};
+
+// Shared by originals and cached fades; transitions never compile another variant.
+export function setCarReviewTreatment(nightWeight, exposure) {
+  review.specular.value = THREE.MathUtils.lerp(CAR_SPECULAR, 1, nightWeight);
+  review.toe.value = NIGHT_CAR_TOE ? nightWeight : 0;
+  review.exposure.value = exposure;
+}
 
 /** Register opaque originals and the actual cached swap materials before warm-up. */
 export function registerCarReflection(material) {
@@ -12,6 +24,29 @@ export function registerCarReflection(material) {
   if (!target) throw new Error('Car environment must be generated before material warm-up');
   material.envMap = target.texture;
   material.envMapIntensity = strength;
+  if ((CAR_SPECULAR !== 1 || NIGHT_CAR_TOE) && !materials.has(material)) {
+    const previous = material.onBeforeCompile;
+    const previousKey = material.customProgramCacheKey();
+    material.onBeforeCompile = function (shader, renderer) {
+      previous.call(this, shader, renderer);
+      shader.uniforms.uCarSpecular = review.specular;
+      shader.uniforms.uCarToe = review.toe;
+      shader.uniforms.uCarExposure = review.exposure;
+      shader.fragmentShader = `uniform float uCarSpecular;
+        uniform float uCarToe;
+        uniform float uCarExposure;\n` + shader.fragmentShader;
+      shader.fragmentShader = shader.fragmentShader.replace('#include <lights_fragment_end>',
+        '#include <lights_fragment_end>\n reflectedLight.indirectSpecular *= uCarSpecular;');
+      // Invert Neutral's black offset for cars only. For non-compressed pixels,
+      // this recovers exposure * radiance without altering the world's curve.
+      shader.fragmentShader = shader.fragmentShader.replace('#include <opaque_fragment>', `
+        float carMin = max(0.0, min(outgoingLight.r, min(outgoingLight.g, outgoingLight.b))) * uCarExposure;
+        float inverseMin = carMin < 0.04 ? sqrt(carMin / 6.25) : carMin + 0.04;
+        outgoingLight += uCarToe * max(0.0, inverseMin - carMin) / max(uCarExposure, 0.0001);
+        #include <opaque_fragment>`);
+    };
+    material.customProgramCacheKey = () => previousKey + '|p3u-t5-car-review';
+  }
   materials.add(material);
 }
 

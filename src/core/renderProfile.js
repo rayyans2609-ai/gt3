@@ -21,6 +21,10 @@ const requestedReflection = params.get('refl');
 export const TONE = UNLOCKED && ['aces', 'agx', 'neutral'].includes(requestedTone) ? requestedTone : 'neutral';
 export const REFLECTION = UNLOCKED && ['low', 'mid', 'high'].includes(requestedReflection) ? requestedReflection : 'mid';
 
+// Review-only T5 controls; locked ignores both.
+export const CAR_SPECULAR = UNLOCKED && params.get('carspec') === 'quarter' ? 0.25 : 1;
+export const NIGHT_CAR_TOE = UNLOCKED && TONE === 'neutral' && params.get('nightcar') === 'toe';
+
 // Stage 1 candidates, not the Stage 2 frontier verdict. Both use the accepted SMAA,
 // shadow and texture choices; only fixed resolution differs. No host selection.
 const unlockedThemes = Object.freeze({

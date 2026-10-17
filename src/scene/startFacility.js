@@ -1,5 +1,6 @@
 /** Fixed-metre grid paint and a restrained pit-wall / parallel-lane corridor. */
 import * as THREE from 'three';
+import { UNLOCKED } from '../core/renderProfile.js';
 import { TRACK_LENGTH, offsetPointAt, tangentAt } from './trackCurve.js';
 import { asphaltEdgeAt, CROSS_SECTION } from './trackProfile.js';
 import { groundHeightAt } from './environment.js';
@@ -79,6 +80,7 @@ export function buildStartFacility() {
     const mesh=new THREE.InstancedMesh(unit,mat,parts.length);mesh.name=name;
     parts.forEach((m,i)=>mesh.setMatrixAt(i,m));mesh.instanceMatrix.needsUpdate=true;
     mesh.computeBoundingSphere();mesh.frustumCulled=false;mesh.receiveShadow=true;root.add(mesh);
+    if (UNLOCKED) mesh.castShadow = true;
   }
   const laneGeometry=new THREE.BufferGeometry();
   laneGeometry.setAttribute('position',new THREE.Float32BufferAttribute(laneVertices,3));

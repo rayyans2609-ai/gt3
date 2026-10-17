@@ -1,0 +1,4162 @@
+{
+  "startedAt": "2026-10-17T09:53:21.079Z",
+  "server": {
+    "startedAt": "2026-10-17T09:53:09.620Z",
+    "url": "http://127.0.0.1:5231",
+    "root": "/Users/shahzadsheikh/Desktop/gt3/.claude/worktrees/p3u-w3",
+    "branch": "p3u-w3",
+    "sha": "ebad49eb259ba3d286814781a7a2b913c72ebb64",
+    "dirtyFiles": 8,
+    "dirtyHash": "f9591b2e43f415ce",
+    "vitePid": 84953,
+    "run": "p3u",
+    "epoch": "1",
+    "task": "W3",
+    "harness": "node local/evidence/p3u/W3/r2-integrity.mjs",
+    "host": {
+      "profile": "m4-16gb",
+      "arch": "arm64",
+      "cpu": "Apple M4",
+      "ramGB": 16,
+      "model": "Mac16,12",
+      "cores": {
+        "performance": 4,
+        "efficiency": 6
+      },
+      "gpu": "Apple M4",
+      "macos": "15.5",
+      "versions": {
+        "node": "v24.21.0",
+        "claude": "2.1.302 (Claude Code)",
+        "codex": "codex-cli 0.163.0",
+        "opencode": "opencode v2.0.32",
+        "chrome": "Google Chrome 155.0.8059.80"
+      },
+      "unavailable": []
+    }
+  },
+  "branch": "p3u-w3",
+  "sha": "ebad49eb259ba3d286814781a7a2b913c72ebb64",
+  "tree": "M src/core/renderProfile.js\n M src/scene/sceneSetup.js\n M src/scene/startFacility.js\n M src/scene/trackFurniture.js\n?? docs/review/p3u/stage2/\n?? scripts/p3u-w3-capture.mjs\n?? scripts/p3u-w3-shadow-check.mjs\n?? src/scene/shadowStability.js",
+  "browser": "Chrome/155.0.8059.80",
+  "viewport": {
+    "width": 1470,
+    "height": 956,
+    "deviceScaleFactor": 2,
+    "emulationApplied": true
+  },
+  "headful": false,
+  "instrumentation": {
+    "/Users/shahzadsheikh/Desktop/gt3/.claude/worktrees/p3u-w3/scripts/lib/p3u-common.mjs": "1ad92b353954ec13ea5aa4f989ffe75f40cb2270489ee0769d56fa77eae61374",
+    "/Users/shahzadsheikh/Desktop/gt3/.claude/worktrees/p3u-w3/scripts/lib/p3u-trials.js": "a462f82f581e58b1152b95859e4bec3b3f3896a534b774f34471eb8d56611b10",
+    "/Users/shahzadsheikh/Desktop/gt3/.claude/worktrees/p3u-w3/local/evidence/p3u/W3/r2-integrity.mjs": "23aead8ee309687eca63289cf613c349337916549e91a1ce6187e5d72613aed5"
+  },
+  "display": {
+    "geometry": {
+      "expected": {
+        "width": 1470,
+        "height": 956,
+        "dpr": 2
+      },
+      "rounds": 0,
+      "pass": true,
+      "measured": {
+        "width": 1470,
+        "height": 956,
+        "dpr": 2,
+        "screen": {
+          "width": 800,
+          "height": 600
+        },
+        "visibility": "visible",
+        "webdriver": true,
+        "elementFullscreen": false
+      }
+    },
+    "screen": {
+      "width": 800,
+      "height": 600
+    }
+  },
+  "hudRects": {
+    "viewport": {
+      "width": 1470,
+      "height": 956
+    },
+    "lapTimer": {
+      "selector": ".hud-lap-timer",
+      "present": true,
+      "visibility": "visible",
+      "rect": {
+        "x": 30,
+        "y": 903,
+        "width": 90.2,
+        "height": 23,
+        "right": 120.2,
+        "bottom": 926
+      }
+    },
+    "themeToggle": {
+      "selector": ".theme-segmented",
+      "present": true,
+      "visibility": "visible",
+      "rect": {
+        "x": 1228,
+        "y": 886,
+        "width": 120,
+        "height": 46,
+        "right": 1348,
+        "bottom": 932
+      }
+    },
+    "audioAnchor": {
+      "selector": ".audio-anchor",
+      "present": true,
+      "visibility": "visible",
+      "rect": {
+        "x": 1366,
+        "y": 890,
+        "width": 80,
+        "height": 42,
+        "right": 1446,
+        "bottom": 932
+      }
+    },
+    "audioPlayer": {
+      "selector": "#music-player",
+      "present": true,
+      "visibility": "hidden",
+      "rect": {
+        "x": 1388,
+        "y": 912.8,
+        "width": 74,
+        "height": 31.2,
+        "right": 1462,
+        "bottom": 944
+      }
+    },
+    "audioPlayerOpen": false,
+    "gated": [
+      "lapTimer",
+      "themeToggle",
+      "audioAnchor"
+    ],
+    "withinViewport": true,
+    "failures": []
+  },
+  "errors": [],
+  "method": "W4 36-frame fixed-dt pans, live grain, threshold-8 luma reversals; no wall-clock perf measurement",
+  "integration": "Pre-W4 production wash retains grain for every AA candidate; integrated repeat must preserve W4 final grain when replacing SMAA",
+  "pageHelperSha256": "5cd0c84a0c5aa043533b4413ebf25262076ae1d4292abd7c01f318abe117c61f",
+  "harnessChanges": "Local copy of W4 p3u-w4-integrity.mjs: import/page-helper locations only; optional fifth config field passes candidate to existing quality(). No metric/pose/pan changes.",
+  "configs": [
+    {
+      "tag": "smooth-smaa",
+      "query": "?version=unlocked",
+      "dpr": 1.5,
+      "scenarios": [
+        {
+          "name": "t123-creep",
+          "car": 0,
+          "t": 0.123,
+          "theme": "day",
+          "speed": 0.01,
+          "blurStrength0": 0.0042,
+          "metresPerFrame": 0.05208969250253613,
+          "size": {
+            "w": 2205,
+            "h": 1434
+          },
+          "metrics": {
+            "frames": 36,
+            "threshold": 8,
+            "flickerEventsPerFramePerMP": 445.59897413172615,
+            "strongEventsPerFramePerMP": 47.457383697319,
+            "pixelsEverFlickeringFraction": 0.00828344354943279,
+            "maxCount": 18,
+            "perFrame": [
+              {
+                "flicker": 0,
+                "flickerStrong": 0,
+                "meanAbsDiff": null
+              },
+              {
+                "flicker": 0,
+                "flickerStrong": 0,
+                "meanAbsDiff": 1.6011603525650149
+              },
+              {
+                "flicker": 1426,
+                "flickerStrong": 156,
+                "meanAbsDiff": 1.6003801427591027
+              },
+              {
+                "flicker": 1382,
+                "flickerStrong": 139,
+                "meanAbsDiff": 1.5995793761484138
+              },
+              {
+                "flicker": 1353,
+                "flickerStrong": 146,
+                "meanAbsDiff": 1.5984357852857554
+              },
+              {
+                "flicker": 1411,
+                "flickerStrong": 165,
+                "meanAbsDiff": 1.60203385863876
+              },
+              {
+                "flicker": 1457,
+                "flickerStrong": 197,
+                "meanAbsDiff": 1.5986707653772807
+              },
+              {
+                "flicker": 1399,
+                "flickerStrong": 171,
+                "meanAbsDiff": 1.599314035237526
+              },
+              {
+                "flicker": 1362,
+                "flickerStrong": 147,
+                "meanAbsDiff": 1.5991353491652356
+              },
+              {
+                "flicker": 1350,
+                "flickerStrong": 135,
+                "meanAbsDiff": 1.6007950739570584
+              },
+              {
+                "flicker": 1480,
+                "flickerStrong": 137,
+                "meanAbsDiff": 1.6006208155042585
+              },
+              {
+                "flicker": 1405,
+                "flickerStrong": 156,
+                "meanAbsDiff": 1.598594547070339
+              },
+              {
+                "flicker": 1445,
+                "flickerStrong": 174,
+                "meanAbsDiff": 1.6017476446645604
+              },
+              {
+                "flicker": 1414,
+                "flickerStrong": 148,
+                "meanAbsDiff": 1.599732129020832
+              },
+              {
+                "flicker": 1434,
+                "flickerStrong": 168,
+                "meanAbsDiff": 1.5995477502949111
+              },
+              {
+                "flicker": 1384,
+                "flickerStrong": 145,
+                "meanAbsDiff": 1.599103723311733
+              },
+              {
+                "flicker": 1367,
+                "flickerStrong": 149,
+                "meanAbsDiff": 1.5976720209236648
+              },
+              {
+                "flicker": 1398,
+                "flickerStrong": 154,
+                "meanAbsDiff": 1.6008153145033002
+              },
+              {
+                "flicker": 1329,
+                "flickerStrong": 135,
+                "meanAbsDiff": 1.5989455940442192
+              },
+              {
+                "flicker": 1428,
+                "flickerStrong": 141,
+                "meanAbsDiff": 1.5992201064526228
+              },
+              {
+                "flicker": 1454,
+                "flickerStrong": 137,
+                "meanAbsDiff": 1.6010768603117678
+              },
+              {
+                "flicker": 1464,
+                "flickerStrong": 165,
+                "meanAbsDiff": 1.5987112464697641
+              },
+              {
+                "flicker": 1403,
+                "flickerStrong": 146,
+                "meanAbsDiff": 1.5994971489293068
+              },
+              {
+                "flicker": 1378,
+                "flickerStrong": 134,
+                "meanAbsDiff": 1.5974228091980633
+              },
+              {
+                "flicker": 1399,
+                "flickerStrong": 143,
+                "meanAbsDiff": 1.5997394029671377
+              },
+              {
+                "flicker": 1372,
+                "flickerStrong": 147,
+                "meanAbsDiff": 1.6000139153755413
+              },
+              {
+                "flicker": 1438,
+                "flickerStrong": 152,
+                "meanAbsDiff": 1.5986144713580457
+              },
+              {
+                "flicker": 1383,
+                "flickerStrong": 124,
+                "meanAbsDiff": 1.5991128948092486
+              },
+              {
+                "flicker": 1459,
+                "flickerStrong": 181,
+                "meanAbsDiff": 1.5988352198154947
+              },
+              {
+                "flicker": 1404,
+                "flickerStrong": 134,
+                "meanAbsDiff": 1.5987741819182346
+              },
+              {
+                "flicker": 1373,
+                "flickerStrong": 140,
+                "meanAbsDiff": 1.5975066177098454
+              },
+              {
+                "flicker": 1364,
+                "flickerStrong": 130,
+                "meanAbsDiff": 1.5984285113394499
+              },
+              {
+                "flicker": 1405,
+                "flickerStrong": 141,
+                "meanAbsDiff": 1.6003747663640073
+              },
+              {
+                "flicker": 1434,
+                "flickerStrong": 142,
+                "meanAbsDiff": 1.5990414203803325
+              },
+              {
+                "flicker": 1473,
+                "flickerStrong": 144,
+                "meanAbsDiff": 1.5988507164837111
+              },
+              {
+                "flicker": 1478,
+                "flickerStrong": 179,
+                "meanAbsDiff": 1.599234654345234
+              }
+            ]
+          }
+        },
+        {
+          "name": "fence-creep",
+          "car": 3,
+          "t": 0.628,
+          "theme": "day",
+          "speed": 0.01,
+          "blurStrength0": 0.0042,
+          "metresPerFrame": 0.05208969250253613,
+          "size": {
+            "w": 2205,
+            "h": 1434
+          },
+          "metrics": {
+            "frames": 36,
+            "threshold": 8,
+            "flickerEventsPerFramePerMP": 322.7418349952719,
+            "strongEventsPerFramePerMP": 55.13130403253816,
+            "pixelsEverFlickeringFraction": 0.006708476044997264,
+            "maxCount": 20,
+            "perFrame": [
+              {
+                "flicker": 0,
+                "flickerStrong": 0,
+                "meanAbsDiff": null
+              },
+              {
+                "flicker": 0,
+                "flickerStrong": 0,
+                "meanAbsDiff": 1.6108701221074204
+              },
+              {
+                "flicker": 962,
+                "flickerStrong": 169,
+                "meanAbsDiff": 1.6114520378118704
+              },
+              {
+                "flicker": 1007,
+                "flickerStrong": 208,
+                "meanAbsDiff": 1.6099036360243772
+              },
+              {
+                "flicker": 1042,
+                "flickerStrong": 144,
+                "meanAbsDiff": 1.6094624553680144
+              },
+              {
+                "flicker": 984,
+                "flickerStrong": 162,
+                "meanAbsDiff": 1.6105709415332847
+              },
+              {
+                "flicker": 1077,
+                "flickerStrong": 212,
+                "meanAbsDiff": 1.6117224388593188
+              },
+              {
+                "flicker": 1041,
+                "flickerStrong": 165,
+                "meanAbsDiff": 1.6101389323744375
+              },
+              {
+                "flicker": 964,
+                "flickerStrong": 169,
+                "meanAbsDiff": 1.6104068033536054
+              },
+              {
+                "flicker": 1040,
+                "flickerStrong": 202,
+                "meanAbsDiff": 1.610297377900486
+              },
+              {
+                "flicker": 1026,
+                "flickerStrong": 179,
+                "meanAbsDiff": 1.609529818435975
+              },
+              {
+                "flicker": 1009,
+                "flickerStrong": 163,
+                "meanAbsDiff": 1.612587089694083
+              },
+              {
+                "flicker": 1070,
+                "flickerStrong": 211,
+                "meanAbsDiff": 1.609899840921957
+              },
+              {
+                "flicker": 972,
+                "flickerStrong": 156,
+                "meanAbsDiff": 1.6090269673652817
+              },
+              {
+                "flicker": 977,
+                "flickerStrong": 153,
+                "meanAbsDiff": 1.6094899698605616
+              },
+              {
+                "flicker": 1094,
+                "flickerStrong": 197,
+                "meanAbsDiff": 1.6125535662893702
+              },
+              {
+                "flicker": 1034,
+                "flickerStrong": 175,
+                "meanAbsDiff": 1.6102189457837994
+              },
+              {
+                "flicker": 977,
+                "flickerStrong": 175,
+                "meanAbsDiff": 1.6125130851968867
+              },
+              {
+                "flicker": 1076,
+                "flickerStrong": 203,
+                "meanAbsDiff": 1.6106398858939206
+              },
+              {
+                "flicker": 1036,
+                "flickerStrong": 171,
+                "meanAbsDiff": 1.6114090266511067
+              },
+              {
+                "flicker": 991,
+                "flickerStrong": 162,
+                "meanAbsDiff": 1.610588335752711
+              },
+              {
+                "flicker": 1052,
+                "flickerStrong": 182,
+                "meanAbsDiff": 1.611378033314674
+              },
+              {
+                "flicker": 1020,
+                "flickerStrong": 157,
+                "meanAbsDiff": 1.6110608260040418
+              },
+              {
+                "flicker": 1015,
+                "flickerStrong": 177,
+                "meanAbsDiff": 1.6119378109216722
+              },
+              {
+                "flicker": 1043,
+                "flickerStrong": 158,
+                "meanAbsDiff": 1.6110636723308571
+              },
+              {
+                "flicker": 1016,
+                "flickerStrong": 157,
+                "meanAbsDiff": 1.610376758792778
+              },
+              {
+                "flicker": 990,
+                "flickerStrong": 181,
+                "meanAbsDiff": 1.6129716600726762
+              },
+              {
+                "flicker": 1057,
+                "flickerStrong": 170,
+                "meanAbsDiff": 1.611691129264351
+              },
+              {
+                "flicker": 1031,
+                "flickerStrong": 163,
+                "meanAbsDiff": 1.6124264303582894
+              },
+              {
+                "flicker": 948,
+                "flickerStrong": 165,
+                "meanAbsDiff": 1.6088277244882145
+              },
+              {
+                "flicker": 1018,
+                "flickerStrong": 161,
+                "meanAbsDiff": 1.609448539992473
+              },
+              {
+                "flicker": 1072,
+                "flickerStrong": 173,
+                "meanAbsDiff": 1.6123479982416025
+              },
+              {
+                "flicker": 1020,
+                "flickerStrong": 179,
+                "meanAbsDiff": 1.61156272829913
+              },
+              {
+                "flicker": 1014,
+                "flickerStrong": 159,
+                "meanAbsDiff": 1.6097654310445704
+              },
+              {
+                "flicker": 1015,
+                "flickerStrong": 197,
+                "meanAbsDiff": 1.6113318595685602
+              },
+              {
+                "flicker": 1007,
+                "flickerStrong": 172,
+                "meanAbsDiff": 1.6109899840921957
+              }
+            ]
+          }
+        },
+        {
+          "name": "grid-creep",
+          "car": 0,
+          "t": 0.995,
+          "theme": "day",
+          "speed": 0.01,
+          "blurStrength0": 0.0042,
+          "metresPerFrame": 0.05208969250253613,
+          "size": {
+            "w": 2205,
+            "h": 1434
+          },
+          "metrics": {
+            "frames": 36,
+            "threshold": 8,
+            "flickerEventsPerFramePerMP": 534.7373724013082,
+            "strongEventsPerFramePerMP": 125.86159521921275,
+            "pixelsEverFlickeringFraction": 0.008439675265736234,
+            "maxCount": 15,
+            "perFrame": [
+              {
+                "flicker": 0,
+                "flickerStrong": 0,
+                "meanAbsDiff": null
+              },
+              {
+                "flicker": 0,
+                "flickerStrong": 0,
+                "meanAbsDiff": 1.6482287940745801
+              },
+              {
+                "flicker": 1673,
+                "flickerStrong": 383,
+                "meanAbsDiff": 1.6478549764861778
+              },
+              {
+                "flicker": 1693,
+                "flickerStrong": 395,
+                "meanAbsDiff": 1.6476614262627414
+              },
+              {
+                "flicker": 1697,
+                "flickerStrong": 424,
+                "meanAbsDiff": 1.6493859840542446
+              },
+              {
+                "flicker": 1742,
+                "flickerStrong": 388,
+                "meanAbsDiff": 1.6476215776873278
+              },
+              {
+                "flicker": 1659,
+                "flickerStrong": 394,
+                "meanAbsDiff": 1.6485086828780793
+              },
+              {
+                "flicker": 1688,
+                "flickerStrong": 426,
+                "meanAbsDiff": 1.6487117208575666
+              },
+              {
+                "flicker": 1737,
+                "flickerStrong": 440,
+                "meanAbsDiff": 1.6479292972419093
+              },
+              {
+                "flicker": 1783,
+                "flickerStrong": 406,
+                "meanAbsDiff": 1.647958709285667
+              },
+              {
+                "flicker": 1746,
+                "flickerStrong": 434,
+                "meanAbsDiff": 1.6478258807009554
+              },
+              {
+                "flicker": 1737,
+                "flickerStrong": 427,
+                "meanAbsDiff": 1.646843265432626
+              },
+              {
+                "flicker": 1693,
+                "flickerStrong": 374,
+                "meanAbsDiff": 1.6483258854448335
+              },
+              {
+                "flicker": 1667,
+                "flickerStrong": 372,
+                "meanAbsDiff": 1.647564967409558
+              },
+              {
+                "flicker": 1707,
+                "flickerStrong": 424,
+                "meanAbsDiff": 1.6483053286400566
+              },
+              {
+                "flicker": 1719,
+                "flickerStrong": 411,
+                "meanAbsDiff": 1.6474096844688597
+              },
+              {
+                "flicker": 1708,
+                "flickerStrong": 392,
+                "meanAbsDiff": 1.6484988788634933
+              },
+              {
+                "flicker": 1675,
+                "flickerStrong": 422,
+                "meanAbsDiff": 1.6487863578718331
+              },
+              {
+                "flicker": 1723,
+                "flickerStrong": 422,
+                "meanAbsDiff": 1.6474273949468212
+              },
+              {
+                "flicker": 1728,
+                "flickerStrong": 411,
+                "meanAbsDiff": 1.6481968519625423
+              },
+              {
+                "flicker": 1654,
+                "flickerStrong": 384,
+                "meanAbsDiff": 1.6477069674917852
+              },
+              {
+                "flicker": 1633,
+                "flickerStrong": 382,
+                "meanAbsDiff": 1.6464061961372183
+              },
+              {
+                "flicker": 1702,
+                "flickerStrong": 416,
+                "meanAbsDiff": 1.6490494849729758
+              },
+              {
+                "flicker": 1688,
+                "flickerStrong": 376,
+                "meanAbsDiff": 1.6481294888945814
+              },
+              {
+                "flicker": 1615,
+                "flickerStrong": 349,
+                "meanAbsDiff": 1.6445507073122136
+              },
+              {
+                "flicker": 1646,
+                "flickerStrong": 399,
+                "meanAbsDiff": 1.649366376025073
+              },
+              {
+                "flicker": 1754,
+                "flickerStrong": 436,
+                "meanAbsDiff": 1.6486364513262302
+              },
+              {
+                "flicker": 1665,
+                "flickerStrong": 349,
+                "meanAbsDiff": 1.644541852073233
+              },
+              {
+                "flicker": 1635,
+                "flickerStrong": 318,
+                "meanAbsDiff": 1.6461908240748646
+              },
+              {
+                "flicker": 1676,
+                "flickerStrong": 398,
+                "meanAbsDiff": 1.6476557336091109
+              },
+              {
+                "flicker": 1709,
+                "flickerStrong": 420,
+                "meanAbsDiff": 1.648157003387129
+              },
+              {
+                "flicker": 1704,
+                "flickerStrong": 406,
+                "meanAbsDiff": 1.6476724953114672
+              },
+              {
+                "flicker": 1689,
+                "flickerStrong": 377,
+                "meanAbsDiff": 1.6468865928519245
+              },
+              {
+                "flicker": 1603,
+                "flickerStrong": 386,
+                "meanAbsDiff": 1.648053586846175
+              },
+              {
+                "flicker": 1675,
+                "flickerStrong": 413,
+                "meanAbsDiff": 1.647879960910445
+              },
+              {
+                "flicker": 1665,
+                "flickerStrong": 377,
+                "meanAbsDiff": 1.6469900093928784
+              }
+            ]
+          }
+        }
+      ],
+      "quality": {
+        "dpr": 1.5,
+        "candidate": "baseline",
+        "sceneSamples": 0,
+        "maxSamples": 4,
+        "halfFloatSamples": [
+          4,
+          2
+        ],
+        "probe": {
+          "mode": "race",
+          "locked": false,
+          "speed01": 0,
+          "progress": 0.000894373451819198,
+          "applied": 1.5,
+          "level": "high",
+          "still": 766.8999999761581,
+          "sinceSwitch": null,
+          "canvasW": 2205,
+          "ratio": 1.5
+        },
+        "passes": [
+          {
+            "name": "RenderPass",
+            "enabled": true
+          },
+          {
+            "name": "ShaderPass",
+            "enabled": true
+          },
+          {
+            "name": "ShaderPass",
+            "enabled": true
+          },
+          {
+            "name": "SMAAPass",
+            "enabled": true
+          }
+        ],
+        "targets": [
+          {
+            "width": 2205,
+            "height": 1434,
+            "samples": 0
+          },
+          {
+            "width": 2205,
+            "height": 1434,
+            "samples": 0
+          }
+        ]
+      }
+    },
+    {
+      "tag": "smooth-msaa2",
+      "query": "?version=unlocked",
+      "dpr": 1.5,
+      "scenarios": [
+        {
+          "name": "t123-creep",
+          "car": 0,
+          "t": 0.123,
+          "theme": "day",
+          "speed": 0.01,
+          "blurStrength0": 0.0042,
+          "metresPerFrame": 0.05208969250253613,
+          "size": {
+            "w": 2205,
+            "h": 1434
+          },
+          "metrics": {
+            "frames": 36,
+            "threshold": 8,
+            "flickerEventsPerFramePerMP": 161.77554238803842,
+            "strongEventsPerFramePerMP": 47.21553893523936,
+            "pixelsEverFlickeringFraction": 0.0041306527259904425,
+            "maxCount": 24,
+            "perFrame": [
+              {
+                "flicker": 0,
+                "flickerStrong": 0,
+                "meanAbsDiff": null
+              },
+              {
+                "flicker": 0,
+                "flickerStrong": 0,
+                "meanAbsDiff": 1.5899701768201469
+              },
+              {
+                "flicker": 495,
+                "flickerStrong": 155,
+                "meanAbsDiff": 1.59076113941625
+              },
+              {
+                "flicker": 509,
+                "flickerStrong": 165,
+                "meanAbsDiff": 1.5912121240871988
+              },
+              {
+                "flicker": 545,
+                "flickerStrong": 149,
+                "meanAbsDiff": 1.5908740437132547
+              },
+              {
+                "flicker": 507,
+                "flickerStrong": 145,
+                "meanAbsDiff": 1.591064747609876
+              },
+              {
+                "flicker": 542,
+                "flickerStrong": 151,
+                "meanAbsDiff": 1.590679544714213
+              },
+              {
+                "flicker": 509,
+                "flickerStrong": 154,
+                "meanAbsDiff": 1.591192199799492
+              },
+              {
+                "flicker": 532,
+                "flickerStrong": 145,
+                "meanAbsDiff": 1.5915707612659196
+              },
+              {
+                "flicker": 488,
+                "flickerStrong": 151,
+                "meanAbsDiff": 1.5914540618664945
+              },
+              {
+                "flicker": 517,
+                "flickerStrong": 153,
+                "meanAbsDiff": 1.5897478470700228
+              },
+              {
+                "flicker": 494,
+                "flickerStrong": 142,
+                "meanAbsDiff": 1.5904350768666369
+              },
+              {
+                "flicker": 513,
+                "flickerStrong": 156,
+                "meanAbsDiff": 1.5910071885565011
+              },
+              {
+                "flicker": 520,
+                "flickerStrong": 147,
+                "meanAbsDiff": 1.5898563237475372
+              },
+              {
+                "flicker": 509,
+                "flickerStrong": 142,
+                "meanAbsDiff": 1.5919385699421562
+              },
+              {
+                "flicker": 518,
+                "flickerStrong": 153,
+                "meanAbsDiff": 1.5907238209091168
+              },
+              {
+                "flicker": 501,
+                "flickerStrong": 145,
+                "meanAbsDiff": 1.5906384311046595
+              },
+              {
+                "flicker": 478,
+                "flickerStrong": 142,
+                "meanAbsDiff": 1.590577076948864
+              },
+              {
+                "flicker": 483,
+                "flickerStrong": 148,
+                "meanAbsDiff": 1.5911242042144613
+              },
+              {
+                "flicker": 510,
+                "flickerStrong": 143,
+                "meanAbsDiff": 1.5897450007432075
+              },
+              {
+                "flicker": 541,
+                "flickerStrong": 160,
+                "meanAbsDiff": 1.5903835267254276
+              },
+              {
+                "flicker": 545,
+                "flickerStrong": 149,
+                "meanAbsDiff": 1.590751019143129
+              },
+              {
+                "flicker": 522,
+                "flickerStrong": 157,
+                "meanAbsDiff": 1.591189985989747
+              },
+              {
+                "flicker": 541,
+                "flickerStrong": 140,
+                "meanAbsDiff": 1.589703254616584
+              },
+              {
+                "flicker": 468,
+                "flickerStrong": 147,
+                "meanAbsDiff": 1.5910011796443357
+              },
+              {
+                "flicker": 504,
+                "flickerStrong": 142,
+                "meanAbsDiff": 1.5885384744320787
+              },
+              {
+                "flicker": 499,
+                "flickerStrong": 148,
+                "meanAbsDiff": 1.5902636647406523
+              },
+              {
+                "flicker": 498,
+                "flickerStrong": 147,
+                "meanAbsDiff": 1.5909951707321701
+              },
+              {
+                "flicker": 535,
+                "flickerStrong": 143,
+                "meanAbsDiff": 1.588912292020481
+              },
+              {
+                "flicker": 530,
+                "flickerStrong": 148,
+                "meanAbsDiff": 1.5908791038498151
+              },
+              {
+                "flicker": 509,
+                "flickerStrong": 144,
+                "meanAbsDiff": 1.5896428492363939
+              },
+              {
+                "flicker": 486,
+                "flickerStrong": 155,
+                "meanAbsDiff": 1.588971116107996
+              },
+              {
+                "flicker": 509,
+                "flickerStrong": 159,
+                "meanAbsDiff": 1.5896776376752468
+              },
+              {
+                "flicker": 500,
+                "flickerStrong": 142,
+                "meanAbsDiff": 1.589868025313333
+              },
+              {
+                "flicker": 516,
+                "flickerStrong": 150,
+                "meanAbsDiff": 1.5905789745000742
+              },
+              {
+                "flicker": 519,
+                "flickerStrong": 159,
+                "meanAbsDiff": 1.590073909619636
+              }
+            ]
+          }
+        },
+        {
+          "name": "fence-creep",
+          "car": 3,
+          "t": 0.628,
+          "theme": "day",
+          "speed": 0.01,
+          "blurStrength0": 0.0042,
+          "metresPerFrame": 0.05208969250253613,
+          "size": {
+            "w": 2205,
+            "h": 1434
+          },
+          "metrics": {
+            "frames": 36,
+            "threshold": 8,
+            "flickerEventsPerFramePerMP": 198.8056961510778,
+            "strongEventsPerFramePerMP": 61.298345465568836,
+            "pixelsEverFlickeringFraction": 0.004715098498720734,
+            "maxCount": 20,
+            "perFrame": [
+              {
+                "flicker": 0,
+                "flickerStrong": 0,
+                "meanAbsDiff": null
+              },
+              {
+                "flicker": 0,
+                "flickerStrong": 0,
+                "meanAbsDiff": 1.6065263111288215
+              },
+              {
+                "flicker": 651,
+                "flickerStrong": 204,
+                "meanAbsDiff": 1.6062397808960869
+              },
+              {
+                "flicker": 588,
+                "flickerStrong": 198,
+                "meanAbsDiff": 1.6048997934831766
+              },
+              {
+                "flicker": 596,
+                "flickerStrong": 182,
+                "meanAbsDiff": 1.6059687473315687
+              },
+              {
+                "flicker": 665,
+                "flickerStrong": 209,
+                "meanAbsDiff": 1.6060310502629689
+              },
+              {
+                "flicker": 624,
+                "flickerStrong": 191,
+                "meanAbsDiff": 1.604659120738021
+              },
+              {
+                "flicker": 616,
+                "flickerStrong": 183,
+                "meanAbsDiff": 1.6071544005793856
+              },
+              {
+                "flicker": 649,
+                "flickerStrong": 179,
+                "meanAbsDiff": 1.6039927640047187
+              },
+              {
+                "flicker": 615,
+                "flickerStrong": 186,
+                "meanAbsDiff": 1.603322928427531
+              },
+              {
+                "flicker": 615,
+                "flickerStrong": 196,
+                "meanAbsDiff": 1.6058988541953276
+              },
+              {
+                "flicker": 667,
+                "flickerStrong": 205,
+                "meanAbsDiff": 1.6048545685126678
+              },
+              {
+                "flicker": 634,
+                "flickerStrong": 183,
+                "meanAbsDiff": 1.6045250271191693
+              },
+              {
+                "flicker": 628,
+                "flickerStrong": 198,
+                "meanAbsDiff": 1.6071768549353727
+              },
+              {
+                "flicker": 663,
+                "flickerStrong": 203,
+                "meanAbsDiff": 1.6043039624031854
+              },
+              {
+                "flicker": 595,
+                "flickerStrong": 176,
+                "meanAbsDiff": 1.6055177626606199
+              },
+              {
+                "flicker": 655,
+                "flickerStrong": 213,
+                "meanAbsDiff": 1.606496899085064
+              },
+              {
+                "flicker": 636,
+                "flickerStrong": 202,
+                "meanAbsDiff": 1.6047713925179556
+              },
+              {
+                "flicker": 619,
+                "flickerStrong": 190,
+                "meanAbsDiff": 1.605379557680813
+              },
+              {
+                "flicker": 637,
+                "flickerStrong": 195,
+                "meanAbsDiff": 1.6052596956960377
+              },
+              {
+                "flicker": 616,
+                "flickerStrong": 198,
+                "meanAbsDiff": 1.6033415876810975
+              },
+              {
+                "flicker": 596,
+                "flickerStrong": 172,
+                "meanAbsDiff": 1.6068258079614923
+              },
+              {
+                "flicker": 615,
+                "flickerStrong": 200,
+                "meanAbsDiff": 1.6068637589856956
+              },
+              {
+                "flicker": 628,
+                "flickerStrong": 184,
+                "meanAbsDiff": 1.605124020784511
+              },
+              {
+                "flicker": 663,
+                "flickerStrong": 209,
+                "meanAbsDiff": 1.605927001204945
+              },
+              {
+                "flicker": 624,
+                "flickerStrong": 178,
+                "meanAbsDiff": 1.6064415538414343
+              },
+              {
+                "flicker": 627,
+                "flickerStrong": 195,
+                "meanAbsDiff": 1.6055411657922118
+              },
+              {
+                "flicker": 642,
+                "flickerStrong": 216,
+                "meanAbsDiff": 1.6058371837809973
+              },
+              {
+                "flicker": 653,
+                "flickerStrong": 205,
+                "meanAbsDiff": 1.606042751828765
+              },
+              {
+                "flicker": 618,
+                "flickerStrong": 193,
+                "meanAbsDiff": 1.6043593076468152
+              },
+              {
+                "flicker": 623,
+                "flickerStrong": 201,
+                "meanAbsDiff": 1.6063273845102894
+              },
+              {
+                "flicker": 624,
+                "flickerStrong": 187,
+                "meanAbsDiff": 1.6049330006293545
+              },
+              {
+                "flicker": 609,
+                "flickerStrong": 188,
+                "meanAbsDiff": 1.6065788100456362
+              },
+              {
+                "flicker": 650,
+                "flickerStrong": 199,
+                "meanAbsDiff": 1.6069886811070313
+              },
+              {
+                "flicker": 635,
+                "flickerStrong": 188,
+                "meanAbsDiff": 1.6038605679370772
+              },
+              {
+                "flicker": 597,
+                "flickerStrong": 184,
+                "meanAbsDiff": 1.6043861896222924
+              }
+            ]
+          }
+        },
+        {
+          "name": "grid-creep",
+          "car": 0,
+          "t": 0.995,
+          "theme": "day",
+          "speed": 0.01,
+          "blurStrength0": 0.0042,
+          "metresPerFrame": 0.05208969250253613,
+          "size": {
+            "w": 2205,
+            "h": 1434
+          },
+          "metrics": {
+            "frames": 36,
+            "threshold": 8,
+            "flickerEventsPerFramePerMP": 308.3148647650599,
+            "strongEventsPerFramePerMP": 110.36492700287926,
+            "pixelsEverFlickeringFraction": 0.006058881014051366,
+            "maxCount": 18,
+            "perFrame": [
+              {
+                "flicker": 0,
+                "flickerStrong": 0,
+                "meanAbsDiff": null
+              },
+              {
+                "flicker": 0,
+                "flickerStrong": 0,
+                "meanAbsDiff": 1.6502082562453155
+              },
+              {
+                "flicker": 959,
+                "flickerStrong": 323,
+                "meanAbsDiff": 1.6510008001340937
+              },
+              {
+                "flicker": 953,
+                "flickerStrong": 367,
+                "meanAbsDiff": 1.6509236330515469
+              },
+              {
+                "flicker": 981,
+                "flickerStrong": 358,
+                "meanAbsDiff": 1.6492664383280045
+              },
+              {
+                "flicker": 971,
+                "flickerStrong": 347,
+                "meanAbsDiff": 1.6512572858060006
+              },
+              {
+                "flicker": 981,
+                "flickerStrong": 359,
+                "meanAbsDiff": 1.6512664573035165
+              },
+              {
+                "flicker": 1004,
+                "flickerStrong": 357,
+                "meanAbsDiff": 1.6503584790494534
+              },
+              {
+                "flicker": 983,
+                "flickerStrong": 351,
+                "meanAbsDiff": 1.649891365193218
+              },
+              {
+                "flicker": 977,
+                "flickerStrong": 344,
+                "meanAbsDiff": 1.6501949733868442
+              },
+              {
+                "flicker": 928,
+                "flickerStrong": 343,
+                "meanAbsDiff": 1.649772451984048
+              },
+              {
+                "flicker": 980,
+                "flickerStrong": 358,
+                "meanAbsDiff": 1.6485744646533649
+              },
+              {
+                "flicker": 947,
+                "flickerStrong": 340,
+                "meanAbsDiff": 1.6508145238569625
+              },
+              {
+                "flicker": 940,
+                "flickerStrong": 342,
+                "meanAbsDiff": 1.651061838031354
+              },
+              {
+                "flicker": 972,
+                "flickerStrong": 333,
+                "meanAbsDiff": 1.6501314054213039
+              },
+              {
+                "flicker": 970,
+                "flickerStrong": 373,
+                "meanAbsDiff": 1.6498236858667223
+              },
+              {
+                "flicker": 967,
+                "flickerStrong": 353,
+                "meanAbsDiff": 1.6511535530065118
+              },
+              {
+                "flicker": 993,
+                "flickerStrong": 329,
+                "meanAbsDiff": 1.6511190808261937
+              },
+              {
+                "flicker": 990,
+                "flickerStrong": 359,
+                "meanAbsDiff": 1.6505327375022534
+              },
+              {
+                "flicker": 972,
+                "flickerStrong": 352,
+                "meanAbsDiff": 1.6513625998981647
+              },
+              {
+                "flicker": 969,
+                "flickerStrong": 343,
+                "meanAbsDiff": 1.6506886529600218
+              },
+              {
+                "flicker": 985,
+                "flickerStrong": 343,
+                "meanAbsDiff": 1.6508961185589996
+              },
+              {
+                "flicker": 1015,
+                "flickerStrong": 359,
+                "meanAbsDiff": 1.649587756999592
+              },
+              {
+                "flicker": 954,
+                "flickerStrong": 338,
+                "meanAbsDiff": 1.6492626432255841
+              },
+              {
+                "flicker": 967,
+                "flickerStrong": 331,
+                "meanAbsDiff": 1.650086180450795
+              },
+              {
+                "flicker": 976,
+                "flickerStrong": 348,
+                "meanAbsDiff": 1.6503787195956952
+              },
+              {
+                "flicker": 998,
+                "flickerStrong": 357,
+                "meanAbsDiff": 1.6501266615432784
+              },
+              {
+                "flicker": 952,
+                "flickerStrong": 360,
+                "meanAbsDiff": 1.6523743109517168
+              },
+              {
+                "flicker": 978,
+                "flickerStrong": 349,
+                "meanAbsDiff": 1.6499429153344276
+              },
+              {
+                "flicker": 962,
+                "flickerStrong": 344,
+                "meanAbsDiff": 1.6501304566456987
+              },
+              {
+                "flicker": 999,
+                "flickerStrong": 359,
+                "meanAbsDiff": 1.6509887823097626
+              },
+              {
+                "flicker": 984,
+                "flickerStrong": 364,
+                "meanAbsDiff": 1.6507186975208494
+              },
+              {
+                "flicker": 996,
+                "flickerStrong": 331,
+                "meanAbsDiff": 1.6503176816984348
+              },
+              {
+                "flicker": 983,
+                "flickerStrong": 333,
+                "meanAbsDiff": 1.649216153220935
+              },
+              {
+                "flicker": 1006,
+                "flickerStrong": 370,
+                "meanAbsDiff": 1.6490956587190897
+              },
+              {
+                "flicker": 954,
+                "flickerStrong": 348,
+                "meanAbsDiff": 1.650935334617343
+              }
+            ]
+          }
+        }
+      ],
+      "quality": {
+        "dpr": 1.5,
+        "candidate": "msaa2",
+        "sceneSamples": 2,
+        "maxSamples": 4,
+        "halfFloatSamples": [
+          4,
+          2
+        ],
+        "probe": {
+          "mode": "race",
+          "locked": false,
+          "speed01": 0,
+          "progress": 0.9963891477756289,
+          "applied": 1.5,
+          "level": "high",
+          "still": 767.3999999761581,
+          "sinceSwitch": null,
+          "canvasW": 2205,
+          "ratio": 1.5
+        },
+        "passes": [
+          {
+            "name": "RenderPass",
+            "enabled": true
+          },
+          {
+            "name": "ShaderPass",
+            "enabled": true
+          },
+          {
+            "name": "ShaderPass",
+            "enabled": true
+          },
+          {
+            "name": "SMAAPass",
+            "enabled": false
+          }
+        ],
+        "targets": [
+          {
+            "width": 2205,
+            "height": 1434,
+            "samples": 2
+          },
+          {
+            "width": 2205,
+            "height": 1434,
+            "samples": 0
+          }
+        ]
+      }
+    },
+    {
+      "tag": "smooth-msaa4",
+      "query": "?version=unlocked",
+      "dpr": 1.5,
+      "scenarios": [
+        {
+          "name": "t123-creep",
+          "car": 0,
+          "t": 0.123,
+          "theme": "day",
+          "speed": 0.01,
+          "blurStrength0": 0.0042,
+          "metresPerFrame": 0.05208969250253613,
+          "size": {
+            "w": 2205,
+            "h": 1434
+          },
+          "metrics": {
+            "frames": 36,
+            "threshold": 8,
+            "flickerEventsPerFramePerMP": 174.9839870862338,
+            "strongEventsPerFramePerMP": 43.271608969017635,
+            "pixelsEverFlickeringFraction": 0.003856456576121848,
+            "maxCount": 17,
+            "perFrame": [
+              {
+                "flicker": 0,
+                "flickerStrong": 0,
+                "meanAbsDiff": null
+              },
+              {
+                "flicker": 0,
+                "flickerStrong": 0,
+                "meanAbsDiff": 1.5885093786468563
+              },
+              {
+                "flicker": 578,
+                "flickerStrong": 145,
+                "meanAbsDiff": 1.587775342587058
+              },
+              {
+                "flicker": 560,
+                "flickerStrong": 154,
+                "meanAbsDiff": 1.5898408270793207
+              },
+              {
+                "flicker": 554,
+                "flickerStrong": 146,
+                "meanAbsDiff": 1.5885264566077477
+              },
+              {
+                "flicker": 592,
+                "flickerStrong": 153,
+                "meanAbsDiff": 1.5874695205836868
+              },
+              {
+                "flicker": 574,
+                "flickerStrong": 141,
+                "meanAbsDiff": 1.5888019177917565
+              },
+              {
+                "flicker": 547,
+                "flickerStrong": 138,
+                "meanAbsDiff": 1.5895672634465223
+              },
+              {
+                "flicker": 545,
+                "flickerStrong": 142,
+                "meanAbsDiff": 1.5877854628601789
+              },
+              {
+                "flicker": 518,
+                "flickerStrong": 131,
+                "meanAbsDiff": 1.5891437932681207
+              },
+              {
+                "flicker": 561,
+                "flickerStrong": 135,
+                "meanAbsDiff": 1.5887026126117578
+              },
+              {
+                "flicker": 546,
+                "flickerStrong": 147,
+                "meanAbsDiff": 1.5896191298462667
+              },
+              {
+                "flicker": 536,
+                "flickerStrong": 127,
+                "meanAbsDiff": 1.5877778726553382
+              },
+              {
+                "flicker": 568,
+                "flickerStrong": 133,
+                "meanAbsDiff": 1.5884869242908692
+              },
+              {
+                "flicker": 558,
+                "flickerStrong": 136,
+                "meanAbsDiff": 1.5888335436452592
+              },
+              {
+                "flicker": 545,
+                "flickerStrong": 146,
+                "meanAbsDiff": 1.5895245685442936
+              },
+              {
+                "flicker": 545,
+                "flickerStrong": 134,
+                "meanAbsDiff": 1.5882304386189623
+              },
+              {
+                "flicker": 506,
+                "flickerStrong": 133,
+                "meanAbsDiff": 1.5875855874660418
+              },
+              {
+                "flicker": 561,
+                "flickerStrong": 127,
+                "meanAbsDiff": 1.5885859132123328
+              },
+              {
+                "flicker": 561,
+                "flickerStrong": 144,
+                "meanAbsDiff": 1.5891222876877389
+              },
+              {
+                "flicker": 567,
+                "flickerStrong": 138,
+                "meanAbsDiff": 1.588494830754245
+              },
+              {
+                "flicker": 569,
+                "flickerStrong": 130,
+                "meanAbsDiff": 1.5882000777995997
+              },
+              {
+                "flicker": 555,
+                "flickerStrong": 151,
+                "meanAbsDiff": 1.5896169160365214
+              },
+              {
+                "flicker": 533,
+                "flickerStrong": 139,
+                "meanAbsDiff": 1.5879119662741898
+              },
+              {
+                "flicker": 537,
+                "flickerStrong": 137,
+                "meanAbsDiff": 1.5885824343684476
+              },
+              {
+                "flicker": 540,
+                "flickerStrong": 130,
+                "meanAbsDiff": 1.5885365768808686
+              },
+              {
+                "flicker": 519,
+                "flickerStrong": 126,
+                "meanAbsDiff": 1.588947080459334
+              },
+              {
+                "flicker": 559,
+                "flickerStrong": 124,
+                "meanAbsDiff": 1.587671293529034
+              },
+              {
+                "flicker": 565,
+                "flickerStrong": 138,
+                "meanAbsDiff": 1.5889663722299705
+              },
+              {
+                "flicker": 570,
+                "flickerStrong": 123,
+                "meanAbsDiff": 1.5882797749504265
+              },
+              {
+                "flicker": 543,
+                "flickerStrong": 137,
+                "meanAbsDiff": 1.58896067957634
+              },
+              {
+                "flicker": 565,
+                "flickerStrong": 129,
+                "meanAbsDiff": 1.5875716720905007
+              },
+              {
+                "flicker": 559,
+                "flickerStrong": 141,
+                "meanAbsDiff": 1.5879075386546995
+              },
+              {
+                "flicker": 560,
+                "flickerStrong": 138,
+                "meanAbsDiff": 1.5887146304360888
+              },
+              {
+                "flicker": 551,
+                "flickerStrong": 138,
+                "meanAbsDiff": 1.5887589066309926
+              },
+              {
+                "flicker": 565,
+                "flickerStrong": 121,
+                "meanAbsDiff": 1.5877108258459125
+              }
+            ]
+          }
+        },
+        {
+          "name": "fence-creep",
+          "car": 3,
+          "t": 0.628,
+          "theme": "day",
+          "speed": 0.01,
+          "blurStrength0": 0.0042,
+          "metresPerFrame": 0.05208969250253613,
+          "size": {
+            "w": 2205,
+            "h": 1434
+          },
+          "metrics": {
+            "frames": 36,
+            "threshold": 8,
+            "flickerEventsPerFramePerMP": 195.52218841976585,
+            "strongEventsPerFramePerMP": 40.79735101851061,
+            "pixelsEverFlickeringFraction": 0.003705917513448894,
+            "maxCount": 21,
+            "perFrame": [
+              {
+                "flicker": 0,
+                "flickerStrong": 0,
+                "meanAbsDiff": null
+              },
+              {
+                "flicker": 0,
+                "flickerStrong": 0,
+                "meanAbsDiff": 1.602441199631875
+              },
+              {
+                "flicker": 647,
+                "flickerStrong": 146,
+                "meanAbsDiff": 1.6023444245201568
+              },
+              {
+                "flicker": 600,
+                "flickerStrong": 138,
+                "meanAbsDiff": 1.6013899562614446
+              },
+              {
+                "flicker": 633,
+                "flickerStrong": 123,
+                "meanAbsDiff": 1.6006012074750868
+              },
+              {
+                "flicker": 597,
+                "flickerStrong": 118,
+                "meanAbsDiff": 1.600382356568848
+              },
+              {
+                "flicker": 621,
+                "flickerStrong": 114,
+                "meanAbsDiff": 1.6018305044007375
+              },
+              {
+                "flicker": 592,
+                "flickerStrong": 128,
+                "meanAbsDiff": 1.600919679819859
+              },
+              {
+                "flicker": 598,
+                "flickerStrong": 125,
+                "meanAbsDiff": 1.5998475633861169
+              },
+              {
+                "flicker": 624,
+                "flickerStrong": 127,
+                "meanAbsDiff": 1.6009462455368013
+              },
+              {
+                "flicker": 602,
+                "flickerStrong": 119,
+                "meanAbsDiff": 1.6022609322669095
+              },
+              {
+                "flicker": 637,
+                "flickerStrong": 121,
+                "meanAbsDiff": 1.600162556887004
+              },
+              {
+                "flicker": 610,
+                "flickerStrong": 134,
+                "meanAbsDiff": 1.601241631008517
+              },
+              {
+                "flicker": 647,
+                "flickerStrong": 129,
+                "meanAbsDiff": 1.601382682315139
+              },
+              {
+                "flicker": 636,
+                "flickerStrong": 154,
+                "meanAbsDiff": 1.6013776221785785
+              },
+              {
+                "flicker": 595,
+                "flickerStrong": 132,
+                "meanAbsDiff": 1.6007027264648304
+              },
+              {
+                "flicker": 628,
+                "flickerStrong": 138,
+                "meanAbsDiff": 1.6009813502341894
+              },
+              {
+                "flicker": 636,
+                "flickerStrong": 123,
+                "meanAbsDiff": 1.6007248645622825
+              },
+              {
+                "flicker": 623,
+                "flickerStrong": 139,
+                "meanAbsDiff": 1.6016815466307397
+              },
+              {
+                "flicker": 632,
+                "flickerStrong": 127,
+                "meanAbsDiff": 1.6009984281950809
+              },
+              {
+                "flicker": 601,
+                "flickerStrong": 120,
+                "meanAbsDiff": 1.6003864679298032
+              },
+              {
+                "flicker": 583,
+                "flickerStrong": 126,
+                "meanAbsDiff": 1.6019955913560218
+              },
+              {
+                "flicker": 616,
+                "flickerStrong": 140,
+                "meanAbsDiff": 1.6003304901691033
+              },
+              {
+                "flicker": 589,
+                "flickerStrong": 120,
+                "meanAbsDiff": 1.6015367002216971
+              },
+              {
+                "flicker": 625,
+                "flickerStrong": 116,
+                "meanAbsDiff": 1.6016366379187659
+              },
+              {
+                "flicker": 584,
+                "flickerStrong": 139,
+                "meanAbsDiff": 1.602290344310667
+              },
+              {
+                "flicker": 607,
+                "flickerStrong": 113,
+                "meanAbsDiff": 1.6003168910520973
+              },
+              {
+                "flicker": 625,
+                "flickerStrong": 126,
+                "meanAbsDiff": 1.6012441610767971
+              },
+              {
+                "flicker": 630,
+                "flickerStrong": 133,
+                "meanAbsDiff": 1.6013140542130382
+              },
+              {
+                "flicker": 613,
+                "flickerStrong": 120,
+                "meanAbsDiff": 1.6021600457942358
+              },
+              {
+                "flicker": 617,
+                "flickerStrong": 135,
+                "meanAbsDiff": 1.601695778264816
+              },
+              {
+                "flicker": 616,
+                "flickerStrong": 125,
+                "meanAbsDiff": 1.601279898291255
+              },
+              {
+                "flicker": 647,
+                "flickerStrong": 128,
+                "meanAbsDiff": 1.6006328333285895
+              },
+              {
+                "flicker": 636,
+                "flickerStrong": 136,
+                "meanAbsDiff": 1.6026537253674134
+              },
+              {
+                "flicker": 650,
+                "flickerStrong": 121,
+                "meanAbsDiff": 1.6001669845064943
+              },
+              {
+                "flicker": 623,
+                "flickerStrong": 153,
+                "meanAbsDiff": 1.601801408615515
+              }
+            ]
+          }
+        },
+        {
+          "name": "grid-creep",
+          "car": 0,
+          "t": 0.995,
+          "theme": "day",
+          "speed": 0.01,
+          "blurStrength0": 0.0042,
+          "metresPerFrame": 0.05208969250253613,
+          "size": {
+            "w": 2205,
+            "h": 1434
+          },
+          "metrics": {
+            "frames": 36,
+            "threshold": 8,
+            "flickerEventsPerFramePerMP": 324.406843164974,
+            "strongEventsPerFramePerMP": 61.28904374395039,
+            "pixelsEverFlickeringFraction": 0.0063087252567228655,
+            "maxCount": 14,
+            "perFrame": [
+              {
+                "flicker": 0,
+                "flickerStrong": 0,
+                "meanAbsDiff": null
+              },
+              {
+                "flicker": 0,
+                "flickerStrong": 0,
+                "meanAbsDiff": 1.6443157272206883
+              },
+              {
+                "flicker": 975,
+                "flickerStrong": 196,
+                "meanAbsDiff": 1.6453049839182534
+              },
+              {
+                "flicker": 1008,
+                "flickerStrong": 196,
+                "meanAbsDiff": 1.643274920381914
+              },
+              {
+                "flicker": 1018,
+                "flickerStrong": 195,
+                "meanAbsDiff": 1.643834697988912
+              },
+              {
+                "flicker": 1013,
+                "flickerStrong": 185,
+                "meanAbsDiff": 1.6435159093856044
+              },
+              {
+                "flicker": 1008,
+                "flickerStrong": 173,
+                "meanAbsDiff": 1.6427815570672712
+              },
+              {
+                "flicker": 1015,
+                "flickerStrong": 182,
+                "meanAbsDiff": 1.6439254641884649
+              },
+              {
+                "flicker": 982,
+                "flickerStrong": 187,
+                "meanAbsDiff": 1.6433283680743334
+              },
+              {
+                "flicker": 983,
+                "flickerStrong": 171,
+                "meanAbsDiff": 1.6442793574891603
+              },
+              {
+                "flicker": 964,
+                "flickerStrong": 183,
+                "meanAbsDiff": 1.6443280613035545
+              },
+              {
+                "flicker": 1026,
+                "flickerStrong": 191,
+                "meanAbsDiff": 1.64445171839075
+              },
+              {
+                "flicker": 1035,
+                "flickerStrong": 211,
+                "meanAbsDiff": 1.644521927785526
+              },
+              {
+                "flicker": 1020,
+                "flickerStrong": 203,
+                "meanAbsDiff": 1.6435930764681512
+              },
+              {
+                "flicker": 1057,
+                "flickerStrong": 203,
+                "meanAbsDiff": 1.6438840343203762
+              },
+              {
+                "flicker": 1000,
+                "flickerStrong": 186,
+                "meanAbsDiff": 1.6436443103508256
+              },
+              {
+                "flicker": 990,
+                "flickerStrong": 170,
+                "meanAbsDiff": 1.6448669658472408
+              },
+              {
+                "flicker": 1008,
+                "flickerStrong": 172,
+                "meanAbsDiff": 1.6451082711094667
+              },
+              {
+                "flicker": 1047,
+                "flickerStrong": 201,
+                "meanAbsDiff": 1.6430165371587966
+              },
+              {
+                "flicker": 1053,
+                "flickerStrong": 197,
+                "meanAbsDiff": 1.6448268010132923
+              },
+              {
+                "flicker": 1092,
+                "flickerStrong": 222,
+                "meanAbsDiff": 1.6456079595948097
+              },
+              {
+                "flicker": 1036,
+                "flickerStrong": 191,
+                "meanAbsDiff": 1.6437357090674485
+              },
+              {
+                "flicker": 1046,
+                "flickerStrong": 197,
+                "meanAbsDiff": 1.6433198290938877
+              },
+              {
+                "flicker": 1025,
+                "flickerStrong": 195,
+                "meanAbsDiff": 1.6446070013314484
+              },
+              {
+                "flicker": 1044,
+                "flickerStrong": 189,
+                "meanAbsDiff": 1.6446680392287087
+              },
+              {
+                "flicker": 1033,
+                "flickerStrong": 201,
+                "meanAbsDiff": 1.6433533524986006
+              },
+              {
+                "flicker": 1016,
+                "flickerStrong": 198,
+                "meanAbsDiff": 1.6444485558053998
+              },
+              {
+                "flicker": 1067,
+                "flickerStrong": 189,
+                "meanAbsDiff": 1.6441778384994166
+              },
+              {
+                "flicker": 1007,
+                "flickerStrong": 201,
+                "meanAbsDiff": 1.6457322491990753
+              },
+              {
+                "flicker": 1052,
+                "flickerStrong": 208,
+                "meanAbsDiff": 1.6424940780589317
+              },
+              {
+                "flicker": 1026,
+                "flickerStrong": 227,
+                "meanAbsDiff": 1.6434814372052866
+              },
+              {
+                "flicker": 1051,
+                "flickerStrong": 194,
+                "meanAbsDiff": 1.643998836168591
+              },
+              {
+                "flicker": 1064,
+                "flickerStrong": 207,
+                "meanAbsDiff": 1.6448378700620183
+              },
+              {
+                "flicker": 1034,
+                "flickerStrong": 190,
+                "meanAbsDiff": 1.6433081275280916
+              },
+              {
+                "flicker": 1031,
+                "flickerStrong": 176,
+                "meanAbsDiff": 1.6429978779052299
+              },
+              {
+                "flicker": 1050,
+                "flickerStrong": 202,
+                "meanAbsDiff": 1.6448132018962862
+              }
+            ]
+          }
+        }
+      ],
+      "quality": {
+        "dpr": 1.5,
+        "candidate": "msaa4",
+        "sceneSamples": 4,
+        "maxSamples": 4,
+        "halfFloatSamples": [
+          4,
+          2
+        ],
+        "probe": {
+          "mode": "race",
+          "locked": false,
+          "speed01": 0,
+          "progress": 0.9963891442210243,
+          "applied": 1.5,
+          "level": "high",
+          "still": 766.8000000119209,
+          "sinceSwitch": null,
+          "canvasW": 2205,
+          "ratio": 1.5
+        },
+        "passes": [
+          {
+            "name": "RenderPass",
+            "enabled": true
+          },
+          {
+            "name": "ShaderPass",
+            "enabled": true
+          },
+          {
+            "name": "ShaderPass",
+            "enabled": true
+          },
+          {
+            "name": "SMAAPass",
+            "enabled": false
+          }
+        ],
+        "targets": [
+          {
+            "width": 2205,
+            "height": 1434,
+            "samples": 4
+          },
+          {
+            "width": 2205,
+            "height": 1434,
+            "samples": 0
+          }
+        ]
+      }
+    },
+    {
+      "tag": "quality-smaa",
+      "query": "?version=unlocked&mode=quality",
+      "dpr": 2,
+      "scenarios": [
+        {
+          "name": "t123-creep",
+          "car": 0,
+          "t": 0.123,
+          "theme": "day",
+          "speed": 0.01,
+          "blurStrength0": 0.0042,
+          "metresPerFrame": 0.05208969250253613,
+          "size": {
+            "w": 2940,
+            "h": 1912
+          },
+          "metrics": {
+            "frames": 36,
+            "threshold": 8,
+            "flickerEventsPerFramePerMP": 301.8937700603254,
+            "strongEventsPerFramePerMP": 41.89960503029664,
+            "pixelsEverFlickeringFraction": 0.006294295961062249,
+            "maxCount": 17,
+            "perFrame": [
+              {
+                "flicker": 0,
+                "flickerStrong": 0,
+                "meanAbsDiff": null
+              },
+              {
+                "flicker": 0,
+                "flickerStrong": 0,
+                "meanAbsDiff": 1.600233043007998
+              },
+              {
+                "flicker": 1655,
+                "flickerStrong": 219,
+                "meanAbsDiff": 1.6014521603620528
+              },
+              {
+                "flicker": 1735,
+                "flickerStrong": 243,
+                "meanAbsDiff": 1.6000101400392792
+              },
+              {
+                "flicker": 1752,
+                "flickerStrong": 231,
+                "meanAbsDiff": 1.6023306079754078
+              },
+              {
+                "flicker": 1796,
+                "flickerStrong": 242,
+                "meanAbsDiff": 1.600444916460308
+              },
+              {
+                "flicker": 1743,
+                "flickerStrong": 267,
+                "meanAbsDiff": 1.6018102638544958
+              },
+              {
+                "flicker": 1667,
+                "flickerStrong": 249,
+                "meanAbsDiff": 1.5999332892152678
+              },
+              {
+                "flicker": 1717,
+                "flickerStrong": 240,
+                "meanAbsDiff": 1.6010458472091766
+              },
+              {
+                "flicker": 1693,
+                "flickerStrong": 232,
+                "meanAbsDiff": 1.5997600190703896
+              },
+              {
+                "flicker": 1734,
+                "flickerStrong": 230,
+                "meanAbsDiff": 1.602190070588905
+              },
+              {
+                "flicker": 1699,
+                "flickerStrong": 240,
+                "meanAbsDiff": 1.600305090655509
+              },
+              {
+                "flicker": 1614,
+                "flickerStrong": 206,
+                "meanAbsDiff": 1.6001718469814703
+              },
+              {
+                "flicker": 1663,
+                "flickerStrong": 227,
+                "meanAbsDiff": 1.5999354239603791
+              },
+              {
+                "flicker": 1705,
+                "flickerStrong": 222,
+                "meanAbsDiff": 1.6007608587368
+              },
+              {
+                "flicker": 1722,
+                "flickerStrong": 230,
+                "meanAbsDiff": 1.6009072666723594
+              },
+              {
+                "flicker": 1791,
+                "flickerStrong": 273,
+                "meanAbsDiff": 1.6000464307061737
+              },
+              {
+                "flicker": 1668,
+                "flickerStrong": 228,
+                "meanAbsDiff": 1.6015546281274016
+              },
+              {
+                "flicker": 1653,
+                "flickerStrong": 234,
+                "meanAbsDiff": 1.5995157686505566
+              },
+              {
+                "flicker": 1709,
+                "flickerStrong": 255,
+                "meanAbsDiff": 1.6008684854695017
+              },
+              {
+                "flicker": 1670,
+                "flickerStrong": 238,
+                "meanAbsDiff": 1.5995047391341475
+              },
+              {
+                "flicker": 1685,
+                "flickerStrong": 257,
+                "meanAbsDiff": 1.6013557410411863
+              },
+              {
+                "flicker": 1674,
+                "flickerStrong": 249,
+                "meanAbsDiff": 1.5997578843252782
+              },
+              {
+                "flicker": 1733,
+                "flickerStrong": 231,
+                "meanAbsDiff": 1.6002558136225202
+              },
+              {
+                "flicker": 1733,
+                "flickerStrong": 230,
+                "meanAbsDiff": 1.5996052500498108
+              },
+              {
+                "flicker": 1765,
+                "flickerStrong": 243,
+                "meanAbsDiff": 1.6009976375487434
+              },
+              {
+                "flicker": 1687,
+                "flickerStrong": 222,
+                "meanAbsDiff": 1.5994924643497566
+              },
+              {
+                "flicker": 1651,
+                "flickerStrong": 229,
+                "meanAbsDiff": 1.5998829448097232
+              },
+              {
+                "flicker": 1624,
+                "flickerStrong": 235,
+                "meanAbsDiff": 1.5994225514473572
+              },
+              {
+                "flicker": 1661,
+                "flickerStrong": 203,
+                "meanAbsDiff": 1.6010483377451399
+              },
+              {
+                "flicker": 1715,
+                "flickerStrong": 201,
+                "meanAbsDiff": 1.5993318247801211
+              },
+              {
+                "flicker": 1682,
+                "flickerStrong": 233,
+                "meanAbsDiff": 1.5999436071499729
+              },
+              {
+                "flicker": 1713,
+                "flickerStrong": 239,
+                "meanAbsDiff": 1.6008341516522928
+              },
+              {
+                "flicker": 1679,
+                "flickerStrong": 270,
+                "meanAbsDiff": 1.599042388922096
+              },
+              {
+                "flicker": 1657,
+                "flickerStrong": 231,
+                "meanAbsDiff": 1.6000845003273276
+              },
+              {
+                "flicker": 1654,
+                "flickerStrong": 229,
+                "meanAbsDiff": 1.5992291791193465
+              }
+            ]
+          }
+        },
+        {
+          "name": "fence-creep",
+          "car": 3,
+          "t": 0.628,
+          "theme": "day",
+          "speed": 0.01,
+          "blurStrength0": 0.0042,
+          "metresPerFrame": 0.05208969250253613,
+          "size": {
+            "w": 2940,
+            "h": 1912
+          },
+          "metrics": {
+            "frames": 36,
+            "threshold": 8,
+            "flickerEventsPerFramePerMP": 312.69306885934293,
+            "strongEventsPerFramePerMP": 45.38426249160753,
+            "pixelsEverFlickeringFraction": 0.006245196823499275,
+            "maxCount": 21,
+            "perFrame": [
+              {
+                "flicker": 0,
+                "flickerStrong": 0,
+                "meanAbsDiff": null
+              },
+              {
+                "flicker": 0,
+                "flickerStrong": 0,
+                "meanAbsDiff": 1.6137256994848148
+              },
+              {
+                "flicker": 1690,
+                "flickerStrong": 250,
+                "meanAbsDiff": 1.6138667705575955
+              },
+              {
+                "flicker": 1779,
+                "flickerStrong": 261,
+                "meanAbsDiff": 1.6142181140238523
+              },
+              {
+                "flicker": 1727,
+                "flickerStrong": 248,
+                "meanAbsDiff": 1.6133572780576666
+              },
+              {
+                "flicker": 1671,
+                "flickerStrong": 237,
+                "meanAbsDiff": 1.614901054564085
+              },
+              {
+                "flicker": 1780,
+                "flickerStrong": 255,
+                "meanAbsDiff": 1.6134978154441693
+              },
+              {
+                "flicker": 1774,
+                "flickerStrong": 266,
+                "meanAbsDiff": 1.6137806691714343
+              },
+              {
+                "flicker": 1788,
+                "flickerStrong": 245,
+                "meanAbsDiff": 1.6124480545356217
+              },
+              {
+                "flicker": 1644,
+                "flickerStrong": 215,
+                "meanAbsDiff": 1.6133531864628696
+              },
+              {
+                "flicker": 1751,
+                "flickerStrong": 273,
+                "meanAbsDiff": 1.6124711809409957
+              },
+              {
+                "flicker": 1764,
+                "flickerStrong": 249,
+                "meanAbsDiff": 1.6122658896194462
+              },
+              {
+                "flicker": 1789,
+                "flickerStrong": 276,
+                "meanAbsDiff": 1.6136661045171206
+              },
+              {
+                "flicker": 1744,
+                "flickerStrong": 252,
+                "meanAbsDiff": 1.6129587923035322
+              },
+              {
+                "flicker": 1806,
+                "flickerStrong": 259,
+                "meanAbsDiff": 1.6128524108388125
+              },
+              {
+                "flicker": 1729,
+                "flickerStrong": 262,
+                "meanAbsDiff": 1.6123359804172714
+              },
+              {
+                "flicker": 1739,
+                "flickerStrong": 272,
+                "meanAbsDiff": 1.614422337972846
+              },
+              {
+                "flicker": 1721,
+                "flickerStrong": 232,
+                "meanAbsDiff": 1.6123276193322518
+              },
+              {
+                "flicker": 1796,
+                "flickerStrong": 259,
+                "meanAbsDiff": 1.6136762445564
+              },
+              {
+                "flicker": 1775,
+                "flickerStrong": 252,
+                "meanAbsDiff": 1.6129219679503601
+              },
+              {
+                "flicker": 1786,
+                "flickerStrong": 247,
+                "meanAbsDiff": 1.6144719707966868
+              },
+              {
+                "flicker": 1764,
+                "flickerStrong": 252,
+                "meanAbsDiff": 1.6129659081205705
+              },
+              {
+                "flicker": 1707,
+                "flickerStrong": 231,
+                "meanAbsDiff": 1.6137653701648023
+              },
+              {
+                "flicker": 1748,
+                "flickerStrong": 251,
+                "meanAbsDiff": 1.6141058620100759
+              },
+              {
+                "flicker": 1800,
+                "flickerStrong": 249,
+                "meanAbsDiff": 1.6144475991233314
+              },
+              {
+                "flicker": 1726,
+                "flickerStrong": 255,
+                "meanAbsDiff": 1.613623587510318
+              },
+              {
+                "flicker": 1752,
+                "flickerStrong": 263,
+                "meanAbsDiff": 1.6130865212193664
+              },
+              {
+                "flicker": 1796,
+                "flickerStrong": 268,
+                "meanAbsDiff": 1.6136748213929923
+              },
+              {
+                "flicker": 1823,
+                "flickerStrong": 268,
+                "meanAbsDiff": 1.6150915805652806
+              },
+              {
+                "flicker": 1722,
+                "flickerStrong": 240,
+                "meanAbsDiff": 1.6120671804286568
+              },
+              {
+                "flicker": 1692,
+                "flickerStrong": 245,
+                "meanAbsDiff": 1.6122142999459197
+              },
+              {
+                "flicker": 1841,
+                "flickerStrong": 291,
+                "meanAbsDiff": 1.6142935416844562
+              },
+              {
+                "flicker": 1715,
+                "flickerStrong": 261,
+                "meanAbsDiff": 1.6127204124327554
+              },
+              {
+                "flicker": 1813,
+                "flickerStrong": 259,
+                "meanAbsDiff": 1.6136335496541714
+              },
+              {
+                "flicker": 1746,
+                "flickerStrong": 266,
+                "meanAbsDiff": 1.6128821193749465
+              },
+              {
+                "flicker": 1865,
+                "flickerStrong": 265,
+                "meanAbsDiff": 1.615044082486551
+              }
+            ]
+          }
+        },
+        {
+          "name": "grid-creep",
+          "car": 0,
+          "t": 0.995,
+          "theme": "day",
+          "speed": 0.01,
+          "blurStrength0": 0.0042,
+          "metresPerFrame": 0.05208969250253613,
+          "size": {
+            "w": 2940,
+            "h": 1912
+          },
+          "metrics": {
+            "frames": 36,
+            "threshold": 8,
+            "flickerEventsPerFramePerMP": 520.1034388650858,
+            "strongEventsPerFramePerMP": 124.28088390167784,
+            "pixelsEverFlickeringFraction": 0.007991596220077989,
+            "maxCount": 15,
+            "perFrame": [
+              {
+                "flicker": 0,
+                "flickerStrong": 0,
+                "meanAbsDiff": null
+              },
+              {
+                "flicker": 0,
+                "flickerStrong": 0,
+                "meanAbsDiff": 1.6532474810007685
+              },
+              {
+                "flicker": 3000,
+                "flickerStrong": 713,
+                "meanAbsDiff": 1.6524720348390403
+              },
+              {
+                "flicker": 2896,
+                "flickerStrong": 639,
+                "meanAbsDiff": 1.6520473984572908
+              },
+              {
+                "flicker": 2901,
+                "flickerStrong": 688,
+                "meanAbsDiff": 1.651949200182165
+              },
+              {
+                "flicker": 2901,
+                "flickerStrong": 690,
+                "meanAbsDiff": 1.653264025275382
+              },
+              {
+                "flicker": 2938,
+                "flickerStrong": 719,
+                "meanAbsDiff": 1.6542002889021719
+              },
+              {
+                "flicker": 2921,
+                "flickerStrong": 704,
+                "meanAbsDiff": 1.6516462442717672
+              },
+              {
+                "flicker": 2934,
+                "flickerStrong": 655,
+                "meanAbsDiff": 1.65218633478496
+              },
+              {
+                "flicker": 2887,
+                "flickerStrong": 693,
+                "meanAbsDiff": 1.650716206984886
+              },
+              {
+                "flicker": 2827,
+                "flickerStrong": 687,
+                "meanAbsDiff": 1.653577832806763
+              },
+              {
+                "flicker": 2948,
+                "flickerStrong": 667,
+                "meanAbsDiff": 1.6524715011527624
+              },
+              {
+                "flicker": 2951,
+                "flickerStrong": 722,
+                "meanAbsDiff": 1.6520625195684968
+              },
+              {
+                "flicker": 2915,
+                "flickerStrong": 701,
+                "meanAbsDiff": 1.6521984316739249
+              },
+              {
+                "flicker": 2976,
+                "flickerStrong": 695,
+                "meanAbsDiff": 1.6528100361483506
+              },
+              {
+                "flicker": 2898,
+                "flickerStrong": 659,
+                "meanAbsDiff": 1.652969964136282
+              },
+              {
+                "flicker": 2903,
+                "flickerStrong": 702,
+                "meanAbsDiff": 1.6517243403637605
+              },
+              {
+                "flicker": 2978,
+                "flickerStrong": 735,
+                "meanAbsDiff": 1.6551404662283324
+              },
+              {
+                "flicker": 2915,
+                "flickerStrong": 711,
+                "meanAbsDiff": 1.6528014971679048
+              },
+              {
+                "flicker": 2876,
+                "flickerStrong": 690,
+                "meanAbsDiff": 1.6528086129849429
+              },
+              {
+                "flicker": 2824,
+                "flickerStrong": 669,
+                "meanAbsDiff": 1.6532691842427347
+              },
+              {
+                "flicker": 2929,
+                "flickerStrong": 716,
+                "meanAbsDiff": 1.652499430734637
+              },
+              {
+                "flicker": 2943,
+                "flickerStrong": 725,
+                "meanAbsDiff": 1.6525839310619646
+              },
+              {
+                "flicker": 2878,
+                "flickerStrong": 689,
+                "meanAbsDiff": 1.6518200481029233
+              },
+              {
+                "flicker": 2998,
+                "flickerStrong": 714,
+                "meanAbsDiff": 1.6530327612216436
+              },
+              {
+                "flicker": 2997,
+                "flickerStrong": 706,
+                "meanAbsDiff": 1.6522398813081718
+              },
+              {
+                "flicker": 2952,
+                "flickerStrong": 693,
+                "meanAbsDiff": 1.6514802678393534
+              },
+              {
+                "flicker": 2978,
+                "flickerStrong": 698,
+                "meanAbsDiff": 1.653027424358865
+              },
+              {
+                "flicker": 2926,
+                "flickerStrong": 675,
+                "meanAbsDiff": 1.651661899069251
+              },
+              {
+                "flicker": 2917,
+                "flickerStrong": 728,
+                "meanAbsDiff": 1.6521413272421939
+              },
+              {
+                "flicker": 2966,
+                "flickerStrong": 730,
+                "meanAbsDiff": 1.6528854638089545
+              },
+              {
+                "flicker": 2910,
+                "flickerStrong": 688,
+                "meanAbsDiff": 1.6515405743887512
+              },
+              {
+                "flicker": 2814,
+                "flickerStrong": 671,
+                "meanAbsDiff": 1.6526673640167364
+              },
+              {
+                "flicker": 2859,
+                "flickerStrong": 719,
+                "meanAbsDiff": 1.6521685452423647
+              },
+              {
+                "flicker": 3051,
+                "flickerStrong": 752,
+                "meanAbsDiff": 1.6529950473913415
+              },
+              {
+                "flicker": 2897,
+                "flickerStrong": 710,
+                "meanAbsDiff": 1.6517839353314547
+              }
+            ]
+          }
+        }
+      ],
+      "quality": {
+        "dpr": 2,
+        "candidate": "baseline",
+        "sceneSamples": 0,
+        "maxSamples": 4,
+        "halfFloatSamples": [
+          4,
+          2
+        ],
+        "probe": {
+          "mode": "race",
+          "locked": false,
+          "speed01": 0,
+          "progress": 0.9963891440234078,
+          "applied": 2,
+          "level": "high",
+          "still": 766.6999999880791,
+          "sinceSwitch": null,
+          "canvasW": 2940,
+          "ratio": 2
+        },
+        "passes": [
+          {
+            "name": "RenderPass",
+            "enabled": true
+          },
+          {
+            "name": "ShaderPass",
+            "enabled": true
+          },
+          {
+            "name": "ShaderPass",
+            "enabled": true
+          },
+          {
+            "name": "SMAAPass",
+            "enabled": true
+          }
+        ],
+        "targets": [
+          {
+            "width": 2940,
+            "height": 1912,
+            "samples": 0
+          },
+          {
+            "width": 2940,
+            "height": 1912,
+            "samples": 0
+          }
+        ]
+      }
+    },
+    {
+      "tag": "quality-msaa2",
+      "query": "?version=unlocked&mode=quality",
+      "dpr": 2,
+      "scenarios": [
+        {
+          "name": "t123-creep",
+          "car": 0,
+          "t": 0.123,
+          "theme": "day",
+          "speed": 0.01,
+          "blurStrength0": 0.0042,
+          "metresPerFrame": 0.05208969250253613,
+          "size": {
+            "w": 2940,
+            "h": 1912
+          },
+          "metrics": {
+            "frames": 36,
+            "threshold": 8,
+            "flickerEventsPerFramePerMP": 179.49125256797282,
+            "strongEventsPerFramePerMP": 57.5177769852711,
+            "pixelsEverFlickeringFraction": 0.00481883129820966,
+            "maxCount": 20,
+            "perFrame": [
+              {
+                "flicker": 0,
+                "flickerStrong": 0,
+                "meanAbsDiff": null
+              },
+              {
+                "flicker": 0,
+                "flickerStrong": 0,
+                "meanAbsDiff": 1.5966954145675007
+              },
+              {
+                "flicker": 1031,
+                "flickerStrong": 324,
+                "meanAbsDiff": 1.598073748327783
+              },
+              {
+                "flicker": 1036,
+                "flickerStrong": 327,
+                "meanAbsDiff": 1.5973178706629094
+              },
+              {
+                "flicker": 1020,
+                "flickerStrong": 340,
+                "meanAbsDiff": 1.5978755728232716
+              },
+              {
+                "flicker": 1020,
+                "flickerStrong": 315,
+                "meanAbsDiff": 1.5959827654911336
+              },
+              {
+                "flicker": 1004,
+                "flickerStrong": 321,
+                "meanAbsDiff": 1.5990477257848745
+              },
+              {
+                "flicker": 1033,
+                "flickerStrong": 327,
+                "meanAbsDiff": 1.5964540104744827
+              },
+              {
+                "flicker": 1015,
+                "flickerStrong": 340,
+                "meanAbsDiff": 1.5975057282327156
+              },
+              {
+                "flicker": 995,
+                "flickerStrong": 326,
+                "meanAbsDiff": 1.5955152563117296
+              },
+              {
+                "flicker": 1036,
+                "flickerStrong": 317,
+                "meanAbsDiff": 1.596656811260069
+              },
+              {
+                "flicker": 996,
+                "flickerStrong": 299,
+                "meanAbsDiff": 1.5956186135542083
+              },
+              {
+                "flicker": 1018,
+                "flickerStrong": 339,
+                "meanAbsDiff": 1.5961821862636267
+              },
+              {
+                "flicker": 1000,
+                "flickerStrong": 334,
+                "meanAbsDiff": 1.596716406227763
+              },
+              {
+                "flicker": 1001,
+                "flickerStrong": 324,
+                "meanAbsDiff": 1.5964810505792275
+              },
+              {
+                "flicker": 1033,
+                "flickerStrong": 315,
+                "meanAbsDiff": 1.5972815799960152
+              },
+              {
+                "flicker": 1032,
+                "flickerStrong": 325,
+                "meanAbsDiff": 1.5953469672387783
+              },
+              {
+                "flicker": 987,
+                "flickerStrong": 314,
+                "meanAbsDiff": 1.597357007656619
+              },
+              {
+                "flicker": 992,
+                "flickerStrong": 325,
+                "meanAbsDiff": 1.5965032875074716
+              },
+              {
+                "flicker": 1005,
+                "flickerStrong": 330,
+                "meanAbsDiff": 1.597451114336948
+              },
+              {
+                "flicker": 1027,
+                "flickerStrong": 326,
+                "meanAbsDiff": 1.5963803617681382
+              },
+              {
+                "flicker": 996,
+                "flickerStrong": 307,
+                "meanAbsDiff": 1.5989118136794467
+              },
+              {
+                "flicker": 975,
+                "flickerStrong": 310,
+                "meanAbsDiff": 1.595710051803148
+              },
+              {
+                "flicker": 992,
+                "flickerStrong": 320,
+                "meanAbsDiff": 1.5973820909116785
+              },
+              {
+                "flicker": 1005,
+                "flickerStrong": 312,
+                "meanAbsDiff": 1.5968010844505167
+              },
+              {
+                "flicker": 1033,
+                "flickerStrong": 330,
+                "meanAbsDiff": 1.5979049255685538
+              },
+              {
+                "flicker": 1016,
+                "flickerStrong": 319,
+                "meanAbsDiff": 1.5960482310078843
+              },
+              {
+                "flicker": 997,
+                "flickerStrong": 321,
+                "meanAbsDiff": 1.595657572652492
+              },
+              {
+                "flicker": 999,
+                "flickerStrong": 323,
+                "meanAbsDiff": 1.596690789286426
+              },
+              {
+                "flicker": 977,
+                "flickerStrong": 327,
+                "meanAbsDiff": 1.5954471223635898
+              },
+              {
+                "flicker": 1009,
+                "flickerStrong": 333,
+                "meanAbsDiff": 1.597824338940597
+              },
+              {
+                "flicker": 1002,
+                "flickerStrong": 325,
+                "meanAbsDiff": 1.5945460820311388
+              },
+              {
+                "flicker": 1009,
+                "flickerStrong": 315,
+                "meanAbsDiff": 1.5964212777161073
+              },
+              {
+                "flicker": 994,
+                "flickerStrong": 331,
+                "meanAbsDiff": 1.5949331824780122
+              },
+              {
+                "flicker": 1009,
+                "flickerStrong": 320,
+                "meanAbsDiff": 1.5969642145561154
+              },
+              {
+                "flicker": 1011,
+                "flickerStrong": 332,
+                "meanAbsDiff": 1.59536315572254
+              }
+            ]
+          }
+        },
+        {
+          "name": "fence-creep",
+          "car": 3,
+          "t": 0.628,
+          "theme": "day",
+          "speed": 0.01,
+          "blurStrength0": 0.0042,
+          "metresPerFrame": 0.05208969250253613,
+          "size": {
+            "w": 2940,
+            "h": 1912
+          },
+          "metrics": {
+            "frames": 36,
+            "threshold": 8,
+            "flickerEventsPerFramePerMP": 209.01666105772856,
+            "strongEventsPerFramePerMP": 80.34071369133429,
+            "pixelsEverFlickeringFraction": 0.005178357954060285,
+            "maxCount": 20,
+            "perFrame": [
+              {
+                "flicker": 0,
+                "flickerStrong": 0,
+                "meanAbsDiff": null
+              },
+              {
+                "flicker": 0,
+                "flickerStrong": 0,
+                "meanAbsDiff": 1.61087848319244
+              },
+              {
+                "flicker": 1120,
+                "flickerStrong": 450,
+                "meanAbsDiff": 1.6097830031594227
+              },
+              {
+                "flicker": 1214,
+                "flickerStrong": 481,
+                "meanAbsDiff": 1.6106390359491076
+              },
+              {
+                "flicker": 1232,
+                "flickerStrong": 459,
+                "meanAbsDiff": 1.609952181709504
+              },
+              {
+                "flicker": 1193,
+                "flickerStrong": 472,
+                "meanAbsDiff": 1.6114452580195258
+              },
+              {
+                "flicker": 1167,
+                "flickerStrong": 435,
+                "meanAbsDiff": 1.6091536091424017
+              },
+              {
+                "flicker": 1181,
+                "flickerStrong": 408,
+                "meanAbsDiff": 1.6099564511997269
+              },
+              {
+                "flicker": 1139,
+                "flickerStrong": 424,
+                "meanAbsDiff": 1.6088230794409815
+              },
+              {
+                "flicker": 1125,
+                "flickerStrong": 416,
+                "meanAbsDiff": 1.6106948951128568
+              },
+              {
+                "flicker": 1131,
+                "flickerStrong": 436,
+                "meanAbsDiff": 1.6096184498904165
+              },
+              {
+                "flicker": 1199,
+                "flickerStrong": 475,
+                "meanAbsDiff": 1.6102318333191017
+              },
+              {
+                "flicker": 1152,
+                "flickerStrong": 468,
+                "meanAbsDiff": 1.611135008396664
+              },
+              {
+                "flicker": 1189,
+                "flickerStrong": 465,
+                "meanAbsDiff": 1.6097876284404975
+              },
+              {
+                "flicker": 1169,
+                "flickerStrong": 460,
+                "meanAbsDiff": 1.6108751031793471
+              },
+              {
+                "flicker": 1214,
+                "flickerStrong": 447,
+                "meanAbsDiff": 1.6107415037144566
+              },
+              {
+                "flicker": 1231,
+                "flickerStrong": 454,
+                "meanAbsDiff": 1.6110773702786554
+              },
+              {
+                "flicker": 1210,
+                "flickerStrong": 476,
+                "meanAbsDiff": 1.6097995474340363
+              },
+              {
+                "flicker": 1138,
+                "flickerStrong": 430,
+                "meanAbsDiff": 1.611791976204708
+              },
+              {
+                "flicker": 1221,
+                "flickerStrong": 467,
+                "meanAbsDiff": 1.6102787977115531
+              },
+              {
+                "flicker": 1159,
+                "flickerStrong": 463,
+                "meanAbsDiff": 1.6116227976546267
+              },
+              {
+                "flicker": 1165,
+                "flickerStrong": 459,
+                "meanAbsDiff": 1.6097604104403267
+              },
+              {
+                "flicker": 1166,
+                "flickerStrong": 435,
+                "meanAbsDiff": 1.6111522642529816
+              },
+              {
+                "flicker": 1173,
+                "flickerStrong": 447,
+                "meanAbsDiff": 1.6094519397717246
+              },
+              {
+                "flicker": 1184,
+                "flickerStrong": 444,
+                "meanAbsDiff": 1.611019020578943
+              },
+              {
+                "flicker": 1217,
+                "flickerStrong": 439,
+                "meanAbsDiff": 1.6094442902684085
+              },
+              {
+                "flicker": 1117,
+                "flickerStrong": 436,
+                "meanAbsDiff": 1.6093795363333618
+              },
+              {
+                "flicker": 1185,
+                "flickerStrong": 466,
+                "meanAbsDiff": 1.6101019696581562
+              },
+              {
+                "flicker": 1110,
+                "flickerStrong": 436,
+                "meanAbsDiff": 1.6098865382973273
+              },
+              {
+                "flicker": 1113,
+                "flickerStrong": 416,
+                "meanAbsDiff": 1.6110953377166766
+              },
+              {
+                "flicker": 1187,
+                "flickerStrong": 463,
+                "meanAbsDiff": 1.6091391996128996
+              },
+              {
+                "flicker": 1114,
+                "flickerStrong": 428,
+                "meanAbsDiff": 1.6110668744485241
+              },
+              {
+                "flicker": 1183,
+                "flickerStrong": 482,
+                "meanAbsDiff": 1.6095471138246094
+              },
+              {
+                "flicker": 1185,
+                "flickerStrong": 454,
+                "meanAbsDiff": 1.6119236188199129
+              },
+              {
+                "flicker": 1250,
+                "flickerStrong": 485,
+                "meanAbsDiff": 1.6106924045768936
+              },
+              {
+                "flicker": 1215,
+                "flickerStrong": 479,
+                "meanAbsDiff": 1.6122968434235618
+              }
+            ]
+          }
+        },
+        {
+          "name": "grid-creep",
+          "car": 0,
+          "t": 0.995,
+          "theme": "day",
+          "speed": 0.01,
+          "blurStrength0": 0.0042,
+          "metresPerFrame": 0.05208969250253613,
+          "size": {
+            "w": 2940,
+            "h": 1912
+          },
+          "metrics": {
+            "frames": 36,
+            "threshold": 8,
+            "flickerEventsPerFramePerMP": 291.6438541943975,
+            "strongEventsPerFramePerMP": 114.69545977386771,
+            "pixelsEverFlickeringFraction": 0.006614685623203256,
+            "maxCount": 13,
+            "perFrame": [
+              {
+                "flicker": 0,
+                "flickerStrong": 0,
+                "meanAbsDiff": null
+              },
+              {
+                "flicker": 0,
+                "flickerStrong": 0,
+                "meanAbsDiff": 1.6568294054023283
+              },
+              {
+                "flicker": 1638,
+                "flickerStrong": 628,
+                "meanAbsDiff": 1.657369495915521
+              },
+              {
+                "flicker": 1653,
+                "flickerStrong": 636,
+                "meanAbsDiff": 1.6566749921726012
+              },
+              {
+                "flicker": 1704,
+                "flickerStrong": 648,
+                "meanAbsDiff": 1.6592567884894545
+              },
+              {
+                "flicker": 1670,
+                "flickerStrong": 704,
+                "meanAbsDiff": 1.6561349016594085
+              },
+              {
+                "flicker": 1614,
+                "flickerStrong": 621,
+                "meanAbsDiff": 1.658074317593146
+              },
+              {
+                "flicker": 1624,
+                "flickerStrong": 640,
+                "meanAbsDiff": 1.6571088791165
+              },
+              {
+                "flicker": 1634,
+                "flickerStrong": 640,
+                "meanAbsDiff": 1.6577448552642815
+              },
+              {
+                "flicker": 1621,
+                "flickerStrong": 664,
+                "meanAbsDiff": 1.6565488643156008
+              },
+              {
+                "flicker": 1613,
+                "flickerStrong": 599,
+                "meanAbsDiff": 1.6564165101186918
+              },
+              {
+                "flicker": 1664,
+                "flickerStrong": 670,
+                "meanAbsDiff": 1.6577185267412404
+              },
+              {
+                "flicker": 1610,
+                "flickerStrong": 625,
+                "meanAbsDiff": 1.6571965815614949
+              },
+              {
+                "flicker": 1642,
+                "flickerStrong": 646,
+                "meanAbsDiff": 1.6577252867674266
+              },
+              {
+                "flicker": 1639,
+                "flickerStrong": 656,
+                "meanAbsDiff": 1.6574536404519966
+              },
+              {
+                "flicker": 1657,
+                "flickerStrong": 647,
+                "meanAbsDiff": 1.6583077163919961
+              },
+              {
+                "flicker": 1660,
+                "flickerStrong": 674,
+                "meanAbsDiff": 1.6559048828736516
+              },
+              {
+                "flicker": 1656,
+                "flickerStrong": 652,
+                "meanAbsDiff": 1.6571266686590955
+              },
+              {
+                "flicker": 1609,
+                "flickerStrong": 633,
+                "meanAbsDiff": 1.6554101556940768
+              },
+              {
+                "flicker": 1600,
+                "flickerStrong": 624,
+                "meanAbsDiff": 1.658312163777645
+              },
+              {
+                "flicker": 1636,
+                "flickerStrong": 666,
+                "meanAbsDiff": 1.6557474454216834
+              },
+              {
+                "flicker": 1602,
+                "flickerStrong": 620,
+                "meanAbsDiff": 1.6572286027381664
+              },
+              {
+                "flicker": 1631,
+                "flickerStrong": 646,
+                "meanAbsDiff": 1.6555996143227165
+              },
+              {
+                "flicker": 1629,
+                "flickerStrong": 635,
+                "meanAbsDiff": 1.6571944468163835
+              },
+              {
+                "flicker": 1671,
+                "flickerStrong": 658,
+                "meanAbsDiff": 1.6561615859733014
+              },
+              {
+                "flicker": 1683,
+                "flickerStrong": 649,
+                "meanAbsDiff": 1.6571972931431986
+              },
+              {
+                "flicker": 1656,
+                "flickerStrong": 639,
+                "meanAbsDiff": 1.6568146400819743
+              },
+              {
+                "flicker": 1668,
+                "flickerStrong": 675,
+                "meanAbsDiff": 1.6570419904363418
+              },
+              {
+                "flicker": 1626,
+                "flickerStrong": 651,
+                "meanAbsDiff": 1.6566449278456152
+              },
+              {
+                "flicker": 1620,
+                "flickerStrong": 621,
+                "meanAbsDiff": 1.6561464648620954
+              },
+              {
+                "flicker": 1621,
+                "flickerStrong": 619,
+                "meanAbsDiff": 1.657143390829135
+              },
+              {
+                "flicker": 1594,
+                "flickerStrong": 646,
+                "meanAbsDiff": 1.656336101386161
+              },
+              {
+                "flicker": 1634,
+                "flickerStrong": 638,
+                "meanAbsDiff": 1.657196225770643
+              },
+              {
+                "flicker": 1676,
+                "flickerStrong": 627,
+                "meanAbsDiff": 1.6562167335553468
+              },
+              {
+                "flicker": 1658,
+                "flickerStrong": 674,
+                "meanAbsDiff": 1.6586809409956451
+              },
+              {
+                "flicker": 1627,
+                "flickerStrong": 650,
+                "meanAbsDiff": 1.6558296331084734
+              }
+            ]
+          }
+        }
+      ],
+      "quality": {
+        "dpr": 2,
+        "candidate": "msaa2",
+        "sceneSamples": 2,
+        "maxSamples": 4,
+        "halfFloatSamples": [
+          4,
+          2
+        ],
+        "probe": {
+          "mode": "race",
+          "locked": false,
+          "speed01": 0,
+          "progress": 0.9963891438052787,
+          "applied": 2,
+          "level": "high",
+          "still": 766.4000000357628,
+          "sinceSwitch": null,
+          "canvasW": 2940,
+          "ratio": 2
+        },
+        "passes": [
+          {
+            "name": "RenderPass",
+            "enabled": true
+          },
+          {
+            "name": "ShaderPass",
+            "enabled": true
+          },
+          {
+            "name": "ShaderPass",
+            "enabled": true
+          },
+          {
+            "name": "SMAAPass",
+            "enabled": false
+          }
+        ],
+        "targets": [
+          {
+            "width": 2940,
+            "height": 1912,
+            "samples": 2
+          },
+          {
+            "width": 2940,
+            "height": 1912,
+            "samples": 0
+          }
+        ]
+      }
+    },
+    {
+      "tag": "quality-msaa4",
+      "query": "?version=unlocked&mode=quality",
+      "dpr": 2,
+      "scenarios": [
+        {
+          "name": "t123-creep",
+          "car": 0,
+          "t": 0.123,
+          "theme": "day",
+          "speed": 0.01,
+          "blurStrength0": 0.0042,
+          "metresPerFrame": 0.05208969250253613,
+          "size": {
+            "w": 2940,
+            "h": 1912
+          },
+          "metrics": {
+            "frames": 36,
+            "threshold": 8,
+            "flickerEventsPerFramePerMP": 184.97984968045796,
+            "strongEventsPerFramePerMP": 29.92305708894437,
+            "pixelsEverFlickeringFraction": 0.004021503999089175,
+            "maxCount": 17,
+            "perFrame": [
+              {
+                "flicker": 0,
+                "flickerStrong": 0,
+                "meanAbsDiff": null
+              },
+              {
+                "flicker": 0,
+                "flickerStrong": 0,
+                "meanAbsDiff": 1.5936133763128681
+              },
+              {
+                "flicker": 1096,
+                "flickerStrong": 183,
+                "meanAbsDiff": 1.594646948737654
+              },
+              {
+                "flicker": 1070,
+                "flickerStrong": 170,
+                "meanAbsDiff": 1.5945507073122136
+              },
+              {
+                "flicker": 1085,
+                "flickerStrong": 167,
+                "meanAbsDiff": 1.594598561181795
+              },
+              {
+                "flicker": 1024,
+                "flickerStrong": 164,
+                "meanAbsDiff": 1.5953571072780577
+              },
+              {
+                "flicker": 1029,
+                "flickerStrong": 169,
+                "meanAbsDiff": 1.59439878461845
+              },
+              {
+                "flicker": 1048,
+                "flickerStrong": 171,
+                "meanAbsDiff": 1.5955038710044687
+              },
+              {
+                "flicker": 1031,
+                "flickerStrong": 177,
+                "meanAbsDiff": 1.5939944283152592
+              },
+              {
+                "flicker": 1078,
+                "flickerStrong": 165,
+                "meanAbsDiff": 1.5944911123445193
+              },
+              {
+                "flicker": 1084,
+                "flickerStrong": 173,
+                "meanAbsDiff": 1.5939085048245238
+              },
+              {
+                "flicker": 1047,
+                "flickerStrong": 182,
+                "meanAbsDiff": 1.5955040488998946
+              },
+              {
+                "flicker": 1011,
+                "flickerStrong": 156,
+                "meanAbsDiff": 1.5937492884182962
+              },
+              {
+                "flicker": 995,
+                "flickerStrong": 153,
+                "meanAbsDiff": 1.5946951583980873
+              },
+              {
+                "flicker": 1036,
+                "flickerStrong": 149,
+                "meanAbsDiff": 1.5935486223778215
+              },
+              {
+                "flicker": 1063,
+                "flickerStrong": 152,
+                "meanAbsDiff": 1.594470476475109
+              },
+              {
+                "flicker": 1052,
+                "flickerStrong": 168,
+                "meanAbsDiff": 1.592898058805112
+              },
+              {
+                "flicker": 1053,
+                "flickerStrong": 176,
+                "meanAbsDiff": 1.5933892280761677
+              },
+              {
+                "flicker": 1074,
+                "flickerStrong": 169,
+                "meanAbsDiff": 1.5944338300173626
+              },
+              {
+                "flicker": 1081,
+                "flickerStrong": 172,
+                "meanAbsDiff": 1.5935032590442035
+              },
+              {
+                "flicker": 1062,
+                "flickerStrong": 152,
+                "meanAbsDiff": 1.5940881792047363
+              },
+              {
+                "flicker": 1030,
+                "flickerStrong": 165,
+                "meanAbsDiff": 1.5937291862351635
+              },
+              {
+                "flicker": 1038,
+                "flickerStrong": 155,
+                "meanAbsDiff": 1.594605499103407
+              },
+              {
+                "flicker": 992,
+                "flickerStrong": 178,
+                "meanAbsDiff": 1.5934659010047534
+              },
+              {
+                "flicker": 1028,
+                "flickerStrong": 157,
+                "meanAbsDiff": 1.594601585404036
+              },
+              {
+                "flicker": 1007,
+                "flickerStrong": 170,
+                "meanAbsDiff": 1.593214534767882
+              },
+              {
+                "flicker": 1040,
+                "flickerStrong": 176,
+                "meanAbsDiff": 1.594466562775738
+              },
+              {
+                "flicker": 1036,
+                "flickerStrong": 164,
+                "meanAbsDiff": 1.5935834898813082
+              },
+              {
+                "flicker": 1032,
+                "flickerStrong": 183,
+                "meanAbsDiff": 1.5950785230410156
+              },
+              {
+                "flicker": 996,
+                "flickerStrong": 170,
+                "meanAbsDiff": 1.5935619645347678
+              },
+              {
+                "flicker": 1007,
+                "flickerStrong": 177,
+                "meanAbsDiff": 1.5945421683317678
+              },
+              {
+                "flicker": 1024,
+                "flickerStrong": 157,
+                "meanAbsDiff": 1.5934344135143597
+              },
+              {
+                "flicker": 1006,
+                "flickerStrong": 170,
+                "meanAbsDiff": 1.5932227179574758
+              },
+              {
+                "flicker": 1008,
+                "flickerStrong": 150,
+                "meanAbsDiff": 1.5945165513904307
+              },
+              {
+                "flicker": 1056,
+                "flickerStrong": 202,
+                "meanAbsDiff": 1.593466968377309
+              },
+              {
+                "flicker": 1035,
+                "flickerStrong": 177,
+                "meanAbsDiff": 1.59432317906242
+              }
+            ]
+          }
+        },
+        {
+          "name": "fence-creep",
+          "car": 3,
+          "t": 0.628,
+          "theme": "day",
+          "speed": 0.01,
+          "blurStrength0": 0.0042,
+          "metresPerFrame": 0.05208969250253613,
+          "size": {
+            "w": 2940,
+            "h": 1912
+          },
+          "metrics": {
+            "frames": 36,
+            "threshold": 8,
+            "flickerEventsPerFramePerMP": 188.7470469359292,
+            "strongEventsPerFramePerMP": 50.244993394847484,
+            "pixelsEverFlickeringFraction": 0.004261662824125466,
+            "maxCount": 22,
+            "perFrame": [
+              {
+                "flicker": 0,
+                "flickerStrong": 0,
+                "meanAbsDiff": null
+              },
+              {
+                "flicker": 0,
+                "flickerStrong": 0,
+                "meanAbsDiff": 1.6062821990720975
+              },
+              {
+                "flicker": 1076,
+                "flickerStrong": 296,
+                "meanAbsDiff": 1.607519639655025
+              },
+              {
+                "flicker": 1052,
+                "flickerStrong": 307,
+                "meanAbsDiff": 1.6058084635527852
+              },
+              {
+                "flicker": 1073,
+                "flickerStrong": 288,
+                "meanAbsDiff": 1.6066952722511598
+              },
+              {
+                "flicker": 1051,
+                "flickerStrong": 297,
+                "meanAbsDiff": 1.6052667719807587
+              },
+              {
+                "flicker": 1083,
+                "flickerStrong": 283,
+                "meanAbsDiff": 1.605997922181425
+              },
+              {
+                "flicker": 1022,
+                "flickerStrong": 262,
+                "meanAbsDiff": 1.605236173967495
+              },
+              {
+                "flicker": 1034,
+                "flickerStrong": 263,
+                "meanAbsDiff": 1.6066314077932429
+              },
+              {
+                "flicker": 1077,
+                "flickerStrong": 273,
+                "meanAbsDiff": 1.6052763783337602
+              },
+              {
+                "flicker": 1065,
+                "flickerStrong": 271,
+                "meanAbsDiff": 1.6067472177155382
+              },
+              {
+                "flicker": 1062,
+                "flickerStrong": 293,
+                "meanAbsDiff": 1.6054909202174594
+              },
+              {
+                "flicker": 1006,
+                "flickerStrong": 294,
+                "meanAbsDiff": 1.6063295192554008
+              },
+              {
+                "flicker": 1093,
+                "flickerStrong": 288,
+                "meanAbsDiff": 1.605262502490536
+              },
+              {
+                "flicker": 1075,
+                "flickerStrong": 297,
+                "meanAbsDiff": 1.60656647596277
+              },
+              {
+                "flicker": 1087,
+                "flickerStrong": 309,
+                "meanAbsDiff": 1.6050086457177013
+              },
+              {
+                "flicker": 1055,
+                "flickerStrong": 285,
+                "meanAbsDiff": 1.6063716804713517
+              },
+              {
+                "flicker": 1106,
+                "flickerStrong": 281,
+                "meanAbsDiff": 1.6071951583980872
+              },
+              {
+                "flicker": 1022,
+                "flickerStrong": 256,
+                "meanAbsDiff": 1.6065111504852987
+              },
+              {
+                "flicker": 1071,
+                "flickerStrong": 256,
+                "meanAbsDiff": 1.6067982737027866
+              },
+              {
+                "flicker": 1080,
+                "flickerStrong": 295,
+                "meanAbsDiff": 1.6074650257592578
+              },
+              {
+                "flicker": 1119,
+                "flickerStrong": 307,
+                "meanAbsDiff": 1.6075497039820112
+              },
+              {
+                "flicker": 1059,
+                "flickerStrong": 280,
+                "meanAbsDiff": 1.6060738835283068
+              },
+              {
+                "flicker": 1084,
+                "flickerStrong": 288,
+                "meanAbsDiff": 1.6078229513562747
+              },
+              {
+                "flicker": 1074,
+                "flickerStrong": 306,
+                "meanAbsDiff": 1.6066813964079356
+              },
+              {
+                "flicker": 1056,
+                "flickerStrong": 260,
+                "meanAbsDiff": 1.6073301810263854
+              },
+              {
+                "flicker": 1000,
+                "flickerStrong": 257,
+                "meanAbsDiff": 1.6061130205220164
+              },
+              {
+                "flicker": 1047,
+                "flickerStrong": 279,
+                "meanAbsDiff": 1.6076020052372413
+              },
+              {
+                "flicker": 1042,
+                "flickerStrong": 269,
+                "meanAbsDiff": 1.6058038382717104
+              },
+              {
+                "flicker": 993,
+                "flickerStrong": 254,
+                "meanAbsDiff": 1.6068438149318305
+              },
+              {
+                "flicker": 1060,
+                "flickerStrong": 293,
+                "meanAbsDiff": 1.6055885848063074
+              },
+              {
+                "flicker": 1019,
+                "flickerStrong": 272,
+                "meanAbsDiff": 1.60612956479663
+              },
+              {
+                "flicker": 1113,
+                "flickerStrong": 310,
+                "meanAbsDiff": 1.6062306093985712
+              },
+              {
+                "flicker": 1048,
+                "flickerStrong": 253,
+                "meanAbsDiff": 1.606819443258475
+              },
+              {
+                "flicker": 1117,
+                "flickerStrong": 312,
+                "meanAbsDiff": 1.6060338570574673
+              },
+              {
+                "flicker": 1053,
+                "flickerStrong": 269,
+                "meanAbsDiff": 1.6068048558335468
+              }
+            ]
+          }
+        },
+        {
+          "name": "grid-creep",
+          "car": 0,
+          "t": 0.995,
+          "theme": "day",
+          "speed": 0.01,
+          "blurStrength0": 0.0042,
+          "metresPerFrame": 0.05208969250253613,
+          "size": {
+            "w": 2940,
+            "h": 1912
+          },
+          "metrics": {
+            "frames": 36,
+            "threshold": 8,
+            "flickerEventsPerFramePerMP": 296.5307461896893,
+            "strongEventsPerFramePerMP": 86.65600131265896,
+            "pixelsEverFlickeringFraction": 0.0053612344519397715,
+            "maxCount": 17,
+            "perFrame": [
+              {
+                "flicker": 0,
+                "flickerStrong": 0,
+                "meanAbsDiff": null
+              },
+              {
+                "flicker": 0,
+                "flickerStrong": 0,
+                "meanAbsDiff": 1.650361661400962
+              },
+              {
+                "flicker": 1663,
+                "flickerStrong": 471,
+                "meanAbsDiff": 1.6497292431616999
+              },
+              {
+                "flicker": 1670,
+                "flickerStrong": 521,
+                "meanAbsDiff": 1.6499199470583212
+              },
+              {
+                "flicker": 1655,
+                "flickerStrong": 499,
+                "meanAbsDiff": 1.649309765747303
+              },
+              {
+                "flicker": 1640,
+                "flickerStrong": 467,
+                "meanAbsDiff": 1.650263996812114
+              },
+              {
+                "flicker": 1626,
+                "flickerStrong": 498,
+                "meanAbsDiff": 1.6488655608686988
+              },
+              {
+                "flicker": 1665,
+                "flickerStrong": 470,
+                "meanAbsDiff": 1.6504607491532177
+              },
+              {
+                "flicker": 1704,
+                "flickerStrong": 476,
+                "meanAbsDiff": 1.6496730282070988
+              },
+              {
+                "flicker": 1651,
+                "flickerStrong": 505,
+                "meanAbsDiff": 1.6504883229442404
+              },
+              {
+                "flicker": 1655,
+                "flickerStrong": 511,
+                "meanAbsDiff": 1.64967605242934
+              },
+              {
+                "flicker": 1686,
+                "flickerStrong": 483,
+                "meanAbsDiff": 1.6507035764096434
+              },
+              {
+                "flicker": 1619,
+                "flickerStrong": 477,
+                "meanAbsDiff": 1.649547434036376
+              },
+              {
+                "flicker": 1654,
+                "flickerStrong": 476,
+                "meanAbsDiff": 1.6502876569037657
+              },
+              {
+                "flicker": 1669,
+                "flickerStrong": 477,
+                "meanAbsDiff": 1.6499951968234994
+              },
+              {
+                "flicker": 1712,
+                "flickerStrong": 523,
+                "meanAbsDiff": 1.6500551475820453
+              },
+              {
+                "flicker": 1692,
+                "flickerStrong": 470,
+                "meanAbsDiff": 1.6510474482680102
+              },
+              {
+                "flicker": 1652,
+                "flickerStrong": 475,
+                "meanAbsDiff": 1.6496056058406625
+              },
+              {
+                "flicker": 1677,
+                "flickerStrong": 472,
+                "meanAbsDiff": 1.6498285088093816
+              },
+              {
+                "flicker": 1681,
+                "flickerStrong": 514,
+                "meanAbsDiff": 1.6488541755614379
+              },
+              {
+                "flicker": 1698,
+                "flickerStrong": 494,
+                "meanAbsDiff": 1.6501405373865028
+              },
+              {
+                "flicker": 1672,
+                "flickerStrong": 480,
+                "meanAbsDiff": 1.6491276008311275
+              },
+              {
+                "flicker": 1676,
+                "flickerStrong": 480,
+                "meanAbsDiff": 1.649811075057638
+              },
+              {
+                "flicker": 1691,
+                "flickerStrong": 476,
+                "meanAbsDiff": 1.649219394870919
+              },
+              {
+                "flicker": 1653,
+                "flickerStrong": 472,
+                "meanAbsDiff": 1.6501905260011955
+              },
+              {
+                "flicker": 1646,
+                "flickerStrong": 504,
+                "meanAbsDiff": 1.6489388537841916
+              },
+              {
+                "flicker": 1665,
+                "flickerStrong": 461,
+                "meanAbsDiff": 1.6498548373324224
+              },
+              {
+                "flicker": 1748,
+                "flickerStrong": 506,
+                "meanAbsDiff": 1.648374925283921
+              },
+              {
+                "flicker": 1589,
+                "flickerStrong": 466,
+                "meanAbsDiff": 1.6489964919022002
+              },
+              {
+                "flicker": 1578,
+                "flickerStrong": 440,
+                "meanAbsDiff": 1.6480490208635756
+              },
+              {
+                "flicker": 1700,
+                "flickerStrong": 500,
+                "meanAbsDiff": 1.6494693379443828
+              },
+              {
+                "flicker": 1757,
+                "flickerStrong": 519,
+                "meanAbsDiff": 1.65109316739248
+              },
+              {
+                "flicker": 1621,
+                "flickerStrong": 482,
+                "meanAbsDiff": 1.6502019113084565
+              },
+              {
+                "flicker": 1703,
+                "flickerStrong": 510,
+                "meanAbsDiff": 1.6509517405288476
+              },
+              {
+                "flicker": 1682,
+                "flickerStrong": 504,
+                "meanAbsDiff": 1.6500016010588336
+              },
+              {
+                "flicker": 1624,
+                "flickerStrong": 483,
+                "meanAbsDiff": 1.650606623402499
+              }
+            ]
+          }
+        }
+      ],
+      "quality": {
+        "dpr": 2,
+        "candidate": "msaa4",
+        "sceneSamples": 4,
+        "maxSamples": 4,
+        "halfFloatSamples": [
+          4,
+          2
+        ],
+        "probe": {
+          "mode": "race",
+          "locked": false,
+          "speed01": 0,
+          "progress": 0.9963891438757572,
+          "applied": 2,
+          "level": "high",
+          "still": 766.8000000119209,
+          "sinceSwitch": null,
+          "canvasW": 2940,
+          "ratio": 2
+        },
+        "passes": [
+          {
+            "name": "RenderPass",
+            "enabled": true
+          },
+          {
+            "name": "ShaderPass",
+            "enabled": true
+          },
+          {
+            "name": "ShaderPass",
+            "enabled": true
+          },
+          {
+            "name": "SMAAPass",
+            "enabled": false
+          }
+        ],
+        "targets": [
+          {
+            "width": 2940,
+            "height": 1912,
+            "samples": 4
+          },
+          {
+            "width": 2940,
+            "height": 1912,
+            "samples": 0
+          }
+        ]
+      }
+    }
+  ]
+}

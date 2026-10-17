@@ -27,8 +27,7 @@ export const REFLECTION = UNLOCKED && ['low', 'mid', 'high'].includes(requestedR
 export const CAR_SPECULAR = UNLOCKED && params.get('carspec') !== 'full' ? 0.25 : 1;
 export const NIGHT_CAR_TOE = UNLOCKED && TONE === 'neutral' && params.get('nightcar') === 'toe';
 
-// Stage 1 candidates, not the Stage 2 frontier verdict. Both use the accepted SMAA,
-// shadow and texture choices; only fixed resolution differs. No host selection.
+// Fixed, explicit mode frontiers. Locked retains the accepted Phase 3 settings.
 const unlockedThemes = Object.freeze({
   day: Object.freeze({ exposure: { aces: 0.265, agx: 0.16, neutral: 0.35 }, reflection: { low: 0.35, mid: 0.7, high: 1.4 },
     // Linear HDR endpoints inverted through this tone + sRGB transform to keep
@@ -53,9 +52,10 @@ export const SETTINGS_TABLE = Object.freeze({
   locked: Object.freeze({ dpr: 1, output: false, carEnvironment: false }),
   // Stage 2 interface (manager, 2026-10-17). W3 owns the values; W5 consumes textureSet and
   // anisotropy in the loader. Absent keys mean the accepted locked behaviour.
+  // Tour retains the memory saving; 8x filtering recovers oblique livery detail.
   'unlocked/smooth': Object.freeze({ dpr: 1.5, output: true, carEnvironment: true, themes: unlockedThemes,
-    textureSet: 'tour', anisotropy: 1 }),
+    textureSet: 'tour', anisotropy: 8, shadowMapSize: 4096, stableShadows: true }),
   'unlocked/quality': Object.freeze({ dpr: 2, output: true, carEnvironment: true, themes: unlockedThemes,
-    textureSet: 'tour', anisotropy: 1 }),
+    textureSet: 'tour', anisotropy: 8, shadowMapSize: 4096, stableShadows: true }),
 });
 export const SETTINGS = SETTINGS_TABLE[UNLOCKED ? `unlocked/${QUALITY_MODE}` : 'locked'];

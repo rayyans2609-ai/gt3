@@ -1,0 +1,244 @@
+{
+  "run": "p3u/e6",
+  "testedProductSource": "fa9f19be4b6c073212583db4cecb2b41126fa083",
+  "server": {
+    "startedAt": "2026-10-17T15:20:15.187Z",
+    "url": "http://127.0.0.1:5247",
+    "root": "/Users/shahzadsheikh/Desktop/gt3/.claude/worktrees/p3u-final",
+    "branch": "p3u-final",
+    "sha": "fa9f19be4b6c073212583db4cecb2b41126fa083",
+    "dirtyFiles": 0,
+    "dirtyHash": "e3b0c44298fc1c14",
+    "vitePid": 36827,
+    "run": "p3u",
+    "epoch": "6",
+    "task": "FinalSustained",
+    "harness": "node scripts/p3u-w6-perf.mjs",
+    "host": {
+      "profile": "m4-16gb",
+      "arch": "arm64",
+      "cpu": "Apple M4",
+      "ramGB": 16,
+      "model": "Mac16,12",
+      "cores": {
+        "performance": 4,
+        "efficiency": 6
+      },
+      "gpu": "Apple M4",
+      "macos": "15.5",
+      "versions": {
+        "node": "v24.21.0",
+        "claude": "2.1.302 (Claude Code)",
+        "codex": "codex-cli 0.163.0",
+        "opencode": null,
+        "chrome": "Google Chrome 155.0.8059.80"
+      },
+      "unavailable": [
+        "versions.opencode"
+      ]
+    }
+  },
+  "admission": {
+    "pass": true,
+    "reasons": [],
+    "paging": {
+      "pageouts": 0,
+      "swapouts": 0
+    }
+  },
+  "smooth": {
+    "status": "incomplete_host_stop",
+    "monitorError": "Paging rose in two consecutive host-sample intervals",
+    "errors": [
+      "Error: Paging rose in two consecutive host-sample intervals\n    at file:///Users/shahzadsheikh/Desktop/gt3/.claude/worktrees/p3u-final/scripts/p3u-w6-perf.mjs:134:38"
+    ],
+    "partialFrames": 3635,
+    "partialSeconds": 60.832,
+    "rafIntervalsOver33ms": 2,
+    "notQualification": true,
+    "hostSamples": [
+      {
+        "elapsedSeconds": 0.249,
+        "at": "2026-10-17T15:20:45.102Z",
+        "pressure": 1,
+        "pageouts": 830160,
+        "swapouts": 1155784,
+        "idle": 76.99,
+        "system": 14.8
+      },
+      {
+        "elapsedSeconds": 10.498,
+        "at": "2026-10-17T15:20:55.352Z",
+        "pressure": 1,
+        "pageouts": 830160,
+        "swapouts": 1155784,
+        "idle": 76.95,
+        "system": 14.74
+      },
+      {
+        "elapsedSeconds": 20.495,
+        "at": "2026-10-17T15:21:05.349Z",
+        "pressure": 1,
+        "pageouts": 830160,
+        "swapouts": 1155784,
+        "idle": 78.94,
+        "system": 14.35
+      },
+      {
+        "elapsedSeconds": 30.494,
+        "at": "2026-10-17T15:21:15.348Z",
+        "pressure": 1,
+        "pageouts": 830160,
+        "swapouts": 1155784,
+        "idle": 79.4,
+        "system": 13.33
+      },
+      {
+        "elapsedSeconds": 40.493,
+        "at": "2026-10-17T15:21:25.347Z",
+        "pressure": 1,
+        "pageouts": 830160,
+        "swapouts": 1155784,
+        "idle": 77.35,
+        "system": 13.67
+      },
+      {
+        "elapsedSeconds": 50.503,
+        "at": "2026-10-17T15:21:35.354Z",
+        "pressure": 1,
+        "pageouts": 830180,
+        "swapouts": 1155784,
+        "idle": 63.96,
+        "system": 15.76
+      },
+      {
+        "elapsedSeconds": 60.493,
+        "at": "2026-10-17T15:21:45.347Z",
+        "pressure": 1,
+        "pageouts": 830198,
+        "swapouts": 1155784,
+        "idle": 77.4,
+        "system": 13.46
+      },
+      {
+        "elapsedSeconds": 60.847,
+        "at": "2026-10-17T15:21:45.700Z",
+        "pressure": 1,
+        "pageouts": 830198,
+        "swapouts": 1155784,
+        "idle": 79.29,
+        "system": 12.12
+      }
+    ],
+    "display": {
+      "mode": "native-fullscreen",
+      "deviceEmulation": "none (defaultViewport null: real window, real device pixel ratio)",
+      "fullscreen": {
+        "startedWindowState": "maximized",
+        "endedWindowState": "fullscreen",
+        "method": "CDP Browser.setWindowBounds"
+      },
+      "geometry": {
+        "expected": {
+          "width": 1470,
+          "height": 919,
+          "dpr": 2
+        },
+        "rounds": 7,
+        "pass": true,
+        "measured": {
+          "width": 1470,
+          "height": 919,
+          "dpr": 2,
+          "screen": {
+            "width": 1470,
+            "height": 956
+          },
+          "visibility": "visible",
+          "webdriver": true,
+          "elementFullscreen": true
+        },
+        "documentFullscreenAttempt": true
+      },
+      "screen": {
+        "width": 1470,
+        "height": 956
+      }
+    },
+    "power": {
+      "source": "AC Power",
+      "batteryPercent": 100,
+      "lowPowerMode": false
+    },
+    "product": {
+      "settings": {
+        "dpr": 1.5,
+        "output": true,
+        "carEnvironment": true,
+        "textureSet": "tour",
+        "anisotropy": 8,
+        "shadowMapSize": 4096,
+        "stableShadows": true
+      },
+      "version": "unlocked",
+      "mode": "smooth",
+      "pixelRatio": 1.5,
+      "canvas": [
+        2205,
+        1378
+      ],
+      "targets": [
+        {
+          "width": 2205,
+          "height": 1378.5,
+          "type": 1016,
+          "samples": 0
+        },
+        {
+          "width": 2205,
+          "height": 1378.5,
+          "type": 1016,
+          "samples": 0
+        }
+      ],
+      "passes": [
+        {
+          "name": "RenderPass",
+          "enabled": true
+        },
+        {
+          "name": "ShaderPass",
+          "enabled": true
+        },
+        {
+          "name": "ShaderPass",
+          "enabled": true
+        },
+        {
+          "name": "SMAAPass",
+          "enabled": true
+        }
+      ],
+      "programs": 116,
+      "memory": {
+        "geometries": 1501,
+        "textures": 303
+      }
+    }
+  },
+  "quality": {
+    "status": "not_started_after_live_host_stop"
+  },
+  "rawEvidence": "p3u-final/local/evidence/p3u/final-sustained-e6/",
+  "sourceChanges": "none",
+  "cleanup": {
+    "ownedPids": [
+      37084,
+      36934,
+      36827
+    ],
+    "allExited": true,
+    "hostSettingsChanged": false
+  },
+  "smallestPracticalNextAction": "Clean Mac restart; reopen only Codex, AC power, unlocked screen. Recheck admission before two full sustained modes. No guarantee of zero background paging; no thresholds waived."
+}

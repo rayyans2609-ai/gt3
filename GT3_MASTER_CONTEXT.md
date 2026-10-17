@@ -12,6 +12,8 @@ GT3 is a desktop-only interactive motorsport showcase in Three.js/WebGL with a D
 
 **SPEC_V3 implementation in progress. Phase 3 is HUMAN-ACCEPTED (owner, 2026-10-14) and merged to `main` (tag `phase3-accepted-2026-10-14`). Phase 4 has not started.**
 
+**Phase3 Unlocked reopening — HUMAN-ACCEPTED (owner, 2026-10-17), local integration authorized.** `?version=unlocked` defaults to QualityDPR2; `&mode=smooth` selects DPR1.5. No-version/Locked behavior stays accepted DPR1+SMAA. Approved NeutralDay/ACESNight, mediumreflections, quarterDaycarspecular, SMAA, stabilizedshadows and loading/image/glass/minimap improvements retained. Final integrated600s/mode M4 qualification is explicitly deferred and not passed; owner accepts this limitation for closure. See `docs/review/p3u/OWNER-REVIEW.md`. No further development begins; Phase8 Night lighting stays future work.
+
 **Built so far** (Phases 1–3 complete):
 - **Phase 1:** two-state Day/Night theme, experience state machine, session persistence.
 - **Phase 2:** playlist music engine inside `audioManager.js`; global speaker and compact expandable player.

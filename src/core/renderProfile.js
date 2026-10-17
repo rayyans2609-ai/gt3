@@ -15,7 +15,8 @@
 const params = new URLSearchParams(globalThis.location?.search || '');
 export const VERSION = params.get('version') === 'unlocked' ? 'unlocked' : 'locked';
 export const UNLOCKED = VERSION === 'unlocked';
-export const QUALITY_MODE = UNLOCKED && params.get('mode') === 'quality' ? 'quality' : 'smooth';
+// Owner lock-in (2026-10-17): Quality is the Unlocked default; Smooth stays explicit.
+export const QUALITY_MODE = UNLOCKED && params.get('mode') !== 'smooth' ? 'quality' : 'smooth';
 const requestedTone = params.get('tone');
 const requestedReflection = params.get('refl');
 // Owner-approved Stage 1 unlocked look (2026-10-17): split tone (Neutral Day / ACES Night),

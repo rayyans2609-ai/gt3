@@ -1,12 +1,12 @@
 # Phase 3 Unlocked — final owner review
 
-**Owner review package, p3u/e4. Source engineering is integrated; final qualification is blocked by host admission. Stage2 is not complete. No owner acceptance, main merge or push has occurred.**
+**HUMAN-ACCEPTED by the owner, 2026-10-17. Local main integration authorized; final sustained M4 qualification explicitly accepted as deferred. No push authorized.**
 
-## Recommended lock-in
+## Final owner lock-in
 
-| | Smooth (Unlocked default) | Quality (explicit option) |
+| | Smooth (explicit alternative) | Quality (Unlocked default) |
 |---|---|---|
-| URL | `?version=unlocked` | `?version=unlocked&mode=quality` |
+| URL | `?version=unlocked&mode=smooth` | `?version=unlocked` (or `&mode=quality`) |
 | Main render DPR / AA | fixed1.5 / SMAA | fixed2 / SMAA |
 | Tone / reflections / car specular | Neutral Day → ACES Night / medium / quarter Day | same |
 | Shadows | stabilized4096² PCFSoft, existing120m coverage, added opaque furniture casters | same |
@@ -14,7 +14,7 @@
 | Loading | full roster warm before ready, compile/upload ahead, scene-only warm draws | same |
 | Glass background | CSS-resolution, single-sample private transmission target | same |
 
-Recommend retaining Smooth as the unlocked default and Quality as an explicit higher-resolution option. Default URL and `?version=locked` retain the accepted Phase3. The owner chooses final visual acceptance and trackpad feel.
+The owner selected Quality (DPR2) as the preferred and default Unlocked mode, retaining explicit Smooth (DPR1.5). The no-version URL and `?version=locked` retain accepted Locked behavior. The owner approved the completed visual direction and existing loading, image-integrity, glass and minimap improvements; no further visual choices are pending.
 
 ## Review images
 
@@ -64,14 +64,12 @@ Final sourcefa9f19b: **Locked23/23 and default23/23 pixel-identical to acceptedf
 
 Earlier WaveA V1 passed swap, timer/finish, route persistence and pre-ready input after URL correction. Unchanged timer/finish and persistence evidence is reused. The refreshed Unlocked checks are complete as collective evidence:28swap behavior phases PASS/no app errors; two A1 minimum-event coverage assertions failed (1observed warmup wheel, require3) before behavioral assertions. These are retained as insufficient coverage. Dedicated pre-ready PASS directly proves input/readiness/momentum/restore; no assertion was weakened or product code changed. See the [E5 functional judgment](stage2/final/e5-report.md). Minimap22states/profile and Ferrari/Aston target/visual checks passed. Integrated production build PASS.
 
-Integration branch:`p3u-profiles`; W6 checkpoint:`35a58ed`. Final source HEAD: `fa9f19be4b6c073212583db4cecb2b41126fa083` (production build PASS). Later review/evidence commits change documentation and copied images only; the tested product dependency cone is unchanged. Main:`fa12e92`, untouched. No push.
+Integration branch: `p3u-profiles`. Runtime evidence before final lock-in used product source `fa9f19b`; intervening review commits changed documentation/evidence only. The final product edit changes only Unlocked's default mode selector. Seven focused full-export configuration comparisons prove unchanged Locked/default/unknown-version behavior and explicit modes, and prove new Unlocked default equals the previously reviewed Quality configuration. Syntax, whitespace and the final production build pass. [Final configuration checks](stage2/final/closure-checks.json). Existing pixel-equivalence and functional evidence remains valid for unchanged paths. Local integration is authorized; its merge commit records the outcome. No push.
 
-## Blockers, limitations and owner checkpoint
+## Accepted limitations and deferred qualification
 
-**Completion blockers:** only the full600s Smooth and600s Quality on integrated source remain. Admission can pass while the workload subsequently exceeds host memory conditions. Unused apps and verified idle GT3 remnants are closed; initial admission passes but sustained zero paging still fails. The owner explicitly forbids a restart, product changes or touching protected apps/documents. No further safe process target was identified. Qualification therefore remains blocked by the live paging rule; stop further identical attempts. No threshold waiver is proposed or assumed. The failed partial attempt remains evidence and cannot be relabeled a pass. Preserve completed evidence; no new matrix, harness expansion or cosmetic scope.
+The owner explicitly accepts closure without the two final integrated ten-minute M4 sustained runs. They are **not passed**. Historical diagnostic measurements and every interrupted attempt remain preserved above and in the linked artifacts. The outstanding qualification is one600s Smooth and one600s Quality on a suitable host, only if separately resumed by the owner. No automatic retry, safeguard relaxation, restart, or interference with protected apps/documents is authorized. This deferred item no longer blocks owner-authorized local integration.
 
-**Proposed acceptable limitations:** thin-feature motion shimmer, occasional swap misses including the recovered50.2ms event, targeted glass sampling tradeoff, minimap raster edges at large zoom, and a Three r180 private-target guard that must be revalidated on renderer upgrades. Final sustained results may alter the performance recommendation. Approved Night darkness/lighting stays unchanged.
+Accepted residual limitations: thin-feature motion shimmer, occasional swap misses including the historical50.2ms event, targeted glass background sampling, minimap raster edges at large zoom, and the Three r180 private-target guard needing revalidation on renderer upgrades. No universal no-stall, thermal, displayed-frame or GPU-memory claim is made.
 
-**Provisional lock-in recommendation:** Smooth default and Quality option with the shared defaults above; retain Tour512/aniso8/SMAA, improved shadows/image integrity/loading, W6 transmission budget and Unlocked minimap smoothing. Avoid unqualified full-texture/MSAA experiments at closeout.
-
-The owner can review these visual choices now. **Do not declare Stage2 complete or merge main until the remaining qualification is supplied and the owner explicitly locks in the result and authorizes merge.** Main remainsfa12e92348241ef5e42a57abc72f586c552ee888. No push or Phase4. Original W6/Terra work, source, raw captures and restart commands remain preserved.
+Phase3 reopening engineering and visual review are complete. Phase8 Night route lighting remains future work only. No Phase4 or further development begins. Final main SHA, owned-process cleanup and seat release are recorded in the local closure handoff/run record and final owner confirmation.

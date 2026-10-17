@@ -1,0 +1,38 @@
+{
+  "result": "partial",
+  "runner": "bash local/briefs/run-final.sh",
+  "runnerInvocations": 1,
+  "exitCode": 75,
+  "failedStage": "swap browser preflight",
+  "stopReason": "memory pressure not normal (pressure 2)",
+  "source": {
+    "branch": "p3u-final",
+    "sha": "fa9f19be4b6c073212583db4cecb2b41126fa083",
+    "dirtyFiles": 0
+  },
+  "captures": {
+    "locked": {"states": 23, "errors": [], "identicalToReference": true, "differingPixels": 0, "comparedPixels": 129289440, "themes": ["day", "night"]},
+    "default": {"states": 23, "errors": [], "identicalToReference": true, "differingPixels": 0, "comparedPixels": 129289440, "themes": ["day", "night"]}
+  },
+  "functionals": {"swap": "not run; preflight failed", "preready": "not reached"},
+  "sustained": {"smooth600s": "not started", "quality600s": "not started", "rafGpuStats": null, "analysis": null},
+  "hostAtFailure": {
+    "profile": "m4-16gb",
+    "pressure": 2,
+    "pageouts": 822134,
+    "swapouts": 1155784,
+    "swapUsedMB": 1309.62,
+    "swapFreeMB": 738.38,
+    "pagingDelta": {"pageouts": 0, "swapouts": 0}
+  },
+  "report": "REPORT.md",
+  "evidence": {
+    "lockedManifest": "locked/manifest.json",
+    "defaultManifest": "default/manifest.json",
+    "lockedDiff": "locked-diff.json",
+    "defaultDiff": "default-diff.json",
+    "swapPreflight": "swap/preflight.json",
+    "serverProvenance": ["locked/server.log.provenance.json", "default/server.log.provenance.json"]
+  },
+  "continuation": "After browser-class admission is normal, resume at swap response check; then preready and the two sustained runs. Preserve completed captures/diffs."
+}

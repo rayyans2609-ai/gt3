@@ -1,0 +1,4058 @@
+{
+  "startedAt": "2026-10-17T14:29:03.185Z",
+  "base": "http://127.0.0.1:5247",
+  "query": "?version=unlocked&mode=quality",
+  "profile": "unlocked",
+  "viewport": {
+    "width": 1470,
+    "height": 956,
+    "deviceScaleFactor": 2,
+    "emulationApplied": true
+  },
+  "headful": false,
+  "browserPid": 27059,
+  "preflight": {
+    "pass": true,
+    "cls": "browser",
+    "profile": "m4-16gb",
+    "provisional": true,
+    "reasons": [],
+    "warnings": [],
+    "paging": {
+      "pageouts": 0,
+      "swapouts": 0
+    },
+    "at": "2026-10-17T14:29:02.807Z",
+    "identity": {
+      "profile": "m4-16gb",
+      "arch": "arm64",
+      "cpu": "Apple M4",
+      "ramGB": 16,
+      "model": "Mac16,12",
+      "cores": {
+        "performance": 4,
+        "efficiency": 6
+      },
+      "gpu": "Apple M4",
+      "macos": "15.5",
+      "versions": {
+        "node": "v24.21.0",
+        "claude": "2.1.302 (Claude Code)",
+        "codex": "codex-cli 0.163.0",
+        "opencode": "opencode v2.0.32",
+        "chrome": "Google Chrome 155.0.8059.80"
+      },
+      "unavailable": []
+    },
+    "a": {
+      "pressure": 1,
+      "pageouts": 820077,
+      "swapouts": 1155784,
+      "idle": 84.91,
+      "system": 10.61,
+      "swap": "total = 2048.00M  used = 1317.62M  free = 730.38M  (encrypted)"
+    },
+    "b": {
+      "pressure": 1,
+      "pageouts": 820077,
+      "swapouts": 1155784,
+      "idle": 82.98,
+      "system": 11.34,
+      "swap": "total = 2048.00M  used = 1317.62M  free = 730.38M  (encrypted)"
+    },
+    "counts": {
+      "heavy": 0,
+      "browsers": 0,
+      "agents": 3,
+      "runWorkers": null
+    },
+    "workloads": {
+      "viteServers": [
+        {
+          "pid": 26388,
+          "ppid": 26382,
+          "rssMB": 134,
+          "command": "node node_modules/vite/bin/vite.js --host 127.0.0.1 --port 5247 --strictPort",
+          "cwd": "/Users/shahzadsheikh/Desktop/gt3/.claude/worktrees/p3u-w6",
+          "port": "5247"
+        }
+      ],
+      "builds": [],
+      "browsers": [],
+      "agents": [
+        {
+          "pid": 24225,
+          "ppid": 24224,
+          "rssMB": 80,
+          "command": "/Users/shahzadsheikh/Library/Application Support/Claude/claude-code/2.1.299/4fa9694b7975/claude.app/Contents/MacOS/claude --output-format stream-json --verbose --input-format stream-json --model=claude-opus-5-5 --permission-prompt-tool=stdio --resume=4f0a9bf5-5921-4f00-858d-fba6a44bb2b6 --allowedTools=mcp__computer-use,mcp__ccd_session__spawn_task,mcp__ccd_session__dismiss_task,mcp__ccd_session__mark_chapter,mcp__ccd_session_mgmt__list_sessions,mcp__ccd_session_mgmt__get_session,mcp__ccd_session_mgmt__get_usage,mcp__ccd_host__get_storage_usage,mcp__ccd_session_mgmt__set_session_title,mcp__ccd_session_mgmt__send_message,mcp__ccd_session_mgmt__detach_session,mcp__ccd_sidebar__list_groups,mcp__ccd_sidebar__create_group,mcp__ccd_sidebar__set_view,mcp__ccd_sidebar__list_sections,mcp__ccd_sidebar__create_section,mcp__ccd_session_mgmt__search_session_transcripts,mcp__ccd_session_mgmt__list_events,mcp__ccd_session_mgmt__export_transcript,mcp__scheduled-tasks__list_task_runs,mcp__ccd_session__read_widget_context,mcp__ccd_session__list_start_targets,mcp__ccd_view__show_pane,mcp__ccd_view__close_pane,mcp__ccd_view__get_layout,mcp__ccd_view__set_transcript_view,mcp__ccd_settings__get_settings,mcp__mcp-registry__search_mcp_registry,mcp__mcp-registry__suggest_connectors,mcp__mcp-registry__list_connectors,mcp__ccd_connectors__session_connectors_status,mcp__ccd_connectors__reconnect_session_connector,mcp__ccd_pr__get_status,mcp__ccd_window__open_session_in,mcp__ccd_window__close_split,mcp__ccd_window__set_sidebar_collapsed,mcp__ccd_window__get_window_layout,mcp__claude-in-chrome__request_credentials,mcp__claude-in-chrome__list_granted_credentials,mcp__claude-in-chrome__autofill_credential,mcp__claude-in-chrome__release_credentials,mcp__claude-in-chrome__enter_verification_code --disallowedTools=SubscribePR --setting-sources=user,project,local --permission-mode=default --include-partial-messages --await-initialize --thinking-display omitted --replay-user-messages --settings {\"deniedMcpServers\":[{\"serverName\":\"Claude Browser\"},{\"serverName\":\"Claude Code Android Emulator\"},{\"serverName\":\"Claude Code iOS Simulator\"},{\"serverName\":\"Claude Preview\"},{\"serverName\":\"Claude_Browser\"},{\"serverName\":\"Claude_Code_Android_Emulator\"},{\"serverName\":\"Claude_Code_iOS_Simulator\"},{\"serverName\":\"Claude_Preview\"},{\"serverName\":\"Claude_for_Chrome\"},{\"serverName\":\"Framebuffer\"},{\"serverName\":\"Window Halo\"},{\"serverName\":\"Window_Halo\"},{\"serverName\":\"ccd_connectors\"},{\"serverName\":\"ccd_directory\"},{\"serverName\":\"ccd_host\"},{\"serverName\":\"ccd_pr\"},{\"serverName\":\"ccd_session\"},{\"serverName\":\"ccd_session_mgmt\"},{\"serverName\":\"ccd_settings\"},{\"serverName\":\"ccd_sidebar\"},{\"serverName\":\"ccd_turn\"},{\"serverName\":\"ccd_view\"},{\"serverName\":\"ccd_window\"},{\"serverName\":\"claude-in-chrome\"},{\"serverName\":\"claude_browser\"},{\"serverName\":\"claude_code_android_emulator\"},{\"serverName\":\"claude_code_ios_simulator\"},{\"serverName\":\"claude_for_chrome\"},{\"serverName\":\"claude_in_chrome\"},{\"serverName\":\"claude_preview\"},{\"serverName\":\"computer-use\"},{\"serverName\":\"computer_use\"},{\"serverName\":\"cowork\"},{\"serverName\":\"cowork-onboarding\"},{\"serverName\":\"cowork_onboarding\"},{\"serverName\":\"dev-debug\"},{\"serverName\":\"dev_debug\"},{\"serverName\":\"dispatch\"},{\"serverName\":\"framebuffer\"},{\"serverName\":\"mcp-registry\"},{\"serverName\":\"mcp_registry\"},{\"serverName\":\"plugins\"},{\"serverName\":\"remote-devices\"},{\"serverName\":\"remote_devices\"},{\"serverName\":\"scheduled-tasks\"},{\"serverName\":\"scheduled_tasks\"},{\"serverName\":\"session_info\"},{\"serverName\":\"skills\"},{\"serverName\":\"window_halo\"}]}"
+        },
+        {
+          "pid": 25237,
+          "ppid": 1012,
+          "rssMB": 32,
+          "command": "node /Users/shahzadsheikh/.npm-global/bin/codex exec --dangerously-bypass-approvals-and-sandbox --skip-git-repo-check --disable multi_agent -m gpt-6-luna -c model_reasoning_effort=\"medium\" GT3 ROLE: worker. p3u/e4 CandidateChecks4, Luna medium. Execute exact prepared checks; no source edits, commits, agents, routes, system changes or extra suites. Do not reread whole repo/docs. Manager owns integration. Host browser+agent admission passed. The prepared harness itself performs canonical browser preflight before any browser is launched: do not add a redundant standalone browser check. No admission guard is bypassed. One browser/server at a time.\\012\\012Run bash local/briefs/candidate-checks-e4.sh once from this worktree. Each command is behind scripts/with-verification-server.sh with correct e4 provenance. It captures candidate minimap Locked then Unlocked, then W6 glass product/stock/repeat from ../p3u-w6. On failure inspect redirected run.log and write concise REPORT.md in local/evidence/p3u/candidate-checks-e4; stop, no retries or app edits. Prior blocked evidence is preserved by new output paths.\\012\\012Minimap manifests: local/evidence/p3u/candidate-checks-e4/map-{locked,unlocked}/manifest.json, expect pass true,22captures each. Harness checks locked160segments vs unlocked48gradients, fractions/reversal/gantry/completion, numeric alpha/coordinate continuity. Neutral backing is diagnostic only. Make4xzoom PNGs for day/night-fractional and gantry-after captures via scripts/lib/p3u-w4-zoom.mjs (whole340x340crop; determine dimensions using PNG decoder). No elaborate sheet.\\012\\012Glass outputs ../p3u-w6/local/evidence/p3u/W6-e4/. Expect4states per product/stock/repeat. Inspect captures[].transmissionTarget: productscale.5/samples0/1470x956, stockscale1/samples4/2940x1912; mainDPR2. Repeat diff must4/4identical; stock/product differences expected. Parse compact facts, not giant manifests. Make car zoom crops from boundsCSS*2, margin12/clamp, scale2 with existing helper. Record differences and artifacts. No timing runs or broad regression.\\012\\012Write REPORT.md with sourceSHA/dirty provenance, actual pass/fail/targetfacts, artifact paths, limitations. Exit0 alone is not pass. Clean only owned browser/server via existing finally/traps. End done/evidence/unverified/blocked. Print compact output only."
+        },
+        {
+          "pid": 14785,
+          "ppid": 14733,
+          "rssMB": 28,
+          "command": "node /Users/shahzadsheikh/.npm-global/bin/codex"
+        }
+      ]
+    }
+  },
+  "admissionAttempts": [
+    {
+      "pass": false,
+      "cls": "browser",
+      "profile": "m4-16gb",
+      "provisional": true,
+      "reasons": [
+        "memory pressure not normal"
+      ],
+      "warnings": [],
+      "paging": {
+        "pageouts": 0,
+        "swapouts": 0
+      },
+      "at": "2026-10-17T14:28:00.455Z",
+      "identity": {
+        "profile": "m4-16gb",
+        "arch": "arm64",
+        "cpu": "Apple M4",
+        "ramGB": 16,
+        "model": "Mac16,12",
+        "cores": {
+          "performance": 4,
+          "efficiency": 6
+        },
+        "gpu": "Apple M4",
+        "macos": "15.5",
+        "versions": {
+          "node": "v24.21.0",
+          "claude": "2.1.302 (Claude Code)",
+          "codex": "codex-cli 0.163.0",
+          "opencode": "opencode v2.0.32",
+          "chrome": "Google Chrome 155.0.8059.80"
+        },
+        "unavailable": []
+      },
+      "a": {
+        "pressure": 2,
+        "pageouts": 820077,
+        "swapouts": 1155784,
+        "idle": 79.45,
+        "system": 12.32,
+        "swap": "total = 2048.00M  used = 1317.62M  free = 730.38M  (encrypted)"
+      },
+      "b": {
+        "pressure": 2,
+        "pageouts": 820077,
+        "swapouts": 1155784,
+        "idle": 83.5,
+        "system": 10.73,
+        "swap": "total = 2048.00M  used = 1317.62M  free = 730.38M  (encrypted)"
+      },
+      "counts": {
+        "heavy": 0,
+        "browsers": 0,
+        "agents": 3,
+        "runWorkers": null
+      },
+      "workloads": {
+        "viteServers": [
+          {
+            "pid": 26388,
+            "ppid": 26382,
+            "rssMB": 134,
+            "command": "node node_modules/vite/bin/vite.js --host 127.0.0.1 --port 5247 --strictPort",
+            "cwd": "/Users/shahzadsheikh/Desktop/gt3/.claude/worktrees/p3u-w6",
+            "port": "5247"
+          }
+        ],
+        "builds": [],
+        "browsers": [],
+        "agents": [
+          {
+            "pid": 24225,
+            "ppid": 24224,
+            "rssMB": 80,
+            "command": "/Users/shahzadsheikh/Library/Application Support/Claude/claude-code/2.1.299/4fa9694b7975/claude.app/Contents/MacOS/claude --output-format stream-json --verbose --input-format stream-json --model=claude-opus-5-5 --permission-prompt-tool=stdio --resume=4f0a9bf5-5921-4f00-858d-fba6a44bb2b6 --allowedTools=mcp__computer-use,mcp__ccd_session__spawn_task,mcp__ccd_session__dismiss_task,mcp__ccd_session__mark_chapter,mcp__ccd_session_mgmt__list_sessions,mcp__ccd_session_mgmt__get_session,mcp__ccd_session_mgmt__get_usage,mcp__ccd_host__get_storage_usage,mcp__ccd_session_mgmt__set_session_title,mcp__ccd_session_mgmt__send_message,mcp__ccd_session_mgmt__detach_session,mcp__ccd_sidebar__list_groups,mcp__ccd_sidebar__create_group,mcp__ccd_sidebar__set_view,mcp__ccd_sidebar__list_sections,mcp__ccd_sidebar__create_section,mcp__ccd_session_mgmt__search_session_transcripts,mcp__ccd_session_mgmt__list_events,mcp__ccd_session_mgmt__export_transcript,mcp__scheduled-tasks__list_task_runs,mcp__ccd_session__read_widget_context,mcp__ccd_session__list_start_targets,mcp__ccd_view__show_pane,mcp__ccd_view__close_pane,mcp__ccd_view__get_layout,mcp__ccd_view__set_transcript_view,mcp__ccd_settings__get_settings,mcp__mcp-registry__search_mcp_registry,mcp__mcp-registry__suggest_connectors,mcp__mcp-registry__list_connectors,mcp__ccd_connectors__session_connectors_status,mcp__ccd_connectors__reconnect_session_connector,mcp__ccd_pr__get_status,mcp__ccd_window__open_session_in,mcp__ccd_window__close_split,mcp__ccd_window__set_sidebar_collapsed,mcp__ccd_window__get_window_layout,mcp__claude-in-chrome__request_credentials,mcp__claude-in-chrome__list_granted_credentials,mcp__claude-in-chrome__autofill_credential,mcp__claude-in-chrome__release_credentials,mcp__claude-in-chrome__enter_verification_code --disallowedTools=SubscribePR --setting-sources=user,project,local --permission-mode=default --include-partial-messages --await-initialize --thinking-display omitted --replay-user-messages --settings {\"deniedMcpServers\":[{\"serverName\":\"Claude Browser\"},{\"serverName\":\"Claude Code Android Emulator\"},{\"serverName\":\"Claude Code iOS Simulator\"},{\"serverName\":\"Claude Preview\"},{\"serverName\":\"Claude_Browser\"},{\"serverName\":\"Claude_Code_Android_Emulator\"},{\"serverName\":\"Claude_Code_iOS_Simulator\"},{\"serverName\":\"Claude_Preview\"},{\"serverName\":\"Claude_for_Chrome\"},{\"serverName\":\"Framebuffer\"},{\"serverName\":\"Window Halo\"},{\"serverName\":\"Window_Halo\"},{\"serverName\":\"ccd_connectors\"},{\"serverName\":\"ccd_directory\"},{\"serverName\":\"ccd_host\"},{\"serverName\":\"ccd_pr\"},{\"serverName\":\"ccd_session\"},{\"serverName\":\"ccd_session_mgmt\"},{\"serverName\":\"ccd_settings\"},{\"serverName\":\"ccd_sidebar\"},{\"serverName\":\"ccd_turn\"},{\"serverName\":\"ccd_view\"},{\"serverName\":\"ccd_window\"},{\"serverName\":\"claude-in-chrome\"},{\"serverName\":\"claude_browser\"},{\"serverName\":\"claude_code_android_emulator\"},{\"serverName\":\"claude_code_ios_simulator\"},{\"serverName\":\"claude_for_chrome\"},{\"serverName\":\"claude_in_chrome\"},{\"serverName\":\"claude_preview\"},{\"serverName\":\"computer-use\"},{\"serverName\":\"computer_use\"},{\"serverName\":\"cowork\"},{\"serverName\":\"cowork-onboarding\"},{\"serverName\":\"cowork_onboarding\"},{\"serverName\":\"dev-debug\"},{\"serverName\":\"dev_debug\"},{\"serverName\":\"dispatch\"},{\"serverName\":\"framebuffer\"},{\"serverName\":\"mcp-registry\"},{\"serverName\":\"mcp_registry\"},{\"serverName\":\"plugins\"},{\"serverName\":\"remote-devices\"},{\"serverName\":\"remote_devices\"},{\"serverName\":\"scheduled-tasks\"},{\"serverName\":\"scheduled_tasks\"},{\"serverName\":\"session_info\"},{\"serverName\":\"skills\"},{\"serverName\":\"window_halo\"}]}"
+          },
+          {
+            "pid": 25237,
+            "ppid": 1012,
+            "rssMB": 32,
+            "command": "node /Users/shahzadsheikh/.npm-global/bin/codex exec --dangerously-bypass-approvals-and-sandbox --skip-git-repo-check --disable multi_agent -m gpt-6-luna -c model_reasoning_effort=\"medium\" GT3 ROLE: worker. p3u/e4 CandidateChecks4, Luna medium. Execute exact prepared checks; no source edits, commits, agents, routes, system changes or extra suites. Do not reread whole repo/docs. Manager owns integration. Host browser+agent admission passed. The prepared harness itself performs canonical browser preflight before any browser is launched: do not add a redundant standalone browser check. No admission guard is bypassed. One browser/server at a time.\\012\\012Run bash local/briefs/candidate-checks-e4.sh once from this worktree. Each command is behind scripts/with-verification-server.sh with correct e4 provenance. It captures candidate minimap Locked then Unlocked, then W6 glass product/stock/repeat from ../p3u-w6. On failure inspect redirected run.log and write concise REPORT.md in local/evidence/p3u/candidate-checks-e4; stop, no retries or app edits. Prior blocked evidence is preserved by new output paths.\\012\\012Minimap manifests: local/evidence/p3u/candidate-checks-e4/map-{locked,unlocked}/manifest.json, expect pass true,22captures each. Harness checks locked160segments vs unlocked48gradients, fractions/reversal/gantry/completion, numeric alpha/coordinate continuity. Neutral backing is diagnostic only. Make4xzoom PNGs for day/night-fractional and gantry-after captures via scripts/lib/p3u-w4-zoom.mjs (whole340x340crop; determine dimensions using PNG decoder). No elaborate sheet.\\012\\012Glass outputs ../p3u-w6/local/evidence/p3u/W6-e4/. Expect4states per product/stock/repeat. Inspect captures[].transmissionTarget: productscale.5/samples0/1470x956, stockscale1/samples4/2940x1912; mainDPR2. Repeat diff must4/4identical; stock/product differences expected. Parse compact facts, not giant manifests. Make car zoom crops from boundsCSS*2, margin12/clamp, scale2 with existing helper. Record differences and artifacts. No timing runs or broad regression.\\012\\012Write REPORT.md with sourceSHA/dirty provenance, actual pass/fail/targetfacts, artifact paths, limitations. Exit0 alone is not pass. Clean only owned browser/server via existing finally/traps. End done/evidence/unverified/blocked. Print compact output only."
+          },
+          {
+            "pid": 14785,
+            "ppid": 14733,
+            "rssMB": 28,
+            "command": "node /Users/shahzadsheikh/.npm-global/bin/codex"
+          }
+        ]
+      }
+    },
+    {
+      "pass": false,
+      "cls": "browser",
+      "profile": "m4-16gb",
+      "provisional": true,
+      "reasons": [
+        "memory pressure not normal"
+      ],
+      "warnings": [],
+      "paging": {
+        "pageouts": 0,
+        "swapouts": 0
+      },
+      "at": "2026-10-17T14:28:31.633Z",
+      "identity": {
+        "profile": "m4-16gb",
+        "arch": "arm64",
+        "cpu": "Apple M4",
+        "ramGB": 16,
+        "model": "Mac16,12",
+        "cores": {
+          "performance": 4,
+          "efficiency": 6
+        },
+        "gpu": "Apple M4",
+        "macos": "15.5",
+        "versions": {
+          "node": "v24.21.0",
+          "claude": "2.1.302 (Claude Code)",
+          "codex": "codex-cli 0.163.0",
+          "opencode": "opencode v2.0.32",
+          "chrome": "Google Chrome 155.0.8059.80"
+        },
+        "unavailable": []
+      },
+      "a": {
+        "pressure": 2,
+        "pageouts": 820077,
+        "swapouts": 1155784,
+        "idle": 81.94,
+        "system": 11.66,
+        "swap": "total = 2048.00M  used = 1317.62M  free = 730.38M  (encrypted)"
+      },
+      "b": {
+        "pressure": 2,
+        "pageouts": 820077,
+        "swapouts": 1155784,
+        "idle": 81.79,
+        "system": 12.5,
+        "swap": "total = 2048.00M  used = 1317.62M  free = 730.38M  (encrypted)"
+      },
+      "counts": {
+        "heavy": 0,
+        "browsers": 0,
+        "agents": 3,
+        "runWorkers": null
+      },
+      "workloads": {
+        "viteServers": [
+          {
+            "pid": 26388,
+            "ppid": 26382,
+            "rssMB": 134,
+            "command": "node node_modules/vite/bin/vite.js --host 127.0.0.1 --port 5247 --strictPort",
+            "cwd": "/Users/shahzadsheikh/Desktop/gt3/.claude/worktrees/p3u-w6",
+            "port": "5247"
+          }
+        ],
+        "builds": [],
+        "browsers": [],
+        "agents": [
+          {
+            "pid": 24225,
+            "ppid": 24224,
+            "rssMB": 80,
+            "command": "/Users/shahzadsheikh/Library/Application Support/Claude/claude-code/2.1.299/4fa9694b7975/claude.app/Contents/MacOS/claude --output-format stream-json --verbose --input-format stream-json --model=claude-opus-5-5 --permission-prompt-tool=stdio --resume=4f0a9bf5-5921-4f00-858d-fba6a44bb2b6 --allowedTools=mcp__computer-use,mcp__ccd_session__spawn_task,mcp__ccd_session__dismiss_task,mcp__ccd_session__mark_chapter,mcp__ccd_session_mgmt__list_sessions,mcp__ccd_session_mgmt__get_session,mcp__ccd_session_mgmt__get_usage,mcp__ccd_host__get_storage_usage,mcp__ccd_session_mgmt__set_session_title,mcp__ccd_session_mgmt__send_message,mcp__ccd_session_mgmt__detach_session,mcp__ccd_sidebar__list_groups,mcp__ccd_sidebar__create_group,mcp__ccd_sidebar__set_view,mcp__ccd_sidebar__list_sections,mcp__ccd_sidebar__create_section,mcp__ccd_session_mgmt__search_session_transcripts,mcp__ccd_session_mgmt__list_events,mcp__ccd_session_mgmt__export_transcript,mcp__scheduled-tasks__list_task_runs,mcp__ccd_session__read_widget_context,mcp__ccd_session__list_start_targets,mcp__ccd_view__show_pane,mcp__ccd_view__close_pane,mcp__ccd_view__get_layout,mcp__ccd_view__set_transcript_view,mcp__ccd_settings__get_settings,mcp__mcp-registry__search_mcp_registry,mcp__mcp-registry__suggest_connectors,mcp__mcp-registry__list_connectors,mcp__ccd_connectors__session_connectors_status,mcp__ccd_connectors__reconnect_session_connector,mcp__ccd_pr__get_status,mcp__ccd_window__open_session_in,mcp__ccd_window__close_split,mcp__ccd_window__set_sidebar_collapsed,mcp__ccd_window__get_window_layout,mcp__claude-in-chrome__request_credentials,mcp__claude-in-chrome__list_granted_credentials,mcp__claude-in-chrome__autofill_credential,mcp__claude-in-chrome__release_credentials,mcp__claude-in-chrome__enter_verification_code --disallowedTools=SubscribePR --setting-sources=user,project,local --permission-mode=default --include-partial-messages --await-initialize --thinking-display omitted --replay-user-messages --settings {\"deniedMcpServers\":[{\"serverName\":\"Claude Browser\"},{\"serverName\":\"Claude Code Android Emulator\"},{\"serverName\":\"Claude Code iOS Simulator\"},{\"serverName\":\"Claude Preview\"},{\"serverName\":\"Claude_Browser\"},{\"serverName\":\"Claude_Code_Android_Emulator\"},{\"serverName\":\"Claude_Code_iOS_Simulator\"},{\"serverName\":\"Claude_Preview\"},{\"serverName\":\"Claude_for_Chrome\"},{\"serverName\":\"Framebuffer\"},{\"serverName\":\"Window Halo\"},{\"serverName\":\"Window_Halo\"},{\"serverName\":\"ccd_connectors\"},{\"serverName\":\"ccd_directory\"},{\"serverName\":\"ccd_host\"},{\"serverName\":\"ccd_pr\"},{\"serverName\":\"ccd_session\"},{\"serverName\":\"ccd_session_mgmt\"},{\"serverName\":\"ccd_settings\"},{\"serverName\":\"ccd_sidebar\"},{\"serverName\":\"ccd_turn\"},{\"serverName\":\"ccd_view\"},{\"serverName\":\"ccd_window\"},{\"serverName\":\"claude-in-chrome\"},{\"serverName\":\"claude_browser\"},{\"serverName\":\"claude_code_android_emulator\"},{\"serverName\":\"claude_code_ios_simulator\"},{\"serverName\":\"claude_for_chrome\"},{\"serverName\":\"claude_in_chrome\"},{\"serverName\":\"claude_preview\"},{\"serverName\":\"computer-use\"},{\"serverName\":\"computer_use\"},{\"serverName\":\"cowork\"},{\"serverName\":\"cowork-onboarding\"},{\"serverName\":\"cowork_onboarding\"},{\"serverName\":\"dev-debug\"},{\"serverName\":\"dev_debug\"},{\"serverName\":\"dispatch\"},{\"serverName\":\"framebuffer\"},{\"serverName\":\"mcp-registry\"},{\"serverName\":\"mcp_registry\"},{\"serverName\":\"plugins\"},{\"serverName\":\"remote-devices\"},{\"serverName\":\"remote_devices\"},{\"serverName\":\"scheduled-tasks\"},{\"serverName\":\"scheduled_tasks\"},{\"serverName\":\"session_info\"},{\"serverName\":\"skills\"},{\"serverName\":\"window_halo\"}]}"
+          },
+          {
+            "pid": 25237,
+            "ppid": 1012,
+            "rssMB": 32,
+            "command": "node /Users/shahzadsheikh/.npm-global/bin/codex exec --dangerously-bypass-approvals-and-sandbox --skip-git-repo-check --disable multi_agent -m gpt-6-luna -c model_reasoning_effort=\"medium\" GT3 ROLE: worker. p3u/e4 CandidateChecks4, Luna medium. Execute exact prepared checks; no source edits, commits, agents, routes, system changes or extra suites. Do not reread whole repo/docs. Manager owns integration. Host browser+agent admission passed. The prepared harness itself performs canonical browser preflight before any browser is launched: do not add a redundant standalone browser check. No admission guard is bypassed. One browser/server at a time.\\012\\012Run bash local/briefs/candidate-checks-e4.sh once from this worktree. Each command is behind scripts/with-verification-server.sh with correct e4 provenance. It captures candidate minimap Locked then Unlocked, then W6 glass product/stock/repeat from ../p3u-w6. On failure inspect redirected run.log and write concise REPORT.md in local/evidence/p3u/candidate-checks-e4; stop, no retries or app edits. Prior blocked evidence is preserved by new output paths.\\012\\012Minimap manifests: local/evidence/p3u/candidate-checks-e4/map-{locked,unlocked}/manifest.json, expect pass true,22captures each. Harness checks locked160segments vs unlocked48gradients, fractions/reversal/gantry/completion, numeric alpha/coordinate continuity. Neutral backing is diagnostic only. Make4xzoom PNGs for day/night-fractional and gantry-after captures via scripts/lib/p3u-w4-zoom.mjs (whole340x340crop; determine dimensions using PNG decoder). No elaborate sheet.\\012\\012Glass outputs ../p3u-w6/local/evidence/p3u/W6-e4/. Expect4states per product/stock/repeat. Inspect captures[].transmissionTarget: productscale.5/samples0/1470x956, stockscale1/samples4/2940x1912; mainDPR2. Repeat diff must4/4identical; stock/product differences expected. Parse compact facts, not giant manifests. Make car zoom crops from boundsCSS*2, margin12/clamp, scale2 with existing helper. Record differences and artifacts. No timing runs or broad regression.\\012\\012Write REPORT.md with sourceSHA/dirty provenance, actual pass/fail/targetfacts, artifact paths, limitations. Exit0 alone is not pass. Clean only owned browser/server via existing finally/traps. End done/evidence/unverified/blocked. Print compact output only."
+          },
+          {
+            "pid": 14785,
+            "ppid": 14733,
+            "rssMB": 28,
+            "command": "node /Users/shahzadsheikh/.npm-global/bin/codex"
+          }
+        ]
+      }
+    },
+    {
+      "pass": true,
+      "cls": "browser",
+      "profile": "m4-16gb",
+      "provisional": true,
+      "reasons": [],
+      "warnings": [],
+      "paging": {
+        "pageouts": 0,
+        "swapouts": 0
+      },
+      "at": "2026-10-17T14:29:02.807Z",
+      "identity": {
+        "profile": "m4-16gb",
+        "arch": "arm64",
+        "cpu": "Apple M4",
+        "ramGB": 16,
+        "model": "Mac16,12",
+        "cores": {
+          "performance": 4,
+          "efficiency": 6
+        },
+        "gpu": "Apple M4",
+        "macos": "15.5",
+        "versions": {
+          "node": "v24.21.0",
+          "claude": "2.1.302 (Claude Code)",
+          "codex": "codex-cli 0.163.0",
+          "opencode": "opencode v2.0.32",
+          "chrome": "Google Chrome 155.0.8059.80"
+        },
+        "unavailable": []
+      },
+      "a": {
+        "pressure": 1,
+        "pageouts": 820077,
+        "swapouts": 1155784,
+        "idle": 84.91,
+        "system": 10.61,
+        "swap": "total = 2048.00M  used = 1317.62M  free = 730.38M  (encrypted)"
+      },
+      "b": {
+        "pressure": 1,
+        "pageouts": 820077,
+        "swapouts": 1155784,
+        "idle": 82.98,
+        "system": 11.34,
+        "swap": "total = 2048.00M  used = 1317.62M  free = 730.38M  (encrypted)"
+      },
+      "counts": {
+        "heavy": 0,
+        "browsers": 0,
+        "agents": 3,
+        "runWorkers": null
+      },
+      "workloads": {
+        "viteServers": [
+          {
+            "pid": 26388,
+            "ppid": 26382,
+            "rssMB": 134,
+            "command": "node node_modules/vite/bin/vite.js --host 127.0.0.1 --port 5247 --strictPort",
+            "cwd": "/Users/shahzadsheikh/Desktop/gt3/.claude/worktrees/p3u-w6",
+            "port": "5247"
+          }
+        ],
+        "builds": [],
+        "browsers": [],
+        "agents": [
+          {
+            "pid": 24225,
+            "ppid": 24224,
+            "rssMB": 80,
+            "command": "/Users/shahzadsheikh/Library/Application Support/Claude/claude-code/2.1.299/4fa9694b7975/claude.app/Contents/MacOS/claude --output-format stream-json --verbose --input-format stream-json --model=claude-opus-5-5 --permission-prompt-tool=stdio --resume=4f0a9bf5-5921-4f00-858d-fba6a44bb2b6 --allowedTools=mcp__computer-use,mcp__ccd_session__spawn_task,mcp__ccd_session__dismiss_task,mcp__ccd_session__mark_chapter,mcp__ccd_session_mgmt__list_sessions,mcp__ccd_session_mgmt__get_session,mcp__ccd_session_mgmt__get_usage,mcp__ccd_host__get_storage_usage,mcp__ccd_session_mgmt__set_session_title,mcp__ccd_session_mgmt__send_message,mcp__ccd_session_mgmt__detach_session,mcp__ccd_sidebar__list_groups,mcp__ccd_sidebar__create_group,mcp__ccd_sidebar__set_view,mcp__ccd_sidebar__list_sections,mcp__ccd_sidebar__create_section,mcp__ccd_session_mgmt__search_session_transcripts,mcp__ccd_session_mgmt__list_events,mcp__ccd_session_mgmt__export_transcript,mcp__scheduled-tasks__list_task_runs,mcp__ccd_session__read_widget_context,mcp__ccd_session__list_start_targets,mcp__ccd_view__show_pane,mcp__ccd_view__close_pane,mcp__ccd_view__get_layout,mcp__ccd_view__set_transcript_view,mcp__ccd_settings__get_settings,mcp__mcp-registry__search_mcp_registry,mcp__mcp-registry__suggest_connectors,mcp__mcp-registry__list_connectors,mcp__ccd_connectors__session_connectors_status,mcp__ccd_connectors__reconnect_session_connector,mcp__ccd_pr__get_status,mcp__ccd_window__open_session_in,mcp__ccd_window__close_split,mcp__ccd_window__set_sidebar_collapsed,mcp__ccd_window__get_window_layout,mcp__claude-in-chrome__request_credentials,mcp__claude-in-chrome__list_granted_credentials,mcp__claude-in-chrome__autofill_credential,mcp__claude-in-chrome__release_credentials,mcp__claude-in-chrome__enter_verification_code --disallowedTools=SubscribePR --setting-sources=user,project,local --permission-mode=default --include-partial-messages --await-initialize --thinking-display omitted --replay-user-messages --settings {\"deniedMcpServers\":[{\"serverName\":\"Claude Browser\"},{\"serverName\":\"Claude Code Android Emulator\"},{\"serverName\":\"Claude Code iOS Simulator\"},{\"serverName\":\"Claude Preview\"},{\"serverName\":\"Claude_Browser\"},{\"serverName\":\"Claude_Code_Android_Emulator\"},{\"serverName\":\"Claude_Code_iOS_Simulator\"},{\"serverName\":\"Claude_Preview\"},{\"serverName\":\"Claude_for_Chrome\"},{\"serverName\":\"Framebuffer\"},{\"serverName\":\"Window Halo\"},{\"serverName\":\"Window_Halo\"},{\"serverName\":\"ccd_connectors\"},{\"serverName\":\"ccd_directory\"},{\"serverName\":\"ccd_host\"},{\"serverName\":\"ccd_pr\"},{\"serverName\":\"ccd_session\"},{\"serverName\":\"ccd_session_mgmt\"},{\"serverName\":\"ccd_settings\"},{\"serverName\":\"ccd_sidebar\"},{\"serverName\":\"ccd_turn\"},{\"serverName\":\"ccd_view\"},{\"serverName\":\"ccd_window\"},{\"serverName\":\"claude-in-chrome\"},{\"serverName\":\"claude_browser\"},{\"serverName\":\"claude_code_android_emulator\"},{\"serverName\":\"claude_code_ios_simulator\"},{\"serverName\":\"claude_for_chrome\"},{\"serverName\":\"claude_in_chrome\"},{\"serverName\":\"claude_preview\"},{\"serverName\":\"computer-use\"},{\"serverName\":\"computer_use\"},{\"serverName\":\"cowork\"},{\"serverName\":\"cowork-onboarding\"},{\"serverName\":\"cowork_onboarding\"},{\"serverName\":\"dev-debug\"},{\"serverName\":\"dev_debug\"},{\"serverName\":\"dispatch\"},{\"serverName\":\"framebuffer\"},{\"serverName\":\"mcp-registry\"},{\"serverName\":\"mcp_registry\"},{\"serverName\":\"plugins\"},{\"serverName\":\"remote-devices\"},{\"serverName\":\"remote_devices\"},{\"serverName\":\"scheduled-tasks\"},{\"serverName\":\"scheduled_tasks\"},{\"serverName\":\"session_info\"},{\"serverName\":\"skills\"},{\"serverName\":\"window_halo\"}]}"
+          },
+          {
+            "pid": 25237,
+            "ppid": 1012,
+            "rssMB": 32,
+            "command": "node /Users/shahzadsheikh/.npm-global/bin/codex exec --dangerously-bypass-approvals-and-sandbox --skip-git-repo-check --disable multi_agent -m gpt-6-luna -c model_reasoning_effort=\"medium\" GT3 ROLE: worker. p3u/e4 CandidateChecks4, Luna medium. Execute exact prepared checks; no source edits, commits, agents, routes, system changes or extra suites. Do not reread whole repo/docs. Manager owns integration. Host browser+agent admission passed. The prepared harness itself performs canonical browser preflight before any browser is launched: do not add a redundant standalone browser check. No admission guard is bypassed. One browser/server at a time.\\012\\012Run bash local/briefs/candidate-checks-e4.sh once from this worktree. Each command is behind scripts/with-verification-server.sh with correct e4 provenance. It captures candidate minimap Locked then Unlocked, then W6 glass product/stock/repeat from ../p3u-w6. On failure inspect redirected run.log and write concise REPORT.md in local/evidence/p3u/candidate-checks-e4; stop, no retries or app edits. Prior blocked evidence is preserved by new output paths.\\012\\012Minimap manifests: local/evidence/p3u/candidate-checks-e4/map-{locked,unlocked}/manifest.json, expect pass true,22captures each. Harness checks locked160segments vs unlocked48gradients, fractions/reversal/gantry/completion, numeric alpha/coordinate continuity. Neutral backing is diagnostic only. Make4xzoom PNGs for day/night-fractional and gantry-after captures via scripts/lib/p3u-w4-zoom.mjs (whole340x340crop; determine dimensions using PNG decoder). No elaborate sheet.\\012\\012Glass outputs ../p3u-w6/local/evidence/p3u/W6-e4/. Expect4states per product/stock/repeat. Inspect captures[].transmissionTarget: productscale.5/samples0/1470x956, stockscale1/samples4/2940x1912; mainDPR2. Repeat diff must4/4identical; stock/product differences expected. Parse compact facts, not giant manifests. Make car zoom crops from boundsCSS*2, margin12/clamp, scale2 with existing helper. Record differences and artifacts. No timing runs or broad regression.\\012\\012Write REPORT.md with sourceSHA/dirty provenance, actual pass/fail/targetfacts, artifact paths, limitations. Exit0 alone is not pass. Clean only owned browser/server via existing finally/traps. End done/evidence/unverified/blocked. Print compact output only."
+          },
+          {
+            "pid": 14785,
+            "ppid": 14733,
+            "rssMB": 28,
+            "command": "node /Users/shahzadsheikh/.npm-global/bin/codex"
+          }
+        ]
+      }
+    }
+  ],
+  "server": {
+    "startedAt": "2026-10-17T14:27:49.231Z",
+    "url": "http://127.0.0.1:5247",
+    "root": "/Users/shahzadsheikh/Desktop/gt3/.claude/worktrees/p3u-w6",
+    "branch": "p3u-w6",
+    "sha": "bb5d6de9004bc97d9c016e613b755c825288c021",
+    "dirtyFiles": 9,
+    "dirtyHash": "91a7f6743195a766",
+    "vitePid": 26388,
+    "run": "p3u",
+    "epoch": "4",
+    "task": "FinalVerify",
+    "harness": "node scripts/p3u-w6-visual-capture.mjs",
+    "host": {
+      "profile": "m4-16gb",
+      "arch": "arm64",
+      "cpu": "Apple M4",
+      "ramGB": 16,
+      "model": "Mac16,12",
+      "cores": {
+        "performance": 4,
+        "efficiency": 6
+      },
+      "gpu": "Apple M4",
+      "macos": "15.5",
+      "versions": {
+        "node": "v24.21.0",
+        "claude": "2.1.302 (Claude Code)",
+        "codex": "codex-cli 0.163.0",
+        "opencode": "opencode v2.0.32",
+        "chrome": "Google Chrome 155.0.8059.80"
+      },
+      "unavailable": []
+    }
+  },
+  "branch": "p3u-w6",
+  "sha": "bb5d6de9004bc97d9c016e613b755c825288c021",
+  "tree": "M src/main.js\n?? scripts/p3u-w6-analyze.mjs\n?? scripts/p3u-w6-carfade.mjs\n?? scripts/p3u-w6-gate.mjs\n?? scripts/p3u-w6-memory.mjs\n?? scripts/p3u-w6-perf.mjs\n?? scripts/p3u-w6-trace.mjs\n?? scripts/p3u-w6-visual-capture.mjs\n?? src/scene/transmissionBudget.js",
+  "browser": "Chrome/155.0.8059.80",
+  "conditions": {
+    "browserSaverState": 0,
+    "browserSaverSetting": "battery saver disabled in the disposable profile (measurement default; GT3_BROWSER_SAVER=1 restores the control)",
+    "osPowerSettings": "Battery Power:\n Sleep On Power Button 1\n lowpowermode         0\n standby              1\n ttyskeepawake        1\n hibernatemode        3\n powernap             1\n hibernatefile        /var/vm/sleepimage\n displaysleep         10\n womp                 0\n networkoversleep     0\n sleep                1\n lessbright           1\n tcpkeepalive         1\n disksleep            10\nAC Power:\n Sleep On Power Button 1\n lowpowermode         0\n standby              1\n ttyskeepawake        1\n hibernatemode        3\n powernap             1\n hibernatefile        /var/vm/sleepimage\n displaysleep         20\n womp                 1\n networkoversleep     0\n sleep                0\n tcpkeepalive         1\n disksleep            10\n",
+    "powerManagement": "System-wide power settings:\n SleepDisabled\t\t0\nCurrently in use:\n standby              1\n Sleep On Power Button 1\n hibernatefile        /var/vm/sleepimage\n powernap             1\n networkoversleep     0\n disksleep            10\n sleep                0 (sleep prevented by Claude, caffeinate, caffeinate, powerd, caffeinate, caffeinate)\n hibernatemode        3\n ttyskeepawake        1\n displaysleep         20 (display sleep prevented by caffeinate)\n tcpkeepalive         1\n lowpowermode         0\n womp                 1\n",
+    "power": "Now drawing from 'AC Power'\n -InternalBattery-0 (id=21364835)\t100%; charged; 0:00 remaining present: true\n",
+    "powerSource": "AC Power",
+    "batteryPercent": 100,
+    "lowPowerMode": false,
+    "thermal": "Note: No thermal warning level has been recorded\nNote: No performance warning level has been recorded\nNote: No CPU power status has been recorded\n",
+    "awakeAssertion": "owned caffeinate -dimsu held for the run, SIGTERM released at exit (also self-stops with the harness process via -w)",
+    "caffeinatePid": 26496,
+    "candidate": "baseline",
+    "navigatorWebdriver": true,
+    "visibilityStart": "visible",
+    "visibilityEnd": "visible"
+  },
+  "errors": [],
+  "instrumentation": {
+    "/Users/shahzadsheikh/Desktop/gt3/.claude/worktrees/p3u-w6/scripts/lib/p3u-common.mjs": "1ad92b353954ec13ea5aa4f989ffe75f40cb2270489ee0769d56fa77eae61374",
+    "/Users/shahzadsheikh/Desktop/gt3/.claude/worktrees/p3u-w6/scripts/lib/p3u-trials.js": "a462f82f581e58b1152b95859e4bec3b3f3896a534b774f34471eb8d56611b10",
+    "/Users/shahzadsheikh/Desktop/gt3/.claude/worktrees/p3u-w6/scripts/p3u-w6-visual-capture.mjs": "19179c51ce5f9b314b31249904b614061f6bd2880ee5cc12f156a051f05f5388"
+  },
+  "gpu": {
+    "devices": [
+      {
+        "vendorId": 4203,
+        "deviceId": 0,
+        "vendorString": "Google Inc. (Apple)",
+        "deviceString": "ANGLE (Apple, ANGLE Metal Renderer: Apple M4, Version 15.5 (Build 24F74))",
+        "driverVendor": "Apple",
+        "driverVersion": "15.5"
+      }
+    ],
+    "auxAttributes": {
+      "amdSwitchable": false,
+      "canSupportThreadedTextureMailbox": false,
+      "directRenderingVersion": "",
+      "displayType": "ANGLE_METAL",
+      "glExtensions": "GL_AMD_performance_monitor GL_ANGLE_base_vertex_base_instance_shader_builtin GL_ANGLE_blob_cache GL_ANGLE_client_arrays GL_ANGLE_clip_cull_distance GL_ANGLE_compressed_texture_etc GL_ANGLE_depth_texture GL_ANGLE_framebuffer_blit GL_ANGLE_framebuffer_multisample GL_ANGLE_get_serialized_context_string GL_ANGLE_get_tex_level_parameter GL_ANGLE_instanced_arrays GL_ANGLE_memory_size GL_ANGLE_pack_reverse_row_order GL_ANGLE_polygon_mode GL_ANGLE_program_binary_readiness_query GL_ANGLE_program_cache_control GL_ANGLE_provoking_vertex GL_ANGLE_renderability_validation GL_ANGLE_request_extension GL_ANGLE_rgbx_internal_format GL_ANGLE_robust_client_memory GL_ANGLE_shader_pixel_local_storage GL_ANGLE_shader_pixel_local_storage_coherent GL_ANGLE_stencil_texturing GL_ANGLE_texture_compression_dxt3 GL_ANGLE_texture_compression_dxt5 GL_ANGLE_texture_multisample GL_ANGLE_translated_shader_source GL_APPLE_clip_distance GL_ARM_rgba8 GL_CHROMIUM_bind_generates_resource GL_CHROMIUM_bind_uniform_location GL_CHROMIUM_copy_texture GL_CHROMIUM_lose_context GL_EXT_base_instance GL_EXT_blend_func_extended GL_EXT_blend_minmax GL_EXT_clip_control GL_EXT_color_buffer_float GL_EXT_color_buffer_half_float GL_EXT_compressed_ETC1_RGB8_sub_texture GL_EXT_conservative_depth GL_EXT_debug_label GL_EXT_debug_marker GL_EXT_depth_clamp GL_EXT_discard_framebuffer GL_EXT_disjoint_timer_query GL_EXT_draw_buffers GL_EXT_draw_buffers_indexed GL_EXT_draw_elements_base_vertex GL_EXT_float_blend GL_EXT_frag_depth GL_EXT_instanced_arrays GL_EXT_map_buffer_range GL_EXT_multisampled_render_to_texture GL_EXT_occlusion_query_boolean GL_EXT_polygon_offset_clamp GL_EXT_pvrtc_sRGB GL_EXT_read_format_bgra GL_EXT_render_snorm GL_EXT_robustness GL_EXT_sRGB GL_EXT_shader_texture_lod GL_EXT_texture_compression_bptc GL_EXT_texture_compression_dxt1 GL_EXT_texture_compression_rgtc GL_EXT_texture_compression_s3tc_srgb GL_EXT_texture_filter_anisotropic GL_EXT_texture_format_BGRA8888 GL_EXT_texture_mirror_clamp_to_edge GL_EXT_texture_norm16 GL_EXT_texture_rg GL_EXT_texture_sRGB_R8 GL_EXT_texture_sRGB_RG8 GL_EXT_texture_shadow_lod GL_EXT_texture_storage GL_IMG_texture_compression_pvrtc GL_KHR_debug GL_KHR_parallel_shader_compile GL_KHR_robustness GL_KHR_texture_compression_astc_hdr GL_KHR_texture_compression_astc_ldr GL_KHR_texture_compression_astc_sliced_3d GL_MESA_framebuffer_flip_y GL_NV_fence GL_NV_framebuffer_blit GL_NV_pixel_buffer_object GL_NV_shader_noperspective_interpolation GL_OES_EGL_image GL_OES_EGL_sync GL_OES_compressed_ETC1_RGB8_texture GL_OES_depth24 GL_OES_depth32 GL_OES_depth_texture GL_OES_draw_buffers_indexed GL_OES_draw_elements_base_vertex GL_OES_element_index_uint GL_OES_fbo_render_mipmap GL_OES_get_program_binary GL_OES_mapbuffer GL_OES_packed_depth_stencil GL_OES_required_internalformat GL_OES_rgb8_rgba8 GL_OES_sample_variables GL_OES_shader_multisample_interpolation GL_OES_standard_derivatives GL_OES_surfaceless_context GL_OES_texture_3D GL_OES_texture_float GL_OES_texture_float_linear GL_OES_texture_half_float GL_OES_texture_half_float_linear GL_OES_texture_npot GL_OES_texture_stencil8 GL_OES_vertex_array_object GL_QCOM_render_shared_exponent ",
+      "glImplementationParts": "(gl=egl-angle,angle=metal)",
+      "glRenderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M4, Version 15.5 (Build 24F74))",
+      "glResetNotificationStrategy": 33362,
+      "glVendor": "Google Inc. (Apple)",
+      "glVersion": "OpenGL ES 3.0 (ANGLE 2.1.28854 git hash: cccf60cde32c)",
+      "glWsExtensions": "",
+      "glWsVendor": "",
+      "glWsVersion": "",
+      "inProcessGpu": false,
+      "initializationTime": 0.031747,
+      "isAsan": false,
+      "isClangCoverage": false,
+      "jpegDecodeAcceleratorSupported": false,
+      "maxMsaaSamples": "4",
+      "optimus": false,
+      "passthroughCmdDecoder": true,
+      "pixelShaderVersion": "3.00",
+      "processCrashCount": 0,
+      "sandboxed": true,
+      "skiaBackendType": "GraphiteDawnMetal",
+      "subpixelFontRendering": true,
+      "targetCpuBits": 64,
+      "vertexShaderVersion": "3.00",
+      "visibilityCallbackCallCount": 0
+    },
+    "featureStatus": {
+      "2d_canvas": "enabled",
+      "direct_rendering_display_compositor": "disabled_off_ok",
+      "gpu_compositing": "enabled",
+      "multiple_raster_threads": "enabled_on",
+      "opengl": "enabled_on",
+      "rasterization": "enabled",
+      "raw_draw": "disabled_off_ok",
+      "skia_graphite": "enabled_on",
+      "trees_in_viz": "disabled_off",
+      "video_decode": "enabled",
+      "video_encode": "enabled",
+      "webgl": "enabled",
+      "webgpu": "enabled",
+      "webnn": "disabled_off"
+    },
+    "driverBugWorkarounds": [
+      "disable_2d_canvas_auto_flush",
+      "enable_webgl_timer_query_extensions",
+      "disabled_extension_GL_KHR_blend_equation_advanced",
+      "disabled_extension_GL_KHR_blend_equation_advanced_coherent"
+    ],
+    "videoDecoding": [],
+    "videoEncoding": []
+  },
+  "browserEvents": [],
+  "display": {
+    "geometry": {
+      "expected": {
+        "width": 1470,
+        "height": 956,
+        "dpr": 2
+      },
+      "rounds": 0,
+      "pass": true,
+      "measured": {
+        "width": 1470,
+        "height": 956,
+        "dpr": 2,
+        "screen": {
+          "width": 800,
+          "height": 600
+        },
+        "visibility": "visible",
+        "webdriver": true,
+        "elementFullscreen": false
+      }
+    },
+    "screen": {
+      "width": 800,
+      "height": 600
+    }
+  },
+  "hudRects": {
+    "viewport": {
+      "width": 1470,
+      "height": 956
+    },
+    "lapTimer": {
+      "selector": ".hud-lap-timer",
+      "present": true,
+      "visibility": "visible",
+      "rect": {
+        "x": 30,
+        "y": 903,
+        "width": 90.2,
+        "height": 23,
+        "right": 120.2,
+        "bottom": 926
+      }
+    },
+    "themeToggle": {
+      "selector": ".theme-segmented",
+      "present": true,
+      "visibility": "visible",
+      "rect": {
+        "x": 1228,
+        "y": 886,
+        "width": 120,
+        "height": 46,
+        "right": 1348,
+        "bottom": 932
+      }
+    },
+    "audioAnchor": {
+      "selector": ".audio-anchor",
+      "present": true,
+      "visibility": "visible",
+      "rect": {
+        "x": 1366,
+        "y": 890,
+        "width": 80,
+        "height": 42,
+        "right": 1446,
+        "bottom": 932
+      }
+    },
+    "audioPlayer": {
+      "selector": "#music-player",
+      "present": true,
+      "visibility": "hidden",
+      "rect": {
+        "x": 1388,
+        "y": 912.8,
+        "width": 74,
+        "height": 31.2,
+        "right": 1462,
+        "bottom": 944
+      }
+    },
+    "audioPlayerOpen": false,
+    "gated": [
+      "lapTimer",
+      "themeToggle",
+      "audioAnchor"
+    ],
+    "withinViewport": true,
+    "failures": []
+  },
+  "loading": {
+    "readiness": {
+      "status": "ready",
+      "model": "ready",
+      "audio": "ready",
+      "gpu": "ready",
+      "progress": 1,
+      "reasons": [],
+      "warmupSteps": [
+        {
+          "phase": "normal-solo",
+          "startedAt": 1201.199999988079,
+          "endedAt": 1324.300000011921,
+          "setupMs": 0,
+          "renderMs": 123.10000002384186,
+          "totalMs": 123.10000002384186
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1351.8999999761581,
+          "endedAt": 1353.199999988079,
+          "setupMs": 0,
+          "renderMs": 1.300000011920929,
+          "totalMs": 1.300000011920929
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1357.0999999642372,
+          "endedAt": 1376.8999999761581,
+          "setupMs": 0,
+          "renderMs": 19.80000001192093,
+          "totalMs": 19.80000001192093
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1376.8999999761581,
+          "endedAt": 1377.3999999761581,
+          "setupMs": 0,
+          "renderMs": 0.5,
+          "totalMs": 0.5
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1377.3999999761581,
+          "endedAt": 1377.800000011921,
+          "setupMs": 0,
+          "renderMs": 0.40000003576278687,
+          "totalMs": 0.40000003576278687
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1377.800000011921,
+          "endedAt": 1378.300000011921,
+          "setupMs": 0,
+          "renderMs": 0.5,
+          "totalMs": 0.5
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1378.300000011921,
+          "endedAt": 1378.5999999642372,
+          "setupMs": 0,
+          "renderMs": 0.2999999523162842,
+          "totalMs": 0.2999999523162842
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1379.8999999761581,
+          "endedAt": 1380.3999999761581,
+          "setupMs": 0,
+          "renderMs": 0.5,
+          "totalMs": 0.5
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1380.5,
+          "endedAt": 1382.5,
+          "setupMs": 0,
+          "renderMs": 2,
+          "totalMs": 2
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1382.5,
+          "endedAt": 1384.699999988079,
+          "setupMs": 0,
+          "renderMs": 2.199999988079071,
+          "totalMs": 2.199999988079071
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1384.699999988079,
+          "endedAt": 1385.699999988079,
+          "setupMs": 0.10000002384185791,
+          "renderMs": 0.8999999761581421,
+          "totalMs": 1
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1385.699999988079,
+          "endedAt": 1386.3999999761581,
+          "setupMs": 0,
+          "renderMs": 0.699999988079071,
+          "totalMs": 0.699999988079071
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1386.3999999761581,
+          "endedAt": 1386.8999999761581,
+          "setupMs": 0,
+          "renderMs": 0.5,
+          "totalMs": 0.5
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1386.8999999761581,
+          "endedAt": 1388.8999999761581,
+          "setupMs": 0,
+          "renderMs": 2,
+          "totalMs": 2
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1388.8999999761581,
+          "endedAt": 1389.300000011921,
+          "setupMs": 0,
+          "renderMs": 0.40000003576278687,
+          "totalMs": 0.40000003576278687
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1389.300000011921,
+          "endedAt": 1391.300000011921,
+          "setupMs": 0,
+          "renderMs": 2,
+          "totalMs": 2
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1391.300000011921,
+          "endedAt": 1391.8999999761581,
+          "setupMs": 0,
+          "renderMs": 0.5999999642372131,
+          "totalMs": 0.5999999642372131
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1391.8999999761581,
+          "endedAt": 1392.199999988079,
+          "setupMs": 0,
+          "renderMs": 0.30000001192092896,
+          "totalMs": 0.30000001192092896
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1392.199999988079,
+          "endedAt": 1392.699999988079,
+          "setupMs": 0,
+          "renderMs": 0.5,
+          "totalMs": 0.5
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1394.3999999761581,
+          "endedAt": 1396,
+          "setupMs": 0,
+          "renderMs": 1.600000023841858,
+          "totalMs": 1.600000023841858
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1396,
+          "endedAt": 1396.3999999761581,
+          "setupMs": 0,
+          "renderMs": 0.3999999761581421,
+          "totalMs": 0.3999999761581421
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1396.3999999761581,
+          "endedAt": 1396.800000011921,
+          "setupMs": 0,
+          "renderMs": 0.40000003576278687,
+          "totalMs": 0.40000003576278687
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1396.800000011921,
+          "endedAt": 1397,
+          "setupMs": 0,
+          "renderMs": 0.19999998807907104,
+          "totalMs": 0.19999998807907104
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1397,
+          "endedAt": 1397.5,
+          "setupMs": 0,
+          "renderMs": 0.5,
+          "totalMs": 0.5
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1397.5,
+          "endedAt": 1397.800000011921,
+          "setupMs": 0,
+          "renderMs": 0.30000001192092896,
+          "totalMs": 0.30000001192092896
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1397.800000011921,
+          "endedAt": 1398.0999999642372,
+          "setupMs": 0,
+          "renderMs": 0.2999999523162842,
+          "totalMs": 0.2999999523162842
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1398.0999999642372,
+          "endedAt": 1398.3999999761581,
+          "setupMs": 0,
+          "renderMs": 0.30000001192092896,
+          "totalMs": 0.30000001192092896
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1398.3999999761581,
+          "endedAt": 1398.699999988079,
+          "setupMs": 0,
+          "renderMs": 0.30000001192092896,
+          "totalMs": 0.30000001192092896
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1398.699999988079,
+          "endedAt": 1400,
+          "setupMs": 0,
+          "renderMs": 1.300000011920929,
+          "totalMs": 1.300000011920929
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1400,
+          "endedAt": 1400.3999999761581,
+          "setupMs": 0.09999996423721313,
+          "renderMs": 0.30000001192092896,
+          "totalMs": 0.3999999761581421
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1400.3999999761581,
+          "endedAt": 1400.5999999642372,
+          "setupMs": 0,
+          "renderMs": 0.19999998807907104,
+          "totalMs": 0.19999998807907104
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1400.5999999642372,
+          "endedAt": 1400.8999999761581,
+          "setupMs": 0,
+          "renderMs": 0.30000001192092896,
+          "totalMs": 0.30000001192092896
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1400.8999999761581,
+          "endedAt": 1401.199999988079,
+          "setupMs": 0,
+          "renderMs": 0.30000001192092896,
+          "totalMs": 0.30000001192092896
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1401.199999988079,
+          "endedAt": 1401.3999999761581,
+          "setupMs": 0,
+          "renderMs": 0.19999998807907104,
+          "totalMs": 0.19999998807907104
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1401.3999999761581,
+          "endedAt": 1402.3999999761581,
+          "setupMs": 0,
+          "renderMs": 1,
+          "totalMs": 1
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1402.3999999761581,
+          "endedAt": 1402.699999988079,
+          "setupMs": 0,
+          "renderMs": 0.30000001192092896,
+          "totalMs": 0.30000001192092896
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1402.699999988079,
+          "endedAt": 1403,
+          "setupMs": 0,
+          "renderMs": 0.30000001192092896,
+          "totalMs": 0.30000001192092896
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1403,
+          "endedAt": 1403.199999988079,
+          "setupMs": 0,
+          "renderMs": 0.19999998807907104,
+          "totalMs": 0.19999998807907104
+        },
+        {
+          "phase": "pulse-solo",
+          "startedAt": 1403.199999988079,
+          "endedAt": 1403.699999988079,
+          "setupMs": 0.19999998807907104,
+          "renderMs": 0.30000001192092896,
+          "totalMs": 0.5
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1405.3999999761581,
+          "endedAt": 1406,
+          "setupMs": 0,
+          "renderMs": 0.6000000238418579,
+          "totalMs": 0.6000000238418579
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1416.5999999642372,
+          "endedAt": 1420,
+          "setupMs": 0,
+          "renderMs": 3.400000035762787,
+          "totalMs": 3.400000035762787
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1420,
+          "endedAt": 1437.0999999642372,
+          "setupMs": 0,
+          "renderMs": 17.099999964237213,
+          "totalMs": 17.099999964237213
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1438.800000011921,
+          "endedAt": 1442.8999999761581,
+          "setupMs": 0,
+          "renderMs": 4.099999964237213,
+          "totalMs": 4.099999964237213
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1442.8999999761581,
+          "endedAt": 1443.300000011921,
+          "setupMs": 0.10000002384185791,
+          "renderMs": 0.30000001192092896,
+          "totalMs": 0.40000003576278687
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1443.300000011921,
+          "endedAt": 1443.699999988079,
+          "setupMs": 0,
+          "renderMs": 0.3999999761581421,
+          "totalMs": 0.3999999761581421
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1443.699999988079,
+          "endedAt": 1444,
+          "setupMs": 0,
+          "renderMs": 0.30000001192092896,
+          "totalMs": 0.30000001192092896
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1444,
+          "endedAt": 1444.5,
+          "setupMs": 0,
+          "renderMs": 0.5,
+          "totalMs": 0.5
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1444.5,
+          "endedAt": 1445.0999999642372,
+          "setupMs": 0,
+          "renderMs": 0.5999999642372131,
+          "totalMs": 0.5999999642372131
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1445.0999999642372,
+          "endedAt": 1445.5999999642372,
+          "setupMs": 0,
+          "renderMs": 0.5,
+          "totalMs": 0.5
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1445.5999999642372,
+          "endedAt": 1446.0999999642372,
+          "setupMs": 0,
+          "renderMs": 0.5,
+          "totalMs": 0.5
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1446.0999999642372,
+          "endedAt": 1446.300000011921,
+          "setupMs": 0,
+          "renderMs": 0.20000004768371582,
+          "totalMs": 0.20000004768371582
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1450.199999988079,
+          "endedAt": 1450.699999988079,
+          "setupMs": 0,
+          "renderMs": 0.5,
+          "totalMs": 0.5
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1450.699999988079,
+          "endedAt": 1450.8999999761581,
+          "setupMs": 0,
+          "renderMs": 0.19999998807907104,
+          "totalMs": 0.19999998807907104
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1451,
+          "endedAt": 1453.5,
+          "setupMs": 0,
+          "renderMs": 2.5,
+          "totalMs": 2.5
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1453.5,
+          "endedAt": 1453.800000011921,
+          "setupMs": 0,
+          "renderMs": 0.30000001192092896,
+          "totalMs": 0.30000001192092896
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1453.800000011921,
+          "endedAt": 1454.0999999642372,
+          "setupMs": 0,
+          "renderMs": 0.2999999523162842,
+          "totalMs": 0.2999999523162842
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1454.0999999642372,
+          "endedAt": 1454.300000011921,
+          "setupMs": 0,
+          "renderMs": 0.20000004768371582,
+          "totalMs": 0.20000004768371582
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1454.300000011921,
+          "endedAt": 1454.5,
+          "setupMs": 0,
+          "renderMs": 0.19999998807907104,
+          "totalMs": 0.19999998807907104
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1454.5,
+          "endedAt": 1454.699999988079,
+          "setupMs": 0,
+          "renderMs": 0.19999998807907104,
+          "totalMs": 0.19999998807907104
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1454.699999988079,
+          "endedAt": 1455,
+          "setupMs": 0,
+          "renderMs": 0.30000001192092896,
+          "totalMs": 0.30000001192092896
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1455,
+          "endedAt": 1455.0999999642372,
+          "setupMs": 0,
+          "renderMs": 0.09999996423721313,
+          "totalMs": 0.09999996423721313
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1455.0999999642372,
+          "endedAt": 1455.300000011921,
+          "setupMs": 0,
+          "renderMs": 0.20000004768371582,
+          "totalMs": 0.20000004768371582
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1455.300000011921,
+          "endedAt": 1455.5,
+          "setupMs": 0,
+          "renderMs": 0.19999998807907104,
+          "totalMs": 0.19999998807907104
+        },
+        {
+          "phase": "pulse-solo",
+          "startedAt": 1455.5,
+          "endedAt": 1455.699999988079,
+          "setupMs": 0,
+          "renderMs": 0.19999998807907104,
+          "totalMs": 0.19999998807907104
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1462.8999999761581,
+          "endedAt": 1475.5999999642372,
+          "setupMs": 0.10000002384185791,
+          "renderMs": 12.599999964237213,
+          "totalMs": 12.699999988079071
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1478.5999999642372,
+          "endedAt": 1479.800000011921,
+          "setupMs": 0,
+          "renderMs": 1.2000000476837158,
+          "totalMs": 1.2000000476837158
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1479.800000011921,
+          "endedAt": 1480.199999988079,
+          "setupMs": 0,
+          "renderMs": 0.3999999761581421,
+          "totalMs": 0.3999999761581421
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1480.199999988079,
+          "endedAt": 1480.800000011921,
+          "setupMs": 0,
+          "renderMs": 0.6000000238418579,
+          "totalMs": 0.6000000238418579
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1480.800000011921,
+          "endedAt": 1481.300000011921,
+          "setupMs": 0,
+          "renderMs": 0.5,
+          "totalMs": 0.5
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1481.300000011921,
+          "endedAt": 1481.699999988079,
+          "setupMs": 0,
+          "renderMs": 0.3999999761581421,
+          "totalMs": 0.3999999761581421
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1481.699999988079,
+          "endedAt": 1482.3999999761581,
+          "setupMs": 0,
+          "renderMs": 0.699999988079071,
+          "totalMs": 0.699999988079071
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1482.3999999761581,
+          "endedAt": 1482.699999988079,
+          "setupMs": 0,
+          "renderMs": 0.30000001192092896,
+          "totalMs": 0.30000001192092896
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1482.699999988079,
+          "endedAt": 1483.5,
+          "setupMs": 0,
+          "renderMs": 0.800000011920929,
+          "totalMs": 0.800000011920929
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1483.5,
+          "endedAt": 1483.8999999761581,
+          "setupMs": 0,
+          "renderMs": 0.3999999761581421,
+          "totalMs": 0.3999999761581421
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1483.8999999761581,
+          "endedAt": 1484.3999999761581,
+          "setupMs": 0,
+          "renderMs": 0.5,
+          "totalMs": 0.5
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1484.5,
+          "endedAt": 1485.199999988079,
+          "setupMs": 0,
+          "renderMs": 0.699999988079071,
+          "totalMs": 0.699999988079071
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1485.199999988079,
+          "endedAt": 1485.699999988079,
+          "setupMs": 0,
+          "renderMs": 0.5,
+          "totalMs": 0.5
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1485.699999988079,
+          "endedAt": 1486.0999999642372,
+          "setupMs": 0,
+          "renderMs": 0.3999999761581421,
+          "totalMs": 0.3999999761581421
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1486.0999999642372,
+          "endedAt": 1486.3999999761581,
+          "setupMs": 0,
+          "renderMs": 0.30000001192092896,
+          "totalMs": 0.30000001192092896
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1486.3999999761581,
+          "endedAt": 1486.800000011921,
+          "setupMs": 0,
+          "renderMs": 0.40000003576278687,
+          "totalMs": 0.40000003576278687
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1486.800000011921,
+          "endedAt": 1487.199999988079,
+          "setupMs": 0,
+          "renderMs": 0.3999999761581421,
+          "totalMs": 0.3999999761581421
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1487.199999988079,
+          "endedAt": 1498.300000011921,
+          "setupMs": 0,
+          "renderMs": 11.100000023841858,
+          "totalMs": 11.100000023841858
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1506.199999988079,
+          "endedAt": 1508.300000011921,
+          "setupMs": 0,
+          "renderMs": 2.100000023841858,
+          "totalMs": 2.100000023841858
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1510.3999999761581,
+          "endedAt": 1511.199999988079,
+          "setupMs": 0,
+          "renderMs": 0.800000011920929,
+          "totalMs": 0.800000011920929
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1511.199999988079,
+          "endedAt": 1511.699999988079,
+          "setupMs": 0,
+          "renderMs": 0.5,
+          "totalMs": 0.5
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1511.699999988079,
+          "endedAt": 1512,
+          "setupMs": 0,
+          "renderMs": 0.30000001192092896,
+          "totalMs": 0.30000001192092896
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1512,
+          "endedAt": 1512.199999988079,
+          "setupMs": 0,
+          "renderMs": 0.19999998807907104,
+          "totalMs": 0.19999998807907104
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1512.199999988079,
+          "endedAt": 1512.5999999642372,
+          "setupMs": 0,
+          "renderMs": 0.3999999761581421,
+          "totalMs": 0.3999999761581421
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1512.5999999642372,
+          "endedAt": 1512.8999999761581,
+          "setupMs": 0,
+          "renderMs": 0.30000001192092896,
+          "totalMs": 0.30000001192092896
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1512.8999999761581,
+          "endedAt": 1513.0999999642372,
+          "setupMs": 0,
+          "renderMs": 0.19999998807907104,
+          "totalMs": 0.19999998807907104
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1513.0999999642372,
+          "endedAt": 1513.3999999761581,
+          "setupMs": 0,
+          "renderMs": 0.30000001192092896,
+          "totalMs": 0.30000001192092896
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1513.3999999761581,
+          "endedAt": 1513.699999988079,
+          "setupMs": 0,
+          "renderMs": 0.30000001192092896,
+          "totalMs": 0.30000001192092896
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1513.699999988079,
+          "endedAt": 1514,
+          "setupMs": 0.10000002384185791,
+          "renderMs": 0.19999998807907104,
+          "totalMs": 0.30000001192092896
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1514,
+          "endedAt": 1514.300000011921,
+          "setupMs": 0,
+          "renderMs": 0.30000001192092896,
+          "totalMs": 0.30000001192092896
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1514.300000011921,
+          "endedAt": 1514.5999999642372,
+          "setupMs": 0,
+          "renderMs": 0.2999999523162842,
+          "totalMs": 0.2999999523162842
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1514.5999999642372,
+          "endedAt": 1514.8999999761581,
+          "setupMs": 0,
+          "renderMs": 0.30000001192092896,
+          "totalMs": 0.30000001192092896
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1514.8999999761581,
+          "endedAt": 1515.0999999642372,
+          "setupMs": 0,
+          "renderMs": 0.19999998807907104,
+          "totalMs": 0.19999998807907104
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1515.0999999642372,
+          "endedAt": 1515.3999999761581,
+          "setupMs": 0,
+          "renderMs": 0.30000001192092896,
+          "totalMs": 0.30000001192092896
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1515.3999999761581,
+          "endedAt": 1515.5999999642372,
+          "setupMs": 0,
+          "renderMs": 0.19999998807907104,
+          "totalMs": 0.19999998807907104
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1515.5999999642372,
+          "endedAt": 1516.699999988079,
+          "setupMs": 0.10000002384185791,
+          "renderMs": 1,
+          "totalMs": 1.100000023841858
+        },
+        {
+          "phase": "pulse-solo",
+          "startedAt": 1516.699999988079,
+          "endedAt": 1517.0999999642372,
+          "setupMs": 0,
+          "renderMs": 0.3999999761581421,
+          "totalMs": 0.3999999761581421
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1534.8999999761581,
+          "endedAt": 1555.8999999761581,
+          "setupMs": 0,
+          "renderMs": 21,
+          "totalMs": 21
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1567.8999999761581,
+          "endedAt": 1584.0999999642372,
+          "setupMs": 0,
+          "renderMs": 16.19999998807907,
+          "totalMs": 16.19999998807907
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1585.5999999642372,
+          "endedAt": 1588.300000011921,
+          "setupMs": 0,
+          "renderMs": 2.700000047683716,
+          "totalMs": 2.700000047683716
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1588.300000011921,
+          "endedAt": 1588.699999988079,
+          "setupMs": 0,
+          "renderMs": 0.3999999761581421,
+          "totalMs": 0.3999999761581421
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1588.699999988079,
+          "endedAt": 1589.199999988079,
+          "setupMs": 0,
+          "renderMs": 0.5,
+          "totalMs": 0.5
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1589.199999988079,
+          "endedAt": 1590.5,
+          "setupMs": 0,
+          "renderMs": 1.300000011920929,
+          "totalMs": 1.300000011920929
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1590.5,
+          "endedAt": 1591.0999999642372,
+          "setupMs": 0,
+          "renderMs": 0.5999999642372131,
+          "totalMs": 0.5999999642372131
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1591.0999999642372,
+          "endedAt": 1591.5999999642372,
+          "setupMs": 0,
+          "renderMs": 0.5,
+          "totalMs": 0.5
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1591.5999999642372,
+          "endedAt": 1592,
+          "setupMs": 0,
+          "renderMs": 0.40000003576278687,
+          "totalMs": 0.40000003576278687
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1592,
+          "endedAt": 1592.5,
+          "setupMs": 0,
+          "renderMs": 0.5,
+          "totalMs": 0.5
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1592.5,
+          "endedAt": 1593.5999999642372,
+          "setupMs": 0,
+          "renderMs": 1.0999999642372131,
+          "totalMs": 1.0999999642372131
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1593.5999999642372,
+          "endedAt": 1593.800000011921,
+          "setupMs": 0,
+          "renderMs": 0.20000004768371582,
+          "totalMs": 0.20000004768371582
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1593.800000011921,
+          "endedAt": 1594.3999999761581,
+          "setupMs": 0,
+          "renderMs": 0.5999999642372131,
+          "totalMs": 0.5999999642372131
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1594.3999999761581,
+          "endedAt": 1594.699999988079,
+          "setupMs": 0,
+          "renderMs": 0.30000001192092896,
+          "totalMs": 0.30000001192092896
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1594.699999988079,
+          "endedAt": 1595.300000011921,
+          "setupMs": 0,
+          "renderMs": 0.6000000238418579,
+          "totalMs": 0.6000000238418579
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1595.300000011921,
+          "endedAt": 1595.800000011921,
+          "setupMs": 0,
+          "renderMs": 0.5,
+          "totalMs": 0.5
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1595.8999999761581,
+          "endedAt": 1596.300000011921,
+          "setupMs": 0,
+          "renderMs": 0.40000003576278687,
+          "totalMs": 0.40000003576278687
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1596.300000011921,
+          "endedAt": 1598.800000011921,
+          "setupMs": 0,
+          "renderMs": 2.5,
+          "totalMs": 2.5
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1599.300000011921,
+          "endedAt": 1602.800000011921,
+          "setupMs": 0,
+          "renderMs": 3.5,
+          "totalMs": 3.5
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1602.800000011921,
+          "endedAt": 1603.300000011921,
+          "setupMs": 0,
+          "renderMs": 0.5,
+          "totalMs": 0.5
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1603.300000011921,
+          "endedAt": 1603.5999999642372,
+          "setupMs": 0,
+          "renderMs": 0.2999999523162842,
+          "totalMs": 0.2999999523162842
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1603.5999999642372,
+          "endedAt": 1603.8999999761581,
+          "setupMs": 0,
+          "renderMs": 0.30000001192092896,
+          "totalMs": 0.30000001192092896
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1603.8999999761581,
+          "endedAt": 1604.199999988079,
+          "setupMs": 0,
+          "renderMs": 0.30000001192092896,
+          "totalMs": 0.30000001192092896
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1604.199999988079,
+          "endedAt": 1604.5,
+          "setupMs": 0,
+          "renderMs": 0.30000001192092896,
+          "totalMs": 0.30000001192092896
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1604.5,
+          "endedAt": 1604.699999988079,
+          "setupMs": 0,
+          "renderMs": 0.19999998807907104,
+          "totalMs": 0.19999998807907104
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1604.699999988079,
+          "endedAt": 1604.8999999761581,
+          "setupMs": 0,
+          "renderMs": 0.19999998807907104,
+          "totalMs": 0.19999998807907104
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1604.8999999761581,
+          "endedAt": 1605.199999988079,
+          "setupMs": 0,
+          "renderMs": 0.30000001192092896,
+          "totalMs": 0.30000001192092896
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1605.199999988079,
+          "endedAt": 1605.3999999761581,
+          "setupMs": 0,
+          "renderMs": 0.19999998807907104,
+          "totalMs": 0.19999998807907104
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1605.3999999761581,
+          "endedAt": 1605.5999999642372,
+          "setupMs": 0,
+          "renderMs": 0.19999998807907104,
+          "totalMs": 0.19999998807907104
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1605.5999999642372,
+          "endedAt": 1605.699999988079,
+          "setupMs": 0,
+          "renderMs": 0.10000002384185791,
+          "totalMs": 0.10000002384185791
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1605.699999988079,
+          "endedAt": 1606,
+          "setupMs": 0,
+          "renderMs": 0.30000001192092896,
+          "totalMs": 0.30000001192092896
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1606,
+          "endedAt": 1606.300000011921,
+          "setupMs": 0,
+          "renderMs": 0.30000001192092896,
+          "totalMs": 0.30000001192092896
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1606.300000011921,
+          "endedAt": 1606.5999999642372,
+          "setupMs": 0,
+          "renderMs": 0.2999999523162842,
+          "totalMs": 0.2999999523162842
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1606.5999999642372,
+          "endedAt": 1606.800000011921,
+          "setupMs": 0,
+          "renderMs": 0.20000004768371582,
+          "totalMs": 0.20000004768371582
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1606.800000011921,
+          "endedAt": 1607,
+          "setupMs": 0,
+          "renderMs": 0.19999998807907104,
+          "totalMs": 0.19999998807907104
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1607,
+          "endedAt": 1607.300000011921,
+          "setupMs": 0,
+          "renderMs": 0.30000001192092896,
+          "totalMs": 0.30000001192092896
+        },
+        {
+          "phase": "pulse-solo",
+          "startedAt": 1607.300000011921,
+          "endedAt": 1607.5,
+          "setupMs": 0,
+          "renderMs": 0.19999998807907104,
+          "totalMs": 0.19999998807907104
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1610.5,
+          "endedAt": 1612,
+          "setupMs": 0,
+          "renderMs": 1.5,
+          "totalMs": 1.5
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1617.5999999642372,
+          "endedAt": 1618.800000011921,
+          "setupMs": 0,
+          "renderMs": 1.2000000476837158,
+          "totalMs": 1.2000000476837158
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1618.800000011921,
+          "endedAt": 1619.5,
+          "setupMs": 0,
+          "renderMs": 0.699999988079071,
+          "totalMs": 0.699999988079071
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1619.5,
+          "endedAt": 1620,
+          "setupMs": 0,
+          "renderMs": 0.5,
+          "totalMs": 0.5
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1620,
+          "endedAt": 1620.5,
+          "setupMs": 0,
+          "renderMs": 0.5,
+          "totalMs": 0.5
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1620.5,
+          "endedAt": 1621,
+          "setupMs": 0,
+          "renderMs": 0.5,
+          "totalMs": 0.5
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1621,
+          "endedAt": 1621.300000011921,
+          "setupMs": 0,
+          "renderMs": 0.30000001192092896,
+          "totalMs": 0.30000001192092896
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1621.300000011921,
+          "endedAt": 1622.0999999642372,
+          "setupMs": 0,
+          "renderMs": 0.7999999523162842,
+          "totalMs": 0.7999999523162842
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1622.0999999642372,
+          "endedAt": 1622.300000011921,
+          "setupMs": 0,
+          "renderMs": 0.20000004768371582,
+          "totalMs": 0.20000004768371582
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1622.300000011921,
+          "endedAt": 1622.699999988079,
+          "setupMs": 0,
+          "renderMs": 0.3999999761581421,
+          "totalMs": 0.3999999761581421
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1622.699999988079,
+          "endedAt": 1623.199999988079,
+          "setupMs": 0,
+          "renderMs": 0.5,
+          "totalMs": 0.5
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1623.199999988079,
+          "endedAt": 1623.5999999642372,
+          "setupMs": 0,
+          "renderMs": 0.3999999761581421,
+          "totalMs": 0.3999999761581421
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1623.5999999642372,
+          "endedAt": 1624.0999999642372,
+          "setupMs": 0,
+          "renderMs": 0.5,
+          "totalMs": 0.5
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1624.0999999642372,
+          "endedAt": 1624.699999988079,
+          "setupMs": 0,
+          "renderMs": 0.6000000238418579,
+          "totalMs": 0.6000000238418579
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1624.699999988079,
+          "endedAt": 1625.300000011921,
+          "setupMs": 0,
+          "renderMs": 0.6000000238418579,
+          "totalMs": 0.6000000238418579
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1625.300000011921,
+          "endedAt": 1625.699999988079,
+          "setupMs": 0,
+          "renderMs": 0.3999999761581421,
+          "totalMs": 0.3999999761581421
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1634.300000011921,
+          "endedAt": 1634.800000011921,
+          "setupMs": 0,
+          "renderMs": 0.5,
+          "totalMs": 0.5
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1634.800000011921,
+          "endedAt": 1635.0999999642372,
+          "setupMs": 0,
+          "renderMs": 0.2999999523162842,
+          "totalMs": 0.2999999523162842
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1635.0999999642372,
+          "endedAt": 1635.300000011921,
+          "setupMs": 0,
+          "renderMs": 0.20000004768371582,
+          "totalMs": 0.20000004768371582
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1635.300000011921,
+          "endedAt": 1635.5999999642372,
+          "setupMs": 0,
+          "renderMs": 0.2999999523162842,
+          "totalMs": 0.2999999523162842
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1635.5999999642372,
+          "endedAt": 1636.300000011921,
+          "setupMs": 0,
+          "renderMs": 0.7000000476837158,
+          "totalMs": 0.7000000476837158
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1636.300000011921,
+          "endedAt": 1636.5999999642372,
+          "setupMs": 0,
+          "renderMs": 0.2999999523162842,
+          "totalMs": 0.2999999523162842
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1636.5999999642372,
+          "endedAt": 1636.8999999761581,
+          "setupMs": 0,
+          "renderMs": 0.30000001192092896,
+          "totalMs": 0.30000001192092896
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1636.8999999761581,
+          "endedAt": 1637.0999999642372,
+          "setupMs": 0,
+          "renderMs": 0.19999998807907104,
+          "totalMs": 0.19999998807907104
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1637.0999999642372,
+          "endedAt": 1637.3999999761581,
+          "setupMs": 0,
+          "renderMs": 0.30000001192092896,
+          "totalMs": 0.30000001192092896
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1637.3999999761581,
+          "endedAt": 1637.5,
+          "setupMs": 0,
+          "renderMs": 0.10000002384185791,
+          "totalMs": 0.10000002384185791
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1637.5,
+          "endedAt": 1637.800000011921,
+          "setupMs": 0,
+          "renderMs": 0.30000001192092896,
+          "totalMs": 0.30000001192092896
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1639.800000011921,
+          "endedAt": 1640.300000011921,
+          "setupMs": 0,
+          "renderMs": 0.5,
+          "totalMs": 0.5
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1640.300000011921,
+          "endedAt": 1640.5,
+          "setupMs": 0,
+          "renderMs": 0.19999998807907104,
+          "totalMs": 0.19999998807907104
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1640.5,
+          "endedAt": 1640.800000011921,
+          "setupMs": 0,
+          "renderMs": 0.30000001192092896,
+          "totalMs": 0.30000001192092896
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1640.800000011921,
+          "endedAt": 1641,
+          "setupMs": 0,
+          "renderMs": 0.19999998807907104,
+          "totalMs": 0.19999998807907104
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1641,
+          "endedAt": 1641.300000011921,
+          "setupMs": 0,
+          "renderMs": 0.30000001192092896,
+          "totalMs": 0.30000001192092896
+        },
+        {
+          "phase": "pulse-solo",
+          "startedAt": 1641.300000011921,
+          "endedAt": 1641.5,
+          "setupMs": 0,
+          "renderMs": 0.19999998807907104,
+          "totalMs": 0.19999998807907104
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1663.8999999761581,
+          "endedAt": 1675.0999999642372,
+          "setupMs": 0,
+          "renderMs": 11.199999988079071,
+          "totalMs": 11.199999988079071
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1701.8999999761581,
+          "endedAt": 1717.8999999761581,
+          "setupMs": 0,
+          "renderMs": 16,
+          "totalMs": 16
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1719.5,
+          "endedAt": 1720.5999999642372,
+          "setupMs": 0,
+          "renderMs": 1.0999999642372131,
+          "totalMs": 1.0999999642372131
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1720.5999999642372,
+          "endedAt": 1721.199999988079,
+          "setupMs": 0,
+          "renderMs": 0.6000000238418579,
+          "totalMs": 0.6000000238418579
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1721.199999988079,
+          "endedAt": 1723.699999988079,
+          "setupMs": 0,
+          "renderMs": 2.5,
+          "totalMs": 2.5
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1723.699999988079,
+          "endedAt": 1723.8999999761581,
+          "setupMs": 0,
+          "renderMs": 0.19999998807907104,
+          "totalMs": 0.19999998807907104
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1727.5999999642372,
+          "endedAt": 1728.300000011921,
+          "setupMs": 0,
+          "renderMs": 0.7000000476837158,
+          "totalMs": 0.7000000476837158
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1728.300000011921,
+          "endedAt": 1729.8999999761581,
+          "setupMs": 0,
+          "renderMs": 1.5999999642372131,
+          "totalMs": 1.5999999642372131
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1729.8999999761581,
+          "endedAt": 1730.5,
+          "setupMs": 0,
+          "renderMs": 0.6000000238418579,
+          "totalMs": 0.6000000238418579
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1730.5999999642372,
+          "endedAt": 1730.800000011921,
+          "setupMs": 0,
+          "renderMs": 0.20000004768371582,
+          "totalMs": 0.20000004768371582
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1730.800000011921,
+          "endedAt": 1731.199999988079,
+          "setupMs": 0,
+          "renderMs": 0.3999999761581421,
+          "totalMs": 0.3999999761581421
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1731.199999988079,
+          "endedAt": 1731.199999988079,
+          "setupMs": 0,
+          "renderMs": 0,
+          "totalMs": 0
+        },
+        {
+          "phase": "pulse-solo",
+          "startedAt": 1731.199999988079,
+          "endedAt": 1731.3999999761581,
+          "setupMs": 0,
+          "renderMs": 0.19999998807907104,
+          "totalMs": 0.19999998807907104
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1743.3999999761581,
+          "endedAt": 1758.5999999642372,
+          "setupMs": 0,
+          "renderMs": 15.199999988079071,
+          "totalMs": 15.199999988079071
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1760.5,
+          "endedAt": 1772.3999999761581,
+          "setupMs": 0,
+          "renderMs": 11.899999976158142,
+          "totalMs": 11.899999976158142
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1772.5,
+          "endedAt": 1773.5,
+          "setupMs": 0,
+          "renderMs": 1,
+          "totalMs": 1
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1773.5,
+          "endedAt": 1774.199999988079,
+          "setupMs": 0,
+          "renderMs": 0.699999988079071,
+          "totalMs": 0.699999988079071
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1774.199999988079,
+          "endedAt": 1774.699999988079,
+          "setupMs": 0,
+          "renderMs": 0.5,
+          "totalMs": 0.5
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1774.699999988079,
+          "endedAt": 1775,
+          "setupMs": 0,
+          "renderMs": 0.30000001192092896,
+          "totalMs": 0.30000001192092896
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1775,
+          "endedAt": 1776,
+          "setupMs": 0,
+          "renderMs": 1,
+          "totalMs": 1
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1776,
+          "endedAt": 1777.800000011921,
+          "setupMs": 0,
+          "renderMs": 1.800000011920929,
+          "totalMs": 1.800000011920929
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1777.800000011921,
+          "endedAt": 1779.300000011921,
+          "setupMs": 0,
+          "renderMs": 1.5,
+          "totalMs": 1.5
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1779.3999999761581,
+          "endedAt": 1782.800000011921,
+          "setupMs": 0,
+          "renderMs": 3.400000035762787,
+          "totalMs": 3.400000035762787
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1782.800000011921,
+          "endedAt": 1783.8999999761581,
+          "setupMs": 0,
+          "renderMs": 1.0999999642372131,
+          "totalMs": 1.0999999642372131
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1783.8999999761581,
+          "endedAt": 1785.699999988079,
+          "setupMs": 0,
+          "renderMs": 1.800000011920929,
+          "totalMs": 1.800000011920929
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1786.800000011921,
+          "endedAt": 1787.699999988079,
+          "setupMs": 0,
+          "renderMs": 0.8999999761581421,
+          "totalMs": 0.8999999761581421
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1787.699999988079,
+          "endedAt": 1788.199999988079,
+          "setupMs": 0,
+          "renderMs": 0.5,
+          "totalMs": 0.5
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1788.199999988079,
+          "endedAt": 1788.3999999761581,
+          "setupMs": 0,
+          "renderMs": 0.19999998807907104,
+          "totalMs": 0.19999998807907104
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1788.3999999761581,
+          "endedAt": 1789.3999999761581,
+          "setupMs": 0,
+          "renderMs": 1,
+          "totalMs": 1
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1789.3999999761581,
+          "endedAt": 1791.800000011921,
+          "setupMs": 0,
+          "renderMs": 2.400000035762787,
+          "totalMs": 2.400000035762787
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1791.800000011921,
+          "endedAt": 1792.0999999642372,
+          "setupMs": 0,
+          "renderMs": 0.2999999523162842,
+          "totalMs": 0.2999999523162842
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1792.0999999642372,
+          "endedAt": 1792.3999999761581,
+          "setupMs": 0,
+          "renderMs": 0.30000001192092896,
+          "totalMs": 0.30000001192092896
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1792.3999999761581,
+          "endedAt": 1792.699999988079,
+          "setupMs": 0,
+          "renderMs": 0.30000001192092896,
+          "totalMs": 0.30000001192092896
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1792.699999988079,
+          "endedAt": 1792.8999999761581,
+          "setupMs": 0,
+          "renderMs": 0.19999998807907104,
+          "totalMs": 0.19999998807907104
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1792.8999999761581,
+          "endedAt": 1793.199999988079,
+          "setupMs": 0,
+          "renderMs": 0.30000001192092896,
+          "totalMs": 0.30000001192092896
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1793.199999988079,
+          "endedAt": 1793.5,
+          "setupMs": 0,
+          "renderMs": 0.30000001192092896,
+          "totalMs": 0.30000001192092896
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1793.5,
+          "endedAt": 1793.699999988079,
+          "setupMs": 0,
+          "renderMs": 0.19999998807907104,
+          "totalMs": 0.19999998807907104
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1793.699999988079,
+          "endedAt": 1794.5,
+          "setupMs": 0,
+          "renderMs": 0.800000011920929,
+          "totalMs": 0.800000011920929
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1794.5,
+          "endedAt": 1795,
+          "setupMs": 0,
+          "renderMs": 0.5,
+          "totalMs": 0.5
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1795,
+          "endedAt": 1795.3999999761581,
+          "setupMs": 0,
+          "renderMs": 0.3999999761581421,
+          "totalMs": 0.3999999761581421
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1795.3999999761581,
+          "endedAt": 1795.800000011921,
+          "setupMs": 0,
+          "renderMs": 0.40000003576278687,
+          "totalMs": 0.40000003576278687
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1795.800000011921,
+          "endedAt": 1796,
+          "setupMs": 0,
+          "renderMs": 0.19999998807907104,
+          "totalMs": 0.19999998807907104
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1796,
+          "endedAt": 1796.0999999642372,
+          "setupMs": 0,
+          "renderMs": 0.09999996423721313,
+          "totalMs": 0.09999996423721313
+        },
+        {
+          "phase": "pulse-solo",
+          "startedAt": 1796.0999999642372,
+          "endedAt": 1796.300000011921,
+          "setupMs": 0.10000002384185791,
+          "renderMs": 0.10000002384185791,
+          "totalMs": 0.20000004768371582
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1796.300000011921,
+          "endedAt": 1797.0999999642372,
+          "setupMs": 0,
+          "renderMs": 0.7999999523162842,
+          "totalMs": 0.7999999523162842
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1797.0999999642372,
+          "endedAt": 1797.3999999761581,
+          "setupMs": 0,
+          "renderMs": 0.30000001192092896,
+          "totalMs": 0.30000001192092896
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1797.3999999761581,
+          "endedAt": 1797.699999988079,
+          "setupMs": 0,
+          "renderMs": 0.30000001192092896,
+          "totalMs": 0.30000001192092896
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1797.699999988079,
+          "endedAt": 1798.0999999642372,
+          "setupMs": 0,
+          "renderMs": 0.3999999761581421,
+          "totalMs": 0.3999999761581421
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1798.0999999642372,
+          "endedAt": 1806.199999988079,
+          "setupMs": 0,
+          "renderMs": 8.100000023841858,
+          "totalMs": 8.100000023841858
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1806.199999988079,
+          "endedAt": 1806.8999999761581,
+          "setupMs": 0,
+          "renderMs": 0.699999988079071,
+          "totalMs": 0.699999988079071
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1806.8999999761581,
+          "endedAt": 1807.0999999642372,
+          "setupMs": 0,
+          "renderMs": 0.19999998807907104,
+          "totalMs": 0.19999998807907104
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1807.0999999642372,
+          "endedAt": 1809.300000011921,
+          "setupMs": 0,
+          "renderMs": 2.200000047683716,
+          "totalMs": 2.200000047683716
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1809.300000011921,
+          "endedAt": 1809.800000011921,
+          "setupMs": 0,
+          "renderMs": 0.5,
+          "totalMs": 0.5
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1809.800000011921,
+          "endedAt": 1810,
+          "setupMs": 0,
+          "renderMs": 0.19999998807907104,
+          "totalMs": 0.19999998807907104
+        },
+        {
+          "phase": "pulse-solo",
+          "startedAt": 1810,
+          "endedAt": 1810.0999999642372,
+          "setupMs": 0,
+          "renderMs": 0.09999996423721313,
+          "totalMs": 0.09999996423721313
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1810.0999999642372,
+          "endedAt": 1825.5999999642372,
+          "setupMs": 0,
+          "renderMs": 15.5,
+          "totalMs": 15.5
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1827.199999988079,
+          "endedAt": 1835.0999999642372,
+          "setupMs": 0,
+          "renderMs": 7.899999976158142,
+          "totalMs": 7.899999976158142
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1835.0999999642372,
+          "endedAt": 1836.300000011921,
+          "setupMs": 0,
+          "renderMs": 1.2000000476837158,
+          "totalMs": 1.2000000476837158
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1836.3999999761581,
+          "endedAt": 1837.8999999761581,
+          "setupMs": 0,
+          "renderMs": 1.5,
+          "totalMs": 1.5
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1837.8999999761581,
+          "endedAt": 1842.199999988079,
+          "setupMs": 0,
+          "renderMs": 4.300000011920929,
+          "totalMs": 4.300000011920929
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1842.199999988079,
+          "endedAt": 1842.3999999761581,
+          "setupMs": 0,
+          "renderMs": 0.19999998807907104,
+          "totalMs": 0.19999998807907104
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1842.3999999761581,
+          "endedAt": 1846.0999999642372,
+          "setupMs": 0,
+          "renderMs": 3.699999988079071,
+          "totalMs": 3.699999988079071
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1846.0999999642372,
+          "endedAt": 1847.8999999761581,
+          "setupMs": 0,
+          "renderMs": 1.800000011920929,
+          "totalMs": 1.800000011920929
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1847.8999999761581,
+          "endedAt": 1848.300000011921,
+          "setupMs": 0,
+          "renderMs": 0.40000003576278687,
+          "totalMs": 0.40000003576278687
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1848.300000011921,
+          "endedAt": 1848.800000011921,
+          "setupMs": 0,
+          "renderMs": 0.5,
+          "totalMs": 0.5
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1848.800000011921,
+          "endedAt": 1849.300000011921,
+          "setupMs": 0,
+          "renderMs": 0.5,
+          "totalMs": 0.5
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1849.300000011921,
+          "endedAt": 1849.5,
+          "setupMs": 0,
+          "renderMs": 0.19999998807907104,
+          "totalMs": 0.19999998807907104
+        },
+        {
+          "phase": "pulse-solo",
+          "startedAt": 1849.5,
+          "endedAt": 1849.699999988079,
+          "setupMs": 0,
+          "renderMs": 0.19999998807907104,
+          "totalMs": 0.19999998807907104
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1849.699999988079,
+          "endedAt": 1851.300000011921,
+          "setupMs": 0,
+          "renderMs": 1.600000023841858,
+          "totalMs": 1.600000023841858
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1852.800000011921,
+          "endedAt": 1855.8999999761581,
+          "setupMs": 0,
+          "renderMs": 3.099999964237213,
+          "totalMs": 3.099999964237213
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1855.8999999761581,
+          "endedAt": 1857.5,
+          "setupMs": 0,
+          "renderMs": 1.600000023841858,
+          "totalMs": 1.600000023841858
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1857.5,
+          "endedAt": 1858,
+          "setupMs": 0,
+          "renderMs": 0.5,
+          "totalMs": 0.5
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1858,
+          "endedAt": 1858.3999999761581,
+          "setupMs": 0,
+          "renderMs": 0.3999999761581421,
+          "totalMs": 0.3999999761581421
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1858.3999999761581,
+          "endedAt": 1858.800000011921,
+          "setupMs": 0,
+          "renderMs": 0.40000003576278687,
+          "totalMs": 0.40000003576278687
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1858.800000011921,
+          "endedAt": 1860.5,
+          "setupMs": 0,
+          "renderMs": 1.699999988079071,
+          "totalMs": 1.699999988079071
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1860.5,
+          "endedAt": 1865.5999999642372,
+          "setupMs": 0,
+          "renderMs": 5.099999964237213,
+          "totalMs": 5.099999964237213
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1865.5999999642372,
+          "endedAt": 1867.300000011921,
+          "setupMs": 0,
+          "renderMs": 1.7000000476837158,
+          "totalMs": 1.7000000476837158
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1867.300000011921,
+          "endedAt": 1867.800000011921,
+          "setupMs": 0,
+          "renderMs": 0.5,
+          "totalMs": 0.5
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1867.800000011921,
+          "endedAt": 1868.0999999642372,
+          "setupMs": 0,
+          "renderMs": 0.2999999523162842,
+          "totalMs": 0.2999999523162842
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1868.0999999642372,
+          "endedAt": 1868.5999999642372,
+          "setupMs": 0,
+          "renderMs": 0.5,
+          "totalMs": 0.5
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1868.699999988079,
+          "endedAt": 1868.800000011921,
+          "setupMs": 0,
+          "renderMs": 0.10000002384185791,
+          "totalMs": 0.10000002384185791
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1868.8999999761581,
+          "endedAt": 1869.699999988079,
+          "setupMs": 0,
+          "renderMs": 0.800000011920929,
+          "totalMs": 0.800000011920929
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1869.699999988079,
+          "endedAt": 1870.0999999642372,
+          "setupMs": 0,
+          "renderMs": 0.3999999761581421,
+          "totalMs": 0.3999999761581421
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1870.0999999642372,
+          "endedAt": 1870.3999999761581,
+          "setupMs": 0,
+          "renderMs": 0.30000001192092896,
+          "totalMs": 0.30000001192092896
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1870.3999999761581,
+          "endedAt": 1870.800000011921,
+          "setupMs": 0,
+          "renderMs": 0.40000003576278687,
+          "totalMs": 0.40000003576278687
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1870.800000011921,
+          "endedAt": 1871,
+          "setupMs": 0,
+          "renderMs": 0.19999998807907104,
+          "totalMs": 0.19999998807907104
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1871,
+          "endedAt": 1871.300000011921,
+          "setupMs": 0,
+          "renderMs": 0.30000001192092896,
+          "totalMs": 0.30000001192092896
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1871.300000011921,
+          "endedAt": 1871.5,
+          "setupMs": 0,
+          "renderMs": 0.19999998807907104,
+          "totalMs": 0.19999998807907104
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1871.5,
+          "endedAt": 1872.3999999761581,
+          "setupMs": 0,
+          "renderMs": 0.8999999761581421,
+          "totalMs": 0.8999999761581421
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1872.3999999761581,
+          "endedAt": 1872.5999999642372,
+          "setupMs": 0,
+          "renderMs": 0.19999998807907104,
+          "totalMs": 0.19999998807907104
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1872.5999999642372,
+          "endedAt": 1872.800000011921,
+          "setupMs": 0,
+          "renderMs": 0.20000004768371582,
+          "totalMs": 0.20000004768371582
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1872.800000011921,
+          "endedAt": 1873,
+          "setupMs": 0,
+          "renderMs": 0.19999998807907104,
+          "totalMs": 0.19999998807907104
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1873,
+          "endedAt": 1873.0999999642372,
+          "setupMs": 0,
+          "renderMs": 0.09999996423721313,
+          "totalMs": 0.09999996423721313
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1873.0999999642372,
+          "endedAt": 1873.300000011921,
+          "setupMs": 0,
+          "renderMs": 0.20000004768371582,
+          "totalMs": 0.20000004768371582
+        },
+        {
+          "phase": "pulse-solo",
+          "startedAt": 1873.300000011921,
+          "endedAt": 1873.3999999761581,
+          "setupMs": 0,
+          "renderMs": 0.09999996423721313,
+          "totalMs": 0.09999996423721313
+        },
+        {
+          "phase": "fade-pair",
+          "startedAt": 1873.3999999761581,
+          "endedAt": 1876.0999999642372,
+          "setupMs": 0.19999998807907104,
+          "renderMs": 2.5,
+          "totalMs": 2.699999988079071
+        },
+        {
+          "phase": "fade-pair",
+          "startedAt": 1876.199999988079,
+          "endedAt": 1879.0999999642372,
+          "setupMs": 0,
+          "renderMs": 2.899999976158142,
+          "totalMs": 2.899999976158142
+        },
+        {
+          "phase": "fade-pair",
+          "startedAt": 1880.300000011921,
+          "endedAt": 1883.699999988079,
+          "setupMs": 0,
+          "renderMs": 3.399999976158142,
+          "totalMs": 3.399999976158142
+        },
+        {
+          "phase": "fade-pair",
+          "startedAt": 1883.699999988079,
+          "endedAt": 1886.5999999642372,
+          "setupMs": 0.10000002384185791,
+          "renderMs": 2.799999952316284,
+          "totalMs": 2.899999976158142
+        },
+        {
+          "phase": "fade-pair",
+          "startedAt": 1886.5999999642372,
+          "endedAt": 1889,
+          "setupMs": 0,
+          "renderMs": 2.400000035762787,
+          "totalMs": 2.400000035762787
+        },
+        {
+          "phase": "fade-pair",
+          "startedAt": 1889.0999999642372,
+          "endedAt": 1890.699999988079,
+          "setupMs": 0,
+          "renderMs": 1.600000023841858,
+          "totalMs": 1.600000023841858
+        },
+        {
+          "phase": "fade-pair",
+          "startedAt": 1890.699999988079,
+          "endedAt": 1892.699999988079,
+          "setupMs": 0.10000002384185791,
+          "renderMs": 1.899999976158142,
+          "totalMs": 2
+        },
+        {
+          "phase": "fade-pair",
+          "startedAt": 1892.800000011921,
+          "endedAt": 1893.800000011921,
+          "setupMs": 0,
+          "renderMs": 1,
+          "totalMs": 1
+        },
+        {
+          "phase": "fade-pair",
+          "startedAt": 1893.800000011921,
+          "endedAt": 1894.8999999761581,
+          "setupMs": 0,
+          "renderMs": 1.0999999642372131,
+          "totalMs": 1.0999999642372131
+        },
+        {
+          "phase": "shadow",
+          "startedAt": 1894.8999999761581,
+          "endedAt": 1985.3999999761581,
+          "setupMs": 0,
+          "renderMs": 90.5,
+          "totalMs": 90.5
+        },
+        {
+          "phase": "shadow",
+          "startedAt": 1986.5,
+          "endedAt": 1987.3999999761581,
+          "setupMs": 0,
+          "renderMs": 0.8999999761581421,
+          "totalMs": 0.8999999761581421
+        },
+        {
+          "phase": "gate-response",
+          "startedAt": 1987.699999988079,
+          "endedAt": 1990.0999999642372,
+          "setupMs": 0,
+          "renderMs": 2.399999976158142,
+          "totalMs": 2.399999976158142
+        },
+        {
+          "phase": "full-scene-control",
+          "startedAt": 1990.3999999761581,
+          "endedAt": 2006.699999988079,
+          "setupMs": 0,
+          "renderMs": 16.30000001192093,
+          "totalMs": 16.30000001192093
+        }
+      ],
+      "readyAt": 2007,
+      "warmupCars": "all"
+    },
+    "resources": [
+      {
+        "name": "http://127.0.0.1:5247/models/tour/lexus_rcf_gt3.glb",
+        "duration": 20.80000001192093,
+        "transferSize": 2627520,
+        "decodedBodySize": 2627220
+      },
+      {
+        "name": "http://127.0.0.1:5247/models/tour/mercedes_amg_gt3.glb",
+        "duration": 14.699999988079071,
+        "transferSize": 1666972,
+        "decodedBodySize": 1666672
+      },
+      {
+        "name": "http://127.0.0.1:5247/models/tour/nissan_gtr_gt3.glb",
+        "duration": 14.300000011920929,
+        "transferSize": 1649348,
+        "decodedBodySize": 1649048
+      },
+      {
+        "name": "http://127.0.0.1:5247/models/tour/audi_r8_gt3.glb",
+        "duration": 19,
+        "transferSize": 2309580,
+        "decodedBodySize": 2309280
+      },
+      {
+        "name": "http://127.0.0.1:5247/models/tour/bmw_m6_gt3.glb",
+        "duration": 34.30000001192093,
+        "transferSize": 3926668,
+        "decodedBodySize": 3926368
+      },
+      {
+        "name": "http://127.0.0.1:5247/models/tour/ferrari_488_gt3.glb",
+        "duration": 6.199999988079071,
+        "transferSize": 640592,
+        "decodedBodySize": 640292
+      },
+      {
+        "name": "http://127.0.0.1:5247/models/tour/aston_vantage_gt3.glb",
+        "duration": 21.19999998807907,
+        "transferSize": 482888,
+        "decodedBodySize": 482588
+      },
+      {
+        "name": "http://127.0.0.1:5247/models/tour/mclaren_720s_gt3.glb",
+        "duration": 46.80000001192093,
+        "transferSize": 3016348,
+        "decodedBodySize": 3016048
+      },
+      {
+        "name": "http://127.0.0.1:5247/models/tour/lamborghini_huracan_gt3.glb",
+        "duration": 58.80000001192093,
+        "transferSize": 3101784,
+        "decodedBodySize": 3101484
+      },
+      {
+        "name": "http://127.0.0.1:5247/models/tour/porsche_911_gt3r.glb",
+        "duration": 76.80000001192093,
+        "transferSize": 2625240,
+        "decodedBodySize": 2624940
+      },
+      {
+        "name": "http://127.0.0.1:5247/draco/gltf/draco_wasm_wrapper.js",
+        "duration": 15.399999976158142,
+        "transferSize": 58756,
+        "decodedBodySize": 58456
+      },
+      {
+        "name": "http://127.0.0.1:5247/draco/gltf/draco_decoder.wasm",
+        "duration": 21.80000001192093,
+        "transferSize": 192720,
+        "decodedBodySize": 192420
+      }
+    ],
+    "rendererMemory": {
+      "geometries": 1501,
+      "textures": 303
+    },
+    "programs": 116
+  },
+  "quality": {
+    "dpr": 2,
+    "candidate": "",
+    "sceneSamples": 0,
+    "maxSamples": 4,
+    "halfFloatSamples": [
+      4,
+      2
+    ],
+    "diagnosticWarmupMs": 0,
+    "reflectionScope": "none",
+    "rendererMemory": {
+      "geometries": 1501,
+      "textures": 303
+    },
+    "programs": 116,
+    "probe": {
+      "mode": "race",
+      "locked": false,
+      "speed01": 0,
+      "progress": 0.0008943730202074623,
+      "applied": 2,
+      "level": "high",
+      "still": 766.6000000238419,
+      "sinceSwitch": null,
+      "canvasW": 2940,
+      "ratio": 2
+    },
+    "environment": false,
+    "passes": [
+      {
+        "name": "RenderPass",
+        "enabled": true
+      },
+      {
+        "name": "ShaderPass",
+        "enabled": true
+      },
+      {
+        "name": "ShaderPass",
+        "enabled": true
+      },
+      {
+        "name": "SMAAPass",
+        "enabled": true
+      }
+    ],
+    "targets": [
+      {
+        "width": 2940,
+        "height": 1912,
+        "samples": 0
+      },
+      {
+        "width": 2940,
+        "height": 1912,
+        "samples": 0
+      }
+    ],
+    "timerExtension": true
+  },
+  "transmissionVariant": "product",
+  "stateSet": "ferrari-day,ferrari-night,aston-day,aston-night",
+  "captures": [
+    {
+      "name": "ferrari-day",
+      "index": 5,
+      "theme": "day",
+      "t": 0.123,
+      "file": "ferrari-day.png",
+      "sha256": "61bbc66c09006c4fd3d6d3e82bd8bdaa0091e624dd46b58f7a90f7c3f49619d7",
+      "probe": {
+        "mode": "race",
+        "locked": false,
+        "speed01": 0,
+        "progress": 0.12614160527985382,
+        "applied": 2,
+        "level": "high",
+        "still": 766.6000000238419,
+        "sinceSwitch": null,
+        "canvasW": 2940,
+        "ratio": 2
+      },
+      "environment": false,
+      "camera": {
+        "position": [
+          46.20052307590598,
+          208.2878532625406,
+          -490.5569780961339
+        ],
+        "quaternion": [
+          -0.3702543457061976,
+          -0.5383996395935492,
+          -0.28410615187685734,
+          0.701656071046874
+        ],
+        "fov": 40
+      },
+      "carBoundsCSS": {
+        "x": 860.5945029457689,
+        "y": 183.1097399090664,
+        "width": 72.87778072610388,
+        "height": 55.98542593070323
+      },
+      "triangles": 34769,
+      "materials": [
+        {
+          "name": "LOD_A_CHASSIS_mm_lights_Mat",
+          "type": "MeshStandardMaterial",
+          "color": "ffffff",
+          "roughness": 0,
+          "metalness": 0,
+          "envMap": true,
+          "envMapIntensity": 0.7,
+          "normalMap": false
+        },
+        {
+          "name": "LOD_A_INTERIOR_mm_cab_Mat",
+          "type": "MeshStandardMaterial",
+          "color": "ffffff",
+          "roughness": 0.5,
+          "metalness": 0.5,
+          "envMap": true,
+          "envMapIntensity": 0.7,
+          "normalMap": false
+        },
+        {
+          "name": "LOD_A_HEADLIGHT_LENS_RIGHT_mm_windows_Mat",
+          "type": "MeshPhysicalMaterial",
+          "color": "ffffff",
+          "roughness": 0,
+          "metalness": 0,
+          "envMap": true,
+          "envMapIntensity": 0.7,
+          "normalMap": false
+        },
+        {
+          "name": "LOD_A_BRAKE_CALIPER_FRONT_LEFT_mm_misc_Mat",
+          "type": "MeshStandardMaterial",
+          "color": "ffffff",
+          "roughness": 0.5,
+          "metalness": 0.5,
+          "envMap": true,
+          "envMapIntensity": 0.7,
+          "normalMap": false
+        },
+        {
+          "name": "LOD_A_DOOR_RIGHT_mm_ext_Mat",
+          "type": "MeshStandardMaterial",
+          "color": "ffffff",
+          "roughness": 0,
+          "metalness": 0,
+          "envMap": true,
+          "envMapIntensity": 0.7,
+          "normalMap": false
+        },
+        {
+          "name": "LOD_A_FRONTBUMPER_mm_chassis_Mat",
+          "type": "MeshStandardMaterial",
+          "color": "ffffff",
+          "roughness": 0.5,
+          "metalness": 0.5,
+          "envMap": true,
+          "envMapIntensity": 0.7,
+          "normalMap": false
+        },
+        {
+          "name": "LOD_A_INTERIOR_mm_ext_Mat",
+          "type": "MeshStandardMaterial",
+          "color": "ffffff",
+          "roughness": 0,
+          "metalness": 0,
+          "envMap": true,
+          "envMapIntensity": 0.7,
+          "normalMap": false
+        },
+        {
+          "name": "LOD_A_FRONTBUMPER_mm_badges_Mat",
+          "type": "MeshStandardMaterial",
+          "color": "ffffff",
+          "roughness": 0.5,
+          "metalness": 0.5,
+          "envMap": true,
+          "envMapIntensity": 0.7,
+          "normalMap": false
+        },
+        {
+          "name": "LOD_A_DOOR_RIGHT_mm_badges_Mat",
+          "type": "MeshStandardMaterial",
+          "color": "ffffff",
+          "roughness": 0.5,
+          "metalness": 0.5,
+          "envMap": true,
+          "envMapIntensity": 0.7,
+          "normalMap": false
+        },
+        {
+          "name": "LOD_A_BRAKE_CALIPER_FRONT_LEFT_mm_misc_Mat",
+          "type": "MeshStandardMaterial",
+          "color": "ffffff",
+          "roughness": 0.5,
+          "metalness": 0.5,
+          "envMap": true,
+          "envMapIntensity": 0.7,
+          "normalMap": false
+        },
+        {
+          "name": "LOD_A_WHEEL_REAR_mm_wheel_Mat",
+          "type": "MeshStandardMaterial",
+          "color": "ffffff",
+          "roughness": 0.5,
+          "metalness": 0.5,
+          "envMap": true,
+          "envMapIntensity": 0.7,
+          "normalMap": false
+        },
+        {
+          "name": "LOD_A_TYRE_REAR_mm_tyre_Mat",
+          "type": "MeshStandardMaterial",
+          "color": "ffffff",
+          "roughness": 0.5,
+          "metalness": 0.5,
+          "envMap": true,
+          "envMapIntensity": 0.7,
+          "normalMap": false
+        },
+        {
+          "name": "LOD_A_ROTOR_mm_rotor_Mat",
+          "type": "MeshStandardMaterial",
+          "color": "ffffff",
+          "roughness": 0.5,
+          "metalness": 0.5,
+          "envMap": true,
+          "envMapIntensity": 0.7,
+          "normalMap": false
+        },
+        {
+          "name": "LOD_A_TYRE_mm_tyre_Mat",
+          "type": "MeshStandardMaterial",
+          "color": "ffffff",
+          "roughness": 0.5,
+          "metalness": 0.5,
+          "envMap": true,
+          "envMapIntensity": 0.7,
+          "normalMap": false
+        }
+      ],
+      "textures": [
+        {
+          "slot": "map",
+          "width": 512,
+          "height": 512,
+          "anisotropy": 8
+        },
+        {
+          "slot": "envMap",
+          "width": 336,
+          "height": 256,
+          "anisotropy": 1
+        },
+        {
+          "slot": "map",
+          "width": 512,
+          "height": 512,
+          "anisotropy": 8
+        },
+        {
+          "slot": "map",
+          "width": 512,
+          "height": 512,
+          "anisotropy": 8
+        },
+        {
+          "slot": "transmissionMap",
+          "width": 512,
+          "height": 512,
+          "anisotropy": 8
+        },
+        {
+          "slot": "map",
+          "width": 512,
+          "height": 512,
+          "anisotropy": 8
+        },
+        {
+          "slot": "map",
+          "width": 512,
+          "height": 512,
+          "anisotropy": 8
+        },
+        {
+          "slot": "map",
+          "width": 512,
+          "height": 512,
+          "anisotropy": 8
+        },
+        {
+          "slot": "map",
+          "width": 512,
+          "height": 512,
+          "anisotropy": 8
+        },
+        {
+          "slot": "map",
+          "width": 512,
+          "height": 512,
+          "anisotropy": 8
+        },
+        {
+          "slot": "map",
+          "width": 512,
+          "height": 512,
+          "anisotropy": 8
+        },
+        {
+          "slot": "map",
+          "width": 512,
+          "height": 512,
+          "anisotropy": 8
+        },
+        {
+          "slot": "map",
+          "width": 256,
+          "height": 256,
+          "anisotropy": 8
+        },
+        {
+          "slot": "map",
+          "width": 256,
+          "height": 256,
+          "anisotropy": 8
+        },
+        {
+          "slot": "map",
+          "width": 256,
+          "height": 256,
+          "anisotropy": 8
+        }
+      ],
+      "heap": 200198609,
+      "transmissionTarget": {
+        "width": 1470,
+        "height": 956,
+        "samples": 0,
+        "scale": 0.5,
+        "mainDPR": 2
+      }
+    },
+    {
+      "name": "ferrari-night",
+      "index": 5,
+      "theme": "night",
+      "t": 0.123,
+      "file": "ferrari-night.png",
+      "sha256": "0c3ff07143d317cda27b2b82633e1ad320c5ec79769dc340560e7c47c2384a9f",
+      "probe": {
+        "mode": "race",
+        "locked": false,
+        "speed01": 0,
+        "progress": 0.12614160527985382,
+        "applied": 2,
+        "level": "high",
+        "still": 766.6000000238419,
+        "sinceSwitch": null,
+        "canvasW": 2940,
+        "ratio": 2
+      },
+      "environment": false,
+      "camera": {
+        "position": [
+          46.20052307590598,
+          208.2878532625406,
+          -490.5569780961339
+        ],
+        "quaternion": [
+          -0.3702543457061976,
+          -0.5383996395935492,
+          -0.28410615187685734,
+          0.701656071046874
+        ],
+        "fov": 40
+      },
+      "carBoundsCSS": {
+        "x": 860.5945029457689,
+        "y": 183.1097399090664,
+        "width": 72.87778072610388,
+        "height": 55.98542593070323
+      },
+      "triangles": 34769,
+      "materials": [
+        {
+          "name": "LOD_A_CHASSIS_mm_lights_Mat",
+          "type": "MeshStandardMaterial",
+          "color": "ffffff",
+          "roughness": 0,
+          "metalness": 0,
+          "envMap": true,
+          "envMapIntensity": 0.14,
+          "normalMap": false
+        },
+        {
+          "name": "LOD_A_INTERIOR_mm_cab_Mat",
+          "type": "MeshStandardMaterial",
+          "color": "ffffff",
+          "roughness": 0.5,
+          "metalness": 0.5,
+          "envMap": true,
+          "envMapIntensity": 0.14,
+          "normalMap": false
+        },
+        {
+          "name": "LOD_A_HEADLIGHT_LENS_RIGHT_mm_windows_Mat",
+          "type": "MeshPhysicalMaterial",
+          "color": "ffffff",
+          "roughness": 0,
+          "metalness": 0,
+          "envMap": true,
+          "envMapIntensity": 0.14,
+          "normalMap": false
+        },
+        {
+          "name": "LOD_A_BRAKE_CALIPER_FRONT_LEFT_mm_misc_Mat",
+          "type": "MeshStandardMaterial",
+          "color": "ffffff",
+          "roughness": 0.5,
+          "metalness": 0.5,
+          "envMap": true,
+          "envMapIntensity": 0.14,
+          "normalMap": false
+        },
+        {
+          "name": "LOD_A_DOOR_RIGHT_mm_ext_Mat",
+          "type": "MeshStandardMaterial",
+          "color": "ffffff",
+          "roughness": 0,
+          "metalness": 0,
+          "envMap": true,
+          "envMapIntensity": 0.14,
+          "normalMap": false
+        },
+        {
+          "name": "LOD_A_FRONTBUMPER_mm_chassis_Mat",
+          "type": "MeshStandardMaterial",
+          "color": "ffffff",
+          "roughness": 0.5,
+          "metalness": 0.5,
+          "envMap": true,
+          "envMapIntensity": 0.14,
+          "normalMap": false
+        },
+        {
+          "name": "LOD_A_INTERIOR_mm_ext_Mat",
+          "type": "MeshStandardMaterial",
+          "color": "ffffff",
+          "roughness": 0,
+          "metalness": 0,
+          "envMap": true,
+          "envMapIntensity": 0.14,
+          "normalMap": false
+        },
+        {
+          "name": "LOD_A_FRONTBUMPER_mm_badges_Mat",
+          "type": "MeshStandardMaterial",
+          "color": "ffffff",
+          "roughness": 0.5,
+          "metalness": 0.5,
+          "envMap": true,
+          "envMapIntensity": 0.14,
+          "normalMap": false
+        },
+        {
+          "name": "LOD_A_DOOR_RIGHT_mm_badges_Mat",
+          "type": "MeshStandardMaterial",
+          "color": "ffffff",
+          "roughness": 0.5,
+          "metalness": 0.5,
+          "envMap": true,
+          "envMapIntensity": 0.14,
+          "normalMap": false
+        },
+        {
+          "name": "LOD_A_BRAKE_CALIPER_FRONT_LEFT_mm_misc_Mat",
+          "type": "MeshStandardMaterial",
+          "color": "ffffff",
+          "roughness": 0.5,
+          "metalness": 0.5,
+          "envMap": true,
+          "envMapIntensity": 0.14,
+          "normalMap": false
+        },
+        {
+          "name": "LOD_A_WHEEL_REAR_mm_wheel_Mat",
+          "type": "MeshStandardMaterial",
+          "color": "ffffff",
+          "roughness": 0.5,
+          "metalness": 0.5,
+          "envMap": true,
+          "envMapIntensity": 0.14,
+          "normalMap": false
+        },
+        {
+          "name": "LOD_A_TYRE_REAR_mm_tyre_Mat",
+          "type": "MeshStandardMaterial",
+          "color": "ffffff",
+          "roughness": 0.5,
+          "metalness": 0.5,
+          "envMap": true,
+          "envMapIntensity": 0.14,
+          "normalMap": false
+        },
+        {
+          "name": "LOD_A_ROTOR_mm_rotor_Mat",
+          "type": "MeshStandardMaterial",
+          "color": "ffffff",
+          "roughness": 0.5,
+          "metalness": 0.5,
+          "envMap": true,
+          "envMapIntensity": 0.14,
+          "normalMap": false
+        },
+        {
+          "name": "LOD_A_TYRE_mm_tyre_Mat",
+          "type": "MeshStandardMaterial",
+          "color": "ffffff",
+          "roughness": 0.5,
+          "metalness": 0.5,
+          "envMap": true,
+          "envMapIntensity": 0.14,
+          "normalMap": false
+        }
+      ],
+      "textures": [
+        {
+          "slot": "map",
+          "width": 512,
+          "height": 512,
+          "anisotropy": 8
+        },
+        {
+          "slot": "envMap",
+          "width": 336,
+          "height": 256,
+          "anisotropy": 1
+        },
+        {
+          "slot": "map",
+          "width": 512,
+          "height": 512,
+          "anisotropy": 8
+        },
+        {
+          "slot": "map",
+          "width": 512,
+          "height": 512,
+          "anisotropy": 8
+        },
+        {
+          "slot": "transmissionMap",
+          "width": 512,
+          "height": 512,
+          "anisotropy": 8
+        },
+        {
+          "slot": "map",
+          "width": 512,
+          "height": 512,
+          "anisotropy": 8
+        },
+        {
+          "slot": "map",
+          "width": 512,
+          "height": 512,
+          "anisotropy": 8
+        },
+        {
+          "slot": "map",
+          "width": 512,
+          "height": 512,
+          "anisotropy": 8
+        },
+        {
+          "slot": "map",
+          "width": 512,
+          "height": 512,
+          "anisotropy": 8
+        },
+        {
+          "slot": "map",
+          "width": 512,
+          "height": 512,
+          "anisotropy": 8
+        },
+        {
+          "slot": "map",
+          "width": 512,
+          "height": 512,
+          "anisotropy": 8
+        },
+        {
+          "slot": "map",
+          "width": 512,
+          "height": 512,
+          "anisotropy": 8
+        },
+        {
+          "slot": "map",
+          "width": 256,
+          "height": 256,
+          "anisotropy": 8
+        },
+        {
+          "slot": "map",
+          "width": 256,
+          "height": 256,
+          "anisotropy": 8
+        },
+        {
+          "slot": "map",
+          "width": 256,
+          "height": 256,
+          "anisotropy": 8
+        }
+      ],
+      "heap": 234132948,
+      "transmissionTarget": {
+        "width": 1470,
+        "height": 956,
+        "samples": 0,
+        "scale": 0.5,
+        "mainDPR": 2
+      }
+    },
+    {
+      "name": "aston-day",
+      "index": 7,
+      "theme": "day",
+      "t": 0.123,
+      "file": "aston-day.png",
+      "sha256": "fdfefb93766717d9995c2255c25f8cda6628795a4c388ff4f7af958916367537",
+      "probe": {
+        "mode": "race",
+        "locked": false,
+        "speed01": 0,
+        "progress": 0.12614160527985382,
+        "applied": 2,
+        "level": "high",
+        "still": 766.6000000238419,
+        "sinceSwitch": null,
+        "canvasW": 2940,
+        "ratio": 2
+      },
+      "environment": false,
+      "camera": {
+        "position": [
+          46.20052307590598,
+          208.2878532625406,
+          -490.5569780961339
+        ],
+        "quaternion": [
+          -0.3702543457061976,
+          -0.5383996395935492,
+          -0.28410615187685734,
+          0.701656071046874
+        ],
+        "fov": 40
+      },
+      "carBoundsCSS": {
+        "x": 860.81816002896,
+        "y": 176.87028712116472,
+        "width": 73.57374282470994,
+        "height": 62.014943227342656
+      },
+      "triangles": 23805,
+      "materials": [
+        {
+          "name": "Vehicle_Exterior_mm_ext",
+          "type": "MeshStandardMaterial",
+          "color": "ffffff",
+          "roughness": 0,
+          "metalness": 0,
+          "envMap": true,
+          "envMapIntensity": 0.7,
+          "normalMap": false
+        },
+        {
+          "name": "Vehicle_Exterior_mm_misc",
+          "type": "MeshStandardMaterial",
+          "color": "ffffff",
+          "roughness": 0.5,
+          "metalness": 0,
+          "envMap": true,
+          "envMapIntensity": 0.7,
+          "normalMap": false
+        },
+        {
+          "name": "Vehicle_Exterior_mm_windows",
+          "type": "MeshPhysicalMaterial",
+          "color": "ffffff",
+          "roughness": 0,
+          "metalness": 0,
+          "envMap": true,
+          "envMapIntensity": 0.7,
+          "normalMap": false
+        },
+        {
+          "name": "Vehicle_Exterior_mm_lights",
+          "type": "MeshStandardMaterial",
+          "color": "ffffff",
+          "roughness": 0.5,
+          "metalness": 0,
+          "envMap": true,
+          "envMapIntensity": 0.7,
+          "normalMap": false
+        },
+        {
+          "name": "Vehicle_Exterior_mm_badges",
+          "type": "MeshStandardMaterial",
+          "color": "ffffff",
+          "roughness": 0.5,
+          "metalness": 0,
+          "envMap": true,
+          "envMapIntensity": 0.7,
+          "normalMap": false
+        },
+        {
+          "name": "Vehicle_Exterior_mm_cab",
+          "type": "MeshStandardMaterial",
+          "color": "ffffff",
+          "roughness": 0.5,
+          "metalness": 0,
+          "envMap": true,
+          "envMapIntensity": 0.7,
+          "normalMap": false
+        },
+        {
+          "name": "Vehicle_Exterior_mm_chassis",
+          "type": "MeshStandardMaterial",
+          "color": "ffffff",
+          "roughness": 0.5,
+          "metalness": 0,
+          "envMap": true,
+          "envMapIntensity": 0.7,
+          "normalMap": false
+        },
+        {
+          "name": "Vehicle_Exterior_mm_tyre",
+          "type": "MeshStandardMaterial",
+          "color": "ffffff",
+          "roughness": 0.5,
+          "metalness": 0,
+          "envMap": true,
+          "envMapIntensity": 0.7,
+          "normalMap": false
+        },
+        {
+          "name": "Vehicle_Exterior_mm_wheel",
+          "type": "MeshStandardMaterial",
+          "color": "ffffff",
+          "roughness": 0.5,
+          "metalness": 0,
+          "envMap": true,
+          "envMapIntensity": 0.7,
+          "normalMap": false
+        },
+        {
+          "name": "Vehicle_Exterior_mm_misc",
+          "type": "MeshStandardMaterial",
+          "color": "ffffff",
+          "roughness": 0.5,
+          "metalness": 0,
+          "envMap": true,
+          "envMapIntensity": 0.7,
+          "normalMap": false
+        },
+        {
+          "name": "Vehicle_Exterior_mm_rotor",
+          "type": "MeshStandardMaterial",
+          "color": "ffffff",
+          "roughness": 0.5,
+          "metalness": 0,
+          "envMap": true,
+          "envMapIntensity": 0.7,
+          "normalMap": false
+        }
+      ],
+      "textures": [
+        {
+          "slot": "map",
+          "width": 512,
+          "height": 512,
+          "anisotropy": 8
+        },
+        {
+          "slot": "envMap",
+          "width": 336,
+          "height": 256,
+          "anisotropy": 1
+        },
+        {
+          "slot": "map",
+          "width": 512,
+          "height": 512,
+          "anisotropy": 8
+        },
+        {
+          "slot": "map",
+          "width": 512,
+          "height": 512,
+          "anisotropy": 8
+        },
+        {
+          "slot": "transmissionMap",
+          "width": 512,
+          "height": 512,
+          "anisotropy": 8
+        },
+        {
+          "slot": "map",
+          "width": 512,
+          "height": 512,
+          "anisotropy": 8
+        },
+        {
+          "slot": "map",
+          "width": 512,
+          "height": 512,
+          "anisotropy": 8
+        },
+        {
+          "slot": "map",
+          "width": 512,
+          "height": 512,
+          "anisotropy": 8
+        },
+        {
+          "slot": "map",
+          "width": 512,
+          "height": 512,
+          "anisotropy": 8
+        },
+        {
+          "slot": "map",
+          "width": 256,
+          "height": 256,
+          "anisotropy": 8
+        },
+        {
+          "slot": "map",
+          "width": 512,
+          "height": 512,
+          "anisotropy": 8
+        },
+        {
+          "slot": "map",
+          "width": 256,
+          "height": 256,
+          "anisotropy": 8
+        }
+      ],
+      "heap": 235145611,
+      "transmissionTarget": {
+        "width": 1470,
+        "height": 956,
+        "samples": 0,
+        "scale": 0.5,
+        "mainDPR": 2
+      }
+    },
+    {
+      "name": "aston-night",
+      "index": 7,
+      "theme": "night",
+      "t": 0.123,
+      "file": "aston-night.png",
+      "sha256": "05f2b41d8d5273f8b062c71518253a9c10183cd2351ef3904a9aabde1e1dc727",
+      "probe": {
+        "mode": "race",
+        "locked": false,
+        "speed01": 0,
+        "progress": 0.12614160527985382,
+        "applied": 2,
+        "level": "high",
+        "still": 766.6000000238419,
+        "sinceSwitch": null,
+        "canvasW": 2940,
+        "ratio": 2
+      },
+      "environment": false,
+      "camera": {
+        "position": [
+          46.20052307590598,
+          208.2878532625406,
+          -490.5569780961339
+        ],
+        "quaternion": [
+          -0.3702543457061976,
+          -0.5383996395935492,
+          -0.28410615187685734,
+          0.701656071046874
+        ],
+        "fov": 40
+      },
+      "carBoundsCSS": {
+        "x": 860.81816002896,
+        "y": 176.87028712116472,
+        "width": 73.57374282470994,
+        "height": 62.014943227342656
+      },
+      "triangles": 23805,
+      "materials": [
+        {
+          "name": "Vehicle_Exterior_mm_ext",
+          "type": "MeshStandardMaterial",
+          "color": "ffffff",
+          "roughness": 0,
+          "metalness": 0,
+          "envMap": true,
+          "envMapIntensity": 0.14,
+          "normalMap": false
+        },
+        {
+          "name": "Vehicle_Exterior_mm_misc",
+          "type": "MeshStandardMaterial",
+          "color": "ffffff",
+          "roughness": 0.5,
+          "metalness": 0,
+          "envMap": true,
+          "envMapIntensity": 0.14,
+          "normalMap": false
+        },
+        {
+          "name": "Vehicle_Exterior_mm_windows",
+          "type": "MeshPhysicalMaterial",
+          "color": "ffffff",
+          "roughness": 0,
+          "metalness": 0,
+          "envMap": true,
+          "envMapIntensity": 0.14,
+          "normalMap": false
+        },
+        {
+          "name": "Vehicle_Exterior_mm_lights",
+          "type": "MeshStandardMaterial",
+          "color": "ffffff",
+          "roughness": 0.5,
+          "metalness": 0,
+          "envMap": true,
+          "envMapIntensity": 0.14,
+          "normalMap": false
+        },
+        {
+          "name": "Vehicle_Exterior_mm_badges",
+          "type": "MeshStandardMaterial",
+          "color": "ffffff",
+          "roughness": 0.5,
+          "metalness": 0,
+          "envMap": true,
+          "envMapIntensity": 0.14,
+          "normalMap": false
+        },
+        {
+          "name": "Vehicle_Exterior_mm_cab",
+          "type": "MeshStandardMaterial",
+          "color": "ffffff",
+          "roughness": 0.5,
+          "metalness": 0,
+          "envMap": true,
+          "envMapIntensity": 0.14,
+          "normalMap": false
+        },
+        {
+          "name": "Vehicle_Exterior_mm_chassis",
+          "type": "MeshStandardMaterial",
+          "color": "ffffff",
+          "roughness": 0.5,
+          "metalness": 0,
+          "envMap": true,
+          "envMapIntensity": 0.14,
+          "normalMap": false
+        },
+        {
+          "name": "Vehicle_Exterior_mm_tyre",
+          "type": "MeshStandardMaterial",
+          "color": "ffffff",
+          "roughness": 0.5,
+          "metalness": 0,
+          "envMap": true,
+          "envMapIntensity": 0.14,
+          "normalMap": false
+        },
+        {
+          "name": "Vehicle_Exterior_mm_wheel",
+          "type": "MeshStandardMaterial",
+          "color": "ffffff",
+          "roughness": 0.5,
+          "metalness": 0,
+          "envMap": true,
+          "envMapIntensity": 0.14,
+          "normalMap": false
+        },
+        {
+          "name": "Vehicle_Exterior_mm_misc",
+          "type": "MeshStandardMaterial",
+          "color": "ffffff",
+          "roughness": 0.5,
+          "metalness": 0,
+          "envMap": true,
+          "envMapIntensity": 0.14,
+          "normalMap": false
+        },
+        {
+          "name": "Vehicle_Exterior_mm_rotor",
+          "type": "MeshStandardMaterial",
+          "color": "ffffff",
+          "roughness": 0.5,
+          "metalness": 0,
+          "envMap": true,
+          "envMapIntensity": 0.14,
+          "normalMap": false
+        }
+      ],
+      "textures": [
+        {
+          "slot": "map",
+          "width": 512,
+          "height": 512,
+          "anisotropy": 8
+        },
+        {
+          "slot": "envMap",
+          "width": 336,
+          "height": 256,
+          "anisotropy": 1
+        },
+        {
+          "slot": "map",
+          "width": 512,
+          "height": 512,
+          "anisotropy": 8
+        },
+        {
+          "slot": "map",
+          "width": 512,
+          "height": 512,
+          "anisotropy": 8
+        },
+        {
+          "slot": "transmissionMap",
+          "width": 512,
+          "height": 512,
+          "anisotropy": 8
+        },
+        {
+          "slot": "map",
+          "width": 512,
+          "height": 512,
+          "anisotropy": 8
+        },
+        {
+          "slot": "map",
+          "width": 512,
+          "height": 512,
+          "anisotropy": 8
+        },
+        {
+          "slot": "map",
+          "width": 512,
+          "height": 512,
+          "anisotropy": 8
+        },
+        {
+          "slot": "map",
+          "width": 512,
+          "height": 512,
+          "anisotropy": 8
+        },
+        {
+          "slot": "map",
+          "width": 256,
+          "height": 256,
+          "anisotropy": 8
+        },
+        {
+          "slot": "map",
+          "width": 512,
+          "height": 512,
+          "anisotropy": 8
+        },
+        {
+          "slot": "map",
+          "width": 256,
+          "height": 256,
+          "anisotropy": 8
+        }
+      ],
+      "heap": 236141831,
+      "transmissionTarget": {
+        "width": 1470,
+        "height": 956,
+        "samples": 0,
+        "scale": 0.5,
+        "mainDPR": 2
+      }
+    }
+  ],
+  "colorPipeline": {
+    "exposureA": 0.1,
+    "exposureB": 4,
+    "changedChannels": 16863840,
+    "maxDelta": 227,
+    "rendererToneMapping": 4,
+    "passes": [
+      {
+        "type": "RenderPass",
+        "fragmentHasToneMappingCode": false
+      },
+      {
+        "type": "ShaderPass",
+        "fragmentHasToneMappingCode": false
+      },
+      {
+        "type": "ShaderPass",
+        "fragmentHasToneMappingCode": false
+      },
+      {
+        "type": "SMAAPass",
+        "fragmentHasToneMappingCode": false
+      }
+    ]
+  }
+}

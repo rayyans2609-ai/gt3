@@ -1,0 +1,35 @@
+{
+  "a": "local/evidence/p3u/W6-e4/glass-product",
+  "b": "local/evidence/p3u/W6-e4/glass-repeat",
+  "identical": true,
+  "results": [
+    {
+      "state": "ferrari-day",
+      "identical": true,
+      "maxChannelDelta": 0,
+      "differingPixels": 0,
+      "pixels": 5621280
+    },
+    {
+      "state": "ferrari-night",
+      "identical": true,
+      "maxChannelDelta": 0,
+      "differingPixels": 0,
+      "pixels": 5621280
+    },
+    {
+      "state": "aston-day",
+      "identical": true,
+      "maxChannelDelta": 0,
+      "differingPixels": 0,
+      "pixels": 5621280
+    },
+    {
+      "state": "aston-night",
+      "identical": true,
+      "maxChannelDelta": 0,
+      "differingPixels": 0,
+      "pixels": 5621280
+    }
+  ]
+}

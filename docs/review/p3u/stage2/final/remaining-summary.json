@@ -1,0 +1,30 @@
+{
+  "result": "partial",
+  "runner": "bash local/briefs/run-remaining.sh",
+  "runnerInvocations": 1,
+  "exitCode": 75,
+  "failedStage": "swap browser preflight",
+  "stopReason": "paging rising {\"pageouts\":40,\"swapouts\":0}",
+  "source": {"branch": "p3u-final", "sha": "fa9f19be4b6c073212583db4cecb2b41126fa083", "dirtyTrackedFiles": 0},
+  "provenance": {"serverStarted": false, "serverRecord": null, "hostIdentity": "Apple M4 / Mac16,12 / arm64 / 16 GB / macOS 15.5", "node": "v24.21.0", "chrome": "155.0.8059.80"},
+  "diagnostics": {"runtimeErrors": null, "incomplete": null, "monitorError": null, "gpuDisjoint": null, "gpuQueries": null, "status": "not produced; admission stopped before server or runtime"},
+  "functionals": {"swap": "not run; preflight failed", "preready": "not reached"},
+  "sustained": {
+    "smooth600s": "not started", "quality600s": "not started",
+    "rafGpuP50P95P99Max": null, "thresholdCountsGt25Gt33Gt50": null,
+    "toursGatesThemes": null, "steadyVsSwap": null, "firstLastMinute": null,
+    "memoryResourceGrowth": null, "reason": "admission stopped before measured runs"
+  },
+  "hostAtFailure": {
+    "profile": "m4-16gb", "pressureStartEnd": [1, 1],
+    "pageoutsStartEnd": [822403, 822443], "pageoutsDelta": 40,
+    "swapoutsStartEnd": [1155784, 1155784], "swapoutsDelta": 0,
+    "swapUsedMB": 1309.62, "swapFreeMB": 738.38, "swapTotalMB": 2048,
+    "cpuIdlePercent": [78.9, 59.48], "cpuSystemPercent": [11.45, 19.67],
+    "heavyWorkloads": 0, "browsers": 0, "observedAgentProcesses": 3
+  },
+  "powerThermalDisplay": "sustained checks were not reached; no temperature/frequency or physical display result",
+  "retainedPriorProof": {"path": "../final/summary.json", "lockedStates": 23, "defaultStates": 23, "differingPixelsEach": 0, "comparedPixelsEach": 129289440},
+  "evidence": {"preflight": "swap/preflight.json", "report": "REPORT.md", "prereadyDirectory": "preready/"},
+  "continuation": "Resume remaining checks only after browser admission passes its paging stability gate. Do not repeat the completed identity proofs."
+}

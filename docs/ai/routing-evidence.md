@@ -72,6 +72,8 @@ A running record of **material** model work. It feeds `model-routing.md` §15, w
 
 | 2026-10-17 | P3u W6 glass restart / combined minimap+glass capture attempt | test | gpt-6-luna @ medium | partial (host blocked) | N | — | Sol inspected redirected W6 run.log; no app change | Sol | sol-led, m4-16gb. W6verify2: actual launch17:08, stopped after harness admission refused (paging, then pressure/CPU);12.3K tokens, failed to write requested report. CandidateChecks: stopped before harness on fresh preflight pageouts2;20.4K tokens, faithful report. Neither produced runtime proof. Manager admission pass before launch does not guarantee the next admission window; don't keep spawning models on unchanged host failures. |
 
+| 2026-10-17 | P3u candidate acceptance / final qualification | test + integration | Luna Medium (execution), Sol High (judgment/integration); owner-directed Terra High minimap | partial: accepted source, host-blocked final qualification | Y for candidate artifacts | — | Sol: Unlocked gate + focused diagnostic entry; no Terra product rework | Sol | e4: minimap22states/profile and4glass fresh-page comparisons pass; W6 binding proved and4repeat PNGs exact. Final Locked/default23states each zero pixel delta atfa9f19b. FinalVerify pressure2 stop, one continuation40pageouts stop, neither ran functionals/sustained. No further worker retries on unchanged host; final review explicitly incomplete. Original W6 engineering/evidence preserved, no Claude calls. |
+
 ## Emerging patterns
 
 *(Fill this in once repeated rows support a claim, for example "Muse unusually reliable at contained CSS/UI", "DeepSeek effective on state-tracing bugs", "Bunny retrieval did / didn't cut first-pass failures". Cite the row dates. Leave empty until the evidence exists.)*

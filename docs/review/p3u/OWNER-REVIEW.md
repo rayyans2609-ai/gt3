@@ -1,0 +1,74 @@
+# Phase 3 Unlocked — final owner review
+
+**Owner review package, p3u/e4. Source engineering is integrated; final qualification is blocked by host admission. Stage2 is not complete. No owner acceptance, main merge or push has occurred.**
+
+## Recommended lock-in
+
+| | Smooth (Unlocked default) | Quality (explicit option) |
+|---|---|---|
+| URL | `?version=unlocked` | `?version=unlocked&mode=quality` |
+| Main render DPR / AA | fixed1.5 / SMAA | fixed2 / SMAA |
+| Tone / reflections / car specular | Neutral Day → ACES Night / medium / quarter Day | same |
+| Shadows | stabilized4096² PCFSoft, existing120m coverage, added opaque furniture casters | same |
+| Car textures / filtering | Tour512 / anisotropy8 | same |
+| Loading | full roster warm before ready, compile/upload ahead, scene-only warm draws | same |
+| Glass background | CSS-resolution, single-sample private transmission target | same |
+
+Recommend retaining Smooth as the unlocked default and Quality as an explicit higher-resolution option. Default URL and `?version=locked` retain the accepted Phase3. The owner chooses final visual acceptance and trackpad feel.
+
+## Review images
+
+- [Approved Day colour/reflections comparison](stage1/FINAL/day.png), [Night](stage1/FINAL/night.png), [Day/Night transition](stage1/FINAL/transition.png). These are the already-approved Stage1 choices, retained.
+- [Smooth/Quality resolution and AA comparison](stage2/W3/modes-aa.png): first two columns show the shipped SMAA modes; MSAA columns are diagnostic alternatives, not shipped selections.
+- [Shadow before / stabilized2048 / stabilized4096](stage2/W3/shadows.png); [opaque pit-wall casting](stage2/W3/casters.png). The strongest delivered gain is stability in motion: a0.1-texel light shift changed4905 Day pixels before and zero after (Night1517→0), rather than a large change in still-image darkness.
+- [Image-integrity grain/AA before](stage2/W4/grain-range-before.png) / [after](stage2/W4/grain-range-after.png); [Locked / before / after car crop](stage2/W4/rest-crop-locked_vs_before_vs_after.png). Grain-induced edge flicker at rest138→0events/frame/MP in Smooth; Quality130→0. Thin geometry can still shimmer while moving.
+- [Minimap Day before](stage2/minimap/before-day-fractional.png) / [after](stage2/minimap/after-day-fractional.png), [Day zoom before](stage2/minimap/before-day-fractional-zoom4x.png) / [after](stage2/minimap/after-day-fractional-zoom4x.png); [Night zoom before](stage2/minimap/before-night-fractional-zoom4x.png) / [after](stage2/minimap/after-night-fractional-zoom4x.png). These isolate the route on a neutral backing. The old repeated brightness bands are substantially reduced; raster edges remain at4×.
+- Glass target [Ferrari Day stock](stage2/W6/stock-ferrari-day-car-zoom2x.png) / [product](stage2/W6/product-ferrari-day-car-zoom2x.png), [Aston Day stock](stage2/W6/stock-aston-day-car-zoom2x.png) / [product](stage2/W6/product-aston-day-car-zoom2x.png), [Night stock](stage2/W6/stock-aston-night-car-zoom2x.png) / [product](stage2/W6/product-aston-night-car-zoom2x.png). Four repeated captures are pixel-identical; stock/product changes3–46pixels of5.62million per state, max channel delta1–7. This does not prove every possible camera view.
+
+## Delivered engineering
+
+W3 preserves existing lighting while stabilizing and sharpening shadows, adding missing opaque furniture casters, increasing mode resolution and consuming anisotropy8. W4 moves grain/dither behind SMAA without another fullscreen pass, removing grain-driven edge instability. W5 keeps all cars GPU-ready before input, consumes texture/filter settings, and reduces warm-up work by compiling/uploading ahead and warming the scene pass. W6 bounds the private glass-transmission pass that can become expensive at swaps, preserving main-scene and shadow quality. The minimap replaces Unlocked’s160 constant-alpha pieces with a continuous completed base and48 moving local gradients; Locked keeps its original implementation.22states/profile passed, including fractional, reverse, gantry, finish and reset.
+
+## Meaningful tradeoffs
+
+- Quality renders1.78× Smooth's main pixel count. It provides finer silhouettes/livery at higher GPU work and power risk; measured sustained evidence below decides practical cost. It is not artificially capped at50–55FPS.
+- CSS-density glass background sampling is a targeted quality/performance tradeoff on Ferrari/Aston glazing. Review the actual crops; main-scene geometry/shadows stay at the selected mode resolution.
+- Retain Tour textures: full textures added~529MiB decoded storage and~524–562MB process footprint for a small visible Tour benefit, plus~0.4–0.5s startup in W5's comparison. Existing `&textures=full` is an experimental review override, not a sustained-verified final recommendation.
+- Retain SMAA. MSAA2/4 improved some motion metrics but worsened some strong-edge reversals or GPU cost in pre-integration diagnostics. A final integrated MSAA configuration has not been qualified. Adopting it would need more work, not just selecting an equivalent approved option.
+- Optional `&grain=css` reproduces the softer Locked grain scale. Recommend retaining the already-approved default grain unless the owner prefers the comparison in [this sheet](stage2/W4/grain-scale-locked_smooth_smoothcss_quality.png).
+- Night retains the approved lighting and darkness. Phase8 route lighting, stronger illumination and scenery are outside this reopening.
+
+## Sustained measurements and outstanding qualification
+
+Fresh integrated600s Smooth and600s Quality have **not started**. FinalVerify completed image identity but stopped at swap admission (pressure2). One bounded continuation stopped before launch with pressure1 but40pageouts during admission. [Capture report](stage2/final/capture-report.md), [remaining-stage stop](stage2/final/remaining-report.md). No guard was relaxed. No demonstrated product defect caused these stops.
+
+Recovered W6 results are diagnostic evidence of the implementation, **not final integrated qualification**. Both covered15Tours/135crossings, alternating Day/Night, hardware GPU/fullscreen. The original monitor omitted canonical CPU/paging automatic stops; the corrected final harness includes them. Minimap changes were absent.
+
+| Mode | Duration / frames | RAF p95 / p99 / max ms | GPU p95 / p99 ms | RAF >33 / >50 ms |
+|---|---|---|---|---|
+| Smooth |600.5s /36,019|17.4 /17.6 /50.2|14.82 /15.50|10 /1|
+| Quality |600.4s /36,011|17.5 /17.6 /34.1|15.02 /15.62|14 /0|
+
+Programs116/textures303/geometries1501 stayed flat; reported pressure normal/swapout delta0/no pmset warning. Smooth’s50.2ms interval occurred during a BMW swap with GPU54.55ms and no long JS task/new shader. The exact original83/116ms events lack complete original traces and cannot be individually attributed. No universal stall-elimination claim.
+
+A short recovered Quality session changed maximum233.4→34.1ms and >50ms2→0 after the patch. Single-session uncontrolled observations do not establish a sustained causal speed ratio. Fresh glass captures do prove actual target binding and tiny measured still-image differences. [W6 evidence and limits](stage2/W6/REPORT.md).
+
+Measurements report application RAF cadence and WebGL GPU elapsed time, not displayed-frame counts. Process RSS is not direct GPU allocation. `pmset` thermal messages provide warnings, not temperature or frequency telemetry. Localhost startup measures local cached assets, not internet download performance. Automated wheel input cannot accept subjective trackpad feel on the owner's behalf.
+
+## Regression and provenance
+
+Final sourcefa9f19b: **Locked23/23 and default23/23 pixel-identical to acceptedfa12e92**, zero changed pixels over129,289,440 compared pixels per profile, no capture errors.10cars×Day/Night plusgrid/gate/finish.1470×956CSS/deviceDPR2/renderDPR1, headless emulation: deterministic image identity, not physical fullscreen pacing. [Locked diff](stage2/final/locked-diff.json), [default diff](stage2/final/default-diff.json), [provenance](stage2/final/locked-provenance.json).
+
+Earlier WaveA V1 passed swap, timer/finish, route persistence and pre-ready input after URL correction. Unchanged timer/finish and persistence evidence is reused. The planned Unlocked swap/pre-ready refresh remains unrun because of host admission. Minimap22states/profile and Ferrari/Aston target/visual checks passed. Integrated production build PASS.
+
+Integration branch:`p3u-profiles`; W6 checkpoint:`35a58ed`. Final source HEAD: `fa9f19be4b6c073212583db4cecb2b41126fa083` (production build PASS). Later review/evidence commits change documentation and copied images only; the tested product dependency cone is unchanged. Main:`fa12e92`, untouched. No push.
+
+## Blockers, limitations and owner checkpoint
+
+**Completion blockers:** Unlocked swap/pre-ready refresh and fresh600s/mode on integrated source remain unrun because host admission is unstable. Smallest path: close unused memory-heavy apps/tabs, obtain stable admission, then those checks only (about25–30min once admitted). Preserve completed evidence; no new matrix, harness expansion or cosmetic scope.
+
+**Proposed acceptable limitations:** thin-feature motion shimmer, occasional swap misses including the recovered50.2ms event, targeted glass sampling tradeoff, minimap raster edges at large zoom, and a Three r180 private-target guard that must be revalidated on renderer upgrades. Final sustained results may alter the performance recommendation. Approved Night darkness/lighting stays unchanged.
+
+**Provisional lock-in recommendation:** Smooth default and Quality option with the shared defaults above; retain Tour512/aniso8/SMAA, improved shadows/image integrity/loading, W6 transmission budget and Unlocked minimap smoothing. Avoid unqualified full-texture/MSAA experiments at closeout.
+
+The owner can review these visual choices now. **Do not declare Stage2 complete or merge main until the remaining qualification is supplied and the owner explicitly locks in the result and authorizes merge.** Main remainsfa12e92348241ef5e42a57abc72f586c552ee888. No push or Phase4. Original W6/Terra work, source, raw captures and restart commands remain preserved.

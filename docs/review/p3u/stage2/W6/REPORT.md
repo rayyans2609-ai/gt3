@@ -22,7 +22,7 @@ The historical83/116ms intervals are consistent with the reproduced transmission
 
 ## Completion verification
 
-Integrated syntax and Vite production build pass. Luna W6verify stopped at host admission after pageouts rose; it produced no new runtime proof. A deterministic visual adapter now explicitly sets and records both transmission scale and samples, and the swap harness accepts a profile query. Final target settings, Ferrari/Aston Day/Night comparisons, Locked/default23-state diffs and affected loading/swap checks are pending a stable host window. Final integrated sustained measurements follow the minimap integration. Until those reports are attached, completion remains pending.
+Integrated syntax and final production build pass atfa9f19b. CandidateChecks4 under p3u/e4 supplied fresh-page target proof: at main DPR2 product/repeat1470×956 samples0 scale0.5, stock2940×1912 samples4 scale1. Four Ferrari/Aston Day/Night repeat images are pixel-identical. Stock/product differences are46/15/22/3pixels respectively (of5,621,280 each), maximum channel differences7/1/6/1. Sol inspected Ferrari crops; no material image loss visible. The selected crops, manifests and diff JSONs accompany this report. These are deterministic stills at1470×956CSS, not fullscreen timing geometry or proof across every camera pose. Final integrated Locked/default, affected functional and sustained checks are running separately.
 
 ### Host-monitor correction before final measurements
 

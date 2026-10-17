@@ -1,0 +1,193 @@
+{
+  "definition": "Mean CIE L* of fixed CSS pixel rectangles, screenshot DPR2. Same T1 pose t=.123, away from HUD/car. Far region is terrain, not a sky claim.",
+  "rois": {
+    "road": [
+      520,
+      65,
+      100,
+      25
+    ],
+    "terrain": [
+      450,
+      600,
+      100,
+      80
+    ],
+    "farTerrain": [
+      1280,
+      180,
+      100,
+      80
+    ]
+  },
+  "results": [
+    {
+      "key": "locked",
+      "theme": "day",
+      "means": {
+        "road": 11.149099614160418,
+        "terrain": 26.980672182948666,
+        "farTerrain": 23.520731857956953
+      },
+      "delta": {
+        "road": 0,
+        "terrain": 0,
+        "farTerrain": 0
+      }
+    },
+    {
+      "key": "locked",
+      "theme": "night",
+      "means": {
+        "road": 1.6556363841937765,
+        "terrain": 3.2413844105896086,
+        "farTerrain": 3.6724585594986063
+      },
+      "delta": {
+        "road": 0,
+        "terrain": 0,
+        "farTerrain": 0
+      }
+    },
+    {
+      "key": "aces-mid",
+      "theme": "day",
+      "means": {
+        "road": 12.326509120894492,
+        "terrain": 25.635278061163962,
+        "farTerrain": 22.826080040363784
+      },
+      "delta": {
+        "road": 1.1774095067340742,
+        "terrain": -1.3453941217847039,
+        "farTerrain": -0.6946518175931686
+      }
+    },
+    {
+      "key": "aces-mid",
+      "theme": "night",
+      "means": {
+        "road": 1.2140348441310111,
+        "terrain": 3.4040320911544364,
+        "farTerrain": 3.818495705612907
+      },
+      "delta": {
+        "road": -0.4416015400627653,
+        "terrain": 0.1626476805648278,
+        "farTerrain": 0.14603714611430085
+      }
+    },
+    {
+      "key": "agx-mid",
+      "theme": "day",
+      "means": {
+        "road": 13.455471678654284,
+        "terrain": 24.138921990467583,
+        "farTerrain": 21.84001036319495
+      },
+      "delta": {
+        "road": 2.306372064493866,
+        "terrain": -2.841750192481083,
+        "farTerrain": -1.680721494762004
+      }
+    },
+    {
+      "key": "agx-mid",
+      "theme": "night",
+      "means": {
+        "road": 1.157207378063594,
+        "terrain": 3.3858983292438514,
+        "farTerrain": 3.7981037326148392
+      },
+      "delta": {
+        "road": -0.4984290061301824,
+        "terrain": 0.1445139186542428,
+        "farTerrain": 0.1256451731162329
+      }
+    },
+    {
+      "key": "neutral-mid",
+      "theme": "day",
+      "means": {
+        "road": 9.967695364393233,
+        "terrain": 27.78547922818637,
+        "farTerrain": 25.391641290460523
+      },
+      "delta": {
+        "road": -1.1814042497671853,
+        "terrain": 0.8048070452377054,
+        "farTerrain": 1.87090943250357
+      }
+    },
+    {
+      "key": "neutral-mid",
+      "theme": "night",
+      "means": {
+        "road": 0.7069963506319724,
+        "terrain": 3.57323709348507,
+        "farTerrain": 3.973275471762578
+      },
+      "delta": {
+        "road": -0.948640033561804,
+        "terrain": 0.33185268289546155,
+        "farTerrain": 0.30081691226397167
+      }
+    },
+    {
+      "key": "neutral-low",
+      "theme": "day",
+      "means": {
+        "road": 9.967695364393233,
+        "terrain": 27.78547922818637,
+        "farTerrain": 25.391641290460523
+      },
+      "delta": {
+        "road": -1.1814042497671853,
+        "terrain": 0.8048070452377054,
+        "farTerrain": 1.87090943250357
+      }
+    },
+    {
+      "key": "neutral-low",
+      "theme": "night",
+      "means": {
+        "road": 0.7069963506319724,
+        "terrain": 3.57323709348507,
+        "farTerrain": 3.973275471762578
+      },
+      "delta": {
+        "road": -0.948640033561804,
+        "terrain": 0.33185268289546155,
+        "farTerrain": 0.30081691226397167
+      }
+    },
+    {
+      "key": "neutral-high",
+      "theme": "day",
+      "means": {
+        "road": 9.967695364393233,
+        "terrain": 27.78547922818637,
+        "farTerrain": 25.391641290460523
+      },
+      "delta": {
+        "road": -1.1814042497671853,
+        "terrain": 0.8048070452377054,
+        "farTerrain": 1.87090943250357
+      }
+    },
+    {
+      "key": "neutral-high",
+      "theme": "night",
+      "means": {
+        "road": 0.7069963506319724,
+        "terrain": 3.57323709348507,
+        "farTerrain": 3.973275471762578
+      },
+      "delta": {
+        "road": -0.948640033561804,
+        "terrain": 0.33185268289546155,
+        "farTerrain": 0.30081691226397167
+      }
+    }
+  ]
+}

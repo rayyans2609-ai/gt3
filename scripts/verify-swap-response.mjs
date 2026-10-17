@@ -16,7 +16,7 @@ await mkdir(outDir, { recursive: true });
 await mkdir(captureDir, { recursive: true });
 const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
 const assert = (ok, message) => { if (!ok) throw new Error(message); };
-const report = { base, startedAt: new Date().toISOString(), variants: {}, errors: [] };
+const report = { base, query: process.env.GT3_QUERY || '', startedAt: new Date().toISOString(), variants: {}, errors: [] };
 let browser = null;
 const launchBrowser = () => puppeteer.launch({
   executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
@@ -152,7 +152,10 @@ async function variant(name, query) {
   });
 
   try {
-    await page.goto(`${base}/${query}`, { waitUntil: 'domcontentloaded', timeout: 120000 });
+    const url = new URL('/', base);
+    for (const [key, value] of new URLSearchParams(process.env.GT3_QUERY || '')) url.searchParams.set(key, value);
+    for (const [key, value] of new URLSearchParams(query)) url.searchParams.set(key, value);
+    await page.goto(url.href, { waitUntil: 'domcontentloaded', timeout: 120000 });
     await page.mouse.move(800, 450);
 
     await record('A1 input during GPU warm-up is ignored; first gesture after ready starts', async () => {

@@ -1,0 +1,35 @@
+{
+  "a": "local/evidence/p3u/W6-e4/glass-stock",
+  "b": "local/evidence/p3u/W6-e4/glass-product",
+  "identical": false,
+  "results": [
+    {
+      "state": "ferrari-day",
+      "identical": false,
+      "maxChannelDelta": 7,
+      "differingPixels": 46,
+      "pixels": 5621280
+    },
+    {
+      "state": "ferrari-night",
+      "identical": false,
+      "maxChannelDelta": 1,
+      "differingPixels": 15,
+      "pixels": 5621280
+    },
+    {
+      "state": "aston-day",
+      "identical": false,
+      "maxChannelDelta": 6,
+      "differingPixels": 22,
+      "pixels": 5621280
+    },
+    {
+      "state": "aston-night",
+      "identical": false,
+      "maxChannelDelta": 1,
+      "differingPixels": 3,
+      "pixels": 5621280
+    }
+  ]
+}

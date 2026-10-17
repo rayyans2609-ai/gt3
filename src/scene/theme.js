@@ -6,6 +6,8 @@
  * linear space rather than interpolating display-encoded hex bytes.
  */
 import * as THREE from 'three';
+import { SETTINGS, TONE, REFLECTION } from '../core/renderProfile.js';
+import { setCarReflectionStrength, setCarReviewTreatment } from './carEnvironment.js';
 import { state, set, subscribe } from '../core/state.js';
 import {
   ambient,
@@ -14,6 +16,7 @@ import {
   setAtmosphere,
   sun,
   toneMappingExposure,
+  outputThemeWeight,
 } from './sceneSetup.js';
 import { setGroundTint, setSky } from './environment.js';
 
@@ -54,6 +57,9 @@ export const PRESETS = Object.freeze({
 });
 
 function makeFrame(preset) {
+  const treatment = SETTINGS.themes?.[preset === PRESETS.night ? 'night' : 'day'];
+  const endpointTone = TONE === 'split' ? (preset === PRESETS.night ? 'aces' : 'neutral') : TONE;
+  const atmosphere = treatment?.atmosphere[endpointTone];
   return {
     sunColor: new THREE.Color(preset.sun.color),
     sunIntensity: preset.sun.intensity,
@@ -75,6 +81,13 @@ function makeFrame(preset) {
     exposure: preset.exposure,
     grassColor: new THREE.Color(preset.grassTint.color),
     grassAmount: preset.grassTint.amount,
+    ...(treatment ? {
+      nightWeight: preset === PRESETS.night ? 1 : 0,
+      exposure: treatment.exposure[endpointTone], reflection: treatment.reflection[REFLECTION],
+      fogColor: new THREE.Color(...atmosphere.fog),
+      skyHorizon: new THREE.Color(...atmosphere.horizon),
+      skyZenith: new THREE.Color(...atmosphere.zenith),
+    } : {}),
   };
 }
 
@@ -96,6 +109,8 @@ function copyFrame(source, target = makeFrame(PRESETS.day)) {
   target.skyZenith.copy(source.skyZenith);
   target.skySunColor.copy(source.skySunColor);
   target.skySunIntensity = source.skySunIntensity;
+  if (SETTINGS.carEnvironment) target.reflection = source.reflection;
+  if (SETTINGS.carEnvironment) target.nightWeight = source.nightWeight;
   target.exposure = source.exposure;
   target.grassColor.copy(source.grassColor);
   target.grassAmount = source.grassAmount;
@@ -120,6 +135,8 @@ function blendFrame(from, to, amount, out) {
   out.skyZenith.lerpColors(from.skyZenith, to.skyZenith, amount);
   out.skySunColor.lerpColors(from.skySunColor, to.skySunColor, amount);
   out.skySunIntensity = THREE.MathUtils.lerp(from.skySunIntensity, to.skySunIntensity, amount);
+  if (SETTINGS.carEnvironment) out.reflection = THREE.MathUtils.lerp(from.reflection, to.reflection, amount);
+  if (SETTINGS.carEnvironment) out.nightWeight = THREE.MathUtils.lerp(from.nightWeight, to.nightWeight, amount);
   out.exposure = THREE.MathUtils.lerp(from.exposure, to.exposure, amount);
   out.grassColor.lerpColors(from.grassColor, to.grassColor, amount);
   out.grassAmount = THREE.MathUtils.lerp(from.grassAmount, to.grassAmount, amount);
@@ -195,6 +212,9 @@ function writeFrame(frame) {
     uSunColor: frame.skySunColor,
     uSunIntensity: frame.skySunIntensity,
   });
+  if (SETTINGS.carEnvironment) setCarReflectionStrength(frame.reflection);
+  if (SETTINGS.carEnvironment) setCarReviewTreatment(frame.nightWeight, frame.exposure);
+  if (SETTINGS.output) outputThemeWeight.value = frame.nightWeight;
   toneMappingExposure.value = frame.exposure;
   setGroundTint(frame.grassColor, frame.grassAmount);
 }

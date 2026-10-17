@@ -1,5 +1,7 @@
 /** Exercise car render states through the Tour renderer before drive unlock. */
 import * as THREE from 'three';
+import { SETTINGS, UNLOCKED } from '../core/renderProfile.js';
+import { prepareCarEnvironment } from './carEnvironment.js';
 import { CARS } from '../data/cars.js';
 import { getCarModel } from './cars.js';
 import { carMount, rig } from './carRig.js';
@@ -15,10 +17,24 @@ const TEXTURES_PER_FRAME = 4;
 // recovers that without changing the draw set. 12 ms keeps frames near 60 fps when
 // draws are cheap; a single heavy first-use draw may still overshoot (always >= 1 step).
 export const WARMUP_FRAME_BUDGET_MS = 12;
+// Unlocked only. The locked scheduler above is the accepted baseline and stays as it is.
+// Warm-up runs behind the start screen, so a longer per-frame budget costs nothing the owner
+// can see; shader compiles and texture uploads run ahead of the draws instead of one car at a
+// time (M4, p3u W5: ~1.6 s of a 2.34 s warm-up was waiting between steps, only ~0.76 s was draw work).
+export const UNLOCKED_FRAME_BUDGET_MS = 24;
+// Unlocked draws render the scene pass only (same lights, fog, shadow pass and render target
+// as the live RenderPass); the post chain's programs are still created by the one composer
+// control draw at the end. `?warmdraw=composer` restores the full chain for every draw.
+// Draws must keep MESHES_PER_FRAME: larger batches leave one car program uncreated (M4: 115, not 116).
+const SCENE_ONLY_DRAWS = UNLOCKED &&
+  new URLSearchParams(globalThis.location?.search || '').get('warmdraw') !== 'composer';
+const COMPILE_AHEAD_JOBS = 8; // normal+fade programs of the next four cars
+const TEXTURE_AHEAD_CARS = 3;
 
-export function createCarWarmup(onProgress, onStep, { throwAtDraw = -1 } = {}) {
+export function createCarWarmup(onProgress, onStep, { throwAtDraw = -1, indices = null } = {}) {
   const starter = carMount.children[0];
   if (!starter) throw new Error('[warmup] No visible starter car');
+  if (SETTINGS.carEnvironment) prepareCarEnvironment(renderer, CARS.map((_, index) => getCarModel(index)));
   const originalFog = scene.fog;
   const cars = CARS.map((_, index) => {
     const model = getCarModel(index);
@@ -34,6 +50,9 @@ export function createCarWarmup(onProgress, onStep, { throwAtDraw = -1 } = {}) {
     });
     return { model, meshes, snapshot, allVisible };
   });
+  // The cars this warm-up prepares and draws. The roster default is all ten; a subset (unlocked
+  // staged prewarm) still hides and restores every car, so nothing outside it is disturbed.
+  const warm = indices ? indices.map(index => cars[index]) : cars;
   let mappedTexture = null;
   for (const car of cars) {
     for (const { material } of car.snapshot) {
@@ -55,9 +74,9 @@ export function createCarWarmup(onProgress, onStep, { throwAtDraw = -1 } = {}) {
     rig.add(mesh);
     return mesh;
   });
-  const draws = cars.reduce((sum, car) =>
+  const draws = warm.reduce((sum, car) =>
     sum + Math.max(1, Math.ceil(car.meshes.length / MESHES_PER_FRAME)) * 2,
-    2 + shadowProbes.length + cars.length - 1 + cars.length);
+    2 + shadowProbes.length + warm.length - 1 + warm.length);
   let completed = 0;
   let carIndex = 0;
   let offset = 0;
@@ -124,7 +143,13 @@ export function createCarWarmup(onProgress, onStep, { throwAtDraw = -1 } = {}) {
     setup?.();
     if (++drawNumber === throwAtDraw) throw new Error('Injected mid-warm-up draw failure');
     const renderAt = performance.now();
-    render(0);
+    if (SCENE_ONLY_DRAWS && phase !== 'full-scene-control') {
+      // Same scene, lights, fog and shadow pass into the RenderPass target; skips the
+      // post chain, whose programs the composer-rendered control draw still warms.
+      const target = renderer.getRenderTarget();
+      renderer.setRenderTarget(composer.readBuffer);
+      try { renderer.render(scene, camera); } finally { renderer.setRenderTarget(target); }
+    } else render(0);
     const rendered = performance.now();
     onStep?.({ phase, startedAt: started, endedAt: rendered,
       setupMs: renderAt - started,
@@ -191,21 +216,103 @@ export function createCarWarmup(onProgress, onStep, { throwAtDraw = -1 } = {}) {
     }
   }
 
+  // ---- Unlocked scheduler ------------------------------------------------------------
+  // The accepted (locked) prepare() above serialises compile -> 4 uploads/frame -> draws, one
+  // car at a time. This variant keeps the same draws in the same order but runs the shader
+  // compiles (normal and cached-fade variants) and texture uploads ahead of them, bounded by
+  // the frame's wall-time budget, so the wait for one car overlaps the preparation of the next.
+  let frameStartedAt = 0;
+  let frameBudgetMs = WARMUP_FRAME_BUDGET_MS;
+  const aheadJobs = [];
+  const textureQueue = [];
+  let aheadIssued = 0;
+  let textureCursor = 0;
+
+  function buildAhead() {
+    const queued = new Set();
+    warm.forEach((car, index) => {
+      aheadJobs.push({ car, fading: false, issued: false, ready: false, failed: false, error: null });
+      aheadJobs.push({ car, fading: true, issued: false, ready: false, failed: false, error: null });
+      car.model.traverse(object => {
+        if (!object.isMesh) return;
+        const materials = Array.isArray(object.material) ? object.material : [object.material];
+        for (const material of materials) for (const value of Object.values(material || {})) {
+          if (value?.isTexture && !value.isRenderTargetTexture && !queued.has(value)) {
+            queued.add(value);
+            textureQueue.push({ texture: value, car: index });
+          }
+        }
+      });
+    });
+  }
+
+  function issueCompile(job) {
+    job.issued = true;
+    const target = renderer.getRenderTarget();
+    const face = renderer.getActiveCubeFace();
+    const mip = renderer.getActiveMipmapLevel();
+    try {
+      if (job.fading) beginWarmFade(job.car.model, 'crossfade');
+      renderer.setRenderTarget(composer.readBuffer);
+      Promise.resolve(renderer.compileAsync(job.car.model, camera, scene)).then(() => {
+        job.ready = true;
+      }, error => {
+        job.failed = true;
+        job.error = error;
+      });
+    } finally {
+      renderer.setRenderTarget(target, face, mip);
+      // The draw loop switches a car to its fade materials itself; hand it back as found.
+      if (job.fading) for (const entry of job.car.snapshot) entry.object.material = entry.material;
+    }
+  }
+
+  function prepareAhead() {
+    if (!parallelCompile) return false;
+    try {
+      if (!aheadJobs.length) buildAhead();
+      const current = carIndex * 2 + (fading ? 1 : 0);
+      const overBudget = () => performance.now() - frameStartedAt >= frameBudgetMs;
+      while (aheadIssued < aheadJobs.length && aheadIssued < current + COMPILE_AHEAD_JOBS &&
+          (aheadIssued <= current || !overBudget())) {
+        issueCompile(aheadJobs[aheadIssued++]);
+      }
+      for (const job of aheadJobs) if (job.failed) throw job.error;
+      while (textureCursor < textureQueue.length &&
+          textureQueue[textureCursor].car <= carIndex + TEXTURE_AHEAD_CARS && !overBudget()) {
+        const { texture } = textureQueue[textureCursor++];
+        renderer.initTexture(texture);
+        uploadedTextures.add(texture);
+      }
+      const texturesDone = textureCursor >= textureQueue.length ||
+        textureQueue[textureCursor].car > carIndex;
+      pauseFrame = !(aheadJobs[current].ready && texturesDone); // yield instead of spinning
+      return pauseFrame;
+    } catch (error) {
+      parallelCompile = false;
+      console.warn('[warmup] Async preparation unavailable; using draw warm-up.', error);
+      return false;
+    }
+  }
+
   function step() {
     if (done) return true;
     pauseFrame = false;
-    if (!deferProgress) textureUploads = 0;
+    if (!deferProgress) {
+      textureUploads = 0;
+      frameStartedAt = performance.now();
+    }
     try {
-      if (carIndex >= cars.length) {
+      if (carIndex >= warm.length) {
         if (gatePrepared) {
           abort();
           draw('full-scene-control');
           advance();
           return true;
         }
-        if (pairIndex < cars.length - 1) {
-          const first = cars[pairIndex];
-          const second = cars[pairIndex + 1];
+        if (pairIndex < warm.length - 1) {
+          const first = warm[pairIndex];
+          const second = warm[pairIndex + 1];
           draw('fade-pair', () => {
             for (const object of [...first.meshes, ...second.meshes]) object.visible = true;
             beginWarmFade(first.model);
@@ -234,8 +341,8 @@ export function createCarWarmup(onProgress, onStep, { throwAtDraw = -1 } = {}) {
         return false;
       }
 
-      const { model, meshes } = cars[carIndex];
-      if (prepare(cars[carIndex])) return false;
+      const { model, meshes } = warm[carIndex];
+      if (UNLOCKED ? prepareAhead() : prepare(warm[carIndex])) return false;
       const batch = meshes.slice(offset, offset + MESHES_PER_FRAME);
       const enabled = new Set();
       for (const object of batch) {
@@ -285,8 +392,10 @@ export function createCarWarmup(onProgress, onStep, { throwAtDraw = -1 } = {}) {
   // pending compile. All original draws still run in order, retaining geometry,
   // shadow, fade-pair, gate and composer coverage. Errors propagate from step() unchanged
   // (step() has already aborted/restored). Progress is reported once per frame.
-  function runFrame(budgetMs = WARMUP_FRAME_BUDGET_MS) {
+  function runFrame(budgetMs = UNLOCKED ? UNLOCKED_FRAME_BUDGET_MS : WARMUP_FRAME_BUDGET_MS) {
     const frameStart = performance.now();
+    frameStartedAt = frameStart;
+    frameBudgetMs = budgetMs;
     const before = completed;
     textureUploads = 0;
     deferProgress = true;

@@ -10,6 +10,7 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
 import { clone as cloneSkeleton } from 'three/addons/utils/SkeletonUtils.js';
 import { CARS } from '../data/cars.js';
+import { SETTINGS, UNLOCKED } from '../core/renderProfile.js';
 
 export const CANONICAL_LENGTH = 4.6;
 
@@ -381,19 +382,55 @@ function createPlaceholder(car, error) {
 
 // The roster is loaded from the offline Tour-resolution set (textures <= 512 px,
 // built by `node scripts/compress-models.mjs --tour`). Tour, morph, montage and
-// Showcase all clone from this single roster; the full-resolution originals in
-// /models/*.glb are not loaded at runtime.
+// Showcase all clone from this single roster. The full-resolution originals in
+// /models/*.glb (textures <= 1024 px) load only when the unlocked profile asks for
+// SETTINGS.textureSet === 'full'; the locked profile has no such key and never does.
 const TOUR_MODEL_BASE = '/models/tour/';
+const FULL_MODEL_BASE = '/models/';
+
+// Review-only unlocked overrides (?textures=tour|full, ?aniso=1..16), for side-by-side
+// cost/fidelity comparison without editing renderProfile.js. Locked ignores both.
+const reviewParams = new URLSearchParams(globalThis.location?.search || '');
+const requestedTextures = UNLOCKED ? reviewParams.get('textures') : null;
+const requestedAniso = UNLOCKED ? Number(reviewParams.get('aniso')) : NaN;
+export const TEXTURE_SET = UNLOCKED && ['tour', 'full'].includes(requestedTextures)
+  ? requestedTextures : (SETTINGS.textureSet === 'full' ? 'full' : 'tour');
+// Car texture anisotropy. three clamps this to the device maximum when it samples a
+// texture (WebGLTextures.setTextureParameters), so an over-large request is safe.
+export const CAR_ANISOTROPY = UNLOCKED && requestedAniso >= 1 && requestedAniso <= 16
+  ? Math.floor(requestedAniso) : Math.max(1, Math.floor(Number(SETTINGS.anisotropy) || 1));
 
 function modelUrl(modelFile) {
-  return modelFile.startsWith('/') ? modelFile : `${TOUR_MODEL_BASE}${modelFile}`;
+  if (modelFile.startsWith('/')) return modelFile;
+  return `${TEXTURE_SET === 'full' ? FULL_MODEL_BASE : TOUR_MODEL_BASE}${modelFile}`;
+}
+
+/** Raise filtering on every distinct texture of a freshly normalised car. Must run before the
+ *  first upload: anisotropy is a sampler parameter fixed when the texture reaches the GPU. */
+function applyAnisotropy(root) {
+  if (CAR_ANISOTROPY <= 1) return;
+  const seen = new Set();
+  root.traverse((object) => {
+    if (!object.isMesh) return;
+    for (const material of Array.isArray(object.material) ? object.material : [object.material]) {
+      if (!material) continue;
+      for (const value of Object.values(material)) {
+        if (value?.isTexture && !seen.has(value)) {
+          seen.add(value);
+          value.anisotropy = CAR_ANISOTROPY;
+        }
+      }
+    }
+  });
 }
 
 async function loadOne(loader, car) {
   try {
     const gltf = await loader.loadAsync(modelUrl(car.modelFile));
     if (!gltf?.scene) throw new Error(`GLTFLoader returned no scene for ${car.modelFile}.`);
-    return normaliseScene(gltf.scene, car);
+    const group = normaliseScene(gltf.scene, car);
+    applyAnisotropy(group);
+    return group;
   } catch (error) {
     console.error(
       `[cars] Failed to load ${car.id} from ${modelUrl(car.modelFile)}; using placeholder.`,

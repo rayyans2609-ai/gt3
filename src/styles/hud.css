@@ -33,6 +33,10 @@ body.is-player-open #hud-bottomright { right: calc(24px + var(--player-w, 274px)
 /* Completed-route trail: same width as the base line, drawn directly over it.
    Per-segment opacity is written inline each time progress changes. */
 .hud-route__done-seg { fill: none; stroke: var(--route-done); stroke-linecap: round; stroke-linejoin: round; stroke-width: 2.2px; vector-effect: non-scaling-stroke; visibility: hidden; }
+/* Unlocked-only nodes: continuous base and local gradient fade. */
+.hud-route__done-base, .hud-route__trail-gradient { fill: none; stroke-linecap: butt; stroke-linejoin: round; stroke-width: 2.2px; vector-effect: non-scaling-stroke; visibility: hidden; }
+.hud-route__done-base { stroke: var(--route-done); stroke-opacity: .38; }
+.hud-route__trail-stop { stop-color: var(--route-done); }
 .hud-route__checkpoint { fill: var(--fg-muted); opacity: .68; }
 /* Direction arrow: the group carries position + rotation in one transform; the
    shape inherits the marker colour. Z-order in the SVG is route, trail,

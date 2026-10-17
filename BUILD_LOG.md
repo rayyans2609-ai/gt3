@@ -781,3 +781,9 @@ Review package: `docs/review/phase3-final-render-review.md` (§A–§F).
 ## Phase 3 — HUMAN-ACCEPTED (owner, 2026-10-14)
 
 The owner accepted the Phase 3 MVP: fixed DPR1 + SMAA performance/quality tradeoff, geometry, camera, grid, checkpoints, HUD, props and the historical V1 finish mechanics. Published on `phase3-integration` and merged to `main` with history preserved; tag `phase3-accepted-2026-10-14`. Phases 4–8 are separate and not started. Known publication caveat: `font/` (Neue Haas trial, Geist Mono, Switzer) is git-ignored, so a fresh clone falls back to system fonts.
+
+## Phase3 Unlocked reopening — HUMAN-ACCEPTED AND LOCALLY INTEGRATED (2026-10-17)
+
+Owner final lock-in: Unlocked QualityDPR2 default/preferred; explicitSmoothDPR1.5; NeutralDay/ACESNight, mediumreflections, quarterDaycarspecular, SMAA, stabilizedshadows, existing loading/image-integrity/glass/minimap improvements. Locked/no-version unchanged. One default-selector change;7full-export configuration equality cases, syntax/whitespace and final Vite production build PASS. Prior Locked/default23-state pixel identity, functional and W3–W6/minimap evidence reused; no new campaign/agents/Claude.
+
+Owner explicitly accepts deferred final integrated600sSmooth+600sQuality M4 qualification for closure; they are NOT passed. Historical diagnostic numbers and all host-guard-interrupted evidence remain preserved in docs/review/p3u/. No safeguards weakened, benchmarks retried or Mac restart. Local main integration completed by the merge commit containing this entry, without conflicts; no push. Review/limitations: docs/review/p3u/OWNER-REVIEW.md. Phase8 Night lighting stays future work; Phase4/further development not started.

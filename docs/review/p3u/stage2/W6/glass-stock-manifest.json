@@ -1,0 +1,3874 @@
+{
+  "startedAt": "2026-10-17T14:29:25.810Z",
+  "base": "http://127.0.0.1:5247",
+  "query": "?version=unlocked&mode=quality",
+  "profile": "unlocked",
+  "viewport": {
+    "width": 1470,
+    "height": 956,
+    "deviceScaleFactor": 2,
+    "emulationApplied": true
+  },
+  "headful": false,
+  "browserPid": 27420,
+  "preflight": {
+    "pass": true,
+    "cls": "browser",
+    "profile": "m4-16gb",
+    "provisional": true,
+    "reasons": [],
+    "warnings": [],
+    "paging": {
+      "pageouts": 0,
+      "swapouts": 0
+    },
+    "at": "2026-10-17T14:29:25.437Z",
+    "identity": {
+      "profile": "m4-16gb",
+      "arch": "arm64",
+      "cpu": "Apple M4",
+      "ramGB": 16,
+      "model": "Mac16,12",
+      "cores": {
+        "performance": 4,
+        "efficiency": 6
+      },
+      "gpu": "Apple M4",
+      "macos": "15.5",
+      "versions": {
+        "node": "v24.21.0",
+        "claude": "2.1.302 (Claude Code)",
+        "codex": "codex-cli 0.163.0",
+        "opencode": "opencode v2.0.32",
+        "chrome": "Google Chrome 155.0.8059.80"
+      },
+      "unavailable": []
+    },
+    "a": {
+      "pressure": 1,
+      "pageouts": 820310,
+      "swapouts": 1155784,
+      "idle": 82.91,
+      "system": 11.48,
+      "swap": "total = 2048.00M  used = 1317.62M  free = 730.38M  (encrypted)"
+    },
+    "b": {
+      "pressure": 1,
+      "pageouts": 820310,
+      "swapouts": 1155784,
+      "idle": 83.81,
+      "system": 10.7,
+      "swap": "total = 2048.00M  used = 1317.62M  free = 730.38M  (encrypted)"
+    },
+    "counts": {
+      "heavy": 0,
+      "browsers": 0,
+      "agents": 3,
+      "runWorkers": null
+    },
+    "workloads": {
+      "viteServers": [
+        {
+          "pid": 27138,
+          "ppid": 27132,
+          "rssMB": 108,
+          "command": "node node_modules/vite/bin/vite.js --host 127.0.0.1 --port 5247 --strictPort",
+          "cwd": "/Users/shahzadsheikh/Desktop/gt3/.claude/worktrees/p3u-w6",
+          "port": "5247"
+        }
+      ],
+      "builds": [],
+      "browsers": [],
+      "agents": [
+        {
+          "pid": 24225,
+          "ppid": 24224,
+          "rssMB": 74,
+          "command": "/Users/shahzadsheikh/Library/Application Support/Claude/claude-code/2.1.299/4fa9694b7975/claude.app/Contents/MacOS/claude --output-format stream-json --verbose --input-format stream-json --model=claude-opus-5-5 --permission-prompt-tool=stdio --resume=4f0a9bf5-5921-4f00-858d-fba6a44bb2b6 --allowedTools=mcp__computer-use,mcp__ccd_session__spawn_task,mcp__ccd_session__dismiss_task,mcp__ccd_session__mark_chapter,mcp__ccd_session_mgmt__list_sessions,mcp__ccd_session_mgmt__get_session,mcp__ccd_session_mgmt__get_usage,mcp__ccd_host__get_storage_usage,mcp__ccd_session_mgmt__set_session_title,mcp__ccd_session_mgmt__send_message,mcp__ccd_session_mgmt__detach_session,mcp__ccd_sidebar__list_groups,mcp__ccd_sidebar__create_group,mcp__ccd_sidebar__set_view,mcp__ccd_sidebar__list_sections,mcp__ccd_sidebar__create_section,mcp__ccd_session_mgmt__search_session_transcripts,mcp__ccd_session_mgmt__list_events,mcp__ccd_session_mgmt__export_transcript,mcp__scheduled-tasks__list_task_runs,mcp__ccd_session__read_widget_context,mcp__ccd_session__list_start_targets,mcp__ccd_view__show_pane,mcp__ccd_view__close_pane,mcp__ccd_view__get_layout,mcp__ccd_view__set_transcript_view,mcp__ccd_settings__get_settings,mcp__mcp-registry__search_mcp_registry,mcp__mcp-registry__suggest_connectors,mcp__mcp-registry__list_connectors,mcp__ccd_connectors__session_connectors_status,mcp__ccd_connectors__reconnect_session_connector,mcp__ccd_pr__get_status,mcp__ccd_window__open_session_in,mcp__ccd_window__close_split,mcp__ccd_window__set_sidebar_collapsed,mcp__ccd_window__get_window_layout,mcp__claude-in-chrome__request_credentials,mcp__claude-in-chrome__list_granted_credentials,mcp__claude-in-chrome__autofill_credential,mcp__claude-in-chrome__release_credentials,mcp__claude-in-chrome__enter_verification_code --disallowedTools=SubscribePR --setting-sources=user,project,local --permission-mode=default --include-partial-messages --await-initialize --thinking-display omitted --replay-user-messages --settings {\"deniedMcpServers\":[{\"serverName\":\"Claude Browser\"},{\"serverName\":\"Claude Code Android Emulator\"},{\"serverName\":\"Claude Code iOS Simulator\"},{\"serverName\":\"Claude Preview\"},{\"serverName\":\"Claude_Browser\"},{\"serverName\":\"Claude_Code_Android_Emulator\"},{\"serverName\":\"Claude_Code_iOS_Simulator\"},{\"serverName\":\"Claude_Preview\"},{\"serverName\":\"Claude_for_Chrome\"},{\"serverName\":\"Framebuffer\"},{\"serverName\":\"Window Halo\"},{\"serverName\":\"Window_Halo\"},{\"serverName\":\"ccd_connectors\"},{\"serverName\":\"ccd_directory\"},{\"serverName\":\"ccd_host\"},{\"serverName\":\"ccd_pr\"},{\"serverName\":\"ccd_session\"},{\"serverName\":\"ccd_session_mgmt\"},{\"serverName\":\"ccd_settings\"},{\"serverName\":\"ccd_sidebar\"},{\"serverName\":\"ccd_turn\"},{\"serverName\":\"ccd_view\"},{\"serverName\":\"ccd_window\"},{\"serverName\":\"claude-in-chrome\"},{\"serverName\":\"claude_browser\"},{\"serverName\":\"claude_code_android_emulator\"},{\"serverName\":\"claude_code_ios_simulator\"},{\"serverName\":\"claude_for_chrome\"},{\"serverName\":\"claude_in_chrome\"},{\"serverName\":\"claude_preview\"},{\"serverName\":\"computer-use\"},{\"serverName\":\"computer_use\"},{\"serverName\":\"cowork\"},{\"serverName\":\"cowork-onboarding\"},{\"serverName\":\"cowork_onboarding\"},{\"serverName\":\"dev-debug\"},{\"serverName\":\"dev_debug\"},{\"serverName\":\"dispatch\"},{\"serverName\":\"framebuffer\"},{\"serverName\":\"mcp-registry\"},{\"serverName\":\"mcp_registry\"},{\"serverName\":\"plugins\"},{\"serverName\":\"remote-devices\"},{\"serverName\":\"remote_devices\"},{\"serverName\":\"scheduled-tasks\"},{\"serverName\":\"scheduled_tasks\"},{\"serverName\":\"session_info\"},{\"serverName\":\"skills\"},{\"serverName\":\"window_halo\"}]}"
+        },
+        {
+          "pid": 25237,
+          "ppid": 1012,
+          "rssMB": 30,
+          "command": "node /Users/shahzadsheikh/.npm-global/bin/codex exec --dangerously-bypass-approvals-and-sandbox --skip-git-repo-check --disable multi_agent -m gpt-6-luna -c model_reasoning_effort=\"medium\" GT3 ROLE: worker. p3u/e4 CandidateChecks4, Luna medium. Execute exact prepared checks; no source edits, commits, agents, routes, system changes or extra suites. Do not reread whole repo/docs. Manager owns integration. Host browser+agent admission passed. The prepared harness itself performs canonical browser preflight before any browser is launched: do not add a redundant standalone browser check. No admission guard is bypassed. One browser/server at a time.\\012\\012Run bash local/briefs/candidate-checks-e4.sh once from this worktree. Each command is behind scripts/with-verification-server.sh with correct e4 provenance. It captures candidate minimap Locked then Unlocked, then W6 glass product/stock/repeat from ../p3u-w6. On failure inspect redirected run.log and write concise REPORT.md in local/evidence/p3u/candidate-checks-e4; stop, no retries or app edits. Prior blocked evidence is preserved by new output paths.\\012\\012Minimap manifests: local/evidence/p3u/candidate-checks-e4/map-{locked,unlocked}/manifest.json, expect pass true,22captures each. Harness checks locked160segments vs unlocked48gradients, fractions/reversal/gantry/completion, numeric alpha/coordinate continuity. Neutral backing is diagnostic only. Make4xzoom PNGs for day/night-fractional and gantry-after captures via scripts/lib/p3u-w4-zoom.mjs (whole340x340crop; determine dimensions using PNG decoder). No elaborate sheet.\\012\\012Glass outputs ../p3u-w6/local/evidence/p3u/W6-e4/. Expect4states per product/stock/repeat. Inspect captures[].transmissionTarget: productscale.5/samples0/1470x956, stockscale1/samples4/2940x1912; mainDPR2. Repeat diff must4/4identical; stock/product differences expected. Parse compact facts, not giant manifests. Make car zoom crops from boundsCSS*2, margin12/clamp, scale2 with existing helper. Record differences and artifacts. No timing runs or broad regression.\\012\\012Write REPORT.md with sourceSHA/dirty provenance, actual pass/fail/targetfacts, artifact paths, limitations. Exit0 alone is not pass. Clean only owned browser/server via existing finally/traps. End done/evidence/unverified/blocked. Print compact output only."
+        },
+        {
+          "pid": 14785,
+          "ppid": 14733,
+          "rssMB": 28,
+          "command": "node /Users/shahzadsheikh/.npm-global/bin/codex"
+        }
+      ]
+    }
+  },
+  "admissionAttempts": [
+    {
+      "pass": true,
+      "cls": "browser",
+      "profile": "m4-16gb",
+      "provisional": true,
+      "reasons": [],
+      "warnings": [],
+      "paging": {
+        "pageouts": 0,
+        "swapouts": 0
+      },
+      "at": "2026-10-17T14:29:25.437Z",
+      "identity": {
+        "profile": "m4-16gb",
+        "arch": "arm64",
+        "cpu": "Apple M4",
+        "ramGB": 16,
+        "model": "Mac16,12",
+        "cores": {
+          "performance": 4,
+          "efficiency": 6
+        },
+        "gpu": "Apple M4",
+        "macos": "15.5",
+        "versions": {
+          "node": "v24.21.0",
+          "claude": "2.1.302 (Claude Code)",
+          "codex": "codex-cli 0.163.0",
+          "opencode": "opencode v2.0.32",
+          "chrome": "Google Chrome 155.0.8059.80"
+        },
+        "unavailable": []
+      },
+      "a": {
+        "pressure": 1,
+        "pageouts": 820310,
+        "swapouts": 1155784,
+        "idle": 82.91,
+        "system": 11.48,
+        "swap": "total = 2048.00M  used = 1317.62M  free = 730.38M  (encrypted)"
+      },
+      "b": {
+        "pressure": 1,
+        "pageouts": 820310,
+        "swapouts": 1155784,
+        "idle": 83.81,
+        "system": 10.7,
+        "swap": "total = 2048.00M  used = 1317.62M  free = 730.38M  (encrypted)"
+      },
+      "counts": {
+        "heavy": 0,
+        "browsers": 0,
+        "agents": 3,
+        "runWorkers": null
+      },
+      "workloads": {
+        "viteServers": [
+          {
+            "pid": 27138,
+            "ppid": 27132,
+            "rssMB": 108,
+            "command": "node node_modules/vite/bin/vite.js --host 127.0.0.1 --port 5247 --strictPort",
+            "cwd": "/Users/shahzadsheikh/Desktop/gt3/.claude/worktrees/p3u-w6",
+            "port": "5247"
+          }
+        ],
+        "builds": [],
+        "browsers": [],
+        "agents": [
+          {
+            "pid": 24225,
+            "ppid": 24224,
+            "rssMB": 74,
+            "command": "/Users/shahzadsheikh/Library/Application Support/Claude/claude-code/2.1.299/4fa9694b7975/claude.app/Contents/MacOS/claude --output-format stream-json --verbose --input-format stream-json --model=claude-opus-5-5 --permission-prompt-tool=stdio --resume=4f0a9bf5-5921-4f00-858d-fba6a44bb2b6 --allowedTools=mcp__computer-use,mcp__ccd_session__spawn_task,mcp__ccd_session__dismiss_task,mcp__ccd_session__mark_chapter,mcp__ccd_session_mgmt__list_sessions,mcp__ccd_session_mgmt__get_session,mcp__ccd_session_mgmt__get_usage,mcp__ccd_host__get_storage_usage,mcp__ccd_session_mgmt__set_session_title,mcp__ccd_session_mgmt__send_message,mcp__ccd_session_mgmt__detach_session,mcp__ccd_sidebar__list_groups,mcp__ccd_sidebar__create_group,mcp__ccd_sidebar__set_view,mcp__ccd_sidebar__list_sections,mcp__ccd_sidebar__create_section,mcp__ccd_session_mgmt__search_session_transcripts,mcp__ccd_session_mgmt__list_events,mcp__ccd_session_mgmt__export_transcript,mcp__scheduled-tasks__list_task_runs,mcp__ccd_session__read_widget_context,mcp__ccd_session__list_start_targets,mcp__ccd_view__show_pane,mcp__ccd_view__close_pane,mcp__ccd_view__get_layout,mcp__ccd_view__set_transcript_view,mcp__ccd_settings__get_settings,mcp__mcp-registry__search_mcp_registry,mcp__mcp-registry__suggest_connectors,mcp__mcp-registry__list_connectors,mcp__ccd_connectors__session_connectors_status,mcp__ccd_connectors__reconnect_session_connector,mcp__ccd_pr__get_status,mcp__ccd_window__open_session_in,mcp__ccd_window__close_split,mcp__ccd_window__set_sidebar_collapsed,mcp__ccd_window__get_window_layout,mcp__claude-in-chrome__request_credentials,mcp__claude-in-chrome__list_granted_credentials,mcp__claude-in-chrome__autofill_credential,mcp__claude-in-chrome__release_credentials,mcp__claude-in-chrome__enter_verification_code --disallowedTools=SubscribePR --setting-sources=user,project,local --permission-mode=default --include-partial-messages --await-initialize --thinking-display omitted --replay-user-messages --settings {\"deniedMcpServers\":[{\"serverName\":\"Claude Browser\"},{\"serverName\":\"Claude Code Android Emulator\"},{\"serverName\":\"Claude Code iOS Simulator\"},{\"serverName\":\"Claude Preview\"},{\"serverName\":\"Claude_Browser\"},{\"serverName\":\"Claude_Code_Android_Emulator\"},{\"serverName\":\"Claude_Code_iOS_Simulator\"},{\"serverName\":\"Claude_Preview\"},{\"serverName\":\"Claude_for_Chrome\"},{\"serverName\":\"Framebuffer\"},{\"serverName\":\"Window Halo\"},{\"serverName\":\"Window_Halo\"},{\"serverName\":\"ccd_connectors\"},{\"serverName\":\"ccd_directory\"},{\"serverName\":\"ccd_host\"},{\"serverName\":\"ccd_pr\"},{\"serverName\":\"ccd_session\"},{\"serverName\":\"ccd_session_mgmt\"},{\"serverName\":\"ccd_settings\"},{\"serverName\":\"ccd_sidebar\"},{\"serverName\":\"ccd_turn\"},{\"serverName\":\"ccd_view\"},{\"serverName\":\"ccd_window\"},{\"serverName\":\"claude-in-chrome\"},{\"serverName\":\"claude_browser\"},{\"serverName\":\"claude_code_android_emulator\"},{\"serverName\":\"claude_code_ios_simulator\"},{\"serverName\":\"claude_for_chrome\"},{\"serverName\":\"claude_in_chrome\"},{\"serverName\":\"claude_preview\"},{\"serverName\":\"computer-use\"},{\"serverName\":\"computer_use\"},{\"serverName\":\"cowork\"},{\"serverName\":\"cowork-onboarding\"},{\"serverName\":\"cowork_onboarding\"},{\"serverName\":\"dev-debug\"},{\"serverName\":\"dev_debug\"},{\"serverName\":\"dispatch\"},{\"serverName\":\"framebuffer\"},{\"serverName\":\"mcp-registry\"},{\"serverName\":\"mcp_registry\"},{\"serverName\":\"plugins\"},{\"serverName\":\"remote-devices\"},{\"serverName\":\"remote_devices\"},{\"serverName\":\"scheduled-tasks\"},{\"serverName\":\"scheduled_tasks\"},{\"serverName\":\"session_info\"},{\"serverName\":\"skills\"},{\"serverName\":\"window_halo\"}]}"
+          },
+          {
+            "pid": 25237,
+            "ppid": 1012,
+            "rssMB": 30,
+            "command": "node /Users/shahzadsheikh/.npm-global/bin/codex exec --dangerously-bypass-approvals-and-sandbox --skip-git-repo-check --disable multi_agent -m gpt-6-luna -c model_reasoning_effort=\"medium\" GT3 ROLE: worker. p3u/e4 CandidateChecks4, Luna medium. Execute exact prepared checks; no source edits, commits, agents, routes, system changes or extra suites. Do not reread whole repo/docs. Manager owns integration. Host browser+agent admission passed. The prepared harness itself performs canonical browser preflight before any browser is launched: do not add a redundant standalone browser check. No admission guard is bypassed. One browser/server at a time.\\012\\012Run bash local/briefs/candidate-checks-e4.sh once from this worktree. Each command is behind scripts/with-verification-server.sh with correct e4 provenance. It captures candidate minimap Locked then Unlocked, then W6 glass product/stock/repeat from ../p3u-w6. On failure inspect redirected run.log and write concise REPORT.md in local/evidence/p3u/candidate-checks-e4; stop, no retries or app edits. Prior blocked evidence is preserved by new output paths.\\012\\012Minimap manifests: local/evidence/p3u/candidate-checks-e4/map-{locked,unlocked}/manifest.json, expect pass true,22captures each. Harness checks locked160segments vs unlocked48gradients, fractions/reversal/gantry/completion, numeric alpha/coordinate continuity. Neutral backing is diagnostic only. Make4xzoom PNGs for day/night-fractional and gantry-after captures via scripts/lib/p3u-w4-zoom.mjs (whole340x340crop; determine dimensions using PNG decoder). No elaborate sheet.\\012\\012Glass outputs ../p3u-w6/local/evidence/p3u/W6-e4/. Expect4states per product/stock/repeat. Inspect captures[].transmissionTarget: productscale.5/samples0/1470x956, stockscale1/samples4/2940x1912; mainDPR2. Repeat diff must4/4identical; stock/product differences expected. Parse compact facts, not giant manifests. Make car zoom crops from boundsCSS*2, margin12/clamp, scale2 with existing helper. Record differences and artifacts. No timing runs or broad regression.\\012\\012Write REPORT.md with sourceSHA/dirty provenance, actual pass/fail/targetfacts, artifact paths, limitations. Exit0 alone is not pass. Clean only owned browser/server via existing finally/traps. End done/evidence/unverified/blocked. Print compact output only."
+          },
+          {
+            "pid": 14785,
+            "ppid": 14733,
+            "rssMB": 28,
+            "command": "node /Users/shahzadsheikh/.npm-global/bin/codex"
+          }
+        ]
+      }
+    }
+  ],
+  "server": {
+    "startedAt": "2026-10-17T14:29:14.242Z",
+    "url": "http://127.0.0.1:5247",
+    "root": "/Users/shahzadsheikh/Desktop/gt3/.claude/worktrees/p3u-w6",
+    "branch": "p3u-w6",
+    "sha": "bb5d6de9004bc97d9c016e613b755c825288c021",
+    "dirtyFiles": 9,
+    "dirtyHash": "91a7f6743195a766",
+    "vitePid": 27138,
+    "run": "p3u",
+    "epoch": "4",
+    "task": "FinalVerify",
+    "harness": "node scripts/p3u-w6-visual-capture.mjs",
+    "host": {
+      "profile": "m4-16gb",
+      "arch": "arm64",
+      "cpu": "Apple M4",
+      "ramGB": 16,
+      "model": "Mac16,12",
+      "cores": {
+        "performance": 4,
+        "efficiency": 6
+      },
+      "gpu": "Apple M4",
+      "macos": "15.5",
+      "versions": {
+        "node": "v24.21.0",
+        "claude": "2.1.302 (Claude Code)",
+        "codex": "codex-cli 0.163.0",
+        "opencode": "opencode v2.0.32",
+        "chrome": "Google Chrome 155.0.8059.80"
+      },
+      "unavailable": []
+    }
+  },
+  "branch": "p3u-w6",
+  "sha": "bb5d6de9004bc97d9c016e613b755c825288c021",
+  "tree": "M src/main.js\n?? scripts/p3u-w6-analyze.mjs\n?? scripts/p3u-w6-carfade.mjs\n?? scripts/p3u-w6-gate.mjs\n?? scripts/p3u-w6-memory.mjs\n?? scripts/p3u-w6-perf.mjs\n?? scripts/p3u-w6-trace.mjs\n?? scripts/p3u-w6-visual-capture.mjs\n?? src/scene/transmissionBudget.js",
+  "browser": "Chrome/155.0.8059.80",
+  "conditions": {
+    "browserSaverState": 0,
+    "browserSaverSetting": "battery saver disabled in the disposable profile (measurement default; GT3_BROWSER_SAVER=1 restores the control)",
+    "osPowerSettings": "Battery Power:\n Sleep On Power Button 1\n lowpowermode         0\n standby              1\n ttyskeepawake        1\n hibernatemode        3\n powernap             1\n hibernatefile        /var/vm/sleepimage\n displaysleep         10\n womp                 0\n networkoversleep     0\n sleep                1\n lessbright           1\n tcpkeepalive         1\n disksleep            10\nAC Power:\n Sleep On Power Button 1\n lowpowermode         0\n standby              1\n ttyskeepawake        1\n hibernatemode        3\n powernap             1\n hibernatefile        /var/vm/sleepimage\n displaysleep         20\n womp                 1\n networkoversleep     0\n sleep                0\n tcpkeepalive         1\n disksleep            10\n",
+    "powerManagement": "System-wide power settings:\n SleepDisabled\t\t0\nCurrently in use:\n standby              1\n Sleep On Power Button 1\n hibernatefile        /var/vm/sleepimage\n powernap             1\n networkoversleep     0\n disksleep            10\n sleep                0 (sleep prevented by powerd, Claude, caffeinate, caffeinate, caffeinate, caffeinate)\n hibernatemode        3\n ttyskeepawake        1\n displaysleep         20 (display sleep prevented by caffeinate)\n tcpkeepalive         1\n lowpowermode         0\n womp                 1\n",
+    "power": "Now drawing from 'AC Power'\n -InternalBattery-0 (id=21364835)\t100%; charged; 0:00 remaining present: true\n",
+    "powerSource": "AC Power",
+    "batteryPercent": 100,
+    "lowPowerMode": false,
+    "thermal": "Note: No thermal warning level has been recorded\nNote: No performance warning level has been recorded\nNote: No CPU power status has been recorded\n",
+    "awakeAssertion": "owned caffeinate -dimsu held for the run, SIGTERM released at exit (also self-stops with the harness process via -w)",
+    "caffeinatePid": 27239,
+    "candidate": "baseline",
+    "navigatorWebdriver": true,
+    "visibilityStart": "visible",
+    "visibilityEnd": "visible"
+  },
+  "errors": [],
+  "instrumentation": {
+    "/Users/shahzadsheikh/Desktop/gt3/.claude/worktrees/p3u-w6/scripts/lib/p3u-common.mjs": "1ad92b353954ec13ea5aa4f989ffe75f40cb2270489ee0769d56fa77eae61374",
+    "/Users/shahzadsheikh/Desktop/gt3/.claude/worktrees/p3u-w6/scripts/lib/p3u-trials.js": "a462f82f581e58b1152b95859e4bec3b3f3896a534b774f34471eb8d56611b10",
+    "/Users/shahzadsheikh/Desktop/gt3/.claude/worktrees/p3u-w6/scripts/p3u-w6-visual-capture.mjs": "19179c51ce5f9b314b31249904b614061f6bd2880ee5cc12f156a051f05f5388"
+  },
+  "gpu": {
+    "devices": [
+      {
+        "vendorId": 4203,
+        "deviceId": 0,
+        "vendorString": "Google Inc. (Apple)",
+        "deviceString": "ANGLE (Apple, ANGLE Metal Renderer: Apple M4, Version 15.5 (Build 24F74))",
+        "driverVendor": "Apple",
+        "driverVersion": "15.5"
+      }
+    ],
+    "auxAttributes": {
+      "amdSwitchable": false,
+      "canSupportThreadedTextureMailbox": false,
+      "directRenderingVersion": "",
+      "displayType": "ANGLE_METAL",
+      "glExtensions": "GL_AMD_performance_monitor GL_ANGLE_base_vertex_base_instance_shader_builtin GL_ANGLE_blob_cache GL_ANGLE_client_arrays GL_ANGLE_clip_cull_distance GL_ANGLE_compressed_texture_etc GL_ANGLE_depth_texture GL_ANGLE_framebuffer_blit GL_ANGLE_framebuffer_multisample GL_ANGLE_get_serialized_context_string GL_ANGLE_get_tex_level_parameter GL_ANGLE_instanced_arrays GL_ANGLE_memory_size GL_ANGLE_pack_reverse_row_order GL_ANGLE_polygon_mode GL_ANGLE_program_binary_readiness_query GL_ANGLE_program_cache_control GL_ANGLE_provoking_vertex GL_ANGLE_renderability_validation GL_ANGLE_request_extension GL_ANGLE_rgbx_internal_format GL_ANGLE_robust_client_memory GL_ANGLE_shader_pixel_local_storage GL_ANGLE_shader_pixel_local_storage_coherent GL_ANGLE_stencil_texturing GL_ANGLE_texture_compression_dxt3 GL_ANGLE_texture_compression_dxt5 GL_ANGLE_texture_multisample GL_ANGLE_translated_shader_source GL_APPLE_clip_distance GL_ARM_rgba8 GL_CHROMIUM_bind_generates_resource GL_CHROMIUM_bind_uniform_location GL_CHROMIUM_copy_texture GL_CHROMIUM_lose_context GL_EXT_base_instance GL_EXT_blend_func_extended GL_EXT_blend_minmax GL_EXT_clip_control GL_EXT_color_buffer_float GL_EXT_color_buffer_half_float GL_EXT_compressed_ETC1_RGB8_sub_texture GL_EXT_conservative_depth GL_EXT_debug_label GL_EXT_debug_marker GL_EXT_depth_clamp GL_EXT_discard_framebuffer GL_EXT_disjoint_timer_query GL_EXT_draw_buffers GL_EXT_draw_buffers_indexed GL_EXT_draw_elements_base_vertex GL_EXT_float_blend GL_EXT_frag_depth GL_EXT_instanced_arrays GL_EXT_map_buffer_range GL_EXT_multisampled_render_to_texture GL_EXT_occlusion_query_boolean GL_EXT_polygon_offset_clamp GL_EXT_pvrtc_sRGB GL_EXT_read_format_bgra GL_EXT_render_snorm GL_EXT_robustness GL_EXT_sRGB GL_EXT_shader_texture_lod GL_EXT_texture_compression_bptc GL_EXT_texture_compression_dxt1 GL_EXT_texture_compression_rgtc GL_EXT_texture_compression_s3tc_srgb GL_EXT_texture_filter_anisotropic GL_EXT_texture_format_BGRA8888 GL_EXT_texture_mirror_clamp_to_edge GL_EXT_texture_norm16 GL_EXT_texture_rg GL_EXT_texture_sRGB_R8 GL_EXT_texture_sRGB_RG8 GL_EXT_texture_shadow_lod GL_EXT_texture_storage GL_IMG_texture_compression_pvrtc GL_KHR_debug GL_KHR_parallel_shader_compile GL_KHR_robustness GL_KHR_texture_compression_astc_hdr GL_KHR_texture_compression_astc_ldr GL_KHR_texture_compression_astc_sliced_3d GL_MESA_framebuffer_flip_y GL_NV_fence GL_NV_framebuffer_blit GL_NV_pixel_buffer_object GL_NV_shader_noperspective_interpolation GL_OES_EGL_image GL_OES_EGL_sync GL_OES_compressed_ETC1_RGB8_texture GL_OES_depth24 GL_OES_depth32 GL_OES_depth_texture GL_OES_draw_buffers_indexed GL_OES_draw_elements_base_vertex GL_OES_element_index_uint GL_OES_fbo_render_mipmap GL_OES_get_program_binary GL_OES_mapbuffer GL_OES_packed_depth_stencil GL_OES_required_internalformat GL_OES_rgb8_rgba8 GL_OES_sample_variables GL_OES_shader_multisample_interpolation GL_OES_standard_derivatives GL_OES_surfaceless_context GL_OES_texture_3D GL_OES_texture_float GL_OES_texture_float_linear GL_OES_texture_half_float GL_OES_texture_half_float_linear GL_OES_texture_npot GL_OES_texture_stencil8 GL_OES_vertex_array_object GL_QCOM_render_shared_exponent ",
+      "glImplementationParts": "(gl=egl-angle,angle=metal)",
+      "glRenderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M4, Version 15.5 (Build 24F74))",
+      "glResetNotificationStrategy": 33362,
+      "glVendor": "Google Inc. (Apple)",
+      "glVersion": "OpenGL ES 3.0 (ANGLE 2.1.28854 git hash: cccf60cde32c)",
+      "glWsExtensions": "",
+      "glWsVendor": "",
+      "glWsVersion": "",
+      "inProcessGpu": false,
+      "initializationTime": 0.031977,
+      "isAsan": false,
+      "isClangCoverage": false,
+      "jpegDecodeAcceleratorSupported": false,
+      "maxMsaaSamples": "4",
+      "optimus": false,
+      "passthroughCmdDecoder": true,
+      "pixelShaderVersion": "3.00",
+      "processCrashCount": 0,
+      "sandboxed": true,
+      "skiaBackendType": "GraphiteDawnMetal",
+      "subpixelFontRendering": true,
+      "targetCpuBits": 64,
+      "vertexShaderVersion": "3.00",
+      "visibilityCallbackCallCount": 0
+    },
+    "featureStatus": {
+      "2d_canvas": "enabled",
+      "direct_rendering_display_compositor": "disabled_off_ok",
+      "gpu_compositing": "enabled",
+      "multiple_raster_threads": "enabled_on",
+      "opengl": "enabled_on",
+      "rasterization": "enabled",
+      "raw_draw": "disabled_off_ok",
+      "skia_graphite": "enabled_on",
+      "trees_in_viz": "disabled_off",
+      "video_decode": "enabled",
+      "video_encode": "enabled",
+      "webgl": "enabled",
+      "webgpu": "enabled",
+      "webnn": "disabled_off"
+    },
+    "driverBugWorkarounds": [
+      "disable_2d_canvas_auto_flush",
+      "enable_webgl_timer_query_extensions",
+      "disabled_extension_GL_KHR_blend_equation_advanced",
+      "disabled_extension_GL_KHR_blend_equation_advanced_coherent"
+    ],
+    "videoDecoding": [],
+    "videoEncoding": []
+  },
+  "browserEvents": [],
+  "display": {
+    "geometry": {
+      "expected": {
+        "width": 1470,
+        "height": 956,
+        "dpr": 2
+      },
+      "rounds": 0,
+      "pass": true,
+      "measured": {
+        "width": 1470,
+        "height": 956,
+        "dpr": 2,
+        "screen": {
+          "width": 800,
+          "height": 600
+        },
+        "visibility": "visible",
+        "webdriver": true,
+        "elementFullscreen": false
+      }
+    },
+    "screen": {
+      "width": 800,
+      "height": 600
+    }
+  },
+  "hudRects": {
+    "viewport": {
+      "width": 1470,
+      "height": 956
+    },
+    "lapTimer": {
+      "selector": ".hud-lap-timer",
+      "present": true,
+      "visibility": "visible",
+      "rect": {
+        "x": 30,
+        "y": 903,
+        "width": 90.2,
+        "height": 23,
+        "right": 120.2,
+        "bottom": 926
+      }
+    },
+    "themeToggle": {
+      "selector": ".theme-segmented",
+      "present": true,
+      "visibility": "visible",
+      "rect": {
+        "x": 1228,
+        "y": 886,
+        "width": 120,
+        "height": 46,
+        "right": 1348,
+        "bottom": 932
+      }
+    },
+    "audioAnchor": {
+      "selector": ".audio-anchor",
+      "present": true,
+      "visibility": "visible",
+      "rect": {
+        "x": 1366,
+        "y": 890,
+        "width": 80,
+        "height": 42,
+        "right": 1446,
+        "bottom": 932
+      }
+    },
+    "audioPlayer": {
+      "selector": "#music-player",
+      "present": true,
+      "visibility": "hidden",
+      "rect": {
+        "x": 1388,
+        "y": 912.8,
+        "width": 74,
+        "height": 31.2,
+        "right": 1462,
+        "bottom": 944
+      }
+    },
+    "audioPlayerOpen": false,
+    "gated": [
+      "lapTimer",
+      "themeToggle",
+      "audioAnchor"
+    ],
+    "withinViewport": true,
+    "failures": []
+  },
+  "loading": {
+    "readiness": {
+      "status": "ready",
+      "model": "ready",
+      "audio": "ready",
+      "gpu": "ready",
+      "progress": 1,
+      "reasons": [],
+      "warmupSteps": [
+        {
+          "phase": "normal-solo",
+          "startedAt": 1180,
+          "endedAt": 1281,
+          "setupMs": 0.10000002384185791,
+          "renderMs": 100.89999997615814,
+          "totalMs": 101
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1310.1000000238419,
+          "endedAt": 1311.4000000357628,
+          "setupMs": 0,
+          "renderMs": 1.300000011920929,
+          "totalMs": 1.300000011920929
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1312.6000000238419,
+          "endedAt": 1331.699999988079,
+          "setupMs": 0,
+          "renderMs": 19.099999964237213,
+          "totalMs": 19.099999964237213
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1331.699999988079,
+          "endedAt": 1332.199999988079,
+          "setupMs": 0.10000002384185791,
+          "renderMs": 0.3999999761581421,
+          "totalMs": 0.5
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1332.199999988079,
+          "endedAt": 1332.800000011921,
+          "setupMs": 0,
+          "renderMs": 0.6000000238418579,
+          "totalMs": 0.6000000238418579
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1332.800000011921,
+          "endedAt": 1333.300000011921,
+          "setupMs": 0,
+          "renderMs": 0.5,
+          "totalMs": 0.5
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1333.300000011921,
+          "endedAt": 1333.6000000238419,
+          "setupMs": 0,
+          "renderMs": 0.30000001192092896,
+          "totalMs": 0.30000001192092896
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1333.6000000238419,
+          "endedAt": 1334,
+          "setupMs": 0,
+          "renderMs": 0.3999999761581421,
+          "totalMs": 0.3999999761581421
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1334,
+          "endedAt": 1336.300000011921,
+          "setupMs": 0,
+          "renderMs": 2.300000011920929,
+          "totalMs": 2.300000011920929
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1337.5,
+          "endedAt": 1339.699999988079,
+          "setupMs": 0,
+          "renderMs": 2.199999988079071,
+          "totalMs": 2.199999988079071
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1339.699999988079,
+          "endedAt": 1340.300000011921,
+          "setupMs": 0,
+          "renderMs": 0.6000000238418579,
+          "totalMs": 0.6000000238418579
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1340.300000011921,
+          "endedAt": 1340.9000000357628,
+          "setupMs": 0,
+          "renderMs": 0.6000000238418579,
+          "totalMs": 0.6000000238418579
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1340.9000000357628,
+          "endedAt": 1341.300000011921,
+          "setupMs": 0,
+          "renderMs": 0.3999999761581421,
+          "totalMs": 0.3999999761581421
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1341.300000011921,
+          "endedAt": 1343.199999988079,
+          "setupMs": 0,
+          "renderMs": 1.899999976158142,
+          "totalMs": 1.899999976158142
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1343.199999988079,
+          "endedAt": 1343.800000011921,
+          "setupMs": 0,
+          "renderMs": 0.6000000238418579,
+          "totalMs": 0.6000000238418579
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1343.800000011921,
+          "endedAt": 1345.5,
+          "setupMs": 0,
+          "renderMs": 1.699999988079071,
+          "totalMs": 1.699999988079071
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1345.5,
+          "endedAt": 1346,
+          "setupMs": 0,
+          "renderMs": 0.5,
+          "totalMs": 0.5
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1346,
+          "endedAt": 1346.4000000357628,
+          "setupMs": 0,
+          "renderMs": 0.40000003576278687,
+          "totalMs": 0.40000003576278687
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1346.4000000357628,
+          "endedAt": 1346.800000011921,
+          "setupMs": 0,
+          "renderMs": 0.3999999761581421,
+          "totalMs": 0.3999999761581421
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1349,
+          "endedAt": 1351,
+          "setupMs": 0,
+          "renderMs": 2,
+          "totalMs": 2
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1351,
+          "endedAt": 1351.300000011921,
+          "setupMs": 0,
+          "renderMs": 0.30000001192092896,
+          "totalMs": 0.30000001192092896
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1351.300000011921,
+          "endedAt": 1351.6000000238419,
+          "setupMs": 0,
+          "renderMs": 0.30000001192092896,
+          "totalMs": 0.30000001192092896
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1351.699999988079,
+          "endedAt": 1351.9000000357628,
+          "setupMs": 0,
+          "renderMs": 0.20000004768371582,
+          "totalMs": 0.20000004768371582
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1351.9000000357628,
+          "endedAt": 1352.1000000238419,
+          "setupMs": 0,
+          "renderMs": 0.19999998807907104,
+          "totalMs": 0.19999998807907104
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1352.1000000238419,
+          "endedAt": 1352.4000000357628,
+          "setupMs": 0,
+          "renderMs": 0.30000001192092896,
+          "totalMs": 0.30000001192092896
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1352.4000000357628,
+          "endedAt": 1352.6000000238419,
+          "setupMs": 0,
+          "renderMs": 0.19999998807907104,
+          "totalMs": 0.19999998807907104
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1352.6000000238419,
+          "endedAt": 1352.9000000357628,
+          "setupMs": 0,
+          "renderMs": 0.30000001192092896,
+          "totalMs": 0.30000001192092896
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1353,
+          "endedAt": 1353.199999988079,
+          "setupMs": 0,
+          "renderMs": 0.19999998807907104,
+          "totalMs": 0.19999998807907104
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1353.199999988079,
+          "endedAt": 1354.1000000238419,
+          "setupMs": 0,
+          "renderMs": 0.9000000357627869,
+          "totalMs": 0.9000000357627869
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1354.1000000238419,
+          "endedAt": 1354.6000000238419,
+          "setupMs": 0,
+          "renderMs": 0.5,
+          "totalMs": 0.5
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1354.6000000238419,
+          "endedAt": 1354.9000000357628,
+          "setupMs": 0,
+          "renderMs": 0.30000001192092896,
+          "totalMs": 0.30000001192092896
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1354.9000000357628,
+          "endedAt": 1355.4000000357628,
+          "setupMs": 0,
+          "renderMs": 0.5,
+          "totalMs": 0.5
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1355.4000000357628,
+          "endedAt": 1355.6000000238419,
+          "setupMs": 0,
+          "renderMs": 0.19999998807907104,
+          "totalMs": 0.19999998807907104
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1355.6000000238419,
+          "endedAt": 1355.699999988079,
+          "setupMs": 0,
+          "renderMs": 0.09999996423721313,
+          "totalMs": 0.09999996423721313
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1355.699999988079,
+          "endedAt": 1356.6000000238419,
+          "setupMs": 0,
+          "renderMs": 0.9000000357627869,
+          "totalMs": 0.9000000357627869
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1356.6000000238419,
+          "endedAt": 1356.9000000357628,
+          "setupMs": 0,
+          "renderMs": 0.30000001192092896,
+          "totalMs": 0.30000001192092896
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1356.9000000357628,
+          "endedAt": 1357.1000000238419,
+          "setupMs": 0,
+          "renderMs": 0.19999998807907104,
+          "totalMs": 0.19999998807907104
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1357.1000000238419,
+          "endedAt": 1357.199999988079,
+          "setupMs": 0,
+          "renderMs": 0.09999996423721313,
+          "totalMs": 0.09999996423721313
+        },
+        {
+          "phase": "pulse-solo",
+          "startedAt": 1357.199999988079,
+          "endedAt": 1357.6000000238419,
+          "setupMs": 0.10000002384185791,
+          "renderMs": 0.30000001192092896,
+          "totalMs": 0.40000003576278687
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1361.4000000357628,
+          "endedAt": 1362.6000000238419,
+          "setupMs": 0,
+          "renderMs": 1.199999988079071,
+          "totalMs": 1.199999988079071
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1373.199999988079,
+          "endedAt": 1373.9000000357628,
+          "setupMs": 0,
+          "renderMs": 0.7000000476837158,
+          "totalMs": 0.7000000476837158
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1373.9000000357628,
+          "endedAt": 1389.4000000357628,
+          "setupMs": 0,
+          "renderMs": 15.5,
+          "totalMs": 15.5
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1391.199999988079,
+          "endedAt": 1398.9000000357628,
+          "setupMs": 0,
+          "renderMs": 7.700000047683716,
+          "totalMs": 7.700000047683716
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1398.9000000357628,
+          "endedAt": 1399.300000011921,
+          "setupMs": 0,
+          "renderMs": 0.3999999761581421,
+          "totalMs": 0.3999999761581421
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1399.300000011921,
+          "endedAt": 1399.6000000238419,
+          "setupMs": 0,
+          "renderMs": 0.30000001192092896,
+          "totalMs": 0.30000001192092896
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1399.6000000238419,
+          "endedAt": 1399.9000000357628,
+          "setupMs": 0,
+          "renderMs": 0.30000001192092896,
+          "totalMs": 0.30000001192092896
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1399.9000000357628,
+          "endedAt": 1400.4000000357628,
+          "setupMs": 0,
+          "renderMs": 0.5,
+          "totalMs": 0.5
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1400.4000000357628,
+          "endedAt": 1400.9000000357628,
+          "setupMs": 0,
+          "renderMs": 0.5,
+          "totalMs": 0.5
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1400.9000000357628,
+          "endedAt": 1401.4000000357628,
+          "setupMs": 0,
+          "renderMs": 0.5,
+          "totalMs": 0.5
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1401.4000000357628,
+          "endedAt": 1401.9000000357628,
+          "setupMs": 0,
+          "renderMs": 0.5,
+          "totalMs": 0.5
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1401.9000000357628,
+          "endedAt": 1402,
+          "setupMs": 0,
+          "renderMs": 0.09999996423721313,
+          "totalMs": 0.09999996423721313
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1404.699999988079,
+          "endedAt": 1405,
+          "setupMs": 0,
+          "renderMs": 0.30000001192092896,
+          "totalMs": 0.30000001192092896
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1405,
+          "endedAt": 1405.300000011921,
+          "setupMs": 0,
+          "renderMs": 0.30000001192092896,
+          "totalMs": 0.30000001192092896
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1405.300000011921,
+          "endedAt": 1406,
+          "setupMs": 0,
+          "renderMs": 0.699999988079071,
+          "totalMs": 0.699999988079071
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1406,
+          "endedAt": 1406.300000011921,
+          "setupMs": 0,
+          "renderMs": 0.30000001192092896,
+          "totalMs": 0.30000001192092896
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1406.300000011921,
+          "endedAt": 1406.5,
+          "setupMs": 0,
+          "renderMs": 0.19999998807907104,
+          "totalMs": 0.19999998807907104
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1406.5,
+          "endedAt": 1406.699999988079,
+          "setupMs": 0,
+          "renderMs": 0.19999998807907104,
+          "totalMs": 0.19999998807907104
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1406.699999988079,
+          "endedAt": 1407,
+          "setupMs": 0,
+          "renderMs": 0.30000001192092896,
+          "totalMs": 0.30000001192092896
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1407,
+          "endedAt": 1407.4000000357628,
+          "setupMs": 0,
+          "renderMs": 0.40000003576278687,
+          "totalMs": 0.40000003576278687
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1407.4000000357628,
+          "endedAt": 1407.6000000238419,
+          "setupMs": 0,
+          "renderMs": 0.19999998807907104,
+          "totalMs": 0.19999998807907104
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1407.6000000238419,
+          "endedAt": 1407.9000000357628,
+          "setupMs": 0,
+          "renderMs": 0.30000001192092896,
+          "totalMs": 0.30000001192092896
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1407.9000000357628,
+          "endedAt": 1408.1000000238419,
+          "setupMs": 0,
+          "renderMs": 0.19999998807907104,
+          "totalMs": 0.19999998807907104
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1408.1000000238419,
+          "endedAt": 1408.300000011921,
+          "setupMs": 0,
+          "renderMs": 0.19999998807907104,
+          "totalMs": 0.19999998807907104
+        },
+        {
+          "phase": "pulse-solo",
+          "startedAt": 1408.300000011921,
+          "endedAt": 1408.4000000357628,
+          "setupMs": 0,
+          "renderMs": 0.10000002384185791,
+          "totalMs": 0.10000002384185791
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1412.6000000238419,
+          "endedAt": 1429.9000000357628,
+          "setupMs": 0,
+          "renderMs": 17.30000001192093,
+          "totalMs": 17.30000001192093
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1431.6000000238419,
+          "endedAt": 1432.699999988079,
+          "setupMs": 0,
+          "renderMs": 1.0999999642372131,
+          "totalMs": 1.0999999642372131
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1432.699999988079,
+          "endedAt": 1433.1000000238419,
+          "setupMs": 0,
+          "renderMs": 0.40000003576278687,
+          "totalMs": 0.40000003576278687
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1433.1000000238419,
+          "endedAt": 1433.5,
+          "setupMs": 0,
+          "renderMs": 0.3999999761581421,
+          "totalMs": 0.3999999761581421
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1433.5,
+          "endedAt": 1433.9000000357628,
+          "setupMs": 0,
+          "renderMs": 0.40000003576278687,
+          "totalMs": 0.40000003576278687
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1433.9000000357628,
+          "endedAt": 1434.300000011921,
+          "setupMs": 0,
+          "renderMs": 0.3999999761581421,
+          "totalMs": 0.3999999761581421
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1434.300000011921,
+          "endedAt": 1434.6000000238419,
+          "setupMs": 0,
+          "renderMs": 0.30000001192092896,
+          "totalMs": 0.30000001192092896
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1434.6000000238419,
+          "endedAt": 1434.9000000357628,
+          "setupMs": 0,
+          "renderMs": 0.30000001192092896,
+          "totalMs": 0.30000001192092896
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1434.9000000357628,
+          "endedAt": 1435.4000000357628,
+          "setupMs": 0,
+          "renderMs": 0.5,
+          "totalMs": 0.5
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1435.4000000357628,
+          "endedAt": 1435.6000000238419,
+          "setupMs": 0,
+          "renderMs": 0.19999998807907104,
+          "totalMs": 0.19999998807907104
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1435.6000000238419,
+          "endedAt": 1436,
+          "setupMs": 0,
+          "renderMs": 0.3999999761581421,
+          "totalMs": 0.3999999761581421
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1436,
+          "endedAt": 1436.300000011921,
+          "setupMs": 0,
+          "renderMs": 0.30000001192092896,
+          "totalMs": 0.30000001192092896
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1436.300000011921,
+          "endedAt": 1436.699999988079,
+          "setupMs": 0,
+          "renderMs": 0.3999999761581421,
+          "totalMs": 0.3999999761581421
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1436.699999988079,
+          "endedAt": 1437.1000000238419,
+          "setupMs": 0,
+          "renderMs": 0.40000003576278687,
+          "totalMs": 0.40000003576278687
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1437.1000000238419,
+          "endedAt": 1437.4000000357628,
+          "setupMs": 0,
+          "renderMs": 0.30000001192092896,
+          "totalMs": 0.30000001192092896
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1437.4000000357628,
+          "endedAt": 1437.699999988079,
+          "setupMs": 0,
+          "renderMs": 0.2999999523162842,
+          "totalMs": 0.2999999523162842
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1437.699999988079,
+          "endedAt": 1438.199999988079,
+          "setupMs": 0,
+          "renderMs": 0.5,
+          "totalMs": 0.5
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1438.199999988079,
+          "endedAt": 1454,
+          "setupMs": 0.10000002384185791,
+          "renderMs": 15.699999988079071,
+          "totalMs": 15.800000011920929
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1464.300000011921,
+          "endedAt": 1466.199999988079,
+          "setupMs": 0,
+          "renderMs": 1.899999976158142,
+          "totalMs": 1.899999976158142
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1467.9000000357628,
+          "endedAt": 1468.9000000357628,
+          "setupMs": 0,
+          "renderMs": 1,
+          "totalMs": 1
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1468.9000000357628,
+          "endedAt": 1469.199999988079,
+          "setupMs": 0,
+          "renderMs": 0.2999999523162842,
+          "totalMs": 0.2999999523162842
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1469.199999988079,
+          "endedAt": 1469.5,
+          "setupMs": 0,
+          "renderMs": 0.30000001192092896,
+          "totalMs": 0.30000001192092896
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1469.5,
+          "endedAt": 1469.699999988079,
+          "setupMs": 0,
+          "renderMs": 0.19999998807907104,
+          "totalMs": 0.19999998807907104
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1469.699999988079,
+          "endedAt": 1470,
+          "setupMs": 0,
+          "renderMs": 0.30000001192092896,
+          "totalMs": 0.30000001192092896
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1470,
+          "endedAt": 1470.300000011921,
+          "setupMs": 0,
+          "renderMs": 0.30000001192092896,
+          "totalMs": 0.30000001192092896
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1470.300000011921,
+          "endedAt": 1470.5,
+          "setupMs": 0,
+          "renderMs": 0.19999998807907104,
+          "totalMs": 0.19999998807907104
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1470.5,
+          "endedAt": 1470.800000011921,
+          "setupMs": 0,
+          "renderMs": 0.30000001192092896,
+          "totalMs": 0.30000001192092896
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1470.800000011921,
+          "endedAt": 1471.199999988079,
+          "setupMs": 0,
+          "renderMs": 0.3999999761581421,
+          "totalMs": 0.3999999761581421
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1471.199999988079,
+          "endedAt": 1471.699999988079,
+          "setupMs": 0,
+          "renderMs": 0.5,
+          "totalMs": 0.5
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1471.699999988079,
+          "endedAt": 1471.9000000357628,
+          "setupMs": 0,
+          "renderMs": 0.20000004768371582,
+          "totalMs": 0.20000004768371582
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1471.9000000357628,
+          "endedAt": 1472.199999988079,
+          "setupMs": 0,
+          "renderMs": 0.2999999523162842,
+          "totalMs": 0.2999999523162842
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1472.199999988079,
+          "endedAt": 1472.5,
+          "setupMs": 0,
+          "renderMs": 0.30000001192092896,
+          "totalMs": 0.30000001192092896
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1472.5,
+          "endedAt": 1472.699999988079,
+          "setupMs": 0,
+          "renderMs": 0.19999998807907104,
+          "totalMs": 0.19999998807907104
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1472.699999988079,
+          "endedAt": 1473,
+          "setupMs": 0,
+          "renderMs": 0.30000001192092896,
+          "totalMs": 0.30000001192092896
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1473,
+          "endedAt": 1473.300000011921,
+          "setupMs": 0,
+          "renderMs": 0.30000001192092896,
+          "totalMs": 0.30000001192092896
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1473.300000011921,
+          "endedAt": 1483.300000011921,
+          "setupMs": 0,
+          "renderMs": 10,
+          "totalMs": 10
+        },
+        {
+          "phase": "pulse-solo",
+          "startedAt": 1483.300000011921,
+          "endedAt": 1483.800000011921,
+          "setupMs": 0,
+          "renderMs": 0.5,
+          "totalMs": 0.5
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1491.800000011921,
+          "endedAt": 1510.1000000238419,
+          "setupMs": 0,
+          "renderMs": 18.30000001192093,
+          "totalMs": 18.30000001192093
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1529.199999988079,
+          "endedAt": 1546.6000000238419,
+          "setupMs": 0,
+          "renderMs": 17.400000035762787,
+          "totalMs": 17.400000035762787
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1548,
+          "endedAt": 1564.6000000238419,
+          "setupMs": 0,
+          "renderMs": 16.600000023841858,
+          "totalMs": 16.600000023841858
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1564.6000000238419,
+          "endedAt": 1565.199999988079,
+          "setupMs": 0,
+          "renderMs": 0.5999999642372131,
+          "totalMs": 0.5999999642372131
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1565.199999988079,
+          "endedAt": 1565.6000000238419,
+          "setupMs": 0,
+          "renderMs": 0.40000003576278687,
+          "totalMs": 0.40000003576278687
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1565.6000000238419,
+          "endedAt": 1566.300000011921,
+          "setupMs": 0,
+          "renderMs": 0.699999988079071,
+          "totalMs": 0.699999988079071
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1566.300000011921,
+          "endedAt": 1566.6000000238419,
+          "setupMs": 0,
+          "renderMs": 0.30000001192092896,
+          "totalMs": 0.30000001192092896
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1566.6000000238419,
+          "endedAt": 1566.9000000357628,
+          "setupMs": 0,
+          "renderMs": 0.30000001192092896,
+          "totalMs": 0.30000001192092896
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1566.9000000357628,
+          "endedAt": 1567.4000000357628,
+          "setupMs": 0,
+          "renderMs": 0.5,
+          "totalMs": 0.5
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1567.4000000357628,
+          "endedAt": 1567.9000000357628,
+          "setupMs": 0,
+          "renderMs": 0.5,
+          "totalMs": 0.5
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1567.9000000357628,
+          "endedAt": 1568.4000000357628,
+          "setupMs": 0,
+          "renderMs": 0.5,
+          "totalMs": 0.5
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1568.4000000357628,
+          "endedAt": 1568.699999988079,
+          "setupMs": 0,
+          "renderMs": 0.2999999523162842,
+          "totalMs": 0.2999999523162842
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1568.699999988079,
+          "endedAt": 1569,
+          "setupMs": 0,
+          "renderMs": 0.30000001192092896,
+          "totalMs": 0.30000001192092896
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1569,
+          "endedAt": 1569.199999988079,
+          "setupMs": 0,
+          "renderMs": 0.19999998807907104,
+          "totalMs": 0.19999998807907104
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1569.199999988079,
+          "endedAt": 1569.6000000238419,
+          "setupMs": 0,
+          "renderMs": 0.40000003576278687,
+          "totalMs": 0.40000003576278687
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1569.6000000238419,
+          "endedAt": 1570.1000000238419,
+          "setupMs": 0,
+          "renderMs": 0.5,
+          "totalMs": 0.5
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1570.1000000238419,
+          "endedAt": 1570.300000011921,
+          "setupMs": 0,
+          "renderMs": 0.19999998807907104,
+          "totalMs": 0.19999998807907104
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1570.300000011921,
+          "endedAt": 1571.6000000238419,
+          "setupMs": 0,
+          "renderMs": 1.300000011920929,
+          "totalMs": 1.300000011920929
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1572.1000000238419,
+          "endedAt": 1575.800000011921,
+          "setupMs": 0,
+          "renderMs": 3.699999988079071,
+          "totalMs": 3.699999988079071
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1577.300000011921,
+          "endedAt": 1578,
+          "setupMs": 0,
+          "renderMs": 0.699999988079071,
+          "totalMs": 0.699999988079071
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1578,
+          "endedAt": 1578.4000000357628,
+          "setupMs": 0,
+          "renderMs": 0.40000003576278687,
+          "totalMs": 0.40000003576278687
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1578.4000000357628,
+          "endedAt": 1578.699999988079,
+          "setupMs": 0,
+          "renderMs": 0.2999999523162842,
+          "totalMs": 0.2999999523162842
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1578.699999988079,
+          "endedAt": 1579,
+          "setupMs": 0,
+          "renderMs": 0.30000001192092896,
+          "totalMs": 0.30000001192092896
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1579,
+          "endedAt": 1579.1000000238419,
+          "setupMs": 0,
+          "renderMs": 0.10000002384185791,
+          "totalMs": 0.10000002384185791
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1579.1000000238419,
+          "endedAt": 1579.4000000357628,
+          "setupMs": 0,
+          "renderMs": 0.30000001192092896,
+          "totalMs": 0.30000001192092896
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1579.4000000357628,
+          "endedAt": 1579.6000000238419,
+          "setupMs": 0,
+          "renderMs": 0.19999998807907104,
+          "totalMs": 0.19999998807907104
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1579.6000000238419,
+          "endedAt": 1579.699999988079,
+          "setupMs": 0,
+          "renderMs": 0.09999996423721313,
+          "totalMs": 0.09999996423721313
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1579.699999988079,
+          "endedAt": 1579.9000000357628,
+          "setupMs": 0,
+          "renderMs": 0.20000004768371582,
+          "totalMs": 0.20000004768371582
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1579.9000000357628,
+          "endedAt": 1580.1000000238419,
+          "setupMs": 0,
+          "renderMs": 0.19999998807907104,
+          "totalMs": 0.19999998807907104
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1580.1000000238419,
+          "endedAt": 1580.300000011921,
+          "setupMs": 0,
+          "renderMs": 0.19999998807907104,
+          "totalMs": 0.19999998807907104
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1580.300000011921,
+          "endedAt": 1580.5,
+          "setupMs": 0,
+          "renderMs": 0.19999998807907104,
+          "totalMs": 0.19999998807907104
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1580.5,
+          "endedAt": 1580.699999988079,
+          "setupMs": 0,
+          "renderMs": 0.19999998807907104,
+          "totalMs": 0.19999998807907104
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1580.699999988079,
+          "endedAt": 1581,
+          "setupMs": 0,
+          "renderMs": 0.30000001192092896,
+          "totalMs": 0.30000001192092896
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1581,
+          "endedAt": 1581.199999988079,
+          "setupMs": 0,
+          "renderMs": 0.19999998807907104,
+          "totalMs": 0.19999998807907104
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1581.199999988079,
+          "endedAt": 1581.300000011921,
+          "setupMs": 0,
+          "renderMs": 0.10000002384185791,
+          "totalMs": 0.10000002384185791
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1581.300000011921,
+          "endedAt": 1581.5,
+          "setupMs": 0,
+          "renderMs": 0.19999998807907104,
+          "totalMs": 0.19999998807907104
+        },
+        {
+          "phase": "pulse-solo",
+          "startedAt": 1581.5,
+          "endedAt": 1581.699999988079,
+          "setupMs": 0.10000002384185791,
+          "renderMs": 0.09999996423721313,
+          "totalMs": 0.19999998807907104
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1584.6000000238419,
+          "endedAt": 1585.6000000238419,
+          "setupMs": 0,
+          "renderMs": 1,
+          "totalMs": 1
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1585.6000000238419,
+          "endedAt": 1586.300000011921,
+          "setupMs": 0,
+          "renderMs": 0.699999988079071,
+          "totalMs": 0.699999988079071
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1586.300000011921,
+          "endedAt": 1586.699999988079,
+          "setupMs": 0,
+          "renderMs": 0.3999999761581421,
+          "totalMs": 0.3999999761581421
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1586.699999988079,
+          "endedAt": 1587.1000000238419,
+          "setupMs": 0,
+          "renderMs": 0.40000003576278687,
+          "totalMs": 0.40000003576278687
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1587.1000000238419,
+          "endedAt": 1587.300000011921,
+          "setupMs": 0,
+          "renderMs": 0.19999998807907104,
+          "totalMs": 0.19999998807907104
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1587.300000011921,
+          "endedAt": 1587.699999988079,
+          "setupMs": 0,
+          "renderMs": 0.3999999761581421,
+          "totalMs": 0.3999999761581421
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1587.699999988079,
+          "endedAt": 1588,
+          "setupMs": 0,
+          "renderMs": 0.30000001192092896,
+          "totalMs": 0.30000001192092896
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1588,
+          "endedAt": 1588.9000000357628,
+          "setupMs": 0,
+          "renderMs": 0.9000000357627869,
+          "totalMs": 0.9000000357627869
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1588.9000000357628,
+          "endedAt": 1589.1000000238419,
+          "setupMs": 0,
+          "renderMs": 0.19999998807907104,
+          "totalMs": 0.19999998807907104
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1589.1000000238419,
+          "endedAt": 1589.4000000357628,
+          "setupMs": 0,
+          "renderMs": 0.30000001192092896,
+          "totalMs": 0.30000001192092896
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1589.4000000357628,
+          "endedAt": 1589.699999988079,
+          "setupMs": 0,
+          "renderMs": 0.2999999523162842,
+          "totalMs": 0.2999999523162842
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1589.699999988079,
+          "endedAt": 1589.9000000357628,
+          "setupMs": 0,
+          "renderMs": 0.20000004768371582,
+          "totalMs": 0.20000004768371582
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1590,
+          "endedAt": 1590.199999988079,
+          "setupMs": 0,
+          "renderMs": 0.19999998807907104,
+          "totalMs": 0.19999998807907104
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1590.199999988079,
+          "endedAt": 1590.6000000238419,
+          "setupMs": 0,
+          "renderMs": 0.40000003576278687,
+          "totalMs": 0.40000003576278687
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1590.6000000238419,
+          "endedAt": 1590.9000000357628,
+          "setupMs": 0,
+          "renderMs": 0.30000001192092896,
+          "totalMs": 0.30000001192092896
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1590.9000000357628,
+          "endedAt": 1591.199999988079,
+          "setupMs": 0,
+          "renderMs": 0.2999999523162842,
+          "totalMs": 0.2999999523162842
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1604.199999988079,
+          "endedAt": 1604.800000011921,
+          "setupMs": 0,
+          "renderMs": 0.6000000238418579,
+          "totalMs": 0.6000000238418579
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1606.5,
+          "endedAt": 1607,
+          "setupMs": 0,
+          "renderMs": 0.5,
+          "totalMs": 0.5
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1607,
+          "endedAt": 1607.199999988079,
+          "setupMs": 0,
+          "renderMs": 0.19999998807907104,
+          "totalMs": 0.19999998807907104
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1607.199999988079,
+          "endedAt": 1607.4000000357628,
+          "setupMs": 0,
+          "renderMs": 0.20000004768371582,
+          "totalMs": 0.20000004768371582
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1607.4000000357628,
+          "endedAt": 1607.699999988079,
+          "setupMs": 0,
+          "renderMs": 0.2999999523162842,
+          "totalMs": 0.2999999523162842
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1607.699999988079,
+          "endedAt": 1608,
+          "setupMs": 0,
+          "renderMs": 0.30000001192092896,
+          "totalMs": 0.30000001192092896
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1608,
+          "endedAt": 1608.4000000357628,
+          "setupMs": 0,
+          "renderMs": 0.40000003576278687,
+          "totalMs": 0.40000003576278687
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1608.4000000357628,
+          "endedAt": 1608.699999988079,
+          "setupMs": 0,
+          "renderMs": 0.2999999523162842,
+          "totalMs": 0.2999999523162842
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1608.699999988079,
+          "endedAt": 1608.9000000357628,
+          "setupMs": 0,
+          "renderMs": 0.20000004768371582,
+          "totalMs": 0.20000004768371582
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1608.9000000357628,
+          "endedAt": 1609.1000000238419,
+          "setupMs": 0,
+          "renderMs": 0.19999998807907104,
+          "totalMs": 0.19999998807907104
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1609.1000000238419,
+          "endedAt": 1609.300000011921,
+          "setupMs": 0,
+          "renderMs": 0.19999998807907104,
+          "totalMs": 0.19999998807907104
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1609.300000011921,
+          "endedAt": 1609.5,
+          "setupMs": 0,
+          "renderMs": 0.19999998807907104,
+          "totalMs": 0.19999998807907104
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1609.5,
+          "endedAt": 1609.699999988079,
+          "setupMs": 0,
+          "renderMs": 0.19999998807907104,
+          "totalMs": 0.19999998807907104
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1609.699999988079,
+          "endedAt": 1610,
+          "setupMs": 0,
+          "renderMs": 0.30000001192092896,
+          "totalMs": 0.30000001192092896
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1610,
+          "endedAt": 1610.199999988079,
+          "setupMs": 0,
+          "renderMs": 0.19999998807907104,
+          "totalMs": 0.19999998807907104
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1610.199999988079,
+          "endedAt": 1610.5,
+          "setupMs": 0,
+          "renderMs": 0.30000001192092896,
+          "totalMs": 0.30000001192092896
+        },
+        {
+          "phase": "pulse-solo",
+          "startedAt": 1610.5,
+          "endedAt": 1610.699999988079,
+          "setupMs": 0.10000002384185791,
+          "renderMs": 0.09999996423721313,
+          "totalMs": 0.19999998807907104
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1631.699999988079,
+          "endedAt": 1673,
+          "setupMs": 0.10000002384185791,
+          "renderMs": 41.19999998807907,
+          "totalMs": 41.30000001192093
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1676.1000000238419,
+          "endedAt": 1686.4000000357628,
+          "setupMs": 0,
+          "renderMs": 10.300000011920929,
+          "totalMs": 10.300000011920929
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1686.4000000357628,
+          "endedAt": 1687,
+          "setupMs": 0,
+          "renderMs": 0.5999999642372131,
+          "totalMs": 0.5999999642372131
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1687,
+          "endedAt": 1687.5,
+          "setupMs": 0,
+          "renderMs": 0.5,
+          "totalMs": 0.5
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1687.5,
+          "endedAt": 1689,
+          "setupMs": 0,
+          "renderMs": 1.5,
+          "totalMs": 1.5
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1689,
+          "endedAt": 1689.1000000238419,
+          "setupMs": 0,
+          "renderMs": 0.10000002384185791,
+          "totalMs": 0.10000002384185791
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1693.800000011921,
+          "endedAt": 1694.6000000238419,
+          "setupMs": 0,
+          "renderMs": 0.800000011920929,
+          "totalMs": 0.800000011920929
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1694.6000000238419,
+          "endedAt": 1695.800000011921,
+          "setupMs": 0,
+          "renderMs": 1.199999988079071,
+          "totalMs": 1.199999988079071
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1695.800000011921,
+          "endedAt": 1696.199999988079,
+          "setupMs": 0,
+          "renderMs": 0.3999999761581421,
+          "totalMs": 0.3999999761581421
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1696.199999988079,
+          "endedAt": 1696.5,
+          "setupMs": 0,
+          "renderMs": 0.30000001192092896,
+          "totalMs": 0.30000001192092896
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1696.5,
+          "endedAt": 1696.800000011921,
+          "setupMs": 0,
+          "renderMs": 0.30000001192092896,
+          "totalMs": 0.30000001192092896
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1696.800000011921,
+          "endedAt": 1696.9000000357628,
+          "setupMs": 0,
+          "renderMs": 0.10000002384185791,
+          "totalMs": 0.10000002384185791
+        },
+        {
+          "phase": "pulse-solo",
+          "startedAt": 1696.9000000357628,
+          "endedAt": 1697,
+          "setupMs": 0,
+          "renderMs": 0.09999996423721313,
+          "totalMs": 0.09999996423721313
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1700.1000000238419,
+          "endedAt": 1702,
+          "setupMs": 0,
+          "renderMs": 1.899999976158142,
+          "totalMs": 1.899999976158142
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1717.1000000238419,
+          "endedAt": 1734.4000000357628,
+          "setupMs": 0,
+          "renderMs": 17.30000001192093,
+          "totalMs": 17.30000001192093
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1735.9000000357628,
+          "endedAt": 1736.6000000238419,
+          "setupMs": 0,
+          "renderMs": 0.699999988079071,
+          "totalMs": 0.699999988079071
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1736.6000000238419,
+          "endedAt": 1737,
+          "setupMs": 0,
+          "renderMs": 0.3999999761581421,
+          "totalMs": 0.3999999761581421
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1737,
+          "endedAt": 1737.4000000357628,
+          "setupMs": 0,
+          "renderMs": 0.40000003576278687,
+          "totalMs": 0.40000003576278687
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1737.4000000357628,
+          "endedAt": 1737.699999988079,
+          "setupMs": 0,
+          "renderMs": 0.2999999523162842,
+          "totalMs": 0.2999999523162842
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1737.699999988079,
+          "endedAt": 1738.300000011921,
+          "setupMs": 0,
+          "renderMs": 0.6000000238418579,
+          "totalMs": 0.6000000238418579
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1738.300000011921,
+          "endedAt": 1739.300000011921,
+          "setupMs": 0,
+          "renderMs": 1,
+          "totalMs": 1
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1739.300000011921,
+          "endedAt": 1739.6000000238419,
+          "setupMs": 0,
+          "renderMs": 0.30000001192092896,
+          "totalMs": 0.30000001192092896
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1739.6000000238419,
+          "endedAt": 1748.800000011921,
+          "setupMs": 0,
+          "renderMs": 9.199999988079071,
+          "totalMs": 9.199999988079071
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1748.800000011921,
+          "endedAt": 1749.699999988079,
+          "setupMs": 0.10000002384185791,
+          "renderMs": 0.7999999523162842,
+          "totalMs": 0.8999999761581421
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1749.699999988079,
+          "endedAt": 1750.6000000238419,
+          "setupMs": 0,
+          "renderMs": 0.9000000357627869,
+          "totalMs": 0.9000000357627869
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1750.6000000238419,
+          "endedAt": 1751,
+          "setupMs": 0,
+          "renderMs": 0.3999999761581421,
+          "totalMs": 0.3999999761581421
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1751,
+          "endedAt": 1751.5,
+          "setupMs": 0,
+          "renderMs": 0.5,
+          "totalMs": 0.5
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1751.5,
+          "endedAt": 1751.699999988079,
+          "setupMs": 0,
+          "renderMs": 0.19999998807907104,
+          "totalMs": 0.19999998807907104
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1751.800000011921,
+          "endedAt": 1752.699999988079,
+          "setupMs": 0,
+          "renderMs": 0.8999999761581421,
+          "totalMs": 0.8999999761581421
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1752.699999988079,
+          "endedAt": 1755,
+          "setupMs": 0,
+          "renderMs": 2.300000011920929,
+          "totalMs": 2.300000011920929
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1755,
+          "endedAt": 1755.199999988079,
+          "setupMs": 0,
+          "renderMs": 0.19999998807907104,
+          "totalMs": 0.19999998807907104
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1755.300000011921,
+          "endedAt": 1755.5,
+          "setupMs": 0,
+          "renderMs": 0.19999998807907104,
+          "totalMs": 0.19999998807907104
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1755.5,
+          "endedAt": 1755.699999988079,
+          "setupMs": 0,
+          "renderMs": 0.19999998807907104,
+          "totalMs": 0.19999998807907104
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1755.699999988079,
+          "endedAt": 1755.9000000357628,
+          "setupMs": 0,
+          "renderMs": 0.20000004768371582,
+          "totalMs": 0.20000004768371582
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1755.9000000357628,
+          "endedAt": 1756.1000000238419,
+          "setupMs": 0,
+          "renderMs": 0.19999998807907104,
+          "totalMs": 0.19999998807907104
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1756.1000000238419,
+          "endedAt": 1756.300000011921,
+          "setupMs": 0,
+          "renderMs": 0.19999998807907104,
+          "totalMs": 0.19999998807907104
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1756.300000011921,
+          "endedAt": 1756.699999988079,
+          "setupMs": 0,
+          "renderMs": 0.3999999761581421,
+          "totalMs": 0.3999999761581421
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1756.699999988079,
+          "endedAt": 1757.4000000357628,
+          "setupMs": 0,
+          "renderMs": 0.7000000476837158,
+          "totalMs": 0.7000000476837158
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1757.4000000357628,
+          "endedAt": 1757.6000000238419,
+          "setupMs": 0,
+          "renderMs": 0.19999998807907104,
+          "totalMs": 0.19999998807907104
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1757.6000000238419,
+          "endedAt": 1757.800000011921,
+          "setupMs": 0,
+          "renderMs": 0.19999998807907104,
+          "totalMs": 0.19999998807907104
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1757.800000011921,
+          "endedAt": 1758,
+          "setupMs": 0,
+          "renderMs": 0.19999998807907104,
+          "totalMs": 0.19999998807907104
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1758,
+          "endedAt": 1758.199999988079,
+          "setupMs": 0,
+          "renderMs": 0.19999998807907104,
+          "totalMs": 0.19999998807907104
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1758.199999988079,
+          "endedAt": 1758.300000011921,
+          "setupMs": 0,
+          "renderMs": 0.10000002384185791,
+          "totalMs": 0.10000002384185791
+        },
+        {
+          "phase": "pulse-solo",
+          "startedAt": 1758.300000011921,
+          "endedAt": 1758.5,
+          "setupMs": 0,
+          "renderMs": 0.19999998807907104,
+          "totalMs": 0.19999998807907104
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1758.5,
+          "endedAt": 1759,
+          "setupMs": 0,
+          "renderMs": 0.5,
+          "totalMs": 0.5
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1759,
+          "endedAt": 1759.5,
+          "setupMs": 0,
+          "renderMs": 0.5,
+          "totalMs": 0.5
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1759.5,
+          "endedAt": 1759.800000011921,
+          "setupMs": 0,
+          "renderMs": 0.30000001192092896,
+          "totalMs": 0.30000001192092896
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1759.800000011921,
+          "endedAt": 1760,
+          "setupMs": 0,
+          "renderMs": 0.19999998807907104,
+          "totalMs": 0.19999998807907104
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1761,
+          "endedAt": 1764.1000000238419,
+          "setupMs": 0,
+          "renderMs": 3.100000023841858,
+          "totalMs": 3.100000023841858
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1764.1000000238419,
+          "endedAt": 1764.4000000357628,
+          "setupMs": 0,
+          "renderMs": 0.30000001192092896,
+          "totalMs": 0.30000001192092896
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1764.4000000357628,
+          "endedAt": 1764.699999988079,
+          "setupMs": 0,
+          "renderMs": 0.2999999523162842,
+          "totalMs": 0.2999999523162842
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1764.800000011921,
+          "endedAt": 1764.9000000357628,
+          "setupMs": 0,
+          "renderMs": 0.10000002384185791,
+          "totalMs": 0.10000002384185791
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1764.9000000357628,
+          "endedAt": 1765.199999988079,
+          "setupMs": 0,
+          "renderMs": 0.2999999523162842,
+          "totalMs": 0.2999999523162842
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1765.199999988079,
+          "endedAt": 1765.4000000357628,
+          "setupMs": 0,
+          "renderMs": 0.20000004768371582,
+          "totalMs": 0.20000004768371582
+        },
+        {
+          "phase": "pulse-solo",
+          "startedAt": 1765.4000000357628,
+          "endedAt": 1765.5,
+          "setupMs": 0,
+          "renderMs": 0.09999996423721313,
+          "totalMs": 0.09999996423721313
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1765.5,
+          "endedAt": 1771,
+          "setupMs": 0,
+          "renderMs": 5.5,
+          "totalMs": 5.5
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1771,
+          "endedAt": 1775.4000000357628,
+          "setupMs": 0,
+          "renderMs": 4.400000035762787,
+          "totalMs": 4.400000035762787
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1775.4000000357628,
+          "endedAt": 1775.9000000357628,
+          "setupMs": 0,
+          "renderMs": 0.5,
+          "totalMs": 0.5
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1775.9000000357628,
+          "endedAt": 1776.4000000357628,
+          "setupMs": 0,
+          "renderMs": 0.5,
+          "totalMs": 0.5
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1776.4000000357628,
+          "endedAt": 1779.300000011921,
+          "setupMs": 0,
+          "renderMs": 2.899999976158142,
+          "totalMs": 2.899999976158142
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1779.300000011921,
+          "endedAt": 1779.4000000357628,
+          "setupMs": 0,
+          "renderMs": 0.10000002384185791,
+          "totalMs": 0.10000002384185791
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1779.5,
+          "endedAt": 1782.4000000357628,
+          "setupMs": 0,
+          "renderMs": 2.900000035762787,
+          "totalMs": 2.900000035762787
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1782.4000000357628,
+          "endedAt": 1784,
+          "setupMs": 0,
+          "renderMs": 1.5999999642372131,
+          "totalMs": 1.5999999642372131
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1784,
+          "endedAt": 1784.4000000357628,
+          "setupMs": 0,
+          "renderMs": 0.40000003576278687,
+          "totalMs": 0.40000003576278687
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1784.4000000357628,
+          "endedAt": 1784.699999988079,
+          "setupMs": 0,
+          "renderMs": 0.2999999523162842,
+          "totalMs": 0.2999999523162842
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1784.699999988079,
+          "endedAt": 1785,
+          "setupMs": 0,
+          "renderMs": 0.30000001192092896,
+          "totalMs": 0.30000001192092896
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1786,
+          "endedAt": 1786.199999988079,
+          "setupMs": 0,
+          "renderMs": 0.19999998807907104,
+          "totalMs": 0.19999998807907104
+        },
+        {
+          "phase": "pulse-solo",
+          "startedAt": 1786.199999988079,
+          "endedAt": 1786.4000000357628,
+          "setupMs": 0.10000002384185791,
+          "renderMs": 0.10000002384185791,
+          "totalMs": 0.20000004768371582
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1786.4000000357628,
+          "endedAt": 1787.4000000357628,
+          "setupMs": 0,
+          "renderMs": 1,
+          "totalMs": 1
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1787.4000000357628,
+          "endedAt": 1792.199999988079,
+          "setupMs": 0,
+          "renderMs": 4.799999952316284,
+          "totalMs": 4.799999952316284
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1792.199999988079,
+          "endedAt": 1793.199999988079,
+          "setupMs": 0,
+          "renderMs": 1,
+          "totalMs": 1
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1793.199999988079,
+          "endedAt": 1793.699999988079,
+          "setupMs": 0,
+          "renderMs": 0.5,
+          "totalMs": 0.5
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1793.699999988079,
+          "endedAt": 1794.1000000238419,
+          "setupMs": 0,
+          "renderMs": 0.40000003576278687,
+          "totalMs": 0.40000003576278687
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1794.1000000238419,
+          "endedAt": 1794.5,
+          "setupMs": 0,
+          "renderMs": 0.3999999761581421,
+          "totalMs": 0.3999999761581421
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1794.5,
+          "endedAt": 1795.4000000357628,
+          "setupMs": 0,
+          "renderMs": 0.9000000357627869,
+          "totalMs": 0.9000000357627869
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1795.4000000357628,
+          "endedAt": 1798,
+          "setupMs": 0,
+          "renderMs": 2.599999964237213,
+          "totalMs": 2.599999964237213
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1798,
+          "endedAt": 1798.800000011921,
+          "setupMs": 0,
+          "renderMs": 0.800000011920929,
+          "totalMs": 0.800000011920929
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1798.800000011921,
+          "endedAt": 1799.199999988079,
+          "setupMs": 0,
+          "renderMs": 0.3999999761581421,
+          "totalMs": 0.3999999761581421
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1799.199999988079,
+          "endedAt": 1799.4000000357628,
+          "setupMs": 0,
+          "renderMs": 0.20000004768371582,
+          "totalMs": 0.20000004768371582
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1799.4000000357628,
+          "endedAt": 1799.800000011921,
+          "setupMs": 0,
+          "renderMs": 0.3999999761581421,
+          "totalMs": 0.3999999761581421
+        },
+        {
+          "phase": "normal-solo",
+          "startedAt": 1799.800000011921,
+          "endedAt": 1800.1000000238419,
+          "setupMs": 0,
+          "renderMs": 0.30000001192092896,
+          "totalMs": 0.30000001192092896
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1800.1000000238419,
+          "endedAt": 1800.5,
+          "setupMs": 0,
+          "renderMs": 0.3999999761581421,
+          "totalMs": 0.3999999761581421
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1800.5,
+          "endedAt": 1800.699999988079,
+          "setupMs": 0,
+          "renderMs": 0.19999998807907104,
+          "totalMs": 0.19999998807907104
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1800.699999988079,
+          "endedAt": 1801,
+          "setupMs": 0,
+          "renderMs": 0.30000001192092896,
+          "totalMs": 0.30000001192092896
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1801,
+          "endedAt": 1801.199999988079,
+          "setupMs": 0,
+          "renderMs": 0.19999998807907104,
+          "totalMs": 0.19999998807907104
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1801.199999988079,
+          "endedAt": 1801.5,
+          "setupMs": 0,
+          "renderMs": 0.30000001192092896,
+          "totalMs": 0.30000001192092896
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1801.5,
+          "endedAt": 1801.699999988079,
+          "setupMs": 0,
+          "renderMs": 0.19999998807907104,
+          "totalMs": 0.19999998807907104
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1801.699999988079,
+          "endedAt": 1802,
+          "setupMs": 0,
+          "renderMs": 0.30000001192092896,
+          "totalMs": 0.30000001192092896
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1802,
+          "endedAt": 1803.300000011921,
+          "setupMs": 0,
+          "renderMs": 1.300000011920929,
+          "totalMs": 1.300000011920929
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1803.300000011921,
+          "endedAt": 1803.4000000357628,
+          "setupMs": 0,
+          "renderMs": 0.10000002384185791,
+          "totalMs": 0.10000002384185791
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1803.4000000357628,
+          "endedAt": 1803.699999988079,
+          "setupMs": 0,
+          "renderMs": 0.2999999523162842,
+          "totalMs": 0.2999999523162842
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1803.699999988079,
+          "endedAt": 1803.800000011921,
+          "setupMs": 0,
+          "renderMs": 0.10000002384185791,
+          "totalMs": 0.10000002384185791
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1803.800000011921,
+          "endedAt": 1803.9000000357628,
+          "setupMs": 0,
+          "renderMs": 0.10000002384185791,
+          "totalMs": 0.10000002384185791
+        },
+        {
+          "phase": "fade-solo",
+          "startedAt": 1803.9000000357628,
+          "endedAt": 1804,
+          "setupMs": 0,
+          "renderMs": 0.09999996423721313,
+          "totalMs": 0.09999996423721313
+        },
+        {
+          "phase": "pulse-solo",
+          "startedAt": 1804,
+          "endedAt": 1804.199999988079,
+          "setupMs": 0,
+          "renderMs": 0.19999998807907104,
+          "totalMs": 0.19999998807907104
+        },
+        {
+          "phase": "fade-pair",
+          "startedAt": 1804.199999988079,
+          "endedAt": 1806.699999988079,
+          "setupMs": 0.20000004768371582,
+          "renderMs": 2.299999952316284,
+          "totalMs": 2.5
+        },
+        {
+          "phase": "fade-pair",
+          "startedAt": 1806.800000011921,
+          "endedAt": 1809.199999988079,
+          "setupMs": 0,
+          "renderMs": 2.399999976158142,
+          "totalMs": 2.399999976158142
+        },
+        {
+          "phase": "fade-pair",
+          "startedAt": 1809.199999988079,
+          "endedAt": 1813,
+          "setupMs": 0.10000002384185791,
+          "renderMs": 3.699999988079071,
+          "totalMs": 3.800000011920929
+        },
+        {
+          "phase": "fade-pair",
+          "startedAt": 1815.300000011921,
+          "endedAt": 1818.6000000238419,
+          "setupMs": 0.19999998807907104,
+          "renderMs": 3.100000023841858,
+          "totalMs": 3.300000011920929
+        },
+        {
+          "phase": "fade-pair",
+          "startedAt": 1818.6000000238419,
+          "endedAt": 1820.6000000238419,
+          "setupMs": 0,
+          "renderMs": 2,
+          "totalMs": 2
+        },
+        {
+          "phase": "fade-pair",
+          "startedAt": 1820.6000000238419,
+          "endedAt": 1822,
+          "setupMs": 0.09999996423721313,
+          "renderMs": 1.300000011920929,
+          "totalMs": 1.399999976158142
+        },
+        {
+          "phase": "fade-pair",
+          "startedAt": 1822,
+          "endedAt": 1823.699999988079,
+          "setupMs": 0.10000002384185791,
+          "renderMs": 1.5999999642372131,
+          "totalMs": 1.699999988079071
+        },
+        {
+          "phase": "fade-pair",
+          "startedAt": 1823.699999988079,
+          "endedAt": 1824.699999988079,
+          "setupMs": 0.10000002384185791,
+          "renderMs": 0.8999999761581421,
+          "totalMs": 1
+        },
+        {
+          "phase": "fade-pair",
+          "startedAt": 1824.699999988079,
+          "endedAt": 1825.9000000357628,
+          "setupMs": 0,
+          "renderMs": 1.2000000476837158,
+          "totalMs": 1.2000000476837158
+        },
+        {
+          "phase": "shadow",
+          "startedAt": 1825.9000000357628,
+          "endedAt": 1916.5,
+          "setupMs": 0,
+          "renderMs": 90.59999996423721,
+          "totalMs": 90.59999996423721
+        },
+        {
+          "phase": "shadow",
+          "startedAt": 1917.6000000238419,
+          "endedAt": 1918.4000000357628,
+          "setupMs": 0,
+          "renderMs": 0.800000011920929,
+          "totalMs": 0.800000011920929
+        },
+        {
+          "phase": "gate-response",
+          "startedAt": 1918.699999988079,
+          "endedAt": 1931.300000011921,
+          "setupMs": 0,
+          "renderMs": 12.600000023841858,
+          "totalMs": 12.600000023841858
+        },
+        {
+          "phase": "full-scene-control",
+          "startedAt": 1931.800000011921,
+          "endedAt": 1946,
+          "setupMs": 0,
+          "renderMs": 14.199999988079071,
+          "totalMs": 14.199999988079071
+        }
+      ],
+      "readyAt": 1946.199999988079,
+      "warmupCars": "all"
+    },
+    "resources": [
+      {
+        "name": "http://127.0.0.1:5247/models/tour/lexus_rcf_gt3.glb",
+        "duration": 20.100000023841858,
+        "transferSize": 2627520,
+        "decodedBodySize": 2627220
+      },
+      {
+        "name": "http://127.0.0.1:5247/models/tour/nissan_gtr_gt3.glb",
+        "duration": 12.299999952316284,
+        "transferSize": 1649348,
+        "decodedBodySize": 1649048
+      },
+      {
+        "name": "http://127.0.0.1:5247/models/tour/audi_r8_gt3.glb",
+        "duration": 18.19999998807907,
+        "transferSize": 2309580,
+        "decodedBodySize": 2309280
+      },
+      {
+        "name": "http://127.0.0.1:5247/models/tour/ferrari_488_gt3.glb",
+        "duration": 6.199999988079071,
+        "transferSize": 640592,
+        "decodedBodySize": 640292
+      },
+      {
+        "name": "http://127.0.0.1:5247/models/tour/mercedes_amg_gt3.glb",
+        "duration": 12.600000023841858,
+        "transferSize": 1666972,
+        "decodedBodySize": 1666672
+      },
+      {
+        "name": "http://127.0.0.1:5247/models/tour/bmw_m6_gt3.glb",
+        "duration": 29.400000035762787,
+        "transferSize": 3926668,
+        "decodedBodySize": 3926368
+      },
+      {
+        "name": "http://127.0.0.1:5247/models/tour/mclaren_720s_gt3.glb",
+        "duration": 53.90000003576279,
+        "transferSize": 3016348,
+        "decodedBodySize": 3016048
+      },
+      {
+        "name": "http://127.0.0.1:5247/models/tour/aston_vantage_gt3.glb",
+        "duration": 19.5,
+        "transferSize": 482888,
+        "decodedBodySize": 482588
+      },
+      {
+        "name": "http://127.0.0.1:5247/models/tour/lamborghini_huracan_gt3.glb",
+        "duration": 55.30000001192093,
+        "transferSize": 3101784,
+        "decodedBodySize": 3101484
+      },
+      {
+        "name": "http://127.0.0.1:5247/models/tour/porsche_911_gt3r.glb",
+        "duration": 65.80000001192093,
+        "transferSize": 2625240,
+        "decodedBodySize": 2624940
+      },
+      {
+        "name": "http://127.0.0.1:5247/draco/gltf/draco_wasm_wrapper.js",
+        "duration": 14,
+        "transferSize": 58756,
+        "decodedBodySize": 58456
+      },
+      {
+        "name": "http://127.0.0.1:5247/draco/gltf/draco_decoder.wasm",
+        "duration": 19.19999998807907,
+        "transferSize": 192720,
+        "decodedBodySize": 192420
+      }
+    ],
+    "rendererMemory": {
+      "geometries": 1501,
+      "textures": 303
+    },
+    "programs": 116
+  },
+  "quality": {
+    "dpr": 2,
+    "candidate": "",
+    "sceneSamples": 0,
+    "maxSamples": 4,
+    "halfFloatSamples": [
+      4,
+      2
+    ],
+    "diagnosticWarmupMs": 0,
+    "reflectionScope": "none",
+    "rendererMemory": {
+      "geometries": 1501,
+      "textures": 303
+    },
+    "programs": 116,
+    "probe": {
+      "mode": "race",
+      "locked": false,
+      "speed01": 0,
+      "progress": 0.0008943730567181063,
+      "applied": 2,
+      "level": "high",
+      "still": 766.6999999880791,
+      "sinceSwitch": null,
+      "canvasW": 2940,
+      "ratio": 2
+    },
+    "environment": false,
+    "passes": [
+      {
+        "name": "RenderPass",
+        "enabled": true
+      },
+      {
+        "name": "ShaderPass",
+        "enabled": true
+      },
+      {
+        "name": "ShaderPass",
+        "enabled": true
+      },
+      {
+        "name": "SMAAPass",
+        "enabled": true
+      }
+    ],
+    "targets": [
+      {
+        "width": 2940,
+        "height": 1912,
+        "samples": 0
+      },
+      {
+        "width": 2940,
+        "height": 1912,
+        "samples": 0
+      }
+    ],
+    "timerExtension": true
+  },
+  "transmissionVariant": "stock",
+  "stateSet": "ferrari-day,ferrari-night,aston-day,aston-night",
+  "captures": [
+    {
+      "name": "ferrari-day",
+      "index": 5,
+      "theme": "day",
+      "t": 0.123,
+      "file": "ferrari-day.png",
+      "sha256": "baf4b7a0cac46dd5815c0c975f1d2f0495810f4c9b17103d5df75de8090dd914",
+      "probe": {
+        "mode": "race",
+        "locked": false,
+        "speed01": 0,
+        "progress": 0.12614160527985382,
+        "applied": 2,
+        "level": "high",
+        "still": 766.6999999880791,
+        "sinceSwitch": null,
+        "canvasW": 2940,
+        "ratio": 2
+      },
+      "environment": false,
+      "camera": {
+        "position": [
+          46.20052307590598,
+          208.2878532625406,
+          -490.5569780961339
+        ],
+        "quaternion": [
+          -0.3702543457061976,
+          -0.5383996395935492,
+          -0.28410615187685734,
+          0.701656071046874
+        ],
+        "fov": 40
+      },
+      "carBoundsCSS": {
+        "x": 860.5945029457689,
+        "y": 183.1097399090664,
+        "width": 72.87778072610388,
+        "height": 55.98542593070323
+      },
+      "triangles": 34769,
+      "materials": [
+        {
+          "name": "LOD_A_CHASSIS_mm_lights_Mat",
+          "type": "MeshStandardMaterial",
+          "color": "ffffff",
+          "roughness": 0,
+          "metalness": 0,
+          "envMap": true,
+          "envMapIntensity": 0.7,
+          "normalMap": false
+        },
+        {
+          "name": "LOD_A_INTERIOR_mm_cab_Mat",
+          "type": "MeshStandardMaterial",
+          "color": "ffffff",
+          "roughness": 0.5,
+          "metalness": 0.5,
+          "envMap": true,
+          "envMapIntensity": 0.7,
+          "normalMap": false
+        },
+        {
+          "name": "LOD_A_HEADLIGHT_LENS_RIGHT_mm_windows_Mat",
+          "type": "MeshPhysicalMaterial",
+          "color": "ffffff",
+          "roughness": 0,
+          "metalness": 0,
+          "envMap": true,
+          "envMapIntensity": 0.7,
+          "normalMap": false
+        },
+        {
+          "name": "LOD_A_BRAKE_CALIPER_FRONT_LEFT_mm_misc_Mat",
+          "type": "MeshStandardMaterial",
+          "color": "ffffff",
+          "roughness": 0.5,
+          "metalness": 0.5,
+          "envMap": true,
+          "envMapIntensity": 0.7,
+          "normalMap": false
+        },
+        {
+          "name": "LOD_A_DOOR_RIGHT_mm_ext_Mat",
+          "type": "MeshStandardMaterial",
+          "color": "ffffff",
+          "roughness": 0,
+          "metalness": 0,
+          "envMap": true,
+          "envMapIntensity": 0.7,
+          "normalMap": false
+        },
+        {
+          "name": "LOD_A_FRONTBUMPER_mm_chassis_Mat",
+          "type": "MeshStandardMaterial",
+          "color": "ffffff",
+          "roughness": 0.5,
+          "metalness": 0.5,
+          "envMap": true,
+          "envMapIntensity": 0.7,
+          "normalMap": false
+        },
+        {
+          "name": "LOD_A_INTERIOR_mm_ext_Mat",
+          "type": "MeshStandardMaterial",
+          "color": "ffffff",
+          "roughness": 0,
+          "metalness": 0,
+          "envMap": true,
+          "envMapIntensity": 0.7,
+          "normalMap": false
+        },
+        {
+          "name": "LOD_A_FRONTBUMPER_mm_badges_Mat",
+          "type": "MeshStandardMaterial",
+          "color": "ffffff",
+          "roughness": 0.5,
+          "metalness": 0.5,
+          "envMap": true,
+          "envMapIntensity": 0.7,
+          "normalMap": false
+        },
+        {
+          "name": "LOD_A_DOOR_RIGHT_mm_badges_Mat",
+          "type": "MeshStandardMaterial",
+          "color": "ffffff",
+          "roughness": 0.5,
+          "metalness": 0.5,
+          "envMap": true,
+          "envMapIntensity": 0.7,
+          "normalMap": false
+        },
+        {
+          "name": "LOD_A_BRAKE_CALIPER_FRONT_LEFT_mm_misc_Mat",
+          "type": "MeshStandardMaterial",
+          "color": "ffffff",
+          "roughness": 0.5,
+          "metalness": 0.5,
+          "envMap": true,
+          "envMapIntensity": 0.7,
+          "normalMap": false
+        },
+        {
+          "name": "LOD_A_WHEEL_REAR_mm_wheel_Mat",
+          "type": "MeshStandardMaterial",
+          "color": "ffffff",
+          "roughness": 0.5,
+          "metalness": 0.5,
+          "envMap": true,
+          "envMapIntensity": 0.7,
+          "normalMap": false
+        },
+        {
+          "name": "LOD_A_TYRE_REAR_mm_tyre_Mat",
+          "type": "MeshStandardMaterial",
+          "color": "ffffff",
+          "roughness": 0.5,
+          "metalness": 0.5,
+          "envMap": true,
+          "envMapIntensity": 0.7,
+          "normalMap": false
+        },
+        {
+          "name": "LOD_A_ROTOR_mm_rotor_Mat",
+          "type": "MeshStandardMaterial",
+          "color": "ffffff",
+          "roughness": 0.5,
+          "metalness": 0.5,
+          "envMap": true,
+          "envMapIntensity": 0.7,
+          "normalMap": false
+        },
+        {
+          "name": "LOD_A_TYRE_mm_tyre_Mat",
+          "type": "MeshStandardMaterial",
+          "color": "ffffff",
+          "roughness": 0.5,
+          "metalness": 0.5,
+          "envMap": true,
+          "envMapIntensity": 0.7,
+          "normalMap": false
+        }
+      ],
+      "textures": [
+        {
+          "slot": "map",
+          "width": 512,
+          "height": 512,
+          "anisotropy": 8
+        },
+        {
+          "slot": "envMap",
+          "width": 336,
+          "height": 256,
+          "anisotropy": 1
+        },
+        {
+          "slot": "map",
+          "width": 512,
+          "height": 512,
+          "anisotropy": 8
+        },
+        {
+          "slot": "map",
+          "width": 512,
+          "height": 512,
+          "anisotropy": 8
+        },
+        {
+          "slot": "transmissionMap",
+          "width": 512,
+          "height": 512,
+          "anisotropy": 8
+        },
+        {
+          "slot": "map",
+          "width": 512,
+          "height": 512,
+          "anisotropy": 8
+        },
+        {
+          "slot": "map",
+          "width": 512,
+          "height": 512,
+          "anisotropy": 8
+        },
+        {
+          "slot": "map",
+          "width": 512,
+          "height": 512,
+          "anisotropy": 8
+        },
+        {
+          "slot": "map",
+          "width": 512,
+          "height": 512,
+          "anisotropy": 8
+        },
+        {
+          "slot": "map",
+          "width": 512,
+          "height": 512,
+          "anisotropy": 8
+        },
+        {
+          "slot": "map",
+          "width": 512,
+          "height": 512,
+          "anisotropy": 8
+        },
+        {
+          "slot": "map",
+          "width": 512,
+          "height": 512,
+          "anisotropy": 8
+        },
+        {
+          "slot": "map",
+          "width": 256,
+          "height": 256,
+          "anisotropy": 8
+        },
+        {
+          "slot": "map",
+          "width": 256,
+          "height": 256,
+          "anisotropy": 8
+        },
+        {
+          "slot": "map",
+          "width": 256,
+          "height": 256,
+          "anisotropy": 8
+        }
+      ],
+      "heap": 200078751,
+      "transmissionTarget": {
+        "width": 2940,
+        "height": 1912,
+        "samples": 4,
+        "scale": 1,
+        "mainDPR": 2
+      }
+    },
+    {
+      "name": "ferrari-night",
+      "index": 5,
+      "theme": "night",
+      "t": 0.123,
+      "file": "ferrari-night.png",
+      "sha256": "ed8bdaa56b99c00c4879c3ae8c1004455512eb9c6624cb31c189691205498152",
+      "probe": {
+        "mode": "race",
+        "locked": false,
+        "speed01": 0,
+        "progress": 0.12614160527985382,
+        "applied": 2,
+        "level": "high",
+        "still": 766.6999999880791,
+        "sinceSwitch": null,
+        "canvasW": 2940,
+        "ratio": 2
+      },
+      "environment": false,
+      "camera": {
+        "position": [
+          46.20052307590598,
+          208.2878532625406,
+          -490.5569780961339
+        ],
+        "quaternion": [
+          -0.3702543457061976,
+          -0.5383996395935492,
+          -0.28410615187685734,
+          0.701656071046874
+        ],
+        "fov": 40
+      },
+      "carBoundsCSS": {
+        "x": 860.5945029457689,
+        "y": 183.1097399090664,
+        "width": 72.87778072610388,
+        "height": 55.98542593070323
+      },
+      "triangles": 34769,
+      "materials": [
+        {
+          "name": "LOD_A_CHASSIS_mm_lights_Mat",
+          "type": "MeshStandardMaterial",
+          "color": "ffffff",
+          "roughness": 0,
+          "metalness": 0,
+          "envMap": true,
+          "envMapIntensity": 0.14,
+          "normalMap": false
+        },
+        {
+          "name": "LOD_A_INTERIOR_mm_cab_Mat",
+          "type": "MeshStandardMaterial",
+          "color": "ffffff",
+          "roughness": 0.5,
+          "metalness": 0.5,
+          "envMap": true,
+          "envMapIntensity": 0.14,
+          "normalMap": false
+        },
+        {
+          "name": "LOD_A_HEADLIGHT_LENS_RIGHT_mm_windows_Mat",
+          "type": "MeshPhysicalMaterial",
+          "color": "ffffff",
+          "roughness": 0,
+          "metalness": 0,
+          "envMap": true,
+          "envMapIntensity": 0.14,
+          "normalMap": false
+        },
+        {
+          "name": "LOD_A_BRAKE_CALIPER_FRONT_LEFT_mm_misc_Mat",
+          "type": "MeshStandardMaterial",
+          "color": "ffffff",
+          "roughness": 0.5,
+          "metalness": 0.5,
+          "envMap": true,
+          "envMapIntensity": 0.14,
+          "normalMap": false
+        },
+        {
+          "name": "LOD_A_DOOR_RIGHT_mm_ext_Mat",
+          "type": "MeshStandardMaterial",
+          "color": "ffffff",
+          "roughness": 0,
+          "metalness": 0,
+          "envMap": true,
+          "envMapIntensity": 0.14,
+          "normalMap": false
+        },
+        {
+          "name": "LOD_A_FRONTBUMPER_mm_chassis_Mat",
+          "type": "MeshStandardMaterial",
+          "color": "ffffff",
+          "roughness": 0.5,
+          "metalness": 0.5,
+          "envMap": true,
+          "envMapIntensity": 0.14,
+          "normalMap": false
+        },
+        {
+          "name": "LOD_A_INTERIOR_mm_ext_Mat",
+          "type": "MeshStandardMaterial",
+          "color": "ffffff",
+          "roughness": 0,
+          "metalness": 0,
+          "envMap": true,
+          "envMapIntensity": 0.14,
+          "normalMap": false
+        },
+        {
+          "name": "LOD_A_FRONTBUMPER_mm_badges_Mat",
+          "type": "MeshStandardMaterial",
+          "color": "ffffff",
+          "roughness": 0.5,
+          "metalness": 0.5,
+          "envMap": true,
+          "envMapIntensity": 0.14,
+          "normalMap": false
+        },
+        {
+          "name": "LOD_A_DOOR_RIGHT_mm_badges_Mat",
+          "type": "MeshStandardMaterial",
+          "color": "ffffff",
+          "roughness": 0.5,
+          "metalness": 0.5,
+          "envMap": true,
+          "envMapIntensity": 0.14,
+          "normalMap": false
+        },
+        {
+          "name": "LOD_A_BRAKE_CALIPER_FRONT_LEFT_mm_misc_Mat",
+          "type": "MeshStandardMaterial",
+          "color": "ffffff",
+          "roughness": 0.5,
+          "metalness": 0.5,
+          "envMap": true,
+          "envMapIntensity": 0.14,
+          "normalMap": false
+        },
+        {
+          "name": "LOD_A_WHEEL_REAR_mm_wheel_Mat",
+          "type": "MeshStandardMaterial",
+          "color": "ffffff",
+          "roughness": 0.5,
+          "metalness": 0.5,
+          "envMap": true,
+          "envMapIntensity": 0.14,
+          "normalMap": false
+        },
+        {
+          "name": "LOD_A_TYRE_REAR_mm_tyre_Mat",
+          "type": "MeshStandardMaterial",
+          "color": "ffffff",
+          "roughness": 0.5,
+          "metalness": 0.5,
+          "envMap": true,
+          "envMapIntensity": 0.14,
+          "normalMap": false
+        },
+        {
+          "name": "LOD_A_ROTOR_mm_rotor_Mat",
+          "type": "MeshStandardMaterial",
+          "color": "ffffff",
+          "roughness": 0.5,
+          "metalness": 0.5,
+          "envMap": true,
+          "envMapIntensity": 0.14,
+          "normalMap": false
+        },
+        {
+          "name": "LOD_A_TYRE_mm_tyre_Mat",
+          "type": "MeshStandardMaterial",
+          "color": "ffffff",
+          "roughness": 0.5,
+          "metalness": 0.5,
+          "envMap": true,
+          "envMapIntensity": 0.14,
+          "normalMap": false
+        }
+      ],
+      "textures": [
+        {
+          "slot": "map",
+          "width": 512,
+          "height": 512,
+          "anisotropy": 8
+        },
+        {
+          "slot": "envMap",
+          "width": 336,
+          "height": 256,
+          "anisotropy": 1
+        },
+        {
+          "slot": "map",
+          "width": 512,
+          "height": 512,
+          "anisotropy": 8
+        },
+        {
+          "slot": "map",
+          "width": 512,
+          "height": 512,
+          "anisotropy": 8
+        },
+        {
+          "slot": "transmissionMap",
+          "width": 512,
+          "height": 512,
+          "anisotropy": 8
+        },
+        {
+          "slot": "map",
+          "width": 512,
+          "height": 512,
+          "anisotropy": 8
+        },
+        {
+          "slot": "map",
+          "width": 512,
+          "height": 512,
+          "anisotropy": 8
+        },
+        {
+          "slot": "map",
+          "width": 512,
+          "height": 512,
+          "anisotropy": 8
+        },
+        {
+          "slot": "map",
+          "width": 512,
+          "height": 512,
+          "anisotropy": 8
+        },
+        {
+          "slot": "map",
+          "width": 512,
+          "height": 512,
+          "anisotropy": 8
+        },
+        {
+          "slot": "map",
+          "width": 512,
+          "height": 512,
+          "anisotropy": 8
+        },
+        {
+          "slot": "map",
+          "width": 512,
+          "height": 512,
+          "anisotropy": 8
+        },
+        {
+          "slot": "map",
+          "width": 256,
+          "height": 256,
+          "anisotropy": 8
+        },
+        {
+          "slot": "map",
+          "width": 256,
+          "height": 256,
+          "anisotropy": 8
+        },
+        {
+          "slot": "map",
+          "width": 256,
+          "height": 256,
+          "anisotropy": 8
+        }
+      ],
+      "heap": 246208475,
+      "transmissionTarget": {
+        "width": 2940,
+        "height": 1912,
+        "samples": 4,
+        "scale": 1,
+        "mainDPR": 2
+      }
+    },
+    {
+      "name": "aston-day",
+      "index": 7,
+      "theme": "day",
+      "t": 0.123,
+      "file": "aston-day.png",
+      "sha256": "1790c54ff15b4fdd9e010f5537d283ffec7a81f4113e5f30ea290ac6be5362ca",
+      "probe": {
+        "mode": "race",
+        "locked": false,
+        "speed01": 0,
+        "progress": 0.12614160527985382,
+        "applied": 2,
+        "level": "high",
+        "still": 766.6999999880791,
+        "sinceSwitch": null,
+        "canvasW": 2940,
+        "ratio": 2
+      },
+      "environment": false,
+      "camera": {
+        "position": [
+          46.20052307590598,
+          208.2878532625406,
+          -490.5569780961339
+        ],
+        "quaternion": [
+          -0.3702543457061976,
+          -0.5383996395935492,
+          -0.28410615187685734,
+          0.701656071046874
+        ],
+        "fov": 40
+      },
+      "carBoundsCSS": {
+        "x": 860.81816002896,
+        "y": 176.87028712116472,
+        "width": 73.57374282470994,
+        "height": 62.014943227342656
+      },
+      "triangles": 23805,
+      "materials": [
+        {
+          "name": "Vehicle_Exterior_mm_ext",
+          "type": "MeshStandardMaterial",
+          "color": "ffffff",
+          "roughness": 0,
+          "metalness": 0,
+          "envMap": true,
+          "envMapIntensity": 0.7,
+          "normalMap": false
+        },
+        {
+          "name": "Vehicle_Exterior_mm_misc",
+          "type": "MeshStandardMaterial",
+          "color": "ffffff",
+          "roughness": 0.5,
+          "metalness": 0,
+          "envMap": true,
+          "envMapIntensity": 0.7,
+          "normalMap": false
+        },
+        {
+          "name": "Vehicle_Exterior_mm_windows",
+          "type": "MeshPhysicalMaterial",
+          "color": "ffffff",
+          "roughness": 0,
+          "metalness": 0,
+          "envMap": true,
+          "envMapIntensity": 0.7,
+          "normalMap": false
+        },
+        {
+          "name": "Vehicle_Exterior_mm_lights",
+          "type": "MeshStandardMaterial",
+          "color": "ffffff",
+          "roughness": 0.5,
+          "metalness": 0,
+          "envMap": true,
+          "envMapIntensity": 0.7,
+          "normalMap": false
+        },
+        {
+          "name": "Vehicle_Exterior_mm_badges",
+          "type": "MeshStandardMaterial",
+          "color": "ffffff",
+          "roughness": 0.5,
+          "metalness": 0,
+          "envMap": true,
+          "envMapIntensity": 0.7,
+          "normalMap": false
+        },
+        {
+          "name": "Vehicle_Exterior_mm_cab",
+          "type": "MeshStandardMaterial",
+          "color": "ffffff",
+          "roughness": 0.5,
+          "metalness": 0,
+          "envMap": true,
+          "envMapIntensity": 0.7,
+          "normalMap": false
+        },
+        {
+          "name": "Vehicle_Exterior_mm_chassis",
+          "type": "MeshStandardMaterial",
+          "color": "ffffff",
+          "roughness": 0.5,
+          "metalness": 0,
+          "envMap": true,
+          "envMapIntensity": 0.7,
+          "normalMap": false
+        },
+        {
+          "name": "Vehicle_Exterior_mm_tyre",
+          "type": "MeshStandardMaterial",
+          "color": "ffffff",
+          "roughness": 0.5,
+          "metalness": 0,
+          "envMap": true,
+          "envMapIntensity": 0.7,
+          "normalMap": false
+        },
+        {
+          "name": "Vehicle_Exterior_mm_wheel",
+          "type": "MeshStandardMaterial",
+          "color": "ffffff",
+          "roughness": 0.5,
+          "metalness": 0,
+          "envMap": true,
+          "envMapIntensity": 0.7,
+          "normalMap": false
+        },
+        {
+          "name": "Vehicle_Exterior_mm_misc",
+          "type": "MeshStandardMaterial",
+          "color": "ffffff",
+          "roughness": 0.5,
+          "metalness": 0,
+          "envMap": true,
+          "envMapIntensity": 0.7,
+          "normalMap": false
+        },
+        {
+          "name": "Vehicle_Exterior_mm_rotor",
+          "type": "MeshStandardMaterial",
+          "color": "ffffff",
+          "roughness": 0.5,
+          "metalness": 0,
+          "envMap": true,
+          "envMapIntensity": 0.7,
+          "normalMap": false
+        }
+      ],
+      "textures": [
+        {
+          "slot": "map",
+          "width": 512,
+          "height": 512,
+          "anisotropy": 8
+        },
+        {
+          "slot": "envMap",
+          "width": 336,
+          "height": 256,
+          "anisotropy": 1
+        },
+        {
+          "slot": "map",
+          "width": 512,
+          "height": 512,
+          "anisotropy": 8
+        },
+        {
+          "slot": "map",
+          "width": 512,
+          "height": 512,
+          "anisotropy": 8
+        },
+        {
+          "slot": "transmissionMap",
+          "width": 512,
+          "height": 512,
+          "anisotropy": 8
+        },
+        {
+          "slot": "map",
+          "width": 512,
+          "height": 512,
+          "anisotropy": 8
+        },
+        {
+          "slot": "map",
+          "width": 512,
+          "height": 512,
+          "anisotropy": 8
+        },
+        {
+          "slot": "map",
+          "width": 512,
+          "height": 512,
+          "anisotropy": 8
+        },
+        {
+          "slot": "map",
+          "width": 512,
+          "height": 512,
+          "anisotropy": 8
+        },
+        {
+          "slot": "map",
+          "width": 256,
+          "height": 256,
+          "anisotropy": 8
+        },
+        {
+          "slot": "map",
+          "width": 512,
+          "height": 512,
+          "anisotropy": 8
+        },
+        {
+          "slot": "map",
+          "width": 256,
+          "height": 256,
+          "anisotropy": 8
+        }
+      ],
+      "heap": 247153562,
+      "transmissionTarget": {
+        "width": 2940,
+        "height": 1912,
+        "samples": 4,
+        "scale": 1,
+        "mainDPR": 2
+      }
+    },
+    {
+      "name": "aston-night",
+      "index": 7,
+      "theme": "night",
+      "t": 0.123,
+      "file": "aston-night.png",
+      "sha256": "9714c11d0e1761666da469d9952a0c10ea88919699a9723e8e4ef19aae6c2aef",
+      "probe": {
+        "mode": "race",
+        "locked": false,
+        "speed01": 0,
+        "progress": 0.12614160527985382,
+        "applied": 2,
+        "level": "high",
+        "still": 766.6999999880791,
+        "sinceSwitch": null,
+        "canvasW": 2940,
+        "ratio": 2
+      },
+      "environment": false,
+      "camera": {
+        "position": [
+          46.20052307590598,
+          208.2878532625406,
+          -490.5569780961339
+        ],
+        "quaternion": [
+          -0.3702543457061976,
+          -0.5383996395935492,
+          -0.28410615187685734,
+          0.701656071046874
+        ],
+        "fov": 40
+      },
+      "carBoundsCSS": {
+        "x": 860.81816002896,
+        "y": 176.87028712116472,
+        "width": 73.57374282470994,
+        "height": 62.014943227342656
+      },
+      "triangles": 23805,
+      "materials": [
+        {
+          "name": "Vehicle_Exterior_mm_ext",
+          "type": "MeshStandardMaterial",
+          "color": "ffffff",
+          "roughness": 0,
+          "metalness": 0,
+          "envMap": true,
+          "envMapIntensity": 0.14,
+          "normalMap": false
+        },
+        {
+          "name": "Vehicle_Exterior_mm_misc",
+          "type": "MeshStandardMaterial",
+          "color": "ffffff",
+          "roughness": 0.5,
+          "metalness": 0,
+          "envMap": true,
+          "envMapIntensity": 0.14,
+          "normalMap": false
+        },
+        {
+          "name": "Vehicle_Exterior_mm_windows",
+          "type": "MeshPhysicalMaterial",
+          "color": "ffffff",
+          "roughness": 0,
+          "metalness": 0,
+          "envMap": true,
+          "envMapIntensity": 0.14,
+          "normalMap": false
+        },
+        {
+          "name": "Vehicle_Exterior_mm_lights",
+          "type": "MeshStandardMaterial",
+          "color": "ffffff",
+          "roughness": 0.5,
+          "metalness": 0,
+          "envMap": true,
+          "envMapIntensity": 0.14,
+          "normalMap": false
+        },
+        {
+          "name": "Vehicle_Exterior_mm_badges",
+          "type": "MeshStandardMaterial",
+          "color": "ffffff",
+          "roughness": 0.5,
+          "metalness": 0,
+          "envMap": true,
+          "envMapIntensity": 0.14,
+          "normalMap": false
+        },
+        {
+          "name": "Vehicle_Exterior_mm_cab",
+          "type": "MeshStandardMaterial",
+          "color": "ffffff",
+          "roughness": 0.5,
+          "metalness": 0,
+          "envMap": true,
+          "envMapIntensity": 0.14,
+          "normalMap": false
+        },
+        {
+          "name": "Vehicle_Exterior_mm_chassis",
+          "type": "MeshStandardMaterial",
+          "color": "ffffff",
+          "roughness": 0.5,
+          "metalness": 0,
+          "envMap": true,
+          "envMapIntensity": 0.14,
+          "normalMap": false
+        },
+        {
+          "name": "Vehicle_Exterior_mm_tyre",
+          "type": "MeshStandardMaterial",
+          "color": "ffffff",
+          "roughness": 0.5,
+          "metalness": 0,
+          "envMap": true,
+          "envMapIntensity": 0.14,
+          "normalMap": false
+        },
+        {
+          "name": "Vehicle_Exterior_mm_wheel",
+          "type": "MeshStandardMaterial",
+          "color": "ffffff",
+          "roughness": 0.5,
+          "metalness": 0,
+          "envMap": true,
+          "envMapIntensity": 0.14,
+          "normalMap": false
+        },
+        {
+          "name": "Vehicle_Exterior_mm_misc",
+          "type": "MeshStandardMaterial",
+          "color": "ffffff",
+          "roughness": 0.5,
+          "metalness": 0,
+          "envMap": true,
+          "envMapIntensity": 0.14,
+          "normalMap": false
+        },
+        {
+          "name": "Vehicle_Exterior_mm_rotor",
+          "type": "MeshStandardMaterial",
+          "color": "ffffff",
+          "roughness": 0.5,
+          "metalness": 0,
+          "envMap": true,
+          "envMapIntensity": 0.14,
+          "normalMap": false
+        }
+      ],
+      "textures": [
+        {
+          "slot": "map",
+          "width": 512,
+          "height": 512,
+          "anisotropy": 8
+        },
+        {
+          "slot": "envMap",
+          "width": 336,
+          "height": 256,
+          "anisotropy": 1
+        },
+        {
+          "slot": "map",
+          "width": 512,
+          "height": 512,
+          "anisotropy": 8
+        },
+        {
+          "slot": "map",
+          "width": 512,
+          "height": 512,
+          "anisotropy": 8
+        },
+        {
+          "slot": "transmissionMap",
+          "width": 512,
+          "height": 512,
+          "anisotropy": 8
+        },
+        {
+          "slot": "map",
+          "width": 512,
+          "height": 512,
+          "anisotropy": 8
+        },
+        {
+          "slot": "map",
+          "width": 512,
+          "height": 512,
+          "anisotropy": 8
+        },
+        {
+          "slot": "map",
+          "width": 512,
+          "height": 512,
+          "anisotropy": 8
+        },
+        {
+          "slot": "map",
+          "width": 512,
+          "height": 512,
+          "anisotropy": 8
+        },
+        {
+          "slot": "map",
+          "width": 256,
+          "height": 256,
+          "anisotropy": 8
+        },
+        {
+          "slot": "map",
+          "width": 512,
+          "height": 512,
+          "anisotropy": 8
+        },
+        {
+          "slot": "map",
+          "width": 256,
+          "height": 256,
+          "anisotropy": 8
+        }
+      ],
+      "heap": 248085406,
+      "transmissionTarget": {
+        "width": 2940,
+        "height": 1912,
+        "samples": 4,
+        "scale": 1,
+        "mainDPR": 2
+      }
+    }
+  ],
+  "colorPipeline": {
+    "exposureA": 0.1,
+    "exposureB": 4,
+    "changedChannels": 16863840,
+    "maxDelta": 227,
+    "rendererToneMapping": 4,
+    "passes": [
+      {
+        "type": "RenderPass",
+        "fragmentHasToneMappingCode": false
+      },
+      {
+        "type": "ShaderPass",
+        "fragmentHasToneMappingCode": false
+      },
+      {
+        "type": "ShaderPass",
+        "fragmentHasToneMappingCode": false
+      },
+      {
+        "type": "SMAAPass",
+        "fragmentHasToneMappingCode": false
+      }
+    ]
+  }
+}

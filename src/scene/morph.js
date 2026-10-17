@@ -1,5 +1,7 @@
 /** Short body-only crossfade, with the historical emissive pulse as an option. */
 import * as THREE from 'three';
+import { SETTINGS } from '../core/renderProfile.js';
+import { registerCarReflection } from './carEnvironment.js';
 import { state } from '../core/state.js';
 import { CARS } from '../data/cars.js';
 import { carMount, setCarModel, setWheels } from './carRig.js';
@@ -49,6 +51,7 @@ function materialsFor(model) {
   const fadeOne = (normal) => {
     if (!fades.has(normal)) {
       const fade = normal.clone();
+      if (SETTINGS.carEnvironment) registerCarReflection(fade);
       fade.transparent = true;
       fade.depthWrite = false;
       fade.forceSinglePass = true;

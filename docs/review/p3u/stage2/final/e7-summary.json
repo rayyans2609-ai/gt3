@@ -1,0 +1,213 @@
+{
+  "run": "p3u/e7",
+  "source": "fa9f19be4b6c073212583db4cecb2b41126fa083",
+  "server": {
+    "startedAt": "2026-10-17T15:47:33.594Z",
+    "url": "http://127.0.0.1:5247",
+    "root": "/Users/shahzadsheikh/Desktop/gt3/.claude/worktrees/p3u-final",
+    "branch": "p3u-final",
+    "sha": "fa9f19be4b6c073212583db4cecb2b41126fa083",
+    "dirtyFiles": 0,
+    "dirtyHash": "e3b0c44298fc1c14",
+    "vitePid": 39178,
+    "run": "p3u",
+    "epoch": "7",
+    "task": "FinalSustained",
+    "harness": "node scripts/p3u-w6-perf.mjs",
+    "host": {
+      "profile": "m4-16gb",
+      "arch": "arm64",
+      "cpu": "Apple M4",
+      "ramGB": 16,
+      "model": "Mac16,12",
+      "cores": {
+        "performance": 4,
+        "efficiency": 6
+      },
+      "gpu": "Apple M4",
+      "macos": "15.5",
+      "versions": {
+        "node": "v24.21.0",
+        "claude": "2.1.302 (Claude Code)",
+        "codex": "codex-cli 0.163.0",
+        "opencode": null,
+        "chrome": "Google Chrome 155.0.8059.80"
+      },
+      "unavailable": [
+        "versions.opencode"
+      ]
+    }
+  },
+  "cleanup": {
+    "signalledPids": [
+      96983,
+      43393,
+      43376,
+      38393,
+      38402
+    ],
+    "signals": "TERM only, each identity rechecked",
+    "idleGt3Proof": "OpenCode:4succeeded/idleGT3sessions,nohome/global/frontend/otherCLI. Claude:GT3launcherabsent,clientleases0,oldp3u-profilesPTY/spares.",
+    "latePty38491": "oldGT3hostreexecutedthenexitedonitsown,child38502alreadyabsent; no further signal or new task requested",
+    "finalOpenCodeClaudeCensus": [],
+    "protected": "Word/Office, VSCodeandallhelpers(includingliveCodexterminal),activeCodexappserverandtools,unrelatedapps,unsaveddocuments",
+    "restart": false,
+    "hostSettingsChanges": false
+  },
+  "admission": {
+    "pass": true,
+    "reasons": [],
+    "paging": {
+      "pageouts": 0,
+      "swapouts": 0
+    },
+    "at": "2026-10-17T15:47:09.736Z",
+    "a": {
+      "pressure": 1,
+      "pageouts": 830635,
+      "swapouts": 1155784,
+      "idle": 84.2,
+      "system": 11.11,
+      "swap": "total = 2048.00M  used = 831.06M  free = 1216.94M  (encrypted)"
+    },
+    "b": {
+      "pressure": 1,
+      "pageouts": 830635,
+      "swapouts": 1155784,
+      "idle": 81.56,
+      "system": 13.4,
+      "swap": "total = 2048.00M  used = 831.06M  free = 1216.94M  (encrypted)"
+    },
+    "counts": {
+      "heavy": 0,
+      "browsers": 0,
+      "agents": 1,
+      "runWorkers": null
+    }
+  },
+  "smooth": {
+    "status": "incomplete_host_stop",
+    "monitorError": "Paging rose in two consecutive host-sample intervals",
+    "partialFrames": 4246,
+    "partialSeconds": 70.783,
+    "rafIntervalsOver33ms": 1,
+    "hostSamples": [
+      {
+        "elapsedSeconds": 0.246,
+        "pressure": 1,
+        "pageouts": 830784,
+        "swapouts": 1155784,
+        "idle": 77.51,
+        "system": 14.35
+      },
+      {
+        "elapsedSeconds": 10.5,
+        "pressure": 1,
+        "pageouts": 830784,
+        "swapouts": 1155784,
+        "idle": 76.63,
+        "system": 14.1
+      },
+      {
+        "elapsedSeconds": 20.496,
+        "pressure": 1,
+        "pageouts": 830784,
+        "swapouts": 1155784,
+        "idle": 78.24,
+        "system": 12.96
+      },
+      {
+        "elapsedSeconds": 30.494,
+        "pressure": 1,
+        "pageouts": 830784,
+        "swapouts": 1155784,
+        "idle": 78.3,
+        "system": 14.15
+      },
+      {
+        "elapsedSeconds": 40.492,
+        "pressure": 1,
+        "pageouts": 830784,
+        "swapouts": 1155784,
+        "idle": 75.58,
+        "system": 15.2
+      },
+      {
+        "elapsedSeconds": 50.487,
+        "pressure": 1,
+        "pageouts": 830784,
+        "swapouts": 1155784,
+        "idle": 79.31,
+        "system": 13.3
+      },
+      {
+        "elapsedSeconds": 60.496,
+        "pressure": 1,
+        "pageouts": 830904,
+        "swapouts": 1155784,
+        "idle": 78.4,
+        "system": 13.14
+      },
+      {
+        "elapsedSeconds": 70.497,
+        "pressure": 1,
+        "pageouts": 830925,
+        "swapouts": 1155784,
+        "idle": 78.34,
+        "system": 13.82
+      },
+      {
+        "elapsedSeconds": 70.786,
+        "pressure": 1,
+        "pageouts": 830925,
+        "swapouts": 1155784,
+        "idle": 79.68,
+        "system": 12.5
+      }
+    ],
+    "display": {
+      "mode": "native-fullscreen",
+      "deviceEmulation": "none (defaultViewport null: real window, real device pixel ratio)",
+      "fullscreen": {
+        "startedWindowState": "maximized",
+        "endedWindowState": "fullscreen",
+        "method": "CDP Browser.setWindowBounds"
+      },
+      "geometry": {
+        "expected": {
+          "width": 1470,
+          "height": 919,
+          "dpr": 2
+        },
+        "rounds": 7,
+        "pass": true,
+        "measured": {
+          "width": 1470,
+          "height": 919,
+          "dpr": 2,
+          "screen": {
+            "width": 1470,
+            "height": 956
+          },
+          "visibility": "visible",
+          "webdriver": true,
+          "elementFullscreen": true
+        },
+        "documentFullscreenAttempt": true
+      },
+      "screen": {
+        "width": 1470,
+        "height": 956
+      }
+    },
+    "powerSource": "AC Power",
+    "lowPowerMode": false,
+    "productMode": "smooth",
+    "productDPR": 1.5,
+    "notSustainedQualification": true
+  },
+  "quality": "not_started_after_guarded_smooth_stop",
+  "sourceAndHarnessChanges": "none",
+  "rawEvidence": "p3u-final/local/evidence/p3u/final-sustained-e7/",
+  "fullCleanupAudit": "root/local/runs/p3u/recovery/process-cleanup-e7-report.md"
+}

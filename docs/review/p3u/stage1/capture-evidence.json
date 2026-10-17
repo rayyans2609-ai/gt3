@@ -1,0 +1,1589 @@
+{
+  "generatedAt": "2026-10-17T04:12:34.521Z",
+  "captures": {
+    "locked": {
+      "query": "?version=locked",
+      "sha": "ebfa291b75deb9cdec4bd2eedeaa21b1324d400e",
+      "server": {
+        "startedAt": "2026-10-17T03:56:25.786Z",
+        "url": "http://127.0.0.1:5231",
+        "root": "/Users/shahzadsheikh/Desktop/gt3/.claude/worktrees/p3u-t2",
+        "branch": "p3u-t2",
+        "sha": "ebfa291b75deb9cdec4bd2eedeaa21b1324d400e",
+        "dirtyFiles": 7,
+        "dirtyHash": "9c3b473a7a08a4eb",
+        "vitePid": 2482,
+        "run": "p3u",
+        "epoch": "1",
+        "task": "T2",
+        "harness": "bash local/tmp/p3u/final-verification.sh",
+        "host": {
+          "profile": "m4-16gb",
+          "arch": "arm64",
+          "cpu": "Apple M4",
+          "ramGB": 16,
+          "model": "Mac16,12",
+          "cores": {
+            "performance": 4,
+            "efficiency": 6
+          },
+          "gpu": "Apple M4",
+          "macos": "15.5",
+          "versions": {
+            "node": "v24.21.0",
+            "claude": "2.1.302 (Claude Code)",
+            "codex": "codex-cli 0.163.0",
+            "opencode": "opencode v2.0.32",
+            "chrome": "Google Chrome 155.0.8059.80"
+          },
+          "unavailable": []
+        }
+      },
+      "preflight": true,
+      "errors": [],
+      "readyAt": 2946.7999999523163,
+      "states": [
+        {
+          "name": "lexus-day",
+          "sha256": "e235c304cb8d9631c668b6a01bf9a7c7e7c81667f1c4b798347db0763b880284",
+          "camera": {
+            "position": [
+              46.20052307590598,
+              208.2878532625406,
+              -490.5569780961339
+            ],
+            "quaternion": [
+              -0.3702543457061976,
+              -0.5383996395935492,
+              -0.28410615187685734,
+              0.701656071046874
+            ],
+            "fov": 40
+          }
+        },
+        {
+          "name": "lexus-night",
+          "sha256": "12185374547b5b36190f69df7b34d4749901caf148453e16b3db8b5d5f45a411",
+          "camera": {
+            "position": [
+              46.20052307590598,
+              208.2878532625406,
+              -490.5569780961339
+            ],
+            "quaternion": [
+              -0.3702543457061976,
+              -0.5383996395935492,
+              -0.28410615187685734,
+              0.701656071046874
+            ],
+            "fov": 40
+          }
+        },
+        {
+          "name": "nissan-day",
+          "sha256": "f8a44c91879651e845578bfeeb2f03b99e8be50dbb334936c19743099e586fc9",
+          "camera": {
+            "position": [
+              46.20052307590598,
+              208.2878532625406,
+              -490.5569780961339
+            ],
+            "quaternion": [
+              -0.3702543457061976,
+              -0.5383996395935492,
+              -0.28410615187685734,
+              0.701656071046874
+            ],
+            "fov": 40
+          }
+        },
+        {
+          "name": "nissan-night",
+          "sha256": "70d376ee1bc22acacff502a5dd04f7e4f3891b2f59184e0b265845499eb8aae1",
+          "camera": {
+            "position": [
+              46.20052307590598,
+              208.2878532625406,
+              -490.5569780961339
+            ],
+            "quaternion": [
+              -0.3702543457061976,
+              -0.5383996395935492,
+              -0.28410615187685734,
+              0.701656071046874
+            ],
+            "fov": 40
+          }
+        },
+        {
+          "name": "audi-day",
+          "sha256": "f2dccca060b9dfa6db26db55199d922662a60447901b0803d03270577759c2eb",
+          "camera": {
+            "position": [
+              46.20052307590598,
+              208.2878532625406,
+              -490.5569780961339
+            ],
+            "quaternion": [
+              -0.3702543457061976,
+              -0.5383996395935492,
+              -0.28410615187685734,
+              0.701656071046874
+            ],
+            "fov": 40
+          }
+        },
+        {
+          "name": "audi-night",
+          "sha256": "36e1c4bb4056f426bcd9475a3badf9a4144c6745eeb37be7cf2858aa59e21337",
+          "camera": {
+            "position": [
+              46.20052307590598,
+              208.2878532625406,
+              -490.5569780961339
+            ],
+            "quaternion": [
+              -0.3702543457061976,
+              -0.5383996395935492,
+              -0.28410615187685734,
+              0.701656071046874
+            ],
+            "fov": 40
+          }
+        },
+        {
+          "name": "bmw-day",
+          "sha256": "8b190346ea4cad38352564458cb11cfb931eef36c87a1bb52bba48b7c7781006",
+          "camera": {
+            "position": [
+              46.20052307590598,
+              208.2878532625406,
+              -490.5569780961339
+            ],
+            "quaternion": [
+              -0.3702543457061976,
+              -0.5383996395935492,
+              -0.28410615187685734,
+              0.701656071046874
+            ],
+            "fov": 40
+          }
+        },
+        {
+          "name": "bmw-night",
+          "sha256": "0ac39702238c02a93a22ce0007a702a9623e0332cc01f9890256d3f2616f37e7",
+          "camera": {
+            "position": [
+              46.20052307590598,
+              208.2878532625406,
+              -490.5569780961339
+            ],
+            "quaternion": [
+              -0.3702543457061976,
+              -0.5383996395935492,
+              -0.28410615187685734,
+              0.701656071046874
+            ],
+            "fov": 40
+          }
+        },
+        {
+          "name": "mercedes-day",
+          "sha256": "95ceb7222744ced6895d6550d537f4c83ce381c66d10dcc6877c313e820058e3",
+          "camera": {
+            "position": [
+              46.20052307590598,
+              208.2878532625406,
+              -490.5569780961339
+            ],
+            "quaternion": [
+              -0.3702543457061976,
+              -0.5383996395935492,
+              -0.28410615187685734,
+              0.701656071046874
+            ],
+            "fov": 40
+          }
+        },
+        {
+          "name": "mercedes-night",
+          "sha256": "ec08f7fd804db49d3829f03c238299b72b11e1a771231d233a0c4c8639f021e8",
+          "camera": {
+            "position": [
+              46.20052307590598,
+              208.2878532625406,
+              -490.5569780961339
+            ],
+            "quaternion": [
+              -0.3702543457061976,
+              -0.5383996395935492,
+              -0.28410615187685734,
+              0.701656071046874
+            ],
+            "fov": 40
+          }
+        },
+        {
+          "name": "ferrari-day",
+          "sha256": "82cb1d320fdf10885c3f11366938c9a1f41cff013e2d0423fa18d8d9d3c7978a",
+          "camera": {
+            "position": [
+              46.20052307590598,
+              208.2878532625406,
+              -490.5569780961339
+            ],
+            "quaternion": [
+              -0.3702543457061976,
+              -0.5383996395935492,
+              -0.28410615187685734,
+              0.701656071046874
+            ],
+            "fov": 40
+          }
+        },
+        {
+          "name": "ferrari-night",
+          "sha256": "be79f44c00c85d7b60b5736e21ce985dff11d86f50a10d05377d77e296967d35",
+          "camera": {
+            "position": [
+              46.20052307590598,
+              208.2878532625406,
+              -490.5569780961339
+            ],
+            "quaternion": [
+              -0.3702543457061976,
+              -0.5383996395935492,
+              -0.28410615187685734,
+              0.701656071046874
+            ],
+            "fov": 40
+          }
+        },
+        {
+          "name": "mclaren-day",
+          "sha256": "d3c24ffa46b832d21ab71bd18e49054b8346b5c2c5b751268288f377fa2989ef",
+          "camera": {
+            "position": [
+              46.20052307590598,
+              208.2878532625406,
+              -490.5569780961339
+            ],
+            "quaternion": [
+              -0.3702543457061976,
+              -0.5383996395935492,
+              -0.28410615187685734,
+              0.701656071046874
+            ],
+            "fov": 40
+          }
+        },
+        {
+          "name": "mclaren-night",
+          "sha256": "3b6f93b79bf8001a111eb9efc88e993f384d43635a45c1e55e0adadb1e14202b",
+          "camera": {
+            "position": [
+              46.20052307590598,
+              208.2878532625406,
+              -490.5569780961339
+            ],
+            "quaternion": [
+              -0.3702543457061976,
+              -0.5383996395935492,
+              -0.28410615187685734,
+              0.701656071046874
+            ],
+            "fov": 40
+          }
+        },
+        {
+          "name": "aston-day",
+          "sha256": "55de3dd0b36e32edf2a8e8087e4f281b9418f4968d4f78f9b98827a018173dd1",
+          "camera": {
+            "position": [
+              46.20052307590598,
+              208.2878532625406,
+              -490.5569780961339
+            ],
+            "quaternion": [
+              -0.3702543457061976,
+              -0.5383996395935492,
+              -0.28410615187685734,
+              0.701656071046874
+            ],
+            "fov": 40
+          }
+        },
+        {
+          "name": "aston-night",
+          "sha256": "8dbda6715b05a72789a06000a2b563df78afac38f23ef917f5f836baa3cea36e",
+          "camera": {
+            "position": [
+              46.20052307590598,
+              208.2878532625406,
+              -490.5569780961339
+            ],
+            "quaternion": [
+              -0.3702543457061976,
+              -0.5383996395935492,
+              -0.28410615187685734,
+              0.701656071046874
+            ],
+            "fov": 40
+          }
+        },
+        {
+          "name": "lamborghini-day",
+          "sha256": "7958f868f7864727ec2d9b434b024aa7bf1feb89d89b84ddad388d3f69ea7d55",
+          "camera": {
+            "position": [
+              46.20052307590598,
+              208.2878532625406,
+              -490.5569780961339
+            ],
+            "quaternion": [
+              -0.3702543457061976,
+              -0.5383996395935492,
+              -0.28410615187685734,
+              0.701656071046874
+            ],
+            "fov": 40
+          }
+        },
+        {
+          "name": "lamborghini-night",
+          "sha256": "4bec570d025a647ed800dd71c9cb3d5e4231a79406ea6ae591fe63c049d60b1d",
+          "camera": {
+            "position": [
+              46.20052307590598,
+              208.2878532625406,
+              -490.5569780961339
+            ],
+            "quaternion": [
+              -0.3702543457061976,
+              -0.5383996395935492,
+              -0.28410615187685734,
+              0.701656071046874
+            ],
+            "fov": 40
+          }
+        },
+        {
+          "name": "porsche-day",
+          "sha256": "e0f74600397d3a5b672eb9e243f8593b9aef3f276ba949c0877d230f2f3bfaed",
+          "camera": {
+            "position": [
+              46.20052307590598,
+              208.2878532625406,
+              -490.5569780961339
+            ],
+            "quaternion": [
+              -0.3702543457061976,
+              -0.5383996395935492,
+              -0.28410615187685734,
+              0.701656071046874
+            ],
+            "fov": 40
+          }
+        },
+        {
+          "name": "porsche-night",
+          "sha256": "d6440ee1bf7afa71722462c8598d06b24315582ee300cc6a7941d7840247746f",
+          "camera": {
+            "position": [
+              46.20052307590598,
+              208.2878532625406,
+              -490.5569780961339
+            ],
+            "quaternion": [
+              -0.3702543457061976,
+              -0.5383996395935492,
+              -0.28410615187685734,
+              0.701656071046874
+            ],
+            "fov": 40
+          }
+        },
+        {
+          "name": "grid",
+          "sha256": "ac5e62a7e989218a3e5c874c09084abec354aab4fdcd770ed463f7e6ea6238a4",
+          "camera": {
+            "position": [
+              -144.6525969485819,
+              208.2878532625406,
+              31.901840980947323
+            ],
+            "quaternion": [
+              -0.3702543457061976,
+              -0.5383996395935492,
+              -0.28410615187685734,
+              0.701656071046874
+            ],
+            "fov": 40
+          }
+        },
+        {
+          "name": "gate",
+          "sha256": "41baf58a1aa5a24554c2cbff8f72c88f86e3d8ba1730766caffba0caef686340",
+          "camera": {
+            "position": [
+              40.88256212722172,
+              208.2878532625406,
+              -688.9116511084956
+            ],
+            "quaternion": [
+              -0.3702543457061976,
+              -0.5383996395935492,
+              -0.28410615187685734,
+              0.701656071046874
+            ],
+            "fov": 40
+          }
+        },
+        {
+          "name": "finish",
+          "sha256": "8e8e56ca77b65c03ff64a753021c88fbc90c34dd5bac0567de8f20156b30d681",
+          "camera": {
+            "position": [
+              -137.3345793397865,
+              208.2878532625406,
+              14.301138240560384
+            ],
+            "quaternion": [
+              -0.3702543457061976,
+              -0.5383996395935492,
+              -0.28410615187685734,
+              0.701656071046874
+            ],
+            "fov": 40
+          }
+        }
+      ],
+      "outputProbe": {
+        "exposureA": 0.1,
+        "exposureB": 4,
+        "changedChannels": 0,
+        "maxDelta": 0,
+        "rendererToneMapping": 4,
+        "passes": [
+          {
+            "type": "RenderPass",
+            "fragmentHasToneMappingCode": false
+          },
+          {
+            "type": "ShaderPass",
+            "fragmentHasToneMappingCode": false
+          },
+          {
+            "type": "SMAAPass",
+            "fragmentHasToneMappingCode": false
+          },
+          {
+            "type": "ShaderPass",
+            "fragmentHasToneMappingCode": false
+          }
+        ]
+      }
+    },
+    "aces-mid": {
+      "query": "?version=unlocked&mode=smooth&tone=aces&refl=mid",
+      "sha": "ebfa291b75deb9cdec4bd2eedeaa21b1324d400e",
+      "server": {
+        "startedAt": "2026-10-17T03:56:25.786Z",
+        "url": "http://127.0.0.1:5231",
+        "root": "/Users/shahzadsheikh/Desktop/gt3/.claude/worktrees/p3u-t2",
+        "branch": "p3u-t2",
+        "sha": "ebfa291b75deb9cdec4bd2eedeaa21b1324d400e",
+        "dirtyFiles": 7,
+        "dirtyHash": "9c3b473a7a08a4eb",
+        "vitePid": 2482,
+        "run": "p3u",
+        "epoch": "1",
+        "task": "T2",
+        "harness": "bash local/tmp/p3u/final-verification.sh",
+        "host": {
+          "profile": "m4-16gb",
+          "arch": "arm64",
+          "cpu": "Apple M4",
+          "ramGB": 16,
+          "model": "Mac16,12",
+          "cores": {
+            "performance": 4,
+            "efficiency": 6
+          },
+          "gpu": "Apple M4",
+          "macos": "15.5",
+          "versions": {
+            "node": "v24.21.0",
+            "claude": "2.1.302 (Claude Code)",
+            "codex": "codex-cli 0.163.0",
+            "opencode": "opencode v2.0.32",
+            "chrome": "Google Chrome 155.0.8059.80"
+          },
+          "unavailable": []
+        }
+      },
+      "preflight": true,
+      "errors": [],
+      "readyAt": 3243.099999964237,
+      "states": [
+        {
+          "name": "lexus-day",
+          "sha256": "ef7a97ba6056f27ddb09b809ef1937566ac8ffff3f604299645374eb6dcdad3c",
+          "camera": {
+            "position": [
+              46.20052307590598,
+              208.2878532625406,
+              -490.5569780961339
+            ],
+            "quaternion": [
+              -0.3702543457061976,
+              -0.5383996395935492,
+              -0.28410615187685734,
+              0.701656071046874
+            ],
+            "fov": 40
+          }
+        },
+        {
+          "name": "lexus-night",
+          "sha256": "cf7ac51194f42535ab150605abd9597c8d00920226ff45360c36092021974bd7",
+          "camera": {
+            "position": [
+              46.20052307590598,
+              208.2878532625406,
+              -490.5569780961339
+            ],
+            "quaternion": [
+              -0.3702543457061976,
+              -0.5383996395935492,
+              -0.28410615187685734,
+              0.701656071046874
+            ],
+            "fov": 40
+          }
+        },
+        {
+          "name": "bmw-day",
+          "sha256": "361a86466f5ded772cb55b28de8e951b54d1cb96f85f2c796e23869122b6cfd7",
+          "camera": {
+            "position": [
+              46.20052307590598,
+              208.2878532625406,
+              -490.5569780961339
+            ],
+            "quaternion": [
+              -0.3702543457061976,
+              -0.5383996395935492,
+              -0.28410615187685734,
+              0.701656071046874
+            ],
+            "fov": 40
+          }
+        },
+        {
+          "name": "bmw-night",
+          "sha256": "277bc0d74c790c3c87819bf02dab2073f87691b594da27b6081f8a9a3aa87b8a",
+          "camera": {
+            "position": [
+              46.20052307590598,
+              208.2878532625406,
+              -490.5569780961339
+            ],
+            "quaternion": [
+              -0.3702543457061976,
+              -0.5383996395935492,
+              -0.28410615187685734,
+              0.701656071046874
+            ],
+            "fov": 40
+          }
+        },
+        {
+          "name": "ferrari-day",
+          "sha256": "6ae87fd41aea333d779eae60dadaec2da04f2b67b7dabe59b68a8e9b3a14cdc3",
+          "camera": {
+            "position": [
+              46.20052307590598,
+              208.2878532625406,
+              -490.5569780961339
+            ],
+            "quaternion": [
+              -0.3702543457061976,
+              -0.5383996395935492,
+              -0.28410615187685734,
+              0.701656071046874
+            ],
+            "fov": 40
+          }
+        },
+        {
+          "name": "ferrari-night",
+          "sha256": "acdb3aa3328d13a666fd0463af4a810163396f2849ad69805b255b07399e32a2",
+          "camera": {
+            "position": [
+              46.20052307590598,
+              208.2878532625406,
+              -490.5569780961339
+            ],
+            "quaternion": [
+              -0.3702543457061976,
+              -0.5383996395935492,
+              -0.28410615187685734,
+              0.701656071046874
+            ],
+            "fov": 40
+          }
+        },
+        {
+          "name": "mclaren-day",
+          "sha256": "7ec95b622c65a0836d516da1e5f14f2e4a03bccb67e965362aecd7737a0f1322",
+          "camera": {
+            "position": [
+              46.20052307590598,
+              208.2878532625406,
+              -490.5569780961339
+            ],
+            "quaternion": [
+              -0.3702543457061976,
+              -0.5383996395935492,
+              -0.28410615187685734,
+              0.701656071046874
+            ],
+            "fov": 40
+          }
+        },
+        {
+          "name": "mclaren-night",
+          "sha256": "0cbdd178ee4daeb9ff924c549f049c37438245750a6f3e6f6f3b7d3d561af88d",
+          "camera": {
+            "position": [
+              46.20052307590598,
+              208.2878532625406,
+              -490.5569780961339
+            ],
+            "quaternion": [
+              -0.3702543457061976,
+              -0.5383996395935492,
+              -0.28410615187685734,
+              0.701656071046874
+            ],
+            "fov": 40
+          }
+        },
+        {
+          "name": "lamborghini-day",
+          "sha256": "34f49604c516074160481312a816582a0f64f88fe2d8707859cd2095b3a4371d",
+          "camera": {
+            "position": [
+              46.20052307590598,
+              208.2878532625406,
+              -490.5569780961339
+            ],
+            "quaternion": [
+              -0.3702543457061976,
+              -0.5383996395935492,
+              -0.28410615187685734,
+              0.701656071046874
+            ],
+            "fov": 40
+          }
+        },
+        {
+          "name": "lamborghini-night",
+          "sha256": "432524dbaecd68aebb1b9c598696c9d5b3ea8a9681455ceec5a3313cd9ae885f",
+          "camera": {
+            "position": [
+              46.20052307590598,
+              208.2878532625406,
+              -490.5569780961339
+            ],
+            "quaternion": [
+              -0.3702543457061976,
+              -0.5383996395935492,
+              -0.28410615187685734,
+              0.701656071046874
+            ],
+            "fov": 40
+          }
+        }
+      ],
+      "outputProbe": {
+        "exposureA": 0.1,
+        "exposureB": 4,
+        "changedChannels": 9485906,
+        "maxDelta": 251,
+        "rendererToneMapping": 4,
+        "passes": [
+          {
+            "type": "RenderPass",
+            "fragmentHasToneMappingCode": false
+          },
+          {
+            "type": "ShaderPass",
+            "fragmentHasToneMappingCode": false
+          },
+          {
+            "type": "ShaderPass",
+            "fragmentHasToneMappingCode": false
+          },
+          {
+            "type": "SMAAPass",
+            "fragmentHasToneMappingCode": false
+          }
+        ]
+      }
+    },
+    "agx-mid": {
+      "query": "?version=unlocked&mode=smooth&tone=agx&refl=mid",
+      "sha": "ebfa291b75deb9cdec4bd2eedeaa21b1324d400e",
+      "server": {
+        "startedAt": "2026-10-17T03:56:25.786Z",
+        "url": "http://127.0.0.1:5231",
+        "root": "/Users/shahzadsheikh/Desktop/gt3/.claude/worktrees/p3u-t2",
+        "branch": "p3u-t2",
+        "sha": "ebfa291b75deb9cdec4bd2eedeaa21b1324d400e",
+        "dirtyFiles": 7,
+        "dirtyHash": "9c3b473a7a08a4eb",
+        "vitePid": 2482,
+        "run": "p3u",
+        "epoch": "1",
+        "task": "T2",
+        "harness": "bash local/tmp/p3u/final-verification.sh",
+        "host": {
+          "profile": "m4-16gb",
+          "arch": "arm64",
+          "cpu": "Apple M4",
+          "ramGB": 16,
+          "model": "Mac16,12",
+          "cores": {
+            "performance": 4,
+            "efficiency": 6
+          },
+          "gpu": "Apple M4",
+          "macos": "15.5",
+          "versions": {
+            "node": "v24.21.0",
+            "claude": "2.1.302 (Claude Code)",
+            "codex": "codex-cli 0.163.0",
+            "opencode": "opencode v2.0.32",
+            "chrome": "Google Chrome 155.0.8059.80"
+          },
+          "unavailable": []
+        }
+      },
+      "preflight": true,
+      "errors": [],
+      "readyAt": 3282.300000011921,
+      "states": [
+        {
+          "name": "lexus-day",
+          "sha256": "4fab6a2745d016f7e7accd1247212c00f91fb6bb3cb816bf7c7344159be14db5",
+          "camera": {
+            "position": [
+              46.20052307590598,
+              208.2878532625406,
+              -490.5569780961339
+            ],
+            "quaternion": [
+              -0.3702543457061976,
+              -0.5383996395935492,
+              -0.28410615187685734,
+              0.701656071046874
+            ],
+            "fov": 40
+          }
+        },
+        {
+          "name": "lexus-night",
+          "sha256": "8e9cbbab653ca70566a5a5d176adf3872d13899b1c94f95e73ea3def9d2c1ea8",
+          "camera": {
+            "position": [
+              46.20052307590598,
+              208.2878532625406,
+              -490.5569780961339
+            ],
+            "quaternion": [
+              -0.3702543457061976,
+              -0.5383996395935492,
+              -0.28410615187685734,
+              0.701656071046874
+            ],
+            "fov": 40
+          }
+        },
+        {
+          "name": "bmw-day",
+          "sha256": "428a5e02ef1c8b3908434fb2b44bcb459856fab0c62e4e783f6a3de51df76026",
+          "camera": {
+            "position": [
+              46.20052307590598,
+              208.2878532625406,
+              -490.5569780961339
+            ],
+            "quaternion": [
+              -0.3702543457061976,
+              -0.5383996395935492,
+              -0.28410615187685734,
+              0.701656071046874
+            ],
+            "fov": 40
+          }
+        },
+        {
+          "name": "bmw-night",
+          "sha256": "71aff21c86e9ffa7f59a42a736b89d0a06925754c4cf41cabd378e6625db3767",
+          "camera": {
+            "position": [
+              46.20052307590598,
+              208.2878532625406,
+              -490.5569780961339
+            ],
+            "quaternion": [
+              -0.3702543457061976,
+              -0.5383996395935492,
+              -0.28410615187685734,
+              0.701656071046874
+            ],
+            "fov": 40
+          }
+        },
+        {
+          "name": "ferrari-day",
+          "sha256": "a646b6fd8e0510710c12eccc482364641b50a32d4cf17daf6042408204c7686e",
+          "camera": {
+            "position": [
+              46.20052307590598,
+              208.2878532625406,
+              -490.5569780961339
+            ],
+            "quaternion": [
+              -0.3702543457061976,
+              -0.5383996395935492,
+              -0.28410615187685734,
+              0.701656071046874
+            ],
+            "fov": 40
+          }
+        },
+        {
+          "name": "ferrari-night",
+          "sha256": "18493185d82c8eb089223856c77a9215cc6ee462ed5d34a56c4bfb4bcf55d0d4",
+          "camera": {
+            "position": [
+              46.20052307590598,
+              208.2878532625406,
+              -490.5569780961339
+            ],
+            "quaternion": [
+              -0.3702543457061976,
+              -0.5383996395935492,
+              -0.28410615187685734,
+              0.701656071046874
+            ],
+            "fov": 40
+          }
+        },
+        {
+          "name": "mclaren-day",
+          "sha256": "a3e5411384f1513af78f3d10af49fc20713385b1174d159a9f9834ed14375c86",
+          "camera": {
+            "position": [
+              46.20052307590598,
+              208.2878532625406,
+              -490.5569780961339
+            ],
+            "quaternion": [
+              -0.3702543457061976,
+              -0.5383996395935492,
+              -0.28410615187685734,
+              0.701656071046874
+            ],
+            "fov": 40
+          }
+        },
+        {
+          "name": "mclaren-night",
+          "sha256": "0698490b0192e51d7f23d8bdc67c504cee35590a09bbcbfd67933ba27af325fd",
+          "camera": {
+            "position": [
+              46.20052307590598,
+              208.2878532625406,
+              -490.5569780961339
+            ],
+            "quaternion": [
+              -0.3702543457061976,
+              -0.5383996395935492,
+              -0.28410615187685734,
+              0.701656071046874
+            ],
+            "fov": 40
+          }
+        },
+        {
+          "name": "lamborghini-day",
+          "sha256": "1a808bafaafc6eef7c4425f8629275ac4bd6383fc065d20a7dd05f1eea903fa2",
+          "camera": {
+            "position": [
+              46.20052307590598,
+              208.2878532625406,
+              -490.5569780961339
+            ],
+            "quaternion": [
+              -0.3702543457061976,
+              -0.5383996395935492,
+              -0.28410615187685734,
+              0.701656071046874
+            ],
+            "fov": 40
+          }
+        },
+        {
+          "name": "lamborghini-night",
+          "sha256": "dc661e8e63a657526f2f2f1a2af31ccebcb2bfddd9ecfea309f04a68313aa046",
+          "camera": {
+            "position": [
+              46.20052307590598,
+              208.2878532625406,
+              -490.5569780961339
+            ],
+            "quaternion": [
+              -0.3702543457061976,
+              -0.5383996395935492,
+              -0.28410615187685734,
+              0.701656071046874
+            ],
+            "fov": 40
+          }
+        }
+      ],
+      "outputProbe": {
+        "exposureA": 0.1,
+        "exposureB": 4,
+        "changedChannels": 9485907,
+        "maxDelta": 234,
+        "rendererToneMapping": 4,
+        "passes": [
+          {
+            "type": "RenderPass",
+            "fragmentHasToneMappingCode": false
+          },
+          {
+            "type": "ShaderPass",
+            "fragmentHasToneMappingCode": false
+          },
+          {
+            "type": "ShaderPass",
+            "fragmentHasToneMappingCode": false
+          },
+          {
+            "type": "SMAAPass",
+            "fragmentHasToneMappingCode": false
+          }
+        ]
+      }
+    },
+    "neutral-mid": {
+      "query": "?version=unlocked&mode=smooth&tone=neutral&refl=mid",
+      "sha": "ebfa291b75deb9cdec4bd2eedeaa21b1324d400e",
+      "server": {
+        "startedAt": "2026-10-17T03:56:25.786Z",
+        "url": "http://127.0.0.1:5231",
+        "root": "/Users/shahzadsheikh/Desktop/gt3/.claude/worktrees/p3u-t2",
+        "branch": "p3u-t2",
+        "sha": "ebfa291b75deb9cdec4bd2eedeaa21b1324d400e",
+        "dirtyFiles": 7,
+        "dirtyHash": "9c3b473a7a08a4eb",
+        "vitePid": 2482,
+        "run": "p3u",
+        "epoch": "1",
+        "task": "T2",
+        "harness": "bash local/tmp/p3u/final-verification.sh",
+        "host": {
+          "profile": "m4-16gb",
+          "arch": "arm64",
+          "cpu": "Apple M4",
+          "ramGB": 16,
+          "model": "Mac16,12",
+          "cores": {
+            "performance": 4,
+            "efficiency": 6
+          },
+          "gpu": "Apple M4",
+          "macos": "15.5",
+          "versions": {
+            "node": "v24.21.0",
+            "claude": "2.1.302 (Claude Code)",
+            "codex": "codex-cli 0.163.0",
+            "opencode": "opencode v2.0.32",
+            "chrome": "Google Chrome 155.0.8059.80"
+          },
+          "unavailable": []
+        }
+      },
+      "preflight": true,
+      "errors": [],
+      "readyAt": 3261.5,
+      "states": [
+        {
+          "name": "lexus-day",
+          "sha256": "91dca9acc20c528d10e98728299278dd98188b82323e7b2368406d38ab0d64bb",
+          "camera": {
+            "position": [
+              46.20052307590598,
+              208.2878532625406,
+              -490.5569780961339
+            ],
+            "quaternion": [
+              -0.3702543457061976,
+              -0.5383996395935492,
+              -0.28410615187685734,
+              0.701656071046874
+            ],
+            "fov": 40
+          }
+        },
+        {
+          "name": "lexus-night",
+          "sha256": "4b650247f5a194f972859605e888e5b6341c46501b366ae3ffd457f60a137f2b",
+          "camera": {
+            "position": [
+              46.20052307590598,
+              208.2878532625406,
+              -490.5569780961339
+            ],
+            "quaternion": [
+              -0.3702543457061976,
+              -0.5383996395935492,
+              -0.28410615187685734,
+              0.701656071046874
+            ],
+            "fov": 40
+          }
+        },
+        {
+          "name": "bmw-day",
+          "sha256": "0bce11060a512b2b194dc7dfd9a42d4160944ea866c9ab32afb08551b9f79795",
+          "camera": {
+            "position": [
+              46.20052307590598,
+              208.2878532625406,
+              -490.5569780961339
+            ],
+            "quaternion": [
+              -0.3702543457061976,
+              -0.5383996395935492,
+              -0.28410615187685734,
+              0.701656071046874
+            ],
+            "fov": 40
+          }
+        },
+        {
+          "name": "bmw-night",
+          "sha256": "96076f3f8941bbea04770bc9f3533f5990a5870a7c87d7368ea67117bfcb1c67",
+          "camera": {
+            "position": [
+              46.20052307590598,
+              208.2878532625406,
+              -490.5569780961339
+            ],
+            "quaternion": [
+              -0.3702543457061976,
+              -0.5383996395935492,
+              -0.28410615187685734,
+              0.701656071046874
+            ],
+            "fov": 40
+          }
+        },
+        {
+          "name": "ferrari-day",
+          "sha256": "2f040a5ef1f0c9ce0ba58a39b9772a63d5fb452635141aa1197ee4b41b21ef0e",
+          "camera": {
+            "position": [
+              46.20052307590598,
+              208.2878532625406,
+              -490.5569780961339
+            ],
+            "quaternion": [
+              -0.3702543457061976,
+              -0.5383996395935492,
+              -0.28410615187685734,
+              0.701656071046874
+            ],
+            "fov": 40
+          }
+        },
+        {
+          "name": "ferrari-night",
+          "sha256": "5ff751e96943034673fc58a4f1815f10d6b2fa21cd061346496bdb01167e99a5",
+          "camera": {
+            "position": [
+              46.20052307590598,
+              208.2878532625406,
+              -490.5569780961339
+            ],
+            "quaternion": [
+              -0.3702543457061976,
+              -0.5383996395935492,
+              -0.28410615187685734,
+              0.701656071046874
+            ],
+            "fov": 40
+          }
+        },
+        {
+          "name": "mclaren-day",
+          "sha256": "6fa22697e6bf87b87947af1f3b2d6c14ca56740f21065c81d6ae9f7b71c42419",
+          "camera": {
+            "position": [
+              46.20052307590598,
+              208.2878532625406,
+              -490.5569780961339
+            ],
+            "quaternion": [
+              -0.3702543457061976,
+              -0.5383996395935492,
+              -0.28410615187685734,
+              0.701656071046874
+            ],
+            "fov": 40
+          }
+        },
+        {
+          "name": "mclaren-night",
+          "sha256": "c6cf6b33d72e0797360f568a4388d8a6908139dcfb2cb12185fea702e10879a7",
+          "camera": {
+            "position": [
+              46.20052307590598,
+              208.2878532625406,
+              -490.5569780961339
+            ],
+            "quaternion": [
+              -0.3702543457061976,
+              -0.5383996395935492,
+              -0.28410615187685734,
+              0.701656071046874
+            ],
+            "fov": 40
+          }
+        },
+        {
+          "name": "lamborghini-day",
+          "sha256": "bdc1d0354a94cbc1102257a054f9852d1c7ae295638cba238a9a39e24fc1f21e",
+          "camera": {
+            "position": [
+              46.20052307590598,
+              208.2878532625406,
+              -490.5569780961339
+            ],
+            "quaternion": [
+              -0.3702543457061976,
+              -0.5383996395935492,
+              -0.28410615187685734,
+              0.701656071046874
+            ],
+            "fov": 40
+          }
+        },
+        {
+          "name": "lamborghini-night",
+          "sha256": "cb00e0de5c35552e1234828d6278444f7136697a47f678b213896582cde39e97",
+          "camera": {
+            "position": [
+              46.20052307590598,
+              208.2878532625406,
+              -490.5569780961339
+            ],
+            "quaternion": [
+              -0.3702543457061976,
+              -0.5383996395935492,
+              -0.28410615187685734,
+              0.701656071046874
+            ],
+            "fov": 40
+          }
+        }
+      ],
+      "outputProbe": {
+        "exposureA": 0.1,
+        "exposureB": 4,
+        "changedChannels": 9485903,
+        "maxDelta": 253,
+        "rendererToneMapping": 4,
+        "passes": [
+          {
+            "type": "RenderPass",
+            "fragmentHasToneMappingCode": false
+          },
+          {
+            "type": "ShaderPass",
+            "fragmentHasToneMappingCode": false
+          },
+          {
+            "type": "ShaderPass",
+            "fragmentHasToneMappingCode": false
+          },
+          {
+            "type": "SMAAPass",
+            "fragmentHasToneMappingCode": false
+          }
+        ]
+      }
+    },
+    "neutral-low": {
+      "query": "?version=unlocked&mode=smooth&tone=neutral&refl=low",
+      "sha": "ebfa291b75deb9cdec4bd2eedeaa21b1324d400e",
+      "server": {
+        "startedAt": "2026-10-17T03:56:25.786Z",
+        "url": "http://127.0.0.1:5231",
+        "root": "/Users/shahzadsheikh/Desktop/gt3/.claude/worktrees/p3u-t2",
+        "branch": "p3u-t2",
+        "sha": "ebfa291b75deb9cdec4bd2eedeaa21b1324d400e",
+        "dirtyFiles": 7,
+        "dirtyHash": "9c3b473a7a08a4eb",
+        "vitePid": 2482,
+        "run": "p3u",
+        "epoch": "1",
+        "task": "T2",
+        "harness": "bash local/tmp/p3u/final-verification.sh",
+        "host": {
+          "profile": "m4-16gb",
+          "arch": "arm64",
+          "cpu": "Apple M4",
+          "ramGB": 16,
+          "model": "Mac16,12",
+          "cores": {
+            "performance": 4,
+            "efficiency": 6
+          },
+          "gpu": "Apple M4",
+          "macos": "15.5",
+          "versions": {
+            "node": "v24.21.0",
+            "claude": "2.1.302 (Claude Code)",
+            "codex": "codex-cli 0.163.0",
+            "opencode": "opencode v2.0.32",
+            "chrome": "Google Chrome 155.0.8059.80"
+          },
+          "unavailable": []
+        }
+      },
+      "preflight": true,
+      "errors": [],
+      "readyAt": 3331.599999964237,
+      "states": [
+        {
+          "name": "lexus-day",
+          "sha256": "3d091fc84fe653e762383148774c5755536d1b8152b1a4418cae55ddbdef0e0f",
+          "camera": {
+            "position": [
+              46.20052307590598,
+              208.2878532625406,
+              -490.5569780961339
+            ],
+            "quaternion": [
+              -0.3702543457061976,
+              -0.5383996395935492,
+              -0.28410615187685734,
+              0.701656071046874
+            ],
+            "fov": 40
+          }
+        },
+        {
+          "name": "lexus-night",
+          "sha256": "cbf8bd31811eed7c8a78138abed687f28c1e343c7956f6db815bb19a46ed1d0d",
+          "camera": {
+            "position": [
+              46.20052307590598,
+              208.2878532625406,
+              -490.5569780961339
+            ],
+            "quaternion": [
+              -0.3702543457061976,
+              -0.5383996395935492,
+              -0.28410615187685734,
+              0.701656071046874
+            ],
+            "fov": 40
+          }
+        },
+        {
+          "name": "mclaren-day",
+          "sha256": "8aac23c9a439126c55f1b664af2808232630ce149160aa7e49c9899343452457",
+          "camera": {
+            "position": [
+              46.20052307590598,
+              208.2878532625406,
+              -490.5569780961339
+            ],
+            "quaternion": [
+              -0.3702543457061976,
+              -0.5383996395935492,
+              -0.28410615187685734,
+              0.701656071046874
+            ],
+            "fov": 40
+          }
+        },
+        {
+          "name": "mclaren-night",
+          "sha256": "6f19466a35d2d7ba387a86290fdb7a4bec0f946fdcf962f31baf86f442087e30",
+          "camera": {
+            "position": [
+              46.20052307590598,
+              208.2878532625406,
+              -490.5569780961339
+            ],
+            "quaternion": [
+              -0.3702543457061976,
+              -0.5383996395935492,
+              -0.28410615187685734,
+              0.701656071046874
+            ],
+            "fov": 40
+          }
+        },
+        {
+          "name": "lamborghini-day",
+          "sha256": "631d6c98817782b603d96169d570c76078a458d909ef7a872763eca45f9bd605",
+          "camera": {
+            "position": [
+              46.20052307590598,
+              208.2878532625406,
+              -490.5569780961339
+            ],
+            "quaternion": [
+              -0.3702543457061976,
+              -0.5383996395935492,
+              -0.28410615187685734,
+              0.701656071046874
+            ],
+            "fov": 40
+          }
+        },
+        {
+          "name": "lamborghini-night",
+          "sha256": "518b4a4690ff8ac49e1e0e2faeb5b1fdebe0a09090fd097e3eafe19cb3c45c60",
+          "camera": {
+            "position": [
+              46.20052307590598,
+              208.2878532625406,
+              -490.5569780961339
+            ],
+            "quaternion": [
+              -0.3702543457061976,
+              -0.5383996395935492,
+              -0.28410615187685734,
+              0.701656071046874
+            ],
+            "fov": 40
+          }
+        }
+      ],
+      "outputProbe": {
+        "exposureA": 0.1,
+        "exposureB": 4,
+        "changedChannels": 9485903,
+        "maxDelta": 253,
+        "rendererToneMapping": 4,
+        "passes": [
+          {
+            "type": "RenderPass",
+            "fragmentHasToneMappingCode": false
+          },
+          {
+            "type": "ShaderPass",
+            "fragmentHasToneMappingCode": false
+          },
+          {
+            "type": "ShaderPass",
+            "fragmentHasToneMappingCode": false
+          },
+          {
+            "type": "SMAAPass",
+            "fragmentHasToneMappingCode": false
+          }
+        ]
+      }
+    },
+    "neutral-high": {
+      "query": "?version=unlocked&mode=smooth&tone=neutral&refl=high",
+      "sha": "ebfa291b75deb9cdec4bd2eedeaa21b1324d400e",
+      "server": {
+        "startedAt": "2026-10-17T03:56:25.786Z",
+        "url": "http://127.0.0.1:5231",
+        "root": "/Users/shahzadsheikh/Desktop/gt3/.claude/worktrees/p3u-t2",
+        "branch": "p3u-t2",
+        "sha": "ebfa291b75deb9cdec4bd2eedeaa21b1324d400e",
+        "dirtyFiles": 7,
+        "dirtyHash": "9c3b473a7a08a4eb",
+        "vitePid": 2482,
+        "run": "p3u",
+        "epoch": "1",
+        "task": "T2",
+        "harness": "bash local/tmp/p3u/final-verification.sh",
+        "host": {
+          "profile": "m4-16gb",
+          "arch": "arm64",
+          "cpu": "Apple M4",
+          "ramGB": 16,
+          "model": "Mac16,12",
+          "cores": {
+            "performance": 4,
+            "efficiency": 6
+          },
+          "gpu": "Apple M4",
+          "macos": "15.5",
+          "versions": {
+            "node": "v24.21.0",
+            "claude": "2.1.302 (Claude Code)",
+            "codex": "codex-cli 0.163.0",
+            "opencode": "opencode v2.0.32",
+            "chrome": "Google Chrome 155.0.8059.80"
+          },
+          "unavailable": []
+        }
+      },
+      "preflight": true,
+      "errors": [],
+      "readyAt": 3221.899999976158,
+      "states": [
+        {
+          "name": "lexus-day",
+          "sha256": "4366c5167155f49ab2352da3616b871f8d4c1c4f3e50e4b558eae7b5c87859a7",
+          "camera": {
+            "position": [
+              46.20052307590598,
+              208.2878532625406,
+              -490.5569780961339
+            ],
+            "quaternion": [
+              -0.3702543457061976,
+              -0.5383996395935492,
+              -0.28410615187685734,
+              0.701656071046874
+            ],
+            "fov": 40
+          }
+        },
+        {
+          "name": "lexus-night",
+          "sha256": "6928686d2ebf5fdc9095ecb1567b87cd2ddfe7fa5ec457ab5edbfccc72c51c1e",
+          "camera": {
+            "position": [
+              46.20052307590598,
+              208.2878532625406,
+              -490.5569780961339
+            ],
+            "quaternion": [
+              -0.3702543457061976,
+              -0.5383996395935492,
+              -0.28410615187685734,
+              0.701656071046874
+            ],
+            "fov": 40
+          }
+        },
+        {
+          "name": "mclaren-day",
+          "sha256": "e99af7b43eb00494ee958a68afcc0e79316a71fed394686867ccdad47cd85a9e",
+          "camera": {
+            "position": [
+              46.20052307590598,
+              208.2878532625406,
+              -490.5569780961339
+            ],
+            "quaternion": [
+              -0.3702543457061976,
+              -0.5383996395935492,
+              -0.28410615187685734,
+              0.701656071046874
+            ],
+            "fov": 40
+          }
+        },
+        {
+          "name": "mclaren-night",
+          "sha256": "52feff1ca5ab346f8122cde0a6d06d231aae2a1bf79e6a0133d70e47a371f434",
+          "camera": {
+            "position": [
+              46.20052307590598,
+              208.2878532625406,
+              -490.5569780961339
+            ],
+            "quaternion": [
+              -0.3702543457061976,
+              -0.5383996395935492,
+              -0.28410615187685734,
+              0.701656071046874
+            ],
+            "fov": 40
+          }
+        },
+        {
+          "name": "lamborghini-day",
+          "sha256": "8ce96daa763d19a5609341617ff7b0b273ab7bd71ae9a47b9b98c89a9883b913",
+          "camera": {
+            "position": [
+              46.20052307590598,
+              208.2878532625406,
+              -490.5569780961339
+            ],
+            "quaternion": [
+              -0.3702543457061976,
+              -0.5383996395935492,
+              -0.28410615187685734,
+              0.701656071046874
+            ],
+            "fov": 40
+          }
+        },
+        {
+          "name": "lamborghini-night",
+          "sha256": "06f7760f115dbb6f32f45d966c63c8319fad8d4512f79f52fccd9e9bdc855903",
+          "camera": {
+            "position": [
+              46.20052307590598,
+              208.2878532625406,
+              -490.5569780961339
+            ],
+            "quaternion": [
+              -0.3702543457061976,
+              -0.5383996395935492,
+              -0.28410615187685734,
+              0.701656071046874
+            ],
+            "fov": 40
+          }
+        }
+      ],
+      "outputProbe": {
+        "exposureA": 0.1,
+        "exposureB": 4,
+        "changedChannels": 9485903,
+        "maxDelta": 254,
+        "rendererToneMapping": 4,
+        "passes": [
+          {
+            "type": "RenderPass",
+            "fragmentHasToneMappingCode": false
+          },
+          {
+            "type": "ShaderPass",
+            "fragmentHasToneMappingCode": false
+          },
+          {
+            "type": "ShaderPass",
+            "fragmentHasToneMappingCode": false
+          },
+          {
+            "type": "SMAAPass",
+            "fragmentHasToneMappingCode": false
+          }
+        ]
+      }
+    }
+  }
+}

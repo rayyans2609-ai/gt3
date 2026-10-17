@@ -1,0 +1,71 @@
+{
+  "baselineSource": "918622c:src/core/renderProfile.js",
+  "check": "Full exported configuration equality, including settings table, against previous selected configuration",
+  "cases": [
+    {
+      "query": "",
+      "referenceQuery": "",
+      "pass": true,
+      "version": "locked",
+      "mode": "smooth",
+      "dpr": 1
+    },
+    {
+      "query": "?version=locked",
+      "referenceQuery": "?version=locked",
+      "pass": true,
+      "version": "locked",
+      "mode": "smooth",
+      "dpr": 1
+    },
+    {
+      "query": "?version=locked&mode=quality",
+      "referenceQuery": "?version=locked&mode=quality",
+      "pass": true,
+      "version": "locked",
+      "mode": "smooth",
+      "dpr": 1
+    },
+    {
+      "query": "?version=other&mode=quality",
+      "referenceQuery": "?version=other&mode=quality",
+      "pass": true,
+      "version": "locked",
+      "mode": "smooth",
+      "dpr": 1
+    },
+    {
+      "query": "?version=unlocked",
+      "referenceQuery": "?version=unlocked&mode=quality",
+      "pass": true,
+      "version": "unlocked",
+      "mode": "quality",
+      "dpr": 2
+    },
+    {
+      "query": "?version=unlocked&mode=quality",
+      "referenceQuery": "?version=unlocked&mode=quality",
+      "pass": true,
+      "version": "unlocked",
+      "mode": "quality",
+      "dpr": 2
+    },
+    {
+      "query": "?version=unlocked&mode=smooth",
+      "referenceQuery": "?version=unlocked&mode=smooth",
+      "pass": true,
+      "version": "unlocked",
+      "mode": "smooth",
+      "dpr": 1.5
+    }
+  ],
+  "pass": true,
+  "syntaxAndWhitespace": "PASS",
+  "productionBuild": {
+    "result": "PASS",
+    "command": "npm run build",
+    "log": "p3u-profiles/local/evidence/p3u/closure-e8/build.log"
+  },
+  "evidenceReuse": "Locked/default23-state pixel identity, W3-W6/minimap and accepted functional evidence reused; only default-mode selection changed.",
+  "sustainedQualification": "DEFERRED by explicit owner acceptance for closure; not passed; no retries."
+}

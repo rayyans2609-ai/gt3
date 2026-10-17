@@ -1,0 +1,37 @@
+{
+ "startedAt": "2026-10-17T14:57:38.451Z",
+ "url": "http://127.0.0.1:5247",
+ "root": "/Users/shahzadsheikh/Desktop/gt3/.claude/worktrees/p3u-final",
+ "branch": "p3u-final",
+ "sha": "fa9f19be4b6c073212583db4cecb2b41126fa083",
+ "dirtyFiles": 0,
+ "dirtyHash": "e3b0c44298fc1c14",
+ "vitePid": 34078,
+ "run": "p3u",
+ "epoch": "5",
+ "task": "FinalE5",
+ "harness": "node scripts/verify-preready-input.mjs http://127.0.0.1:5247/?version=unlocked",
+ "host": {
+  "profile": "m4-16gb",
+  "arch": "arm64",
+  "cpu": "Apple M4",
+  "ramGB": 16,
+  "model": "Mac16,12",
+  "cores": {
+   "performance": 4,
+   "efficiency": 6
+  },
+  "gpu": "Apple M4",
+  "macos": "15.5",
+  "versions": {
+   "node": "v24.21.0",
+   "claude": "2.1.302 (Claude Code)",
+   "codex": "codex-cli 0.163.0",
+   "opencode": null,
+   "chrome": "Google Chrome 155.0.8059.80"
+  },
+  "unavailable": [
+   "versions.opencode"
+  ]
+ }
+}

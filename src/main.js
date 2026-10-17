@@ -23,6 +23,7 @@ import { state, set, subscribe } from './core/state.js';
 import { Clock } from './core/clock.js';
 import { getRestoredRouteProgress, restoreSession, startRoutePersistence } from './core/session.js';
 import { restoreExperience, setExperience } from './core/experience.js';
+import { UNLOCKED } from './core/renderProfile.js';
 // W2 review scaffolding: resolves ?comp= (pure, no scene imports) before any scene
 // module builds geometry. trackCurve.js also imports it, so order cannot regress.
 import { COMP } from './scene/composition.js';
@@ -104,6 +105,10 @@ async function boot() {
   const aerialCamera = await import('./scene/aerialCamera.js');
   const cars = await import('./scene/cars.js');
   const carWarmup = await import('./scene/carWarmup.js');
+  // Unlocked only: the staged-prewarm policy. Locked never loads or consults it.
+  const prewarm = UNLOCKED ? await import('./scene/carWarmBackground.js') : null;
+  // Unlocked only (W6): bound three's transmission pass. Locked never loads it.
+  const transmission = UNLOCKED ? await import('./scene/transmissionBudget.js') : null;
   const checkpoints = await import('./scene/checkpoints.js');
   const morph = await import('./scene/morph.js');
   const theme = await import('./scene/theme.js');
@@ -135,6 +140,8 @@ async function boot() {
     audio: faults.audioTimeoutMs || 15000,
     gpu: faults.warmupTimeoutMs || 40000 };
   let gpuWarmup = null;
+  let backgroundWarmup = null;
+  let warmupCars = null; // null = every car is warmed before unlock (accepted lifecycle)
 
   timed('init-start-screen', () => startScreen.initStartScreen());
   // Lock before the first yield: input can now be processed between builders, and the drive
@@ -182,7 +189,8 @@ async function boot() {
   // ---- scene (staged: yield so the start screen paints and callbacks run) --
   await yieldToBrowser();
   perfMark('start-screen:painted');
-  const { scene, camera } = timed('init-scene', () => sceneSetup.initScene());
+  const { scene, camera, renderer } = timed('init-scene', () => sceneSetup.initScene());
+  transmission?.budgetTransmission(renderer);
   // initScene creates window.__gt3; these handles were previously attached after the full build.
   window.__gt3.readiness = readiness;
   window.__gt3.scrollMode = scrollDrive.scrollMode;
@@ -334,10 +342,17 @@ async function boot() {
     try {
       if (COMP.look) timed('curb-contact-cache', () => carRig.prepareCurbContacts(
         Array.from({ length: 10 }, (_, index) => cars.getCarModel(index))));
+      if (prewarm && prewarm.PREWARM_MODE !== 'full') {
+        // The window must also cover where a saved route will resume (releaseDrive restores it).
+        const resumed = getRestoredRouteProgress();
+        warmupCars = prewarm.foregroundIndices(state.activeCarIndex,
+          checkpoints.indexAt(resumed ?? 0));
+      }
+      readiness.warmupCars = warmupCars ?? 'all';
       gpuWarmup = carWarmup.createCarWarmup(
         fraction => { fractions.gpu = fraction; reportProgress(); },
         entry => readiness.warmupSteps.push(entry),
-        { throwAtDraw: faults.warmThrowAtStep },
+        { throwAtDraw: faults.warmThrowAtStep, indices: warmupCars },
       );
       perfMark('warmup:start');
       bound('gpu', limits.gpu, () => stopWarmup('gpu-timeout'));
@@ -421,6 +436,8 @@ async function boot() {
   // Tail distance never enters checkpoint logic: progress stays exactly 1.
   registerUpdate(checkpoints.updateCheckpoints);
   registerUpdate(checkpoints.updateGateResponse);
+  let lastSwapEnd = 0;
+  if (prewarm) morph.onMorphComplete(() => { lastSwapEnd = performance.now(); });
   registerUpdate(() => morph.morphTo(state.activeCarIndex));
   registerUpdate(morph.updateMorph);
   registerUpdate(theme.update);
@@ -463,10 +480,21 @@ async function boot() {
       if (gpuWarmup && !gpuWarmup.done && readiness.gpu === 'pending') {
         if (!faults.warmHang && gpuWarmup.runFrame()) {
           gpuWarmup = null;
+          if (warmupCars) {
+            backgroundWarmup = prewarm.createBackgroundWarmup(warmupCars,
+              { getActive: () => state.activeCarIndex });
+            window.__gt3.background = backgroundWarmup;
+          }
           settle('gpu', 'ready');
         }
       } else if (studio.isMontagePlaying()) studio.renderMontage();
-      else sceneSetup.render(dt);
+      else {
+        sceneSetup.render(dt);
+        // Staged prewarm: one small step per calm frame, after the visible frame is drawn.
+        if (backgroundWarmup && readiness.status === 'ready' && state.mode === 'race' &&
+            !morph.isMorphing() && performance.now() - lastSwapEnd > 600 &&
+            checkpoints.getApproach() === null && dt < 0.02) backgroundWarmup.tick();
+      }
     } catch (error) {
       if (readiness.gpu === 'pending' && gpuWarmup) {
         console.error('[gt3] GPU warm-up failed', error);

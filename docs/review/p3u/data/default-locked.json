@@ -1,0 +1,56 @@
+{
+  "a": "local/evidence/p3u/locked-final-key.json",
+  "b": "local/evidence/p3u/default-final",
+  "identical": true,
+  "results": [
+    {
+      "state": "lexus-day",
+      "identical": true,
+      "maxChannelDelta": 0,
+      "differingPixels": 0,
+      "pixels": 5621280
+    },
+    {
+      "state": "lexus-night",
+      "identical": true,
+      "maxChannelDelta": 0,
+      "differingPixels": 0,
+      "pixels": 5621280
+    },
+    {
+      "state": "bmw-day",
+      "identical": true,
+      "maxChannelDelta": 0,
+      "differingPixels": 0,
+      "pixels": 5621280
+    },
+    {
+      "state": "lamborghini-night",
+      "identical": true,
+      "maxChannelDelta": 0,
+      "differingPixels": 0,
+      "pixels": 5621280
+    },
+    {
+      "state": "grid",
+      "identical": true,
+      "maxChannelDelta": 0,
+      "differingPixels": 0,
+      "pixels": 5621280
+    },
+    {
+      "state": "gate",
+      "identical": true,
+      "maxChannelDelta": 0,
+      "differingPixels": 0,
+      "pixels": 5621280
+    },
+    {
+      "state": "finish",
+      "identical": true,
+      "maxChannelDelta": 0,
+      "differingPixels": 0,
+      "pixels": 5621280
+    }
+  ]
+}

@@ -1,0 +1,90 @@
+[
+ {
+  "name": "locked-600-clean",
+  "incomplete": true,
+  "errors": [
+   "TargetCloseError: Protocol error (Input.dispatchMouseEvent): Target closed\n    at CallbackRegistry.clear (file:///Users/shahzadsheikh/Desktop/gt3/node_modules/puppeteer-core/lib/puppeteer/common/CallbackRegistry.js:88:36)\n    at CdpCDPSession.onClosed (file:///Users/shahzadsheikh/Desktop/gt3/node_modules/puppeteer-core/lib/puppeteer/cdp/CdpSession.js:121:25)\n    at #onClose (file:///Users/shahzadsheikh/Desktop/gt3/node_modules/puppeteer-core/lib/puppeteer/cdp/Connection.js:217:21)\n    at Socket.<anonymous> (file:///Users/shahzadsheikh/Desktop/gt3/node_modules/puppeteer-core/lib/puppeteer/node/PipeTransport.js:28:30)\n    at Socket.emit (node:events:526:24)\n    at Pipe.<anonymous> (node:net:362:12)",
+   "Partial capture: Attempted to use detached Frame '19C41C2F666F8AB0EBF7A0AC7580E676'."
+  ],
+  "monitorError": null,
+  "setup": {
+   "gpu": "ANGLE (Apple, ANGLE Metal Renderer: Apple M4, Unspecified Version)",
+   "timerExtension": true,
+   "gcSupported": false,
+   "visibility": "visible",
+   "screen": {
+    "width": 1470,
+    "height": 956,
+    "availWidth": 1470,
+    "availHeight": 956
+   },
+   "css": [
+    1470,
+    956
+   ],
+   "deviceDPR": 2,
+   "probe": {
+    "mode": "race",
+    "locked": false,
+    "speed01": 0,
+    "progress": 0,
+    "applied": 1,
+    "level": "high",
+    "still": 1246.5,
+    "sinceSwitch": null,
+    "canvasW": 1470,
+    "ratio": 1
+   }
+  },
+  "conditions": {
+   "power": "Now drawing from 'Battery Power'\n -InternalBattery-0 (id=21364835)\t20%; discharging; 2:03 remaining present: true\n",
+   "thermal": "Note: No thermal warning level has been recorded\nNote: No performance warning level has been recorded\nNote: No CPU power status has been recorded\n",
+   "candidate": "baseline"
+  },
+  "note": "Excluded; screen saver/background presentation and input acknowledgement failure. Subsequent harness uses visible foreground, explicit per-process user-active assertion and watchdogs."
+ },
+ {
+  "name": "locked-sustained",
+  "incomplete": true,
+  "errors": [
+   "Error: Wheel acknowledgement exceeded 5000ms\n    at Timeout.<anonymous> (file:///Users/shahzadsheikh/Desktop/gt3/.claude/worktrees/p3u-sol/scripts/p3u-perf.mjs:21:152)\n    at listOnTimeout (node:internal/timers:685:17)\n    at process.processTimers (node:internal/timers:618:7)"
+  ],
+  "monitorError": "Presentation suspended: {\"frames\":21,\"frameAgeMs\":5526.899999982119,\"progress\":0.002328995022827275,\"visibility\":\"hidden\"}",
+  "setup": {
+   "gpu": "ANGLE (Apple, ANGLE Metal Renderer: Apple M4, Unspecified Version)",
+   "timerExtension": true,
+   "gcSupported": false,
+   "visibility": "visible",
+   "screen": {
+    "width": 1470,
+    "height": 956,
+    "availWidth": 1470,
+    "availHeight": 956
+   },
+   "css": [
+    1470,
+    956
+   ],
+   "deviceDPR": 2,
+   "probe": {
+    "mode": "race",
+    "locked": false,
+    "speed01": 0,
+    "progress": 0,
+    "applied": 1,
+    "level": "high",
+    "still": 1241.699999988079,
+    "sinceSwitch": null,
+    "canvasW": 1470,
+    "ratio": 1
+   }
+  },
+  "conditions": {
+   "awakeAssertion": "caffeinate -dimsu -w harnessPID (released at exit)",
+   "power": "Now drawing from 'Battery Power'\n -InternalBattery-0 (id=21364835)\t19%; discharging; 1:37 remaining present: true\n",
+   "thermal": "Note: No thermal warning level has been recorded\nNote: No performance warning level has been recorded\nNote: No CPU power status has been recorded\n",
+   "candidate": "baseline"
+  },
+  "note": "Excluded; screen saver/background presentation and input acknowledgement failure. Subsequent harness uses visible foreground, explicit per-process user-active assertion and watchdogs."
+ }
+]

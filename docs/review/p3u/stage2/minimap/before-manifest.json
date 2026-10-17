@@ -1,0 +1,3103 @@
+{
+ "startedAt": "2026-10-17T14:27:19.609Z",
+ "base": "http://127.0.0.1:5248",
+ "query": "?version=locked",
+ "profile": "locked",
+ "viewport": {
+  "width": 1470,
+  "height": 956,
+  "deviceScaleFactor": 2,
+  "emulationApplied": true
+ },
+ "headful": false,
+ "browserPid": 25940,
+ "preflight": {
+  "pass": true,
+  "cls": "browser",
+  "profile": "m4-16gb",
+  "provisional": true,
+  "reasons": [],
+  "warnings": [],
+  "paging": {
+   "pageouts": 0,
+   "swapouts": 0
+  },
+  "at": "2026-10-17T14:27:18.980Z",
+  "identity": {
+   "profile": "m4-16gb",
+   "arch": "arm64",
+   "cpu": "Apple M4",
+   "ramGB": 16,
+   "model": "Mac16,12",
+   "cores": {
+    "performance": 4,
+    "efficiency": 6
+   },
+   "gpu": "Apple M4",
+   "macos": "15.5",
+   "versions": {
+    "node": "v24.21.0",
+    "claude": "2.1.302 (Claude Code)",
+    "codex": "codex-cli 0.163.0",
+    "opencode": "opencode v2.0.32",
+    "chrome": "Google Chrome 155.0.8059.80"
+   },
+   "unavailable": []
+  },
+  "a": {
+   "pressure": 1,
+   "pageouts": 819860,
+   "swapouts": 1155784,
+   "idle": 81,
+   "system": 10.33,
+   "swap": "total = 2048.00M  used = 1317.62M  free = 730.38M  (encrypted)"
+  },
+  "b": {
+   "pressure": 1,
+   "pageouts": 819860,
+   "swapouts": 1155784,
+   "idle": 77.27,
+   "system": 11.86,
+   "swap": "total = 2048.00M  used = 1317.62M  free = 730.38M  (encrypted)"
+  },
+  "counts": {
+   "heavy": 0,
+   "browsers": 0,
+   "agents": 3,
+   "runWorkers": null
+  },
+  "workloads": {
+   "viteServers": [
+    {
+     "pid": 25462,
+     "ppid": 25456,
+     "rssMB": 126,
+     "command": "node node_modules/vite/bin/vite.js --host 127.0.0.1 --port 5248 --strictPort",
+     "cwd": "/Users/shahzadsheikh/Desktop/gt3/.claude/worktrees/p3u-hudtrail",
+     "port": "5248"
+    }
+   ],
+   "builds": [],
+   "browsers": [],
+   "agents": [
+    {
+     "pid": 24225,
+     "ppid": 24224,
+     "rssMB": 106,
+     "command": "/Users/shahzadsheikh/Library/Application Support/Claude/claude-code/2.1.299/4fa9694b7975/claude.app/Contents/MacOS/claude --output-format stream-json --verbose --input-format stream-json --model=claude-opus-5-5 --permission-prompt-tool=stdio --resume=4f0a9bf5-5921-4f00-858d-fba6a44bb2b6 --allowedTools=mcp__computer-use,mcp__ccd_session__spawn_task,mcp__ccd_session__dismiss_task,mcp__ccd_session__mark_chapter,mcp__ccd_session_mgmt__list_sessions,mcp__ccd_session_mgmt__get_session,mcp__ccd_session_mgmt__get_usage,mcp__ccd_host__get_storage_usage,mcp__ccd_session_mgmt__set_session_title,mcp__ccd_session_mgmt__send_message,mcp__ccd_session_mgmt__detach_session,mcp__ccd_sidebar__list_groups,mcp__ccd_sidebar__create_group,mcp__ccd_sidebar__set_view,mcp__ccd_sidebar__list_sections,mcp__ccd_sidebar__create_section,mcp__ccd_session_mgmt__search_session_transcripts,mcp__ccd_session_mgmt__list_events,mcp__ccd_session_mgmt__export_transcript,mcp__scheduled-tasks__list_task_runs,mcp__ccd_session__read_widget_context,mcp__ccd_session__list_start_targets,mcp__ccd_view__show_pane,mcp__ccd_view__close_pane,mcp__ccd_view__get_layout,mcp__ccd_view__set_transcript_view,mcp__ccd_settings__get_settings,mcp__mcp-registry__search_mcp_registry,mcp__mcp-registry__suggest_connectors,mcp__mcp-registry__list_connectors,mcp__ccd_connectors__session_connectors_status,mcp__ccd_connectors__reconnect_session_connector,mcp__ccd_pr__get_status,mcp__ccd_window__open_session_in,mcp__ccd_window__close_split,mcp__ccd_window__set_sidebar_collapsed,mcp__ccd_window__get_window_layout,mcp__claude-in-chrome__request_credentials,mcp__claude-in-chrome__list_granted_credentials,mcp__claude-in-chrome__autofill_credential,mcp__claude-in-chrome__release_credentials,mcp__claude-in-chrome__enter_verification_code --disallowedTools=SubscribePR --setting-sources=user,project,local --permission-mode=default --include-partial-messages --await-initialize --thinking-display omitted --replay-user-messages --settings {\"deniedMcpServers\":[{\"serverName\":\"Claude Browser\"},{\"serverName\":\"Claude Code Android Emulator\"},{\"serverName\":\"Claude Code iOS Simulator\"},{\"serverName\":\"Claude Preview\"},{\"serverName\":\"Claude_Browser\"},{\"serverName\":\"Claude_Code_Android_Emulator\"},{\"serverName\":\"Claude_Code_iOS_Simulator\"},{\"serverName\":\"Claude_Preview\"},{\"serverName\":\"Claude_for_Chrome\"},{\"serverName\":\"Framebuffer\"},{\"serverName\":\"Window Halo\"},{\"serverName\":\"Window_Halo\"},{\"serverName\":\"ccd_connectors\"},{\"serverName\":\"ccd_directory\"},{\"serverName\":\"ccd_host\"},{\"serverName\":\"ccd_pr\"},{\"serverName\":\"ccd_session\"},{\"serverName\":\"ccd_session_mgmt\"},{\"serverName\":\"ccd_settings\"},{\"serverName\":\"ccd_sidebar\"},{\"serverName\":\"ccd_turn\"},{\"serverName\":\"ccd_view\"},{\"serverName\":\"ccd_window\"},{\"serverName\":\"claude-in-chrome\"},{\"serverName\":\"claude_browser\"},{\"serverName\":\"claude_code_android_emulator\"},{\"serverName\":\"claude_code_ios_simulator\"},{\"serverName\":\"claude_for_chrome\"},{\"serverName\":\"claude_in_chrome\"},{\"serverName\":\"claude_preview\"},{\"serverName\":\"computer-use\"},{\"serverName\":\"computer_use\"},{\"serverName\":\"cowork\"},{\"serverName\":\"cowork-onboarding\"},{\"serverName\":\"cowork_onboarding\"},{\"serverName\":\"dev-debug\"},{\"serverName\":\"dev_debug\"},{\"serverName\":\"dispatch\"},{\"serverName\":\"framebuffer\"},{\"serverName\":\"mcp-registry\"},{\"serverName\":\"mcp_registry\"},{\"serverName\":\"plugins\"},{\"serverName\":\"remote-devices\"},{\"serverName\":\"remote_devices\"},{\"serverName\":\"scheduled-tasks\"},{\"serverName\":\"scheduled_tasks\"},{\"serverName\":\"session_info\"},{\"serverName\":\"skills\"},{\"serverName\":\"window_halo\"}]}"
+    },
+    {
+     "pid": 25237,
+     "ppid": 1012,
+     "rssMB": 45,
+     "command": "node /Users/shahzadsheikh/.npm-global/bin/codex exec --dangerously-bypass-approvals-and-sandbox --skip-git-repo-check --disable multi_agent -m gpt-6-luna -c model_reasoning_effort=\"medium\" GT3 ROLE: worker. p3u/e4 CandidateChecks4, Luna medium. Execute exact prepared checks; no source edits, commits, agents, routes, system changes or extra suites. Do not reread whole repo/docs. Manager owns integration. Host browser+agent admission passed. The prepared harness itself performs canonical browser preflight before any browser is launched: do not add a redundant standalone browser check. No admission guard is bypassed. One browser/server at a time.\\012\\012Run bash local/briefs/candidate-checks-e4.sh once from this worktree. Each command is behind scripts/with-verification-server.sh with correct e4 provenance. It captures candidate minimap Locked then Unlocked, then W6 glass product/stock/repeat from ../p3u-w6. On failure inspect redirected run.log and write concise REPORT.md in local/evidence/p3u/candidate-checks-e4; stop, no retries or app edits. Prior blocked evidence is preserved by new output paths.\\012\\012Minimap manifests: local/evidence/p3u/candidate-checks-e4/map-{locked,unlocked}/manifest.json, expect pass true,22captures each. Harness checks locked160segments vs unlocked48gradients, fractions/reversal/gantry/completion, numeric alpha/coordinate continuity. Neutral backing is diagnostic only. Make4xzoom PNGs for day/night-fractional and gantry-after captures via scripts/lib/p3u-w4-zoom.mjs (whole340x340crop; determine dimensions using PNG decoder). No elaborate sheet.\\012\\012Glass outputs ../p3u-w6/local/evidence/p3u/W6-e4/. Expect4states per product/stock/repeat. Inspect captures[].transmissionTarget: productscale.5/samples0/1470x956, stockscale1/samples4/2940x1912; mainDPR2. Repeat diff must4/4identical; stock/product differences expected. Parse compact facts, not giant manifests. Make car zoom crops from boundsCSS*2, margin12/clamp, scale2 with existing helper. Record differences and artifacts. No timing runs or broad regression.\\012\\012Write REPORT.md with sourceSHA/dirty provenance, actual pass/fail/targetfacts, artifact paths, limitations. Exit0 alone is not pass. Clean only owned browser/server via existing finally/traps. End done/evidence/unverified/blocked. Print compact output only."
+    },
+    {
+     "pid": 14785,
+     "ppid": 14733,
+     "rssMB": 29,
+     "command": "node /Users/shahzadsheikh/.npm-global/bin/codex"
+    }
+   ]
+  }
+ },
+ "admissionAttempts": [
+  {
+   "pass": false,
+   "cls": "browser",
+   "profile": "m4-16gb",
+   "provisional": true,
+   "reasons": [
+    "paging rising {\"pageouts\":8,\"swapouts\":0}"
+   ],
+   "warnings": [],
+   "paging": {
+    "pageouts": 8,
+    "swapouts": 0
+   },
+   "at": "2026-10-17T14:26:47.700Z",
+   "identity": {
+    "profile": "m4-16gb",
+    "arch": "arm64",
+    "cpu": "Apple M4",
+    "ramGB": 16,
+    "model": "Mac16,12",
+    "cores": {
+     "performance": 4,
+     "efficiency": 6
+    },
+    "gpu": "Apple M4",
+    "macos": "15.5",
+    "versions": {
+     "node": "v24.21.0",
+     "claude": "2.1.302 (Claude Code)",
+     "codex": "codex-cli 0.163.0",
+     "opencode": "opencode v2.0.32",
+     "chrome": "Google Chrome 155.0.8059.80"
+    },
+    "unavailable": []
+   },
+   "a": {
+    "pressure": 1,
+    "pageouts": 819803,
+    "swapouts": 1155784,
+    "idle": 83,
+    "system": 10.86,
+    "swap": "total = 2048.00M  used = 1317.62M  free = 730.38M  (encrypted)"
+   },
+   "b": {
+    "pressure": 1,
+    "pageouts": 819811,
+    "swapouts": 1155784,
+    "idle": 79.53,
+    "system": 12.53,
+    "swap": "total = 2048.00M  used = 1317.62M  free = 730.38M  (encrypted)"
+   },
+   "counts": {
+    "heavy": 0,
+    "browsers": 0,
+    "agents": 3,
+    "runWorkers": null
+   },
+   "workloads": {
+    "viteServers": [
+     {
+      "pid": 25462,
+      "ppid": 25456,
+      "rssMB": 126,
+      "command": "node node_modules/vite/bin/vite.js --host 127.0.0.1 --port 5248 --strictPort",
+      "cwd": "/Users/shahzadsheikh/Desktop/gt3/.claude/worktrees/p3u-hudtrail",
+      "port": "5248"
+     }
+    ],
+    "builds": [],
+    "browsers": [],
+    "agents": [
+     {
+      "pid": 24225,
+      "ppid": 24224,
+      "rssMB": 106,
+      "command": "/Users/shahzadsheikh/Library/Application Support/Claude/claude-code/2.1.299/4fa9694b7975/claude.app/Contents/MacOS/claude --output-format stream-json --verbose --input-format stream-json --model=claude-opus-5-5 --permission-prompt-tool=stdio --resume=4f0a9bf5-5921-4f00-858d-fba6a44bb2b6 --allowedTools=mcp__computer-use,mcp__ccd_session__spawn_task,mcp__ccd_session__dismiss_task,mcp__ccd_session__mark_chapter,mcp__ccd_session_mgmt__list_sessions,mcp__ccd_session_mgmt__get_session,mcp__ccd_session_mgmt__get_usage,mcp__ccd_host__get_storage_usage,mcp__ccd_session_mgmt__set_session_title,mcp__ccd_session_mgmt__send_message,mcp__ccd_session_mgmt__detach_session,mcp__ccd_sidebar__list_groups,mcp__ccd_sidebar__create_group,mcp__ccd_sidebar__set_view,mcp__ccd_sidebar__list_sections,mcp__ccd_sidebar__create_section,mcp__ccd_session_mgmt__search_session_transcripts,mcp__ccd_session_mgmt__list_events,mcp__ccd_session_mgmt__export_transcript,mcp__scheduled-tasks__list_task_runs,mcp__ccd_session__read_widget_context,mcp__ccd_session__list_start_targets,mcp__ccd_view__show_pane,mcp__ccd_view__close_pane,mcp__ccd_view__get_layout,mcp__ccd_view__set_transcript_view,mcp__ccd_settings__get_settings,mcp__mcp-registry__search_mcp_registry,mcp__mcp-registry__suggest_connectors,mcp__mcp-registry__list_connectors,mcp__ccd_connectors__session_connectors_status,mcp__ccd_connectors__reconnect_session_connector,mcp__ccd_pr__get_status,mcp__ccd_window__open_session_in,mcp__ccd_window__close_split,mcp__ccd_window__set_sidebar_collapsed,mcp__ccd_window__get_window_layout,mcp__claude-in-chrome__request_credentials,mcp__claude-in-chrome__list_granted_credentials,mcp__claude-in-chrome__autofill_credential,mcp__claude-in-chrome__release_credentials,mcp__claude-in-chrome__enter_verification_code --disallowedTools=SubscribePR --setting-sources=user,project,local --permission-mode=default --include-partial-messages --await-initialize --thinking-display omitted --replay-user-messages --settings {\"deniedMcpServers\":[{\"serverName\":\"Claude Browser\"},{\"serverName\":\"Claude Code Android Emulator\"},{\"serverName\":\"Claude Code iOS Simulator\"},{\"serverName\":\"Claude Preview\"},{\"serverName\":\"Claude_Browser\"},{\"serverName\":\"Claude_Code_Android_Emulator\"},{\"serverName\":\"Claude_Code_iOS_Simulator\"},{\"serverName\":\"Claude_Preview\"},{\"serverName\":\"Claude_for_Chrome\"},{\"serverName\":\"Framebuffer\"},{\"serverName\":\"Window Halo\"},{\"serverName\":\"Window_Halo\"},{\"serverName\":\"ccd_connectors\"},{\"serverName\":\"ccd_directory\"},{\"serverName\":\"ccd_host\"},{\"serverName\":\"ccd_pr\"},{\"serverName\":\"ccd_session\"},{\"serverName\":\"ccd_session_mgmt\"},{\"serverName\":\"ccd_settings\"},{\"serverName\":\"ccd_sidebar\"},{\"serverName\":\"ccd_turn\"},{\"serverName\":\"ccd_view\"},{\"serverName\":\"ccd_window\"},{\"serverName\":\"claude-in-chrome\"},{\"serverName\":\"claude_browser\"},{\"serverName\":\"claude_code_android_emulator\"},{\"serverName\":\"claude_code_ios_simulator\"},{\"serverName\":\"claude_for_chrome\"},{\"serverName\":\"claude_in_chrome\"},{\"serverName\":\"claude_preview\"},{\"serverName\":\"computer-use\"},{\"serverName\":\"computer_use\"},{\"serverName\":\"cowork\"},{\"serverName\":\"cowork-onboarding\"},{\"serverName\":\"cowork_onboarding\"},{\"serverName\":\"dev-debug\"},{\"serverName\":\"dev_debug\"},{\"serverName\":\"dispatch\"},{\"serverName\":\"framebuffer\"},{\"serverName\":\"mcp-registry\"},{\"serverName\":\"mcp_registry\"},{\"serverName\":\"plugins\"},{\"serverName\":\"remote-devices\"},{\"serverName\":\"remote_devices\"},{\"serverName\":\"scheduled-tasks\"},{\"serverName\":\"scheduled_tasks\"},{\"serverName\":\"session_info\"},{\"serverName\":\"skills\"},{\"serverName\":\"window_halo\"}]}"
+     },
+     {
+      "pid": 25237,
+      "ppid": 1012,
+      "rssMB": 45,
+      "command": "node /Users/shahzadsheikh/.npm-global/bin/codex exec --dangerously-bypass-approvals-and-sandbox --skip-git-repo-check --disable multi_agent -m gpt-6-luna -c model_reasoning_effort=\"medium\" GT3 ROLE: worker. p3u/e4 CandidateChecks4, Luna medium. Execute exact prepared checks; no source edits, commits, agents, routes, system changes or extra suites. Do not reread whole repo/docs. Manager owns integration. Host browser+agent admission passed. The prepared harness itself performs canonical browser preflight before any browser is launched: do not add a redundant standalone browser check. No admission guard is bypassed. One browser/server at a time.\\012\\012Run bash local/briefs/candidate-checks-e4.sh once from this worktree. Each command is behind scripts/with-verification-server.sh with correct e4 provenance. It captures candidate minimap Locked then Unlocked, then W6 glass product/stock/repeat from ../p3u-w6. On failure inspect redirected run.log and write concise REPORT.md in local/evidence/p3u/candidate-checks-e4; stop, no retries or app edits. Prior blocked evidence is preserved by new output paths.\\012\\012Minimap manifests: local/evidence/p3u/candidate-checks-e4/map-{locked,unlocked}/manifest.json, expect pass true,22captures each. Harness checks locked160segments vs unlocked48gradients, fractions/reversal/gantry/completion, numeric alpha/coordinate continuity. Neutral backing is diagnostic only. Make4xzoom PNGs for day/night-fractional and gantry-after captures via scripts/lib/p3u-w4-zoom.mjs (whole340x340crop; determine dimensions using PNG decoder). No elaborate sheet.\\012\\012Glass outputs ../p3u-w6/local/evidence/p3u/W6-e4/. Expect4states per product/stock/repeat. Inspect captures[].transmissionTarget: productscale.5/samples0/1470x956, stockscale1/samples4/2940x1912; mainDPR2. Repeat diff must4/4identical; stock/product differences expected. Parse compact facts, not giant manifests. Make car zoom crops from boundsCSS*2, margin12/clamp, scale2 with existing helper. Record differences and artifacts. No timing runs or broad regression.\\012\\012Write REPORT.md with sourceSHA/dirty provenance, actual pass/fail/targetfacts, artifact paths, limitations. Exit0 alone is not pass. Clean only owned browser/server via existing finally/traps. End done/evidence/unverified/blocked. Print compact output only."
+     },
+     {
+      "pid": 14785,
+      "ppid": 14733,
+      "rssMB": 29,
+      "command": "node /Users/shahzadsheikh/.npm-global/bin/codex"
+     }
+    ]
+   }
+  },
+  {
+   "pass": true,
+   "cls": "browser",
+   "profile": "m4-16gb",
+   "provisional": true,
+   "reasons": [],
+   "warnings": [],
+   "paging": {
+    "pageouts": 0,
+    "swapouts": 0
+   },
+   "at": "2026-10-17T14:27:18.980Z",
+   "identity": {
+    "profile": "m4-16gb",
+    "arch": "arm64",
+    "cpu": "Apple M4",
+    "ramGB": 16,
+    "model": "Mac16,12",
+    "cores": {
+     "performance": 4,
+     "efficiency": 6
+    },
+    "gpu": "Apple M4",
+    "macos": "15.5",
+    "versions": {
+     "node": "v24.21.0",
+     "claude": "2.1.302 (Claude Code)",
+     "codex": "codex-cli 0.163.0",
+     "opencode": "opencode v2.0.32",
+     "chrome": "Google Chrome 155.0.8059.80"
+    },
+    "unavailable": []
+   },
+   "a": {
+    "pressure": 1,
+    "pageouts": 819860,
+    "swapouts": 1155784,
+    "idle": 81,
+    "system": 10.33,
+    "swap": "total = 2048.00M  used = 1317.62M  free = 730.38M  (encrypted)"
+   },
+   "b": {
+    "pressure": 1,
+    "pageouts": 819860,
+    "swapouts": 1155784,
+    "idle": 77.27,
+    "system": 11.86,
+    "swap": "total = 2048.00M  used = 1317.62M  free = 730.38M  (encrypted)"
+   },
+   "counts": {
+    "heavy": 0,
+    "browsers": 0,
+    "agents": 3,
+    "runWorkers": null
+   },
+   "workloads": {
+    "viteServers": [
+     {
+      "pid": 25462,
+      "ppid": 25456,
+      "rssMB": 126,
+      "command": "node node_modules/vite/bin/vite.js --host 127.0.0.1 --port 5248 --strictPort",
+      "cwd": "/Users/shahzadsheikh/Desktop/gt3/.claude/worktrees/p3u-hudtrail",
+      "port": "5248"
+     }
+    ],
+    "builds": [],
+    "browsers": [],
+    "agents": [
+     {
+      "pid": 24225,
+      "ppid": 24224,
+      "rssMB": 106,
+      "command": "/Users/shahzadsheikh/Library/Application Support/Claude/claude-code/2.1.299/4fa9694b7975/claude.app/Contents/MacOS/claude --output-format stream-json --verbose --input-format stream-json --model=claude-opus-5-5 --permission-prompt-tool=stdio --resume=4f0a9bf5-5921-4f00-858d-fba6a44bb2b6 --allowedTools=mcp__computer-use,mcp__ccd_session__spawn_task,mcp__ccd_session__dismiss_task,mcp__ccd_session__mark_chapter,mcp__ccd_session_mgmt__list_sessions,mcp__ccd_session_mgmt__get_session,mcp__ccd_session_mgmt__get_usage,mcp__ccd_host__get_storage_usage,mcp__ccd_session_mgmt__set_session_title,mcp__ccd_session_mgmt__send_message,mcp__ccd_session_mgmt__detach_session,mcp__ccd_sidebar__list_groups,mcp__ccd_sidebar__create_group,mcp__ccd_sidebar__set_view,mcp__ccd_sidebar__list_sections,mcp__ccd_sidebar__create_section,mcp__ccd_session_mgmt__search_session_transcripts,mcp__ccd_session_mgmt__list_events,mcp__ccd_session_mgmt__export_transcript,mcp__scheduled-tasks__list_task_runs,mcp__ccd_session__read_widget_context,mcp__ccd_session__list_start_targets,mcp__ccd_view__show_pane,mcp__ccd_view__close_pane,mcp__ccd_view__get_layout,mcp__ccd_view__set_transcript_view,mcp__ccd_settings__get_settings,mcp__mcp-registry__search_mcp_registry,mcp__mcp-registry__suggest_connectors,mcp__mcp-registry__list_connectors,mcp__ccd_connectors__session_connectors_status,mcp__ccd_connectors__reconnect_session_connector,mcp__ccd_pr__get_status,mcp__ccd_window__open_session_in,mcp__ccd_window__close_split,mcp__ccd_window__set_sidebar_collapsed,mcp__ccd_window__get_window_layout,mcp__claude-in-chrome__request_credentials,mcp__claude-in-chrome__list_granted_credentials,mcp__claude-in-chrome__autofill_credential,mcp__claude-in-chrome__release_credentials,mcp__claude-in-chrome__enter_verification_code --disallowedTools=SubscribePR --setting-sources=user,project,local --permission-mode=default --include-partial-messages --await-initialize --thinking-display omitted --replay-user-messages --settings {\"deniedMcpServers\":[{\"serverName\":\"Claude Browser\"},{\"serverName\":\"Claude Code Android Emulator\"},{\"serverName\":\"Claude Code iOS Simulator\"},{\"serverName\":\"Claude Preview\"},{\"serverName\":\"Claude_Browser\"},{\"serverName\":\"Claude_Code_Android_Emulator\"},{\"serverName\":\"Claude_Code_iOS_Simulator\"},{\"serverName\":\"Claude_Preview\"},{\"serverName\":\"Claude_for_Chrome\"},{\"serverName\":\"Framebuffer\"},{\"serverName\":\"Window Halo\"},{\"serverName\":\"Window_Halo\"},{\"serverName\":\"ccd_connectors\"},{\"serverName\":\"ccd_directory\"},{\"serverName\":\"ccd_host\"},{\"serverName\":\"ccd_pr\"},{\"serverName\":\"ccd_session\"},{\"serverName\":\"ccd_session_mgmt\"},{\"serverName\":\"ccd_settings\"},{\"serverName\":\"ccd_sidebar\"},{\"serverName\":\"ccd_turn\"},{\"serverName\":\"ccd_view\"},{\"serverName\":\"ccd_window\"},{\"serverName\":\"claude-in-chrome\"},{\"serverName\":\"claude_browser\"},{\"serverName\":\"claude_code_android_emulator\"},{\"serverName\":\"claude_code_ios_simulator\"},{\"serverName\":\"claude_for_chrome\"},{\"serverName\":\"claude_in_chrome\"},{\"serverName\":\"claude_preview\"},{\"serverName\":\"computer-use\"},{\"serverName\":\"computer_use\"},{\"serverName\":\"cowork\"},{\"serverName\":\"cowork-onboarding\"},{\"serverName\":\"cowork_onboarding\"},{\"serverName\":\"dev-debug\"},{\"serverName\":\"dev_debug\"},{\"serverName\":\"dispatch\"},{\"serverName\":\"framebuffer\"},{\"serverName\":\"mcp-registry\"},{\"serverName\":\"mcp_registry\"},{\"serverName\":\"plugins\"},{\"serverName\":\"remote-devices\"},{\"serverName\":\"remote_devices\"},{\"serverName\":\"scheduled-tasks\"},{\"serverName\":\"scheduled_tasks\"},{\"serverName\":\"session_info\"},{\"serverName\":\"skills\"},{\"serverName\":\"window_halo\"}]}"
+     },
+     {
+      "pid": 25237,
+      "ppid": 1012,
+      "rssMB": 45,
+      "command": "node /Users/shahzadsheikh/.npm-global/bin/codex exec --dangerously-bypass-approvals-and-sandbox --skip-git-repo-check --disable multi_agent -m gpt-6-luna -c model_reasoning_effort=\"medium\" GT3 ROLE: worker. p3u/e4 CandidateChecks4, Luna medium. Execute exact prepared checks; no source edits, commits, agents, routes, system changes or extra suites. Do not reread whole repo/docs. Manager owns integration. Host browser+agent admission passed. The prepared harness itself performs canonical browser preflight before any browser is launched: do not add a redundant standalone browser check. No admission guard is bypassed. One browser/server at a time.\\012\\012Run bash local/briefs/candidate-checks-e4.sh once from this worktree. Each command is behind scripts/with-verification-server.sh with correct e4 provenance. It captures candidate minimap Locked then Unlocked, then W6 glass product/stock/repeat from ../p3u-w6. On failure inspect redirected run.log and write concise REPORT.md in local/evidence/p3u/candidate-checks-e4; stop, no retries or app edits. Prior blocked evidence is preserved by new output paths.\\012\\012Minimap manifests: local/evidence/p3u/candidate-checks-e4/map-{locked,unlocked}/manifest.json, expect pass true,22captures each. Harness checks locked160segments vs unlocked48gradients, fractions/reversal/gantry/completion, numeric alpha/coordinate continuity. Neutral backing is diagnostic only. Make4xzoom PNGs for day/night-fractional and gantry-after captures via scripts/lib/p3u-w4-zoom.mjs (whole340x340crop; determine dimensions using PNG decoder). No elaborate sheet.\\012\\012Glass outputs ../p3u-w6/local/evidence/p3u/W6-e4/. Expect4states per product/stock/repeat. Inspect captures[].transmissionTarget: productscale.5/samples0/1470x956, stockscale1/samples4/2940x1912; mainDPR2. Repeat diff must4/4identical; stock/product differences expected. Parse compact facts, not giant manifests. Make car zoom crops from boundsCSS*2, margin12/clamp, scale2 with existing helper. Record differences and artifacts. No timing runs or broad regression.\\012\\012Write REPORT.md with sourceSHA/dirty provenance, actual pass/fail/targetfacts, artifact paths, limitations. Exit0 alone is not pass. Clean only owned browser/server via existing finally/traps. End done/evidence/unverified/blocked. Print compact output only."
+     },
+     {
+      "pid": 14785,
+      "ppid": 14733,
+      "rssMB": 29,
+      "command": "node /Users/shahzadsheikh/.npm-global/bin/codex"
+     }
+    ]
+   }
+  }
+ ],
+ "server": {
+  "startedAt": "2026-10-17T14:26:36.484Z",
+  "url": "http://127.0.0.1:5248",
+  "root": "/Users/shahzadsheikh/Desktop/gt3/.claude/worktrees/p3u-hudtrail",
+  "branch": "p3u-hudtrail",
+  "sha": "4022f1ddcf96f2eea09da38af8f02b5e8f4193dc",
+  "dirtyFiles": 1,
+  "dirtyHash": "f935b18906747fa8",
+  "vitePid": 25462,
+  "run": "p3u",
+  "epoch": "4",
+  "task": "CandidateChecks4",
+  "harness": "node scripts/p3u-minimap-capture.mjs",
+  "host": {
+   "profile": "m4-16gb",
+   "arch": "arm64",
+   "cpu": "Apple M4",
+   "ramGB": 16,
+   "model": "Mac16,12",
+   "cores": {
+    "performance": 4,
+    "efficiency": 6
+   },
+   "gpu": "Apple M4",
+   "macos": "15.5",
+   "versions": {
+    "node": "v24.21.0",
+    "claude": "2.1.302 (Claude Code)",
+    "codex": "codex-cli 0.163.0",
+    "opencode": "opencode v2.0.32",
+    "chrome": "Google Chrome 155.0.8059.80"
+   },
+   "unavailable": []
+  }
+ },
+ "branch": "p3u-hudtrail",
+ "sha": "4022f1ddcf96f2eea09da38af8f02b5e8f4193dc",
+ "tree": "M scripts/p3u-minimap-capture.mjs",
+ "browser": "Chrome/155.0.8059.80",
+ "conditions": {
+  "browserSaverState": 0,
+  "browserSaverSetting": "battery saver disabled in the disposable profile (measurement default; GT3_BROWSER_SAVER=1 restores the control)",
+  "osPowerSettings": "Battery Power:\n Sleep On Power Button 1\n lowpowermode         0\n standby              1\n ttyskeepawake        1\n hibernatemode        3\n powernap             1\n hibernatefile        /var/vm/sleepimage\n displaysleep         10\n womp                 0\n networkoversleep     0\n sleep                1\n lessbright           1\n tcpkeepalive         1\n disksleep            10\nAC Power:\n Sleep On Power Button 1\n lowpowermode         0\n standby              1\n ttyskeepawake        1\n hibernatemode        3\n powernap             1\n hibernatefile        /var/vm/sleepimage\n displaysleep         20\n womp                 1\n networkoversleep     0\n sleep                0\n tcpkeepalive         1\n disksleep            10\n",
+  "powerManagement": "System-wide power settings:\n SleepDisabled\t\t0\nCurrently in use:\n standby              1\n Sleep On Power Button 1\n hibernatefile        /var/vm/sleepimage\n powernap             1\n networkoversleep     0\n disksleep            10\n sleep                0 (sleep prevented by caffeinate, caffeinate, Claude, powerd, caffeinate, caffeinate)\n hibernatemode        3\n ttyskeepawake        1\n displaysleep         20 (display sleep prevented by caffeinate)\n tcpkeepalive         1\n lowpowermode         0\n womp                 1\n",
+  "power": "Now drawing from 'AC Power'\n -InternalBattery-0 (id=21364835)\t100%; charged; 0:00 remaining present: true\n",
+  "powerSource": "AC Power",
+  "batteryPercent": 100,
+  "lowPowerMode": false,
+  "thermal": "Note: No thermal warning level has been recorded\nNote: No performance warning level has been recorded\nNote: No CPU power status has been recorded\n",
+  "awakeAssertion": "owned caffeinate -dimsu held for the run, SIGTERM released at exit (also self-stops with the harness process via -w)",
+  "caffeinatePid": 25565,
+  "candidate": "baseline",
+  "navigatorWebdriver": true,
+  "visibilityStart": "visible"
+ },
+ "errors": [],
+ "instrumentation": {
+  "/Users/shahzadsheikh/Desktop/gt3/.claude/worktrees/p3u-hudtrail/scripts/lib/p3u-common.mjs": "1ad92b353954ec13ea5aa4f989ffe75f40cb2270489ee0769d56fa77eae61374",
+  "/Users/shahzadsheikh/Desktop/gt3/.claude/worktrees/p3u-hudtrail/scripts/lib/p3u-trials.js": "a462f82f581e58b1152b95859e4bec3b3f3896a534b774f34471eb8d56611b10",
+  "/Users/shahzadsheikh/Desktop/gt3/.claude/worktrees/p3u-hudtrail/scripts/p3u-minimap-capture.mjs": "c8bc1aaf7a97c7ea9d84142e1bfc9dfe39b296c9bc428af19232c9c30f1b115d"
+ },
+ "gpu": {
+  "devices": [
+   {
+    "vendorId": 4203,
+    "deviceId": 0,
+    "vendorString": "Google Inc. (Apple)",
+    "deviceString": "ANGLE (Apple, ANGLE Metal Renderer: Apple M4, Version 15.5 (Build 24F74))",
+    "driverVendor": "Apple",
+    "driverVersion": "15.5"
+   }
+  ],
+  "auxAttributes": {
+   "amdSwitchable": false,
+   "canSupportThreadedTextureMailbox": false,
+   "directRenderingVersion": "",
+   "displayType": "ANGLE_METAL",
+   "glExtensions": "GL_AMD_performance_monitor GL_ANGLE_base_vertex_base_instance_shader_builtin GL_ANGLE_blob_cache GL_ANGLE_client_arrays GL_ANGLE_clip_cull_distance GL_ANGLE_compressed_texture_etc GL_ANGLE_depth_texture GL_ANGLE_framebuffer_blit GL_ANGLE_framebuffer_multisample GL_ANGLE_get_serialized_context_string GL_ANGLE_get_tex_level_parameter GL_ANGLE_instanced_arrays GL_ANGLE_memory_size GL_ANGLE_pack_reverse_row_order GL_ANGLE_polygon_mode GL_ANGLE_program_binary_readiness_query GL_ANGLE_program_cache_control GL_ANGLE_provoking_vertex GL_ANGLE_renderability_validation GL_ANGLE_request_extension GL_ANGLE_rgbx_internal_format GL_ANGLE_robust_client_memory GL_ANGLE_shader_pixel_local_storage GL_ANGLE_shader_pixel_local_storage_coherent GL_ANGLE_stencil_texturing GL_ANGLE_texture_compression_dxt3 GL_ANGLE_texture_compression_dxt5 GL_ANGLE_texture_multisample GL_ANGLE_translated_shader_source GL_APPLE_clip_distance GL_ARM_rgba8 GL_CHROMIUM_bind_generates_resource GL_CHROMIUM_bind_uniform_location GL_CHROMIUM_copy_texture GL_CHROMIUM_lose_context GL_EXT_base_instance GL_EXT_blend_func_extended GL_EXT_blend_minmax GL_EXT_clip_control GL_EXT_color_buffer_float GL_EXT_color_buffer_half_float GL_EXT_compressed_ETC1_RGB8_sub_texture GL_EXT_conservative_depth GL_EXT_debug_label GL_EXT_debug_marker GL_EXT_depth_clamp GL_EXT_discard_framebuffer GL_EXT_disjoint_timer_query GL_EXT_draw_buffers GL_EXT_draw_buffers_indexed GL_EXT_draw_elements_base_vertex GL_EXT_float_blend GL_EXT_frag_depth GL_EXT_instanced_arrays GL_EXT_map_buffer_range GL_EXT_multisampled_render_to_texture GL_EXT_occlusion_query_boolean GL_EXT_polygon_offset_clamp GL_EXT_pvrtc_sRGB GL_EXT_read_format_bgra GL_EXT_render_snorm GL_EXT_robustness GL_EXT_sRGB GL_EXT_shader_texture_lod GL_EXT_texture_compression_bptc GL_EXT_texture_compression_dxt1 GL_EXT_texture_compression_rgtc GL_EXT_texture_compression_s3tc_srgb GL_EXT_texture_filter_anisotropic GL_EXT_texture_format_BGRA8888 GL_EXT_texture_mirror_clamp_to_edge GL_EXT_texture_norm16 GL_EXT_texture_rg GL_EXT_texture_sRGB_R8 GL_EXT_texture_sRGB_RG8 GL_EXT_texture_shadow_lod GL_EXT_texture_storage GL_IMG_texture_compression_pvrtc GL_KHR_debug GL_KHR_parallel_shader_compile GL_KHR_robustness GL_KHR_texture_compression_astc_hdr GL_KHR_texture_compression_astc_ldr GL_KHR_texture_compression_astc_sliced_3d GL_MESA_framebuffer_flip_y GL_NV_fence GL_NV_framebuffer_blit GL_NV_pixel_buffer_object GL_NV_shader_noperspective_interpolation GL_OES_EGL_image GL_OES_EGL_sync GL_OES_compressed_ETC1_RGB8_texture GL_OES_depth24 GL_OES_depth32 GL_OES_depth_texture GL_OES_draw_buffers_indexed GL_OES_draw_elements_base_vertex GL_OES_element_index_uint GL_OES_fbo_render_mipmap GL_OES_get_program_binary GL_OES_mapbuffer GL_OES_packed_depth_stencil GL_OES_required_internalformat GL_OES_rgb8_rgba8 GL_OES_sample_variables GL_OES_shader_multisample_interpolation GL_OES_standard_derivatives GL_OES_surfaceless_context GL_OES_texture_3D GL_OES_texture_float GL_OES_texture_float_linear GL_OES_texture_half_float GL_OES_texture_half_float_linear GL_OES_texture_npot GL_OES_texture_stencil8 GL_OES_vertex_array_object GL_QCOM_render_shared_exponent ",
+   "glImplementationParts": "(gl=egl-angle,angle=metal)",
+   "glRenderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M4, Version 15.5 (Build 24F74))",
+   "glResetNotificationStrategy": 33362,
+   "glVendor": "Google Inc. (Apple)",
+   "glVersion": "OpenGL ES 3.0 (ANGLE 2.1.28854 git hash: cccf60cde32c)",
+   "glWsExtensions": "",
+   "glWsVendor": "",
+   "glWsVersion": "",
+   "inProcessGpu": false,
+   "initializationTime": 0.039946,
+   "isAsan": false,
+   "isClangCoverage": false,
+   "jpegDecodeAcceleratorSupported": false,
+   "maxMsaaSamples": "4",
+   "optimus": false,
+   "passthroughCmdDecoder": true,
+   "pixelShaderVersion": "3.00",
+   "processCrashCount": 0,
+   "sandboxed": true,
+   "skiaBackendType": "GraphiteDawnMetal",
+   "subpixelFontRendering": true,
+   "targetCpuBits": 64,
+   "vertexShaderVersion": "3.00",
+   "visibilityCallbackCallCount": 0
+  },
+  "featureStatus": {
+   "2d_canvas": "enabled",
+   "direct_rendering_display_compositor": "disabled_off_ok",
+   "gpu_compositing": "enabled",
+   "multiple_raster_threads": "enabled_on",
+   "opengl": "enabled_on",
+   "rasterization": "enabled",
+   "raw_draw": "disabled_off_ok",
+   "skia_graphite": "enabled_on",
+   "trees_in_viz": "disabled_off",
+   "video_decode": "enabled",
+   "video_encode": "enabled",
+   "webgl": "enabled",
+   "webgpu": "enabled",
+   "webnn": "disabled_off"
+  },
+  "driverBugWorkarounds": [
+   "disable_2d_canvas_auto_flush",
+   "enable_webgl_timer_query_extensions",
+   "disabled_extension_GL_KHR_blend_equation_advanced",
+   "disabled_extension_GL_KHR_blend_equation_advanced_coherent"
+  ],
+  "videoDecoding": [],
+  "videoEncoding": []
+ },
+ "browserEvents": [],
+ "kind": "minimap-neutral-backing",
+ "captures": [
+  {
+   "name": "day-zero",
+   "file": "day-zero.png",
+   "progress": 0,
+   "modern": 0,
+   "legacy": 160,
+   "visible": 0,
+   "baseVisible": 0,
+   "baseLength": 0,
+   "arrow": "translate(98.73 33.11) rotate(180)",
+   "rows": []
+  },
+  {
+   "name": "day-fractional",
+   "file": "day-fractional.png",
+   "progress": 0.25013,
+   "modern": 0,
+   "legacy": 160,
+   "visible": 0,
+   "baseVisible": 0,
+   "baseLength": 0,
+   "arrow": "translate(108.54 113.52) rotate(141)",
+   "rows": []
+  },
+  {
+   "name": "day-forward",
+   "file": "day-forward.png",
+   "progress": 0.76,
+   "modern": 0,
+   "legacy": 160,
+   "visible": 0,
+   "baseVisible": 0,
+   "baseLength": 0,
+   "arrow": "translate(58.6 53.53) rotate(1.5)",
+   "rows": []
+  },
+  {
+   "name": "day-reverse",
+   "file": "day-reverse.png",
+   "progress": 0.002,
+   "modern": 0,
+   "legacy": 160,
+   "visible": 0,
+   "baseVisible": 0,
+   "baseLength": 0,
+   "arrow": "translate(98.73 33.89) rotate(180)",
+   "rows": []
+  },
+  {
+   "name": "day-gantry-before",
+   "file": "day-gantry-before.png",
+   "progress": 0.003572218107016928,
+   "modern": 0,
+   "legacy": 160,
+   "visible": 0,
+   "baseVisible": 0,
+   "baseLength": 0,
+   "arrow": "translate(98.73 34.51) rotate(180)",
+   "rows": []
+  },
+  {
+   "name": "day-gantry-after",
+   "file": "day-gantry-after.png",
+   "progress": 0.003592218107016928,
+   "modern": 0,
+   "legacy": 160,
+   "visible": 0,
+   "baseVisible": 0,
+   "baseLength": 0,
+   "arrow": "translate(98.73 34.52) rotate(180)",
+   "rows": []
+  },
+  {
+   "name": "day-whole-before",
+   "file": "day-whole-before.png",
+   "progress": 0.9964077818929831,
+   "modern": 0,
+   "legacy": 160,
+   "visible": 0,
+   "baseVisible": 0,
+   "baseLength": 0,
+   "arrow": "translate(98.73 33.11) rotate(180)",
+   "rows": []
+  },
+  {
+   "name": "day-whole-after",
+   "file": "day-whole-after.png",
+   "progress": 0.996427781892983,
+   "modern": 0,
+   "legacy": 160,
+   "visible": 0,
+   "baseVisible": 0,
+   "baseLength": 0,
+   "arrow": "translate(98.73 33.12) rotate(180)",
+   "rows": []
+  },
+  {
+   "name": "day-near-finish",
+   "file": "day-near-finish.png",
+   "progress": 0.99999,
+   "modern": 0,
+   "legacy": 160,
+   "visible": 0,
+   "baseVisible": 0,
+   "baseLength": 0,
+   "arrow": "translate(98.73 34.51) rotate(180)",
+   "rows": []
+  },
+  {
+   "name": "day-finish",
+   "file": "day-finish.png",
+   "progress": 1,
+   "modern": 0,
+   "legacy": 160,
+   "visible": 0,
+   "baseVisible": 0,
+   "baseLength": 0,
+   "arrow": "translate(98.73 34.51) rotate(180)",
+   "rows": []
+  },
+  {
+   "name": "day-reset",
+   "file": "day-reset.png",
+   "progress": 0,
+   "modern": 0,
+   "legacy": 160,
+   "visible": 0,
+   "baseVisible": 0,
+   "baseLength": 0,
+   "arrow": "translate(98.73 33.11) rotate(180)",
+   "rows": []
+  },
+  {
+   "name": "night-zero",
+   "file": "night-zero.png",
+   "progress": 0,
+   "modern": 0,
+   "legacy": 160,
+   "visible": 0,
+   "baseVisible": 0,
+   "baseLength": 0,
+   "arrow": "translate(98.73 33.11) rotate(180)",
+   "rows": []
+  },
+  {
+   "name": "night-fractional",
+   "file": "night-fractional.png",
+   "progress": 0.25013,
+   "modern": 0,
+   "legacy": 160,
+   "visible": 0,
+   "baseVisible": 0,
+   "baseLength": 0,
+   "arrow": "translate(108.54 113.52) rotate(141)",
+   "rows": []
+  },
+  {
+   "name": "night-forward",
+   "file": "night-forward.png",
+   "progress": 0.76,
+   "modern": 0,
+   "legacy": 160,
+   "visible": 0,
+   "baseVisible": 0,
+   "baseLength": 0,
+   "arrow": "translate(58.6 53.53) rotate(1.5)",
+   "rows": []
+  },
+  {
+   "name": "night-reverse",
+   "file": "night-reverse.png",
+   "progress": 0.002,
+   "modern": 0,
+   "legacy": 160,
+   "visible": 0,
+   "baseVisible": 0,
+   "baseLength": 0,
+   "arrow": "translate(98.73 33.89) rotate(180)",
+   "rows": []
+  },
+  {
+   "name": "night-gantry-before",
+   "file": "night-gantry-before.png",
+   "progress": 0.003572218107016928,
+   "modern": 0,
+   "legacy": 160,
+   "visible": 0,
+   "baseVisible": 0,
+   "baseLength": 0,
+   "arrow": "translate(98.73 34.51) rotate(180)",
+   "rows": []
+  },
+  {
+   "name": "night-gantry-after",
+   "file": "night-gantry-after.png",
+   "progress": 0.003592218107016928,
+   "modern": 0,
+   "legacy": 160,
+   "visible": 0,
+   "baseVisible": 0,
+   "baseLength": 0,
+   "arrow": "translate(98.73 34.52) rotate(180)",
+   "rows": []
+  },
+  {
+   "name": "night-whole-before",
+   "file": "night-whole-before.png",
+   "progress": 0.9964077818929831,
+   "modern": 0,
+   "legacy": 160,
+   "visible": 0,
+   "baseVisible": 0,
+   "baseLength": 0,
+   "arrow": "translate(98.73 33.11) rotate(180)",
+   "rows": []
+  },
+  {
+   "name": "night-whole-after",
+   "file": "night-whole-after.png",
+   "progress": 0.996427781892983,
+   "modern": 0,
+   "legacy": 160,
+   "visible": 0,
+   "baseVisible": 0,
+   "baseLength": 0,
+   "arrow": "translate(98.73 33.12) rotate(180)",
+   "rows": []
+  },
+  {
+   "name": "night-near-finish",
+   "file": "night-near-finish.png",
+   "progress": 0.99999,
+   "modern": 0,
+   "legacy": 160,
+   "visible": 0,
+   "baseVisible": 0,
+   "baseLength": 0,
+   "arrow": "translate(98.73 34.51) rotate(180)",
+   "rows": []
+  },
+  {
+   "name": "night-finish",
+   "file": "night-finish.png",
+   "progress": 1,
+   "modern": 0,
+   "legacy": 160,
+   "visible": 0,
+   "baseVisible": 0,
+   "baseLength": 0,
+   "arrow": "translate(98.73 34.51) rotate(180)",
+   "rows": []
+  },
+  {
+   "name": "night-reset",
+   "file": "night-reset.png",
+   "progress": 0,
+   "modern": 0,
+   "legacy": 160,
+   "visible": 0,
+   "baseVisible": 0,
+   "baseLength": 0,
+   "arrow": "translate(98.73 33.11) rotate(180)",
+   "rows": []
+  }
+ ],
+ "display": {
+  "geometry": {
+   "expected": {
+    "width": 1470,
+    "height": 956,
+    "dpr": 2
+   },
+   "rounds": 0,
+   "pass": true,
+   "measured": {
+    "width": 1470,
+    "height": 956,
+    "dpr": 2,
+    "screen": {
+     "width": 800,
+     "height": 600
+    },
+    "visibility": "visible",
+    "webdriver": true,
+    "elementFullscreen": false
+   }
+  },
+  "screen": {
+   "width": 800,
+   "height": 600
+  }
+ },
+ "hudRects": {
+  "viewport": {
+   "width": 1470,
+   "height": 956
+  },
+  "lapTimer": {
+   "selector": ".hud-lap-timer",
+   "present": true,
+   "visibility": "visible",
+   "rect": {
+    "x": 30,
+    "y": 903,
+    "width": 90.2,
+    "height": 23,
+    "right": 120.2,
+    "bottom": 926
+   }
+  },
+  "themeToggle": {
+   "selector": ".theme-segmented",
+   "present": true,
+   "visibility": "visible",
+   "rect": {
+    "x": 1228,
+    "y": 886,
+    "width": 120,
+    "height": 46,
+    "right": 1348,
+    "bottom": 932
+   }
+  },
+  "audioAnchor": {
+   "selector": ".audio-anchor",
+   "present": true,
+   "visibility": "visible",
+   "rect": {
+    "x": 1366,
+    "y": 890,
+    "width": 80,
+    "height": 42,
+    "right": 1446,
+    "bottom": 932
+   }
+  },
+  "audioPlayer": {
+   "selector": "#music-player",
+   "present": true,
+   "visibility": "hidden",
+   "rect": {
+    "x": 1388,
+    "y": 912.8,
+    "width": 74,
+    "height": 31.2,
+    "right": 1462,
+    "bottom": 944
+   }
+  },
+  "audioPlayerOpen": false,
+  "gated": [
+   "lapTimer",
+   "themeToggle",
+   "audioAnchor"
+  ],
+  "withinViewport": true,
+  "failures": []
+ },
+ "loading": {
+  "readiness": {
+   "status": "ready",
+   "model": "ready",
+   "audio": "ready",
+   "gpu": "ready",
+   "progress": 1,
+   "reasons": [],
+   "warmupSteps": [
+    {
+     "phase": "normal-solo",
+     "startedAt": 1246,
+     "endedAt": 1341.1000000238419,
+     "setupMs": 0.10000002384185791,
+     "renderMs": 95,
+     "totalMs": 95.10000002384186
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 1342.6000000238419,
+     "endedAt": 1344.1000000238419,
+     "setupMs": 0,
+     "renderMs": 1.5,
+     "totalMs": 1.5
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 1344.1000000238419,
+     "endedAt": 1359.7000000476837,
+     "setupMs": 0,
+     "renderMs": 15.600000023841858,
+     "totalMs": 15.600000023841858
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 1361.7000000476837,
+     "endedAt": 1362.4000000357628,
+     "setupMs": 0,
+     "renderMs": 0.699999988079071,
+     "totalMs": 0.699999988079071
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 1362.4000000357628,
+     "endedAt": 1362.9000000357628,
+     "setupMs": 0,
+     "renderMs": 0.5,
+     "totalMs": 0.5
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 1362.9000000357628,
+     "endedAt": 1363.4000000357628,
+     "setupMs": 0,
+     "renderMs": 0.5,
+     "totalMs": 0.5
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 1363.4000000357628,
+     "endedAt": 1363.800000011921,
+     "setupMs": 0,
+     "renderMs": 0.3999999761581421,
+     "totalMs": 0.3999999761581421
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 1363.800000011921,
+     "endedAt": 1364.1000000238419,
+     "setupMs": 0,
+     "renderMs": 0.30000001192092896,
+     "totalMs": 0.30000001192092896
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 1364.1000000238419,
+     "endedAt": 1373.9000000357628,
+     "setupMs": 0.10000002384185791,
+     "renderMs": 9.699999988079071,
+     "totalMs": 9.800000011920929
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 1379.4000000357628,
+     "endedAt": 1382,
+     "setupMs": 0.09999996423721313,
+     "renderMs": 2.5,
+     "totalMs": 2.599999964237213
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 1382,
+     "endedAt": 1383,
+     "setupMs": 0,
+     "renderMs": 1,
+     "totalMs": 1
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 1383,
+     "endedAt": 1383.800000011921,
+     "setupMs": 0,
+     "renderMs": 0.800000011920929,
+     "totalMs": 0.800000011920929
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 1383.800000011921,
+     "endedAt": 1384.4000000357628,
+     "setupMs": 0,
+     "renderMs": 0.6000000238418579,
+     "totalMs": 0.6000000238418579
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 1384.4000000357628,
+     "endedAt": 1386.7000000476837,
+     "setupMs": 0,
+     "renderMs": 2.300000011920929,
+     "totalMs": 2.300000011920929
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 1386.7000000476837,
+     "endedAt": 1387.5,
+     "setupMs": 0,
+     "renderMs": 0.7999999523162842,
+     "totalMs": 0.7999999523162842
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 1387.5,
+     "endedAt": 1389.4000000357628,
+     "setupMs": 0.10000002384185791,
+     "renderMs": 1.800000011920929,
+     "totalMs": 1.9000000357627869
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 1389.4000000357628,
+     "endedAt": 1390.2000000476837,
+     "setupMs": 0,
+     "renderMs": 0.800000011920929,
+     "totalMs": 0.800000011920929
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 1390.2000000476837,
+     "endedAt": 1390.9000000357628,
+     "setupMs": 0,
+     "renderMs": 0.699999988079071,
+     "totalMs": 0.699999988079071
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 1390.9000000357628,
+     "endedAt": 1391.9000000357628,
+     "setupMs": 0,
+     "renderMs": 1,
+     "totalMs": 1
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 1412.5,
+     "endedAt": 1414.7000000476837,
+     "setupMs": 0.10000002384185791,
+     "renderMs": 2.100000023841858,
+     "totalMs": 2.200000047683716
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 1414.7000000476837,
+     "endedAt": 1415.1000000238419,
+     "setupMs": 0,
+     "renderMs": 0.3999999761581421,
+     "totalMs": 0.3999999761581421
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 1415.1000000238419,
+     "endedAt": 1415.4000000357628,
+     "setupMs": 0,
+     "renderMs": 0.30000001192092896,
+     "totalMs": 0.30000001192092896
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 1415.4000000357628,
+     "endedAt": 1415.7000000476837,
+     "setupMs": 0,
+     "renderMs": 0.30000001192092896,
+     "totalMs": 0.30000001192092896
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 1415.7000000476837,
+     "endedAt": 1415.9000000357628,
+     "setupMs": 0,
+     "renderMs": 0.19999998807907104,
+     "totalMs": 0.19999998807907104
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 1415.9000000357628,
+     "endedAt": 1416.2000000476837,
+     "setupMs": 0,
+     "renderMs": 0.30000001192092896,
+     "totalMs": 0.30000001192092896
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 1416.2000000476837,
+     "endedAt": 1416.6000000238419,
+     "setupMs": 0,
+     "renderMs": 0.3999999761581421,
+     "totalMs": 0.3999999761581421
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 1416.6000000238419,
+     "endedAt": 1416.800000011921,
+     "setupMs": 0,
+     "renderMs": 0.19999998807907104,
+     "totalMs": 0.19999998807907104
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 1416.800000011921,
+     "endedAt": 1417.1000000238419,
+     "setupMs": 0,
+     "renderMs": 0.30000001192092896,
+     "totalMs": 0.30000001192092896
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 1417.1000000238419,
+     "endedAt": 1418.2000000476837,
+     "setupMs": 0,
+     "renderMs": 1.100000023841858,
+     "totalMs": 1.100000023841858
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 1418.2000000476837,
+     "endedAt": 1418.7000000476837,
+     "setupMs": 0,
+     "renderMs": 0.5,
+     "totalMs": 0.5
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 1418.7000000476837,
+     "endedAt": 1419,
+     "setupMs": 0,
+     "renderMs": 0.2999999523162842,
+     "totalMs": 0.2999999523162842
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 1419,
+     "endedAt": 1419.300000011921,
+     "setupMs": 0,
+     "renderMs": 0.30000001192092896,
+     "totalMs": 0.30000001192092896
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 1419.300000011921,
+     "endedAt": 1419.6000000238419,
+     "setupMs": 0,
+     "renderMs": 0.30000001192092896,
+     "totalMs": 0.30000001192092896
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 1419.6000000238419,
+     "endedAt": 1419.800000011921,
+     "setupMs": 0,
+     "renderMs": 0.19999998807907104,
+     "totalMs": 0.19999998807907104
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 1419.800000011921,
+     "endedAt": 1421.2000000476837,
+     "setupMs": 0,
+     "renderMs": 1.4000000357627869,
+     "totalMs": 1.4000000357627869
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 1421.2000000476837,
+     "endedAt": 1421.5,
+     "setupMs": 0,
+     "renderMs": 0.2999999523162842,
+     "totalMs": 0.2999999523162842
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 1421.6000000238419,
+     "endedAt": 1421.800000011921,
+     "setupMs": 0,
+     "renderMs": 0.19999998807907104,
+     "totalMs": 0.19999998807907104
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 1421.800000011921,
+     "endedAt": 1422.1000000238419,
+     "setupMs": 0,
+     "renderMs": 0.30000001192092896,
+     "totalMs": 0.30000001192092896
+    },
+    {
+     "phase": "pulse-solo",
+     "startedAt": 1422.1000000238419,
+     "endedAt": 1422.5,
+     "setupMs": 0.10000002384185791,
+     "renderMs": 0.2999999523162842,
+     "totalMs": 0.3999999761581421
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 1512.2000000476837,
+     "endedAt": 1513,
+     "setupMs": 0,
+     "renderMs": 0.7999999523162842,
+     "totalMs": 0.7999999523162842
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 1513,
+     "endedAt": 1513.5,
+     "setupMs": 0,
+     "renderMs": 0.5,
+     "totalMs": 0.5
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 1513.5,
+     "endedAt": 1520.300000011921,
+     "setupMs": 0,
+     "renderMs": 6.800000011920929,
+     "totalMs": 6.800000011920929
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 1520.300000011921,
+     "endedAt": 1525.7000000476837,
+     "setupMs": 0,
+     "renderMs": 5.400000035762787,
+     "totalMs": 5.400000035762787
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 1529.300000011921,
+     "endedAt": 1530.300000011921,
+     "setupMs": 0,
+     "renderMs": 1,
+     "totalMs": 1
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 1530.300000011921,
+     "endedAt": 1530.6000000238419,
+     "setupMs": 0,
+     "renderMs": 0.30000001192092896,
+     "totalMs": 0.30000001192092896
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 1530.6000000238419,
+     "endedAt": 1531.1000000238419,
+     "setupMs": 0,
+     "renderMs": 0.5,
+     "totalMs": 0.5
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 1531.1000000238419,
+     "endedAt": 1531.6000000238419,
+     "setupMs": 0,
+     "renderMs": 0.5,
+     "totalMs": 0.5
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 1531.6000000238419,
+     "endedAt": 1532.2000000476837,
+     "setupMs": 0,
+     "renderMs": 0.6000000238418579,
+     "totalMs": 0.6000000238418579
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 1532.2000000476837,
+     "endedAt": 1532.9000000357628,
+     "setupMs": 0,
+     "renderMs": 0.699999988079071,
+     "totalMs": 0.699999988079071
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 1532.9000000357628,
+     "endedAt": 1533.5,
+     "setupMs": 0,
+     "renderMs": 0.5999999642372131,
+     "totalMs": 0.5999999642372131
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 1533.5,
+     "endedAt": 1533.7000000476837,
+     "setupMs": 0,
+     "renderMs": 0.20000004768371582,
+     "totalMs": 0.20000004768371582
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 1562.2000000476837,
+     "endedAt": 1562.6000000238419,
+     "setupMs": 0,
+     "renderMs": 0.3999999761581421,
+     "totalMs": 0.3999999761581421
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 1562.6000000238419,
+     "endedAt": 1562.9000000357628,
+     "setupMs": 0,
+     "renderMs": 0.30000001192092896,
+     "totalMs": 0.30000001192092896
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 1562.9000000357628,
+     "endedAt": 1563.800000011921,
+     "setupMs": 0,
+     "renderMs": 0.8999999761581421,
+     "totalMs": 0.8999999761581421
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 1563.800000011921,
+     "endedAt": 1564.2000000476837,
+     "setupMs": 0,
+     "renderMs": 0.40000003576278687,
+     "totalMs": 0.40000003576278687
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 1564.2000000476837,
+     "endedAt": 1564.4000000357628,
+     "setupMs": 0,
+     "renderMs": 0.19999998807907104,
+     "totalMs": 0.19999998807907104
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 1564.4000000357628,
+     "endedAt": 1564.7000000476837,
+     "setupMs": 0,
+     "renderMs": 0.30000001192092896,
+     "totalMs": 0.30000001192092896
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 1564.7000000476837,
+     "endedAt": 1565,
+     "setupMs": 0,
+     "renderMs": 0.2999999523162842,
+     "totalMs": 0.2999999523162842
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 1565,
+     "endedAt": 1565.300000011921,
+     "setupMs": 0,
+     "renderMs": 0.30000001192092896,
+     "totalMs": 0.30000001192092896
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 1565.300000011921,
+     "endedAt": 1565.5,
+     "setupMs": 0,
+     "renderMs": 0.19999998807907104,
+     "totalMs": 0.19999998807907104
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 1565.5,
+     "endedAt": 1565.7000000476837,
+     "setupMs": 0,
+     "renderMs": 0.20000004768371582,
+     "totalMs": 0.20000004768371582
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 1565.7000000476837,
+     "endedAt": 1566,
+     "setupMs": 0,
+     "renderMs": 0.2999999523162842,
+     "totalMs": 0.2999999523162842
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 1566,
+     "endedAt": 1566.2000000476837,
+     "setupMs": 0,
+     "renderMs": 0.20000004768371582,
+     "totalMs": 0.20000004768371582
+    },
+    {
+     "phase": "pulse-solo",
+     "startedAt": 1566.2000000476837,
+     "endedAt": 1566.4000000357628,
+     "setupMs": 0,
+     "renderMs": 0.19999998807907104,
+     "totalMs": 0.19999998807907104
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 1729.5,
+     "endedAt": 1741.300000011921,
+     "setupMs": 0,
+     "renderMs": 11.800000011920929,
+     "totalMs": 11.800000011920929
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 1745,
+     "endedAt": 1746.300000011921,
+     "setupMs": 0,
+     "renderMs": 1.300000011920929,
+     "totalMs": 1.300000011920929
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 1746.300000011921,
+     "endedAt": 1746.9000000357628,
+     "setupMs": 0,
+     "renderMs": 0.6000000238418579,
+     "totalMs": 0.6000000238418579
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 1746.9000000357628,
+     "endedAt": 1747.6000000238419,
+     "setupMs": 0,
+     "renderMs": 0.699999988079071,
+     "totalMs": 0.699999988079071
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 1747.6000000238419,
+     "endedAt": 1748.6000000238419,
+     "setupMs": 0,
+     "renderMs": 1,
+     "totalMs": 1
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 1748.6000000238419,
+     "endedAt": 1749,
+     "setupMs": 0,
+     "renderMs": 0.3999999761581421,
+     "totalMs": 0.3999999761581421
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 1749,
+     "endedAt": 1749.800000011921,
+     "setupMs": 0.10000002384185791,
+     "renderMs": 0.699999988079071,
+     "totalMs": 0.800000011920929
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 1749.800000011921,
+     "endedAt": 1750.2000000476837,
+     "setupMs": 0,
+     "renderMs": 0.40000003576278687,
+     "totalMs": 0.40000003576278687
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 1750.2000000476837,
+     "endedAt": 1751.1000000238419,
+     "setupMs": 0,
+     "renderMs": 0.8999999761581421,
+     "totalMs": 0.8999999761581421
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 1751.1000000238419,
+     "endedAt": 1751.9000000357628,
+     "setupMs": 0,
+     "renderMs": 0.800000011920929,
+     "totalMs": 0.800000011920929
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 1751.9000000357628,
+     "endedAt": 1752.800000011921,
+     "setupMs": 0,
+     "renderMs": 0.8999999761581421,
+     "totalMs": 0.8999999761581421
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 1752.800000011921,
+     "endedAt": 1753.6000000238419,
+     "setupMs": 0,
+     "renderMs": 0.800000011920929,
+     "totalMs": 0.800000011920929
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 1753.6000000238419,
+     "endedAt": 1754.4000000357628,
+     "setupMs": 0,
+     "renderMs": 0.800000011920929,
+     "totalMs": 0.800000011920929
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 1754.4000000357628,
+     "endedAt": 1756.1000000238419,
+     "setupMs": 0,
+     "renderMs": 1.699999988079071,
+     "totalMs": 1.699999988079071
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 1756.1000000238419,
+     "endedAt": 1756.5,
+     "setupMs": 0,
+     "renderMs": 0.3999999761581421,
+     "totalMs": 0.3999999761581421
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 1756.5,
+     "endedAt": 1757.5,
+     "setupMs": 0,
+     "renderMs": 1,
+     "totalMs": 1
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 1761.800000011921,
+     "endedAt": 1762.9000000357628,
+     "setupMs": 0,
+     "renderMs": 1.100000023841858,
+     "totalMs": 1.100000023841858
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 1762.9000000357628,
+     "endedAt": 1768.4000000357628,
+     "setupMs": 0,
+     "renderMs": 5.5,
+     "totalMs": 5.5
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 1794.9000000357628,
+     "endedAt": 1795.800000011921,
+     "setupMs": 0,
+     "renderMs": 0.8999999761581421,
+     "totalMs": 0.8999999761581421
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 1795.800000011921,
+     "endedAt": 1796,
+     "setupMs": 0,
+     "renderMs": 0.19999998807907104,
+     "totalMs": 0.19999998807907104
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 1796,
+     "endedAt": 1796.4000000357628,
+     "setupMs": 0,
+     "renderMs": 0.40000003576278687,
+     "totalMs": 0.40000003576278687
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 1796.4000000357628,
+     "endedAt": 1796.6000000238419,
+     "setupMs": 0,
+     "renderMs": 0.19999998807907104,
+     "totalMs": 0.19999998807907104
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 1796.6000000238419,
+     "endedAt": 1796.800000011921,
+     "setupMs": 0,
+     "renderMs": 0.19999998807907104,
+     "totalMs": 0.19999998807907104
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 1796.800000011921,
+     "endedAt": 1797.1000000238419,
+     "setupMs": 0,
+     "renderMs": 0.30000001192092896,
+     "totalMs": 0.30000001192092896
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 1797.1000000238419,
+     "endedAt": 1797.300000011921,
+     "setupMs": 0,
+     "renderMs": 0.19999998807907104,
+     "totalMs": 0.19999998807907104
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 1797.300000011921,
+     "endedAt": 1797.5,
+     "setupMs": 0,
+     "renderMs": 0.19999998807907104,
+     "totalMs": 0.19999998807907104
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 1797.5,
+     "endedAt": 1797.9000000357628,
+     "setupMs": 0,
+     "renderMs": 0.40000003576278687,
+     "totalMs": 0.40000003576278687
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 1797.9000000357628,
+     "endedAt": 1798.1000000238419,
+     "setupMs": 0,
+     "renderMs": 0.19999998807907104,
+     "totalMs": 0.19999998807907104
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 1798.2000000476837,
+     "endedAt": 1798.4000000357628,
+     "setupMs": 0,
+     "renderMs": 0.19999998807907104,
+     "totalMs": 0.19999998807907104
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 1798.4000000357628,
+     "endedAt": 1798.7000000476837,
+     "setupMs": 0,
+     "renderMs": 0.30000001192092896,
+     "totalMs": 0.30000001192092896
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 1798.7000000476837,
+     "endedAt": 1798.9000000357628,
+     "setupMs": 0,
+     "renderMs": 0.19999998807907104,
+     "totalMs": 0.19999998807907104
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 1798.9000000357628,
+     "endedAt": 1799.2000000476837,
+     "setupMs": 0,
+     "renderMs": 0.30000001192092896,
+     "totalMs": 0.30000001192092896
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 1799.2000000476837,
+     "endedAt": 1799.4000000357628,
+     "setupMs": 0,
+     "renderMs": 0.19999998807907104,
+     "totalMs": 0.19999998807907104
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 1799.4000000357628,
+     "endedAt": 1799.800000011921,
+     "setupMs": 0,
+     "renderMs": 0.3999999761581421,
+     "totalMs": 0.3999999761581421
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 1799.800000011921,
+     "endedAt": 1799.9000000357628,
+     "setupMs": 0,
+     "renderMs": 0.10000002384185791,
+     "totalMs": 0.10000002384185791
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 1799.9000000357628,
+     "endedAt": 1800.9000000357628,
+     "setupMs": 0,
+     "renderMs": 1,
+     "totalMs": 1
+    },
+    {
+     "phase": "pulse-solo",
+     "startedAt": 1800.9000000357628,
+     "endedAt": 1801.2000000476837,
+     "setupMs": 0.09999996423721313,
+     "renderMs": 0.20000004768371582,
+     "totalMs": 0.30000001192092896
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 1845.300000011921,
+     "endedAt": 1851.4000000357628,
+     "setupMs": 0,
+     "renderMs": 6.100000023841858,
+     "totalMs": 6.100000023841858
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 1851.4000000357628,
+     "endedAt": 1854.9000000357628,
+     "setupMs": 0,
+     "renderMs": 3.5,
+     "totalMs": 3.5
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 1854.9000000357628,
+     "endedAt": 1856.6000000238419,
+     "setupMs": 0,
+     "renderMs": 1.699999988079071,
+     "totalMs": 1.699999988079071
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 1856.6000000238419,
+     "endedAt": 1857.4000000357628,
+     "setupMs": 0,
+     "renderMs": 0.800000011920929,
+     "totalMs": 0.800000011920929
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 1861.7000000476837,
+     "endedAt": 1862.7000000476837,
+     "setupMs": 0,
+     "renderMs": 1,
+     "totalMs": 1
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 1862.7000000476837,
+     "endedAt": 1864.1000000238419,
+     "setupMs": 0,
+     "renderMs": 1.399999976158142,
+     "totalMs": 1.399999976158142
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 1864.1000000238419,
+     "endedAt": 1864.9000000357628,
+     "setupMs": 0,
+     "renderMs": 0.800000011920929,
+     "totalMs": 0.800000011920929
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 1864.9000000357628,
+     "endedAt": 1865.4000000357628,
+     "setupMs": 0,
+     "renderMs": 0.5,
+     "totalMs": 0.5
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 1865.4000000357628,
+     "endedAt": 1865.7000000476837,
+     "setupMs": 0,
+     "renderMs": 0.30000001192092896,
+     "totalMs": 0.30000001192092896
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 1865.7000000476837,
+     "endedAt": 1866.300000011921,
+     "setupMs": 0,
+     "renderMs": 0.5999999642372131,
+     "totalMs": 0.5999999642372131
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 1866.300000011921,
+     "endedAt": 1867,
+     "setupMs": 0,
+     "renderMs": 0.699999988079071,
+     "totalMs": 0.699999988079071
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 1867,
+     "endedAt": 1867.7000000476837,
+     "setupMs": 0,
+     "renderMs": 0.7000000476837158,
+     "totalMs": 0.7000000476837158
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 1867.7000000476837,
+     "endedAt": 1869.300000011921,
+     "setupMs": 0,
+     "renderMs": 1.5999999642372131,
+     "totalMs": 1.5999999642372131
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 1869.4000000357628,
+     "endedAt": 1870.2000000476837,
+     "setupMs": 0,
+     "renderMs": 0.800000011920929,
+     "totalMs": 0.800000011920929
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 1870.2000000476837,
+     "endedAt": 1871.4000000357628,
+     "setupMs": 0,
+     "renderMs": 1.199999988079071,
+     "totalMs": 1.199999988079071
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 1871.4000000357628,
+     "endedAt": 1872.1000000238419,
+     "setupMs": 0,
+     "renderMs": 0.699999988079071,
+     "totalMs": 0.699999988079071
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 1872.1000000238419,
+     "endedAt": 1872.5,
+     "setupMs": 0,
+     "renderMs": 0.3999999761581421,
+     "totalMs": 0.3999999761581421
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 1872.5,
+     "endedAt": 1881.4000000357628,
+     "setupMs": 0,
+     "renderMs": 8.900000035762787,
+     "totalMs": 8.900000035762787
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 1912.1000000238419,
+     "endedAt": 1912.9000000357628,
+     "setupMs": 0,
+     "renderMs": 0.800000011920929,
+     "totalMs": 0.800000011920929
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 1912.9000000357628,
+     "endedAt": 1913.2000000476837,
+     "setupMs": 0,
+     "renderMs": 0.30000001192092896,
+     "totalMs": 0.30000001192092896
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 1913.2000000476837,
+     "endedAt": 1913.300000011921,
+     "setupMs": 0,
+     "renderMs": 0.09999996423721313,
+     "totalMs": 0.09999996423721313
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 1913.4000000357628,
+     "endedAt": 1913.6000000238419,
+     "setupMs": 0,
+     "renderMs": 0.19999998807907104,
+     "totalMs": 0.19999998807907104
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 1913.6000000238419,
+     "endedAt": 1913.800000011921,
+     "setupMs": 0,
+     "renderMs": 0.19999998807907104,
+     "totalMs": 0.19999998807907104
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 1913.800000011921,
+     "endedAt": 1914.1000000238419,
+     "setupMs": 0,
+     "renderMs": 0.30000001192092896,
+     "totalMs": 0.30000001192092896
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 1914.1000000238419,
+     "endedAt": 1914.300000011921,
+     "setupMs": 0,
+     "renderMs": 0.19999998807907104,
+     "totalMs": 0.19999998807907104
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 1914.300000011921,
+     "endedAt": 1914.5,
+     "setupMs": 0,
+     "renderMs": 0.19999998807907104,
+     "totalMs": 0.19999998807907104
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 1914.5,
+     "endedAt": 1914.800000011921,
+     "setupMs": 0,
+     "renderMs": 0.30000001192092896,
+     "totalMs": 0.30000001192092896
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 1914.800000011921,
+     "endedAt": 1915,
+     "setupMs": 0,
+     "renderMs": 0.19999998807907104,
+     "totalMs": 0.19999998807907104
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 1915,
+     "endedAt": 1915.300000011921,
+     "setupMs": 0,
+     "renderMs": 0.30000001192092896,
+     "totalMs": 0.30000001192092896
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 1915.300000011921,
+     "endedAt": 1915.5,
+     "setupMs": 0,
+     "renderMs": 0.19999998807907104,
+     "totalMs": 0.19999998807907104
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 1915.5,
+     "endedAt": 1915.7000000476837,
+     "setupMs": 0,
+     "renderMs": 0.20000004768371582,
+     "totalMs": 0.20000004768371582
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 1915.7000000476837,
+     "endedAt": 1915.800000011921,
+     "setupMs": 0,
+     "renderMs": 0.09999996423721313,
+     "totalMs": 0.09999996423721313
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 1915.800000011921,
+     "endedAt": 1916.1000000238419,
+     "setupMs": 0,
+     "renderMs": 0.30000001192092896,
+     "totalMs": 0.30000001192092896
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 1916.1000000238419,
+     "endedAt": 1916.300000011921,
+     "setupMs": 0,
+     "renderMs": 0.19999998807907104,
+     "totalMs": 0.19999998807907104
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 1916.300000011921,
+     "endedAt": 1916.5,
+     "setupMs": 0,
+     "renderMs": 0.19999998807907104,
+     "totalMs": 0.19999998807907104
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 1916.5,
+     "endedAt": 1916.7000000476837,
+     "setupMs": 0,
+     "renderMs": 0.20000004768371582,
+     "totalMs": 0.20000004768371582
+    },
+    {
+     "phase": "pulse-solo",
+     "startedAt": 1916.7000000476837,
+     "endedAt": 1917,
+     "setupMs": 0,
+     "renderMs": 0.2999999523162842,
+     "totalMs": 0.2999999523162842
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 2011.300000011921,
+     "endedAt": 2011.9000000357628,
+     "setupMs": 0,
+     "renderMs": 0.6000000238418579,
+     "totalMs": 0.6000000238418579
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 2011.9000000357628,
+     "endedAt": 2012.5,
+     "setupMs": 0,
+     "renderMs": 0.5999999642372131,
+     "totalMs": 0.5999999642372131
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 2012.5,
+     "endedAt": 2012.9000000357628,
+     "setupMs": 0,
+     "renderMs": 0.40000003576278687,
+     "totalMs": 0.40000003576278687
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 2012.9000000357628,
+     "endedAt": 2013.2000000476837,
+     "setupMs": 0,
+     "renderMs": 0.30000001192092896,
+     "totalMs": 0.30000001192092896
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 2013.2000000476837,
+     "endedAt": 2013.5,
+     "setupMs": 0,
+     "renderMs": 0.2999999523162842,
+     "totalMs": 0.2999999523162842
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 2013.5,
+     "endedAt": 2013.800000011921,
+     "setupMs": 0,
+     "renderMs": 0.30000001192092896,
+     "totalMs": 0.30000001192092896
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 2013.800000011921,
+     "endedAt": 2014.1000000238419,
+     "setupMs": 0,
+     "renderMs": 0.30000001192092896,
+     "totalMs": 0.30000001192092896
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 2014.1000000238419,
+     "endedAt": 2015.7000000476837,
+     "setupMs": 0,
+     "renderMs": 1.600000023841858,
+     "totalMs": 1.600000023841858
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 2015.7000000476837,
+     "endedAt": 2016.1000000238419,
+     "setupMs": 0,
+     "renderMs": 0.3999999761581421,
+     "totalMs": 0.3999999761581421
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 2016.2000000476837,
+     "endedAt": 2017.1000000238419,
+     "setupMs": 0,
+     "renderMs": 0.8999999761581421,
+     "totalMs": 0.8999999761581421
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 2017.1000000238419,
+     "endedAt": 2017.800000011921,
+     "setupMs": 0,
+     "renderMs": 0.699999988079071,
+     "totalMs": 0.699999988079071
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 2017.800000011921,
+     "endedAt": 2018.4000000357628,
+     "setupMs": 0,
+     "renderMs": 0.6000000238418579,
+     "totalMs": 0.6000000238418579
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 2018.4000000357628,
+     "endedAt": 2019.2000000476837,
+     "setupMs": 0,
+     "renderMs": 0.800000011920929,
+     "totalMs": 0.800000011920929
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 2019.2000000476837,
+     "endedAt": 2020.2000000476837,
+     "setupMs": 0,
+     "renderMs": 1,
+     "totalMs": 1
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 2020.2000000476837,
+     "endedAt": 2020.7000000476837,
+     "setupMs": 0,
+     "renderMs": 0.5,
+     "totalMs": 0.5
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 2020.800000011921,
+     "endedAt": 2021.2000000476837,
+     "setupMs": 0,
+     "renderMs": 0.40000003576278687,
+     "totalMs": 0.40000003576278687
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 2028.2000000476837,
+     "endedAt": 2028.9000000357628,
+     "setupMs": 0,
+     "renderMs": 0.699999988079071,
+     "totalMs": 0.699999988079071
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 2029,
+     "endedAt": 2029.4000000357628,
+     "setupMs": 0,
+     "renderMs": 0.40000003576278687,
+     "totalMs": 0.40000003576278687
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 2029.4000000357628,
+     "endedAt": 2029.6000000238419,
+     "setupMs": 0,
+     "renderMs": 0.19999998807907104,
+     "totalMs": 0.19999998807907104
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 2029.6000000238419,
+     "endedAt": 2029.800000011921,
+     "setupMs": 0,
+     "renderMs": 0.19999998807907104,
+     "totalMs": 0.19999998807907104
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 2029.800000011921,
+     "endedAt": 2030,
+     "setupMs": 0,
+     "renderMs": 0.19999998807907104,
+     "totalMs": 0.19999998807907104
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 2030,
+     "endedAt": 2030.2000000476837,
+     "setupMs": 0,
+     "renderMs": 0.20000004768371582,
+     "totalMs": 0.20000004768371582
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 2030.2000000476837,
+     "endedAt": 2030.5,
+     "setupMs": 0,
+     "renderMs": 0.2999999523162842,
+     "totalMs": 0.2999999523162842
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 2030.5,
+     "endedAt": 2030.800000011921,
+     "setupMs": 0,
+     "renderMs": 0.30000001192092896,
+     "totalMs": 0.30000001192092896
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 2030.800000011921,
+     "endedAt": 2030.9000000357628,
+     "setupMs": 0,
+     "renderMs": 0.10000002384185791,
+     "totalMs": 0.10000002384185791
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 2030.9000000357628,
+     "endedAt": 2031.2000000476837,
+     "setupMs": 0,
+     "renderMs": 0.30000001192092896,
+     "totalMs": 0.30000001192092896
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 2031.2000000476837,
+     "endedAt": 2031.300000011921,
+     "setupMs": 0,
+     "renderMs": 0.09999996423721313,
+     "totalMs": 0.09999996423721313
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 2031.300000011921,
+     "endedAt": 2031.5,
+     "setupMs": 0,
+     "renderMs": 0.19999998807907104,
+     "totalMs": 0.19999998807907104
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 2031.5,
+     "endedAt": 2031.6000000238419,
+     "setupMs": 0,
+     "renderMs": 0.10000002384185791,
+     "totalMs": 0.10000002384185791
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 2031.6000000238419,
+     "endedAt": 2031.9000000357628,
+     "setupMs": 0,
+     "renderMs": 0.30000001192092896,
+     "totalMs": 0.30000001192092896
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 2031.9000000357628,
+     "endedAt": 2032,
+     "setupMs": 0,
+     "renderMs": 0.09999996423721313,
+     "totalMs": 0.09999996423721313
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 2032,
+     "endedAt": 2032.2000000476837,
+     "setupMs": 0,
+     "renderMs": 0.20000004768371582,
+     "totalMs": 0.20000004768371582
+    },
+    {
+     "phase": "pulse-solo",
+     "startedAt": 2032.2000000476837,
+     "endedAt": 2032.4000000357628,
+     "setupMs": 0,
+     "renderMs": 0.19999998807907104,
+     "totalMs": 0.19999998807907104
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 2079.100000023842,
+     "endedAt": 2103.300000011921,
+     "setupMs": 0,
+     "renderMs": 24.19999998807907,
+     "totalMs": 24.19999998807907
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 2104,
+     "endedAt": 2123.2000000476837,
+     "setupMs": 0,
+     "renderMs": 19.200000047683716,
+     "totalMs": 19.200000047683716
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 2123.7000000476837,
+     "endedAt": 2124.300000011921,
+     "setupMs": 0,
+     "renderMs": 0.5999999642372131,
+     "totalMs": 0.5999999642372131
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 2124.300000011921,
+     "endedAt": 2124.7000000476837,
+     "setupMs": 0,
+     "renderMs": 0.40000003576278687,
+     "totalMs": 0.40000003576278687
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 2124.7000000476837,
+     "endedAt": 2127.800000011921,
+     "setupMs": 0,
+     "renderMs": 3.099999964237213,
+     "totalMs": 3.099999964237213
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 2127.800000011921,
+     "endedAt": 2128.100000023842,
+     "setupMs": 0,
+     "renderMs": 0.30000001192092896,
+     "totalMs": 0.30000001192092896
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 2145.400000035763,
+     "endedAt": 2146,
+     "setupMs": 0,
+     "renderMs": 0.5999999642372131,
+     "totalMs": 0.5999999642372131
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 2146,
+     "endedAt": 2147,
+     "setupMs": 0,
+     "renderMs": 1,
+     "totalMs": 1
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 2147,
+     "endedAt": 2147.600000023842,
+     "setupMs": 0,
+     "renderMs": 0.6000000238418579,
+     "totalMs": 0.6000000238418579
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 2147.600000023842,
+     "endedAt": 2147.900000035763,
+     "setupMs": 0,
+     "renderMs": 0.30000001192092896,
+     "totalMs": 0.30000001192092896
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 2147.900000035763,
+     "endedAt": 2148.300000011921,
+     "setupMs": 0,
+     "renderMs": 0.3999999761581421,
+     "totalMs": 0.3999999761581421
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 2148.300000011921,
+     "endedAt": 2148.400000035763,
+     "setupMs": 0,
+     "renderMs": 0.10000002384185791,
+     "totalMs": 0.10000002384185791
+    },
+    {
+     "phase": "pulse-solo",
+     "startedAt": 2148.400000035763,
+     "endedAt": 2148.5,
+     "setupMs": 0,
+     "renderMs": 0.09999996423721313,
+     "totalMs": 0.09999996423721313
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 2345.5,
+     "endedAt": 2352.300000011921,
+     "setupMs": 0,
+     "renderMs": 6.800000011920929,
+     "totalMs": 6.800000011920929
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 2352.300000011921,
+     "endedAt": 2359.100000023842,
+     "setupMs": 0,
+     "renderMs": 6.800000011920929,
+     "totalMs": 6.800000011920929
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 2361.7000000476837,
+     "endedAt": 2362.900000035763,
+     "setupMs": 0,
+     "renderMs": 1.199999988079071,
+     "totalMs": 1.199999988079071
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 2362.900000035763,
+     "endedAt": 2363.800000011921,
+     "setupMs": 0,
+     "renderMs": 0.8999999761581421,
+     "totalMs": 0.8999999761581421
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 2363.800000011921,
+     "endedAt": 2364.300000011921,
+     "setupMs": 0,
+     "renderMs": 0.5,
+     "totalMs": 0.5
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 2364.300000011921,
+     "endedAt": 2364.600000023842,
+     "setupMs": 0,
+     "renderMs": 0.30000001192092896,
+     "totalMs": 0.30000001192092896
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 2364.600000023842,
+     "endedAt": 2365.400000035763,
+     "setupMs": 0,
+     "renderMs": 0.800000011920929,
+     "totalMs": 0.800000011920929
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 2365.400000035763,
+     "endedAt": 2368.600000023842,
+     "setupMs": 0,
+     "renderMs": 3.199999988079071,
+     "totalMs": 3.199999988079071
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 2368.600000023842,
+     "endedAt": 2370,
+     "setupMs": 0,
+     "renderMs": 1.399999976158142,
+     "totalMs": 1.399999976158142
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 2370.100000023842,
+     "endedAt": 2373.400000035763,
+     "setupMs": 0,
+     "renderMs": 3.300000011920929,
+     "totalMs": 3.300000011920929
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 2373.400000035763,
+     "endedAt": 2374.900000035763,
+     "setupMs": 0,
+     "renderMs": 1.5,
+     "totalMs": 1.5
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 2378.900000035763,
+     "endedAt": 2380.800000011921,
+     "setupMs": 0,
+     "renderMs": 1.899999976158142,
+     "totalMs": 1.899999976158142
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 2380.900000035763,
+     "endedAt": 2381.400000035763,
+     "setupMs": 0,
+     "renderMs": 0.5,
+     "totalMs": 0.5
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 2381.400000035763,
+     "endedAt": 2381.800000011921,
+     "setupMs": 0,
+     "renderMs": 0.3999999761581421,
+     "totalMs": 0.3999999761581421
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 2381.800000011921,
+     "endedAt": 2382,
+     "setupMs": 0,
+     "renderMs": 0.19999998807907104,
+     "totalMs": 0.19999998807907104
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 2412.100000023842,
+     "endedAt": 2413,
+     "setupMs": 0,
+     "renderMs": 0.8999999761581421,
+     "totalMs": 0.8999999761581421
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 2413,
+     "endedAt": 2415.400000035763,
+     "setupMs": 0,
+     "renderMs": 2.400000035762787,
+     "totalMs": 2.400000035762787
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 2415.400000035763,
+     "endedAt": 2415.600000023842,
+     "setupMs": 0,
+     "renderMs": 0.19999998807907104,
+     "totalMs": 0.19999998807907104
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 2415.600000023842,
+     "endedAt": 2415.800000011921,
+     "setupMs": 0,
+     "renderMs": 0.19999998807907104,
+     "totalMs": 0.19999998807907104
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 2415.800000011921,
+     "endedAt": 2415.900000035763,
+     "setupMs": 0,
+     "renderMs": 0.10000002384185791,
+     "totalMs": 0.10000002384185791
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 2415.900000035763,
+     "endedAt": 2416.2000000476837,
+     "setupMs": 0,
+     "renderMs": 0.30000001192092896,
+     "totalMs": 0.30000001192092896
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 2416.2000000476837,
+     "endedAt": 2416.400000035763,
+     "setupMs": 0,
+     "renderMs": 0.19999998807907104,
+     "totalMs": 0.19999998807907104
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 2416.400000035763,
+     "endedAt": 2416.600000023842,
+     "setupMs": 0,
+     "renderMs": 0.19999998807907104,
+     "totalMs": 0.19999998807907104
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 2416.600000023842,
+     "endedAt": 2416.900000035763,
+     "setupMs": 0,
+     "renderMs": 0.30000001192092896,
+     "totalMs": 0.30000001192092896
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 2416.900000035763,
+     "endedAt": 2417.800000011921,
+     "setupMs": 0,
+     "renderMs": 0.8999999761581421,
+     "totalMs": 0.8999999761581421
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 2417.800000011921,
+     "endedAt": 2418.100000023842,
+     "setupMs": 0,
+     "renderMs": 0.30000001192092896,
+     "totalMs": 0.30000001192092896
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 2418.100000023842,
+     "endedAt": 2418.400000035763,
+     "setupMs": 0,
+     "renderMs": 0.30000001192092896,
+     "totalMs": 0.30000001192092896
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 2418.400000035763,
+     "endedAt": 2418.7000000476837,
+     "setupMs": 0,
+     "renderMs": 0.30000001192092896,
+     "totalMs": 0.30000001192092896
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 2418.7000000476837,
+     "endedAt": 2419,
+     "setupMs": 0,
+     "renderMs": 0.2999999523162842,
+     "totalMs": 0.2999999523162842
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 2419,
+     "endedAt": 2419.100000023842,
+     "setupMs": 0,
+     "renderMs": 0.10000002384185791,
+     "totalMs": 0.10000002384185791
+    },
+    {
+     "phase": "pulse-solo",
+     "startedAt": 2419.100000023842,
+     "endedAt": 2419.300000011921,
+     "setupMs": 0.10000002384185791,
+     "renderMs": 0.09999996423721313,
+     "totalMs": 0.19999998807907104
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 2446.100000023842,
+     "endedAt": 2447.300000011921,
+     "setupMs": 0,
+     "renderMs": 1.199999988079071,
+     "totalMs": 1.199999988079071
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 2447.300000011921,
+     "endedAt": 2447.5,
+     "setupMs": 0,
+     "renderMs": 0.19999998807907104,
+     "totalMs": 0.19999998807907104
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 2447.5,
+     "endedAt": 2447.800000011921,
+     "setupMs": 0,
+     "renderMs": 0.30000001192092896,
+     "totalMs": 0.30000001192092896
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 2447.800000011921,
+     "endedAt": 2448.100000023842,
+     "setupMs": 0,
+     "renderMs": 0.30000001192092896,
+     "totalMs": 0.30000001192092896
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 2448.100000023842,
+     "endedAt": 2462.900000035763,
+     "setupMs": 0,
+     "renderMs": 14.800000011920929,
+     "totalMs": 14.800000011920929
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 2477.800000011921,
+     "endedAt": 2478.2000000476837,
+     "setupMs": 0,
+     "renderMs": 0.40000003576278687,
+     "totalMs": 0.40000003576278687
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 2478.2000000476837,
+     "endedAt": 2478.300000011921,
+     "setupMs": 0,
+     "renderMs": 0.09999996423721313,
+     "totalMs": 0.09999996423721313
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 2478.300000011921,
+     "endedAt": 2478.5,
+     "setupMs": 0,
+     "renderMs": 0.19999998807907104,
+     "totalMs": 0.19999998807907104
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 2478.5,
+     "endedAt": 2478.7000000476837,
+     "setupMs": 0,
+     "renderMs": 0.20000004768371582,
+     "totalMs": 0.20000004768371582
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 2478.7000000476837,
+     "endedAt": 2478.900000035763,
+     "setupMs": 0,
+     "renderMs": 0.19999998807907104,
+     "totalMs": 0.19999998807907104
+    },
+    {
+     "phase": "pulse-solo",
+     "startedAt": 2478.900000035763,
+     "endedAt": 2479.100000023842,
+     "setupMs": 0,
+     "renderMs": 0.19999998807907104,
+     "totalMs": 0.19999998807907104
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 2728.900000035763,
+     "endedAt": 2740.5,
+     "setupMs": 0,
+     "renderMs": 11.599999964237213,
+     "totalMs": 11.599999964237213
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 2740.5,
+     "endedAt": 2747.5,
+     "setupMs": 0,
+     "renderMs": 7,
+     "totalMs": 7
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 2748.300000011921,
+     "endedAt": 2749.100000023842,
+     "setupMs": 0,
+     "renderMs": 0.800000011920929,
+     "totalMs": 0.800000011920929
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 2749.100000023842,
+     "endedAt": 2750,
+     "setupMs": 0,
+     "renderMs": 0.8999999761581421,
+     "totalMs": 0.8999999761581421
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 2750,
+     "endedAt": 2753.800000011921,
+     "setupMs": 0,
+     "renderMs": 3.800000011920929,
+     "totalMs": 3.800000011920929
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 2753.800000011921,
+     "endedAt": 2754,
+     "setupMs": 0,
+     "renderMs": 0.19999998807907104,
+     "totalMs": 0.19999998807907104
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 2795.600000023842,
+     "endedAt": 2798.300000011921,
+     "setupMs": 0,
+     "renderMs": 2.699999988079071,
+     "totalMs": 2.699999988079071
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 2798.300000011921,
+     "endedAt": 2800.100000023842,
+     "setupMs": 0,
+     "renderMs": 1.800000011920929,
+     "totalMs": 1.800000011920929
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 2800.100000023842,
+     "endedAt": 2800.400000035763,
+     "setupMs": 0,
+     "renderMs": 0.30000001192092896,
+     "totalMs": 0.30000001192092896
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 2800.400000035763,
+     "endedAt": 2800.800000011921,
+     "setupMs": 0,
+     "renderMs": 0.3999999761581421,
+     "totalMs": 0.3999999761581421
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 2800.800000011921,
+     "endedAt": 2801.100000023842,
+     "setupMs": 0,
+     "renderMs": 0.30000001192092896,
+     "totalMs": 0.30000001192092896
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 2801.100000023842,
+     "endedAt": 2801.300000011921,
+     "setupMs": 0,
+     "renderMs": 0.19999998807907104,
+     "totalMs": 0.19999998807907104
+    },
+    {
+     "phase": "pulse-solo",
+     "startedAt": 2801.300000011921,
+     "endedAt": 2801.5,
+     "setupMs": 0.10000002384185791,
+     "renderMs": 0.09999996423721313,
+     "totalMs": 0.19999998807907104
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 2912.7000000476837,
+     "endedAt": 2913.800000011921,
+     "setupMs": 0,
+     "renderMs": 1.0999999642372131,
+     "totalMs": 1.0999999642372131
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 2913.800000011921,
+     "endedAt": 2923.400000035763,
+     "setupMs": 0,
+     "renderMs": 9.600000023841858,
+     "totalMs": 9.600000023841858
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 2923.400000035763,
+     "endedAt": 2926.7000000476837,
+     "setupMs": 0,
+     "renderMs": 3.300000011920929,
+     "totalMs": 3.300000011920929
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 2928.100000023842,
+     "endedAt": 2929.2000000476837,
+     "setupMs": 0,
+     "renderMs": 1.100000023841858,
+     "totalMs": 1.100000023841858
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 2929.2000000476837,
+     "endedAt": 2930.2000000476837,
+     "setupMs": 0,
+     "renderMs": 1,
+     "totalMs": 1
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 2930.2000000476837,
+     "endedAt": 2931.5,
+     "setupMs": 0,
+     "renderMs": 1.2999999523162842,
+     "totalMs": 1.2999999523162842
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 2931.5,
+     "endedAt": 2933,
+     "setupMs": 0,
+     "renderMs": 1.5,
+     "totalMs": 1.5
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 2933,
+     "endedAt": 2940.100000023842,
+     "setupMs": 0,
+     "renderMs": 7.100000023841858,
+     "totalMs": 7.100000023841858
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 2945.7000000476837,
+     "endedAt": 2947.400000035763,
+     "setupMs": 0,
+     "renderMs": 1.699999988079071,
+     "totalMs": 1.699999988079071
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 2947.400000035763,
+     "endedAt": 2947.900000035763,
+     "setupMs": 0,
+     "renderMs": 0.5,
+     "totalMs": 0.5
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 2947.900000035763,
+     "endedAt": 2948.300000011921,
+     "setupMs": 0,
+     "renderMs": 0.3999999761581421,
+     "totalMs": 0.3999999761581421
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 2948.300000011921,
+     "endedAt": 2948.900000035763,
+     "setupMs": 0,
+     "renderMs": 0.6000000238418579,
+     "totalMs": 0.6000000238418579
+    },
+    {
+     "phase": "normal-solo",
+     "startedAt": 2948.900000035763,
+     "endedAt": 2949.100000023842,
+     "setupMs": 0,
+     "renderMs": 0.19999998807907104,
+     "totalMs": 0.19999998807907104
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 2978.7000000476837,
+     "endedAt": 2979.300000011921,
+     "setupMs": 0,
+     "renderMs": 0.5999999642372131,
+     "totalMs": 0.5999999642372131
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 2979.300000011921,
+     "endedAt": 2979.600000023842,
+     "setupMs": 0,
+     "renderMs": 0.30000001192092896,
+     "totalMs": 0.30000001192092896
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 2979.600000023842,
+     "endedAt": 2979.800000011921,
+     "setupMs": 0,
+     "renderMs": 0.19999998807907104,
+     "totalMs": 0.19999998807907104
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 2979.800000011921,
+     "endedAt": 2980.100000023842,
+     "setupMs": 0,
+     "renderMs": 0.30000001192092896,
+     "totalMs": 0.30000001192092896
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 2980.100000023842,
+     "endedAt": 2980.400000035763,
+     "setupMs": 0,
+     "renderMs": 0.30000001192092896,
+     "totalMs": 0.30000001192092896
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 2980.400000035763,
+     "endedAt": 2980.900000035763,
+     "setupMs": 0,
+     "renderMs": 0.5,
+     "totalMs": 0.5
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 2980.900000035763,
+     "endedAt": 2981.300000011921,
+     "setupMs": 0,
+     "renderMs": 0.3999999761581421,
+     "totalMs": 0.3999999761581421
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 2981.300000011921,
+     "endedAt": 2982.2000000476837,
+     "setupMs": 0,
+     "renderMs": 0.9000000357627869,
+     "totalMs": 0.9000000357627869
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 2982.2000000476837,
+     "endedAt": 2982.5,
+     "setupMs": 0,
+     "renderMs": 0.2999999523162842,
+     "totalMs": 0.2999999523162842
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 2982.5,
+     "endedAt": 2982.7000000476837,
+     "setupMs": 0,
+     "renderMs": 0.20000004768371582,
+     "totalMs": 0.20000004768371582
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 2982.7000000476837,
+     "endedAt": 2983,
+     "setupMs": 0,
+     "renderMs": 0.2999999523162842,
+     "totalMs": 0.2999999523162842
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 2983,
+     "endedAt": 2983.2000000476837,
+     "setupMs": 0,
+     "renderMs": 0.20000004768371582,
+     "totalMs": 0.20000004768371582
+    },
+    {
+     "phase": "fade-solo",
+     "startedAt": 2983.2000000476837,
+     "endedAt": 2983.400000035763,
+     "setupMs": 0,
+     "renderMs": 0.19999998807907104,
+     "totalMs": 0.19999998807907104
+    },
+    {
+     "phase": "pulse-solo",
+     "startedAt": 2983.400000035763,
+     "endedAt": 2983.5,
+     "setupMs": 0,
+     "renderMs": 0.09999996423721313,
+     "totalMs": 0.09999996423721313
+    },
+    {
+     "phase": "fade-pair",
+     "startedAt": 2983.600000023842,
+     "endedAt": 2986.5,
+     "setupMs": 0.10000002384185791,
+     "renderMs": 2.799999952316284,
+     "totalMs": 2.899999976158142
+    },
+    {
+     "phase": "fade-pair",
+     "startedAt": 2986.5,
+     "endedAt": 2989.2000000476837,
+     "setupMs": 0.20000004768371582,
+     "renderMs": 2.5,
+     "totalMs": 2.700000047683716
+    },
+    {
+     "phase": "fade-pair",
+     "startedAt": 2989.2000000476837,
+     "endedAt": 2992.7000000476837,
+     "setupMs": 0,
+     "renderMs": 3.5,
+     "totalMs": 3.5
+    },
+    {
+     "phase": "fade-pair",
+     "startedAt": 2995.7000000476837,
+     "endedAt": 2998.800000011921,
+     "setupMs": 0.09999996423721313,
+     "renderMs": 3,
+     "totalMs": 3.099999964237213
+    },
+    {
+     "phase": "fade-pair",
+     "startedAt": 2998.800000011921,
+     "endedAt": 3000.100000023842,
+     "setupMs": 0,
+     "renderMs": 1.300000011920929,
+     "totalMs": 1.300000011920929
+    },
+    {
+     "phase": "fade-pair",
+     "startedAt": 3000.100000023842,
+     "endedAt": 3001.300000011921,
+     "setupMs": 0,
+     "renderMs": 1.199999988079071,
+     "totalMs": 1.199999988079071
+    },
+    {
+     "phase": "fade-pair",
+     "startedAt": 3001.400000035763,
+     "endedAt": 3002.400000035763,
+     "setupMs": 0,
+     "renderMs": 1,
+     "totalMs": 1
+    },
+    {
+     "phase": "fade-pair",
+     "startedAt": 3002.400000035763,
+     "endedAt": 3003.100000023842,
+     "setupMs": 0.09999996423721313,
+     "renderMs": 0.6000000238418579,
+     "totalMs": 0.699999988079071
+    },
+    {
+     "phase": "fade-pair",
+     "startedAt": 3003.100000023842,
+     "endedAt": 3004.400000035763,
+     "setupMs": 0.10000002384185791,
+     "renderMs": 1.199999988079071,
+     "totalMs": 1.300000011920929
+    },
+    {
+     "phase": "shadow",
+     "startedAt": 3004.5,
+     "endedAt": 3093.600000023842,
+     "setupMs": 0,
+     "renderMs": 89.10000002384186,
+     "totalMs": 89.10000002384186
+    },
+    {
+     "phase": "shadow",
+     "startedAt": 3096.100000023842,
+     "endedAt": 3097.100000023842,
+     "setupMs": 0,
+     "renderMs": 1,
+     "totalMs": 1
+    },
+    {
+     "phase": "gate-response",
+     "startedAt": 3097.300000011921,
+     "endedAt": 3102.600000023842,
+     "setupMs": 0,
+     "renderMs": 5.300000011920929,
+     "totalMs": 5.300000011920929
+    },
+    {
+     "phase": "full-scene-control",
+     "startedAt": 3103,
+     "endedAt": 3104.900000035763,
+     "setupMs": 0,
+     "renderMs": 1.9000000357627869,
+     "totalMs": 1.9000000357627869
+    }
+   ],
+   "readyAt": 3105.300000011921,
+   "warmupCars": "all"
+  },
+  "resources": [
+   {
+    "name": "http://127.0.0.1:5248/models/tour/nissan_gtr_gt3.glb",
+    "duration": 17.600000023841858,
+    "transferSize": 1649348,
+    "decodedBodySize": 1649048
+   },
+   {
+    "name": "http://127.0.0.1:5248/models/tour/lexus_rcf_gt3.glb",
+    "duration": 26.30000001192093,
+    "transferSize": 2627520,
+    "decodedBodySize": 2627220
+   },
+   {
+    "name": "http://127.0.0.1:5248/models/tour/audi_r8_gt3.glb",
+    "duration": 23.19999998807907,
+    "transferSize": 2309580,
+    "decodedBodySize": 2309280
+   },
+   {
+    "name": "http://127.0.0.1:5248/models/tour/bmw_m6_gt3.glb",
+    "duration": 40.39999997615814,
+    "transferSize": 3926668,
+    "decodedBodySize": 3926368
+   },
+   {
+    "name": "http://127.0.0.1:5248/models/tour/ferrari_488_gt3.glb",
+    "duration": 7,
+    "transferSize": 640592,
+    "decodedBodySize": 640292
+   },
+   {
+    "name": "http://127.0.0.1:5248/models/tour/mercedes_amg_gt3.glb",
+    "duration": 19.400000035762787,
+    "transferSize": 1666972,
+    "decodedBodySize": 1666672
+   },
+   {
+    "name": "http://127.0.0.1:5248/models/tour/aston_vantage_gt3.glb",
+    "duration": 24.80000001192093,
+    "transferSize": 482888,
+    "decodedBodySize": 482588
+   },
+   {
+    "name": "http://127.0.0.1:5248/models/tour/mclaren_720s_gt3.glb",
+    "duration": 42.30000001192093,
+    "transferSize": 3016348,
+    "decodedBodySize": 3016048
+   },
+   {
+    "name": "http://127.0.0.1:5248/models/tour/lamborghini_huracan_gt3.glb",
+    "duration": 74.30000001192093,
+    "transferSize": 3101784,
+    "decodedBodySize": 3101484
+   },
+   {
+    "name": "http://127.0.0.1:5248/models/tour/porsche_911_gt3r.glb",
+    "duration": 75.70000004768372,
+    "transferSize": 2625240,
+    "decodedBodySize": 2624940
+   },
+   {
+    "name": "http://127.0.0.1:5248/draco/gltf/draco_wasm_wrapper.js",
+    "duration": 21.399999976158142,
+    "transferSize": 58756,
+    "decodedBodySize": 58456
+   },
+   {
+    "name": "http://127.0.0.1:5248/draco/gltf/draco_decoder.wasm",
+    "duration": 25.19999998807907,
+    "transferSize": 192720,
+    "decodedBodySize": 192420
+   }
+  ],
+  "rendererMemory": {
+   "geometries": 1501,
+   "textures": 302
+  },
+  "programs": 113
+ },
+ "pass": true
+}

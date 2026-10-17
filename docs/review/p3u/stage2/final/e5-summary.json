@@ -1,0 +1,273 @@
+{
+  "run": "p3u/e5",
+  "testedProductSource": "fa9f19be4b6c073212583db4cecb2b41126fa083",
+  "integration": "82e993d (docs/images-only after tested product)",
+  "swap": {
+    "runnerExit": 1,
+    "variants": {
+      "autoDay": {
+        "passPhases": 14,
+        "failedPhases": [
+          {
+            "label": "A1 input during GPU warm-up is ignored; first gesture after ready starts",
+            "status": "FAIL",
+            "message": "only 1 wheel events were handled during warm-up"
+          }
+        ],
+        "errors": [],
+        "dayResourceDelta": {
+          "programs": 0,
+          "textures": 0,
+          "geometries": 0
+        },
+        "nightResourceDelta": {
+          "programs": 0,
+          "textures": 0,
+          "geometries": 0
+        }
+      },
+      "autoNight": {
+        "passPhases": 14,
+        "failedPhases": [
+          {
+            "label": "A1 input during GPU warm-up is ignored; first gesture after ready starts",
+            "status": "FAIL",
+            "message": "only 1 wheel events were handled during warm-up"
+          }
+        ],
+        "errors": [],
+        "dayResourceDelta": {
+          "programs": 0,
+          "textures": 0,
+          "geometries": 0
+        },
+        "nightResourceDelta": {
+          "programs": 0,
+          "textures": 0,
+          "geometries": 0
+        }
+      }
+    },
+    "judgment": "28 swap behavior phases pass; two A1 fixture coverage assertions insufficient (1 warmup wheel, require3). No threshold changed. Dedicated refreshed pre-ready suite supplies actual boundary behavior evidence."
+  },
+  "preready": {
+    "base": "http://127.0.0.1:5247/?version=unlocked",
+    "cases": {
+      "A": {
+        "wheelEventsSent": 24,
+        "maxGapMs": 271,
+        "atStop": {
+          "progress": 0,
+          "started": false,
+          "locked": true,
+          "active": 0,
+          "ready": "ready",
+          "startVisible": true,
+          "sfx": {
+            "checkpointCross": 0,
+            "audible": 0
+          }
+        },
+        "settled": {
+          "progress": 0,
+          "started": false,
+          "locked": false,
+          "active": 0,
+          "ready": "ready",
+          "startVisible": true,
+          "sfx": {
+            "checkpointCross": 0,
+            "audible": 0
+          }
+        },
+        "probe": [
+          "17 none|locked=false|started=false|y=0 guard=true",
+          "776 loading|locked=true|started=false|y=0 guard=false",
+          "2309 ready|locked=true|started=false|y=0 guard=false",
+          "2941 ready|locked=false|started=false|y=0 guard=false"
+        ],
+        "postReadyInputStarted": false,
+        "firstRealGesture": {
+          "progress": 0.009292407752573052,
+          "started": true,
+          "locked": false,
+          "active": 0,
+          "ready": "ready",
+          "startVisible": false,
+          "sfx": {
+            "checkpointCross": 0,
+            "audible": 0
+          }
+        }
+      },
+      "C": {
+        "before": 0,
+        "afterForward": 1,
+        "afterReverse": {
+          "checkpointCross": 1,
+          "audible": 1
+        },
+        "crossedAt": 0.09345182399386676
+      },
+      "B": {
+        "saved": 0.3119255597617303,
+        "savedActive": 3,
+        "restored": {
+          "progress": 0.3119269376117507,
+          "started": false,
+          "locked": false,
+          "active": 3,
+          "ready": "ready",
+          "startVisible": true,
+          "sfx": {
+            "checkpointCross": 0,
+            "audible": 0
+          }
+        },
+        "gate": {
+          "readyAt": 2038,
+          "unlockAt": 3051,
+          "momentumEnd": 2808
+        }
+      }
+    },
+    "errors": [],
+    "pass": true
+  },
+  "smooth": {
+    "status": "incomplete_host_stop",
+    "monitorError": "Two consecutive nonnormal memory-pressure samples",
+    "errors": [
+      "Error: Two consecutive nonnormal memory-pressure samples\n    at file:///Users/shahzadsheikh/Desktop/gt3/.claude/worktrees/p3u-final/scripts/p3u-w6-perf.mjs:134:38"
+    ],
+    "recordedFrames": 693,
+    "recordedSeconds": 11.533,
+    "rafIntervalsOver33ms": 0,
+    "qualification": "11.5s is not sustained qualification; no 10minute performance conclusion",
+    "display": {
+      "mode": "native-fullscreen",
+      "deviceEmulation": "none (defaultViewport null: real window, real device pixel ratio)",
+      "fullscreen": {
+        "startedWindowState": "maximized",
+        "endedWindowState": "fullscreen",
+        "method": "CDP Browser.setWindowBounds"
+      },
+      "geometry": {
+        "expected": {
+          "width": 1470,
+          "height": 919,
+          "dpr": 2
+        },
+        "rounds": 7,
+        "pass": true,
+        "measured": {
+          "width": 1470,
+          "height": 919,
+          "dpr": 2,
+          "screen": {
+            "width": 1470,
+            "height": 956
+          },
+          "visibility": "visible",
+          "webdriver": true,
+          "elementFullscreen": true
+        },
+        "documentFullscreenAttempt": true
+      },
+      "screen": {
+        "width": 1470,
+        "height": 956
+      }
+    },
+    "product": {
+      "settings": {
+        "dpr": 1.5,
+        "output": true,
+        "carEnvironment": true,
+        "textureSet": "tour",
+        "anisotropy": 8,
+        "shadowMapSize": 4096,
+        "stableShadows": true
+      },
+      "version": "unlocked",
+      "mode": "smooth",
+      "pixelRatio": 1.5,
+      "canvas": [
+        2205,
+        1378
+      ],
+      "targets": [
+        {
+          "width": 2205,
+          "height": 1378.5,
+          "type": 1016,
+          "samples": 0
+        },
+        {
+          "width": 2205,
+          "height": 1378.5,
+          "type": 1016,
+          "samples": 0
+        }
+      ],
+      "passes": [
+        {
+          "name": "RenderPass",
+          "enabled": true
+        },
+        {
+          "name": "ShaderPass",
+          "enabled": true
+        },
+        {
+          "name": "ShaderPass",
+          "enabled": true
+        },
+        {
+          "name": "SMAAPass",
+          "enabled": true
+        }
+      ],
+      "programs": 116,
+      "memory": {
+        "geometries": 1501,
+        "textures": 303
+      }
+    },
+    "powerSource": "AC Power",
+    "lowPowerMode": false,
+    "host": [
+      {
+        "at": "2026-10-17T14:59:25.477Z",
+        "elapsedSeconds": 0.497,
+        "pressure": 2,
+        "pageouts": 827492,
+        "swapouts": 1155784,
+        "idle": 71.21,
+        "system": 16.23
+      },
+      {
+        "at": "2026-10-17T14:59:35.995Z",
+        "elapsedSeconds": 11.014,
+        "pressure": 2,
+        "pageouts": 827671,
+        "swapouts": 1155784,
+        "idle": 70.16,
+        "system": 14.81
+      },
+      {
+        "at": "2026-10-17T14:59:36.524Z",
+        "elapsedSeconds": 11.545,
+        "pressure": 2,
+        "pageouts": 827671,
+        "swapouts": 1155784,
+        "idle": 62.34,
+        "system": 16.46
+      }
+    ]
+  },
+  "quality": {
+    "status": "not_started_after_smooth_host_stop"
+  },
+  "sourceChanges": "none; reused prior build/Locked/W3-W6/minimap evidence"
+}

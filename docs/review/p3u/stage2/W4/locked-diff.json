@@ -1,0 +1,168 @@
+{
+  "a": "/Users/shahzadsheikh/Desktop/gt3/.claude/worktrees/p3u-w4/local/evidence/p3u/w4/locked/ref",
+  "b": "/Users/shahzadsheikh/Desktop/gt3/.claude/worktrees/p3u-w4/local/evidence/p3u/w4/locked/w4",
+  "identical": true,
+  "results": [
+    {
+      "state": "lexus-day",
+      "identical": true,
+      "maxChannelDelta": 0,
+      "differingPixels": 0,
+      "pixels": 5621280
+    },
+    {
+      "state": "lexus-night",
+      "identical": true,
+      "maxChannelDelta": 0,
+      "differingPixels": 0,
+      "pixels": 5621280
+    },
+    {
+      "state": "nissan-day",
+      "identical": true,
+      "maxChannelDelta": 0,
+      "differingPixels": 0,
+      "pixels": 5621280
+    },
+    {
+      "state": "nissan-night",
+      "identical": true,
+      "maxChannelDelta": 0,
+      "differingPixels": 0,
+      "pixels": 5621280
+    },
+    {
+      "state": "audi-day",
+      "identical": true,
+      "maxChannelDelta": 0,
+      "differingPixels": 0,
+      "pixels": 5621280
+    },
+    {
+      "state": "audi-night",
+      "identical": true,
+      "maxChannelDelta": 0,
+      "differingPixels": 0,
+      "pixels": 5621280
+    },
+    {
+      "state": "bmw-day",
+      "identical": true,
+      "maxChannelDelta": 0,
+      "differingPixels": 0,
+      "pixels": 5621280
+    },
+    {
+      "state": "bmw-night",
+      "identical": true,
+      "maxChannelDelta": 0,
+      "differingPixels": 0,
+      "pixels": 5621280
+    },
+    {
+      "state": "mercedes-day",
+      "identical": true,
+      "maxChannelDelta": 0,
+      "differingPixels": 0,
+      "pixels": 5621280
+    },
+    {
+      "state": "mercedes-night",
+      "identical": true,
+      "maxChannelDelta": 0,
+      "differingPixels": 0,
+      "pixels": 5621280
+    },
+    {
+      "state": "ferrari-day",
+      "identical": true,
+      "maxChannelDelta": 0,
+      "differingPixels": 0,
+      "pixels": 5621280
+    },
+    {
+      "state": "ferrari-night",
+      "identical": true,
+      "maxChannelDelta": 0,
+      "differingPixels": 0,
+      "pixels": 5621280
+    },
+    {
+      "state": "mclaren-day",
+      "identical": true,
+      "maxChannelDelta": 0,
+      "differingPixels": 0,
+      "pixels": 5621280
+    },
+    {
+      "state": "mclaren-night",
+      "identical": true,
+      "maxChannelDelta": 0,
+      "differingPixels": 0,
+      "pixels": 5621280
+    },
+    {
+      "state": "aston-day",
+      "identical": true,
+      "maxChannelDelta": 0,
+      "differingPixels": 0,
+      "pixels": 5621280
+    },
+    {
+      "state": "aston-night",
+      "identical": true,
+      "maxChannelDelta": 0,
+      "differingPixels": 0,
+      "pixels": 5621280
+    },
+    {
+      "state": "lamborghini-day",
+      "identical": true,
+      "maxChannelDelta": 0,
+      "differingPixels": 0,
+      "pixels": 5621280
+    },
+    {
+      "state": "lamborghini-night",
+      "identical": true,
+      "maxChannelDelta": 0,
+      "differingPixels": 0,
+      "pixels": 5621280
+    },
+    {
+      "state": "porsche-day",
+      "identical": true,
+      "maxChannelDelta": 0,
+      "differingPixels": 0,
+      "pixels": 5621280
+    },
+    {
+      "state": "porsche-night",
+      "identical": true,
+      "maxChannelDelta": 0,
+      "differingPixels": 0,
+      "pixels": 5621280
+    },
+    {
+      "state": "grid",
+      "identical": true,
+      "maxChannelDelta": 0,
+      "differingPixels": 0,
+      "pixels": 5621280
+    },
+    {
+      "state": "gate",
+      "identical": true,
+      "maxChannelDelta": 0,
+      "differingPixels": 0,
+      "pixels": 5621280
+    },
+    {
+      "state": "finish",
+      "identical": true,
+      "maxChannelDelta": 0,
+      "differingPixels": 0,
+      "pixels": 5621280
+    }
+  ]
+}

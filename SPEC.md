@@ -835,7 +835,7 @@ Raised during Phase 3 review, owned by later phases, and **not to be implemented
 | Authored elevation: grades, crests/compressions, banked turns, terrain-integrated road (supersedes "modest circuit elevation") | E | Phase 8 | §17, §16 |
 | Standing-start five-lamp overlay + single SCROLL TO RACE control | R | Phases 4–5 | §25 |
 | Designed completion experience replacing the interim compact notice and V1 lock (§18 *Finish*) | R | Phase 7 | §21–22 |
-| Selective Night illumination: floodlight towers, integrated fixtures, model-aware headlights, local gate/swap spill | R | Phase 8 | §13a |
+| Selective Night illumination: floodlight towers, integrated fixtures, model-aware headlights, local gate/swap spill. *Owner, 2026-10-17 (Phase 3 unlocked review):* Night needs additional environmental and trackside lighting to reach its full potential. This is an explicit Phase 8 design requirement for exploration and owner review. Not implemented in the Phase 3 reopening; the final creative treatment is the owner's | R | Phase 8 | §13a |
 | Richer facility architecture: pit complex, landmark structures, grandstands | E | Phase 8 | §16–17 |
 | Wheel-only motion blur | E | unassigned (Phase 8 polish) | §30.9 |
 | Ten-car wheel-spin rig re-authoring | D | only if the owner reopens it | §30.9 |
@@ -849,7 +849,7 @@ Raised during Phase 3 review, owned by later phases, and **not to be implemented
 | Environment comparison: OMA white, gray/night, white with light/shadow variations, green as baseline | E | Phase 8 | §16 |
 | Full-quality Showcase models (Tour stays 512-px) | R | Phase 6 | §30.10 |
 | Showcase draws with the shared renderer: give it its own full resolution and anti-aliasing (the Tour now runs fixed DPR1, no canvas MSAA) | R | Phase 6 | §27 |
-| Grand Tour rendering-quality profiles (proposed URLs): `?version=locked` is compatibility-oriented and keeps the accepted fixed DPR1 + SMAA baseline; `?version=unlocked` is higher quality, initially intended for the M4, with final DPR and other settings set by later measurement and owner review. Neither host nor manager selects the profile automatically without a later explicit policy; either Mac may render any profile it can technically support. Unrelated to locked/unlocked car identities. Not implemented (owner direction, 2026-10-16) | R | targeted Phase 3 reopening, when the owner opens it | §27 |
+| Grand Tour rendering-quality profiles — implemented and HUMAN-ACCEPTED (owner, 2026-10-17). No parameter / `?version=locked` preserves accepted fixedDPR1+SMAA. Explicit `?version=unlocked` defaults to QualityDPR2; `&mode=smooth` selects DPR1.5. NeutralDay/ACESNight, mediumreflections, quarterDaycarspecular, SMAA, stabilizedshadows and approved loading/image/glass/minimap retained. Final integrated600s/mode M4 qualification is deferred, explicitly accepted for closure and NOT passed. No automatic host-based profile selection. Unrelated to car discovery identities. | R | Phase3 reopening complete; locally integrated | §27; docs/review/p3u/OWNER-REVIEW.md |
 | UI/UX craft uplift (hierarchy, interactions, transitions, modelling/lighting, delight) | R | every phase | §23 |
 | Custom site-wide cursor | dropped | — | §28 |
 

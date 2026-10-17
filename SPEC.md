@@ -835,7 +835,7 @@ Raised during Phase 3 review, owned by later phases, and **not to be implemented
 | Authored elevation: grades, crests/compressions, banked turns, terrain-integrated road (supersedes "modest circuit elevation") | E | Phase 8 | §17, §16 |
 | Standing-start five-lamp overlay + single SCROLL TO RACE control | R | Phases 4–5 | §25 |
 | Designed completion experience replacing the interim compact notice and V1 lock (§18 *Finish*) | R | Phase 7 | §21–22 |
-| Selective Night illumination: floodlight towers, integrated fixtures, model-aware headlights, local gate/swap spill | R | Phase 8 | §13a |
+| Selective Night illumination: floodlight towers, integrated fixtures, model-aware headlights, local gate/swap spill. *Owner, 2026-10-17 (Phase 3 unlocked review):* Night needs additional environmental and trackside lighting to reach its full potential. This is an explicit Phase 8 design requirement for exploration and owner review. Not implemented in the Phase 3 reopening; the final creative treatment is the owner's | R | Phase 8 | §13a |
 | Richer facility architecture: pit complex, landmark structures, grandstands | E | Phase 8 | §16–17 |
 | Wheel-only motion blur | E | unassigned (Phase 8 polish) | §30.9 |
 | Ten-car wheel-spin rig re-authoring | D | only if the owner reopens it | §30.9 |

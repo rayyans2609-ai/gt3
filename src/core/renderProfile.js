@@ -18,11 +18,13 @@ export const UNLOCKED = VERSION === 'unlocked';
 export const QUALITY_MODE = UNLOCKED && params.get('mode') === 'quality' ? 'quality' : 'smooth';
 const requestedTone = params.get('tone');
 const requestedReflection = params.get('refl');
-export const TONE = UNLOCKED && ['aces', 'agx', 'neutral', 'split'].includes(requestedTone) ? requestedTone : 'neutral';
+// Owner-approved Stage 1 unlocked look (2026-10-17): split tone (Neutral Day / ACES Night),
+// mid reflections, quarter Day car specular. The URL overrides remain for review comparisons.
+export const TONE = UNLOCKED && ['aces', 'agx', 'neutral', 'split'].includes(requestedTone) ? requestedTone : 'split';
 export const REFLECTION = UNLOCKED && ['low', 'mid', 'high'].includes(requestedReflection) ? requestedReflection : 'mid';
 
 // Review-only T5 controls; locked ignores both.
-export const CAR_SPECULAR = UNLOCKED && params.get('carspec') === 'quarter' ? 0.25 : 1;
+export const CAR_SPECULAR = UNLOCKED && params.get('carspec') !== 'full' ? 0.25 : 1;
 export const NIGHT_CAR_TOE = UNLOCKED && TONE === 'neutral' && params.get('nightcar') === 'toe';
 
 // Stage 1 candidates, not the Stage 2 frontier verdict. Both use the accepted SMAA,

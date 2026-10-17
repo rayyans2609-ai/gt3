@@ -7,7 +7,7 @@
  */
 import * as THREE from 'three';
 import { SETTINGS, TONE, REFLECTION } from '../core/renderProfile.js';
-import { setCarReflectionStrength } from './carEnvironment.js';
+import { setCarReflectionStrength, setCarReviewTreatment } from './carEnvironment.js';
 import { state, set, subscribe } from '../core/state.js';
 import {
   ambient,
@@ -80,6 +80,7 @@ function makeFrame(preset) {
     grassColor: new THREE.Color(preset.grassTint.color),
     grassAmount: preset.grassTint.amount,
     ...(treatment ? {
+      nightWeight: preset === PRESETS.night ? 1 : 0,
       exposure: treatment.exposure[TONE], reflection: treatment.reflection[REFLECTION],
       fogColor: new THREE.Color(...atmosphere.fog),
       skyHorizon: new THREE.Color(...atmosphere.horizon),
@@ -107,6 +108,7 @@ function copyFrame(source, target = makeFrame(PRESETS.day)) {
   target.skySunColor.copy(source.skySunColor);
   target.skySunIntensity = source.skySunIntensity;
   if (SETTINGS.carEnvironment) target.reflection = source.reflection;
+  if (SETTINGS.carEnvironment) target.nightWeight = source.nightWeight;
   target.exposure = source.exposure;
   target.grassColor.copy(source.grassColor);
   target.grassAmount = source.grassAmount;
@@ -132,6 +134,7 @@ function blendFrame(from, to, amount, out) {
   out.skySunColor.lerpColors(from.skySunColor, to.skySunColor, amount);
   out.skySunIntensity = THREE.MathUtils.lerp(from.skySunIntensity, to.skySunIntensity, amount);
   if (SETTINGS.carEnvironment) out.reflection = THREE.MathUtils.lerp(from.reflection, to.reflection, amount);
+  if (SETTINGS.carEnvironment) out.nightWeight = THREE.MathUtils.lerp(from.nightWeight, to.nightWeight, amount);
   out.exposure = THREE.MathUtils.lerp(from.exposure, to.exposure, amount);
   out.grassColor.lerpColors(from.grassColor, to.grassColor, amount);
   out.grassAmount = THREE.MathUtils.lerp(from.grassAmount, to.grassAmount, amount);
@@ -208,6 +211,7 @@ function writeFrame(frame) {
     uSunIntensity: frame.skySunIntensity,
   });
   if (SETTINGS.carEnvironment) setCarReflectionStrength(frame.reflection);
+  if (SETTINGS.carEnvironment) setCarReviewTreatment(frame.nightWeight, frame.exposure);
   toneMappingExposure.value = frame.exposure;
   setGroundTint(frame.grassColor, frame.grassAmount);
 }

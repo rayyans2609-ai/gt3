@@ -1,0 +1,35 @@
+{
+  "a": "local/evidence/p3u/t5/after",
+  "b": "local/evidence/p3u/t5/option-combined",
+  "identical": true,
+  "results": [
+    {
+      "state": "lexus-night",
+      "identical": true,
+      "maxChannelDelta": 0,
+      "differingPixels": 0,
+      "pixels": 5621280
+    },
+    {
+      "state": "ferrari-day",
+      "identical": true,
+      "maxChannelDelta": 0,
+      "differingPixels": 0,
+      "pixels": 5621280
+    },
+    {
+      "state": "mclaren-night",
+      "identical": true,
+      "maxChannelDelta": 0,
+      "differingPixels": 0,
+      "pixels": 5621280
+    },
+    {
+      "state": "lamborghini-night",
+      "identical": true,
+      "maxChannelDelta": 0,
+      "differingPixels": 0,
+      "pixels": 5621280
+    }
+  ]
+}

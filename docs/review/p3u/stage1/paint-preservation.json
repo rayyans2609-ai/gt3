@@ -1,0 +1,212 @@
+[
+  {
+    "key": "aces-mid",
+    "state": "lexus-day",
+    "originalPaintPreserved": true
+  },
+  {
+    "key": "aces-mid",
+    "state": "lexus-night",
+    "originalPaintPreserved": true
+  },
+  {
+    "key": "aces-mid",
+    "state": "bmw-day",
+    "originalPaintPreserved": true
+  },
+  {
+    "key": "aces-mid",
+    "state": "bmw-night",
+    "originalPaintPreserved": true
+  },
+  {
+    "key": "aces-mid",
+    "state": "ferrari-day",
+    "originalPaintPreserved": true
+  },
+  {
+    "key": "aces-mid",
+    "state": "ferrari-night",
+    "originalPaintPreserved": true
+  },
+  {
+    "key": "aces-mid",
+    "state": "mclaren-day",
+    "originalPaintPreserved": true
+  },
+  {
+    "key": "aces-mid",
+    "state": "mclaren-night",
+    "originalPaintPreserved": true
+  },
+  {
+    "key": "aces-mid",
+    "state": "lamborghini-day",
+    "originalPaintPreserved": true
+  },
+  {
+    "key": "aces-mid",
+    "state": "lamborghini-night",
+    "originalPaintPreserved": true
+  },
+  {
+    "key": "agx-mid",
+    "state": "lexus-day",
+    "originalPaintPreserved": true
+  },
+  {
+    "key": "agx-mid",
+    "state": "lexus-night",
+    "originalPaintPreserved": true
+  },
+  {
+    "key": "agx-mid",
+    "state": "bmw-day",
+    "originalPaintPreserved": true
+  },
+  {
+    "key": "agx-mid",
+    "state": "bmw-night",
+    "originalPaintPreserved": true
+  },
+  {
+    "key": "agx-mid",
+    "state": "ferrari-day",
+    "originalPaintPreserved": true
+  },
+  {
+    "key": "agx-mid",
+    "state": "ferrari-night",
+    "originalPaintPreserved": true
+  },
+  {
+    "key": "agx-mid",
+    "state": "mclaren-day",
+    "originalPaintPreserved": true
+  },
+  {
+    "key": "agx-mid",
+    "state": "mclaren-night",
+    "originalPaintPreserved": true
+  },
+  {
+    "key": "agx-mid",
+    "state": "lamborghini-day",
+    "originalPaintPreserved": true
+  },
+  {
+    "key": "agx-mid",
+    "state": "lamborghini-night",
+    "originalPaintPreserved": true
+  },
+  {
+    "key": "neutral-mid",
+    "state": "lexus-day",
+    "originalPaintPreserved": true
+  },
+  {
+    "key": "neutral-mid",
+    "state": "lexus-night",
+    "originalPaintPreserved": true
+  },
+  {
+    "key": "neutral-mid",
+    "state": "bmw-day",
+    "originalPaintPreserved": true
+  },
+  {
+    "key": "neutral-mid",
+    "state": "bmw-night",
+    "originalPaintPreserved": true
+  },
+  {
+    "key": "neutral-mid",
+    "state": "ferrari-day",
+    "originalPaintPreserved": true
+  },
+  {
+    "key": "neutral-mid",
+    "state": "ferrari-night",
+    "originalPaintPreserved": true
+  },
+  {
+    "key": "neutral-mid",
+    "state": "mclaren-day",
+    "originalPaintPreserved": true
+  },
+  {
+    "key": "neutral-mid",
+    "state": "mclaren-night",
+    "originalPaintPreserved": true
+  },
+  {
+    "key": "neutral-mid",
+    "state": "lamborghini-day",
+    "originalPaintPreserved": true
+  },
+  {
+    "key": "neutral-mid",
+    "state": "lamborghini-night",
+    "originalPaintPreserved": true
+  },
+  {
+    "key": "neutral-low",
+    "state": "lexus-day",
+    "originalPaintPreserved": true
+  },
+  {
+    "key": "neutral-low",
+    "state": "lexus-night",
+    "originalPaintPreserved": true
+  },
+  {
+    "key": "neutral-low",
+    "state": "mclaren-day",
+    "originalPaintPreserved": true
+  },
+  {
+    "key": "neutral-low",
+    "state": "mclaren-night",
+    "originalPaintPreserved": true
+  },
+  {
+    "key": "neutral-low",
+    "state": "lamborghini-day",
+    "originalPaintPreserved": true
+  },
+  {
+    "key": "neutral-low",
+    "state": "lamborghini-night",
+    "originalPaintPreserved": true
+  },
+  {
+    "key": "neutral-high",
+    "state": "lexus-day",
+    "originalPaintPreserved": true
+  },
+  {
+    "key": "neutral-high",
+    "state": "lexus-night",
+    "originalPaintPreserved": true
+  },
+  {
+    "key": "neutral-high",
+    "state": "mclaren-day",
+    "originalPaintPreserved": true
+  },
+  {
+    "key": "neutral-high",
+    "state": "mclaren-night",
+    "originalPaintPreserved": true
+  },
+  {
+    "key": "neutral-high",
+    "state": "lamborghini-day",
+    "originalPaintPreserved": true
+  },
+  {
+    "key": "neutral-high",
+    "state": "lamborghini-night",
+    "originalPaintPreserved": true
+  }
+]

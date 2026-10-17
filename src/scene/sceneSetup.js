@@ -11,6 +11,7 @@ import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 import { SMAAPass } from 'three/addons/postprocessing/SMAAPass.js';
+import { SETTINGS, TONE } from '../core/renderProfile.js';
 import { state } from '../core/state.js';
 import { TUNE as aerialTuning } from './aerialCamera.js';
 import { COMP } from './composition.js';
@@ -27,7 +28,7 @@ const _sunTargetPosition = new THREE.Vector3();
 // Owner-approved Phase 3 default (2026-10-14): one fixed render resolution with SMAA, no
 // idle/motion switching. Dynamic DPR switching measured as the dominant start/stop hitch source.
 // Setting high and low to the same value makes the switching path inert by construction.
-export const RENDER_DPR = 1;
+export const RENDER_DPR = SETTINGS.output ? SETTINGS.dpr : 1;
 export const ADAPTIVE_RES = {
   high: RENDER_DPR, // fixed; the former native-at-rest policy is retired
   low: RENDER_DPR, // fixed; no motion switching
@@ -278,8 +279,39 @@ function createPostProcessing() {
   antialiasPass = new SMAAPass();
   composer.addPass(antialiasPass);
 
+  if (SETTINGS.output) {
+    // Raw material avoids renderer-injected output transforms: this is the ONE
+    // linear HDR -> display sRGB boundary, before SMAA, with no extra draw.
+    const toneFunction = { aces: 'ACESFilmicToneMapping', agx: 'AgXToneMapping', neutral: 'NeutralToneMapping' }[TONE];
+    const shader = PREMIUM_WASH_SHADER;
+    const material = new THREE.RawShaderMaterial({
+      name: `GT3OutputWash-${TONE}`,
+      uniforms: { ...THREE.UniformsUtils.clone(shader.uniforms), toneMappingExposure: { value: toneMappingExposure.value } },
+      vertexShader: `precision highp float;
+        uniform mat4 projectionMatrix; uniform mat4 modelViewMatrix;
+        attribute vec3 position; attribute vec2 uv;
+        ${shader.vertexShader}`,
+      fragmentShader: `precision highp float;
+        #include <tonemapping_pars_fragment>
+        #include <colorspace_pars_fragment>
+        ${shader.fragmentShader.replace('vec2 fromCenter', `color.rgb = ${toneFunction}(color.rgb);
+          color = sRGBTransferOETF(color);
+          vec2 fromCenter`).replace('gl_FragColor = color;', `// +/- half an 8-bit code, decorrelated from the existing grain.
+          color.rgb += (random(gl_FragCoord.yx + vec2(19.19, 73.73)) - 0.5) / 255.0;
+          gl_FragColor = color;`)}`,
+      depthTest: false, depthWrite: false,
+    });
+    premiumPass = new ShaderPass(material);
+    const draw = premiumPass.render.bind(premiumPass);
+    premiumPass.render = function (r, ...args) {
+      this.uniforms.toneMappingExposure.value = r.toneMappingExposure;
+      return draw(r, ...args);
+    };
+    composer.insertPass(premiumPass, composer.passes.indexOf(antialiasPass));
+  } else {
   premiumPass = new ShaderPass(PREMIUM_WASH_SHADER);
   composer.addPass(premiumPass);
+  }
 }
 
 /**

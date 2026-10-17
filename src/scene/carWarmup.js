@@ -1,5 +1,7 @@
 /** Exercise car render states through the Tour renderer before drive unlock. */
 import * as THREE from 'three';
+import { SETTINGS } from '../core/renderProfile.js';
+import { prepareCarEnvironment } from './carEnvironment.js';
 import { CARS } from '../data/cars.js';
 import { getCarModel } from './cars.js';
 import { carMount, rig } from './carRig.js';
@@ -19,6 +21,7 @@ export const WARMUP_FRAME_BUDGET_MS = 12;
 export function createCarWarmup(onProgress, onStep, { throwAtDraw = -1 } = {}) {
   const starter = carMount.children[0];
   if (!starter) throw new Error('[warmup] No visible starter car');
+  if (SETTINGS.carEnvironment) prepareCarEnvironment(renderer, CARS.map((_, index) => getCarModel(index)));
   const originalFog = scene.fog;
   const cars = CARS.map((_, index) => {
     const model = getCarModel(index);

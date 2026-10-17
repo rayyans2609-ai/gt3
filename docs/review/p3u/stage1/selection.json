@@ -1,0 +1,92 @@
+[
+  {
+    "query": "",
+    "version": "locked",
+    "qualityMode": "smooth",
+    "dpr": 1,
+    "tone": "neutral",
+    "reflection": "mid",
+    "output": false,
+    "carEnvironment": false
+  },
+  {
+    "query": "?mode=quality",
+    "version": "locked",
+    "qualityMode": "smooth",
+    "dpr": 1,
+    "tone": "neutral",
+    "reflection": "mid",
+    "output": false,
+    "carEnvironment": false
+  },
+  {
+    "query": "?version=locked&mode=quality&tone=agx&refl=high",
+    "version": "locked",
+    "qualityMode": "smooth",
+    "dpr": 1,
+    "tone": "neutral",
+    "reflection": "mid",
+    "output": false,
+    "carEnvironment": false
+  },
+  {
+    "query": "?version=unknown&mode=quality",
+    "version": "locked",
+    "qualityMode": "smooth",
+    "dpr": 1,
+    "tone": "neutral",
+    "reflection": "mid",
+    "output": false,
+    "carEnvironment": false
+  },
+  {
+    "query": "?version=unlocked",
+    "version": "unlocked",
+    "qualityMode": "smooth",
+    "dpr": 1.5,
+    "tone": "neutral",
+    "reflection": "mid",
+    "output": true,
+    "carEnvironment": true
+  },
+  {
+    "query": "?version=unlocked&mode=bogus",
+    "version": "unlocked",
+    "qualityMode": "smooth",
+    "dpr": 1.5,
+    "tone": "neutral",
+    "reflection": "mid",
+    "output": true,
+    "carEnvironment": true
+  },
+  {
+    "query": "?version=unlocked&mode=quality&tone=aces&refl=high",
+    "version": "unlocked",
+    "qualityMode": "quality",
+    "dpr": 2,
+    "tone": "aces",
+    "reflection": "high",
+    "output": true,
+    "carEnvironment": true
+  },
+  {
+    "query": "?version=unlocked&tone=agx&refl=low",
+    "version": "unlocked",
+    "qualityMode": "smooth",
+    "dpr": 1.5,
+    "tone": "agx",
+    "reflection": "low",
+    "output": true,
+    "carEnvironment": true
+  },
+  {
+    "query": "?version=unlocked&tone=bogus&refl=bogus",
+    "version": "unlocked",
+    "qualityMode": "smooth",
+    "dpr": 1.5,
+    "tone": "neutral",
+    "reflection": "mid",
+    "output": true,
+    "carEnvironment": true
+  }
+]

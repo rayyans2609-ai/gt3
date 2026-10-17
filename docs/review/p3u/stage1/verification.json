@@ -1,0 +1,1867 @@
+{
+  "sourceHashes": {
+    "src/core/renderProfile.js": "0da4007b412d702798ee0d82f1a5c9043bde55dbb73b2e03cc1d3d018365eed6",
+    "src/scene/sceneSetup.js": "df6880d5a972263a7699969ddd586ec5718973c6cd289ccdd7e3b496c6f5f10a",
+    "src/scene/theme.js": "24f66ff712085f15b363df43bb018039f41ce031ad99819732153276c9401bcf",
+    "src/scene/carEnvironment.js": "0047a18f7b8e61d9b870c7e0d8b4a72e07047e0db44479856a08c9b71bb6b20c",
+    "src/scene/carWarmup.js": "ff3cf4c7c9465f3b99b14a54c0a01fe3739074a001d4f67a2d8e8cce302ba8ec",
+    "src/scene/morph.js": "09fd08d0a40ed6f88572664bb226b77887cb305642d1abdd1da8373e870ebe82"
+  },
+  "pixelProtection": [
+    {
+      "reference": "local/evidence/p3u/stage1/reference",
+      "candidate": "local/evidence/p3u/stage1/default",
+      "states": 23,
+      "identical": true,
+      "differingPixels": 0
+    },
+    {
+      "reference": "local/evidence/p3u/stage1/reference",
+      "candidate": "local/evidence/p3u/stage1/locked",
+      "states": 23,
+      "identical": true,
+      "differingPixels": 0
+    }
+  ],
+  "runtime": [
+    {
+      "mode": "smooth",
+      "errors": [],
+      "selection": {
+        "version": "unlocked",
+        "mode": "smooth",
+        "dpr": 1.5,
+        "tone": "neutral",
+        "reflection": "mid"
+      },
+      "ready": "ready",
+      "output": {
+        "material": "GT3OutputWash-neutral",
+        "passes": [
+          "RenderPass",
+          "ShaderPass",
+          "outputWash",
+          "SMAA"
+        ],
+        "toneBeforeSMAA": true,
+        "encode": true
+      },
+      "sceneEnvironment": false,
+      "variants": [
+        {
+          "theme": "day",
+          "car": 0,
+          "fade": false,
+          "materials": 48,
+          "environment": true,
+          "strength": 0.7,
+          "newPrograms": 0
+        },
+        {
+          "theme": "day",
+          "car": 0,
+          "fade": true,
+          "materials": 48,
+          "environment": true,
+          "strength": 0.7,
+          "newPrograms": 0
+        },
+        {
+          "theme": "day",
+          "car": 1,
+          "fade": false,
+          "materials": 38,
+          "environment": true,
+          "strength": 0.7,
+          "newPrograms": 0
+        },
+        {
+          "theme": "day",
+          "car": 1,
+          "fade": true,
+          "materials": 38,
+          "environment": true,
+          "strength": 0.7,
+          "newPrograms": 0
+        },
+        {
+          "theme": "day",
+          "car": 2,
+          "fade": false,
+          "materials": 57,
+          "environment": true,
+          "strength": 0.7,
+          "newPrograms": 0
+        },
+        {
+          "theme": "day",
+          "car": 2,
+          "fade": true,
+          "materials": 57,
+          "environment": true,
+          "strength": 0.7,
+          "newPrograms": 0
+        },
+        {
+          "theme": "day",
+          "car": 3,
+          "fade": false,
+          "materials": 21,
+          "environment": true,
+          "strength": 0.7,
+          "newPrograms": 0
+        },
+        {
+          "theme": "day",
+          "car": 3,
+          "fade": true,
+          "materials": 21,
+          "environment": true,
+          "strength": 0.7,
+          "newPrograms": 0
+        },
+        {
+          "theme": "day",
+          "car": 4,
+          "fade": false,
+          "materials": 42,
+          "environment": true,
+          "strength": 0.7,
+          "newPrograms": 0
+        },
+        {
+          "theme": "day",
+          "car": 4,
+          "fade": true,
+          "materials": 42,
+          "environment": true,
+          "strength": 0.7,
+          "newPrograms": 0
+        },
+        {
+          "theme": "day",
+          "car": 5,
+          "fade": false,
+          "materials": 14,
+          "environment": true,
+          "strength": 0.7,
+          "newPrograms": 0
+        },
+        {
+          "theme": "day",
+          "car": 5,
+          "fade": true,
+          "materials": 14,
+          "environment": true,
+          "strength": 0.7,
+          "newPrograms": 0
+        },
+        {
+          "theme": "day",
+          "car": 6,
+          "fade": false,
+          "materials": 65,
+          "environment": true,
+          "strength": 0.7,
+          "newPrograms": 0
+        },
+        {
+          "theme": "day",
+          "car": 6,
+          "fade": true,
+          "materials": 65,
+          "environment": true,
+          "strength": 0.7,
+          "newPrograms": 0
+        },
+        {
+          "theme": "day",
+          "car": 7,
+          "fade": false,
+          "materials": 11,
+          "environment": true,
+          "strength": 0.7,
+          "newPrograms": 0
+        },
+        {
+          "theme": "day",
+          "car": 7,
+          "fade": true,
+          "materials": 11,
+          "environment": true,
+          "strength": 0.7,
+          "newPrograms": 0
+        },
+        {
+          "theme": "day",
+          "car": 8,
+          "fade": false,
+          "materials": 59,
+          "environment": true,
+          "strength": 0.7,
+          "newPrograms": 0
+        },
+        {
+          "theme": "day",
+          "car": 8,
+          "fade": true,
+          "materials": 59,
+          "environment": true,
+          "strength": 0.7,
+          "newPrograms": 0
+        },
+        {
+          "theme": "day",
+          "car": 9,
+          "fade": false,
+          "materials": 55,
+          "environment": true,
+          "strength": 0.7,
+          "newPrograms": 0
+        },
+        {
+          "theme": "day",
+          "car": 9,
+          "fade": true,
+          "materials": 55,
+          "environment": true,
+          "strength": 0.7,
+          "newPrograms": 0
+        },
+        {
+          "theme": "night",
+          "car": 0,
+          "fade": false,
+          "materials": 48,
+          "environment": true,
+          "strength": 0.14,
+          "newPrograms": 0
+        },
+        {
+          "theme": "night",
+          "car": 0,
+          "fade": true,
+          "materials": 48,
+          "environment": true,
+          "strength": 0.14,
+          "newPrograms": 0
+        },
+        {
+          "theme": "night",
+          "car": 1,
+          "fade": false,
+          "materials": 38,
+          "environment": true,
+          "strength": 0.14,
+          "newPrograms": 0
+        },
+        {
+          "theme": "night",
+          "car": 1,
+          "fade": true,
+          "materials": 38,
+          "environment": true,
+          "strength": 0.14,
+          "newPrograms": 0
+        },
+        {
+          "theme": "night",
+          "car": 2,
+          "fade": false,
+          "materials": 57,
+          "environment": true,
+          "strength": 0.14,
+          "newPrograms": 0
+        },
+        {
+          "theme": "night",
+          "car": 2,
+          "fade": true,
+          "materials": 57,
+          "environment": true,
+          "strength": 0.14,
+          "newPrograms": 0
+        },
+        {
+          "theme": "night",
+          "car": 3,
+          "fade": false,
+          "materials": 21,
+          "environment": true,
+          "strength": 0.14,
+          "newPrograms": 0
+        },
+        {
+          "theme": "night",
+          "car": 3,
+          "fade": true,
+          "materials": 21,
+          "environment": true,
+          "strength": 0.14,
+          "newPrograms": 0
+        },
+        {
+          "theme": "night",
+          "car": 4,
+          "fade": false,
+          "materials": 42,
+          "environment": true,
+          "strength": 0.14,
+          "newPrograms": 0
+        },
+        {
+          "theme": "night",
+          "car": 4,
+          "fade": true,
+          "materials": 42,
+          "environment": true,
+          "strength": 0.14,
+          "newPrograms": 0
+        },
+        {
+          "theme": "night",
+          "car": 5,
+          "fade": false,
+          "materials": 14,
+          "environment": true,
+          "strength": 0.14,
+          "newPrograms": 0
+        },
+        {
+          "theme": "night",
+          "car": 5,
+          "fade": true,
+          "materials": 14,
+          "environment": true,
+          "strength": 0.14,
+          "newPrograms": 0
+        },
+        {
+          "theme": "night",
+          "car": 6,
+          "fade": false,
+          "materials": 65,
+          "environment": true,
+          "strength": 0.14,
+          "newPrograms": 0
+        },
+        {
+          "theme": "night",
+          "car": 6,
+          "fade": true,
+          "materials": 65,
+          "environment": true,
+          "strength": 0.14,
+          "newPrograms": 0
+        },
+        {
+          "theme": "night",
+          "car": 7,
+          "fade": false,
+          "materials": 11,
+          "environment": true,
+          "strength": 0.14,
+          "newPrograms": 0
+        },
+        {
+          "theme": "night",
+          "car": 7,
+          "fade": true,
+          "materials": 11,
+          "environment": true,
+          "strength": 0.14,
+          "newPrograms": 0
+        },
+        {
+          "theme": "night",
+          "car": 8,
+          "fade": false,
+          "materials": 59,
+          "environment": true,
+          "strength": 0.14,
+          "newPrograms": 0
+        },
+        {
+          "theme": "night",
+          "car": 8,
+          "fade": true,
+          "materials": 59,
+          "environment": true,
+          "strength": 0.14,
+          "newPrograms": 0
+        },
+        {
+          "theme": "night",
+          "car": 9,
+          "fade": false,
+          "materials": 55,
+          "environment": true,
+          "strength": 0.14,
+          "newPrograms": 0
+        },
+        {
+          "theme": "night",
+          "car": 9,
+          "fade": true,
+          "materials": 55,
+          "environment": true,
+          "strength": 0.14,
+          "newPrograms": 0
+        }
+      ],
+      "transition": [
+        {
+          "seconds": 0,
+          "exposure": 0.35,
+          "strength": 0.7
+        },
+        {
+          "seconds": 0.18333333333333332,
+          "exposure": 0.3000157012577386,
+          "strength": 0.5727672395651527
+        },
+        {
+          "seconds": 0.36666666666666664,
+          "exposure": 0.25526094659258725,
+          "strength": 0.4588460458720403
+        },
+        {
+          "seconds": 0.55,
+          "exposure": 0.2192648534395957,
+          "strength": 0.3672196269371527
+        },
+        {
+          "seconds": 0.7333333333333333,
+          "exposure": 0.1921769172883636,
+          "strength": 0.2982685167340165
+        },
+        {
+          "seconds": 0.9166666666666666,
+          "exposure": 0.17234322117865575,
+          "strength": 0.24778274481839643
+        },
+        {
+          "seconds": 1.1,
+          "exposure": 0.15796362589084334,
+          "strength": 0.2111801386312376
+        },
+        {
+          "seconds": 1.2833333333333334,
+          "exposure": 0.14762961759105128,
+          "strength": 0.18487539023176686
+        },
+        {
+          "seconds": 1.4666666666666666,
+          "exposure": 0.1403330150748636,
+          "strength": 0.1663022201905619
+        },
+        {
+          "seconds": 1.65,
+          "exposure": 0.13536311225208963,
+          "strength": 0.15365155845986453
+        },
+        {
+          "seconds": 1.8333333333333333,
+          "exposure": 0.13221358952629167,
+          "strength": 0.14563459152146968
+        },
+        {
+          "seconds": 2.0166666666666666,
+          "exposure": 0.13051677555320113,
+          "strength": 0.14131542868087563
+        },
+        {
+          "seconds": 2.2,
+          "exposure": 0.13,
+          "strength": 0.14
+        }
+      ],
+      "newPrograms": 0,
+      "newTextures": 0
+    },
+    {
+      "mode": "quality",
+      "errors": [],
+      "selection": {
+        "version": "unlocked",
+        "mode": "quality",
+        "dpr": 2,
+        "tone": "neutral",
+        "reflection": "mid"
+      },
+      "ready": "ready",
+      "output": {
+        "material": "GT3OutputWash-neutral",
+        "passes": [
+          "RenderPass",
+          "ShaderPass",
+          "outputWash",
+          "SMAA"
+        ],
+        "toneBeforeSMAA": true,
+        "encode": true
+      },
+      "sceneEnvironment": false,
+      "variants": [
+        {
+          "theme": "day",
+          "car": 0,
+          "fade": false,
+          "materials": 48,
+          "environment": true,
+          "strength": 0.7,
+          "newPrograms": 0
+        },
+        {
+          "theme": "day",
+          "car": 0,
+          "fade": true,
+          "materials": 48,
+          "environment": true,
+          "strength": 0.7,
+          "newPrograms": 0
+        },
+        {
+          "theme": "day",
+          "car": 1,
+          "fade": false,
+          "materials": 38,
+          "environment": true,
+          "strength": 0.7,
+          "newPrograms": 0
+        },
+        {
+          "theme": "day",
+          "car": 1,
+          "fade": true,
+          "materials": 38,
+          "environment": true,
+          "strength": 0.7,
+          "newPrograms": 0
+        },
+        {
+          "theme": "day",
+          "car": 2,
+          "fade": false,
+          "materials": 57,
+          "environment": true,
+          "strength": 0.7,
+          "newPrograms": 0
+        },
+        {
+          "theme": "day",
+          "car": 2,
+          "fade": true,
+          "materials": 57,
+          "environment": true,
+          "strength": 0.7,
+          "newPrograms": 0
+        },
+        {
+          "theme": "day",
+          "car": 3,
+          "fade": false,
+          "materials": 21,
+          "environment": true,
+          "strength": 0.7,
+          "newPrograms": 0
+        },
+        {
+          "theme": "day",
+          "car": 3,
+          "fade": true,
+          "materials": 21,
+          "environment": true,
+          "strength": 0.7,
+          "newPrograms": 0
+        },
+        {
+          "theme": "day",
+          "car": 4,
+          "fade": false,
+          "materials": 42,
+          "environment": true,
+          "strength": 0.7,
+          "newPrograms": 0
+        },
+        {
+          "theme": "day",
+          "car": 4,
+          "fade": true,
+          "materials": 42,
+          "environment": true,
+          "strength": 0.7,
+          "newPrograms": 0
+        },
+        {
+          "theme": "day",
+          "car": 5,
+          "fade": false,
+          "materials": 14,
+          "environment": true,
+          "strength": 0.7,
+          "newPrograms": 0
+        },
+        {
+          "theme": "day",
+          "car": 5,
+          "fade": true,
+          "materials": 14,
+          "environment": true,
+          "strength": 0.7,
+          "newPrograms": 0
+        },
+        {
+          "theme": "day",
+          "car": 6,
+          "fade": false,
+          "materials": 65,
+          "environment": true,
+          "strength": 0.7,
+          "newPrograms": 0
+        },
+        {
+          "theme": "day",
+          "car": 6,
+          "fade": true,
+          "materials": 65,
+          "environment": true,
+          "strength": 0.7,
+          "newPrograms": 0
+        },
+        {
+          "theme": "day",
+          "car": 7,
+          "fade": false,
+          "materials": 11,
+          "environment": true,
+          "strength": 0.7,
+          "newPrograms": 0
+        },
+        {
+          "theme": "day",
+          "car": 7,
+          "fade": true,
+          "materials": 11,
+          "environment": true,
+          "strength": 0.7,
+          "newPrograms": 0
+        },
+        {
+          "theme": "day",
+          "car": 8,
+          "fade": false,
+          "materials": 59,
+          "environment": true,
+          "strength": 0.7,
+          "newPrograms": 0
+        },
+        {
+          "theme": "day",
+          "car": 8,
+          "fade": true,
+          "materials": 59,
+          "environment": true,
+          "strength": 0.7,
+          "newPrograms": 0
+        },
+        {
+          "theme": "day",
+          "car": 9,
+          "fade": false,
+          "materials": 55,
+          "environment": true,
+          "strength": 0.7,
+          "newPrograms": 0
+        },
+        {
+          "theme": "day",
+          "car": 9,
+          "fade": true,
+          "materials": 55,
+          "environment": true,
+          "strength": 0.7,
+          "newPrograms": 0
+        },
+        {
+          "theme": "night",
+          "car": 0,
+          "fade": false,
+          "materials": 48,
+          "environment": true,
+          "strength": 0.14,
+          "newPrograms": 0
+        },
+        {
+          "theme": "night",
+          "car": 0,
+          "fade": true,
+          "materials": 48,
+          "environment": true,
+          "strength": 0.14,
+          "newPrograms": 0
+        },
+        {
+          "theme": "night",
+          "car": 1,
+          "fade": false,
+          "materials": 38,
+          "environment": true,
+          "strength": 0.14,
+          "newPrograms": 0
+        },
+        {
+          "theme": "night",
+          "car": 1,
+          "fade": true,
+          "materials": 38,
+          "environment": true,
+          "strength": 0.14,
+          "newPrograms": 0
+        },
+        {
+          "theme": "night",
+          "car": 2,
+          "fade": false,
+          "materials": 57,
+          "environment": true,
+          "strength": 0.14,
+          "newPrograms": 0
+        },
+        {
+          "theme": "night",
+          "car": 2,
+          "fade": true,
+          "materials": 57,
+          "environment": true,
+          "strength": 0.14,
+          "newPrograms": 0
+        },
+        {
+          "theme": "night",
+          "car": 3,
+          "fade": false,
+          "materials": 21,
+          "environment": true,
+          "strength": 0.14,
+          "newPrograms": 0
+        },
+        {
+          "theme": "night",
+          "car": 3,
+          "fade": true,
+          "materials": 21,
+          "environment": true,
+          "strength": 0.14,
+          "newPrograms": 0
+        },
+        {
+          "theme": "night",
+          "car": 4,
+          "fade": false,
+          "materials": 42,
+          "environment": true,
+          "strength": 0.14,
+          "newPrograms": 0
+        },
+        {
+          "theme": "night",
+          "car": 4,
+          "fade": true,
+          "materials": 42,
+          "environment": true,
+          "strength": 0.14,
+          "newPrograms": 0
+        },
+        {
+          "theme": "night",
+          "car": 5,
+          "fade": false,
+          "materials": 14,
+          "environment": true,
+          "strength": 0.14,
+          "newPrograms": 0
+        },
+        {
+          "theme": "night",
+          "car": 5,
+          "fade": true,
+          "materials": 14,
+          "environment": true,
+          "strength": 0.14,
+          "newPrograms": 0
+        },
+        {
+          "theme": "night",
+          "car": 6,
+          "fade": false,
+          "materials": 65,
+          "environment": true,
+          "strength": 0.14,
+          "newPrograms": 0
+        },
+        {
+          "theme": "night",
+          "car": 6,
+          "fade": true,
+          "materials": 65,
+          "environment": true,
+          "strength": 0.14,
+          "newPrograms": 0
+        },
+        {
+          "theme": "night",
+          "car": 7,
+          "fade": false,
+          "materials": 11,
+          "environment": true,
+          "strength": 0.14,
+          "newPrograms": 0
+        },
+        {
+          "theme": "night",
+          "car": 7,
+          "fade": true,
+          "materials": 11,
+          "environment": true,
+          "strength": 0.14,
+          "newPrograms": 0
+        },
+        {
+          "theme": "night",
+          "car": 8,
+          "fade": false,
+          "materials": 59,
+          "environment": true,
+          "strength": 0.14,
+          "newPrograms": 0
+        },
+        {
+          "theme": "night",
+          "car": 8,
+          "fade": true,
+          "materials": 59,
+          "environment": true,
+          "strength": 0.14,
+          "newPrograms": 0
+        },
+        {
+          "theme": "night",
+          "car": 9,
+          "fade": false,
+          "materials": 55,
+          "environment": true,
+          "strength": 0.14,
+          "newPrograms": 0
+        },
+        {
+          "theme": "night",
+          "car": 9,
+          "fade": true,
+          "materials": 55,
+          "environment": true,
+          "strength": 0.14,
+          "newPrograms": 0
+        }
+      ],
+      "transition": [
+        {
+          "seconds": 0,
+          "exposure": 0.35,
+          "strength": 0.7
+        },
+        {
+          "seconds": 0.18333333333333332,
+          "exposure": 0.3000157012577386,
+          "strength": 0.5727672395651527
+        },
+        {
+          "seconds": 0.36666666666666664,
+          "exposure": 0.25526094659258725,
+          "strength": 0.4588460458720403
+        },
+        {
+          "seconds": 0.55,
+          "exposure": 0.2192648534395957,
+          "strength": 0.3672196269371527
+        },
+        {
+          "seconds": 0.7333333333333333,
+          "exposure": 0.1921769172883636,
+          "strength": 0.2982685167340165
+        },
+        {
+          "seconds": 0.9166666666666666,
+          "exposure": 0.17234322117865575,
+          "strength": 0.24778274481839643
+        },
+        {
+          "seconds": 1.1,
+          "exposure": 0.15796362589084334,
+          "strength": 0.2111801386312376
+        },
+        {
+          "seconds": 1.2833333333333334,
+          "exposure": 0.14762961759105128,
+          "strength": 0.18487539023176686
+        },
+        {
+          "seconds": 1.4666666666666666,
+          "exposure": 0.1403330150748636,
+          "strength": 0.1663022201905619
+        },
+        {
+          "seconds": 1.65,
+          "exposure": 0.13536311225208963,
+          "strength": 0.15365155845986453
+        },
+        {
+          "seconds": 1.8333333333333333,
+          "exposure": 0.13221358952629167,
+          "strength": 0.14563459152146968
+        },
+        {
+          "seconds": 2.0166666666666666,
+          "exposure": 0.13051677555320113,
+          "strength": 0.14131542868087563
+        },
+        {
+          "seconds": 2.2,
+          "exposure": 0.13,
+          "strength": 0.14
+        }
+      ],
+      "newPrograms": 0,
+      "newTextures": 0
+    }
+  ],
+  "lockedFunctional": {
+    "swap": {
+      "failed": 0,
+      "phases": [
+        {
+          "label": "A1 input during GPU warm-up is ignored; first gesture after ready starts",
+          "status": "PASS"
+        },
+        {
+          "label": "theme toggle before cold crossing",
+          "status": "PASS"
+        },
+        {
+          "label": "cold first crossing: zero GL allocations/uploads",
+          "status": "PASS"
+        },
+        {
+          "label": "day: mid-swap theme toggle pins treatment",
+          "status": "PASS"
+        },
+        {
+          "label": "day: reversal before the swap completes",
+          "status": "PASS"
+        },
+        {
+          "label": "day: reversal after the swap midpoint",
+          "status": "PASS"
+        },
+        {
+          "label": "day: retarget across two gates before completion",
+          "status": "PASS"
+        },
+        {
+          "label": "day: gate response lifecycle",
+          "status": "PASS"
+        },
+        {
+          "label": "night: mid-swap theme toggle pins treatment",
+          "status": "PASS"
+        },
+        {
+          "label": "night: reversal before the swap completes",
+          "status": "PASS"
+        },
+        {
+          "label": "night: reversal after the swap midpoint",
+          "status": "PASS"
+        },
+        {
+          "label": "night: retarget across two gates before completion",
+          "status": "PASS"
+        },
+        {
+          "label": "night: gate response lifecycle",
+          "status": "PASS"
+        },
+        {
+          "label": "replay returns to Lexus and keeps discoveries",
+          "status": "PASS"
+        },
+        {
+          "label": "mid-crossing stills",
+          "status": "PASS"
+        }
+      ]
+    },
+    "finish": {
+      "errors": [],
+      "checks": {
+        "near-finish reload stays paused exact and silent": {
+          "result": "PASS",
+          "data": {
+            "before": {
+              "p": 0.9976118545953221,
+              "target": 0.9976118545953221,
+              "tail": 0,
+              "elapsed": 0,
+              "running": false,
+              "frozen": false,
+              "ack": false,
+              "mode": "race",
+              "locked": false,
+              "started": false,
+              "car": 9,
+              "unlocked": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9
+              ],
+              "experience": "tour",
+              "camera": [
+                -142.70603465312647,
+                208.2878532625406,
+                27.733187925853777,
+                -0.3702543457061976,
+                -0.5383996395935492,
+                -0.28410615187685734,
+                0.701656071046874,
+                40
+              ],
+              "position": [
+                -4.882549021710766e-8,
+                -0.2517928660218178,
+                12.123330855836157
+              ],
+              "ndc": [
+                0.1339226114360971,
+                -0.006229362187837144,
+                0.9963680748705841
+              ],
+              "t": 0.997603268982072,
+              "morphing": false,
+              "gateVisible": false,
+              "sfx": 1,
+              "audioStarts": 0,
+              "completions": 0,
+              "theme": "day",
+              "ready": "ready",
+              "timerText": "00:00.0"
+            },
+            "restored": {
+              "p": 0.9976118545953221,
+              "target": 0.9976118545953221,
+              "tail": 0,
+              "elapsed": 0,
+              "running": false,
+              "frozen": false,
+              "ack": false,
+              "mode": "race",
+              "locked": false,
+              "started": false,
+              "car": 9,
+              "unlocked": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9
+              ],
+              "experience": "tour",
+              "camera": [
+                -142.70603465312647,
+                208.2878532625406,
+                27.733187925853777,
+                -0.3702543457061976,
+                -0.5383996395935492,
+                -0.28410615187685734,
+                0.701656071046874,
+                40
+              ],
+              "position": [
+                -4.882549021710766e-8,
+                -0.2517928660218178,
+                12.123330855836157
+              ],
+              "ndc": [
+                0.1339226114360971,
+                -0.006229362187837144,
+                0.9963680748705841
+              ],
+              "t": 0.997603268982072,
+              "morphing": false,
+              "gateVisible": false,
+              "sfx": 0,
+              "audioStarts": 0,
+              "completions": 0,
+              "theme": "day",
+              "ready": "ready",
+              "timerText": "00:00.0"
+            }
+          }
+        },
+        "V1 finish: line freezes stopwatch, completion past the line locks the drive": {
+          "result": "PASS",
+          "data": {
+            "before": {
+              "p": 0.9976118545953221,
+              "target": 0.9976118545953221,
+              "tail": 0,
+              "elapsed": 0,
+              "running": false,
+              "frozen": false,
+              "ack": false,
+              "mode": "race",
+              "locked": false,
+              "started": false,
+              "car": 9,
+              "unlocked": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9
+              ],
+              "experience": "tour",
+              "camera": [
+                -142.70603465312647,
+                208.2878532625406,
+                27.733187925853777,
+                -0.3702543457061976,
+                -0.5383996395935492,
+                -0.28410615187685734,
+                0.701656071046874,
+                40
+              ],
+              "position": [
+                -4.882549021710766e-8,
+                -0.2517928660218178,
+                12.123330855836157
+              ],
+              "ndc": [
+                0.1339226114360971,
+                -0.006229362187837144,
+                0.9963680748705841
+              ],
+              "t": 0.997603268982072,
+              "morphing": false,
+              "gateVisible": false,
+              "sfx": 0,
+              "audioStarts": 2,
+              "completions": 0,
+              "theme": "night",
+              "ready": "ready",
+              "timerText": "00:00.0"
+            },
+            "edge": {
+              "tail": 0.6780650000246169,
+              "elapsed": 199.5,
+              "frozen": true,
+              "running": false,
+              "now": 4032
+            },
+            "finish": {
+              "p": 1,
+              "target": 1,
+              "tail": 6.797436566360375,
+              "elapsed": 199.5,
+              "running": false,
+              "frozen": true,
+              "ack": true,
+              "mode": "finish",
+              "locked": true,
+              "started": true,
+              "car": 9,
+              "unlocked": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9
+              ],
+              "experience": "complete",
+              "camera": [
+                -136.7576402209894,
+                208.2878532625406,
+                13.181171505395202,
+                -0.3702543457061976,
+                -0.5383996395935492,
+                -0.28410615187685734,
+                0.701656071046874,
+                40
+              ],
+              "position": [
+                9.53188604240931e-9,
+                0.014135016304944677,
+                -6.683968675394998
+              ],
+              "ndc": [
+                0.10043606720376784,
+                -0.046885021960121204,
+                0.9963229063065407
+              ],
+              "t": 0.0013576355884161728,
+              "morphing": false,
+              "gateVisible": false,
+              "sfx": 0,
+              "audioStarts": 3,
+              "completions": 1,
+              "theme": "night",
+              "ready": "ready",
+              "timerText": "00:00.1"
+            },
+            "settled": {
+              "p": 1,
+              "target": 1,
+              "tail": 6.797436566360375,
+              "elapsed": 199.5,
+              "running": false,
+              "frozen": true,
+              "ack": true,
+              "mode": "finish",
+              "locked": true,
+              "started": true,
+              "car": 9,
+              "unlocked": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9
+              ],
+              "experience": "complete",
+              "camera": [
+                -136.7576402209894,
+                208.2878532625406,
+                13.181171505395202,
+                -0.3702543457061976,
+                -0.5383996395935492,
+                -0.28410615187685734,
+                0.701656071046874,
+                40
+              ],
+              "position": [
+                9.53188604240931e-9,
+                0.014135016304944677,
+                -6.683968675394998
+              ],
+              "ndc": [
+                0.10043606720376784,
+                -0.046885021960121204,
+                0.9963229063065407
+              ],
+              "t": 0.0013576355884161728,
+              "morphing": false,
+              "gateVisible": false,
+              "sfx": 0,
+              "audioStarts": 3,
+              "completions": 1,
+              "theme": "night",
+              "ready": "ready",
+              "timerText": "00:00.1"
+            }
+          }
+        },
+        "no post-finish coast or reverse escape: input under the completion lock is swallowed": {
+          "result": "PASS",
+          "data": {
+            "held": {
+              "p": 1,
+              "target": 1,
+              "tail": 6.797436566360375,
+              "elapsed": 199.5,
+              "running": false,
+              "frozen": true,
+              "ack": true,
+              "mode": "finish",
+              "locked": true,
+              "started": true,
+              "car": 9,
+              "unlocked": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9
+              ],
+              "experience": "complete",
+              "camera": [
+                -136.7576402209894,
+                208.2878532625406,
+                13.181171505395202,
+                -0.3702543457061976,
+                -0.5383996395935492,
+                -0.28410615187685734,
+                0.701656071046874,
+                40
+              ],
+              "position": [
+                9.53188604240931e-9,
+                0.014135016304944677,
+                -6.683968675394998
+              ],
+              "ndc": [
+                0.10043606720376784,
+                -0.046885021960121204,
+                0.9963229063065407
+              ],
+              "t": 0.0013576355884161728,
+              "morphing": false,
+              "gateVisible": false,
+              "sfx": 0,
+              "audioStarts": 3,
+              "completions": 1,
+              "theme": "day",
+              "ready": "ready",
+              "timerText": "00:00.1"
+            },
+            "forward": {
+              "p": 1,
+              "target": 1,
+              "tail": 6.797436566360375,
+              "elapsed": 199.5,
+              "running": false,
+              "frozen": true,
+              "ack": true,
+              "mode": "finish",
+              "locked": true,
+              "started": true,
+              "car": 9,
+              "unlocked": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9
+              ],
+              "experience": "complete",
+              "camera": [
+                -136.7576402209894,
+                208.2878532625406,
+                13.181171505395202,
+                -0.3702543457061976,
+                -0.5383996395935492,
+                -0.28410615187685734,
+                0.701656071046874,
+                40
+              ],
+              "position": [
+                9.53188604240931e-9,
+                0.014135016304944677,
+                -6.683968675394998
+              ],
+              "ndc": [
+                0.10043606720376784,
+                -0.046885021960121204,
+                0.9963229063065407
+              ],
+              "t": 0.0013576355884161728,
+              "morphing": false,
+              "gateVisible": false,
+              "sfx": 0,
+              "audioStarts": 3,
+              "completions": 1,
+              "theme": "day",
+              "ready": "ready",
+              "timerText": "00:00.1"
+            },
+            "reverse": {
+              "p": 1,
+              "target": 1,
+              "tail": 6.797436566360375,
+              "elapsed": 199.5,
+              "running": false,
+              "frozen": true,
+              "ack": true,
+              "mode": "finish",
+              "locked": true,
+              "started": true,
+              "car": 9,
+              "unlocked": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9
+              ],
+              "experience": "complete",
+              "camera": [
+                -136.7576402209894,
+                208.2878532625406,
+                13.181171505395202,
+                -0.3702543457061976,
+                -0.5383996395935492,
+                -0.28410615187685734,
+                0.701656071046874,
+                40
+              ],
+              "position": [
+                9.53188604240931e-9,
+                0.014135016304944677,
+                -6.683968675394998
+              ],
+              "ndc": [
+                0.10043606720376784,
+                -0.046885021960121204,
+                0.9963229063065407
+              ],
+              "t": 0.0013576355884161728,
+              "morphing": false,
+              "gateVisible": false,
+              "sfx": 0,
+              "audioStarts": 3,
+              "completions": 1,
+              "theme": "day",
+              "ready": "ready",
+              "timerText": "00:00.1"
+            }
+          }
+        },
+        "completed reload restores locked V1 state silently and Replay Route resets": {
+          "result": "PASS",
+          "data": {
+            "before": {
+              "p": 1,
+              "target": 1,
+              "tail": 6.797436566360375,
+              "elapsed": 199.5,
+              "running": false,
+              "frozen": true,
+              "ack": true,
+              "mode": "finish",
+              "locked": true,
+              "started": true,
+              "car": 9,
+              "unlocked": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9
+              ],
+              "experience": "complete",
+              "camera": [
+                -136.7576402209894,
+                208.2878532625406,
+                13.181171505395202,
+                -0.3702543457061976,
+                -0.5383996395935492,
+                -0.28410615187685734,
+                0.701656071046874,
+                40
+              ],
+              "position": [
+                9.53188604240931e-9,
+                0.014135016304944677,
+                -6.683968675394998
+              ],
+              "ndc": [
+                0.10043606720376784,
+                -0.046885021960121204,
+                0.9963229063065407
+              ],
+              "t": 0.0013576355884161728,
+              "morphing": false,
+              "gateVisible": false,
+              "sfx": 0,
+              "audioStarts": 3,
+              "completions": 1,
+              "theme": "day",
+              "ready": "ready",
+              "timerText": "00:00.1"
+            },
+            "restored": {
+              "p": 1,
+              "target": 1,
+              "tail": 5.006819668222306,
+              "elapsed": 199.5,
+              "running": false,
+              "frozen": true,
+              "ack": true,
+              "mode": "finish",
+              "locked": true,
+              "started": false,
+              "car": 9,
+              "unlocked": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9
+              ],
+              "experience": "complete",
+              "camera": [
+                -137.31962985984387,
+                208.2878532625406,
+                14.578358561214849,
+                -0.3702543457061976,
+                -0.5383996395935492,
+                -0.28410615187685734,
+                0.701656071046874,
+                40
+              ],
+              "position": [
+                7.909242358948483e-9,
+                0.0066000434268853195,
+                -4.911456713865796
+              ],
+              "ndc": [
+                0.10347712032461596,
+                -0.042834182845815395,
+                0.9963270472787507
+              ],
+              "t": 0.001000000000000334,
+              "morphing": false,
+              "gateVisible": false,
+              "sfx": 0,
+              "audioStarts": 0,
+              "completions": 0,
+              "theme": "day",
+              "ready": "ready",
+              "timerText": "00:00.1"
+            },
+            "pushed": {
+              "p": 1,
+              "target": 1,
+              "tail": 5.006819668222306,
+              "elapsed": 199.5,
+              "running": false,
+              "frozen": true,
+              "ack": true,
+              "mode": "finish",
+              "locked": true,
+              "started": false,
+              "car": 9,
+              "unlocked": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9
+              ],
+              "experience": "complete",
+              "camera": [
+                -137.31962985984387,
+                208.2878532625406,
+                14.578358561214849,
+                -0.3702543457061976,
+                -0.5383996395935492,
+                -0.28410615187685734,
+                0.701656071046874,
+                40
+              ],
+              "position": [
+                7.909242358948483e-9,
+                0.0066000434268853195,
+                -4.911456713865796
+              ],
+              "ndc": [
+                0.10347712032461596,
+                -0.042834182845815395,
+                0.9963270472787507
+              ],
+              "t": 0.001000000000000334,
+              "morphing": false,
+              "gateVisible": false,
+              "sfx": 0,
+              "audioStarts": 0,
+              "completions": 0,
+              "theme": "day",
+              "ready": "ready",
+              "timerText": "00:00.1"
+            },
+            "replay": {
+              "p": 0,
+              "target": 0,
+              "tail": 0,
+              "elapsed": 0,
+              "running": false,
+              "frozen": false,
+              "ack": false,
+              "mode": "race",
+              "locked": false,
+              "started": false,
+              "car": 0,
+              "unlocked": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9
+              ],
+              "experience": "tour",
+              "camera": [
+                -144.6290592444007,
+                208.2878532625406,
+                32.32205740136035,
+                -0.3702543457061976,
+                -0.5383996395935492,
+                -0.28410615187685734,
+                0.701656071046874,
+                40
+              ],
+              "position": [
+                -7.000000082076107,
+                -0.397219686502825,
+                18.079071076465198
+              ],
+              "ndc": [
+                0.135490611761292,
+                -0.05502273719713098,
+                0.9963227998823394
+              ],
+              "t": 0.996404903473108,
+              "morphing": false,
+              "gateVisible": false,
+              "sfx": 0,
+              "audioStarts": 0,
+              "completions": 0,
+              "theme": "day",
+              "ready": "ready",
+              "timerText": "00:00.0"
+            },
+            "driven": {
+              "p": 0.012119165087313404,
+              "target": 0.01917173722168988,
+              "tail": 0,
+              "elapsed": 482.9000000357628,
+              "running": true,
+              "frozen": false,
+              "ack": false,
+              "mode": "race",
+              "locked": false,
+              "started": true,
+              "car": 0,
+              "unlocked": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9
+              ],
+              "experience": "tour",
+              "camera": [
+                -125.60089991226593,
+                208.2878532625406,
+                -15.42534570723437,
+                -0.3702543457061976,
+                -0.5383996395935492,
+                -0.28410615187685734,
+                0.701656071046874,
+                40
+              ],
+              "position": [
+                -1.3673882811677727,
+                -0.0200014002337973,
+                -42.9165018497295
+              ],
+              "ndc": [
+                0.03551010930563649,
+                -0.14241340603512123,
+                0.9962293431138611
+              ],
+              "t": 0.008567638128735622,
+              "morphing": false,
+              "gateVisible": false,
+              "sfx": 0,
+              "audioStarts": 0,
+              "completions": 0,
+              "theme": "day",
+              "ready": "ready",
+              "timerText": "00:00.4"
+            }
+          }
+        }
+      }
+    },
+    "persistence": {
+      "failed": 0,
+      "phases": [
+        {
+          "name": "default route restore",
+          "status": "PASS"
+        },
+        {
+          "name": "pace route restore and URL preservation",
+          "status": "PASS"
+        },
+        {
+          "name": "fresh browser context starts fresh",
+          "status": "PASS"
+        },
+        {
+          "name": "finish-state refresh restores the scorecard only",
+          "status": "PASS"
+        },
+        {
+          "name": "unversioned old-session world position",
+          "status": "PASS"
+        },
+        {
+          "name": "console errors",
+          "status": "PASS"
+        }
+      ]
+    },
+    "preready": {
+      "base": "http://127.0.0.1:5231/?version=locked",
+      "cases": {
+        "A": {
+          "wheelEventsSent": 40,
+          "maxGapMs": 279,
+          "atStop": {
+            "progress": 0,
+            "started": false,
+            "locked": true,
+            "active": 0,
+            "ready": "ready",
+            "startVisible": true,
+            "sfx": {
+              "checkpointCross": 0,
+              "audible": 0
+            }
+          },
+          "settled": {
+            "progress": 0,
+            "started": false,
+            "locked": false,
+            "active": 0,
+            "ready": "ready",
+            "startVisible": true,
+            "sfx": {
+              "checkpointCross": 0,
+              "audible": 0
+            }
+          },
+          "probe": [
+            "12 none|locked=false|started=false|y=0 guard=true",
+            "686 loading|locked=true|started=false|y=0 guard=false",
+            "2978 ready|locked=true|started=false|y=0 guard=false",
+            "3389 ready|locked=false|started=false|y=0 guard=false"
+          ],
+          "postReadyInputStarted": false,
+          "firstRealGesture": {
+            "progress": 0.009291738122513238,
+            "started": true,
+            "locked": false,
+            "active": 0,
+            "ready": "ready",
+            "startVisible": false,
+            "sfx": {
+              "checkpointCross": 0,
+              "audible": 0
+            }
+          }
+        },
+        "C": {
+          "before": 0,
+          "afterForward": 1,
+          "afterReverse": {
+            "checkpointCross": 1,
+            "audible": 1
+          },
+          "crossedAt": 0.09344847568671917
+        },
+        "B": {
+          "saved": 0.30996335279383874,
+          "savedActive": 3,
+          "restored": {
+            "progress": 0.3099648999480051,
+            "started": false,
+            "locked": false,
+            "active": 3,
+            "ready": "ready",
+            "startVisible": true,
+            "sfx": {
+              "checkpointCross": 0,
+              "audible": 0
+            }
+          },
+          "gate": {
+            "readyAt": 2804,
+            "unlockAt": 3766,
+            "momentumEnd": 3525
+          }
+        }
+      },
+      "errors": [],
+      "pass": true
+    }
+  },
+  "children": [],
+  "notes": "The preready script is an exact local copy of the existing verifier with its Chrome profile path relocated into local/; no assertion or input logic was changed."
+}

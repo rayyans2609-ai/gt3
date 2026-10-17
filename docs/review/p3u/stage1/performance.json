@@ -1,0 +1,527 @@
+[
+  {
+    "mode": "smooth",
+    "theme": "day",
+    "duration": 65.413,
+    "raf": {
+      "n": 3924,
+      "p50": 16.69999999999709,
+      "p95": 17.599999999998545,
+      "p99": 17.700000000004366,
+      "max": 17.80000000000291
+    },
+    "gpu": {
+      "n": 3924,
+      "p50": 13.350458,
+      "p95": 15.114541,
+      "p99": 15.980374,
+      "max": 30.456999
+    },
+    "cpu": {
+      "n": 3925,
+      "p50": 2,
+      "p95": 3.099999964237213,
+      "p99": 4.099999964237213,
+      "max": 4.899999976158142
+    },
+    "over33": 0,
+    "over50": 0,
+    "stalls": [],
+    "loops": 1,
+    "gates": 15,
+    "errors": [],
+    "conditions": {
+      "browserSaverState": 0,
+      "osPowerSettings": "Battery Power:\n Sleep On Power Button 1\n lowpowermode         0\n standby              1\n ttyskeepawake        1\n hibernatemode        3\n powernap             1\n hibernatefile        /var/vm/sleepimage\n displaysleep         10\n womp                 0\n networkoversleep     0\n sleep                1\n lessbright           1\n tcpkeepalive         1\n disksleep            10\nAC Power:\n Sleep On Power Button 1\n lowpowermode         0\n standby              1\n ttyskeepawake        1\n hibernatemode        3\n powernap             1\n hibernatefile        /var/vm/sleepimage\n displaysleep         20\n womp                 1\n networkoversleep     0\n sleep                0\n tcpkeepalive         1\n disksleep            10\n",
+      "awakeAssertion": "caffeinate -dimsu -w harnessPID (released at exit)",
+      "power": "Now drawing from 'AC Power'\n -InternalBattery-0 (id=21364835)\t30%; charging; 2:57 remaining present: true\n",
+      "thermal": "Note: No thermal warning level has been recorded\nNote: No performance warning level has been recorded\nNote: No CPU power status has been recorded\n",
+      "candidate": "baseline"
+    },
+    "setup": {
+      "gpu": "ANGLE (Apple, ANGLE Metal Renderer: Apple M4, Unspecified Version)",
+      "timerExtension": true,
+      "gcSupported": false,
+      "visibility": "visible",
+      "screen": {
+        "width": 1470,
+        "height": 956,
+        "availWidth": 1470,
+        "availHeight": 956
+      },
+      "css": [
+        1470,
+        956
+      ],
+      "deviceDPR": 2,
+      "probe": {
+        "mode": "race",
+        "locked": false,
+        "speed01": 0,
+        "progress": 0,
+        "applied": 1.5,
+        "level": "high",
+        "still": 1243.300000011921,
+        "sinceSwitch": null,
+        "canvasW": 2205,
+        "ratio": 1.5
+      }
+    },
+    "server": {
+      "startedAt": "2026-10-17T03:56:25.786Z",
+      "url": "http://127.0.0.1:5231",
+      "root": "/Users/shahzadsheikh/Desktop/gt3/.claude/worktrees/p3u-t2",
+      "branch": "p3u-t2",
+      "sha": "ebfa291b75deb9cdec4bd2eedeaa21b1324d400e",
+      "dirtyFiles": 7,
+      "dirtyHash": "9c3b473a7a08a4eb",
+      "vitePid": 2482,
+      "run": "p3u",
+      "epoch": "1",
+      "task": "T2",
+      "harness": "bash local/tmp/p3u/final-verification.sh",
+      "host": {
+        "profile": "m4-16gb",
+        "arch": "arm64",
+        "cpu": "Apple M4",
+        "ramGB": 16,
+        "model": "Mac16,12",
+        "cores": {
+          "performance": 4,
+          "efficiency": 6
+        },
+        "gpu": "Apple M4",
+        "macos": "15.5",
+        "versions": {
+          "node": "v24.21.0",
+          "claude": "2.1.302 (Claude Code)",
+          "codex": "codex-cli 0.163.0",
+          "opencode": "opencode v2.0.32",
+          "chrome": "Google Chrome 155.0.8059.80"
+        },
+        "unavailable": []
+      }
+    },
+    "loadingReadyAt": 3432
+  },
+  {
+    "mode": "smooth",
+    "theme": "night",
+    "duration": 65.417,
+    "raf": {
+      "n": 3924,
+      "p50": 16.69999999999709,
+      "p95": 17.600000000000364,
+      "p99": 17.700000000000728,
+      "max": 17.700000000004366
+    },
+    "gpu": {
+      "n": 3924,
+      "p50": 12.828208,
+      "p95": 15.079916,
+      "p99": 15.941541,
+      "max": 26.817416
+    },
+    "cpu": {
+      "n": 3925,
+      "p50": 2.199999988079071,
+      "p95": 3.400000035762787,
+      "p99": 4.399999976158142,
+      "max": 5.800000011920929
+    },
+    "over33": 0,
+    "over50": 0,
+    "stalls": [],
+    "loops": 1,
+    "gates": 15,
+    "errors": [],
+    "conditions": {
+      "browserSaverState": 0,
+      "osPowerSettings": "Battery Power:\n Sleep On Power Button 1\n lowpowermode         0\n standby              1\n ttyskeepawake        1\n hibernatemode        3\n powernap             1\n hibernatefile        /var/vm/sleepimage\n displaysleep         10\n womp                 0\n networkoversleep     0\n sleep                1\n lessbright           1\n tcpkeepalive         1\n disksleep            10\nAC Power:\n Sleep On Power Button 1\n lowpowermode         0\n standby              1\n ttyskeepawake        1\n hibernatemode        3\n powernap             1\n hibernatefile        /var/vm/sleepimage\n displaysleep         20\n womp                 1\n networkoversleep     0\n sleep                0\n tcpkeepalive         1\n disksleep            10\n",
+      "awakeAssertion": "caffeinate -dimsu -w harnessPID (released at exit)",
+      "power": "Now drawing from 'AC Power'\n -InternalBattery-0 (id=21364835)\t31%; charging; 3:03 remaining present: true\n",
+      "thermal": "Note: No thermal warning level has been recorded\nNote: No performance warning level has been recorded\nNote: No CPU power status has been recorded\n",
+      "candidate": "baseline"
+    },
+    "setup": {
+      "gpu": "ANGLE (Apple, ANGLE Metal Renderer: Apple M4, Unspecified Version)",
+      "timerExtension": true,
+      "gcSupported": false,
+      "visibility": "visible",
+      "screen": {
+        "width": 1470,
+        "height": 956,
+        "availWidth": 1470,
+        "availHeight": 956
+      },
+      "css": [
+        1470,
+        956
+      ],
+      "deviceDPR": 2,
+      "probe": {
+        "mode": "race",
+        "locked": false,
+        "speed01": 0,
+        "progress": 0,
+        "applied": 1.5,
+        "level": "high",
+        "still": 1244.699999988079,
+        "sinceSwitch": null,
+        "canvasW": 2205,
+        "ratio": 1.5
+      }
+    },
+    "server": {
+      "startedAt": "2026-10-17T03:56:25.786Z",
+      "url": "http://127.0.0.1:5231",
+      "root": "/Users/shahzadsheikh/Desktop/gt3/.claude/worktrees/p3u-t2",
+      "branch": "p3u-t2",
+      "sha": "ebfa291b75deb9cdec4bd2eedeaa21b1324d400e",
+      "dirtyFiles": 7,
+      "dirtyHash": "9c3b473a7a08a4eb",
+      "vitePid": 2482,
+      "run": "p3u",
+      "epoch": "1",
+      "task": "T2",
+      "harness": "bash local/tmp/p3u/final-verification.sh",
+      "host": {
+        "profile": "m4-16gb",
+        "arch": "arm64",
+        "cpu": "Apple M4",
+        "ramGB": 16,
+        "model": "Mac16,12",
+        "cores": {
+          "performance": 4,
+          "efficiency": 6
+        },
+        "gpu": "Apple M4",
+        "macos": "15.5",
+        "versions": {
+          "node": "v24.21.0",
+          "claude": "2.1.302 (Claude Code)",
+          "codex": "codex-cli 0.163.0",
+          "opencode": "opencode v2.0.32",
+          "chrome": "Google Chrome 155.0.8059.80"
+        },
+        "unavailable": []
+      }
+    },
+    "loadingReadyAt": 3381.7000000476837
+  },
+  {
+    "mode": "quality",
+    "theme": "day",
+    "duration": 65.431,
+    "raf": {
+      "n": 3926,
+      "p50": 16.69999999999709,
+      "p95": 17.5,
+      "p99": 17.600000000000364,
+      "max": 17.799999999999272
+    },
+    "gpu": {
+      "n": 3926,
+      "p50": 13.700749,
+      "p95": 14.934666,
+      "p99": 20.680916,
+      "max": 36.6565
+    },
+    "cpu": {
+      "n": 3927,
+      "p50": 2.100000023841858,
+      "p95": 3.399999976158142,
+      "p99": 4.5,
+      "max": 5.800000011920929
+    },
+    "over33": 0,
+    "over50": 0,
+    "stalls": [],
+    "loops": 1,
+    "gates": 15,
+    "errors": [],
+    "conditions": {
+      "browserSaverState": 0,
+      "osPowerSettings": "Battery Power:\n Sleep On Power Button 1\n lowpowermode         0\n standby              1\n ttyskeepawake        1\n hibernatemode        3\n powernap             1\n hibernatefile        /var/vm/sleepimage\n displaysleep         10\n womp                 0\n networkoversleep     0\n sleep                1\n lessbright           1\n tcpkeepalive         1\n disksleep            10\nAC Power:\n Sleep On Power Button 1\n lowpowermode         0\n standby              1\n ttyskeepawake        1\n hibernatemode        3\n powernap             1\n hibernatefile        /var/vm/sleepimage\n displaysleep         20\n womp                 1\n networkoversleep     0\n sleep                0\n tcpkeepalive         1\n disksleep            10\n",
+      "awakeAssertion": "caffeinate -dimsu -w harnessPID (released at exit)",
+      "power": "Now drawing from 'AC Power'\n -InternalBattery-0 (id=21364835)\t31%; charging; 3:03 remaining present: true\n",
+      "thermal": "Note: No thermal warning level has been recorded\nNote: No performance warning level has been recorded\nNote: No CPU power status has been recorded\n",
+      "candidate": "baseline"
+    },
+    "setup": {
+      "gpu": "ANGLE (Apple, ANGLE Metal Renderer: Apple M4, Unspecified Version)",
+      "timerExtension": true,
+      "gcSupported": false,
+      "visibility": "visible",
+      "screen": {
+        "width": 1470,
+        "height": 956,
+        "availWidth": 1470,
+        "availHeight": 956
+      },
+      "css": [
+        1470,
+        956
+      ],
+      "deviceDPR": 2,
+      "probe": {
+        "mode": "race",
+        "locked": false,
+        "speed01": 0,
+        "progress": 0,
+        "applied": 2,
+        "level": "high",
+        "still": 1239.699999988079,
+        "sinceSwitch": null,
+        "canvasW": 2940,
+        "ratio": 2
+      }
+    },
+    "server": {
+      "startedAt": "2026-10-17T03:56:25.786Z",
+      "url": "http://127.0.0.1:5231",
+      "root": "/Users/shahzadsheikh/Desktop/gt3/.claude/worktrees/p3u-t2",
+      "branch": "p3u-t2",
+      "sha": "ebfa291b75deb9cdec4bd2eedeaa21b1324d400e",
+      "dirtyFiles": 7,
+      "dirtyHash": "9c3b473a7a08a4eb",
+      "vitePid": 2482,
+      "run": "p3u",
+      "epoch": "1",
+      "task": "T2",
+      "harness": "bash local/tmp/p3u/final-verification.sh",
+      "host": {
+        "profile": "m4-16gb",
+        "arch": "arm64",
+        "cpu": "Apple M4",
+        "ramGB": 16,
+        "model": "Mac16,12",
+        "cores": {
+          "performance": 4,
+          "efficiency": 6
+        },
+        "gpu": "Apple M4",
+        "macos": "15.5",
+        "versions": {
+          "node": "v24.21.0",
+          "claude": "2.1.302 (Claude Code)",
+          "codex": "codex-cli 0.163.0",
+          "opencode": "opencode v2.0.32",
+          "chrome": "Google Chrome 155.0.8059.80"
+        },
+        "unavailable": []
+      }
+    },
+    "loadingReadyAt": 4290.199999988079
+  },
+  {
+    "mode": "quality",
+    "theme": "night",
+    "duration": 65.55,
+    "raf": {
+      "n": 3932,
+      "p50": 16.69999999999709,
+      "p95": 17.39999999999418,
+      "p99": 17.599999999998545,
+      "max": 17.80000000000291
+    },
+    "gpu": {
+      "n": 3932,
+      "p50": 13.748999,
+      "p95": 15.086499,
+      "p99": 22.693833,
+      "max": 34.471874
+    },
+    "cpu": {
+      "n": 3933,
+      "p50": 2.100000023841858,
+      "p95": 3.399999976158142,
+      "p99": 4.300000011920929,
+      "max": 6.199999988079071
+    },
+    "over33": 0,
+    "over50": 0,
+    "stalls": [],
+    "loops": 1,
+    "gates": 15,
+    "errors": [],
+    "conditions": {
+      "browserSaverState": 0,
+      "osPowerSettings": "Battery Power:\n Sleep On Power Button 1\n lowpowermode         0\n standby              1\n ttyskeepawake        1\n hibernatemode        3\n powernap             1\n hibernatefile        /var/vm/sleepimage\n displaysleep         10\n womp                 0\n networkoversleep     0\n sleep                1\n lessbright           1\n tcpkeepalive         1\n disksleep            10\nAC Power:\n Sleep On Power Button 1\n lowpowermode         0\n standby              1\n ttyskeepawake        1\n hibernatemode        3\n powernap             1\n hibernatefile        /var/vm/sleepimage\n displaysleep         20\n womp                 1\n networkoversleep     0\n sleep                0\n tcpkeepalive         1\n disksleep            10\n",
+      "awakeAssertion": "caffeinate -dimsu -w harnessPID (released at exit)",
+      "power": "Now drawing from 'AC Power'\n -InternalBattery-0 (id=21364835)\t33%; charging; 3:23 remaining present: true\n",
+      "thermal": "Note: No thermal warning level has been recorded\nNote: No performance warning level has been recorded\nNote: No CPU power status has been recorded\n",
+      "candidate": "baseline"
+    },
+    "setup": {
+      "gpu": "ANGLE (Apple, ANGLE Metal Renderer: Apple M4, Unspecified Version)",
+      "timerExtension": true,
+      "gcSupported": false,
+      "visibility": "visible",
+      "screen": {
+        "width": 1470,
+        "height": 956,
+        "availWidth": 1470,
+        "availHeight": 956
+      },
+      "css": [
+        1470,
+        956
+      ],
+      "deviceDPR": 2,
+      "probe": {
+        "mode": "race",
+        "locked": false,
+        "speed01": 0,
+        "progress": 0,
+        "applied": 2,
+        "level": "high",
+        "still": 1254.300000011921,
+        "sinceSwitch": null,
+        "canvasW": 2940,
+        "ratio": 2
+      }
+    },
+    "server": {
+      "startedAt": "2026-10-17T03:56:25.786Z",
+      "url": "http://127.0.0.1:5231",
+      "root": "/Users/shahzadsheikh/Desktop/gt3/.claude/worktrees/p3u-t2",
+      "branch": "p3u-t2",
+      "sha": "ebfa291b75deb9cdec4bd2eedeaa21b1324d400e",
+      "dirtyFiles": 7,
+      "dirtyHash": "9c3b473a7a08a4eb",
+      "vitePid": 2482,
+      "run": "p3u",
+      "epoch": "1",
+      "task": "T2",
+      "harness": "bash local/tmp/p3u/final-verification.sh",
+      "host": {
+        "profile": "m4-16gb",
+        "arch": "arm64",
+        "cpu": "Apple M4",
+        "ramGB": 16,
+        "model": "Mac16,12",
+        "cores": {
+          "performance": 4,
+          "efficiency": 6
+        },
+        "gpu": "Apple M4",
+        "macos": "15.5",
+        "versions": {
+          "node": "v24.21.0",
+          "claude": "2.1.302 (Claude Code)",
+          "codex": "codex-cli 0.163.0",
+          "opencode": "opencode v2.0.32",
+          "chrome": "Google Chrome 155.0.8059.80"
+        },
+        "unavailable": []
+      }
+    },
+    "loadingReadyAt": 4386.199999988079
+  },
+  {
+    "mode": "locked",
+    "theme": "day",
+    "duration": 65.524,
+    "raf": {
+      "n": 3931,
+      "p50": 16.69999999999709,
+      "p95": 17.60000000000582,
+      "p99": 17.700000000004366,
+      "max": 17.80000000000291
+    },
+    "gpu": {
+      "n": 3931,
+      "p50": 7.564708,
+      "p95": 14.252749,
+      "p99": 15.012375,
+      "max": 17.605
+    },
+    "cpu": {
+      "n": 3932,
+      "p50": 2.100000023841858,
+      "p95": 3.400000035762787,
+      "p99": 4.200000047683716,
+      "max": 5.300000011920929
+    },
+    "over33": 0,
+    "over50": 0,
+    "stalls": [],
+    "loops": 1,
+    "gates": 16,
+    "errors": [],
+    "conditions": {
+      "browserSaverState": 0,
+      "osPowerSettings": "Battery Power:\n Sleep On Power Button 1\n lowpowermode         0\n standby              1\n ttyskeepawake        1\n hibernatemode        3\n powernap             1\n hibernatefile        /var/vm/sleepimage\n displaysleep         10\n womp                 0\n networkoversleep     0\n sleep                1\n lessbright           1\n tcpkeepalive         1\n disksleep            10\nAC Power:\n Sleep On Power Button 1\n lowpowermode         0\n standby              1\n ttyskeepawake        1\n hibernatemode        3\n powernap             1\n hibernatefile        /var/vm/sleepimage\n displaysleep         20\n womp                 1\n networkoversleep     0\n sleep                0\n tcpkeepalive         1\n disksleep            10\n",
+      "awakeAssertion": "caffeinate -dimsu -w harnessPID (released at exit)",
+      "power": "Now drawing from 'AC Power'\n -InternalBattery-0 (id=21364835)\t33%; charging; 3:33 remaining present: true\n",
+      "thermal": "Note: No thermal warning level has been recorded\nNote: No performance warning level has been recorded\nNote: No CPU power status has been recorded\n",
+      "candidate": "baseline"
+    },
+    "setup": {
+      "gpu": "ANGLE (Apple, ANGLE Metal Renderer: Apple M4, Unspecified Version)",
+      "timerExtension": true,
+      "gcSupported": false,
+      "visibility": "visible",
+      "screen": {
+        "width": 1470,
+        "height": 956,
+        "availWidth": 1470,
+        "availHeight": 956
+      },
+      "css": [
+        1470,
+        956
+      ],
+      "deviceDPR": 2,
+      "probe": {
+        "mode": "race",
+        "locked": false,
+        "speed01": 0,
+        "progress": 0,
+        "applied": 1,
+        "level": "high",
+        "still": 1250.1000000238419,
+        "sinceSwitch": null,
+        "canvasW": 1470,
+        "ratio": 1
+      }
+    },
+    "server": {
+      "startedAt": "2026-10-17T03:56:25.786Z",
+      "url": "http://127.0.0.1:5231",
+      "root": "/Users/shahzadsheikh/Desktop/gt3/.claude/worktrees/p3u-t2",
+      "branch": "p3u-t2",
+      "sha": "ebfa291b75deb9cdec4bd2eedeaa21b1324d400e",
+      "dirtyFiles": 7,
+      "dirtyHash": "9c3b473a7a08a4eb",
+      "vitePid": 2482,
+      "run": "p3u",
+      "epoch": "1",
+      "task": "T2",
+      "harness": "bash local/tmp/p3u/final-verification.sh",
+      "host": {
+        "profile": "m4-16gb",
+        "arch": "arm64",
+        "cpu": "Apple M4",
+        "ramGB": 16,
+        "model": "Mac16,12",
+        "cores": {
+          "performance": 4,
+          "efficiency": 6
+        },
+        "gpu": "Apple M4",
+        "macos": "15.5",
+        "versions": {
+          "node": "v24.21.0",
+          "claude": "2.1.302 (Claude Code)",
+          "codex": "codex-cli 0.163.0",
+          "opencode": "opencode v2.0.32",
+          "chrome": "Google Chrome 155.0.8059.80"
+        },
+        "unavailable": []
+      }
+    },
+    "loadingReadyAt": 2924.2000000476837
+  }
+]

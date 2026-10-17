@@ -15,6 +15,7 @@ import { SETTINGS, TONE } from '../core/renderProfile.js';
 import { state } from '../core/state.js';
 import { TUNE as aerialTuning } from './aerialCamera.js';
 import { COMP } from './composition.js';
+import { stabilizeDirectionalShadow } from './shadowStability.js';
 import { onResize } from '../main.js';
 import { INTEGRITY, moveGrainAfterAA } from './imageIntegrity.js';
 
@@ -262,6 +263,10 @@ function createLightingRig() {
   sun.shadow.camera.near = SHADOW_TUNE.near;
   sun.shadow.camera.far = SHADOW_TUNE.far;
   sun.shadow.normalBias = SHADOW_TUNE.normalBias;
+  if (SETTINGS.stableShadows) {
+    sun.shadow.mapSize.set(SETTINGS.shadowMapSize, SETTINGS.shadowMapSize);
+    stabilizeDirectionalShadow(sun.shadow);
+  }
 
   rimLight = new THREE.DirectionalLight(0xd8e1e6, 0.32);
   rimLight.position.set(-32, 24, 48);

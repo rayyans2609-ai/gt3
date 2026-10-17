@@ -1,0 +1,36 @@
+{
+  "run": "p3u/e1/W3",
+  "base": "ebad49eb259ba3d286814781a7a2b913c72ebb64",
+  "verifiedAt": "2026-10-17T09:59:13.094179+00:00",
+  "screenLocked": true,
+  "pixelDiffs": {
+    "locked": {
+      "states": 23,
+      "changedPixels": 0,
+      "reference": "fa12e92348241ef5e42a57abc72f586c552ee888"
+    },
+    "default": {
+      "states": 23,
+      "changedPixels": 0,
+      "reference": "fa12e92348241ef5e42a57abc72f586c552ee888"
+    }
+  },
+  "aaMotion": {
+    "configs": 6,
+    "scenarios": 18,
+    "framesPerScenario": 36,
+    "errors": [],
+    "glSamplesVerified": [
+      0,
+      2,
+      4
+    ]
+  },
+  "settingsCheck": true,
+  "shadowMathCheck": true,
+  "build": "npm run build: pass",
+  "buildLog": "local/evidence/p3u/W3/r2-build.log",
+  "timingRuns": "pending unlock",
+  "integration": "W4/W5 must be merged by manager; repeat checks listed in REPORT.md",
+  "children": []
+}

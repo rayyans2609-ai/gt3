@@ -1,5 +1,6 @@
 /** Sparse safety logic, authored from the shared braking classes; no lights. */
 import * as THREE from 'three';
+import { UNLOCKED } from '../core/renderProfile.js';
 import { TRACK_LENGTH, tangentAt } from './trackCurve.js';
 import { CORNERS, WIDTH_SECTIONS, outerEdgeAt } from './trackProfile.js';
 import { groundPositionAt } from './environment.js';
@@ -103,6 +104,7 @@ export function buildTrackFurniture() {
     const mesh=new THREE.InstancedMesh(box,material,matrices.length);mesh.name=`furniture-${key}`;
     matrices.forEach((m,i)=>mesh.setMatrixAt(i,m));mesh.instanceMatrix.needsUpdate=true;
     mesh.computeBoundingSphere();mesh.frustumCulled=false;mesh.receiveShadow=true;root.add(mesh);
+    if (UNLOCKED && key !== 'service') mesh.castShadow = true;
   }
   if(fenceParts.length) {
     const canvas=document.createElement('canvas');canvas.width=canvas.height=128;

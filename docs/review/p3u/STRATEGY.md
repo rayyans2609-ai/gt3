@@ -1,6 +1,29 @@
 # Unlocked Experience Optimization Strategy (decision checkpoint)
 
-Run p3u, Opus-led, M4 (`m4-16gb`). Branch `p3u-profiles` @ `90ecf93`. Evidence: [AUDIT.md](AUDIT.md) (T1, Sol @ high) plus manager inspection of its controlled contact sheets. **Status: proposed. No unlocked product code exists. Locked is unchanged and proven pixel-identical to `fa12e92` in 7 compared states.** Every change below applies to `?version=unlocked` only.
+Run p3u, Opus-led, M4 (`m4-16gb`). Branch `p3u-profiles` @ `90ecf93`. Evidence: [AUDIT.md](AUDIT.md) (T1, Sol @ high) plus manager inspection of its controlled contact sheets. **Status: approved with amendments (owner, 2026-10-17, §0). Stage 1 engineering authorized. Locked is unchanged and proven pixel-identical to `fa12e92` in 7 compared states.** Every change below applies to `?version=unlocked` only.
+
+## 0. Owner decisions, 2026-10-17 (supersede conflicting text below)
+
+**Approved:** the direction and Stage 1 engineering, with these changes.
+
+- **Two unlocked modes, one architecture:**
+  - `?version=unlocked&mode=smooth` targets exceptionally consistent 60 FPS;
+  - `?version=unlocked&mode=quality` explores extra fidelity, accepting ~50–55 FPS if the visual gain is substantial and motion stays comfortable;
+  - `?version=unlocked` alone gives smooth;
+  - default and `?version=locked` stay the accepted Phase 3, unchanged;
+  - selection is always explicit, never by host or manager, and separate from car-identity locking. `mode` is unused by any existing URL flag (verified). Internally it is named distinctly from `state.mode`;
+  - no artificial FPS cap and no manufactured differences: if quality sustains 60, that's better.
+- **Performance philosophy:**
+  - judge by sustained frame times, presentation cadence, scroll responsiveness and visual quality, not by a 16.7 ms GPU deadline;
+  - stalls of 50–100 ms are unacceptable in either mode;
+  - 50 FPS on the 60 Hz panel has uneven cadence, so it must be measured, not assumed;
+  - the §2 "at least as smooth as locked" bar now applies to **smooth**; **quality** is judged on cadence evenness, no stall clusters and your trackpad feel.
+- **Tone mapping:** ACES, AgX and Neutral are compared without a preselected winner. Correct output color-space handling applies across unlocked. The Ferrari's red must stay convincing, the road keeps its intended appearance, and Night keeps its atmosphere (not navy, not washed out). Per-preset treatment only where it materially helps; no abrupt transitions.
+- **Reflections:** car-only first, evaluated per car and per time of day where justified. Black stays black. No camera, identity or global-brightness compensation.
+- **Time of day:** GT3 has **two** presets, Day and Night. The five-state system was retired in Phase 1 (SPEC §13), so no presets are added. Day gets equal priority with Night, and the animated Day↔Night blend counts as the intermediate state for verification.
+- **Image integrity (W4):** a central objective. Defects are classified as resolution-caused versus material/shader/normal/geometry-caused, and checked both still and in motion.
+- **Frontiers:** two combined-configuration frontiers, smooth and quality, covering resolution, AA, reflections, shadows, textures and post-processing. Full vs selective vs staged prewarm compared. The 83 ms and 116 ms stalls are investigated. Energy Saver, display visibility and power are controlled.
+- **Review cadence:** after the first meaningful Stage 1 implementation, you get a focused Day/Night comparison before any artistic choice is fixed. Your comparisons: (1) tone/color, (2) reflections, (3) smooth vs quality, (4) other visibly consequential effects. Routine tuning stays with engineering.
 
 Legend: **C** = confirmed by measurement or controlled capture · **S** = strongly supported, not yet decisive · **H** = hypothesis · **O** = owner judgment.
 

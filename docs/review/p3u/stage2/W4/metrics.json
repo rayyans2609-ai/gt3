@@ -1,0 +1,744 @@
+{
+ "note": "W4 integrity metrics. Pans: deterministic fixed-dt production frame path, 36 frames after 10 settle frames; flicker = per-pixel luma reversal >=8 codes over consecutive frames (strong >=24), per frame per megapixel. grainRange: per-pixel max-min over 8 grain seeds at a frozen pose; >6 codes = grain-induced SMAA change.",
+ "runs": {
+  "r2": {
+   "label": "frozen grain clock (+ grain range, blur study)",
+   "sha": "ebad49eb259ba3d286814781a7a2b913c72ebb64",
+   "server": {
+    "sha": "ebad49eb259ba3d286814781a7a2b913c72ebb64",
+    "dirtyHash": "9046d3327a56f35f"
+   },
+   "configs": [
+    {
+     "tag": "locked",
+     "query": "?version=locked",
+     "dpr": 1,
+     "pans": {
+      "t123-creep": {
+       "flickerPerFramePerMP": 786.4,
+       "strongPerFramePerMP": 125,
+       "pixelsEverFlickering": 0.01071,
+       "speed": 0.01
+      },
+      "t123-cruise": {
+       "flickerPerFramePerMP": 6918,
+       "strongPerFramePerMP": 4283.8,
+       "pixelsEverFlickering": 0.15128,
+       "speed": 0.3
+      },
+      "t123-night-creep": {
+       "flickerPerFramePerMP": 23.4,
+       "strongPerFramePerMP": 0.5,
+       "pixelsEverFlickering": 0.00072,
+       "speed": 0.01
+      },
+      "fence-creep": {
+       "flickerPerFramePerMP": 598,
+       "strongPerFramePerMP": 109.2,
+       "pixelsEverFlickering": 0.00937,
+       "speed": 0.01
+      },
+      "hairpin-creep": {
+       "flickerPerFramePerMP": 1066.3,
+       "strongPerFramePerMP": 139.2,
+       "pixelsEverFlickering": 0.0151,
+       "speed": 0.01
+      },
+      "grid-creep": {
+       "flickerPerFramePerMP": 1074.6,
+       "strongPerFramePerMP": 298,
+       "pixelsEverFlickering": 0.0135,
+       "speed": 0.01
+      },
+      "grid-cruise": {
+       "flickerPerFramePerMP": 14069.3,
+       "strongPerFramePerMP": 9665.7,
+       "pixelsEverFlickering": 0.2113,
+       "speed": 0.3
+      }
+     },
+     "grainRange": {
+      "grain-t123-day": {
+       "pixelsOver6": 0,
+       "fraction": 0
+      },
+      "grain-t123-night": {
+       "pixelsOver6": 0,
+       "fraction": 0
+      },
+      "grain-fence-day": {
+       "pixelsOver6": 0,
+       "fraction": 0
+      }
+     },
+     "blur": {
+      "blur-t123-max": {
+       "production": {
+        "meanMaxChannel": 0.18023368343153162,
+        "max": 42,
+        "fractionOver4": 0.016150769931403523
+       },
+       "jitter8": {
+        "meanMaxChannel": 0.158579540602852,
+        "max": 52,
+        "fractionOver4": 0.012821279139270772
+       }
+      },
+      "blur-grid-max": {
+       "production": {
+        "meanMaxChannel": 0.15026897788404064,
+        "max": 96,
+        "fractionOver4": 0.010914951754760482
+       },
+       "jitter8": {
+        "meanMaxChannel": 0.14341146500441182,
+        "max": 89,
+        "fractionOver4": 0.008953832579056728
+       }
+      }
+     }
+    },
+    {
+     "tag": "smooth-off",
+     "query": "?version=unlocked&mode=smooth&integrity=off",
+     "dpr": 1.5,
+     "pans": {
+      "t123-creep": {
+       "flickerPerFramePerMP": 416.9,
+       "strongPerFramePerMP": 40.9,
+       "pixelsEverFlickering": 0.00799,
+       "speed": 0.01
+      },
+      "t123-cruise": {
+       "flickerPerFramePerMP": 6256.6,
+       "strongPerFramePerMP": 2394.7,
+       "pixelsEverFlickering": 0.14063,
+       "speed": 0.3
+      },
+      "t123-night-creep": {
+       "flickerPerFramePerMP": 56.6,
+       "strongPerFramePerMP": 3.5,
+       "pixelsEverFlickering": 0.00153,
+       "speed": 0.01
+      },
+      "fence-creep": {
+       "flickerPerFramePerMP": 286.3,
+       "strongPerFramePerMP": 47.5,
+       "pixelsEverFlickering": 0.00639,
+       "speed": 0.01
+      },
+      "hairpin-creep": {
+       "flickerPerFramePerMP": 532.3,
+       "strongPerFramePerMP": 82.1,
+       "pixelsEverFlickering": 0.01061,
+       "speed": 0.01
+      },
+      "grid-creep": {
+       "flickerPerFramePerMP": 471.9,
+       "strongPerFramePerMP": 106.7,
+       "pixelsEverFlickering": 0.00797,
+       "speed": 0.01
+      },
+      "grid-cruise": {
+       "flickerPerFramePerMP": 13536.8,
+       "strongPerFramePerMP": 8445.8,
+       "pixelsEverFlickering": 0.2009,
+       "speed": 0.3
+      }
+     },
+     "grainRange": {
+      "grain-t123-day": {
+       "pixelsOver6": 4206,
+       "fraction": 0.00133
+      },
+      "grain-t123-night": {
+       "pixelsOver6": 3912,
+       "fraction": 0.001237
+      },
+      "grain-fence-day": {
+       "pixelsOver6": 3042,
+       "fraction": 0.000962
+      }
+     },
+     "blur": {
+      "blur-t123-max": {
+       "production": {
+        "meanMaxChannel": 0.16079406192974632,
+        "max": 26,
+        "fractionOver4": 0.01244730342160109
+       },
+       "jitter8": {
+        "meanMaxChannel": 0.13556611859062545,
+        "max": 21,
+        "fractionOver4": 0.00775560805447237
+       }
+      },
+      "blur-grid-max": {
+       "production": {
+        "meanMaxChannel": 0.11196121405326426,
+        "max": 63,
+        "fractionOver4": 0.006996587570407056
+       },
+       "jitter8": {
+        "meanMaxChannel": 0.09819542879913472,
+        "max": 69,
+        "fractionOver4": 0.0047350227864274485
+       }
+      }
+     }
+    },
+    {
+     "tag": "smooth",
+     "query": "?version=unlocked&mode=smooth",
+     "dpr": 1.5,
+     "pans": {
+      "t123-creep": {
+       "flickerPerFramePerMP": 422.7,
+       "strongPerFramePerMP": 39.5,
+       "pixelsEverFlickering": 0.00802,
+       "speed": 0.01
+      },
+      "t123-cruise": {
+       "flickerPerFramePerMP": 6256.9,
+       "strongPerFramePerMP": 2394.4,
+       "pixelsEverFlickering": 0.14062,
+       "speed": 0.3
+      },
+      "t123-night-creep": {
+       "flickerPerFramePerMP": 46.1,
+       "strongPerFramePerMP": 0.6,
+       "pixelsEverFlickering": 0.00128,
+       "speed": 0.01
+      },
+      "fence-creep": {
+       "flickerPerFramePerMP": 284.9,
+       "strongPerFramePerMP": 46.3,
+       "pixelsEverFlickering": 0.00641,
+       "speed": 0.01
+      },
+      "hairpin-creep": {
+       "flickerPerFramePerMP": 531.2,
+       "strongPerFramePerMP": 81.4,
+       "pixelsEverFlickering": 0.01056,
+       "speed": 0.01
+      },
+      "grid-creep": {
+       "flickerPerFramePerMP": 377.8,
+       "strongPerFramePerMP": 91.2,
+       "pixelsEverFlickering": 0.00701,
+       "speed": 0.01
+      },
+      "grid-cruise": {
+       "flickerPerFramePerMP": 13538.9,
+       "strongPerFramePerMP": 8449.2,
+       "pixelsEverFlickering": 0.2008,
+       "speed": 0.3
+      }
+     },
+     "grainRange": {
+      "grain-t123-day": {
+       "pixelsOver6": 0,
+       "fraction": 0
+      },
+      "grain-t123-night": {
+       "pixelsOver6": 0,
+       "fraction": 0
+      },
+      "grain-fence-day": {
+       "pixelsOver6": 0,
+       "fraction": 0
+      }
+     },
+     "blur": {
+      "blur-t123-max": {
+       "production": {
+        "meanMaxChannel": 0.16082663655885412,
+        "max": 26,
+        "fractionOver4": 0.012436550631410165
+       },
+       "jitter8": {
+        "meanMaxChannel": 0.13567048390718445,
+        "max": 21,
+        "fractionOver4": 0.007777746151924275
+       }
+      },
+      "blur-grid-max": {
+       "production": {
+        "meanMaxChannel": 0.11139669256824068,
+        "max": 48,
+        "fractionOver4": 0.006969073077859688
+       },
+       "jitter8": {
+        "meanMaxChannel": 0.09846203474416265,
+        "max": 46,
+        "fractionOver4": 0.0047536820399940545
+       }
+      }
+     }
+    },
+    {
+     "tag": "smooth-css",
+     "query": "?version=unlocked&mode=smooth&grain=css",
+     "dpr": 1.5,
+     "pans": {
+      "t123-creep": {
+       "flickerPerFramePerMP": 421.7,
+       "strongPerFramePerMP": 39.5,
+       "pixelsEverFlickering": 0.00802,
+       "speed": 0.01
+      },
+      "t123-cruise": {
+       "flickerPerFramePerMP": 6256.9,
+       "strongPerFramePerMP": 2393.4,
+       "pixelsEverFlickering": 0.1406,
+       "speed": 0.3
+      },
+      "t123-night-creep": {
+       "flickerPerFramePerMP": 46,
+       "strongPerFramePerMP": 0.6,
+       "pixelsEverFlickering": 0.00128,
+       "speed": 0.01
+      },
+      "fence-creep": {
+       "flickerPerFramePerMP": 284.9,
+       "strongPerFramePerMP": 46.4,
+       "pixelsEverFlickering": 0.00641,
+       "speed": 0.01
+      },
+      "hairpin-creep": {
+       "flickerPerFramePerMP": 531.4,
+       "strongPerFramePerMP": 81.3,
+       "pixelsEverFlickering": 0.01056,
+       "speed": 0.01
+      },
+      "grid-creep": {
+       "flickerPerFramePerMP": 377.8,
+       "strongPerFramePerMP": 90.9,
+       "pixelsEverFlickering": 0.007,
+       "speed": 0.01
+      },
+      "grid-cruise": {
+       "flickerPerFramePerMP": 13541,
+       "strongPerFramePerMP": 8448.6,
+       "pixelsEverFlickering": 0.20079,
+       "speed": 0.3
+      }
+     },
+     "grainRange": {
+      "grain-t123-day": {
+       "pixelsOver6": 0,
+       "fraction": 0
+      },
+      "grain-t123-night": {
+       "pixelsOver6": 0,
+       "fraction": 0
+      },
+      "grain-fence-day": {
+       "pixelsOver6": 0,
+       "fraction": 0
+      }
+     },
+     "blur": {
+      "blur-t123-max": {
+       "production": {
+        "meanMaxChannel": 0.16083738934904507,
+        "max": 26,
+        "fractionOver4": 0.012372666407334669
+       },
+       "jitter8": {
+        "meanMaxChannel": 0.13553765532247303,
+        "max": 21,
+        "fractionOver4": 0.007781224995809574
+       }
+      },
+      "blur-grid-max": {
+       "production": {
+        "meanMaxChannel": 0.11149093761167879,
+        "max": 47,
+        "fractionOver4": 0.0069687568193246615
+       },
+       "jitter8": {
+        "meanMaxChannel": 0.09845855590027736,
+        "max": 47,
+        "fractionOver4": 0.004763802313114926
+       }
+      }
+     }
+    },
+    {
+     "tag": "quality-off",
+     "query": "?version=unlocked&mode=quality&integrity=off",
+     "dpr": 2,
+     "pans": {
+      "t123-creep": {
+       "flickerPerFramePerMP": 276.4,
+       "strongPerFramePerMP": 37.9,
+       "pixelsEverFlickering": 0.00603,
+       "speed": 0.01
+      },
+      "t123-cruise": {
+       "flickerPerFramePerMP": 6302.6,
+       "strongPerFramePerMP": 2444.1,
+       "pixelsEverFlickering": 0.14177,
+       "speed": 0.3
+      },
+      "t123-night-creep": {
+       "flickerPerFramePerMP": 65.7,
+       "strongPerFramePerMP": 2.1,
+       "pixelsEverFlickering": 0.00199,
+       "speed": 0.01
+      },
+      "fence-creep": {
+       "flickerPerFramePerMP": 273.5,
+       "strongPerFramePerMP": 31.8,
+       "pixelsEverFlickering": 0.00593,
+       "speed": 0.01
+      },
+      "hairpin-creep": {
+       "flickerPerFramePerMP": 424.7,
+       "strongPerFramePerMP": 86.2,
+       "pixelsEverFlickering": 0.00944,
+       "speed": 0.01
+      },
+      "grid-creep": {
+       "flickerPerFramePerMP": 481.8,
+       "strongPerFramePerMP": 112.9,
+       "pixelsEverFlickering": 0.00772,
+       "speed": 0.01
+      },
+      "grid-cruise": {
+       "flickerPerFramePerMP": 13312.2,
+       "strongPerFramePerMP": 8483.4,
+       "pixelsEverFlickering": 0.19596,
+       "speed": 0.3
+      }
+     },
+     "grainRange": {
+      "grain-t123-day": {
+       "pixelsOver6": 6218,
+       "fraction": 0.001106
+      },
+      "grain-t123-night": {
+       "pixelsOver6": 6159,
+       "fraction": 0.001096
+      },
+      "grain-fence-day": {
+       "pixelsOver6": 4581,
+       "fraction": 0.000815
+      }
+     },
+     "blur": {
+      "blur-t123-max": {
+       "production": {
+        "meanMaxChannel": 0.17838766259641933,
+        "max": 49,
+        "fractionOver4": 0.014128454729172004
+       },
+       "jitter8": {
+        "meanMaxChannel": 0.1495223507813167,
+        "max": 31,
+        "fractionOver4": 0.009910909970682833
+       }
+      },
+      "blur-grid-max": {
+       "production": {
+        "meanMaxChannel": 0.1170012879628839,
+        "max": 57,
+        "fractionOver4": 0.007773140637007942
+       },
+       "jitter8": {
+        "meanMaxChannel": 0.10077420089374663,
+        "max": 57,
+        "fractionOver4": 0.0053672828964221675
+       }
+      }
+     }
+    },
+    {
+     "tag": "quality",
+     "query": "?version=unlocked&mode=quality",
+     "dpr": 2,
+     "pans": {
+      "t123-creep": {
+       "flickerPerFramePerMP": 271.9,
+       "strongPerFramePerMP": 36.2,
+       "pixelsEverFlickering": 0.00602,
+       "speed": 0.01
+      },
+      "t123-cruise": {
+       "flickerPerFramePerMP": 6303.5,
+       "strongPerFramePerMP": 2444.1,
+       "pixelsEverFlickering": 0.14176,
+       "speed": 0.3
+      },
+      "t123-night-creep": {
+       "flickerPerFramePerMP": 56.6,
+       "strongPerFramePerMP": 0.9,
+       "pixelsEverFlickering": 0.00181,
+       "speed": 0.01
+      },
+      "fence-creep": {
+       "flickerPerFramePerMP": 277.8,
+       "strongPerFramePerMP": 31.2,
+       "pixelsEverFlickering": 0.00602,
+       "speed": 0.01
+      },
+      "hairpin-creep": {
+       "flickerPerFramePerMP": 426.9,
+       "strongPerFramePerMP": 86,
+       "pixelsEverFlickering": 0.00949,
+       "speed": 0.01
+      },
+      "grid-creep": {
+       "flickerPerFramePerMP": 465.6,
+       "strongPerFramePerMP": 98.2,
+       "pixelsEverFlickering": 0.00752,
+       "speed": 0.01
+      },
+      "grid-cruise": {
+       "flickerPerFramePerMP": 13315.9,
+       "strongPerFramePerMP": 8485.4,
+       "pixelsEverFlickering": 0.19592,
+       "speed": 0.3
+      }
+     },
+     "grainRange": {
+      "grain-t123-day": {
+       "pixelsOver6": 0,
+       "fraction": 0
+      },
+      "grain-t123-night": {
+       "pixelsOver6": 0,
+       "fraction": 0
+      },
+      "grain-fence-day": {
+       "pixelsOver6": 0,
+       "fraction": 0
+      }
+     },
+     "blur": {
+      "blur-t123-max": {
+       "production": {
+        "meanMaxChannel": 0.17832539919733584,
+        "max": 49,
+        "fractionOver4": 0.014121338912133892
+       },
+       "jitter8": {
+        "meanMaxChannel": 0.14943091253237697,
+        "max": 32,
+        "fractionOver4": 0.00990379415364472
+       }
+      },
+      "blur-grid-max": {
+       "production": {
+        "meanMaxChannel": 0.11672964164745396,
+        "max": 43,
+        "fractionOver4": 0.007761577434321008
+       },
+       "jitter8": {
+        "meanMaxChannel": 0.10084998434520252,
+        "max": 49,
+        "fractionOver4": 0.005374932399738138
+       }
+      }
+     }
+    }
+   ]
+  },
+  "r2-live": {
+   "label": "live production grain clock",
+   "sha": "ebad49eb259ba3d286814781a7a2b913c72ebb64",
+   "server": {
+    "sha": "ebad49eb259ba3d286814781a7a2b913c72ebb64",
+    "dirtyHash": "9046d3327a56f35f"
+   },
+   "configs": [
+    {
+     "tag": "locked",
+     "query": "?version=locked",
+     "dpr": 1,
+     "pans": {
+      "t123-creep": {
+       "flickerPerFramePerMP": 790.3,
+       "strongPerFramePerMP": 127.2,
+       "pixelsEverFlickering": 0.0107,
+       "speed": 0.01
+      },
+      "t123-night-creep": {
+       "flickerPerFramePerMP": 30.1,
+       "strongPerFramePerMP": 0.5,
+       "pixelsEverFlickering": 0.00089,
+       "speed": 0.01
+      },
+      "fence-creep": {
+       "flickerPerFramePerMP": 610,
+       "strongPerFramePerMP": 112.3,
+       "pixelsEverFlickering": 0.00962,
+       "speed": 0.01
+      },
+      "grid-creep": {
+       "flickerPerFramePerMP": 1058.4,
+       "strongPerFramePerMP": 298.8,
+       "pixelsEverFlickering": 0.01352,
+       "speed": 0.01
+      },
+      "t123-rest": {
+       "flickerPerFramePerMP": 0,
+       "strongPerFramePerMP": 0,
+       "pixelsEverFlickering": 0,
+       "speed": 0
+      }
+     }
+    },
+    {
+     "tag": "smooth-off",
+     "query": "?version=unlocked&mode=smooth&integrity=off",
+     "dpr": 1.5,
+     "pans": {
+      "t123-creep": {
+       "flickerPerFramePerMP": 448.8,
+       "strongPerFramePerMP": 46,
+       "pixelsEverFlickering": 0.00835,
+       "speed": 0.01
+      },
+      "t123-night-creep": {
+       "flickerPerFramePerMP": 113.1,
+       "strongPerFramePerMP": 14.6,
+       "pixelsEverFlickering": 0.00248,
+       "speed": 0.01
+      },
+      "fence-creep": {
+       "flickerPerFramePerMP": 317.6,
+       "strongPerFramePerMP": 54.4,
+       "pixelsEverFlickering": 0.00672,
+       "speed": 0.01
+      },
+      "grid-creep": {
+       "flickerPerFramePerMP": 532.5,
+       "strongPerFramePerMP": 125.3,
+       "pixelsEverFlickering": 0.00843,
+       "speed": 0.01
+      },
+      "t123-rest": {
+       "flickerPerFramePerMP": 138.1,
+       "strongPerFramePerMP": 25.6,
+       "pixelsEverFlickering": 0.00098,
+       "speed": 0
+      }
+     }
+    },
+    {
+     "tag": "smooth",
+     "query": "?version=unlocked&mode=smooth",
+     "dpr": 1.5,
+     "pans": {
+      "t123-creep": {
+       "flickerPerFramePerMP": 416,
+       "strongPerFramePerMP": 40.1,
+       "pixelsEverFlickering": 0.00794,
+       "speed": 0.01
+      },
+      "t123-night-creep": {
+       "flickerPerFramePerMP": 56.5,
+       "strongPerFramePerMP": 0.5,
+       "pixelsEverFlickering": 0.00162,
+       "speed": 0.01
+      },
+      "fence-creep": {
+       "flickerPerFramePerMP": 295.4,
+       "strongPerFramePerMP": 46.6,
+       "pixelsEverFlickering": 0.00654,
+       "speed": 0.01
+      },
+      "grid-creep": {
+       "flickerPerFramePerMP": 399.1,
+       "strongPerFramePerMP": 91.5,
+       "pixelsEverFlickering": 0.00723,
+       "speed": 0.01
+      },
+      "t123-rest": {
+       "flickerPerFramePerMP": 0,
+       "strongPerFramePerMP": 0,
+       "pixelsEverFlickering": 0,
+       "speed": 0
+      }
+     }
+    },
+    {
+     "tag": "quality-off",
+     "query": "?version=unlocked&mode=quality&integrity=off",
+     "dpr": 2,
+     "pans": {
+      "t123-creep": {
+       "flickerPerFramePerMP": 301.6,
+       "strongPerFramePerMP": 42.2,
+       "pixelsEverFlickering": 0.00626,
+       "speed": 0.01
+      },
+      "t123-night-creep": {
+       "flickerPerFramePerMP": 99.6,
+       "strongPerFramePerMP": 8.9,
+       "pixelsEverFlickering": 0.00246,
+       "speed": 0.01
+      },
+      "fence-creep": {
+       "flickerPerFramePerMP": 303.3,
+       "strongPerFramePerMP": 43.8,
+       "pixelsEverFlickering": 0.00619,
+       "speed": 0.01
+      },
+      "grid-creep": {
+       "flickerPerFramePerMP": 522.3,
+       "strongPerFramePerMP": 124.3,
+       "pixelsEverFlickering": 0.00803,
+       "speed": 0.01
+      },
+      "t123-rest": {
+       "flickerPerFramePerMP": 129.5,
+       "strongPerFramePerMP": 29.9,
+       "pixelsEverFlickering": 0.00088,
+       "speed": 0
+      }
+     }
+    },
+    {
+     "tag": "quality",
+     "query": "?version=unlocked&mode=quality",
+     "dpr": 2,
+     "pans": {
+      "t123-creep": {
+       "flickerPerFramePerMP": 273.1,
+       "strongPerFramePerMP": 36.1,
+       "pixelsEverFlickering": 0.00596,
+       "speed": 0.01
+      },
+      "t123-night-creep": {
+       "flickerPerFramePerMP": 59.6,
+       "strongPerFramePerMP": 0.8,
+       "pixelsEverFlickering": 0.00183,
+       "speed": 0.01
+      },
+      "fence-creep": {
+       "flickerPerFramePerMP": 283.4,
+       "strongPerFramePerMP": 31.5,
+       "pixelsEverFlickering": 0.006,
+       "speed": 0.01
+      },
+      "grid-creep": {
+       "flickerPerFramePerMP": 463.4,
+       "strongPerFramePerMP": 98.7,
+       "pixelsEverFlickering": 0.00758,
+       "speed": 0.01
+      },
+      "t123-rest": {
+       "flickerPerFramePerMP": 0,
+       "strongPerFramePerMP": 0,
+       "pixelsEverFlickering": 0,
+       "speed": 0
+      }
+     }
+    }
+   ]
+  }
+ }
+}

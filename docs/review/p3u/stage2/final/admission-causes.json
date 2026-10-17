@@ -1,0 +1,101 @@
+{
+  "source": "scripts/host-check.mjs:154-193 at fa9f19b",
+  "sampleIntervalSeconds": 10,
+  "gates": {
+    "memoryPressure": "both samples ==1",
+    "paging": "non-agent pageout and swapout deltas <=0",
+    "cpuIdle": "both >=25 percent",
+    "systemCPU": "both <50 percent"
+  },
+  "failedAdmissions": [
+    {
+      "at": "2026-10-17T14:39:43.575Z",
+      "pass": false,
+      "cls": "browser",
+      "reasons": [
+        "memory pressure not normal"
+      ],
+      "paging": {
+        "pageouts": 0,
+        "swapouts": 0
+      },
+      "a": {
+        "pressure": 2,
+        "pageouts": 822134,
+        "swapouts": 1155784,
+        "idle": 79.45,
+        "system": 12.62,
+        "swap": "total = 2048.00M  used = 1309.62M  free = 738.38M  (encrypted)"
+      },
+      "b": {
+        "pressure": 2,
+        "pageouts": 822134,
+        "swapouts": 1155784,
+        "idle": 76.76,
+        "system": 12.91,
+        "swap": "total = 2048.00M  used = 1309.62M  free = 738.38M  (encrypted)"
+      },
+      "counts": {
+        "heavy": 0,
+        "browsers": 0,
+        "agents": 3,
+        "runWorkers": null
+      }
+    },
+    {
+      "at": "2026-10-17T14:42:15.107Z",
+      "pass": false,
+      "cls": "browser",
+      "reasons": [
+        "paging rising {\"pageouts\":40,\"swapouts\":0}"
+      ],
+      "paging": {
+        "pageouts": 40,
+        "swapouts": 0
+      },
+      "a": {
+        "pressure": 1,
+        "pageouts": 822403,
+        "swapouts": 1155784,
+        "idle": 78.9,
+        "system": 11.45,
+        "swap": "total = 2048.00M  used = 1309.62M  free = 738.38M  (encrypted)"
+      },
+      "b": {
+        "pressure": 1,
+        "pageouts": 822443,
+        "swapouts": 1155784,
+        "idle": 59.48,
+        "system": 19.67,
+        "swap": "total = 2048.00M  used = 1309.62M  free = 738.38M  (encrypted)"
+      },
+      "counts": {
+        "heavy": 0,
+        "browsers": 0,
+        "agents": 3,
+        "runWorkers": null
+      }
+    }
+  ],
+  "applicationInference": "Both stopped before the swap server/browser launch. No application failure or responsible process is established by these admission records.",
+  "recoveredAdmission": {
+    "at": "2026-10-17T14:50:46.417Z",
+    "pass": true,
+    "pressure": [
+      1,
+      1
+    ],
+    "pageoutDelta": 0,
+    "swapoutDelta": 0,
+    "idle": [
+      82.62,
+      85.3
+    ],
+    "system": [
+      11.76,
+      10.47
+    ],
+    "heavy": 0,
+    "browsers": 0
+  }
+}

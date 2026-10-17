@@ -40,7 +40,9 @@ W3 preserves existing lighting while stabilizing and sharpening shadows, adding 
 
 ## Sustained measurements and outstanding qualification
 
-Fresh integrated600s Smooth and600s Quality have **not started**. FinalVerify completed image identity but stopped at swap admission (pressure2). One bounded continuation stopped before launch with pressure1 but40pageouts during admission. [Capture report](stage2/final/capture-report.md), [remaining-stage stop](stage2/final/remaining-report.md). No guard was relaxed. No demonstrated product defect caused these stops.
+Fresh integrated600s Smooth and600s Quality remain **unqualified**. Original FinalVerify/FinalRemaining stopped before runtime (pressure2, then40pageouts). E5 initially stopped on10pageouts; a bounded deterministic admission wait then launched the functional checks and Smooth without changing thresholds. [Exact original admission causes](stage2/final/admission-causes.json).
+
+**Latest actual attempt:** Smooth’s live monitor automatically stopped after693frames/~11.5s for consecutive pressure2 samples; pageouts rose827492→827671, swapouts stayedflat. AC100%, lowpoweroff, correct1470×919@deviceDPR2 physical fullscreen geometry, hardware GPU and productDPR1.5. Zero>33ms intervals in this short window is not sustained qualification. Quality was not started. No repeat measurement on the unchanged host. [E5 report](stage2/final/e5-report.md), [compact facts](stage2/final/e5-summary.json). No product code changed.
 
 Recovered W6 results are diagnostic evidence of the implementation, **not final integrated qualification**. Both covered15Tours/135crossings, alternating Day/Night, hardware GPU/fullscreen. The original monitor omitted canonical CPU/paging automatic stops; the corrected final harness includes them. Minimap changes were absent.
 
@@ -59,13 +61,13 @@ Measurements report application RAF cadence and WebGL GPU elapsed time, not disp
 
 Final sourcefa9f19b: **Locked23/23 and default23/23 pixel-identical to acceptedfa12e92**, zero changed pixels over129,289,440 compared pixels per profile, no capture errors.10cars×Day/Night plusgrid/gate/finish.1470×956CSS/deviceDPR2/renderDPR1, headless emulation: deterministic image identity, not physical fullscreen pacing. [Locked diff](stage2/final/locked-diff.json), [default diff](stage2/final/default-diff.json), [provenance](stage2/final/locked-provenance.json).
 
-Earlier WaveA V1 passed swap, timer/finish, route persistence and pre-ready input after URL correction. Unchanged timer/finish and persistence evidence is reused. The planned Unlocked swap/pre-ready refresh remains unrun because of host admission. Minimap22states/profile and Ferrari/Aston target/visual checks passed. Integrated production build PASS.
+Earlier WaveA V1 passed swap, timer/finish, route persistence and pre-ready input after URL correction. Unchanged timer/finish and persistence evidence is reused. The refreshed Unlocked checks are complete as collective evidence:28swap behavior phases PASS/no app errors; two A1 minimum-event coverage assertions failed (1observed warmup wheel, require3) before behavioral assertions. These are retained as insufficient coverage. Dedicated pre-ready PASS directly proves input/readiness/momentum/restore; no assertion was weakened or product code changed. See the [E5 functional judgment](stage2/final/e5-report.md). Minimap22states/profile and Ferrari/Aston target/visual checks passed. Integrated production build PASS.
 
 Integration branch:`p3u-profiles`; W6 checkpoint:`35a58ed`. Final source HEAD: `fa9f19be4b6c073212583db4cecb2b41126fa083` (production build PASS). Later review/evidence commits change documentation and copied images only; the tested product dependency cone is unchanged. Main:`fa12e92`, untouched. No push.
 
 ## Blockers, limitations and owner checkpoint
 
-**Completion blockers:** Unlocked swap/pre-ready refresh and fresh600s/mode on integrated source remain unrun because host admission is unstable. Smallest path: close unused memory-heavy apps/tabs, obtain stable admission, then those checks only (about25–30min once admitted). Preserve completed evidence; no new matrix, harness expansion or cosmetic scope.
+**Completion blockers:** only the full600s Smooth and600s Quality on integrated source remain. Admission can pass while the workload subsequently exceeds host memory conditions. Smallest path: close unused memory-heavy apps/tabs, establish a changed healthy host state, then only these two modes (about20–25min once admitted). The failed partial attempt remains evidence and cannot be relabeled a pass. Preserve completed evidence; no new matrix, harness expansion or cosmetic scope.
 
 **Proposed acceptable limitations:** thin-feature motion shimmer, occasional swap misses including the recovered50.2ms event, targeted glass sampling tradeoff, minimap raster edges at large zoom, and a Three r180 private-target guard that must be revalidated on renderer upgrades. Final sustained results may alter the performance recommendation. Approved Night darkness/lighting stays unchanged.
 

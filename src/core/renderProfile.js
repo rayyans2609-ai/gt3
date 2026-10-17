@@ -51,7 +51,11 @@ const unlockedThemes = Object.freeze({
 });
 export const SETTINGS_TABLE = Object.freeze({
   locked: Object.freeze({ dpr: 1, output: false, carEnvironment: false }),
-  'unlocked/smooth': Object.freeze({ dpr: 1.5, output: true, carEnvironment: true, themes: unlockedThemes }),
-  'unlocked/quality': Object.freeze({ dpr: 2, output: true, carEnvironment: true, themes: unlockedThemes }),
+  // Stage 2 interface (manager, 2026-10-17). W3 owns the values; W5 consumes textureSet and
+  // anisotropy in the loader. Absent keys mean the accepted locked behaviour.
+  'unlocked/smooth': Object.freeze({ dpr: 1.5, output: true, carEnvironment: true, themes: unlockedThemes,
+    textureSet: 'tour', anisotropy: 1 }),
+  'unlocked/quality': Object.freeze({ dpr: 2, output: true, carEnvironment: true, themes: unlockedThemes,
+    textureSet: 'tour', anisotropy: 1 }),
 });
 export const SETTINGS = SETTINGS_TABLE[UNLOCKED ? `unlocked/${QUALITY_MODE}` : 'locked'];

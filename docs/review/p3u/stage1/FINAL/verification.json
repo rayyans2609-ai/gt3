@@ -1,0 +1,1000 @@
+{
+  "sourceHashes": {
+    "src/core/renderProfile.js": "35ddb29a892a4baefb8fa0934b43b564ac0a155ae78842860e0cd6acdeeb0fcf",
+    "src/scene/theme.js": "dc0a164c08ff15712d4339540c29ee7f2878fae189990159a40c2574731fd7ae",
+    "src/scene/sceneSetup.js": "61aa3208721fa2536ec4dea975f9dd7156e3679b0526aa06c6f3965279de8e42"
+  },
+  "transitionChecks": {
+    "sameCamera": true,
+    "maxSplitWeightError": 3.9402824437605546e-14,
+    "allMonotonic": true,
+    "allCoarseStepsWithinLocked": false,
+    "finePass": true,
+    "maxFineSplitDelta": 0.007736072181563358,
+    "maxFineLockedDelta": 0.034204912387480135,
+    "endpointNightDiff": {
+      "a": "local/evidence/p3u/t6/aces",
+      "b": "local/evidence/p3u/t6/split",
+      "identical": true,
+      "results": [
+        {
+          "state": "lexus-night",
+          "identical": true,
+          "maxChannelDelta": 0,
+          "differingPixels": 0,
+          "pixels": 5621280
+        },
+        {
+          "state": "mclaren-night",
+          "identical": true,
+          "maxChannelDelta": 0,
+          "differingPixels": 0,
+          "pixels": 5621280
+        },
+        {
+          "state": "lamborghini-night",
+          "identical": true,
+          "maxChannelDelta": 0,
+          "differingPixels": 0,
+          "pixels": 5621280
+        }
+      ]
+    }
+  },
+  "capturedSource": "b562138 + T6 working-tree patch; exact server dirty hashes below",
+  "build": "passed; local/evidence/p3u/t6/build.log",
+  "referenceSHA": "fa12e92",
+  "referencePort": 5232,
+  "locked": {
+    "identical": true,
+    "states": 23
+  },
+  "default": {
+    "identical": true,
+    "states": 23
+  },
+  "allocations": {
+    "pass": true,
+    "method": "Actual WebGL createProgram/createTexture calls counted after readiness; all ten original/fade models, three reflection strengths, nine transition updates both directions, smooth/quality; non-Neutral toe parameter deliberately present to verify it is ignored.",
+    "runs": [
+      {
+        "query": "?version=unlocked&mode=smooth&tone=neutral&refl=mid",
+        "delta": {
+          "programs": 0,
+          "textures": 0
+        },
+        "toeEnabled": false,
+        "dpr": 1.5,
+        "outputProgram": "GT3OutputWash-neutral",
+        "passes": 4,
+        "before": {
+          "creates": {
+            "programs": 118,
+            "textures": 309
+          },
+          "programs": 116,
+          "textures": 303
+        },
+        "after": {
+          "creates": {
+            "programs": 118,
+            "textures": 309
+          },
+          "programs": 116,
+          "textures": 303
+        }
+      },
+      {
+        "query": "?version=unlocked&mode=smooth&tone=neutral&refl=mid&nightcar=toe",
+        "delta": {
+          "programs": 0,
+          "textures": 0
+        },
+        "toeEnabled": true,
+        "dpr": 1.5,
+        "outputProgram": "GT3OutputWash-neutral",
+        "passes": 4,
+        "before": {
+          "creates": {
+            "programs": 118,
+            "textures": 309
+          },
+          "programs": 116,
+          "textures": 303
+        },
+        "after": {
+          "creates": {
+            "programs": 118,
+            "textures": 309
+          },
+          "programs": 116,
+          "textures": 303
+        }
+      },
+      {
+        "query": "?version=unlocked&mode=smooth&tone=neutral&refl=mid&carspec=quarter",
+        "delta": {
+          "programs": 0,
+          "textures": 0
+        },
+        "toeEnabled": false,
+        "dpr": 1.5,
+        "outputProgram": "GT3OutputWash-neutral",
+        "passes": 4,
+        "before": {
+          "creates": {
+            "programs": 118,
+            "textures": 309
+          },
+          "programs": 116,
+          "textures": 303
+        },
+        "after": {
+          "creates": {
+            "programs": 118,
+            "textures": 309
+          },
+          "programs": 116,
+          "textures": 303
+        }
+      },
+      {
+        "query": "?version=unlocked&mode=smooth&tone=neutral&refl=mid&carspec=quarter&nightcar=toe",
+        "delta": {
+          "programs": 0,
+          "textures": 0
+        },
+        "toeEnabled": true,
+        "dpr": 1.5,
+        "outputProgram": "GT3OutputWash-neutral",
+        "passes": 4,
+        "before": {
+          "creates": {
+            "programs": 118,
+            "textures": 309
+          },
+          "programs": 116,
+          "textures": 303
+        },
+        "after": {
+          "creates": {
+            "programs": 118,
+            "textures": 309
+          },
+          "programs": 116,
+          "textures": 303
+        }
+      },
+      {
+        "query": "?version=unlocked&mode=smooth&tone=aces&refl=mid&nightcar=toe",
+        "delta": {
+          "programs": 0,
+          "textures": 0
+        },
+        "toeEnabled": false,
+        "dpr": 1.5,
+        "outputProgram": "GT3OutputWash-aces",
+        "passes": 4,
+        "before": {
+          "creates": {
+            "programs": 118,
+            "textures": 309
+          },
+          "programs": 116,
+          "textures": 303
+        },
+        "after": {
+          "creates": {
+            "programs": 118,
+            "textures": 309
+          },
+          "programs": 116,
+          "textures": 303
+        }
+      },
+      {
+        "query": "?version=unlocked&mode=smooth&tone=aces&refl=mid&carspec=quarter&nightcar=toe",
+        "delta": {
+          "programs": 0,
+          "textures": 0
+        },
+        "toeEnabled": false,
+        "dpr": 1.5,
+        "outputProgram": "GT3OutputWash-aces",
+        "passes": 4,
+        "before": {
+          "creates": {
+            "programs": 118,
+            "textures": 309
+          },
+          "programs": 116,
+          "textures": 303
+        },
+        "after": {
+          "creates": {
+            "programs": 118,
+            "textures": 309
+          },
+          "programs": 116,
+          "textures": 303
+        }
+      },
+      {
+        "query": "?version=unlocked&mode=smooth&tone=agx&refl=mid&nightcar=toe",
+        "delta": {
+          "programs": 0,
+          "textures": 0
+        },
+        "toeEnabled": false,
+        "dpr": 1.5,
+        "outputProgram": "GT3OutputWash-agx",
+        "passes": 4,
+        "before": {
+          "creates": {
+            "programs": 118,
+            "textures": 309
+          },
+          "programs": 116,
+          "textures": 303
+        },
+        "after": {
+          "creates": {
+            "programs": 118,
+            "textures": 309
+          },
+          "programs": 116,
+          "textures": 303
+        }
+      },
+      {
+        "query": "?version=unlocked&mode=smooth&tone=agx&refl=mid&carspec=quarter&nightcar=toe",
+        "delta": {
+          "programs": 0,
+          "textures": 0
+        },
+        "toeEnabled": false,
+        "dpr": 1.5,
+        "outputProgram": "GT3OutputWash-agx",
+        "passes": 4,
+        "before": {
+          "creates": {
+            "programs": 118,
+            "textures": 309
+          },
+          "programs": 116,
+          "textures": 303
+        },
+        "after": {
+          "creates": {
+            "programs": 118,
+            "textures": 309
+          },
+          "programs": 116,
+          "textures": 303
+        }
+      },
+      {
+        "query": "?version=unlocked&mode=smooth&tone=split&refl=mid&nightcar=toe",
+        "delta": {
+          "programs": 0,
+          "textures": 0
+        },
+        "toeEnabled": false,
+        "dpr": 1.5,
+        "outputProgram": "GT3OutputWash-split",
+        "passes": 4,
+        "before": {
+          "creates": {
+            "programs": 118,
+            "textures": 309
+          },
+          "programs": 116,
+          "textures": 303
+        },
+        "after": {
+          "creates": {
+            "programs": 118,
+            "textures": 309
+          },
+          "programs": 116,
+          "textures": 303
+        }
+      },
+      {
+        "query": "?version=unlocked&mode=smooth&tone=split&refl=mid&carspec=quarter&nightcar=toe",
+        "delta": {
+          "programs": 0,
+          "textures": 0
+        },
+        "toeEnabled": false,
+        "dpr": 1.5,
+        "outputProgram": "GT3OutputWash-split",
+        "passes": 4,
+        "before": {
+          "creates": {
+            "programs": 118,
+            "textures": 309
+          },
+          "programs": 116,
+          "textures": 303
+        },
+        "after": {
+          "creates": {
+            "programs": 118,
+            "textures": 309
+          },
+          "programs": 116,
+          "textures": 303
+        }
+      },
+      {
+        "query": "?version=unlocked&mode=quality&tone=neutral&refl=mid",
+        "delta": {
+          "programs": 0,
+          "textures": 0
+        },
+        "toeEnabled": false,
+        "dpr": 2,
+        "outputProgram": "GT3OutputWash-neutral",
+        "passes": 4,
+        "before": {
+          "creates": {
+            "programs": 118,
+            "textures": 309
+          },
+          "programs": 116,
+          "textures": 303
+        },
+        "after": {
+          "creates": {
+            "programs": 118,
+            "textures": 309
+          },
+          "programs": 116,
+          "textures": 303
+        }
+      },
+      {
+        "query": "?version=unlocked&mode=quality&tone=neutral&refl=mid&nightcar=toe",
+        "delta": {
+          "programs": 0,
+          "textures": 0
+        },
+        "toeEnabled": true,
+        "dpr": 2,
+        "outputProgram": "GT3OutputWash-neutral",
+        "passes": 4,
+        "before": {
+          "creates": {
+            "programs": 118,
+            "textures": 309
+          },
+          "programs": 116,
+          "textures": 303
+        },
+        "after": {
+          "creates": {
+            "programs": 118,
+            "textures": 309
+          },
+          "programs": 116,
+          "textures": 303
+        }
+      },
+      {
+        "query": "?version=unlocked&mode=quality&tone=neutral&refl=mid&carspec=quarter",
+        "delta": {
+          "programs": 0,
+          "textures": 0
+        },
+        "toeEnabled": false,
+        "dpr": 2,
+        "outputProgram": "GT3OutputWash-neutral",
+        "passes": 4,
+        "before": {
+          "creates": {
+            "programs": 118,
+            "textures": 309
+          },
+          "programs": 116,
+          "textures": 303
+        },
+        "after": {
+          "creates": {
+            "programs": 118,
+            "textures": 309
+          },
+          "programs": 116,
+          "textures": 303
+        }
+      },
+      {
+        "query": "?version=unlocked&mode=quality&tone=neutral&refl=mid&carspec=quarter&nightcar=toe",
+        "delta": {
+          "programs": 0,
+          "textures": 0
+        },
+        "toeEnabled": true,
+        "dpr": 2,
+        "outputProgram": "GT3OutputWash-neutral",
+        "passes": 4,
+        "before": {
+          "creates": {
+            "programs": 118,
+            "textures": 309
+          },
+          "programs": 116,
+          "textures": 303
+        },
+        "after": {
+          "creates": {
+            "programs": 118,
+            "textures": 309
+          },
+          "programs": 116,
+          "textures": 303
+        }
+      },
+      {
+        "query": "?version=unlocked&mode=quality&tone=aces&refl=mid&nightcar=toe",
+        "delta": {
+          "programs": 0,
+          "textures": 0
+        },
+        "toeEnabled": false,
+        "dpr": 2,
+        "outputProgram": "GT3OutputWash-aces",
+        "passes": 4,
+        "before": {
+          "creates": {
+            "programs": 118,
+            "textures": 309
+          },
+          "programs": 116,
+          "textures": 303
+        },
+        "after": {
+          "creates": {
+            "programs": 118,
+            "textures": 309
+          },
+          "programs": 116,
+          "textures": 303
+        }
+      },
+      {
+        "query": "?version=unlocked&mode=quality&tone=aces&refl=mid&carspec=quarter&nightcar=toe",
+        "delta": {
+          "programs": 0,
+          "textures": 0
+        },
+        "toeEnabled": false,
+        "dpr": 2,
+        "outputProgram": "GT3OutputWash-aces",
+        "passes": 4,
+        "before": {
+          "creates": {
+            "programs": 118,
+            "textures": 309
+          },
+          "programs": 116,
+          "textures": 303
+        },
+        "after": {
+          "creates": {
+            "programs": 118,
+            "textures": 309
+          },
+          "programs": 116,
+          "textures": 303
+        }
+      },
+      {
+        "query": "?version=unlocked&mode=quality&tone=agx&refl=mid&nightcar=toe",
+        "delta": {
+          "programs": 0,
+          "textures": 0
+        },
+        "toeEnabled": false,
+        "dpr": 2,
+        "outputProgram": "GT3OutputWash-agx",
+        "passes": 4,
+        "before": {
+          "creates": {
+            "programs": 118,
+            "textures": 309
+          },
+          "programs": 116,
+          "textures": 303
+        },
+        "after": {
+          "creates": {
+            "programs": 118,
+            "textures": 309
+          },
+          "programs": 116,
+          "textures": 303
+        }
+      },
+      {
+        "query": "?version=unlocked&mode=quality&tone=agx&refl=mid&carspec=quarter&nightcar=toe",
+        "delta": {
+          "programs": 0,
+          "textures": 0
+        },
+        "toeEnabled": false,
+        "dpr": 2,
+        "outputProgram": "GT3OutputWash-agx",
+        "passes": 4,
+        "before": {
+          "creates": {
+            "programs": 118,
+            "textures": 309
+          },
+          "programs": 116,
+          "textures": 303
+        },
+        "after": {
+          "creates": {
+            "programs": 118,
+            "textures": 309
+          },
+          "programs": 116,
+          "textures": 303
+        }
+      },
+      {
+        "query": "?version=unlocked&mode=quality&tone=split&refl=mid&nightcar=toe",
+        "delta": {
+          "programs": 0,
+          "textures": 0
+        },
+        "toeEnabled": false,
+        "dpr": 2,
+        "outputProgram": "GT3OutputWash-split",
+        "passes": 4,
+        "before": {
+          "creates": {
+            "programs": 118,
+            "textures": 309
+          },
+          "programs": 116,
+          "textures": 303
+        },
+        "after": {
+          "creates": {
+            "programs": 118,
+            "textures": 309
+          },
+          "programs": 116,
+          "textures": 303
+        }
+      },
+      {
+        "query": "?version=unlocked&mode=quality&tone=split&refl=mid&carspec=quarter&nightcar=toe",
+        "delta": {
+          "programs": 0,
+          "textures": 0
+        },
+        "toeEnabled": false,
+        "dpr": 2,
+        "outputProgram": "GT3OutputWash-split",
+        "passes": 4,
+        "before": {
+          "creates": {
+            "programs": 118,
+            "textures": 309
+          },
+          "programs": 116,
+          "textures": 303
+        },
+        "after": {
+          "creates": {
+            "programs": 118,
+            "textures": 309
+          },
+          "programs": 116,
+          "textures": 303
+        }
+      }
+    ],
+    "server": {
+      "startedAt": "2026-10-17T04:40:54.706Z",
+      "url": "http://127.0.0.1:5231",
+      "root": "/Users/shahzadsheikh/Desktop/gt3/.claude/worktrees/p3u-t2",
+      "branch": "p3u-t2",
+      "sha": "b56213822d639361fc5e3ca6d5b91acd76f28d7c",
+      "dirtyFiles": 9,
+      "dirtyHash": "170bfc0dac7421bb",
+      "vitePid": 24466,
+      "run": "p3u",
+      "epoch": "e1",
+      "task": "T6",
+      "harness": "bash local/tmp/p3u/t6/verify.sh",
+      "host": {
+        "profile": "m4-16gb",
+        "arch": "arm64",
+        "cpu": "Apple M4",
+        "ramGB": 16,
+        "model": "Mac16,12",
+        "cores": {
+          "performance": 4,
+          "efficiency": 6
+        },
+        "gpu": "Apple M4",
+        "macos": "15.5",
+        "versions": {
+          "node": "v24.21.0",
+          "claude": "2.1.302 (Claude Code)",
+          "codex": "codex-cli 0.163.0",
+          "opencode": "opencode v2.0.32",
+          "chrome": "Google Chrome 155.0.8059.80"
+        },
+        "unavailable": []
+      }
+    },
+    "errors": []
+  },
+  "nightTour": {
+    "url": "http://127.0.0.1:5231/?version=unlocked&mode=smooth&tone=split&refl=mid",
+    "theme": "night",
+    "dpr": 1.5,
+    "requestedSeconds": 65,
+    "elapsedSeconds": 65.483,
+    "frames": 3929,
+    "completedLoops": 1,
+    "carFrames": {
+      "0": 454,
+      "1": 344,
+      "2": 322,
+      "3": 584,
+      "4": 477,
+      "5": 393,
+      "6": 362,
+      "7": 235,
+      "8": 143,
+      "9": 615
+    },
+    "summary": {
+      "raf": {
+        "n": 3928,
+        "p50": 16.69999999999709,
+        "p95": 17.400000000001455,
+        "p99": 17.599999999998545,
+        "max": 17.700000000004366
+      },
+      "cpu": {
+        "n": 3929,
+        "p50": 2.199999988079071,
+        "p95": 3.399999976158142,
+        "p99": 4.300000011920929,
+        "max": 5.400000035762787
+      },
+      "gpu": {
+        "total": {
+          "n": 3928,
+          "p50": 13.654375,
+          "p95": 15.047624,
+          "p99": 15.931041,
+          "max": 32.491999
+        }
+      },
+      "within16_7Percent": 62.47454175152749,
+      "thresholds": {
+        "25": {
+          "count": 0,
+          "perMinute": 0,
+          "clusters": []
+        },
+        "33": {
+          "count": 0,
+          "perMinute": 0,
+          "clusters": []
+        },
+        "50": {
+          "count": 0,
+          "perMinute": 0,
+          "clusters": []
+        }
+      },
+      "heap": {
+        "n": 3929,
+        "p50": 206215744,
+        "p95": 220632683,
+        "p99": 224399064,
+        "max": 226982752
+      },
+      "worst": [
+        {
+          "t": 54426.89999997616,
+          "raf": 54426.4,
+          "dt": 17.700000000004366,
+          "cpu": 1.4000000357627869,
+          "gpu": {
+            "total": 14.909166
+          },
+          "progress": 0.14747143131355156,
+          "speed": 0.582809524840081,
+          "ratio": 1.5,
+          "car": 1,
+          "morph": false,
+          "finish": false,
+          "phase": "steady",
+          "heap": 204492004
+        },
+        {
+          "t": 59360.10000002384,
+          "raf": 59359.8,
+          "dt": 17.700000000004366,
+          "cpu": 2.199999988079071,
+          "gpu": {
+            "total": 13.238041
+          },
+          "progress": 0.29955349842017126,
+          "speed": 0.34130576465460566,
+          "ratio": 1.5,
+          "car": 3,
+          "morph": false,
+          "finish": false,
+          "phase": "steady",
+          "heap": 199587506
+        },
+        {
+          "t": 59426.60000002384,
+          "raf": 59426.4,
+          "dt": 17.700000000004366,
+          "cpu": 1.899999976158142,
+          "gpu": {
+            "total": 13.184125
+          },
+          "progress": 0.30098496361433924,
+          "speed": 0.34579139504064776,
+          "ratio": 1.5,
+          "car": 3,
+          "morph": false,
+          "finish": false,
+          "phase": "steady",
+          "heap": 200943470
+        },
+        {
+          "t": 15326.899999976158,
+          "raf": 15326.5,
+          "dt": 17.700000000000728,
+          "cpu": 3,
+          "gpu": {
+            "total": 13.76125
+          },
+          "progress": 0.20386888663680128,
+          "speed": 0.32673596875724387,
+          "ratio": 1.5,
+          "car": 2,
+          "morph": false,
+          "finish": false,
+          "phase": "steady",
+          "heap": 208936664
+        },
+        {
+          "t": 26860.19999998808,
+          "raf": 26859.8,
+          "dt": 17.700000000000728,
+          "cpu": 1.199999988079071,
+          "gpu": {
+            "total": 8.098583
+          },
+          "progress": 0.5165713691541637,
+          "speed": 0.5547534205426004,
+          "ratio": 1.5,
+          "car": 5,
+          "morph": false,
+          "finish": false,
+          "phase": "steady",
+          "heap": 194431094
+        },
+        {
+          "t": 31293.5,
+          "raf": 31293.1,
+          "dt": 17.69999999999709,
+          "cpu": 2.199999988079071,
+          "gpu": {
+            "total": 14.647916
+          },
+          "progress": 0.66614181996682,
+          "speed": 0.44852668942743723,
+          "ratio": 1.5,
+          "car": 6,
+          "morph": false,
+          "finish": false,
+          "phase": "steady",
+          "heap": 220808505
+        },
+        {
+          "t": 38243.30000001192,
+          "raf": 38243.1,
+          "dt": 17.69999999999709,
+          "cpu": 3.099999964237213,
+          "gpu": {
+            "total": 14.288749
+          },
+          "progress": 0.8606935449261465,
+          "speed": 0.5937737856749266,
+          "ratio": 1.5,
+          "car": 9,
+          "morph": true,
+          "finish": false,
+          "phase": "steady",
+          "heap": 204408651
+        },
+        {
+          "t": 47793.19999998808,
+          "raf": 47793.1,
+          "dt": 17.69999999999709,
+          "cpu": 2.300000011920929,
+          "gpu": {
+            "total": 13.102874
+          },
+          "progress": 1,
+          "speed": 0,
+          "ratio": 1.5,
+          "car": 9,
+          "morph": false,
+          "finish": true,
+          "phase": "steady",
+          "heap": 207452711
+        },
+        {
+          "t": 56543.30000001192,
+          "raf": 56543.1,
+          "dt": 17.69999999999709,
+          "cpu": 2.599999964237213,
+          "gpu": {
+            "total": 14.545416
+          },
+          "progress": 0.22253783762453916,
+          "speed": 0.589948514506365,
+          "ratio": 1.5,
+          "car": 2,
+          "morph": false,
+          "finish": false,
+          "phase": "steady",
+          "heap": 191620522
+        },
+        {
+          "t": 61093.30000001192,
+          "raf": 61093.1,
+          "dt": 17.69999999999709,
+          "cpu": 1.5,
+          "gpu": {
+            "total": 12.66175
+          },
+          "progress": 0.3352022024565968,
+          "speed": 0.3815749105572615,
+          "ratio": 1.5,
+          "car": 3,
+          "morph": false,
+          "finish": false,
+          "phase": "steady",
+          "heap": 208149398
+        },
+        {
+          "t": 69526.69999998808,
+          "raf": 69526.4,
+          "dt": 17.69999999999709,
+          "cpu": 1.100000023841858,
+          "gpu": {
+            "total": 14.574041
+          },
+          "progress": 0.5646355800961872,
+          "speed": 0.33715871379369505,
+          "ratio": 1.5,
+          "car": 5,
+          "morph": false,
+          "finish": false,
+          "phase": "steady",
+          "heap": 199756738
+        },
+        {
+          "t": 44009.89999997616,
+          "raf": 44009.8,
+          "dt": 17.60000000000582,
+          "cpu": 2.400000035762787,
+          "gpu": {
+            "total": 12.341166
+          },
+          "progress": 1,
+          "speed": 0.08112685082646733,
+          "ratio": 1.5,
+          "car": 9,
+          "morph": false,
+          "finish": true,
+          "phase": "steady",
+          "heap": 216091251
+        }
+      ]
+    },
+    "disjointQueries": 0,
+    "pendingQueries": 1,
+    "gpu": "ANGLE (Apple, ANGLE Metal Renderer: Apple M4, Unspecified Version)",
+    "headful": true,
+    "errors": [],
+    "incomplete": false,
+    "server": {
+      "startedAt": "2026-10-17T04:40:54.706Z",
+      "url": "http://127.0.0.1:5231",
+      "root": "/Users/shahzadsheikh/Desktop/gt3/.claude/worktrees/p3u-t2",
+      "branch": "p3u-t2",
+      "sha": "b56213822d639361fc5e3ca6d5b91acd76f28d7c",
+      "dirtyFiles": 9,
+      "dirtyHash": "170bfc0dac7421bb",
+      "vitePid": 24466,
+      "run": "p3u",
+      "epoch": "e1",
+      "task": "T6",
+      "harness": "bash local/tmp/p3u/t6/verify.sh",
+      "host": {
+        "profile": "m4-16gb",
+        "arch": "arm64",
+        "cpu": "Apple M4",
+        "ramGB": 16,
+        "model": "Mac16,12",
+        "cores": {
+          "performance": 4,
+          "efficiency": 6
+        },
+        "gpu": "Apple M4",
+        "macos": "15.5",
+        "versions": {
+          "node": "v24.21.0",
+          "claude": "2.1.302 (Claude Code)",
+          "codex": "codex-cli 0.163.0",
+          "opencode": "opencode v2.0.32",
+          "chrome": "Google Chrome 155.0.8059.80"
+        },
+        "unavailable": []
+      }
+    },
+    "conditions": {
+      "browserSaverState": 0,
+      "osPowerSettings": "Battery Power:\n Sleep On Power Button 1\n lowpowermode         0\n standby              1\n ttyskeepawake        1\n hibernatemode        3\n powernap             1\n hibernatefile        /var/vm/sleepimage\n displaysleep         10\n womp                 0\n networkoversleep     0\n sleep                1\n lessbright           1\n tcpkeepalive         1\n disksleep            10\nAC Power:\n Sleep On Power Button 1\n lowpowermode         0\n standby              1\n ttyskeepawake        1\n hibernatemode        3\n powernap             1\n hibernatefile        /var/vm/sleepimage\n displaysleep         20\n womp                 1\n networkoversleep     0\n sleep                0\n tcpkeepalive         1\n disksleep            10\n",
+      "awakeAssertion": "caffeinate -dimsu -w harnessPID (released at exit)",
+      "power": "Now drawing from 'AC Power'\n -InternalBattery-0 (id=21364835)\t57%; charging; 2:27 remaining present: true\n",
+      "thermal": "Note: No thermal warning level has been recorded\nNote: No performance warning level has been recorded\nNote: No CPU power status has been recorded\n",
+      "candidate": "baseline"
+    },
+    "presentationCaveat": "App RAF cadence under real headful vsync; not a count of displayed frames. Headless is GPU attribution only."
+  },
+  "referenceServer": {
+    "startedAt": "2026-10-17T04:53:25.403Z",
+    "url": "http://127.0.0.1:5232",
+    "root": "/Users/shahzadsheikh/Desktop/gt3/.claude/worktrees/p3u-ref",
+    "branch": "DETACHED",
+    "sha": "fa12e92348241ef5e42a57abc72f586c552ee888",
+    "dirtyFiles": 0,
+    "dirtyHash": "e3b0c44298fc1c14",
+    "vitePid": 27322,
+    "run": "p3u",
+    "epoch": "e1",
+    "task": "T6",
+    "harness": "node ../p3u-t2/scripts/p3u-capture.mjs",
+    "host": {
+      "profile": "m4-16gb",
+      "arch": "arm64",
+      "cpu": "Apple M4",
+      "ramGB": 16,
+      "model": "Mac16,12",
+      "cores": {
+        "performance": 4,
+        "efficiency": 6
+      },
+      "gpu": "Apple M4",
+      "macos": "15.5",
+      "versions": {
+        "node": "v24.21.0",
+        "claude": "2.1.302 (Claude Code)",
+        "codex": "codex-cli 0.163.0",
+        "opencode": "opencode v2.0.32",
+        "chrome": "Google Chrome 155.0.8059.80"
+      },
+      "unavailable": []
+    }
+  }
+}

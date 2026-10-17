@@ -18,7 +18,7 @@ export const UNLOCKED = VERSION === 'unlocked';
 export const QUALITY_MODE = UNLOCKED && params.get('mode') === 'quality' ? 'quality' : 'smooth';
 const requestedTone = params.get('tone');
 const requestedReflection = params.get('refl');
-export const TONE = UNLOCKED && ['aces', 'agx', 'neutral'].includes(requestedTone) ? requestedTone : 'neutral';
+export const TONE = UNLOCKED && ['aces', 'agx', 'neutral', 'split'].includes(requestedTone) ? requestedTone : 'neutral';
 export const REFLECTION = UNLOCKED && ['low', 'mid', 'high'].includes(requestedReflection) ? requestedReflection : 'mid';
 
 // Review-only T5 controls; locked ignores both.

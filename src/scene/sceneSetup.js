@@ -85,6 +85,9 @@ let activeResolutionLevel = 'high';
 let stillTimeMs = 0;
 let timeSinceResolutionSwitchMs = Infinity;
 
+// Shared, allocation-free theme weight, also valid when reversing mid-crossfade.
+export const outputThemeWeight = { value: 0 };
+
 /**
  * Mutable exposure handle for theme.js. Assign to `.value` to update the
  * renderer immediately, including before initScene() has run.
@@ -286,15 +289,17 @@ function createPostProcessing() {
     const shader = PREMIUM_WASH_SHADER;
     const material = new THREE.RawShaderMaterial({
       name: `GT3OutputWash-${TONE}`,
-      uniforms: { ...THREE.UniformsUtils.clone(shader.uniforms), toneMappingExposure: { value: toneMappingExposure.value } },
+      uniforms: { ...THREE.UniformsUtils.clone(shader.uniforms), toneMappingExposure: { value: toneMappingExposure.value }, uThemeNight: outputThemeWeight },
       vertexShader: `precision highp float;
         uniform mat4 projectionMatrix; uniform mat4 modelViewMatrix;
         attribute vec3 position; attribute vec2 uv;
         ${shader.vertexShader}`,
       fragmentShader: `precision highp float;
+        uniform float uThemeNight;
         #include <tonemapping_pars_fragment>
         #include <colorspace_pars_fragment>
-        ${shader.fragmentShader.replace('vec2 fromCenter', `color.rgb = ${toneFunction}(color.rgb);
+        ${shader.fragmentShader.replace('vec2 fromCenter', `${TONE === 'split' ? `// Mix display-linear light, then encode once: no gamma-space darkening.
+          color.rgb = mix(NeutralToneMapping(color.rgb), ACESFilmicToneMapping(color.rgb), uThemeNight);` : `color.rgb = ${toneFunction}(color.rgb);`}
           color = sRGBTransferOETF(color);
           vec2 fromCenter`).replace('gl_FragColor = color;', `// +/- half an 8-bit code, decorrelated from the existing grain.
           color.rgb += (random(gl_FragCoord.yx + vec2(19.19, 73.73)) - 0.5) / 255.0;
@@ -305,6 +310,7 @@ function createPostProcessing() {
     const draw = premiumPass.render.bind(premiumPass);
     premiumPass.render = function (r, ...args) {
       this.uniforms.toneMappingExposure.value = r.toneMappingExposure;
+      this.uniforms.uThemeNight.value = outputThemeWeight.value;
       return draw(r, ...args);
     };
     composer.insertPass(premiumPass, composer.passes.indexOf(antialiasPass));

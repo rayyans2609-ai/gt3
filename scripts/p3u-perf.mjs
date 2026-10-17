@@ -1,4 +1,6 @@
-/** P3u complete-tour pacing / GPU attribution. Headful by default (60 Hz compositor).
+/** P3u complete-tour pacing / GPU attribution. Headful by default (true macOS fullscreen,
+ * real page: 1470×919 @2x beneath the 1470×956 panel's camera-notch band, asserted with
+ * the bottom-HUD visibility gate before timing).
  * GT3_DURATION=600 (seconds, loops), GT3_MODE=tour|steady, GT3_GPU_SCOPE=total|passes|shadow
  * GT3_HEADLESS=1 is attribution only, never presentation acceptance. GT3_TRACE=1 enables
  * Chrome GC trace (extra observer overhead); raw RAF + GPU samples are always gzipped.
@@ -13,7 +15,7 @@ import { launch, ready, quality, env, wait, dist } from './lib/p3u-common.mjs';
 const out = env.GT3_OUT || 'local/evidence/p3u/perf', duration = +(env.GT3_DURATION || 600);
 const mode = env.GT3_MODE || 'tour', scope = env.GT3_GPU_SCOPE || 'total';
 if (!(duration > 0) || !['tour', 'steady'].includes(mode) || !['total', 'passes', 'shadow'].includes(scope)) throw Error('Invalid duration/mode/scope');
-const { browser, page, report } = await launch('perf', out, env.GT3_HEADLESS !== '1');
+const { browser, page, report, releaseDisplay } = await launch('perf', out, env.GT3_HEADLESS !== '1');
 report.mode = mode; report.gpuScope = scope; report.gpuSampling = scope === 'passes' ? 'One pass per frame, round-robin; avoids per-pass query flush amplification on Metal' : 'One query per frame'; report.requestedSeconds = duration;
 report.presentationCaveat = 'App RAF cadence under real headful vsync; not a count of displayed frames. Headless is GPU attribution only.';
 report.traceEnabled = env.GT3_TRACE === '1';
@@ -36,7 +38,7 @@ try {
       p.frames.push(f); p.current = null;
     });
   });
-  report.loading = await ready(page);
+  report.loading = await ready(page, report);
   report.quality = await quality(page);
   report.theme = env.GT3_THEME || 'day';
   if (report.theme !== 'day') await page.evaluate(async theme => (await import('/src/scene/theme.js')).applyTheme(theme, { instant: true }), report.theme);
@@ -170,6 +172,9 @@ try {
 }
 finally {
   if (tracing) try { await page.tracing.stop(); } catch (e) { report.errors.push(`Trace stop: ${e.message}`); }
+  try { report.conditions.visibilityEnd = await page.evaluate(() => document.visibilityState); }
+  catch (e) { report.conditions.visibilityEnd = `unknown (${e.message.split('\n')[0]})`; }
   await writeFile(`${out}/report.json`, JSON.stringify(report, null, 2) + '\n');
+  releaseDisplay();
   await browser.close().catch(() => {});
 }

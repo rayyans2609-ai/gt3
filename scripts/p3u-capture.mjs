@@ -1,11 +1,13 @@
 /** Deterministic scene + DOM captures. Usage: GT3_OUT=... [GT3_STATES=all|cars|key|name,...]
  * with-verification-server.sh node scripts/p3u-capture.mjs [base] ['?version=locked']
  * GT3_RENDER_DPR=1|1.5|2, GT3_DEVICE_DPR=1|2, GT3_CANDIDATE=env,full,aniso,msaa2,...
- * Capture clocks are frozen; timing harness never uses these modifications. */
+ * Capture clocks are frozen; timing harness never uses these modifications.
+ * Viewport stays emulated for deterministic PNGs, but runs share the no-banner launch
+ * (--enable-automation removed) and the same display/HUD on-screen gates as pacing. */
 import { writeFile } from 'node:fs/promises';
 import { launch, ready, quality, env, wait, hash } from './lib/p3u-common.mjs';
 const out = env.GT3_OUT || 'local/evidence/p3u/capture';
-const { browser, page, report } = await launch('browser', out);
+const { browser, page, report, releaseDisplay } = await launch('browser', out);
 try {
   await page.evaluateOnNewDocument(() => {
     // Fixed pseudo-random sequence also covers procedural texture creation.
@@ -15,7 +17,7 @@ try {
     const raf = requestAnimationFrame.bind(window);
     window.requestAnimationFrame = cb => raf(t => { if (!window.__p3uFreeze || cb.name !== 'frame') cb(t); });
   });
-  report.loading = await ready(page);
+  report.loading = await ready(page, report);
   await page.evaluate(async () => { const cars = await import('/src/scene/cars.js'); for (let i = 0; i < 10; i++) cars.getCarModel(i).traverse(o => { o.userData.__p3uRotation = o.rotation.toArray(); }); });
   await page.mouse.wheel({ deltaY: 20 }); await wait(1600);
   report.quality = await quality(page);
@@ -85,6 +87,11 @@ try {
     report.captures.push({ ...s, file: `${s.name}.png`, sha256: hash(png), ...facts });
     console.log('CAPTURE', s.name);
   }
+  report.conditions.visibilityEnd = await page.evaluate(() => document.visibilityState);
   await writeFile(`${out}/manifest.json`, JSON.stringify(report, null, 2) + '\n');
-} catch (e) { report.incomplete = true; report.errors.push(e.stack); await writeFile(`${out}/failed.json`, JSON.stringify(report, null, 2)); throw e; }
-finally { await browser.close(); }
+} catch (e) {
+  report.incomplete = true; report.errors.push(e.stack);
+  try { report.conditions.visibilityEnd = await page.evaluate(() => document.visibilityState); } catch { report.conditions.visibilityEnd = 'unknown'; }
+  await writeFile(`${out}/failed.json`, JSON.stringify(report, null, 2)); throw e;
+}
+finally { releaseDisplay(); await browser.close(); }

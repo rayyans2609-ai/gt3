@@ -107,6 +107,8 @@ async function boot() {
   const carWarmup = await import('./scene/carWarmup.js');
   // Unlocked only: the staged-prewarm policy. Locked never loads or consults it.
   const prewarm = UNLOCKED ? await import('./scene/carWarmBackground.js') : null;
+  // Unlocked only (W6): bound three's transmission pass. Locked never loads it.
+  const transmission = UNLOCKED ? await import('./scene/transmissionBudget.js') : null;
   const checkpoints = await import('./scene/checkpoints.js');
   const morph = await import('./scene/morph.js');
   const theme = await import('./scene/theme.js');
@@ -187,7 +189,8 @@ async function boot() {
   // ---- scene (staged: yield so the start screen paints and callbacks run) --
   await yieldToBrowser();
   perfMark('start-screen:painted');
-  const { scene, camera } = timed('init-scene', () => sceneSetup.initScene());
+  const { scene, camera, renderer } = timed('init-scene', () => sceneSetup.initScene());
+  transmission?.budgetTransmission(renderer);
   // initScene creates window.__gt3; these handles were previously attached after the full build.
   window.__gt3.readiness = readiness;
   window.__gt3.scrollMode = scrollDrive.scrollMode;

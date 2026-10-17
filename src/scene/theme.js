@@ -16,6 +16,7 @@ import {
   setAtmosphere,
   sun,
   toneMappingExposure,
+  outputThemeWeight,
 } from './sceneSetup.js';
 import { setGroundTint, setSky } from './environment.js';
 
@@ -57,7 +58,8 @@ export const PRESETS = Object.freeze({
 
 function makeFrame(preset) {
   const treatment = SETTINGS.themes?.[preset === PRESETS.night ? 'night' : 'day'];
-  const atmosphere = treatment?.atmosphere[TONE];
+  const endpointTone = TONE === 'split' ? (preset === PRESETS.night ? 'aces' : 'neutral') : TONE;
+  const atmosphere = treatment?.atmosphere[endpointTone];
   return {
     sunColor: new THREE.Color(preset.sun.color),
     sunIntensity: preset.sun.intensity,
@@ -81,7 +83,7 @@ function makeFrame(preset) {
     grassAmount: preset.grassTint.amount,
     ...(treatment ? {
       nightWeight: preset === PRESETS.night ? 1 : 0,
-      exposure: treatment.exposure[TONE], reflection: treatment.reflection[REFLECTION],
+      exposure: treatment.exposure[endpointTone], reflection: treatment.reflection[REFLECTION],
       fogColor: new THREE.Color(...atmosphere.fog),
       skyHorizon: new THREE.Color(...atmosphere.horizon),
       skyZenith: new THREE.Color(...atmosphere.zenith),
@@ -212,6 +214,7 @@ function writeFrame(frame) {
   });
   if (SETTINGS.carEnvironment) setCarReflectionStrength(frame.reflection);
   if (SETTINGS.carEnvironment) setCarReviewTreatment(frame.nightWeight, frame.exposure);
+  if (SETTINGS.output) outputThemeWeight.value = frame.nightWeight;
   toneMappingExposure.value = frame.exposure;
   setGroundTint(frame.grassColor, frame.grassAmount);
 }

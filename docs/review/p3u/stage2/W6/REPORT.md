@@ -23,3 +23,7 @@ The historical83/116ms intervals are consistent with the reproduced transmission
 ## Completion verification
 
 Integrated syntax and Vite production build pass. Luna W6verify stopped at host admission after pageouts rose; it produced no new runtime proof. A deterministic visual adapter now explicitly sets and records both transmission scale and samples, and the swap harness accepts a profile query. Final target settings, Ferrari/Aston Day/Night comparisons, Locked/default23-state diffs and affected loading/swap checks are pending a stable host window. Final integrated sustained measurements follow the minimap integration. Until those reports are attached, completion remains pending.
+
+### Host-monitor correction before final measurements
+
+Recovery found that the original sustained harness stopped on two nonnormal memory-pressure samples but did not enforce the canonical M4 CPU/paging degradation conditions. The final harness also stops on two consecutive low-idle samples, high-system-CPU samples, or increasing paging intervals. The recovered runs recorded paging and normal pressure but did not have these complete automatic stops; they remain diagnostic observations with this limitation. They are not substituted for the final admitted run. The exact original script remains preserved in the W6 worktree. Final launch commands additionally require an unlocked console before each sustained mode.

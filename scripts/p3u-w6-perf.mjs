@@ -104,7 +104,7 @@ try {
   }
   // Clock sync for trace analysis: the mark's trace timestamp pairs with this performance.now().
   report.traceSync = await page.evaluate(() => { const p = window.__p3uPerf; p.recording = true; p.start = performance.now(); performance.mark('w6:sync'); return p.start; });
-  let monitoring = false, previous;
+  let monitoring = false, previous, previousPaging = false;
   const sample = async () => {
     if (monitoring) return; monitoring = true;
     try {
@@ -115,7 +115,14 @@ try {
       if (app.frameAgeMs > 2000 || app.visibility !== 'visible') throw Error(`Presentation suspended: ${JSON.stringify(app)}`);
       const row = { app, elapsedSeconds: (Date.now() - started) / 1000, ...host, processes: undefined, gpuProcess: gpuProc, thermal: thermal.stdout.trim() };
       await appendFile(`${out}/host.jsonl`, JSON.stringify(row) + '\n');
-      if (previous && previous.pressure !== 1 && host.pressure !== 1) throw Error('Two consecutive nonnormal memory-pressure samples');
+      if (previous) {
+        const paging = host.pageouts > previous.pageouts || host.swapouts > previous.swapouts;
+        if (previous.pressure !== 1 && host.pressure !== 1) throw Error('Two consecutive nonnormal memory-pressure samples');
+        if (previous.idle < 15 && host.idle < 15) throw Error('Two consecutive low CPU-idle samples');
+        if (previous.system > 65 && host.system > 65) throw Error('Two consecutive high system-CPU samples');
+        if (previousPaging && paging) throw Error('Paging rose in two consecutive host-sample intervals');
+        previousPaging = paging;
+      }
       previous = host;
     } catch (e) { report.monitorError = e.message; } finally { monitoring = false; }
   };

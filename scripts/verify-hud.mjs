@@ -77,7 +77,10 @@ async function openPage({ width = 1600, height = 900, faults = null, reducedMoti
 }
 
 async function load(page, query = '') {
-  await page.goto(`${base}${query}`, { waitUntil: 'domcontentloaded', timeout: 120000 });
+  const url = new URL(base);
+  for (const [k, v] of new URLSearchParams(process.env.GT3_QUERY || '')) url.searchParams.set(k, v);
+  for (const [k, v] of new URLSearchParams(query)) url.searchParams.set(k, v);
+  await page.goto(url.href, { waitUntil: 'domcontentloaded', timeout: 120000 });
   await page.waitForFunction(() => window.__gt3?.readiness
     && ['ready', 'degraded'].includes(window.__gt3.readiness.status)
     && document.querySelector('#start-screen.is-ready'), { timeout: 180000 });
@@ -184,7 +187,10 @@ const hudState = page => read(page, async () => {
   const pick = list => list.filter(s => s.getAttribute('aria-hidden') === 'false');
   const vis = pick(slots);
   const marker = document.querySelector('.hud-route__marker');
+  const smoothTrail = new URLSearchParams(location.search).get('version') === 'unlocked';
   const doneSegs = [...document.querySelectorAll('.hud-route__done-seg')];
+  const doneBases = [...document.querySelectorAll('.hud-route__done-base')];
+  const trailSegs = [...document.querySelectorAll('.hud-route__trail-gradient')];
   const svg = document.querySelector('.hud-route__svg');
   const order = svg ? [...svg.children].map(el => el.getAttribute('class')) : [];
   return {
@@ -198,8 +204,11 @@ const hudState = page => read(page, async () => {
     bottomLeftChildren: document.querySelector('#hud-bottomleft')?.childElementCount ?? -1,
     markerTag: marker?.tagName.toLowerCase() ?? null,
     markerTransform: marker?.getAttribute('transform') ?? null,
-    trailSegs: doneSegs.length,
-    trailVisible: doneSegs.filter(s => s.style.visibility !== 'hidden').length,
+    smoothTrail,
+    trailBases: doneBases.length,
+    trailBaseVisible: doneBases.filter(s => s.style.visibility !== 'hidden').length,
+    trailSegs: smoothTrail ? trailSegs.length : doneSegs.length,
+    trailVisible: (smoothTrail ? trailSegs : doneSegs).filter(s => s.style.visibility !== 'hidden').length,
     svgOrder: order,
   };
 });
@@ -278,8 +287,15 @@ try {
     assert(h0.legacyInfoBlocks === 0, 'legacy .hud-info block still in the DOM');
     assert(h0.bottomLeftChildren === 0, `bottom-left not empty: ${h0.bottomLeftChildren} children`);
     assert(h0.markerTag === 'g', `minimap marker is <${h0.markerTag}>, expected the <g> arrow`);
+    if (h0.smoothTrail) {
+    assert(h0.trailBases === 3, `trail has ${h0.trailBases} base paths, expected 3`);
+    assert(h0.trailSegs === 48, `trail has ${h0.trailSegs} local gradients, expected 48`);
+    assert(h0.trailBaseVisible === 0 && h0.trailVisible === 0,
+      `trail visible before any progress: base=${h0.trailBaseVisible} fade=${h0.trailVisible}`);
+    } else {
     assert(h0.trailSegs === 160, `trail has ${h0.trailSegs} segments, expected 160`);
     assert(h0.trailVisible === 0, `trail visible before any progress: ${h0.trailVisible} segs`);
+    }
     const order = h0.svgOrder;
     const iPath = order.indexOf('hud-route__path');
     const iDone = order.indexOf('hud-route__done');
@@ -363,6 +379,15 @@ try {
     let h = await hudState(page);
     assert(/translate\(.+\) rotate\(.+\)/.test(h.markerTransform ?? ''),
       `arrow transform missing translate+rotate: "${h.markerTransform}"`);
+    if (h.smoothTrail) {
+    assert(h.trailBaseVisible > 0 && h.trailVisible === h.trailSegs,
+      `trail should be partial at t=0.25 (base=${h.trailBaseVisible}, fade=${h.trailVisible}/${h.trailSegs})`);
+    const opacities = await read(page, () => [...document.querySelectorAll('.hud-route__trail-gradient stop')]
+      .map(s => Number.parseFloat(s.getAttribute('stop-opacity'))));
+    assert(opacities.every(o => o >= 0 && o <= 1.001),
+      `trail gradient opacities outside [0, 1]: min=${Math.min(...opacities)} max=${Math.max(...opacities)}`);
+    assert(Math.max(...opacities) > 0.99, 'trail never reaches full strength right behind the car');
+    } else {
     assert(h.trailVisible > 0 && h.trailVisible < h.trailSegs,
       `trail should be partial at t=0.25 (visible ${h.trailVisible}/${h.trailSegs})`);
     const opacities = await read(page, () => [...document.querySelectorAll('.hud-route__done-seg')]
@@ -370,6 +395,7 @@ try {
     assert(opacities.every(o => o >= 0.37 && o <= 1.001),
       `trail opacities outside [0.38, 1]: min=${Math.min(...opacities)} max=${Math.max(...opacities)}`);
     assert(Math.max(...opacities) > 0.9, 'trail never reaches full strength right behind the car');
+    }
     const a1 = await angleOf(0.1);
     const a2 = await angleOf(0.55);
     assert(Number.isFinite(a1.angle) && Number.isFinite(a2.angle), `arrow angles not finite: ${a1.angle}, ${a2.angle}`);
@@ -380,7 +406,10 @@ try {
     await seek(page, 0.002, true);
     await wait(600);
     h = await hudState(page);
-    assert(h.trailVisible === 0, `trail did not shrink on reverse: ${h.trailVisible} segs visible`);
+    if (h.smoothTrail) {
+    assert(h.trailBaseVisible > 0 && h.trailVisible === h.trailSegs,
+      `trail did not retain fractional reverse state: base=${h.trailBaseVisible} fade=${h.trailVisible}`);
+    } else assert(h.trailVisible === 0, `trail did not shrink on reverse: ${h.trailVisible} segs visible`);
   });
 
   // ---- S2 car info through wheel-driven checkpoint crossings (default + bounded) ----

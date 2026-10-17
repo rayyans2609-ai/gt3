@@ -12,6 +12,7 @@
  */
 
 import * as THREE from 'three';
+import { UNLOCKED } from '../core/renderProfile.js';
 import { state } from '../core/state.js';
 import { formatLapTime } from '../core/lapTimer.js';
 import { getCar } from '../data/cars.js';
@@ -23,8 +24,10 @@ const MAP_SIZE = 170;
 const MAP_PADDING = 9;
 const MAP_SAMPLES = 160;
 // Completed-route trail: strongest right behind the car, easing over this lap
-// fraction back to a quiet base opacity.
+// fraction back to a quiet base opacity. Each local SVG gradient is interpolated
+// along its own route tangent, never across the map as a screen-space gradient.
 const TRAIL_FADE_SPAN = 0.22;
+const TRAIL_GRADIENT_STEPS = 48;
 const TRAIL_BASE_OPACITY = 0.38;
 // Route-tangent probe for the minimap arrow (forward tangent always).
 const TANGENT_EPSILON = 0.002;
@@ -42,7 +45,15 @@ const routeWorldA = new THREE.Vector3();
 const routeWorldB = new THREE.Vector3();
 let routeMarker;
 let trailSegs = [];
-const trailState = []; // last written per-segment state: 'h' (hidden) or opacity string
+const trailState = [];
+let trailBaseBeforeGantry;
+let trailBaseAfterGantry;
+let trailBaseWholeRoute;
+const trailGradientSegs = [];
+const trailWorldA = new THREE.Vector3();
+const trailWorldB = new THREE.Vector3();
+const trailPointA = { x: 0, y: 0 };
+const trailPointB = { x: 0, y: 0 };
 let lastTrailProgress = NaN;
 let writtenRouteX = NaN;
 let writtenRouteY = NaN;
@@ -126,20 +137,55 @@ function buildRouteMap(root) {
     return `${index === 0 ? 'M' : 'L'}${projected.x.toFixed(2)} ${projected.y.toFixed(2)}`;
   }).join(' ');
   svg.append(svgElement('path', { class: 'hud-route__path', d }));
-  // Completed-route trail: one short segment per map sample, drawn over the
-  // base route at the same stroke width. Per-frame work only touches inline
-  // opacity/visibility, and only when progress actually changed.
+  // The completed-route base uses dash intervals on continuous paths. This keeps
+  // the yellow section crisp at fractional progress without the accumulated caps
+  // and overlap bands caused by one independently stroked path per map sample.
   const done = svgElement('g', { class: 'hud-route__done' });
-  for (let i = 0; i < MAP_SAMPLES; i++) {
-    const a = routeProject(points[i], { x: 0, y: 0 });
-    const b = routeProject(points[i + 1], { x: 0, y: 0 });
-    const seg = svgElement('path', {
-      class: 'hud-route__done-seg',
-      d: `M${a.x.toFixed(2)} ${a.y.toFixed(2)}L${b.x.toFixed(2)} ${b.y.toFixed(2)}`,
-    });
-    seg.style.visibility = 'hidden';
-    done.append(seg);
-    trailSegs.push(seg);
+  if (UNLOCKED) {
+    const completedPath = className => {
+      const path = svgElement('path', {
+        class: className, d, pathLength: '1', 'stroke-dasharray': '0 1',
+      });
+      path.style.visibility = 'hidden';
+      done.append(path);
+      return path;
+    };
+    trailBaseBeforeGantry = completedPath('hud-route__done-base');
+    trailBaseAfterGantry = completedPath('hud-route__done-base');
+    trailBaseWholeRoute = completedPath('hud-route__done-base');
+
+    // SVG has no path-length gradient paint server. A small, fixed pool of local
+    // gradients solves that without rebuilding DOM: every gradient follows one
+    // short tangent and interpolates alpha continuously into the next one.
+    const defs = svgElement('defs');
+    for (let i = 0; i < TRAIL_GRADIENT_STEPS; i++) {
+      const gradient = svgElement('linearGradient', {
+        id: `hud-route-trail-gradient-${i}`, gradientUnits: 'userSpaceOnUse',
+      });
+      const from = svgElement('stop', { offset: '0%', class: 'hud-route__trail-stop' });
+      const to = svgElement('stop', { offset: '100%', class: 'hud-route__trail-stop' });
+      gradient.append(from, to);
+      defs.append(gradient);
+      const segment = svgElement('path', {
+        class: 'hud-route__trail-gradient', stroke: `url(#hud-route-trail-gradient-${i})`,
+      });
+      segment.style.visibility = 'hidden';
+      done.append(segment);
+      trailGradientSegs.push({ segment, gradient, from, to });
+    }
+    svg.append(defs);
+  } else {
+    for (let i = 0; i < MAP_SAMPLES; i++) {
+      const a = routeProject(points[i], { x: 0, y: 0 });
+      const b = routeProject(points[i + 1], { x: 0, y: 0 });
+      const seg = svgElement('path', {
+        class: 'hud-route__done-seg',
+        d: `M${a.x.toFixed(2)} ${a.y.toFixed(2)}L${b.x.toFixed(2)} ${b.y.toFixed(2)}`,
+      });
+      seg.style.visibility = 'hidden';
+      done.append(seg);
+      trailSegs.push(seg);
+    }
   }
   svg.append(done);
   for (const t of CHECKPOINT_ROUTE_T) {
@@ -187,7 +233,18 @@ function smoothstep01(x) {
   return clamped * clamped * (3 - 2 * clamped);
 }
 
-function updateTrail(progress) {
+function setTrailInterval(path, start, end) {
+  const length = end - start;
+  if (length <= 0) {
+    path.style.visibility = 'hidden';
+    return;
+  }
+  path.setAttribute('stroke-dasharray', `${length} ${1 - length}`);
+  path.setAttribute('stroke-dashoffset', `${-start}`);
+  path.style.visibility = 'visible';
+}
+
+function updateLockedTrail(progress) {
   if (progress === lastTrailProgress) return;
   lastTrailProgress = progress;
   const count = trailSegs.length;
@@ -211,6 +268,56 @@ function updateTrail(progress) {
       if (trailState[i] === 'h' || trailState[i] === undefined) seg.style.visibility = 'visible';
     }
     trailState[i] = state;
+  }
+}
+
+function updateTrail(progress) {
+  if (!UNLOCKED) return updateLockedTrail(progress);
+  if (progress === lastTrailProgress) return;
+  lastTrailProgress = progress;
+  const travelled = Math.max(0, Math.min(1, progress));
+  // Keep the grid approach and post-gantry lap as separate route intervals.
+  // Near completion they meet, at which point one full-route path avoids painting
+  // the shared GRID_T..finish section twice.
+  const routeEnd = GRID_T + travelled * (1 + GRID_GAP);
+  const afterGantry = routeEnd - 1;
+  if (routeEnd <= 1) {
+    setTrailInterval(trailBaseBeforeGantry, GRID_T, routeEnd);
+    setTrailInterval(trailBaseAfterGantry, 0, 0);
+    setTrailInterval(trailBaseWholeRoute, 0, 0);
+  } else if (afterGantry < GRID_T) {
+    setTrailInterval(trailBaseBeforeGantry, GRID_T, 1);
+    setTrailInterval(trailBaseAfterGantry, 0, afterGantry);
+    setTrailInterval(trailBaseWholeRoute, 0, 0);
+  } else {
+    setTrailInterval(trailBaseBeforeGantry, 0, 0);
+    setTrailInterval(trailBaseAfterGantry, 0, 0);
+    setTrailInterval(trailBaseWholeRoute, 0, 1);
+  }
+
+  if (travelled <= 0) {
+    for (const { segment } of trailGradientSegs) segment.style.visibility = 'hidden';
+    return;
+  }
+
+  const fadeStart = Math.max(0, travelled - TRAIL_FADE_SPAN);
+  const fadeLength = travelled - fadeStart;
+  for (let i = 0; i < trailGradientSegs.length; i++) {
+    const aTravel = fadeStart + fadeLength * i / trailGradientSegs.length;
+    const bTravel = fadeStart + fadeLength * (i + 1) / trailGradientSegs.length;
+    routeProject(pointAt(routeTAt(aTravel), trailWorldA), trailPointA);
+    routeProject(pointAt(routeTAt(bTravel), trailWorldB), trailPointB);
+    const fromOpacity = smoothstep01(1 - (travelled - aTravel) / TRAIL_FADE_SPAN);
+    const toOpacity = smoothstep01(1 - (travelled - bTravel) / TRAIL_FADE_SPAN);
+    const { segment, gradient, from, to } = trailGradientSegs[i];
+    gradient.setAttribute('x1', trailPointA.x);
+    gradient.setAttribute('y1', trailPointA.y);
+    gradient.setAttribute('x2', trailPointB.x);
+    gradient.setAttribute('y2', trailPointB.y);
+    from.setAttribute('stop-opacity', fromOpacity);
+    to.setAttribute('stop-opacity', toOpacity);
+    segment.setAttribute('d', `M${trailPointA.x} ${trailPointA.y}L${trailPointB.x} ${trailPointB.y}`);
+    segment.style.visibility = 'visible';
   }
 }
 

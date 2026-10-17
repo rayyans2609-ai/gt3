@@ -9,11 +9,90 @@ export const wait = ms => new Promise(r => setTimeout(r, ms));
 export const env = process.env;
 export const base = env.GT3_URL || process.argv[2] || 'http://127.0.0.1:5231';
 export const query = env.GT3_QUERY ?? process.argv[3] ?? '?version=locked';
+// Owner display truth: MacBook Air (M4) built-in panel, 1470×956 points at 2×, 60 Hz.
+// Native macOS fullscreen reserves the camera-notch band, leaving a 1470×919 page.
+// Deterministic emulation deliberately retains the full 1470×956 capture viewport.
 export const viewport = { width: 1470, height: 956, deviceScaleFactor: +(env.GT3_DEVICE_DPR || 2) };
+export const expectedDisplay = {
+  width: 1470, height: 919, dpr: 2,
+};
+
+let lastLaunchHeadful = false;
+
+/** Prove the page geometry before any measured window. Headful runs must see the real
+ * panel (true macOS fullscreen, no emulation); emulated runs must match the harness's own
+ * pinned device configuration (GT3_DEVICE_DPR honored; GT3_EXPECT_* override both). */
+export async function assertDisplay(page, { headful = false, emulated = null, sink = null } = {}) {
+  const expected = {
+    width: +(env.GT3_EXPECT_WIDTH || (headful ? expectedDisplay.width : emulated.width)),
+    height: +(env.GT3_EXPECT_HEIGHT || (headful ? expectedDisplay.height : emulated.height)),
+    dpr: +(env.GT3_EXPECT_DPR ?? (emulated ? emulated.deviceScaleFactor : expectedDisplay.dpr)),
+  };
+  const record = { expected, rounds: 0, pass: false };
+  if (sink) sink.display = { ...(sink.display || {}), geometry: record };
+  const measure = () => page.evaluate(() => ({ width: innerWidth, height: innerHeight, dpr: devicePixelRatio,
+    screen: { width: screen.width, height: screen.height }, visibility: document.visibilityState,
+    webdriver: navigator.webdriver, elementFullscreen: !!document.fullscreenElement }));
+  try {
+    // In native fullscreen the toolbar only slides away once the pointer leaves the top
+    // edge; park it mid-page and re-measure until the geometry settles or shots are spent.
+    for (; record.rounds <= 5; record.rounds++) {
+      try { await page.mouse.move(Math.round(expected.width * .5), Math.round(expected.height * .55)); } catch { /* window gone */ }
+      await wait(500);
+      record.measured = await measure();
+      if (record.measured.width === expected.width && record.measured.height === expected.height && record.measured.dpr === expected.dpr) { record.pass = true; break; }
+    }
+    if (!record.pass && headful && !record.measured.elementFullscreen) {
+      // Last resort: real document fullscreen (no window chrome at all), then re-measure.
+      try { await page.evaluate(() => document.documentElement.requestFullscreen()); record.documentFullscreenAttempt = true; await wait(700); }
+      catch (e) { record.documentFullscreenError = e.message.split('\n')[0]; }
+      if (!record.pass) { record.measured = await measure(); record.rounds++; if (record.measured.width === expected.width && record.measured.height === expected.height && record.measured.dpr === expected.dpr) record.pass = true; }
+    }
+  } catch (e) { record.error = e.message.split('\n')[0]; }
+  if (!record.pass) throw Error(`Display assertion failed (headful=${headful}): measured ${record.measured?.width}x${record.measured?.height} @${record.measured?.dpr}x dpr on screen ${record.measured?.screen?.width}x${record.measured?.screen?.height}, expected ${expected.width}x${expected.height} @${expected.dpr}x dpr (GT3_EXPECT_WIDTH/HEIGHT/DPR; headful requires true fullscreen, detail in report.display.geometry)`);
+  return record;
+}
+
+/** Bottom-HUD visibility proof: the lap timer, the Day/Night switch and the always-visible
+ * audio control must lie fully inside the viewport (1 px fraction tolerance); the music
+ * panel is gated whenever it is open — closed, it is intentionally transformed out of flow
+ * under its anchor. Every rectangle is recorded in the report. */
+export async function assertHUDOnScreen(page, sink = null) {
+  const hud = await page.evaluate(() => {
+    const probe = selector => {
+      const el = document.querySelector(selector);
+      if (!el) return { selector, present: false };
+      const r = el.getBoundingClientRect(), s = getComputedStyle(el);
+      return { selector, present: true, visibility: s.visibility,
+        rect: { x: +r.x.toFixed(1), y: +r.y.toFixed(1), width: +r.width.toFixed(1), height: +r.height.toFixed(1), right: +r.right.toFixed(1), bottom: +r.bottom.toFixed(1) } };
+    };
+    return { viewport: { width: innerWidth, height: innerHeight },
+      lapTimer: probe('.hud-lap-timer'), themeToggle: probe('.theme-segmented'),
+      audioAnchor: probe('.audio-anchor'), audioPlayer: probe('#music-player'),
+      audioPlayerOpen: document.querySelector('#audio-layer.is-open') != null };
+  });
+  const bleed = 1;
+  const inside = e => e.present && e.visibility !== 'hidden' && e.rect.width > 0 && e.rect.height > 0
+    && e.rect.x >= -bleed && e.rect.y >= -bleed
+    && e.rect.right <= hud.viewport.width + bleed && e.rect.bottom <= hud.viewport.height + bleed;
+  const gated = ['lapTimer', 'themeToggle', 'audioAnchor'];
+  if (hud.audioPlayerOpen) gated.push('audioPlayer');
+  const failures = gated.filter(key => !inside(hud[key]));
+  const record = { ...hud, gated, withinViewport: failures.length === 0, failures };
+  if (sink) sink.hudRects = record;
+  if (failures.length) throw Error(`HUD on-screen assertion failed (viewport ${hud.viewport.width}x${hud.viewport.height}, elements gated: ${gated.join(', ')}): `
+    + failures.map(k => `${k} ${JSON.stringify(hud[k])}`).join('; '));
+  return record;
+}
+
 export async function launch(kind, out, headful = false) {
+  lastLaunchHeadful = !!headful;
   await mkdir(out, { recursive: true });
-  // Keep the display/compositor active for owned evidence sessions without changing OS settings.
-  const awake = spawn('caffeinate', ['-dimsu', '-t', '43200', '-w', String(process.pid)], { stdio: 'ignore' }); awake.unref();
+  // Owned display-sleep prevention: one caffeinate -dimsu held for the run and SIGTERM
+  // released at exit. -w also binds its lifetime to this harness process, so even a hard
+  // kill cannot leak the assertion. No OS preferences are changed.
+  const awake = spawn('caffeinate', ['-dimsu', '-w', String(process.pid)], { stdio: 'ignore' }); awake.unref();
+  const releaseDisplay = () => { try { if (awake.exitCode == null) awake.kill('SIGTERM'); } catch { /* already gone */ } };
   if (!env.GT3_SERVER_LOG) throw Error('Run behind scripts/with-verification-server.sh with GT3_SERVER_LOG');
   const provenance = JSON.parse(await readFile(`${env.GT3_SERVER_LOG}.provenance.json`, 'utf8'));
   if (provenance.url !== base) throw Error('Server provenance URL mismatch');
@@ -35,16 +114,37 @@ export async function launch(kind, out, headful = false) {
   // Fresh measurement profile only. Chromium's below-20% battery saver otherwise caps RAF.
   const browserSaverState = +(env.GT3_BROWSER_SAVER || 0);
   await writeFile(`${profileDir}/Local State`, JSON.stringify({ performance_tuning: { battery_saver_mode: { state: browserSaverState } } }));
+  // Puppeteer otherwise injects --enable-automation, which paints the “Chrome is being
+  // controlled by automated test software” banner. Dropping it removes the banner, but
+  // does not guarantee navigator.webdriver is false; that runtime fact is recorded.
+  const args = ['--no-first-run', '--enable-gpu', '--use-gl=angle', '--use-angle=metal',
+    ...(headful
+      ? ['--start-fullscreen', `--window-size=${viewport.width},${viewport.height}`]
+      : ['--window-size=1470,1050']),
+    `--user-data-dir=${profileDir}`];
+  // Headful pacing must use the owner's real display path: no viewport emulation, so the
+  // page sees the genuine fullscreen window and the real device pixel ratio.
   const browser = await puppeteer.launch({ executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
-    headless: headful ? false : 'new', pipe: true, timeout: 180000, protocolTimeout: 180000,
-    args: ['--no-first-run', '--enable-gpu', '--use-gl=angle', '--use-angle=metal', '--window-size=1470,1050',
-      `--user-data-dir=${profileDir}`], defaultViewport: viewport });
-  const report = { startedAt: new Date().toISOString(), base, query, profile: new URLSearchParams(query).get('version') === 'unlocked' ? 'unlocked' : 'locked', viewport, headful, browserPid: browser.process().pid, preflight, admissionAttempts, server: provenance,
+    headless: headful ? false : 'new', pipe: true, timeout: 180000, protocolTimeout: 180000, args,
+    ignoreDefaultArgs: ['--enable-automation'], defaultViewport: headful ? null : viewport });
+  const powerText = execFileSync('pmset', ['-g', 'batt'], { encoding: 'utf8' });
+  const pmsetText = execFileSync('pmset', ['-g'], { encoding: 'utf8' });
+  const report = { startedAt: new Date().toISOString(), base, query, profile: new URLSearchParams(query).get('version') === 'unlocked' ? 'unlocked' : 'locked', viewport: { ...viewport, emulationApplied: !headful }, headful, browserPid: browser.process().pid, preflight, admissionAttempts, server: provenance,
     branch: execFileSync('git', ['branch', '--show-current'], { encoding: 'utf8' }).trim(),
     sha: execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(),
     tree: execFileSync('git', ['status', '--porcelain'], { encoding: 'utf8' }).trim(),
-    browser: await browser.version(), conditions: { browserSaverState, osPowerSettings: execFileSync('pmset', ['-g', 'custom'], { encoding: 'utf8' }), awakeAssertion: 'caffeinate -dimsu -w harnessPID (released at exit)', power: execFileSync('pmset', ['-g', 'batt'], { encoding: 'utf8' }),
-      thermal: execFileSync('pmset', ['-g', 'therm'], { encoding: 'utf8' }), candidate: env.GT3_CANDIDATE || 'baseline' }, errors: [] };
+    browser: await browser.version(), conditions: {
+      browserSaverState, browserSaverSetting: browserSaverState === 0
+        ? 'battery saver disabled in the disposable profile (measurement default; GT3_BROWSER_SAVER=1 restores the control)'
+        : 'Chromium battery saver enabled (GT3_BROWSER_SAVER=1 control)',
+      osPowerSettings: execFileSync('pmset', ['-g', 'custom'], { encoding: 'utf8' }), powerManagement: pmsetText,
+      power: powerText, powerSource: /Now drawing from\s+'([^']+)'/i.exec(powerText)?.[1]
+        ?? /using\s+'([^']+)'/i.exec(powerText)?.[1] ?? 'unknown',
+      batteryPercent: +(/([\d.]+)%/.exec(powerText)?.[1] ?? NaN),
+      lowPowerMode: /lowpowermode\s+1(?!\d)/.test(pmsetText),
+      thermal: execFileSync('pmset', ['-g', 'therm'], { encoding: 'utf8' }),
+      awakeAssertion: 'owned caffeinate -dimsu held for the run, SIGTERM released at exit (also self-stops with the harness process via -w)',
+      caffeinatePid: awake.pid, candidate: env.GT3_CANDIDATE || 'baseline' }, errors: [] };
   report.instrumentation = instrumentation;
   const cdp = await browser.target().createCDPSession();
   report.gpu = (await cdp.send('SystemInfo.getInfo')).gpu;
@@ -61,9 +161,39 @@ export async function launch(kind, out, headful = false) {
     await page.setRequestInterception(true);
     page.on('request', r => r.continue({ url: r.url().replace('/models/tour/', '/models/') }));
   }
-  return { browser, page, report };
+  if (headful) await enterFullscreen(page, report);
+  return { browser, page, report, releaseDisplay };
 }
-export async function ready(page) {
+
+/** True macOS fullscreen, verified rather than assumed: --start-fullscreen should open the
+ * first window already fullscreen; CDP Browser.setWindowBounds is the deterministic
+ * fallback (pin a normal window at panel size, then request fullscreen) whose state is
+ * re-read to confirm. Any gap found here is caught later by assertDisplay. */
+async function enterFullscreen(page, report) {
+  const display = report.display = { mode: 'native-fullscreen',
+    deviceEmulation: 'none (defaultViewport null: real window, real device pixel ratio)', fullscreen: {} };
+  let session = null;
+  try {
+    session = await page.createCDPSession();
+    const { windowId } = await session.send('Browser.getWindowForTarget');
+    display.fullscreen.startedWindowState = (await session.send('Browser.getWindowBounds', { windowId })).bounds.windowState;
+    if (display.fullscreen.startedWindowState !== 'fullscreen') {
+      await session.send('Browser.setWindowBounds', { windowId, bounds: { windowState: 'normal', width: viewport.width, height: viewport.height } });
+      await wait(250);
+      await session.send('Browser.setWindowBounds', { windowId, bounds: { windowState: 'fullscreen' } });
+      await wait(900); // macOS native fullscreen animation
+      display.fullscreen.endedWindowState = (await session.send('Browser.getWindowBounds', { windowId })).bounds.windowState;
+      if (display.fullscreen.endedWindowState === 'fullscreen') display.fullscreen.method = 'CDP Browser.setWindowBounds';
+      else throw Error(`window state '${display.fullscreen.endedWindowState}' after the CDP fullscreen request`);
+    } else {
+      display.fullscreen.method = 'chrome --start-fullscreen';
+      display.fullscreen.endedWindowState = 'fullscreen';
+    }
+  } catch (e) { display.fullscreen.error = e.message.split('\n')[0]; }
+  finally { try { await session?.detach(); } catch { /* session may already be gone */ } }
+  return display;
+}
+export async function ready(page, report = null) {
   if (/env|output/.test(env.GT3_CANDIDATE || '')) {
     // Optimize diagnostic imports before booting large model sets, avoiding an HMR
     // bootstrap/reload peak that can transiently keep two decoded rosters resident.
@@ -83,6 +213,18 @@ export async function ready(page) {
   await page.bringToFront();
   await page.mouse.move(735, 478);
   await wait(1200);
+  // Display + HUD gates run for every consumer (perf, capture, attribution), before any
+  // timing or capture window. With no report supplied (older callers) the launch mode is
+  // remembered by the module; a violation still aborts the run in every case.
+  const headful = report ? !!report.headful : lastLaunchHeadful;
+  if (report) report.display = { ...(report.display || {}), geometry: null };
+  const geometry = await assertDisplay(page, { headful, emulated: headful ? null : viewport, sink: report });
+  if (report) {
+    report.display.screen = geometry.measured?.screen;
+    report.conditions.navigatorWebdriver = geometry.measured?.webdriver;
+  }
+  await assertHUDOnScreen(page, report);
+  if (report) report.conditions.visibilityStart = await page.evaluate(() => document.visibilityState);
   return page.evaluate(() => ({ readiness: window.__gt3.readiness, resources: performance.getEntriesByType('resource').filter(r => /models\/|draco/.test(r.name)).map(r => ({ name: r.name, duration: r.duration, transferSize: r.transferSize, decodedBodySize: r.decodedBodySize })), rendererMemory: { ...window.__gt3.renderer.info.memory }, programs: window.__gt3.renderer.info.programs.length }));
 }
 export async function quality(page, dpr = +(env.GT3_RENDER_DPR || 1), candidate = env.GT3_CANDIDATE || '') {

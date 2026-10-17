@@ -2,7 +2,7 @@
  * GT3_QUERY selects locked/unlocked. Neutral backing isolates SVG joins/fade;
  * these are deterministic image checks, never timing or whole-scene look proof. */
 import {writeFile} from 'node:fs/promises';
-import {launch,ready,env,query} from './lib/p3u-common.mjs';
+import {launch,ready,env,query,wait} from './lib/p3u-common.mjs';
 const out=env.GT3_OUT||'local/evidence/p3u/minimap';
 const {browser,page,report,releaseDisplay}=await launch('browser',out);
 const unlocked=new URLSearchParams(query).get('version')==='unlocked';
@@ -13,6 +13,7 @@ try {
     window.requestAnimationFrame=cb=>raf(t=>{if(!window.__mapFreeze||cb.name!=='frame')cb(t)});
   });
   report.loading=await ready(page,report);
+  await page.mouse.wheel({deltaY:20}); await wait(1600);
   await page.evaluate(()=>{window.__mapFreeze=true});
   await page.addStyleTag({content:'.hud-route{background:#202427} *,*::before,*::after{animation:none!important;transition:none!important}'});
   const bounds=await page.$('.hud-route');

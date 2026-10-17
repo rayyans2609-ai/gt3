@@ -16,6 +16,7 @@ import { state } from '../core/state.js';
 import { TUNE as aerialTuning } from './aerialCamera.js';
 import { COMP } from './composition.js';
 import { onResize } from '../main.js';
+import { INTEGRITY, moveGrainAfterAA } from './imageIntegrity.js';
 
 const FOV_DAMPING = 0.06;
 const FOV_PROJECTION_EPSILON = 0.01;
@@ -301,7 +302,8 @@ function createPostProcessing() {
         ${shader.fragmentShader.replace('vec2 fromCenter', `${TONE === 'split' ? `// Mix display-linear light, then encode once: no gamma-space darkening.
           color.rgb = mix(NeutralToneMapping(color.rgb), ACESFilmicToneMapping(color.rgb), uThemeNight);` : `color.rgb = ${toneFunction}(color.rgb);`}
           color = sRGBTransferOETF(color);
-          vec2 fromCenter`).replace('gl_FragColor = color;', `// +/- half an 8-bit code, decorrelated from the existing grain.
+          vec2 fromCenter`).replace(INTEGRITY ? /float grain[^\n]*\n|color\.rgb \+= grain[^\n]*\n/g : 'gl_FragColor = color;', INTEGRITY ? ''
+          : `// +/- half an 8-bit code, decorrelated from the existing grain.
           color.rgb += (random(gl_FragCoord.yx + vec2(19.19, 73.73)) - 0.5) / 255.0;
           gl_FragColor = color;`)}`,
       depthTest: false, depthWrite: false,
@@ -314,6 +316,8 @@ function createPostProcessing() {
       return draw(r, ...args);
     };
     composer.insertPass(premiumPass, composer.passes.indexOf(antialiasPass));
+    // W4: grain and dither follow SMAA (see imageIntegrity.js); tone, sRGB and vignette stay ahead.
+    if (INTEGRITY) moveGrainAfterAA(antialiasPass, premiumPass.uniforms, RENDER_DPR);
   } else {
   premiumPass = new ShaderPass(PREMIUM_WASH_SHADER);
   composer.addPass(premiumPass);

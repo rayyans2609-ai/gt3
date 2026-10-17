@@ -66,6 +66,12 @@ A running record of **material** model work. It feeds `model-routing.md` §15, w
 
 **Lesson (2026-10-17, one run, two models):** an OpenCode worker's exit 0 is not completion. Both free workers ended `opencode run` with a text-only "next I'll…" turn and no commit. Check completion deterministically (commit present, files ⊆ owned, `node --check`, leaked tool-markup scan, required artifacts) instead of supervising continuously. Tell OpenCode workers explicitly that a message without a tool call ends their run.
 
+
+| 2026-10-17 | P3u W6 recovered-patch verification attempt | test | gpt-6-luna @ medium | partial (host blocked) | N | — | Sol: prepared exact visual-target adapter and commands for restart | Sol evidence audit | sol-led, m4-16gb. Worker exited0 with explicit BLOCKED; no new runtime captures or functional proof. It located valid V1 baselines and honored host admission after paging rose. ~2min, 82.5K reported tokens including broad source/tool output: continuation brief now supplies exact commands and compact facts to avoid repeating context. Host refusal is an environment result, not a test PASS or model failure. |
+
+
+| 2026-10-17 | P3u W6 glass restart / combined minimap+glass capture attempt | test | gpt-6-luna @ medium | partial (host blocked) | N | — | Sol inspected redirected W6 run.log; no app change | Sol | sol-led, m4-16gb. W6verify2: actual launch17:08, stopped after harness admission refused (paging, then pressure/CPU);12.3K tokens, failed to write requested report. CandidateChecks: stopped before harness on fresh preflight pageouts2;20.4K tokens, faithful report. Neither produced runtime proof. Manager admission pass before launch does not guarantee the next admission window; don't keep spawning models on unchanged host failures. |
+
 ## Emerging patterns
 
 *(Fill this in once repeated rows support a claim, for example "Muse unusually reliable at contained CSS/UI", "DeepSeek effective on state-tracing bugs", "Bunny retrieval did / didn't cut first-pass failures". Cite the row dates. Leave empty until the evidence exists.)*

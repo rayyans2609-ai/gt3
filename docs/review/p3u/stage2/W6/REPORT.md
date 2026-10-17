@@ -14,7 +14,7 @@ This uses Three r180 target characteristics (mipmaps, no depth resolve, multisam
 
 - Before patch, Quality 65s: RAF maximum 233.4ms, two intervals >50ms; GPU p99 16.76ms, maximum48.22ms. After patch, 65s: maximum34.1ms, zero >50ms, GPU p99 15.27ms. These are single sessions, not a controlled sustained before/after claim.
 - Gate ablation: disabling morph or hiding the car removes the large crossing cost; disabling shadow updates helps less. Transmission resolution/sample ablations identify the expensive pass (observed crossing maximum155ms). Sequential full/stock diagnostic variants do not always restore samples on the full condition, so their exact full/stock ratio is not acceptance evidence. Final runtime assertions and fresh-page measurements supersede that ambiguity.
-- Smooth 600.5s, alternating themes, 15 Tours/135 crossings: RAF p95/p99 17.4/17.6ms, maximum50.2ms; ten >33ms, one >50ms; GPU p95/p99 14.82/15.50ms. The 50.2ms event was GPU-bound in an Audi swap window (GPU54.55ms; no long JS task), not new shader allocation. It prevents claiming universal stall elimination.
+- Smooth 600.5s, alternating themes, 15 Tours/135 crossings: RAF p95/p99 17.4/17.6ms, maximum50.2ms; ten >33ms, one >50ms; GPU p95/p99 14.82/15.50ms. The 50.2ms event was GPU-bound in a BMW swap window (GPU54.55ms; no long JS task), not new shader allocation. It prevents claiming universal stall elimination.
 - Quality600.4s, alternating themes, 15 Tours/135 crossings: RAF p95/p99 17.5/17.6ms, maximum34.1ms; fourteen >33ms, zero >50ms; GPU p95/p99 15.02/15.62ms.
 - Both stayed at116 programs/303 textures/1501 geometries after ready. Memory pressure remained normal; swapout delta zero; no thermal/performance warning was reported by pmset. Process RSS is not GPU memory residency; thermal warnings do not measure chip temperature or prove absence of frequency changes.
 
@@ -22,4 +22,4 @@ The historical83/116ms intervals are consistent with the reproduced transmission
 
 ## Completion verification
 
-Integrated syntax and Vite production build pass. Luna W6verify is collecting actual target settings, Ferrari/Aston Day/Night comparisons, Locked/default23-state diffs, and affected loading/swap functional checks. Final integrated sustained measurements follow the minimap integration. Until those reports are attached, completion remains pending.
+Integrated syntax and Vite production build pass. Luna W6verify stopped at host admission after pageouts rose; it produced no new runtime proof. A deterministic visual adapter now explicitly sets and records both transmission scale and samples, and the swap harness accepts a profile query. Final target settings, Ferrari/Aston Day/Night comparisons, Locked/default23-state diffs and affected loading/swap checks are pending a stable host window. Final integrated sustained measurements follow the minimap integration. Until those reports are attached, completion remains pending.

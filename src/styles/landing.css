@@ -1,0 +1,220 @@
+/* Phase 4 Landing (SPEC §4) and the PROVISIONAL Hub field (Phase 5 replaces #hub).
+   :root[data-world] names which world owns the screen and the page scroll: 'landing' (Landing
+   and Hub) or 'tour'. index.html sets it before first paint; main.js switches it at handoff. */
+
+:root {
+  --landing-field: #ffffff;
+  --landing-ink: #111416;
+  --landing-muted: rgba(17, 20, 22, 0.52);
+}
+
+:root[data-theme='night'] {
+  --landing-field: #0c1930;
+  --landing-ink: #edf0ea;
+  --landing-muted: rgba(237, 240, 234, 0.56);
+}
+
+/* ---- world ownership --------------------------------------------------- */
+
+:root[data-world='landing'],
+:root[data-world='landing'] body {
+  background: var(--landing-field);
+  transition: background-color 700ms var(--ease);
+}
+
+#landing-spacer { display: none; }
+:root[data-world='landing'] #landing-spacer { display: block; height: 360vh; }
+:root[data-world='landing'] #scroll-spacer { display: none; }
+
+/* Grand Tour-only surfaces stay out of the Landing world (the edge row stays: SPEC §8, §13). */
+:root[data-world='landing'] #start-screen,
+:root[data-world='landing'] #hud-topleft,
+:root[data-world='landing'] #hud-topright,
+:root[data-world='landing'] #hud-bottomleft,
+:root[data-world='landing'] .hud-lap-timer,
+:root[data-world='landing'] #finish-screen,
+:root[data-world='landing'] #montage-layer { display: none; }
+
+:root[data-world='tour'] #landing { display: none; }
+
+/* ---- Landing composition ------------------------------------------------ */
+
+#landing {
+  position: fixed;
+  inset: 0;
+  color: var(--landing-ink);
+  pointer-events: none;
+  transition: color 700ms var(--ease);
+}
+
+:root { --landing-type: clamp(210px, 26vw, 600px); }
+
+/* Oversized and anchored low-left; the hero floats above it to the right (a diagonal, not a
+   lockup). The line box is cut to the cap height so the baseline sits on the margin. */
+.landing-wordmark {
+  position: absolute;
+  left: 4.4vw;
+  bottom: 5.5vh;
+  margin-left: -0.045em;
+  font-family: var(--font-display);
+  font-size: var(--landing-type);
+  font-weight: 500;
+  line-height: 0.74;
+  letter-spacing: -0.06em;
+  transform-origin: 0% 100%;
+  will-change: transform, opacity;
+}
+
+.landing-eyebrow {
+  position: absolute;
+  left: 4.4vw;
+  bottom: calc(5.5vh + var(--landing-type) * 0.74 + 22px);
+  font-family: var(--font-ui);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--landing-muted);
+}
+
+.landing-caption {
+  position: absolute;
+  left: 66.5%;
+  top: 59vh;
+  transform: translateX(-50%);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--landing-muted);
+  opacity: 0;
+}
+
+.landing-cue {
+  position: absolute;
+  left: 50%;
+  bottom: 34px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  transform: translateX(-50%);
+  font-family: var(--font-ui);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--landing-muted);
+}
+
+.landing-cue__track {
+  position: relative;
+  width: 1px;
+  height: 30px;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--landing-ink) 14%, transparent);
+}
+
+.landing-cue__line {
+  position: absolute;
+  left: 0;
+  top: -14px;
+  width: 1px;
+  height: 14px;
+  background: var(--landing-ink);
+  animation: landing-cue 2.4s var(--ease) infinite;
+}
+
+@keyframes landing-cue {
+  0% { transform: translateY(0); opacity: 0; }
+  25% { opacity: 1; }
+  100% { transform: translateY(44px); opacity: 0; }
+}
+
+/* Resolve toward the field: a scroll-driven dissolve with a wide radial bias (landing.js sets
+   --lead and --lag, 0..100 %). Day: light leads at the headlight. Night: navy leads at the edges. */
+#landing-resolve {
+  --x: 50%;
+  --y: 50%;
+  --lead: 0%;
+  --lag: 0%;
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+:root[data-theme='day'] #landing-resolve {
+  background: radial-gradient(circle at var(--x) var(--y),
+    color-mix(in srgb, var(--landing-field) var(--lead), transparent) 0,
+    color-mix(in srgb, var(--landing-field) var(--lag), transparent) 85vmax);
+}
+
+:root[data-theme='night'] #landing-resolve {
+  background: radial-gradient(circle at var(--x) var(--y),
+    color-mix(in srgb, var(--landing-field) var(--lag), transparent) 0,
+    color-mix(in srgb, var(--landing-field) var(--lead), transparent) 85vmax);
+}
+
+/* ---- PROVISIONAL Hub (Phase 5 replaces this) ----------------------------- */
+
+#hub {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: var(--landing-field);
+  color: var(--landing-ink);
+  opacity: 0;
+  pointer-events: none;
+  transition: background-color 700ms var(--ease), color 700ms var(--ease);
+}
+
+#hub[hidden] { display: none; }
+#hub.is-interactive { pointer-events: auto; }
+
+.hub-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+.hub-start {
+  min-width: 196px;
+  height: 52px;
+  padding: 0 34px;
+  border: 1px solid var(--landing-ink);
+  border-radius: 26px;
+  background: var(--landing-ink);
+  color: var(--landing-field);
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background-color 200ms var(--ease), color 200ms var(--ease), opacity 200ms var(--ease);
+}
+
+.hub-start:hover { background: transparent; color: var(--landing-ink); }
+.hub-start:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.hub-start:disabled { opacity: 0.32; cursor: default; }
+.hub-start:disabled:hover { background: var(--landing-ink); color: var(--landing-field); }
+
+.hub-status {
+  min-height: 14px;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--landing-muted);
+}
+
+/* Prompt-only start screen: entering from the Hub keeps the accepted SCROLL TO RACE handoff
+   but not the legacy start card (SPEC §20, §25). */
+#start-screen.is-prompt-only .start-screen__panel { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-cue__line { animation: none; }
+}

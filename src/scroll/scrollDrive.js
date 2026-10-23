@@ -100,6 +100,9 @@ let quietTimer = 0;
 // A gesture still in flight when the drive unlocks (trackpad momentum, a held wheel) belongs to
 // the time before readiness; the boot unlock waits until input has been idle this long.
 const UNLOCK_QUIET_MS = 250;
+// Dormant (Phase 4): the Landing world owns the page scroll. The drive neither reads nor
+// moves the page, swallows nothing and fires no first-scroll; route state is left untouched.
+let dormant = false;
 
 const firstScrollHandlers = [];
 
@@ -117,6 +120,7 @@ function readScroll() {
 }
 
 function onScroll() {
+  if (dormant) return;
   if (state.scrollLocked) {
     // Locked: pin the viewport. Anything that slipped through (momentum fling,
     // find-in-page, a stray keypress) is snapped straight back.
@@ -157,6 +161,7 @@ function syncPageTo(t) {
 
 function userInputIsRecent(now = performance.now()) { return now - lastUserInputAt <= 1000; }
 function noteUserInput(e) {
+  if (dormant) return;
   if (!e.isTrusted || state.scrollLocked || document.visibilityState === 'hidden') return;
   if (e.type === 'keydown' && !SCROLL_KEYS.has(e.key)) return;
   if (e.type === 'wheel' && e.deltaY === 0) return;
@@ -188,7 +193,7 @@ function swallow(e) {
 }
 
 function swallowKeys(e) {
-  if (state.scrollLocked && SCROLL_KEYS.has(e.key)) {
+  if (!dormant && state.scrollLocked && SCROLL_KEYS.has(e.key)) {
     lastSwallowedAt = performance.now();
     e.preventDefault();
   }
@@ -278,6 +283,30 @@ export function unlockScroll() {
   set('targetProgress', Math.min(1, rawTarget));
 }
 
+/**
+ * Phase 4: hand the page scroll to the Landing world (true) or take it back (false).
+ * Going dormant drops the boot guard and every swallower and holds the drive locked, so nothing
+ * scrolled on the Landing can become route input. Waking leaves the drive locked: the caller
+ * places the route (seekTo) and unlocks when quiet, exactly like the boot release.
+ */
+export function setDriveDormant(value) {
+  if (value) {
+    releaseBootGuard();
+    clearTimeout(quietTimer);
+    pauseDriving();
+    detachSwallowers();
+    set('scrollLocked', true);
+    dormant = true;
+    return;
+  }
+  dormant = false;
+  lockedScrollY = window.scrollY || 0;
+}
+
+export function isDriveDormant() {
+  return dormant;
+}
+
 /** Register a callback for the very first scroll input (start screen, audio gate). */
 export function onFirstScroll(fn) {
   if (hasStarted) fn();
@@ -348,6 +377,7 @@ export function seekTo(t, { instant = false } = {}) {
  * Writes state.progress, state.velocity and state.speed01.
  */
 export function update(dt) {
+  if (dormant) return;
   if (bounded) return updateBounded(dt);
   // Frame-rate independent damping. The naive `t += (target - t) * k` is tied to
   // frame rate; this gives the same feel at 60, 120 and 144 Hz.
@@ -450,6 +480,7 @@ function publishTravel(meters, delta, dt) {
 // ---------------------------------------------------------------------------
 
 function onResize() {
+  if (dormant) return;
   // Page height changed: re-place the page on the car so px<->metre mapping stays aligned.
   if (bounded && !state.scrollLocked) syncPageTo(state.progress + state.finishTailMeters / TOUR_LENGTH);
   onScroll();

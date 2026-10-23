@@ -163,6 +163,15 @@ export function dismissStartScreenForRestore() {
   root.hidden = true;
 }
 
+/**
+ * Entry from the Hub (Phase 4): keep only the accepted SCROLL TO RACE prompt; the legacy start
+ * card is not shown, because loading and the Start Race action already happened on the Hub.
+ */
+export function usePromptOnly() {
+  if (!root) root = document.getElementById('start-screen');
+  root?.classList.add('is-prompt-only');
+}
+
 /** Populate the existing start-screen root. Main owns asset preloading. */
 export function initStartScreen() {
   if (initialized) return;

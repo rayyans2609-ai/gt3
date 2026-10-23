@@ -224,7 +224,7 @@ function applyResolution(dpr) {
   return true;
 }
 
-function resizeScene(width, height) {
+export function resizeScene(width, height) {
   if (!renderer || !camera || !composer) return;
 
   const safeWidth = Math.max(1, width);

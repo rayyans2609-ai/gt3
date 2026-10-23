@@ -466,6 +466,27 @@ async function beginPreload() {
 }
 
 /**
+ * Load one car from the full-resolution set (textures <= 1024 px) with the same verified
+ * normalisation. Independent of the Tour roster: never added to it, never warmed by it.
+ * Used by the Landing hero (SPEC §4), which is seen far closer than any Tour car.
+ */
+export async function loadFullResolutionCar(index) {
+  assertIndex(index);
+  const car = CARS[index];
+  const dracoLoader = new DRACOLoader();
+  dracoLoader.setDecoderPath(DRACO_DECODER_PATH);
+  const loader = new GLTFLoader();
+  loader.setDRACOLoader(dracoLoader);
+  try {
+    const gltf = await loader.loadAsync(`${FULL_MODEL_BASE}${car.modelFile}`);
+    if (!gltf?.scene) throw new Error(`GLTFLoader returned no scene for ${car.modelFile}.`);
+    return normaliseScene(gltf.scene, car);
+  } finally {
+    dracoLoader.dispose();
+  }
+}
+
+/**
  * Preload all cars. Repeated calls share the same work and resolved array.
  * @param {(loaded: number, total: number, fraction: number) => void} [onProgress]
  * @returns {Promise<THREE.Group[]>}

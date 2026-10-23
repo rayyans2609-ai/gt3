@@ -22,7 +22,7 @@ import * as THREE from 'three';
 import { state, set, subscribe } from './core/state.js';
 import { Clock } from './core/clock.js';
 import { getRestoredRouteProgress, restoreSession, startRoutePersistence } from './core/session.js';
-import { restoreExperience, setExperience } from './core/experience.js';
+import { restoreExperience, setExperience, beginTransition, completeTransition } from './core/experience.js';
 import { UNLOCKED } from './core/renderProfile.js';
 // W2 review scaffolding: resolves ?comp= (pure, no scene imports) before any scene
 // module builds geometry. trackCurve.js also imports it, so order cannot regress.
@@ -88,9 +88,17 @@ async function boot() {
   perfMark('boot:start');
   restoreSession();
 
-  // LEGACY BRIDGE — remove in Phases 4–7. Phase 4 replaces this with real boot
-  // resolution; today's running race is the V3 Grand Tour regardless of saved state.
-  restoreExperience('tour');
+  // Boot resolution (SPEC §24–25). A new session starts on the Landing; a refresh restores the
+  // experience it left: the Hub at rest, or the Grand Tour at its saved route position. Showcase
+  // does not exist yet (Phase 6) and resolves to the Hub. index.html made the same decision
+  // before first paint from the same session record.
+  const bootIntoTour = state.experience === 'tour' || state.experience === 'complete';
+  restoreExperience(bootIntoTour ? 'tour'
+    : state.experience === 'hub' || state.experience === 'showcase' ? 'hub' : 'landing');
+  document.documentElement.dataset.world = bootIntoTour ? 'tour' : 'landing';
+  // The Landing hero streams first; the Tour roster follows in the background.
+  const landing = bootIntoTour ? null : await import('./landing/landing.js');
+  landing?.preloadHero();
   subscribe('mode', (mode) => {
     if (mode === 'finish') setExperience('complete');
     else if (mode === 'race' && state.experience === 'complete') setExperience('tour');
@@ -122,6 +130,7 @@ async function boot() {
   const soundCue = await import('./ui/soundCue.js');
   const startScreen = await import('./ui/startScreen.js');
   const finishScreen = await import('./ui/finishScreen.js');
+  const hub = await import('./ui/hub.js');
 
   perfMark('imports:end');
   perfMeasure('imports', 'boot:start', 'imports:end');
@@ -148,7 +157,10 @@ async function boot() {
   // must already swallow it (the whole boot used to be one task, so nothing could interleave).
   timed('init-scroll-drive', () => {
     scrollDrive.initScrollDrive();
-    scrollDrive.lockScroll();
+    // On the Landing the page scroll belongs to the Landing; the drive waits, dormant, until
+    // START RACE arms it. A restored Tour locks exactly as before.
+    if (bootIntoTour) scrollDrive.lockScroll();
+    else scrollDrive.setDriveDormant(true);
   });
 
   perfMark('preload:start');
@@ -191,6 +203,18 @@ async function boot() {
   perfMark('start-screen:painted');
   const { scene, camera, renderer } = timed('init-scene', () => sceneSetup.initScene());
   transmission?.budgetTransmission(renderer);
+  if (landing) {
+    timed('init-landing', () => {
+      landing.initLanding(renderer, {
+        onHub: () => setExperience('hub'),
+        onLanding: () => setExperience('landing'),
+      });
+      onResize(landing.onLandingResize); // after the shared renderer's own resize
+      landing.activateLanding({ atHub: state.experience === 'hub' });
+    });
+  }
+  hub.initHub({ onStartRace: () => { void enterTour(); } });
+  hub.setHubReadiness(readiness);
   // initScene creates window.__gt3; these handles were previously attached after the full build.
   window.__gt3.readiness = readiness;
   window.__gt3.scrollMode = scrollDrive.scrollMode;
@@ -252,6 +276,7 @@ async function boot() {
     readiness.progress = readiness.status === 'loading'
       ? fractions.model * 0.65 + fractions.audio * 0.15 + fractions.gpu * 0.20 : 1;
     startScreen.setLoadState(readiness);
+    hub.setHubReadiness(readiness);
     window.dispatchEvent(new CustomEvent('gt3:preload',
       { detail: { fraction: readiness.progress, status: readiness.status } }));
   }
@@ -276,23 +301,9 @@ async function boot() {
       ? 'ready' : 'degraded';
     readiness.readyAt = performance.now();
     perfMark(`ready:${readiness.status}`);
-    const savedRouteProgress = getRestoredRouteProgress();
-    const restoreFinish = savedRouteProgress !== null && finishScreen.isFinishProgress(savedRouteProgress);
-    if (restoreFinish) set('mode', 'finish');
-    if (savedRouteProgress !== null) {
-      // Restore while locked so this programmatic scroll cannot consume the first real gesture.
-      scrollDrive.seekTo(savedRouteProgress, { instant: true });
-      const routeIndex = checkpoints.restoreAtProgress(savedRouteProgress);
-      morph.resetMorph(routeIndex);
-      aerialCamera.snap();
-    }
-    // Unlock only once any gesture begun during loading has finished (SPEC §14).
-    scrollDrive.unlockScrollWhenQuiet(); // a finish restore below re-locks (V1) and cancels it
-    if (restoreFinish) {
-      startScreen.dismissStartScreenForRestore(); // no gesture will come; keep it (and its sound cue) out of the finish card
-      finishScreen.restoreFinishScreen();
-    }
-    startRoutePersistence();
+    // A restored Tour arms now. From the Landing world the drive stays dormant: the Hub's
+    // START RACE arms it (enterTour), so readiness alone never starts the Tour.
+    if (state.experience === 'tour') armTour({ unlock: true });
     reportProgress();
     console.info(`[gt3] ${readiness.status} — three r${THREE.REVISION}`,
       readiness.reasons);
@@ -399,6 +410,60 @@ async function boot() {
     startWarmup();
   }).catch(error => modelsFailed(error, 'model-rejection'));
 
+  /**
+   * Place the drive at the session's route position and start persisting it. The drive is
+   * locked throughout, so the programmatic placement cannot consume the first real gesture.
+   */
+  function armTour({ unlock }) {
+    const savedRouteProgress = getRestoredRouteProgress();
+    const restoreFinish = savedRouteProgress !== null && finishScreen.isFinishProgress(savedRouteProgress);
+    if (restoreFinish) set('mode', 'finish');
+    if (savedRouteProgress !== null) {
+      // Restore while locked so this programmatic scroll cannot consume the first real gesture.
+      scrollDrive.seekTo(savedRouteProgress, { instant: true });
+      const routeIndex = checkpoints.restoreAtProgress(savedRouteProgress);
+      morph.resetMorph(routeIndex);
+      aerialCamera.snap();
+    } else {
+      // The page held the Landing's scroll until now; put it back on the start line.
+      scrollDrive.seekTo(0, { instant: true });
+    }
+    // Unlock only once any gesture begun during loading has finished (SPEC §14).
+    if (unlock) scrollDrive.unlockScrollWhenQuiet(); // a finish restore below re-locks (V1) and cancels it
+    if (restoreFinish) {
+      startScreen.dismissStartScreenForRestore(); // no gesture will come; keep it (and its sound cue) out of the finish card
+      finishScreen.restoreFinishScreen();
+    }
+    startRoutePersistence();
+  }
+
+  /**
+   * Hub -> Grand Tour (SPEC §25; provisional Hub, owner 2026-10-24). The Hub field is opaque,
+   * so the canvas switches to the Tour underneath it; the field then fades away and the drive
+   * unlocks once any momentum from the Hub has died away. No input crosses the handoff.
+   */
+  let entering = false;
+  async function enterTour() {
+    if (entering || state.experience !== 'hub' || state.transition ||
+        !['ready', 'degraded'].includes(readiness.status)) return;
+    entering = true;
+    scrollDrive.setDriveDormant(false);
+    scrollDrive.lockScroll(); // swallow wheel and keys through the handoff
+    if (!beginTransition('tour')) { entering = false; return; }
+    landing?.deactivateLanding();
+    sceneSetup.resizeScene(window.innerWidth, window.innerHeight); // the Tour's fixed DPR again
+    document.documentElement.dataset.world = 'tour';
+    startScreen.usePromptOnly();
+    armTour({ unlock: false });
+    // Two Tour frames under the field before revealing it: no blank or half-built frame.
+    await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+    await hub.leaveHub(520);
+    completeTransition();
+    scrollDrive.unlockScrollWhenQuiet();
+    entering = false;
+  }
+  window.__gt3.enterTour = enterTour;
+
   // ---- wiring ------------------------------------------------------------
 
   // The studio (a second WebGL renderer, SPEC §27) is NOT created at boot: nothing in the Grand
@@ -430,6 +495,14 @@ async function boot() {
     if (direction > 0) audio.playCheckpointCross();
   });
 
+  if (landing) {
+    registerUpdate(landing.updateLanding);
+    registerUpdate(() => {
+      if (landing.landingActive()) hub.setHubPresence(landing.landingHubPresence(), state.experience === 'hub');
+    });
+    window.__gt3.landing = { seek: landing.seekLanding, progress: landing.landingProgress,
+      loaded: landing.heroLoaded, active: landing.landingActive, tuning: landing.landingTuning };
+  }
   registerUpdate(scrollDrive.update);
   registerUpdate(carRig.update);
   registerUpdate(aerialCamera.update);
@@ -476,9 +549,13 @@ async function boot() {
     for (const update of updates) update(dt, state);
 
     // The legacy montage remains available for a later manual-unlock flow.
+    const landingOwns = Boolean(landing?.landingActive());
     try {
       if (gpuWarmup && !gpuWarmup.done && readiness.gpu === 'pending') {
-        if (!faults.warmHang && gpuWarmup.runFrame()) {
+        // While the visitor moves through the Landing transition the warm-up waits a moment,
+        // so its first-use stalls never land on the signature shot. Its draws are then covered
+        // by the Landing frame below.
+        if (!faults.warmHang && !landing?.landingBusy() && gpuWarmup.runFrame()) {
           gpuWarmup = null;
           if (warmupCars) {
             backgroundWarmup = prewarm.createBackgroundWarmup(warmupCars,
@@ -487,7 +564,9 @@ async function boot() {
           }
           settle('gpu', 'ready');
         }
-      } else if (studio.isMontagePlaying()) studio.renderMontage();
+        if (landingOwns) landing.renderLanding();
+      } else if (landingOwns) landing.renderLanding();
+      else if (studio.isMontagePlaying()) studio.renderMontage();
       else {
         sceneSetup.render(dt);
         // Staged prewarm: one small step per calm frame, after the visible frame is drawn.

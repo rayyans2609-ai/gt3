@@ -11,6 +11,17 @@
       if (new URLSearchParams(location.search).get('font') === 'sw') document.documentElement.dataset.font = 'sw';
     </script>
     <script>
+      // World and theme before first paint (SPEC §24–25): a restored Grand Tour boots straight
+      // back into the Tour; everything else (a new session included) is the Landing world.
+      (function () {
+        var root = document.documentElement, saved = null;
+        try { saved = JSON.parse(sessionStorage.getItem('gt3.session.v1') || 'null'); } catch (e) { saved = null; }
+        var experience = saved && saved.experience;
+        root.dataset.world = experience === 'tour' || experience === 'complete' ? 'tour' : 'landing';
+        root.dataset.theme = saved && saved.theme === 'night' ? 'night' : 'day';
+      })();
+    </script>
+    <script>
       // Boot input guard (SPEC §14): until scrollDrive locks the drive, scroll input made while the
       // modules load must not move the page. Removed by scrollDrive.lockScroll(); records the last
       // swallowed gesture so the post-ready unlock can wait out any in-flight momentum.
@@ -36,7 +47,21 @@
   <body>
     <canvas id="scene"></canvas>
     <div id="scroll-spacer"></div>
+    <div id="landing-spacer"></div>
     <div id="overlay">
+      <div id="landing">
+        <h1 class="landing-wordmark">GT3</h1>
+        <p class="landing-eyebrow">A Grand Tour</p>
+        <p class="landing-caption">McLaren 720S GT3</p>
+        <div id="landing-resolve"></div>
+        <div class="landing-cue" aria-hidden="true"><span>Scroll</span><span class="landing-cue__track"><span class="landing-cue__line"></span></span></div>
+      </div>
+      <div id="hub" hidden>
+        <div class="hub-stack">
+          <button type="button" class="hub-start" disabled>Start Race</button>
+          <p class="hub-status" aria-live="polite"></p>
+        </div>
+      </div>
       <div id="start-screen"></div>
       <div id="hud">
         <div id="hud-topleft"></div>

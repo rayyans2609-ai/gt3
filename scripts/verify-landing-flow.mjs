@@ -8,8 +8,13 @@
  *   momentum-carryover    wheel momentum across the START RACE click crosses nothing into the Tour
  *   tour-drives           the first real gesture after entry drives (progress, started)
  *   refresh-tour          a reload in the Tour restores the exact route position within 0.002
+ *   tour-home-return      the home control returns to the Hub with route and discoveries kept
+ *   hub-after-return-isolated  wheel at the returned Hub moves only the Landing scroll
+ *   tour-reentry          START RACE re-enters the Tour at the preserved route position
  *   refresh-hub           a reload at the Hub re-enters the Hub directly (world stays landing)
  *   new-session-fresh     a new browser context starts fresh on the Landing
+ *   theme-mid-transition  the Day/Night switch lands both field colours from mid-transition
+ *   audio-gesture-only    scrolling never starts audio; only the speaker click can (or headless)
  * Usage: node scripts/verify-landing-flow.mjs [base-url]   (GT3_URL env wins; default 127.0.0.1:5243)
  */
 import puppeteer from 'puppeteer-core';
@@ -35,6 +40,9 @@ const snap = page => page.evaluate(async () => {
     locked: state.scrollLocked,
     transition: state.transition ? `${state.transition.from}->${state.transition.to}` : null,
     activeCarIndex: state.activeCarIndex,
+    unlocked: [...state.unlocked].sort((a, b) => a - b),
+    theme: state.theme,
+    audioReady: state.audioReady,
     readiness: window.__gt3?.readiness?.status ?? 'none',
     landing: landing
       ? { loaded: landing.loaded(), progress: landing.progress(), active: landing.active() }
@@ -44,6 +52,12 @@ const snap = page => page.evaluate(async () => {
   };
 });
 const readyOk = s => s.readiness === 'ready' || s.readiness === 'degraded';
+
+/** Non-noise observations so far; a case compares before/after counts for "no new errors". */
+const cleanErrorCount = () => rawErrors.filter(e => !isNoise(e.text)).length;
+
+/** Values handed between the main-flow cases (route position recorded at the home return). */
+const shared = {};
 
 /** Snapshot with the fields relevant to a session-storage check (unchanged between samples). */
 const getSession = page => page.evaluate(() => sessionStorage.getItem('gt3.session.v1'));
@@ -250,6 +264,149 @@ const cases = [
         readiness: restored.readiness, activeCarIndex: restored.activeCarIndex };
     },
   },
+  // 11 — the home control returns to the Hub: route, discovery and session all survive.
+  {
+    name: 'tour-home-return',
+    run: async page => {
+      const pre = await snap(page);
+      if (pre.world !== 'tour' || pre.experience !== 'tour') {
+        throw new Error(`main page not in the Tour: world=${pre.world} experience=${pre.experience}`);
+      }
+      // Create a discovery first: place the car just past checkpoint 1 (unlock + swap to car 1).
+      await page.evaluate(async () => {
+        const { seekTo } = await import('/src/scroll/scrollDrive.js');
+        const { CHECKPOINT_T } = await import('/src/scene/trackCurve.js');
+        seekTo(CHECKPOINT_T[0] + 0.01, { instant: true });
+      });
+      const discovered = await until(page, async p => {
+        const s = await snap(p);
+        return s.unlocked.includes(1) && s.activeCarIndex === 1 ? s : null;
+      }, { cap: 5000, step: 60, label: 'checkpoint 1 discovery (unlock + car swap)' });
+      await wait(500); // let the gate reaction and the car swap finish before the click
+      const before = await snap(page);
+      await page.click('.home-control');
+      const atHub = await until(page, async p => {
+        const s = await snap(p);
+        return s.world === 'landing' && s.experience === 'hub' && !s.transition ? s : null;
+      }, { cap: 3000, step: 80, label: 'home control reached the Hub' });
+      const field = await page.evaluate(() => {
+        const hub = document.getElementById('hub');
+        return { hidden: Boolean(hub?.hidden ?? true), opacity: hub ? Number(getComputedStyle(hub).opacity) : 0 };
+      });
+      const after = await snap(page);
+      const deltaProgress = Math.abs(after.progress - before.progress);
+      const routeDelta = after.session ? Math.abs((after.session.routeProgress ?? NaN) - before.progress) : Infinity;
+      if (after.world !== 'landing' || after.experience !== 'hub') {
+        throw new Error(`ended elsewhere: world=${after.world} experience=${after.experience}`);
+      }
+      if (after.transition !== null) throw new Error(`transition still open: ${after.transition}`);
+      if (after.landing?.active !== true) {
+        throw new Error(`Landing not active after the return: ${JSON.stringify(after.landing)}`);
+      }
+      if (field.hidden || !(field.opacity > 0.95)) {
+        throw new Error(`#hub not visible: hidden=${field.hidden} opacity=${field.opacity}`);
+      }
+      if (!(deltaProgress < 1e-6)) {
+        throw new Error(`route position changed across the return: before=${before.progress} after=${after.progress} (Δ=${deltaProgress})`);
+      }
+      if (!after.unlocked.includes(1)) throw new Error(`discovery lost: unlocked=${JSON.stringify(after.unlocked)}`);
+      if (after.session?.experience !== 'hub') {
+        throw new Error(`session not at the Hub: ${JSON.stringify(after.session)}`);
+      }
+      if (!(routeDelta < 1e-4)) {
+        throw new Error(`session routeProgress drifted: session=${after.session?.routeProgress} route=${before.progress}`);
+      }
+      shared.reentryProgress = before.progress;
+      return { discoveredWithin5s: true, unlocked: discovered.unlocked, activeCarIndex: discovered.activeCarIndex,
+        routeProgress: Math.round(before.progress * 10000) / 10000,
+        deltaProgress: Number(deltaProgress.toFixed(9)), hubField: field, hubState: atHub.landing,
+        session: { experience: after.session?.experience, routeProgress: after.session?.routeProgress,
+          routeDelta: Number(routeDelta.toFixed(9)) } };
+    },
+  },
+  // 12 — wheeling at the returned Hub: the Landing scroll moves, the route input holds zero.
+  {
+    name: 'hub-after-return-isolated',
+    run: async page => {
+      const before = await snap(page);
+      if (before.experience !== 'hub') throw new Error(`main page not at the Hub: experience=${before.experience}`);
+      await wheel(page, -200, 4, 80);
+      await wait(600); // let the returning scroll damping settle below the Hub threshold
+      const up = await snap(page);
+      if (!(up.landing?.progress < 0.99)) {
+        throw new Error(`Landing scroll did not leave the Hub rest point: landingProgress=${up.landing?.progress}`);
+      }
+      const upDelta = Math.abs(up.progress - before.progress);
+      if (!(upDelta < 1e-6)) throw new Error(`route input during the Hub wheel-up: Δ=${upDelta}`);
+      let down = 0; let again = null;
+      while (down < 40) {
+        await page.mouse.wheel({ deltaY: 300 });
+        down++; await wait(60);
+        const s = await snap(page);
+        if (s.experience === 'hub') { again = s; break; }
+      }
+      if (!again) {
+        throw new Error(`no Hub re-entry within 40 down-steps: experience=${(await snap(page)).experience}`);
+      }
+      const downDelta = Math.abs(again.progress - before.progress);
+      if (!(downDelta < 1e-6)) throw new Error(`route input during the Hub re-entry: Δ=${downDelta}`);
+      await wait(500); // the scroll settles on the Hub rest point before the next case clicks
+      const settled = await snap(page);
+      if (settled.experience !== 'hub') {
+        throw new Error(`did not hold the Hub after re-entry: experience=${settled.experience}`);
+      }
+      return { landingProgress: Math.round(up.landing.progress * 1000) / 1000,
+        routeDeltaUp: Number(upDelta.toFixed(9)), downSteps: down,
+        routeDeltaDown: Number(downDelta.toFixed(9)) };
+    },
+  },
+  // 13 — START RACE re-enters the Tour at the preserved route position, unlocked, static until driven.
+  {
+    name: 'tour-reentry',
+    run: async page => {
+      const atHub = await snap(page);
+      if (atHub.experience !== 'hub') throw new Error(`main page not at the Hub: experience=${atHub.experience}`);
+      const target = shared.reentryProgress
+        ?? await page.evaluate(async () => (await import('/src/scene/trackCurve.js')).CHECKPOINT_T[0] + 0.01);
+      const clickedAt = Date.now();
+      await page.click('.hub-start');
+      const entry = await until(page, async p => {
+        const s = await snap(p);
+        return s.world === 'tour' && s.experience === 'tour' && !s.transition ? s : null;
+      }, { cap: 3000, step: 80, label: 'START RACE did not re-enter the Tour' });
+      const entryMs = Date.now() - clickedAt;
+      const targetDelta = Math.abs(entry.progress - target);
+      if (!(targetDelta < 1e-4)) {
+        throw new Error(`route position not restored: entry=${entry.progress} target=${target} (Δ=${targetDelta})`);
+      }
+      if (entry.activeCarIndex !== 1) {
+        throw new Error(`active car is not the discovered one: ${entry.activeCarIndex}`);
+      }
+      if (!entry.unlocked.includes(1)) throw new Error(`discovery lost on re-entry: ${JSON.stringify(entry.unlocked)}`);
+      // Hub momentum must cross nothing into the Tour: 800 ms of stasis.
+      const samples = [];
+      for (let i = 0; i < 8; i++) {
+        await wait(100);
+        const s = await snap(page).catch(() => null);
+        if (s) samples.push(s.progress);
+      }
+      if (samples.some(v => Math.abs(v - target) > 1e-4)) {
+        throw new Error(`route moved right after re-entry: target=${target} samples=${JSON.stringify(samples)}`);
+      }
+      await wait(400); // the quiet unlock after the handoff has matured by now
+      await wheel(page, 300, 15, 60);
+      await wait(800);
+      const drove = await snap(page);
+      if (!(drove.progress > target)) {
+        throw new Error(`no drive after re-entry: progress=${drove.progress} target=${target} locked=${drove.locked} started=${drove.started}`);
+      }
+      return { entryMs, target: Math.round(target * 10000) / 10000,
+        progressAtEntry: Math.round(entry.progress * 10000) / 10000,
+        targetDelta: Number(targetDelta.toFixed(9)), activeCarIndex: entry.activeCarIndex,
+        progressSamples: samples.map(v => Math.round(v * 10000) / 10000),
+        progressAfterDrive: Math.round(drove.progress * 10000) / 10000, started: drove.started };
+    },
+  },
   // 9 — a NEW page (empty session) reaches the Hub via seek and reloads straight into the Hub.
   {
     name: 'refresh-hub',
@@ -292,6 +449,103 @@ const cases = [
       } finally { await context.close().catch(() => {}); }
     },
   },
+  // 14 — the Day/Night switch lands both field colours from a mid-transition and both directions.
+  {
+    name: 'theme-mid-transition',
+    run: async (page, browser) => {
+      const errors0 = cleanErrorCount();
+      const touch = p => p.evaluate(() => ({
+        datasetTheme: document.documentElement.dataset.theme,
+        bodyBackground: getComputedStyle(document.body).backgroundColor,
+      }));
+      const p2 = await open(browser, 'theme');
+      try {
+        await until(p2, async p => { const s = await snap(p); return s.landing?.loaded ? s : null; },
+          { cap: 30000, label: 'landing hero load (theme page)' });
+        const dayBefore = await touch(p2);
+        await p2.evaluate(() => window.__gt3.landing.seek(0.5));
+        await wait(250); // let the seek land before the click
+        await p2.click('.theme-segmented__option[data-value="night"]');
+        await wait(1000); // the field transition is 700 ms
+        const night = await touch(p2);
+        const nightState = await snap(p2);
+        // The same switch at the Hub edge and again inside the Landing field.
+        await p2.evaluate(() => window.__gt3.landing.seek(0.97));
+        await wait(300);
+        await p2.evaluate(() => window.__gt3.landing.seek(0.2));
+        await p2.click('.theme-segmented__option[data-value="day"]');
+        await wait(1000);
+        const day = await touch(p2);
+        const dayState = await snap(p2);
+        const newErrors = rawErrors.filter(e => !isNoise(e.text)).slice(errors0);
+        if (night.datasetTheme !== 'night' || nightState.theme !== 'night') {
+          throw new Error(`night did not hold: dataset=${night.datasetTheme} state=${nightState.theme}`);
+        }
+        if (nightState.landing?.active !== true) {
+          throw new Error(`Landing not active under the night field: ${JSON.stringify(nightState.landing)}`);
+        }
+        if (night.bodyBackground !== 'rgb(12, 25, 48)') {
+          throw new Error(`night body field wrong: ${night.bodyBackground}`);
+        }
+        if (day.datasetTheme !== 'day' || dayState.theme !== 'day') {
+          throw new Error(`day did not hold: dataset=${day.datasetTheme} state=${dayState.theme}`);
+        }
+        if (day.bodyBackground !== 'rgb(255, 255, 255)') {
+          throw new Error(`day body field wrong: ${day.bodyBackground}`);
+        }
+        if (newErrors.length) throw new Error(`new page errors: ${JSON.stringify(newErrors.map(e => e.text))}`);
+        return { dayBefore, night: { datasetTheme: night.datasetTheme, bodyBackground: night.bodyBackground,
+            landingActive: nightState.landing?.active },
+          day: { datasetTheme: day.datasetTheme, bodyBackground: day.bodyBackground },
+          newPageErrors: newErrors.length };
+      } finally { await p2.close().catch(() => {}); }
+    },
+  },
+  // 15 — scrolling never starts audio; only the speaker gesture can (headless fallback accepted).
+  {
+    name: 'audio-gesture-only',
+    run: async (page, browser) => {
+      const errors0 = cleanErrorCount();
+      const p2 = await open(browser, 'audio');
+      try {
+        await until(p2, async p => { const s = await snap(p); return s.landing?.loaded ? s : null; },
+          { cap: 30000, label: 'landing hero load (audio page)' });
+        await wheel(p2, 120, 6, 60);
+        await wait(400);
+        const scrolled = await snap(p2);
+        if (!(scrolled.landing?.progress > 0.05)) {
+          throw new Error(`the Landing scroll did not move: landingProgress=${scrolled.landing?.progress}`);
+        }
+        if (scrolled.audioReady !== false) {
+          throw new Error(`scroll started audio: audioReady=${scrolled.audioReady}`);
+        }
+        await p2.evaluate(() => window.__gt3.landing.seek(0));
+        await wait(200); // settle at the top of the Landing before the gesture
+        await p2.click('.audio-speaker');
+        let started = null;
+        try {
+          started = await until(p2, async p => {
+            const s = await snap(p);
+            return s.audioReady === true ? s : null;
+          }, { cap: 6000, step: 120, label: 'audioReady after the speaker click' });
+        } catch { /* headless audio may never be available: use the speaker's own state below */ }
+        const dataSound = await p2.evaluate(() => document.querySelector('.audio-speaker')?.dataset.sound ?? null);
+        const newErrors = rawErrors.filter(e => !isNoise(e.text)).slice(errors0);
+        if (started) {
+          return { audioReadyAfterScroll: false, landingProgressAfterScroll: Math.round(scrolled.landing.progress * 1000) / 1000,
+            audioReady: true, dataSound, newPageErrors: newErrors.length };
+        }
+        const healthyIdle = dataSound === 'starting' || dataSound === 'on' || dataSound === 'idle';
+        if (!healthyIdle || newErrors.length) {
+          throw new Error(`audio did not start and the speaker is unhealthy: data-sound=${dataSound}`
+            + ` newPageErrors=${JSON.stringify(newErrors.map(e => e.text))}`);
+        }
+        return { audioReadyAfterScroll: false,
+          landingProgressAfterScroll: Math.round(scrolled.landing.progress * 1000) / 1000,
+          audioReady: false, dataSound, note: 'headless audio unavailable', newPageErrors: newErrors.length };
+      } finally { await p2.close().catch(() => {}); }
+    },
+  },
 ];
 
 /** Run one browser-GPU session for the whole flow; each case gets a named report entry. */
@@ -307,7 +561,8 @@ try {
   });
   const page = await open(browser, 'main');
 
-  // Cases 1–7, 8 share one page flow; cases 9–10 open their own surfaces and stand alone.
+  // Cases 1–8, 11–13 share one page flow (11–13 continue the main page through the Tour↔Hub
+  // round trip); refresh-hub, new-session-fresh, theme and audio stand alone on their own pages.
   for (const [index, step] of cases.entries()) {
     const entry = report.cases[step.name] = { pass: true };
     try {

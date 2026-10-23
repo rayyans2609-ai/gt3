@@ -139,7 +139,14 @@ try {
       await page.evaluate(() => window.__gt3.leaveTour()); atHub(await settled(page, 'hub'));
 
       // Real keyboard focus/activation, handoff keys, then a second entry by Space.
-      await page.focus('.hub-start'); await page.keyboard.press('Enter');
+      await page.evaluate(() => document.activeElement?.blur());
+      let tabReachedStart = false;
+      for (let i = 0; i < 12 && !tabReachedStart; i++) {
+        await page.keyboard.press('Tab');
+        tabReachedStart = await page.evaluate(() => document.activeElement?.matches('.hub-start'));
+      }
+      assert(tabReachedStart); result.tabReachedStart = true;
+      await page.keyboard.press('Enter');
       for (const key of ['PageDown', 'Space', 'ArrowDown']) await page.keyboard.press(key);
       result.keyboardEntry = await settled(page, 'tour'); atTour(result.keyboardEntry);
       assert.equal(result.keyboardEntry.progress, 0);
@@ -158,6 +165,36 @@ try {
       });
       await page.reload({ waitUntil: 'domcontentloaded' });
       await page.waitForFunction(() => ['ready', 'degraded'].includes(window.__gt3?.readiness?.status), { timeout: 90000 });
+      const refreshed = await settled(page, 'tour'); atTour(refreshed);
+      assert(Math.abs(refreshed.progress - .2) < 1e-6);
+      await page.evaluate(() => window.__gt3.leaveTour()); atHub(await settled(page, 'hub'));
+      await page.reload({ waitUntil: 'domcontentloaded' });
+      await page.waitForFunction(() => window.__gt3?.landing?.active(), { timeout: 30000 });
+      result.hubRefresh = await settled(page, 'hub'); atHub(result.hubRefresh);
+      await page.waitForFunction(() => ['ready', 'degraded'].includes(window.__gt3?.readiness?.status), { timeout: 90000 });
+
+      // Entry has not committed its destination while the opaque field is up.
+      result.entrySession = await page.evaluate(() => {
+        void window.__gt3.enterTour();
+        return JSON.parse(sessionStorage.getItem('gt3.session.v1')).experience;
+      });
+      assert.equal(result.entrySession, 'hub');
+      await page.reload({ waitUntil: 'domcontentloaded' });
+      await page.waitForFunction(() => window.__gt3?.landing?.active()
+        && ['ready', 'degraded'].includes(window.__gt3.readiness?.status), { timeout: 90000 });
+      atHub(await settled(page, 'hub'));
+
+      // Repeated short wheel reversals across the Hub threshold must stay in Landing's
+      // scroll domain, with no transition or accumulated route movement.
+      await page.mouse.move(720, 450);
+      for (let i = 0; i < 8; i++) {
+        await page.mouse.wheel({ deltaY: -90 }); await wait(30);
+        await page.mouse.wheel({ deltaY: 90 }); await wait(30);
+      }
+      const threshold = await snapshot(page);
+      assert.equal(threshold.progress, .2); assert.equal(threshold.transition, null);
+      assert.equal(threshold.dormant, true); await reachHub(page);
+      result.thresholdRouteHeld = true;
 
       // Exercise the Hub's readiness presentation and the actual entry guard with
       // deterministic state fixtures. Phase 3 load-recovery already covers phase settlement.
@@ -170,24 +207,22 @@ try {
           const button = document.querySelector('.hub-start');
           rows.push({ status, disabled: button.disabled,
             text: document.querySelector('.hub-status').textContent });
-          if (status !== 'degraded') await window.__gt3.enterTour();
+          if (status !== 'degraded') {
+            await window.__gt3.enterTour();
+            const { state } = await import('/src/core/state.js');
+            rows.at(-1).entryBlocked = state.experience === 'hub' && !state.transition;
+          }
         }
         await window.__gt3.enterTour();
         readiness.status = original; hub.setHubReadiness(readiness);
         return rows;
       });
       assert.deepEqual(result.readinessStates.map(row => row.disabled), [true, true, false]);
+      assert(result.readinessStates.slice(0, 2).every(row => row.entryBlocked));
       assert.match(result.readinessStates[0].text, /Preparing the grid \d+%/);
       assert.equal(result.readinessStates[1].text, 'Route unavailable');
       atTour(await settled(page, 'tour'));
       await page.evaluate(() => window.__gt3.leaveTour()); atHub(await settled(page, 'hub'));
-      const refreshed = await settled(page, 'tour'); atTour(refreshed);
-      assert(Math.abs(refreshed.progress - .2) < 1e-6);
-      await page.evaluate(() => window.__gt3.leaveTour()); atHub(await settled(page, 'hub'));
-      await page.reload({ waitUntil: 'domcontentloaded' });
-      await page.waitForFunction(() => window.__gt3?.landing?.active(), { timeout: 30000 });
-      result.hubRefresh = await settled(page, 'hub'); atHub(result.hubRefresh);
-      await page.waitForFunction(() => ['ready', 'degraded'].includes(window.__gt3?.readiness?.status), { timeout: 90000 });
 
       // Resize at the resting Hub and inside Landing, then restore the Tour's profile.
       await page.setViewport({ width: 1100, height: 720, deviceScaleFactor: 2 }); await wait(250);

@@ -186,13 +186,15 @@ try {
 
       // Repeated short wheel reversals across the Hub threshold must stay in Landing's
       // scroll domain, with no transition or accumulated route movement.
+      const thresholdBefore = await snapshot(page);
       await page.mouse.move(720, 450);
       for (let i = 0; i < 8; i++) {
         await page.mouse.wheel({ deltaY: -90 }); await wait(30);
         await page.mouse.wheel({ deltaY: 90 }); await wait(30);
       }
       const threshold = await snapshot(page);
-      assert.equal(threshold.progress, .2); assert.equal(threshold.transition, null);
+      assert.equal(threshold.progress, thresholdBefore.progress);
+      assert.equal(threshold.session.routeProgress, .2); assert.equal(threshold.transition, null);
       assert.equal(threshold.dormant, true); await reachHub(page);
       result.thresholdRouteHeld = true;
 

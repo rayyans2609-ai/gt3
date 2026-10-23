@@ -612,8 +612,9 @@ async function boot() {
       if (gpuWarmup && !gpuWarmup.done && readiness.gpu === 'pending') {
         // While the visitor moves through the Landing transition the warm-up waits a moment,
         // so its first-use stalls never land on the signature shot. Its draws are then covered
-        // by the Landing frame below.
-        if (!faults.warmHang && !landing?.landingBusy() && gpuWarmup.runFrame()) {
+        // by the Landing frame below. At rest, leave room for that visible frame: the Tour's
+        // 12/24 ms loading-screen budgets can consume a whole refresh before the hero draws.
+        if (!faults.warmHang && !landing?.landingBusy() && gpuWarmup.runFrame(landingOwns ? 4 : undefined)) {
           gpuWarmup = null;
           if (warmupCars) {
             backgroundWarmup = prewarm.createBackgroundWarmup(warmupCars,

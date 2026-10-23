@@ -35,7 +35,7 @@ async function settled(page, experience) {
   await page.waitForFunction(async expected => {
     const { state } = await import('/src/core/state.js');
     return state.experience === expected && !state.transition;
-  }, { timeout: 5000 }, experience);
+  }, { timeout: 5000, polling: 50 }, experience);
   await wait(300);
   return snapshot(page);
 }
@@ -158,6 +158,29 @@ try {
       });
       await page.reload({ waitUntil: 'domcontentloaded' });
       await page.waitForFunction(() => ['ready', 'degraded'].includes(window.__gt3?.readiness?.status), { timeout: 90000 });
+
+      // Exercise the Hub's readiness presentation and the actual entry guard with
+      // deterministic state fixtures. Phase 3 load-recovery already covers phase settlement.
+      result.readinessStates = await page.evaluate(async () => {
+        const hub = await import('/src/ui/hub.js');
+        const readiness = window.__gt3.readiness, original = readiness.status;
+        const rows = [];
+        for (const status of ['loading', 'failed', 'degraded']) {
+          readiness.status = status; hub.setHubReadiness(readiness);
+          const button = document.querySelector('.hub-start');
+          rows.push({ status, disabled: button.disabled,
+            text: document.querySelector('.hub-status').textContent });
+          if (status !== 'degraded') await window.__gt3.enterTour();
+        }
+        await window.__gt3.enterTour();
+        readiness.status = original; hub.setHubReadiness(readiness);
+        return rows;
+      });
+      assert.deepEqual(result.readinessStates.map(row => row.disabled), [true, true, false]);
+      assert.match(result.readinessStates[0].text, /Preparing the grid \d+%/);
+      assert.equal(result.readinessStates[1].text, 'Route unavailable');
+      atTour(await settled(page, 'tour'));
+      await page.evaluate(() => window.__gt3.leaveTour()); atHub(await settled(page, 'hub'));
       const refreshed = await settled(page, 'tour'); atTour(refreshed);
       assert(Math.abs(refreshed.progress - .2) < 1e-6);
       await page.evaluate(() => window.__gt3.leaveTour()); atHub(await settled(page, 'hub'));
@@ -169,6 +192,9 @@ try {
       // Resize at the resting Hub and inside Landing, then restore the Tour's profile.
       await page.setViewport({ width: 1100, height: 720, deviceScaleFactor: 2 }); await wait(250);
       assert.deepEqual((await snapshot(page)).renderer.size, [1100, 720]);
+      await page.setViewport({ width: 1280, height: 1000, deviceScaleFactor: 2 }); await wait(500);
+      result.hubGrowth = await snapshot(page);
+      atHub(result.hubGrowth);
       await page.evaluate(() => window.__gt3.landing.seek(.5)); await wait(300);
       await page.setViewport({ width: 1280, height: 800, deviceScaleFactor: 2 }); await wait(250);
       assert.deepEqual((await snapshot(page)).renderer.viewport, [0, 0, 1280, 800]);
@@ -178,6 +204,15 @@ try {
       assert.deepEqual(resized.renderer.size, [1280, 800]);
       result.homeControls = await page.$$eval('.home-control', nodes => nodes.length);
       assert.equal(result.homeControls, 1);
+
+      // A completed Tour keeps its existing finish behavior; home cannot open a new edge.
+      await page.evaluate(async () => {
+        const { restoreFinishScreen } = await import('/src/ui/finishScreen.js');
+        restoreFinishScreen(); await window.__gt3.leaveTour();
+      });
+      result.finish = await snapshot(page);
+      assert.equal(result.finish.experience, 'complete');
+      assert.equal(result.finish.mode, 'finish'); assert.equal(result.finish.transition, null);
       assert.deepEqual(result.errors, []);
       result.pass = true;
     } finally { await page.close(); }

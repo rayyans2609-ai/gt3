@@ -304,7 +304,8 @@ try {
   await phase('unversioned old-session world position', async () => {
     // Seed the incoming document: the outgoing page's lifecycle flush correctly
     // persists its live route and would overwrite a fixture written before reload.
-    await page.evaluateOnNewDocument(() => sessionStorage.setItem('gt3.session.v1',JSON.stringify({routeProgress:.4,unlocked:[0,1,2,3,4]})));
+    // Phase 4: a session without `experience` boots the Landing; this fixture is a Tour session.
+    await page.evaluateOnNewDocument(() => sessionStorage.setItem('gt3.session.v1',JSON.stringify({experience:'tour',routeProgress:.4,unlocked:[0,1,2,3,4]})));
     if (page.url() === 'about:blank') {
       await page.goto(base, { waitUntil: 'domcontentloaded', timeout: 120000 });
     } else await page.reload({waitUntil:'domcontentloaded',timeout:120000});

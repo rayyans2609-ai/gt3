@@ -22,7 +22,7 @@ import * as THREE from 'three';
 import { state, set, subscribe } from './core/state.js';
 import { Clock } from './core/clock.js';
 import { getRestoredRouteProgress, persistRouteProgress, restoreSession, startRoutePersistence } from './core/session.js';
-import { restoreExperience, setExperience, beginTransition, completeTransition } from './core/experience.js';
+import { restoreExperience, setExperience, beginTransition, completeTransition, cancelTransition } from './core/experience.js';
 import { UNLOCKED } from './core/renderProfile.js';
 // W2 review scaffolding: resolves ?comp= (pure, no scene imports) before any scene
 // module builds geometry. trackCurve.js also imports it, so order cannot regress.
@@ -463,20 +463,33 @@ async function boot() {
     if (entering || state.experience !== 'hub' || state.transition ||
         !['ready', 'degraded'].includes(readiness.status)) return;
     entering = true;
-    scrollDrive.setDriveDormant(false);
-    scrollDrive.lockScroll(); // swallow wheel and keys through the handoff
-    if (!beginTransition('tour')) { entering = false; return; }
-    landing?.deactivateLanding();
-    sceneSetup.resizeScene(window.innerWidth, window.innerHeight); // the Tour's fixed DPR again
-    document.documentElement.dataset.world = 'tour';
-    startScreen.usePromptOnly();
-    armTour({ unlock: false });
-    // Two Tour frames under the field before revealing it: no blank or half-built frame.
-    await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-    await hub.leaveHub(520);
-    completeTransition();
-    scrollDrive.unlockScrollWhenQuiet();
-    entering = false;
+    const wasArmed = tourArmed;
+    try {
+      if (!beginTransition('tour')) return;
+      scrollDrive.setDriveDormant(false);
+      scrollDrive.lockScroll(); // swallow wheel and keys through the handoff
+      landing?.deactivateLanding();
+      sceneSetup.resizeScene(window.innerWidth, window.innerHeight); // the Tour's fixed DPR again
+      document.documentElement.dataset.world = 'tour';
+      startScreen.usePromptOnly();
+      armTour({ unlock: false });
+      // Two paints under the field; bounded yields also settle in a hidden tab without rAF.
+      await yieldToBrowser();
+      await yieldToBrowser();
+      await hub.leaveHub(520);
+      completeTransition();
+      scrollDrive.unlockScrollWhenQuiet();
+    } catch (error) {
+      console.error('[gt3] Tour entry failed; returning to the Hub', error);
+      tourArmed = wasArmed;
+      cancelTransition();
+      scrollDrive.setDriveDormant(true);
+      document.documentElement.dataset.world = 'landing';
+      landing.activateLanding({ atHub: true });
+      hub.resetHub(1, true);
+    } finally {
+      entering = false;
+    }
   }
   window.__gt3.enterTour = enterTour;
 
@@ -488,20 +501,32 @@ async function boot() {
   async function leaveTour() {
     if (entering || state.experience !== 'tour' || state.transition || state.mode !== 'race') return;
     entering = true;
-    scrollDrive.lockScroll();
-    persistRouteProgress(state.progress, { flush: true });
-    if (!beginTransition('hub')) { scrollDrive.unlockScroll(); entering = false; return; }
-    await hub.coverHub(420);
-    scrollDrive.setDriveDormant(true);
-    if (!landing) {
-      landing = await import('./landing/landing.js');
-      landing.preloadHero();
-      startLanding();
+    try {
+      scrollDrive.lockScroll();
+      persistRouteProgress(state.progress, { flush: true });
+      if (!beginTransition('hub')) { scrollDrive.unlockScroll(); return; }
+      await hub.coverHub(420);
+      scrollDrive.setDriveDormant(true);
+      if (!landing) {
+        landing = await import('./landing/landing.js');
+        landing.preloadHero();
+        startLanding();
+      }
+      document.documentElement.dataset.world = 'landing';
+      landing.activateLanding({ atHub: true });
+      completeTransition();
+    } catch (error) {
+      console.error('[gt3] Hub return failed; resuming the Tour', error);
+      cancelTransition();
+      landing?.deactivateLanding();
+      document.documentElement.dataset.world = 'tour';
+      sceneSetup.resizeScene(window.innerWidth, window.innerHeight);
+      scrollDrive.setDriveDormant(false);
+      hub.resetHub(0, false);
+      scrollDrive.unlockScrollWhenQuiet();
+    } finally {
+      entering = false;
     }
-    document.documentElement.dataset.world = 'landing';
-    landing.activateLanding({ atHub: true });
-    completeTransition();
-    entering = false;
   }
   window.__gt3.leaveTour = leaveTour;
 

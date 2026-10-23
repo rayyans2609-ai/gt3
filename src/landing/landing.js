@@ -539,14 +539,21 @@ export function updateLanding(dt) {
 export function renderLanding() {
   if (!active || landingCovered()) return;
   const exposure = renderer.toneMappingExposure;
+  const target = renderer.getRenderTarget();
+  const face = renderer.getActiveCubeFace();
+  const mip = renderer.getActiveMipmapLevel();
   const resolve = smooth(...SEG.resolve, progress);
   // Day burns out to white the way light does (highlights first); Night sinks into the dark.
   const day = Math.exp(Math.log(7) * Math.pow(resolve, 1.5));
   const night = 0.88 * Math.exp(Math.log(0.25) * resolve);
   renderer.toneMappingExposure = THREE.MathUtils.lerp(day, night, themeMix.value);
-  renderer.setRenderTarget(null);
-  renderer.render(scene, camera);
-  renderer.toneMappingExposure = exposure;
+  try {
+    renderer.setRenderTarget(null);
+    renderer.render(scene, camera);
+  } finally {
+    renderer.toneMappingExposure = exposure;
+    renderer.setRenderTarget(target, face, mip);
+  }
 }
 
 // Review handles (no behaviour of their own).

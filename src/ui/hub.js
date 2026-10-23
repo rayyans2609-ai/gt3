@@ -31,6 +31,7 @@ export function initHub({ onStartRace }) {
   if (!root) throw new Error('Expected #hub');
   button = root.querySelector('.hub-start');
   status = root.querySelector('.hub-status');
+  root.inert = true;
   onStart = onStartRace;
   button.addEventListener('click', () => { if (ready) onStart?.(); });
 }
@@ -51,8 +52,17 @@ export function setHubPresence(value, canInteract) {
   }
   if (canInteract !== interactive) {
     interactive = canInteract;
+    root.inert = !canInteract;
     root.classList.toggle('is-interactive', canInteract);
   }
+}
+
+/** Restore a settled field after an interrupted handoff, including cached DOM state. */
+export function resetHub(value, canInteract) {
+  root.style.transition = '';
+  presence = -1;
+  interactive = null;
+  setHubPresence(value, canInteract);
 }
 
 /** Fade the field away over the Tour (Hub -> Grand Tour handoff). */
@@ -60,6 +70,7 @@ export function leaveHub(durationMs) {
   return new Promise((resolve) => {
     root.classList.remove('is-interactive');
     interactive = false;
+    root.inert = true;
     root.style.transition = `opacity ${durationMs}ms var(--ease)`;
     root.style.opacity = '0';
     window.setTimeout(() => {
@@ -74,6 +85,9 @@ export function leaveHub(durationMs) {
 /** Bring the field up over the Tour (Grand Tour -> Hub); the Hub is interactive once opaque. */
 export function coverHub(durationMs) {
   return new Promise((resolve) => {
+    root.inert = true;
+    root.classList.remove('is-interactive');
+    interactive = false;
     root.hidden = false;
     root.style.transition = 'none';
     root.style.opacity = '0';

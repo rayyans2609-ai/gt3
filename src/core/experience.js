@@ -90,6 +90,13 @@ export function completeTransition() {
   return true;
 }
 
+/** Abandon choreography that failed; the caller restores the originating view. */
+export function cancelTransition() {
+  set('transition', null);
+  if (ownsScrollLock) unlockScroll();
+  ownsScrollLock = false;
+}
+
 /** Boot-only restoration: accepts known experience values without requiring an edge. */
 export function restoreExperience(key) {
   if (!EXPERIENCES.includes(key)) {

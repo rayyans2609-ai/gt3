@@ -10,7 +10,7 @@ GT3 is a desktop-only interactive motorsport showcase in Three.js/WebGL with a D
 
 ## Current phase
 
-**SPEC_V3 implementation in progress. Phase 3 is HUMAN-ACCEPTED (owner, 2026-10-14) and merged to `main` (tag `phase3-accepted-2026-10-14`). Phase 4 has not started.**
+**SPEC_V3 implementation in progress. Phase 3 is HUMAN-ACCEPTED (owner, 2026-10-14) and merged to `main` (tag `phase3-accepted-2026-10-14`). Phase 4 (Landing) is in implementation on branch `p4-landing` (opened by the owner 2026-10-24): McLaren 720S GT3 Landing hero, reversible Landing→Hub transition, and a deliberately minimal provisional Hub (START RACE only) bridging to the accepted Tour. Not yet owner-accepted.**
 
 **Phase3 Unlocked reopening — HUMAN-ACCEPTED (owner, 2026-10-17), locally integrated into main.** `?version=unlocked` defaults to QualityDPR2; `&mode=smooth` selects DPR1.5. No-version/Locked behavior stays accepted DPR1+SMAA. Approved NeutralDay/ACESNight, mediumreflections, quarterDaycarspecular, SMAA, stabilizedshadows and loading/image/glass/minimap improvements retained. Final integrated600s/mode M4 qualification is explicitly deferred and not passed; owner accepts this limitation for closure. See `docs/review/p3u/OWNER-REVIEW.md`. No further development begins; Phase8 Night lighting stays future work.
 

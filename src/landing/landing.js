@@ -84,8 +84,7 @@ let keyLight = null;
 let fillLight = null;
 let rimLight = null;
 let heroReady = false;
-const lampBlades = [];   // dark LED blades that light up as the camera arrives
-const lampGlows = [];    // already-emissive lamp strips that brighten with them
+const lampGlows = [];    // the authored emissive lamp strips (DRL), brightened as the camera arrives
 let heroAppear = 0;
 let active = false;
 let hubHandler = null;
@@ -194,14 +193,8 @@ function dressHero(model) {
         material.clearcoat = 1;
         material.clearcoatRoughness = 0.045;
       }
-      // The headlights wake with the scroll. The emissive map is assigned before the first
-      // compile, so lighting them later only changes a uniform (no new shader variant).
-      if (material.name === 'EXT_Emissive_Light_Front' && !lampBlades.includes(material)) {
-        material.emissive = new THREE.Color('#eef3ff');
-        material.emissiveMap = material.map;
-        material.emissiveIntensity = 0;
-        lampBlades.push(material);
-      } else if (/^(lights_emissive|endu_lights)/.test(material.name) && !lampGlows.includes(material)) {
+      // The lamps wake with the scroll: only emissiveIntensity changes (a uniform, no new shader).
+      if (/^(lights_emissive|endu_lights)/.test(material.name) && !lampGlows.includes(material)) {
         lampGlows.push(material);
       }
     }
@@ -511,7 +504,6 @@ export function updateLanding(dt) {
   fillLight.intensity = THREE.MathUtils.lerp(0.35, 0.06, night);
   rimLight.intensity = 2.6 * night;
   const lamps = smooth(...SEG.lamps, progress);
-  for (const material of lampBlades) material.emissiveIntensity = lamps * THREE.MathUtils.lerp(7, 11, night);
   for (const material of lampGlows) material.emissiveIntensity = 1 + lamps * 4;
   keyLight.position.set(-4 + pointer.x * 1.5 * rest, 9, -6);
   scene.background.copy(_field.copy(FIELD.day).lerp(FIELD.night, night));

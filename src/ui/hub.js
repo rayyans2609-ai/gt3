@@ -70,3 +70,20 @@ export function leaveHub(durationMs) {
     }, durationMs);
   });
 }
+
+/** Bring the field up over the Tour (Grand Tour -> Hub); the Hub is interactive once opaque. */
+export function coverHub(durationMs) {
+  return new Promise((resolve) => {
+    root.hidden = false;
+    root.style.transition = 'none';
+    root.style.opacity = '0';
+    void root.offsetWidth;
+    root.style.transition = `opacity ${durationMs}ms var(--ease)`;
+    root.style.opacity = '1';
+    window.setTimeout(() => {
+      root.style.transition = '';
+      presence = 1;
+      resolve();
+    }, durationMs);
+  });
+}

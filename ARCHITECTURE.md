@@ -77,13 +77,13 @@ text/HUD/player UI. One fixed canvas behind it, one shared `WebGLRenderer`.
       finishSequence.js route-end hero transition + completion hero car [new]
       finishLine.js   finish at FINISH_T → bounded 3D gantry with traffic lights (Phase 3
                       closure, SPEC §18); finishSequence may later reuse it [evolve]
-      landingStage.js Landing field scene: floating Lexus, cursor response, push-in [new]
     montage/
       studio.js       montage studio (own renderer — sanctioned exception, see below) [keep]
       choreography.js 5-shot camera timeline [keep]
     ui/
-      landing.js      GT3 wordmark, sound-on affordance [new; replaces startScreen.js]
-      hub.js          START RACE, Cars, Day/Night, integrated player slot [new]
+      hub.js          PROVISIONAL Hub (Phase 4): theme field + START RACE only; the real Hub
+                      (Cars, integrated player) is Phase 5 [done provisional / evolve]
+      homeControl.js  Grand Tour back/home control → Hub (SPEC §25) [done, Phase 4]
       showcase.js     Showcase scene + DOM (already uses shared renderer) [evolve]
       selector.js     bottom ten-car selector, ?/badge states [new]
       unlockFlow.js   manual unlock: flag wipe → montage → reveal → narration [new]
@@ -124,13 +124,19 @@ text/HUD/player UI. One fixed canvas behind it, one shared `WebGLRenderer`.
   (`ADAPTIVE_RES.high == low == RENDER_DPR`). Originally: lower dpr while scrolling, full dpr at rest (~420 ms
   settle). Landing push-in and Grand Tour use it; Showcase, montage and the completion hero
   render at full quality.
-- **Landing→Hub** is a field scene (themed background + Lexus); the Hub itself is mostly DOM
-  over the resolved theme field. The Landing Lexus is a clone from `cars.js`, not a second load.
+- **Landing→Hub** (`src/landing/landing.js`, Phase 4) is its own small scene + camera drawn by the
+  shared renderer at native DPR (≤ 2) while the Landing owns the screen; main.js draws it instead of
+  the Tour, and the Tour's fixed DPR is restored on entry. The hero (McLaren 720S GT3, owner
+  2026-10-24) is one extra load of its full-resolution GLB (`cars.loadFullResolutionCar`, same
+  verified normalisation), falling back to the roster clone. The Hub is DOM over the resolved field.
 
 ## Experiences and scroll ownership
-`scrollDrive.js` remains the **only** reader of `window.scrollY` and uses native document
-scroll with passive listeners (threaded scrolling preserved). It remaps the spacer per
-experience:
+Native document scroll with passive listeners throughout (threaded scrolling preserved). As built
+in Phase 4, each world owns its own spacer instead of one remapped spacer: `:root[data-world]` is
+`landing` (Landing + Hub: `#landing-spacer`, read by `landing.js`) or `tour` (`#scroll-spacer`,
+read only by `scrollDrive.js`). While the Landing world owns the scroll, the drive is **dormant**
+(`setDriveDormant`): it reads, moves and swallows nothing, so Landing scroll can never become route
+input. START RACE wakes it locked, places the route and unlocks when input is quiet.
 
 | experience | scroll role | mechanism |
 |---|---|---|
@@ -254,8 +260,8 @@ voice <audio> → MediaElementSource ──────────────�
 0 lexus_rcf_gt3 · 1 nissan_gtr_gt3 · 2 audi_r8_gt3 · 3 bmw_m6_gt3 · 4 mercedes_amg_gt3
 5 ferrari_488_gt3 · 6 mclaren_720s_gt3 · 7 aston_vantage_gt3 · 8 lamborghini_huracan_gt3
 9 porsche_911_gt3r
-Lexus (0) is the Landing hero car, the Grand Tour starting car, and discovered from session
-start (Showcase never shows it locked).
+Lexus (0) is the Grand Tour starting car and discovered from session start (Showcase never shows
+it locked). The Landing hero is decoupled from it: McLaren (6), owner 2026-10-24, presentation only.
 
 ## Design system (SPEC §12–13, §23)
 - Fonts: Neue Haas Grotesk (primary; from local `font/`, never fetched), Geist Mono (timing /
@@ -303,8 +309,8 @@ Only the implications that touch module boundaries or shared systems; product tr
   state; its state shape is decided in Phase 6.
 - Volume sliders (Phase 5) map onto the existing `masterGain` / `musicMuteGain` chain as separate
   level gains, so mute and level stay independent. New persisted keys land with that phase.
-- A Landing hero change (Phase 4) may decouple "Landing hero" from roster index 0 / the Tour
-  starting car; that coupling is currently assumed throughout and needs an owner decision first.
+- Landing hero decoupled from roster index 0 (Phase 4, owner 2026-10-24): the Landing loads its
+  own hero copy; nothing in the Tour, discovery or session reads the hero choice.
 
 ## Known later dependencies and phase ownership
 - **Night route lighting (SPEC §13a) is owned by Phase 8** (scenery / lighting / performance

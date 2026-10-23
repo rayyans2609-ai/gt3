@@ -25,7 +25,7 @@ Landing, Hub, dedicated Showcase, manual unlock, and the completion hero transit
 
 ### 1a. What to preserve from current code
 
-- The 10 locked GT3 GLB models and their **exact roster order** (`src/data/cars.js`): Lexus, Nissan, Audi, BMW, Mercedes, Ferrari, McLaren, Aston, Lamborghini, Porsche. Lexus is both the player/hero car (Landing) and roster index 0. The Landing hero is expected to change later (§4, §31); until that decision, Lexus remains both.
+- The 10 locked GT3 GLB models and their **exact roster order** (`src/data/cars.js`): Lexus, Nissan, Audi, BMW, Mercedes, Ferrari, McLaren, Aston, Lamborghini, Porsche. Lexus is roster index 0, the Grand Tour starting car and discovered at session start. *Owner, 2026-10-24:* the provisional Landing hero is the McLaren 720S GT3 (index 6), a featured presentation only; the Tour starter, roster order and discovery rules are unchanged (§4, §31).
 - The verified per-model orientation table in `src/scene/cars.js` (do not re-derive orientation from geometry heuristics).
 - The montage/studio system (`src/montage/`) — retained for future manual unlock only (§11); no longer called by Grand Tour checkpoints.
 - The narration audio (`audios/voices/voice_01…10`) and per-car copy already authored in `src/data/cars.js`.
@@ -77,15 +77,15 @@ Do not add: mobile, opponents, traffic, racing AI, multiplayer, accounts, databa
 
 Empty, restrained composition. **Pure white in Day. Deep navy in Night.** Same composition in both themes.
 
-Use: large `GT3`, a small floating Lexus RC F GT3, substantial negative space, a persistent audio control. No floor, scenery, platform, card, stats, large navigation, or visible primary CTA.
+Use: large `GT3`, a small floating hero car (provisionally the McLaren 720S GT3, below), substantial negative space, a persistent audio control. No floor, scenery, platform, card, stats, large navigation, or visible primary CTA.
 
-**Landing hero car — future requirement (2026-10-06).** The Landing hero should eventually replace the Lexus. Ferrari, Lamborghini, Porsche and McLaren remain candidates; no manufacturer is selected. Whether this also changes the Grand Tour starting car and the discovered-at-start car (roster index 0, §18, §26) is undecided (§31). Until it is decided, the Lexus described below remains current.
+**Landing hero car — owner decision (2026-10-24).** The provisional Landing hero is the **McLaren 720S GT3** (roster index 6); its final visual acceptance belongs to the owner. The Lexus RC F GT3 stays the Grand Tour starting car (roster index 0) and the discovered-at-start car; the McLaren's Landing presence is a featured presentation, not an unlock, and changes no Tour progression or discovery rule (§18, §26). *(History, 2026-10-06: the Landing hero was to replace the Lexus; Ferrari, Lamborghini, Porsche and McLaren were candidates.)*
 
-Scrolling progresses the experience. The Lexus rotates extremely slowly, reacts subtly to cursor yaw/pitch, and may have subtle lighting response; it stays small enough to preserve the composition.
+Scrolling progresses the experience. The hero car rotates extremely slowly, reacts subtly to cursor yaw/pitch, and may have subtle lighting response; it stays small enough to preserve the composition.
 
 ## Landing → Hub signature transition
 
-Downward scroll: (1) Lexus idle settles, (2) car rotates toward a deliberate front-three-quarter, (3) `GT3` recedes/fades, (4) camera pushes toward a bright automotive front/headlight/body detail, (5) reflections/bodywork increasingly fill the viewport, (6) frame resolves toward the active theme's base field (white in Day, deep navy in Night), (7) Grand Tour Hub emerges from that same field. Reverse cleanly when scrolling upward. No hard cut. Exact automotive detail is implementation-level.
+Downward scroll: (1) the hero car's idle settles, (2) car rotates toward a deliberate front-three-quarter, (3) `GT3` recedes/fades, (4) camera pushes toward a bright automotive front/headlight/body detail, (5) reflections/bodywork increasingly fill the viewport, (6) frame resolves toward the active theme's base field (white in Day, deep navy in Night), (7) Grand Tour Hub emerges from that same field. Reverse cleanly when scrolling upward. No hard cut. Exact automotive detail is implementation-level.
 
 ---
 
@@ -829,7 +829,7 @@ Raised during Phase 3 review, owned by later phases, and **not to be implemented
 | Spinning 3D car in the Grand Tour bottom-left, with hover/proximity response like the Landing car | R | Phase 6 | §20, §11 |
 | Click the spinning car → dedicated standalone presentation of that car, preserving relevant Showcase function, replacing the awkward selection flow | R | Phase 6 | §11, §25 |
 | Substantially better rotating-car presentation: materials, lighting, animation, composition (also informs the Phase 7 completion hero) | R | Phase 6 (→ 7) | §11, §21 |
-| Landing hero car replaces Lexus; candidates Ferrari, Lamborghini, Porsche, McLaren; none selected | R | Phase 4 | §4 |
+| Landing hero car replaces Lexus — provisionally the McLaren 720S GT3 (owner, 2026-10-24); Tour starter stays Lexus; final visual acceptance with the owner | R | Phase 4 | §4 |
 | Independent master-volume and music-volume sliders with separate mutes | R | Phase 5 (Hub player pass) | §7 |
 | Full loading UX: 0–100 % progress, no early interaction, prominent Start Race | D | designed with the page/navigation flow (Phases 4–5) | §25 |
 | Authored elevation: grades, crests/compressions, banked turns, terrain-integrated road (supersedes "modest circuit elevation") | E | Phase 8 | §17, §16 |
@@ -856,6 +856,6 @@ Raised during Phase 3 review, owned by later phases, and **not to be implemented
 **Placement clarifications (owner, 2026-10-06).** These are recorded as the working placements:
 1. **HUD-car click-through** is a deliberate, user-initiated exit from Grand Tour, like *Leaving Grand Tour mid-run*, not an interruption. It preserves route and discovery state and belongs to Phase 6 (§25).
 2. **The spinning 3D car** lives in the **Grand Tour HUD bottom-left**, the space freed by the Phase 3 top-left consolidation. Its click-through presentation is Phase 6.
-3. **Landing hero vs Tour starting car:** still open. Replacing the Landing hero (Phase 4) does not by itself change the Tour starting car, roster index 0, or the discovered-at-start car. The owner decides before Phase 4 implementation.
+3. **Landing hero vs Tour starting car:** decided (owner, 2026-10-24). Landing hero: McLaren 720S GT3 (provisional). Tour starting car, roster index 0 and discovered-at-start car: Lexus RC F GT3, unchanged.
 4. **Gate illumination** is Phase 3 checkpoint feedback, local to the gate. It is not Night route lighting, which remains Phase 8 (§13a).
 5. **Volume sliders** belong to Phase 5's player pass. They may be pulled forward as a small standalone task if the owner asks.

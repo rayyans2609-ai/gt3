@@ -21,7 +21,7 @@ import './styles/finishTail.css';
 import * as THREE from 'three';
 import { state, set, subscribe } from './core/state.js';
 import { Clock } from './core/clock.js';
-import { getRestoredRouteProgress, restoreSession, startRoutePersistence } from './core/session.js';
+import { getRestoredRouteProgress, persistRouteProgress, restoreSession, startRoutePersistence } from './core/session.js';
 import { restoreExperience, setExperience, beginTransition, completeTransition } from './core/experience.js';
 import { UNLOCKED } from './core/renderProfile.js';
 // W2 review scaffolding: resolves ?comp= (pure, no scene imports) before any scene
@@ -96,8 +96,9 @@ async function boot() {
   restoreExperience(bootIntoTour ? 'tour'
     : state.experience === 'hub' || state.experience === 'showcase' ? 'hub' : 'landing');
   document.documentElement.dataset.world = bootIntoTour ? 'tour' : 'landing';
-  // The Landing hero streams first; the Tour roster follows in the background.
-  const landing = bootIntoTour ? null : await import('./landing/landing.js');
+  // The Landing hero streams first; the Tour roster follows in the background. A session that
+  // boots into the Tour loads the Landing only if the visitor goes back to the Hub.
+  let landing = bootIntoTour ? null : await import('./landing/landing.js');
   landing?.preloadHero();
   subscribe('mode', (mode) => {
     if (mode === 'finish') setExperience('complete');
@@ -131,6 +132,7 @@ async function boot() {
   const startScreen = await import('./ui/startScreen.js');
   const finishScreen = await import('./ui/finishScreen.js');
   const hub = await import('./ui/hub.js');
+  const homeControl = await import('./ui/homeControl.js');
 
   perfMark('imports:end');
   perfMeasure('imports', 'boot:start', 'imports:end');
@@ -203,17 +205,27 @@ async function boot() {
   perfMark('start-screen:painted');
   const { scene, camera, renderer } = timed('init-scene', () => sceneSetup.initScene());
   transmission?.budgetTransmission(renderer);
+  function startLanding() {
+    landing.initLanding(renderer, {
+      onHub: () => setExperience('hub'),
+      onLanding: () => setExperience('landing'),
+    });
+    onResize(landing.onLandingResize); // after the shared renderer's own resize
+    registerUpdate(landing.updateLanding);
+    registerUpdate(() => {
+      if (landing.landingActive()) hub.setHubPresence(landing.landingHubPresence(), state.experience === 'hub');
+    });
+    window.__gt3.landing = { seek: landing.seekLanding, progress: landing.landingProgress,
+      loaded: landing.heroLoaded, active: landing.landingActive, tuning: landing.landingTuning };
+  }
   if (landing) {
     timed('init-landing', () => {
-      landing.initLanding(renderer, {
-        onHub: () => setExperience('hub'),
-        onLanding: () => setExperience('landing'),
-      });
-      onResize(landing.onLandingResize); // after the shared renderer's own resize
+      startLanding();
       landing.activateLanding({ atHub: state.experience === 'hub' });
     });
   }
   hub.initHub({ onStartRace: () => { void enterTour(); } });
+  homeControl.initHomeControl({ onHome: () => { void leaveTour(); } });
   hub.setHubReadiness(readiness);
   // initScene creates window.__gt3; these handles were previously attached after the full build.
   window.__gt3.readiness = readiness;
@@ -414,8 +426,12 @@ async function boot() {
    * Place the drive at the session's route position and start persisting it. The drive is
    * locked throughout, so the programmatic placement cannot consume the first real gesture.
    */
+  let tourArmed = false;
   function armTour({ unlock }) {
-    const savedRouteProgress = getRestoredRouteProgress();
+    // First arming resumes the session's saved route; a later re-entry resumes where the
+    // visitor left the Tour (the drive was dormant meanwhile, so state.progress still holds it).
+    const savedRouteProgress = tourArmed ? state.progress : getRestoredRouteProgress();
+    tourArmed = true;
     const restoreFinish = savedRouteProgress !== null && finishScreen.isFinishProgress(savedRouteProgress);
     if (restoreFinish) set('mode', 'finish');
     if (savedRouteProgress !== null) {
@@ -464,6 +480,31 @@ async function boot() {
   }
   window.__gt3.enterTour = enterTour;
 
+  /**
+   * Grand Tour -> Hub (SPEC §25 "Leaving Grand Tour mid-run"). The drive freezes and the route
+   * is saved; the Hub field fades up over the Tour and the Landing world takes the screen and
+   * the page scroll underneath it, at the Hub's rest point. Discoveries are untouched.
+   */
+  async function leaveTour() {
+    if (entering || state.experience !== 'tour' || state.transition || state.mode !== 'race') return;
+    entering = true;
+    scrollDrive.lockScroll();
+    persistRouteProgress(state.progress, { flush: true });
+    if (!beginTransition('hub')) { scrollDrive.unlockScroll(); entering = false; return; }
+    await hub.coverHub(420);
+    scrollDrive.setDriveDormant(true);
+    if (!landing) {
+      landing = await import('./landing/landing.js');
+      landing.preloadHero();
+      startLanding();
+    }
+    document.documentElement.dataset.world = 'landing';
+    landing.activateLanding({ atHub: true });
+    completeTransition();
+    entering = false;
+  }
+  window.__gt3.leaveTour = leaveTour;
+
   // ---- wiring ------------------------------------------------------------
 
   // The studio (a second WebGL renderer, SPEC §27) is NOT created at boot: nothing in the Grand
@@ -495,14 +536,6 @@ async function boot() {
     if (direction > 0) audio.playCheckpointCross();
   });
 
-  if (landing) {
-    registerUpdate(landing.updateLanding);
-    registerUpdate(() => {
-      if (landing.landingActive()) hub.setHubPresence(landing.landingHubPresence(), state.experience === 'hub');
-    });
-    window.__gt3.landing = { seek: landing.seekLanding, progress: landing.landingProgress,
-      loaded: landing.heroLoaded, active: landing.landingActive, tuning: landing.landingTuning };
-  }
   registerUpdate(scrollDrive.update);
   registerUpdate(carRig.update);
   registerUpdate(aerialCamera.update);

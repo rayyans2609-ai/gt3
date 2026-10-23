@@ -28,9 +28,14 @@ Idle turntable settles (0–.22) → car turns to a front three-quarter → `GT3
 - Landing frame pacing (headless, after readiness): DPR 2 and DPR 1 both p50/p99 16.7/16.8 ms; one 33 ms frame in about 680.
 - Production build and preview: Landing → Hub → Tour works.
 
+## Overnight technical closeout (2026-10-24, unattended)
+Sol @ high hardened the integration seams (details and evidence: `W1-ENGINEERING.md`): Hub→Tour and Tour→Hub now recover cleanly from a failed handoff and no longer wait on rAF in a hidden tab; Landing draws restore renderer state even on exceptions (checked for Locked DPR1 and Unlocked Quality DPR2); START RACE cannot take keyboard focus before the Hub is at rest; the Tour warm-up gets at most 4 ms per frame while the Landing is visible (Landing frames steadier; Locked readiness about 3.1 → 3.5 s while you are still on the Landing). No visual changes. Flow 15/15 and the new seams harness pass on `73320f7`. Luna captured 1280×800, 1920×1080 and 2560×1080 (no layout defect); at ≤ 1100 px the existing desktop-only note shows by design.
+
 ## Not verified / known limits
 - Intel Mac (Landing at DPR 2 and the warm-up running under the Landing are unmeasured there).
-- Landing pacing during the first seconds while the Tour's GPU warm-up still runs. It pauses while you scroll the transition.
+- The first seconds of Landing motion: warm-up contention is reduced, but individual cold first-use draws (about 66–91 ms) remain; judge it live.
+- Failed readiness leaves START RACE disabled ("Route unavailable"); reload retries. An in-app retry would be new UX scope.
+- Ultrawide (21:9) proportions, and the Scroll cue sitting close to the "3" at 1280/1920 widths: visual judgement.
 - Livery texture (1024 px) softens close up, so the push stops about 0.8 m from the lamp. The LED blades sit behind the housing and can't be lit; only the DRL strip wakes.
 - After a refresh *into the Tour*, the Landing hero loads only when you first press home (covered by the Hub; it fades in when ready).
 

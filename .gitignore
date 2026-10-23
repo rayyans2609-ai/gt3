@@ -1,4 +1,5 @@
-node_modules/
+# Dependencies may be a directory or a worktree-local symlink.
+node_modules
 dist/
 .DS_Store
 *.local

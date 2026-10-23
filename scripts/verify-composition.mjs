@@ -3,7 +3,7 @@
  * run the preflight first, one browser at a time, external Vite only).
  *   GT3_URL=http://127.0.0.1:5192 GT3_COMPS=base,a,b,c GT3_CAMS=leg1 node scripts/verify-composition.mjs
  * Independent camera matrix: GT3_COMPS=a,b,c GT3_CAMS=glide,hold,wide,soft
- * Env: GT3_CAPTURE_DIR (review stills/sequence; default ~/Desktop/gt3-review-2026-10-04/w2),
+ * Env: GT3_CAPTURE_DIR (review stills/sequence; default local/evidence/verify-composition/),
  *      GT3_NO_CAPTURE=1, GT3_SOFTWARE_GL=1. GT3_LOOKS=r1,r2,r3 selects visual presets;
  *      GT3_LEAN=1 limits those runs to three review frames (24×14 edge grid),
  *      two gates, forward/back hairpin-curb wheel motion and two desktop aspects.

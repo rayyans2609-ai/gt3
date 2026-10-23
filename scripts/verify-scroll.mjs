@@ -5,8 +5,9 @@
  * scripts/sim-scroll-pace.mjs so the pure-node prediction can be compared directly with the browser result.
  *
  * Usage (Vite already running, e.g. port 5193):
- *   GT3_URL=http://127.0.0.1:5193 GT3_PREFLIGHT=<session preflight> HEAVY_OWNER=w3 \
+ *   GT3_URL=http://127.0.0.1:5193 \
  *   node scripts/verify-scroll.mjs
+ * Optional GT3_PREFLIGHT=<session shell preflight> overrides scripts/host-check.mjs preflight browser.
  * Env: GT3_MODES=default,cap,pace (subset), GT3_QUERY="comp=b&gate=quiet" extra params for every URL,
  *      GT3_HEADLESS=1 (default headed is closer to a real user; headless is acceptable for proxies),
  *      GT3_SOUND=1 to click the speaker (sound-on pass) before the scenarios.
@@ -14,6 +15,7 @@
  * momentum), delivered with timer jitter (~1-4 ms) and, on macOS, Chrome may apply its own wheel smoothing.
  */
 import puppeteer from 'puppeteer-core';
+import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { mkdir, mkdtemp, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
@@ -27,7 +29,10 @@ const headless = process.env.GT3_HEADLESS === '1';
 const sound = process.env.GT3_SOUND === '1';
 const only = process.env.GT3_SCROLL_ONLY || '';
 assert.ok(!only || only === 'interactions', `unknown GT3_SCROLL_ONLY: ${only}`);
-const preflight = process.env.GT3_PREFLIGHT || '/Users/rayyansheikh/.claude/jobs/d1cd9f0a/tmp/preflight-session.sh';
+// Keep optional legacy session preflights; default to the shared, host-aware gate.
+const preflightCommand = process.env.GT3_PREFLIGHT ? 'bash' : process.execPath;
+const preflightArgs = process.env.GT3_PREFLIGHT ? [process.env.GT3_PREFLIGHT]
+  : [fileURLToPath(new URL('./host-check.mjs', import.meta.url)), 'preflight', 'browser'];
 const chrome = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 const pause = ms => new Promise(r => setTimeout(r, ms));
 const r1 = x => (Number.isFinite(x) ? +x.toFixed(1) : null);
@@ -46,13 +51,11 @@ const SCEN = {
 };
 
 function preflightOk() {
-  for (let i = 1; i <= 10; i++) {
-    const c = spawnSync('bash', [preflight], { encoding: 'utf8', timeout: 60000, env: { ...process.env } });
-    const o = `${c.stdout || ''}${c.stderr || ''}`; console.log(o.trim());
-    if (o.includes('PREFLIGHT PASS')) return;
-    if (i < 10) spawnSync('sleep', ['60']);
-  }
-  throw new Error('preflight never passed (host problem, not a product failure)');
+  const check = spawnSync(preflightCommand, preflightArgs, { encoding: 'utf8', timeout: 60000 });
+  const output = `${check.stdout || ''}${check.stderr || ''}`;
+  console.log(output.trim());
+  if (check.status === 0 && (!process.env.GT3_PREFLIGHT || output.includes('PREFLIGHT PASS'))) return;
+  throw new Error('Browser preflight refused or unavailable; stop and check host health before retrying.');
 }
 
 async function installSampler(page) {

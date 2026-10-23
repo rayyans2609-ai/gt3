@@ -41,7 +41,7 @@ Never run a bare `codex exec`, `opencode run` or `claude -p` for routed work, an
 
 ## Workspace boundary
 
-- `~/Desktop/gt3` is the canonical entry point on both Macs. Start every GT3 session with it as the selected project/working directory.
+- Start each GT3 session in the actual checkout: **M4:** `~/Documents/rayyan/gt3`; **Intel:** `~/Desktop/gt3`. These are host locations, not script requirements. From anywhere inside a checkout/worktree, use `git rev-parse --show-toplevel` to find its root; use the shared Git directory (`git rev-parse --git-common-dir`) when locating main-checkout run records. Select the actual checkout as the project/working directory.
 - Create GT3 files inside this repository by default: tracked source/docs in their established directories, tracked review evidence in `docs/review/`, and local-only material (owner handoffs, raw captures, screenshots, briefs, benchmark sandboxes, scratch output, run records) under the git-ignored `local/` (`local/handoffs/`, `local/evidence/`, `local/benchmarks/`, `local/runs/`, `local/transfer/`, `local/tmp/`). Worktrees go in `.claude/worktrees/`. Script defaults must stay repo-relative, never `~/Desktop/...`, a home path or a job temp dir; home directories differ between the Macs.
 - External files may be read or imported when needed. Modifying or deleting anything outside this repository needs explicit owner authorization.
 - Starting from the repo root does not authorize changing `main`. Respect dedicated worktrees and do routine work on a branch. No push or merge without explicit owner approval.

@@ -18,7 +18,8 @@
 set -euo pipefail
 
 die() { echo "gt3-run: $*" >&2; exit "${2:-2}"; }
-ROOT=$(cd "$(git rev-parse --git-common-dir 2>/dev/null)/.." 2>/dev/null && pwd -P) || die "run inside the GT3 repository"
+COMMON_DIR=$(git rev-parse --git-common-dir 2>/dev/null) || die "run inside the GT3 repository"
+ROOT=$(cd "$COMMON_DIR/.." 2>/dev/null && pwd -P) || die "run inside the GT3 repository"
 NOTES_REF=refs/notes/gt3-run
 cmd=${1:-}; run=${2:-}
 [[ -n "$cmd" && -n "$run" ]] || die "usage: gt3-run.sh <status|claim|release|checkpoint|import> <run> ..."

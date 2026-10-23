@@ -18,7 +18,7 @@ This file owns what is shared by every manager configuration and every host: hos
 
 | | Opus-led | Sol-led |
 |---|---|---|
-| Orient | `claude` in `~/Desktop/gt3` (Opus, effort high, permission mode `auto`) | `codex -s read-only -m gpt-6.1-sol -c model_reasoning_effort="high" --disable multi_agent` in `~/Desktop/gt3` |
+| Orient | `claude` in the actual checkout (§2.1) (Opus, effort high, permission mode `auto`) | `codex -s read-only -m gpt-6.1-sol -c model_reasoning_effort="high" --disable multi_agent` in the actual checkout (§2.1) |
 | Engineer | in the objective worktree (`EnterWorktree`, or start `claude` there) | `codex -C <abs worktree> -m gpt-6.1-sol -c model_reasoning_effort="high" --disable multi_agent -c 'projects."<abs worktree>".trust_level="trusted"'` (default sandbox: workspace-write) |
 | Autonomous | same session + the Autonomous invocation block | add `-c approval_policy="never"` (or the same flags with `codex exec`) |
 | Routine GT3 ops without prompts | `.claude/settings.json` allow-list | `.codex/rules/gt3.rules` `allow` (runs outside the sandbox) |
@@ -64,6 +64,12 @@ The owner selects. No agent infers its own authority.
 - **Main checkout** is for orientation. Engineering happens in an authorized non-main worktree. Sol's writable workspace is that worktree, and Opus works there.
 - **Phone steering** of a Sol session is only verified for ChatGPT desktop-app sessions (§9).
 - **Role check (entrypoints).** If `GT3_ROLE=worker` is set, or the prompt carries a `GT3 ROLE: worker` line, you are a worker: follow the brief only. Otherwise you are the manager in the configuration the owner named. If none was named, assume the configuration of the harness you run in (Claude Code → opus-led, Codex → sol-led) and say so.
+
+### 2.1 Checkout location and local setup
+
+The M4 checkout is `~/Documents/rayyan/gt3`; the Intel checkout is `~/Desktop/gt3`. Neither path is required by scripts. Start in the actual checkout, then use `git rev-parse --show-toplevel` for the current checkout/worktree root. Run records remain in the main checkout, discovered from `git rev-parse --git-common-dir` by `gt3-run.sh` and the route guard.
+
+On each Mac, from the checkout root, set `git config --local core.hooksPath scripts/git-hooks`. This relative setting follows the repository when moved and uses each worktree's hook; an absolute setting copied from another location can silently disable the guard. After moving a repository with its worktrees, run `git worktree repair .claude/worktrees/<name> ...` for the existing worktrees at their new locations. Repair preserves their files, branches and edits; do not prune or recreate them. Project selection/trust is local to each Mac and must refer to its actual checkout/worktree.
 
 ## 3. Run record
 
@@ -278,7 +284,7 @@ A branch has one writer host at a time: the seat's host.
 ### 8.4 Local material per host
 Never committed or transferred unless stated:
 - `font/` (licensed; copy into worktrees that build);
-- `node_modules` (a symlink is fine; list it in `.git/info/exclude`);
+- `node_modules` (a symlink is fine; both directories and symlinks are git-ignored);
 - `local/`, `.claude/worktrees/`;
 - Claude/Codex session histories, credentials and provider configs.
 
@@ -301,7 +307,7 @@ No custom app, dashboard, relay, daemon or third-party remote-access tool. No in
 ### 9.2 One-time setup (owner; nothing is installed or changed by agents)
 | Host | Claude Code (Remote Control) | Codex (remote connections) |
 |---|---|---|
-| Each Mac | Signed in through claude.ai (Pro supports RC). Either run `/remote-control` in a session, enable auto-connect (`/config` → Enable Remote Control for all sessions), or keep a **server** running in the repo: `claude remote-control --name gt3-<host> --spawn worktree --permission-mode default`. Server mode lets the phone start new sessions on that Mac. Optional: `/config` → push notifications. | ChatGPT desktop app running and signed in to the same account and workspace. **Settings → Connections → Control this Mac or PC → Set up**, then pair the iPhone by QR. Save `~/Desktop/gt3` as a project. Pair the phone with **each** Mac. |
+| Each Mac | Signed in through claude.ai (Pro supports RC). Either run `/remote-control` in a session, enable auto-connect (`/config` → Enable Remote Control for all sessions), or keep a **server** running in the repo: `claude remote-control --name gt3-<host> --spawn worktree --permission-mode default`. Server mode lets the phone start new sessions on that Mac. Optional: `/config` → push notifications. | ChatGPT desktop app running and signed in to the same account and workspace. **Settings → Connections → Control this Mac or PC → Set up**, then pair the iPhone by QR. Save the actual checkout (§2.1) as a project. Pair the phone with **each** Mac. |
 | iPhone | Claude app, same account. Optional: Require trusted devices (Pro, account settings). | ChatGPT app (latest), same account and workspace. |
 
 A Codex session meant to be steered from the phone should be started **in the ChatGPT desktop app**. Phone access to a Terminal `codex` session is unverified. The CLI's own `codex remote-control` subcommands are experimental and are **not** the supported mobile path. Remote access stops whenever a Mac sleeps, goes offline or quits the app, so keep the active Mac awake while away.

@@ -1,4 +1,5 @@
 /** Checkpoint hitch diagnostic. Run: node scripts/diag-swap-hitch.mjs
+ * Optional GT3_PREFLIGHT=<session shell preflight> overrides scripts/host-check.mjs preflight browser.
  * Env: GT3_URL (external Vite URL), GT3_HEADLESS=1, GT3_CONTEXTS=3,
  * GT3_PREWARM=1 (optional old-style comparison), GT3_OUT (results directory),
  * GT3_LABEL (free-form build label recorded in results, e.g. `w4` or `baseline-602c462`).
@@ -17,6 +18,7 @@
  * before close; any increase marks that context `hostContaminated` (host paging/swapping).
  */
 import puppeteer from 'puppeteer-core';
+import { fileURLToPath } from 'node:url';
 import { spawn, spawnSync, execFile } from 'node:child_process';
 import { mkdir, mkdtemp, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
@@ -39,7 +41,10 @@ const doPrewarm = process.env.GT3_PREWARM === '1';
 const startupOnly = process.env.GT3_STARTUP_ONLY === '1';
 const firstGateOnly = process.env.GT3_FIRST_GATE_ONLY === '1';
 const chrome = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
-const preflight = process.env.GT3_PREFLIGHT || '/Users/rayyansheikh/.claude/jobs/60022478/tmp/preflight.sh';
+// Keep optional legacy session preflights; default to the shared, host-aware gate.
+const preflightCommand = process.env.GT3_PREFLIGHT ? 'bash' : process.execPath;
+const preflightArgs = process.env.GT3_PREFLIGHT ? [process.env.GT3_PREFLIGHT]
+  : [fileURLToPath(new URL('./host-check.mjs', import.meta.url)), 'preflight', 'browser'];
 const pause = ms => new Promise(resolve => setTimeout(resolve, ms));
 const assert = (ok, message) => { if (!ok) throw new Error(message); };
 const result = { startedAt: new Date().toISOString(), base, pageUrl, scrollMode, wheelDeltaY: wheelDeltaAbs,
@@ -96,15 +101,12 @@ async function waitForServer() {
 }
 
 async function preflightBeforeBrowser() {
-  for (let attempt = 1; attempt <= 10; attempt++) {
-    const check = spawnSync('bash', [preflight], { encoding: 'utf8', timeout: 60000 });
-    const output = `${check.stdout || ''}${check.stderr || ''}`;
-    result.host.push({ at: new Date().toISOString(), attempt, output: output.trim() });
-    console.log(output.trim());
-    if (output.includes('PREFLIGHT PASS')) return;
-    if (attempt < 10) await pause(60000);
-  }
-  throw new Error('Ten consecutive browser preflights failed');
+  const check = spawnSync(preflightCommand, preflightArgs, { encoding: 'utf8', timeout: 60000 });
+  const output = `${check.stdout || ''}${check.stderr || ''}`;
+  result.host.push({ at: new Date().toISOString(), attempt: 1, output: output.trim() });
+  console.log(output.trim());
+  if (check.status === 0 && (!process.env.GT3_PREFLIGHT || output.includes('PREFLIGHT PASS'))) return;
+  throw new Error('Browser preflight refused or unavailable; stop and check host health before retrying.');
 }
 
 function percentile(values, fraction) {

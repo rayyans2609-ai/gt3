@@ -23,6 +23,12 @@
 
 route_guard_die() { echo "$ROUTE_GUARD_NAME: $*" >&2; exit 2; }
 
+route_repo_root() {
+  local common_dir
+  common_dir=$(git rev-parse --git-common-dir 2>/dev/null) || return 1
+  (cd "$common_dir/.." 2>/dev/null && pwd -P)
+}
+
 route_guard() {
   local provider="$1" model="$2" mode="$3"
 
@@ -51,7 +57,7 @@ route_guard() {
     [[ "$GT3_RUN" =~ ^[A-Za-z0-9._-]+$ ]] || route_guard_die "GT3_RUN must be [A-Za-z0-9._-]"
     [[ -n "${GT3_TASK:-}" ]] || route_guard_die "GT3_RUN is set but GT3_TASK is missing"
     local root rec field_state field_seat field_epoch field_config host
-    root=$(cd "$(git rev-parse --git-common-dir 2>/dev/null)/.." 2>/dev/null && pwd -P) || route_guard_die "GT3_RUN needs the GT3 repository"
+    root=$(route_repo_root) || route_guard_die "GT3_RUN needs the GT3 repository"
     rec="$root/local/runs/$GT3_RUN/run.md"
     [[ -f "$rec" ]] || route_guard_die "no run record $rec (claim the run first: scripts/gt3-run.sh claim)"
     field_state=$(sed -n 's/^state: //p' "$rec" | head -1); field_seat=$(sed -n 's/^seat: //p' "$rec" | head -1)
@@ -84,7 +90,7 @@ route_guard() {
 route_log() {
   [[ -n "${GT3_RUN:-}" ]] || return 0
   local root log
-  root=$(cd "$(git rev-parse --git-common-dir 2>/dev/null)/.." 2>/dev/null && pwd -P) || return 0
+  root=$(route_repo_root) || return 0
   log="$root/local/runs/$GT3_RUN/launches.log"
   mkdir -p "${log%/*}"
   # pid survives the wrapper's exec; start time guards against PID reuse.

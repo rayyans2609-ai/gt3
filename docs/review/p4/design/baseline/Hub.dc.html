@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>GT3 Hub provisional</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div style="position: relative; width: 1440px; height: 900px; overflow: hidden; background: {{ground}}; color: {{ink}}; font-family: 'Neue Haas Grotesk Text', 'Helvetica Neue', Helvetica, Arial, sans-serif">
+<button type="button" style="position: absolute; left: 622px; top: 424px; box-sizing: border-box; width: 196px; height: 52px; padding: 0 34px; border: 1px solid {{ink}}; border-radius: 26px; background: {{ink}}; color: {{ground}}; font-family: inherit; font-size: 13px; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase">Start Race</button>
+<div style="position: absolute; left: 1198px; top: 830px; width: 120px; height: 46px; box-sizing: border-box; padding: 3px; border: 1px solid {{line}}; border-radius: 24px; background: {{pill}}; box-shadow: 0 8px 26px {{shadow}}">
+<span style="position: absolute; top: 3px; left: {{thumbLeft}}; width: 56px; height: 38px; border-radius: 20px; background: {{thumb}}"></span>
+<svg viewBox="0 0 24 24" aria-hidden="true" style="position: absolute; left: 24px; top: 12px; width: 20px; height: 20px; fill: none; stroke: {{sunInk}}; stroke-width: 1.5; stroke-linecap: round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.8v2.4m0 13.6v2.4M2.8 12h2.4m13.6 0h2.4M5.5 5.5l1.7 1.7m9.6 9.6 1.7 1.7m0-12.9-1.7 1.7m-9.6 9.6-1.7 1.7"/></svg>
+<svg viewBox="0 0 24 24" aria-hidden="true" style="position: absolute; left: 80px; top: 12px; width: 20px; height: 20px; fill: {{moonInk}}; stroke: none"><path d="M12 5a7 7 0 1 0 6.6 9.2A5.6 5.6 0 0 1 12 5z"/></svg>
+</div>
+<div style="position: absolute; left: 1336px; top: 834px; width: 80px; height: 42px; box-sizing: border-box; border: 1px solid {{line}}; border-radius: 22px; background: {{pill}}; box-shadow: 0 8px 26px {{shadow}}">
+<svg viewBox="0 0 24 24" aria-hidden="true" style="position: absolute; left: 10px; top: 9px; width: 20px; height: 20px; fill: none; stroke: {{muted}}; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round"><path d="M4 9h4l5-4v14l-5-4H4z"/></svg>
+<span style="position: absolute; left: 54px; top: 7px; font-size: 20px; line-height: 26px; color: {{muted}}">+</span>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["day","night"],"default":"day"},"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const night = (this.props.theme ?? 'day') === 'night';
+    return {
+      ground: night ? '#0c1930' : '#ffffff',
+      ink: night ? '#edf0ea' : '#111416',
+      muted: night ? 'rgba(237, 240, 234, 0.56)' : 'rgba(17, 20, 22, 0.52)',
+      line: night ? 'rgba(237, 240, 234, 0.18)' : 'rgba(18, 21, 23, 0.18)',
+      pill: night ? 'rgba(19, 36, 62, 0.94)' : 'rgba(255, 255, 255, 0.94)',
+      shadow: night ? 'rgba(0, 0, 0, 0.35)' : 'rgba(18, 21, 23, 0.12)',
+      thumb: night ? 'rgba(216, 185, 79, 0.22)' : 'rgba(101, 82, 29, 0.22)',
+      thumbLeft: night ? '60px' : '4px',
+      sunInk: night ? 'rgba(237, 240, 234, 0.56)' : '#65521d',
+      moonInk: night ? '#d8b94f' : 'rgba(17, 20, 22, 0.52)'
+    };
+  }
+}
+</script>
+</body>
+</html>

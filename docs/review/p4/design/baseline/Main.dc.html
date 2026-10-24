@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>GT3 Landing at rest</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400&amp;display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div style="position: relative; width: 1440px; height: 900px; overflow: hidden; background: {{ground}}; color: {{ink}}; font-family: 'Neue Haas Grotesk Display', 'Helvetica Neue', Helvetica, Arial, sans-serif">
+<h1 style="position: absolute; left: 46.5px; top: 573.4px; margin: 0; font-size: 374.4px; font-weight: 500; line-height: 0.74; letter-spacing: -0.06em; color: {{ink}}">GT3</h1>
+<p style="position: absolute; left: 63.4px; top: 537px; margin: 0; font-size: 12px; font-weight: 500; line-height: 14px; letter-spacing: 0.24em; text-transform: uppercase; color: {{muted}}">A Grand Tour</p>
+<img src="{{carSrc}}" alt="McLaren 720S GT3" style="position: absolute; left: 697px; top: 214px; width: 520px; height: 320px; display: block">
+<p style="position: absolute; left: 837.6px; top: 531px; width: 240px; margin: 0; text-align: center; font-family: 'Geist Mono', ui-monospace, Menlo, monospace; font-size: 11px; line-height: 14px; letter-spacing: 0.08em; text-transform: uppercase; color: {{muted}}">McLaren 720S GT3</p>
+<div style="position: absolute; left: 690px; top: 812px; width: 60px; display: flex; flex-direction: column; align-items: center; gap: 12px; font-size: 10px; font-weight: 500; line-height: 12px; letter-spacing: 0.22em; text-transform: uppercase; color: {{muted}}">
+<span>Scroll</span>
+<span style="display: block; width: 1px; height: 30px; background: {{track}}"></span>
+</div>
+<div style="position: absolute; left: 1198px; top: 830px; width: 120px; height: 46px; box-sizing: border-box; padding: 3px; border: 1px solid {{line}}; border-radius: 24px; background: {{pill}}; box-shadow: 0 8px 26px {{shadow}}">
+<span style="position: absolute; top: 3px; left: {{thumbLeft}}; width: 56px; height: 38px; border-radius: 20px; background: {{thumb}}"></span>
+<svg viewBox="0 0 24 24" aria-hidden="true" style="position: absolute; left: 24px; top: 12px; width: 20px; height: 20px; fill: none; stroke: {{sunInk}}; stroke-width: 1.5; stroke-linecap: round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.8v2.4m0 13.6v2.4M2.8 12h2.4m13.6 0h2.4M5.5 5.5l1.7 1.7m9.6 9.6 1.7 1.7m0-12.9-1.7 1.7m-9.6 9.6-1.7 1.7"/></svg>
+<svg viewBox="0 0 24 24" aria-hidden="true" style="position: absolute; left: 80px; top: 12px; width: 20px; height: 20px; fill: {{moonInk}}; stroke: none"><path d="M12 5a7 7 0 1 0 6.6 9.2A5.6 5.6 0 0 1 12 5z"/></svg>
+</div>
+<div style="position: absolute; left: 1336px; top: 834px; width: 80px; height: 42px; box-sizing: border-box; border: 1px solid {{line}}; border-radius: 22px; background: {{pill}}; box-shadow: 0 8px 26px {{shadow}}">
+<svg viewBox="0 0 24 24" aria-hidden="true" style="position: absolute; left: 10px; top: 9px; width: 20px; height: 20px; fill: none; stroke: {{muted}}; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round"><path d="M4 9h4l5-4v14l-5-4H4z"/></svg>
+<span style="position: absolute; left: 54px; top: 7px; font-size: 20px; line-height: 26px; color: {{muted}}">+</span>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["day","night"],"default":"day"},"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const night = (this.props.theme ?? 'day') === 'night';
+    return {
+      ground: night ? '#0c1930' : '#ffffff',
+      ink: night ? '#edf0ea' : '#111416',
+      muted: night ? 'rgba(237, 240, 234, 0.56)' : 'rgba(17, 20, 22, 0.52)',
+      track: night ? 'rgba(237, 240, 234, 0.14)' : 'rgba(17, 20, 22, 0.14)',
+      line: night ? 'rgba(237, 240, 234, 0.18)' : 'rgba(18, 21, 23, 0.18)',
+      pill: night ? 'rgba(19, 36, 62, 0.94)' : 'rgba(255, 255, 255, 0.94)',
+      shadow: night ? 'rgba(0, 0, 0, 0.35)' : 'rgba(18, 21, 23, 0.12)',
+      thumb: night ? 'rgba(216, 185, 79, 0.22)' : 'rgba(101, 82, 29, 0.22)',
+      thumbLeft: night ? '60px' : '4px',
+      sunInk: night ? 'rgba(237, 240, 234, 0.56)' : '#65521d',
+      moonInk: night ? '#d8b94f' : 'rgba(17, 20, 22, 0.52)',
+      carSrc: night ? '/_blob/1d04535b738e3f3441d496fc3adcd233' : '/_blob/41c68792c819d0efba195f992dee1063'
+    };
+  }
+}
+</script>
+</body>
+</html>

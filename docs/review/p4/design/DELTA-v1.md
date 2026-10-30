@@ -26,3 +26,13 @@ Not changes: the editor's note-box sizes (`w` on the title note), SVG self-closi
 
 ## Runtime feedback (owner message 2026-10-30; the live app is the authority)
 No visible graphic fade into white or navy. The camera physically pushes into the McLaren's surfaces until the car overtakes the viewport. Day: a bright/white region or reflection fills the frame and resolves into the pure-white Hub field. Night: a dark/deep-blue region (the blue paint) fills the frame and resolves into the navy field. Spatial continuity, convincing motion, smoothness; reversible and scroll-controlled; subtle support allowed, but the car's surface and the camera carry the transition. Inspect the geometry before choosing; the old headlight target need not stay.
+
+## Implementation status (2026-10-30, p4-landing)
+IMPLEMENTED and machine-VERIFIED; not HUMAN-ACCEPTED.
+- Items 1-6 + runtime transition: Sol @ high, `94f4a79` (evidence `m4:local/evidence/t1/`, report `REPORT.md`). GT3 ink centre 720 px at 1440x900, label gap 32.81 px, car pivot (720, 577.8) at 0.828x; no collisions at 1280x800, 1920x1080, 2560x1080 (wide aspects cap the type at 39.824vh). Caption removed; cue 13 px / 8x33 px.
+- Items 7-8: GLM 5.3 Flash Free, `43274b1` -> integrated as `df096ba`. Hub 233x65 r26; Landing-world controls Day `--accent #597eb3`, near-black inactive; Night unchanged; **Tour HUD unchanged** (Luna check).
+- Transition: Day pushes onto the white front-fender livery, Night onto the adjacent blue paint (points chosen by ray hits on the real GLB, `geometry.json`); camera stops 8 mm off the paint; the `#landing-resolve` DOM gradient is removed. Support: exposure, plus a paint-fragment-only colour match over progress .93-.96 (largest correction 6/255 Day, 19/255 Night); every canvas pixel is exactly the field colour from .96, before the Hub appears at .965. Forward/reverse frames pixel-identical.
+- Harnesses on `94f4a79`: build, flow 15/15, Landing/Hub profile parity 58/58 (tolerances unchanged). GLM's change is CSS-only, identical in both profiles: evidence reused, not rerun.
+- Captures: `m4:local/evidence/t3/` (Luna @ medium, `df096ba`): composition Day/Night at 1440x900, 1280x800, 1920x1080; Hub; numeric control/button checks; canvas assets refreshed (`assets-v2`) and published to the canvas (version 79: car renders and transition stills only).
+
+Still for the owner: interpretations 1-4 above; motion feel and close-up softness under natural scrolling; the responsive height cap on wide screens; the low-contrast label.

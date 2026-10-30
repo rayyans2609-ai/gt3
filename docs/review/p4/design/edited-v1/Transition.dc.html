@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>GT3 transition stills</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400&amp;display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div style="width: 1440px; height: 780px; box-sizing: border-box; padding: 28px 24px 24px; display: flex; flex-direction: column; gap: 18px; background: {{ground}}; color: {{ink}}; font-family: 'Geist Mono', ui-monospace, Menlo, monospace">
+<div style="display: flex; justify-content: space-between; font-size: 11px; line-height: 16px; letter-spacing: 0.08em; text-transform: uppercase; color: {{muted}}">
+<span>Real frames from the running GT3 Landing at fixed scroll progress (1440 x 900)</span>
+<span>Runtime is the authority: comment here to direct camera, timing or lighting</span>
+</div>
+<sc-if value="{{isDay}}" hint-placeholder-val="{{ true }}">
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px">
+<div style="display: flex; flex-direction: column; gap: 8px"><img src="/_blob/b303554ca47475fdadfe9391e35ab525" alt="Transition at progress 0.20" style="display: block; width: 100%; height: 280px; object-fit: cover"><span style="font-size: 11px; line-height: 14px; letter-spacing: 0.06em; color: {{muted}}">0.20  GT3 recedes, car turns</span></div>
+<div style="display: flex; flex-direction: column; gap: 8px"><img src="/_blob/5160a631b9ed08ee409882369177e76e" alt="Transition at progress 0.40" style="display: block; width: 100%; height: 280px; object-fit: cover"><span style="font-size: 11px; line-height: 14px; letter-spacing: 0.06em; color: {{muted}}">0.40  push begins</span></div>
+<div style="display: flex; flex-direction: column; gap: 8px"><img src="/_blob/eb2f8aaec18bed7cd3f5b267de666817" alt="Transition at progress 0.55" style="display: block; width: 100%; height: 280px; object-fit: cover"><span style="font-size: 11px; line-height: 14px; letter-spacing: 0.06em; color: {{muted}}">0.55  front three-quarter</span></div>
+<div style="display: flex; flex-direction: column; gap: 8px"><img src="/_blob/d14e0144e64b45c3680f8de5d06f61dd" alt="Transition at progress 0.70" style="display: block; width: 100%; height: 280px; object-fit: cover"><span style="font-size: 11px; line-height: 14px; letter-spacing: 0.06em; color: {{muted}}">0.70  headlight approach</span></div>
+<div style="display: flex; flex-direction: column; gap: 8px"><img src="/_blob/65b339feed380bf373eba8ebe6cccc06" alt="Transition at progress 0.80" style="display: block; width: 100%; height: 280px; object-fit: cover"><span style="font-size: 11px; line-height: 14px; letter-spacing: 0.06em; color: {{muted}}">0.80  lamp fills the frame</span></div>
+<div style="display: flex; flex-direction: column; gap: 8px"><img src="/_blob/54460ef69f9a5276021a5f065474899b" alt="Transition at progress 0.88" style="display: block; width: 100%; height: 280px; object-fit: cover"><span style="font-size: 11px; line-height: 14px; letter-spacing: 0.06em; color: {{muted}}">0.88  resolving to the field</span></div>
+</div>
+</sc-if>
+<sc-if value="{{isNight}}" hint-placeholder-val="{{ false }}">
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px">
+<div style="display: flex; flex-direction: column; gap: 8px"><img src="/_blob/5d0ad58ab2dd297f5b2091fd761f0768" alt="Transition at progress 0.20, night" style="display: block; width: 100%; height: 280px; object-fit: cover"><span style="font-size: 11px; line-height: 14px; letter-spacing: 0.06em; color: {{muted}}">0.20  GT3 recedes, car turns</span></div>
+<div style="display: flex; flex-direction: column; gap: 8px"><img src="/_blob/a33e17e64fb98339749d7753db1d1373" alt="Transition at progress 0.40, night" style="display: block; width: 100%; height: 280px; object-fit: cover"><span style="font-size: 11px; line-height: 14px; letter-spacing: 0.06em; color: {{muted}}">0.40  push begins</span></div>
+<div style="display: flex; flex-direction: column; gap: 8px"><img src="/_blob/103efeb5868169c6ff7a77c35460ae9e" alt="Transition at progress 0.55, night" style="display: block; width: 100%; height: 280px; object-fit: cover"><span style="font-size: 11px; line-height: 14px; letter-spacing: 0.06em; color: {{muted}}">0.55  front three-quarter</span></div>
+<div style="display: flex; flex-direction: column; gap: 8px"><img src="/_blob/2d69c634037e978e8af5d9eecb0fb010" alt="Transition at progress 0.70, night" style="display: block; width: 100%; height: 280px; object-fit: cover"><span style="font-size: 11px; line-height: 14px; letter-spacing: 0.06em; color: {{muted}}">0.70  headlight approach</span></div>
+<div style="display: flex; flex-direction: column; gap: 8px"><img src="/_blob/64f9a6266d6257da3ec5441fb21a6b03" alt="Transition at progress 0.80, night" style="display: block; width: 100%; height: 280px; object-fit: cover"><span style="font-size: 11px; line-height: 14px; letter-spacing: 0.06em; color: {{muted}}">0.80  lamp fills the frame</span></div>
+<div style="display: flex; flex-direction: column; gap: 8px"><img src="/_blob/20535bbb3524ce296b877b167b395694" alt="Transition at progress 0.88, night" style="display: block; width: 100%; height: 280px; object-fit: cover"><span style="font-size: 11px; line-height: 14px; letter-spacing: 0.06em; color: {{muted}}">0.88  resolving to the field</span></div>
+</div>
+</sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["day","night"],"default":"day"},"$preview":{"width":1440,"height":780}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const night = (this.props.theme ?? 'day') === 'night';
+    return {
+      isDay: !night,
+      isNight: night,
+      ground: night ? '#0c1930' : '#ffffff',
+      ink: night ? '#edf0ea' : '#111416',
+      muted: night ? 'rgba(237, 240, 234, 0.56)' : 'rgba(17, 20, 22, 0.52)'
+    };
+  }
+}
+</script>
+</body>
+</html>

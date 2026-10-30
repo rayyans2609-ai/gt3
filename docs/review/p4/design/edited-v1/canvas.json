@@ -1,0 +1,66 @@
+{
+  "v": 3,
+  "attachments": {},
+  "boards": {
+    "Hub.dc.html": {
+      "h": 900,
+      "title": "Hub, provisional (minimal)",
+      "w": 1440,
+      "x": 1520,
+      "y": 0
+    },
+    "Main.dc.html": {
+      "h": 900,
+      "title": "Landing at rest (Day/Night tweak)",
+      "w": 1440,
+      "x": 0,
+      "y": 0
+    },
+    "Transition.dc.html": {
+      "h": 780,
+      "title": "Transition stills, reference only",
+      "w": 1440,
+      "x": 0,
+      "y": 1020
+    }
+  },
+  "createdOnFiles": {
+    "at": "2026-10-24T13:30:00Z",
+    "v": 1
+  },
+  "designSystems": [],
+  "launch": {
+    "view": "canvas"
+  },
+  "notes": {
+    "editable": {
+      "fill": "green",
+      "text": "EDIT HERE (Landing board): GT3 wordmark (move, resize, retype, weight, tracking), 'A Grand Tour' label, car caption, Scroll cue, and the McLaren image (move and scale). Colours follow the Theme tweak. Hub board: the START RACE button size and position. Leave comments on anything.\n\nthe bottom left 2 controls have the wrong colour scheme keep it black and blue and white - day and blue and white and yellow and cream - night. ",
+      "w": 440,
+      "x": 1520,
+      "y": 1020
+    },
+    "runtime": {
+      "fill": "orange",
+      "text": "RUNTIME ONLY (real Three.js, not editable here): car pose and turn, camera path and timing of the push, lighting, reflections, the headlight wake, the white/navy resolve. The board on the left shows real stills of it. Comment on a still to direct a change; Claude Code implements it in the live app.",
+      "w": 440,
+      "x": 2000,
+      "y": 1020
+    },
+    "title": {
+      "kind": "title1",
+      "maxW": 2960,
+      "text": "GT3 Phase 4: Landing",
+      "w": 240,
+      "x": 0,
+      "y": -260
+    }
+  },
+  "order": [
+    "Main.dc.html",
+    "Hub.dc.html",
+    "Transition.dc.html"
+  ],
+  "pages": [],
+  "title": "GT3 Phase 4 Landing"
+}

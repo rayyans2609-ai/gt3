@@ -148,8 +148,8 @@
 }
 
 .hub-start {
-  min-width: 196px;
-  height: 52px;
+  min-width: 233px;
+  height: 65px;
   padding: 0 34px;
   border: 1px solid var(--landing-ink);
   border-radius: 26px;
@@ -206,4 +206,18 @@
 
 @media (prefers-reduced-motion: reduce) {
   .landing-cue__line { animation: none; }
+}
+
+/* Edge controls on the Landing and Hub (owner canvas note, 2026-10-30): Day black / blue / white,
+   Night blue / white / yellow / cream. Scoped to the Landing world; the Grand Tour HUD is unchanged. */
+:root[data-world='landing'][data-theme='day'] {
+  --accent: #597eb3;
+}
+:root[data-world='landing'] .theme-segmented__option,
+:root[data-world='landing'] .audio-speaker[data-sound='idle'],
+:root[data-world='landing'] .audio-speaker[data-sound='muted'] {
+  color: var(--fg);
+}
+:root[data-world='landing'] .theme-segmented__option[aria-checked='true'] {
+  color: var(--accent);
 }

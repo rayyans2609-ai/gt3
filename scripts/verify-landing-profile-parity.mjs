@@ -27,7 +27,8 @@ const POINTS = [0, 0.3, 0.55, 0.75, 0.88, 0.94, 1];
 const TOL = { mean: 0.05, over8pct: 0.02 };
 // At p0 (car at rest) the ground shadow's opacity pulses +-15 % with the idle bob, which follows
 // performance.now() and cannot be frozen from outside; that is the only time-dependent pixel
-// region (about 107x41 CSS px under the car, <= 18/255). Looser bound for p0 only.
+// region (now centred at x720, below the y578 pivot; about 89x34 CSS px, <= 18/255).
+// Looser bound for p0 only; the original strict tolerances are unchanged.
 const TOL_P0 = { mean: 0.12, over8pct: 0.5 };
 
 const browser = await puppeteer.launch({

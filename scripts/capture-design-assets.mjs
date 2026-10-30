@@ -17,8 +17,8 @@ const out = path.resolve(process.argv[2] || 'local/design-canvas/assets');
 const wait = ms => new Promise(r => setTimeout(r, ms));
 fs.mkdirSync(out, { recursive: true });
 const W = 1440, H = 900;
-// Crop around the resting car (centre ~ 66.5 % / 40.5 % of the viewport) incl. its ground shadow.
-const CROP = { x: 697, y: 214, width: 520, height: 320 };
+// Crop around the resting car (centre ~ 50 % / 64.2 % of the viewport) incl. its ground shadow.
+const CROP = { x: 507, y: 453, width: 426, height: 265 };
 const STILLS = [0.2, 0.4, 0.55, 0.7, 0.8, 0.88];
 
 const browser = await puppeteer.launch({

@@ -37,10 +37,10 @@ const TUNE = {
   restFov: 20,
   closeFov: 28,
   restElevationDeg: 8.5,
-  restWidthFraction: 0.29,    // projected car width / viewport width at rest
-  restHeightFraction: 0.34,   // cap for tall or narrow viewports
-  restScreenX: 0.665,         // car centre, fraction of viewport width (lens shift, no skew)
-  restScreenY: 0.405,
+  restWidthFraction: 0.240,   // projected car width / viewport width at rest
+  restHeightFraction: 0.2815, // cap for tall or narrow viewports
+  restScreenX: 0.500,         // car centre, fraction of viewport width (lens shift, no skew)
+  restScreenY: 0.642,
   floatHeight: 0.92,          // pivot (car centre) above the shadow plane
   bobAmplitude: 0.035,
   bobSeconds: 7.5,
@@ -51,11 +51,14 @@ const TUNE = {
   pointerEnvYaw: 0.32,        // restrained lighting response to the pointer
   pointerDamping: 3.2,        // 1/s
   scrollDamping: 9,           // 1/s: smooths wheel steps; never runs on after input ends
-  // Close-up target: the near (car-left) LED headlight unit (measured from the GLB: centre
-  // -0.70, 0.43, -1.91 in model space), in pivot space.
-  headlight: [-0.70, -0.15, -1.91],
-  approach: [-0.42, 0.24, -1.0], // direction from the headlight toward the final camera
-  closeDistance: 0.8,          // closer than this and the 1024 px livery visibly softens
+  // Measured on the GLB's near front fender, canonical coordinates minus the 0.58 m
+  // pivot offset. Both are EXT_Carpaint_Inst: white livery (255/255/255) beside blue paint
+  // (2/118/204). Adjacent points keep a mid-push theme change spatially continuous.
+  daySurface: [-0.55, 0.073668, -1.55],
+  nightSurface: [-0.75, 0.087681, -1.55],
+  dayNormal: [-0.056864, 0.957657, -0.282240],
+  nightNormal: [0.053159, 0.964941, -0.257027],
+  closeDistance: 0.008,       // stop outside the paint; never pass through the shell
   openingYawDeg: -30,         // first impression: a front three-quarter, turning toward the hero angle
 };
 
@@ -65,7 +68,7 @@ const SEG = {
   type: [0.05, 0.36],
   lamps: [0.56, 0.84],
   push: [0.17, 0.97],
-  resolve: [0.78, 0.985],
+  resolve: [0.93, 0.96],      // final paint-only colour match, after surface coverage
   hub: [0.965, 1],
   hubEnter: 0.99,
   hubLeave: 0.975,
@@ -104,25 +107,28 @@ const themeMix = { value: 0, target: 0 }; // 0 day, 1 night
 let wordmark = null;
 let eyebrow = null;
 let cue = null;
-let caption = null;
-let resolveLayer = null;
 let lastStyle = {};
 
 // Scratch.
 const _yAxis = new THREE.Vector3(0, 1, 0);
 const _center = new THREE.Vector3();
 const _rest = new THREE.Vector3();
-const _headlight = new THREE.Vector3();
+const _surface = new THREE.Vector3();
+const _themePoint = new THREE.Vector3();
 const _approach = new THREE.Vector3();
 const _restDir = new THREE.Vector3();
 const _dir = new THREE.Vector3();
 const _pos = new THREE.Vector3();
 const _look = new THREE.Vector3();
-const _ndc = new THREE.Vector3();
 const _field = new THREE.Color();
 const _q = new THREE.Quaternion();
 const heroYaw = -THREE.MathUtils.degToRad(TUNE.heroAzimuthDeg);
 let restDistance = 20;
+// Applied only to the Landing copy's paint fragments. No screen overlay or page dissolve.
+const surfaceUniforms = {
+  match: { value: 0 },
+  field: { value: new THREE.Color(1, 1, 1) },
+};
 
 // ---------------------------------------------------------------------------
 // Studio reflections: a soft neutral room with long strip softboxes, rendered once to PMREM.
@@ -193,6 +199,16 @@ function dressHero(model) {
         material.clearcoat = 1;
         material.clearcoatRoughness = 0.045;
       }
+      if (material.name === 'EXT_Carpaint_Inst') {
+        material.onBeforeCompile = (shader) => {
+          shader.uniforms.landingSurfaceMatch = surfaceUniforms.match;
+          shader.uniforms.landingField = surfaceUniforms.field;
+          shader.fragmentShader = 'uniform float landingSurfaceMatch;\nuniform vec3 landingField;\n'
+            + shader.fragmentShader.replace('#include <colorspace_fragment>',
+              '#include <colorspace_fragment>\ngl_FragColor.rgb = mix(gl_FragColor.rgb, landingField, landingSurfaceMatch);');
+        };
+        material.customProgramCacheKey = () => 'landing-surface-match-v1';
+      }
       // The lamps wake with the scroll: only emissiveIntensity changes (a uniform, no new shader).
       if (/^(lights_emissive|endu_lights)/.test(material.name) && !lampGlows.includes(material)) {
         lampGlows.push(material);
@@ -259,26 +275,32 @@ function restCameraPosition(out) {
     .add(_center.set(0, TUNE.floatHeight, 0));
 }
 
-/** World headlight point and approach direction for the car at its hero angle. */
-function headlightFrame(point, approach) {
+/** World paint point and outward surface normal at the settled hero angle. */
+function surfaceFrame(point, approach, night) {
   _q.setFromAxisAngle(_yAxis, heroYaw);
-  point.set(...TUNE.headlight).applyQuaternion(_q).add(_center.set(0, TUNE.floatHeight, 0));
-  approach.set(...TUNE.approach).normalize().applyQuaternion(_q);
+  point.set(...TUNE.daySurface).lerp(_themePoint.set(...TUNE.nightSurface), night);
+  // The rail stays above the slight fender crown while blending themes, even at 8 mm.
+  point.y += 0.015 * 4 * night * (1 - night);
+  point.applyQuaternion(_q).add(_center.set(0, TUNE.floatHeight, 0));
+  approach.set(...TUNE.dayNormal).lerp(_themePoint.set(...TUNE.nightNormal), night)
+    .normalize().applyQuaternion(_q);
 }
 
-/**
- * The push: aim moves from the car's centre to the headlight, the viewing direction swings from
- * the resting angle onto the headlight's approach line, and the distance shrinks geometrically,
- * so the subject grows at an even perceived rate instead of all at the end.
+/** Two continuous logarithmic dollies: whole car → fender, then fender → paint.
+ * The camera arcs toward the measured outward normal, so the near plane stays outside
+ * the shell and the same actual triangles grow through the viewport in both directions.
  */
-function pushCamera(out, look, s) {
+function pushCamera(out, look, p, night) {
   restCameraPosition(_rest);
   _center.set(0, TUNE.floatHeight, 0);
   _restDir.copy(_rest).sub(_center).normalize();
-  headlightFrame(_headlight, _approach);
-  look.copy(_center).lerp(_headlight, smooth(0.04, 0.72, s));
-  _dir.copy(_restDir).lerp(_approach, smooth(0, 0.8, s)).normalize();
-  const distance = restDistance * Math.pow(TUNE.closeDistance / restDistance, s);
+  surfaceFrame(_surface, _approach, night);
+  look.copy(_center).lerp(_surface, smooth(0.2, 0.66, p));
+  _dir.copy(_restDir).lerp(_approach, smooth(0.34, 0.82, p)).normalize();
+  const body = smooth(0.17, 0.74, p);
+  const paint = smooth(0.65, 0.965, p);
+  const distance = restDistance * Math.pow(0.65 / restDistance, body)
+    * Math.pow(TUNE.closeDistance / 0.65, paint);
   return out.copy(look).addScaledVector(_dir, distance);
 }
 
@@ -365,8 +387,6 @@ export function initLanding(sharedRenderer, { onHub, onLanding } = {}) {
   wordmark = document.querySelector('.landing-wordmark');
   eyebrow = document.querySelector('.landing-eyebrow');
   cue = document.querySelector('.landing-cue');
-  caption = document.querySelector('.landing-caption');
-  resolveLayer = document.getElementById('landing-resolve');
 
   resize();
   window.addEventListener('scroll', onScroll, { passive: true });
@@ -485,12 +505,15 @@ export function updateLanding(dt) {
   shadow.material.opacity = heroAppear * (0.55 - 0.25 * night) * (1 - push) * (0.85 + 0.15 * (1 - bob / TUNE.bobAmplitude * rest));
 
   // ---- camera ----------------------------------------------------------------
-  pushCamera(_pos, _look, push);
+  pushCamera(_pos, _look, progress, night);
+  // Preserve the resting depth precision (decals lie close to the body), then move the
+  // near plane inward with the dolly so the paint can fill the frame without clipping.
+  camera.near = Math.min(0.05, _pos.distanceTo(_look) * 0.1);
   camera.position.copy(_pos);
   camera.lookAt(_look);
   const fov = THREE.MathUtils.lerp(TUNE.restFov, TUNE.closeFov, smooth(0.4, 1, push));
   if (camera.fov !== fov) camera.fov = fov;
-  // Lens shift places the resting car centre-right without perspective skew.
+  // Lens shift preserves the owner’s resting pivot without perspective skew.
   const shift = 1 - smooth(0, 0.45, push);
   const w = window.innerWidth, h = window.innerHeight;
   camera.setViewOffset(w, h, -(TUNE.restScreenX - 0.5) * w * shift, -(TUNE.restScreenY - 0.5) * h * shift, w, h);
@@ -514,20 +537,11 @@ export function updateLanding(dt) {
     `translate3d(${(-2.2 * typeOut).toFixed(3)}vw, ${(-1.2 * typeOut).toFixed(3)}vh, 0) scale(${(1 - 0.07 * typeOut).toFixed(4)})`);
   write(eyebrow, 'eo', 'opacity', (1 - smooth(...SEG.type, progress * 1.25)).toFixed(3));
   write(cue, 'co', 'opacity', (1 - smooth(0, 0.05, progress)).toFixed(3));
-  write(caption, 'ca', 'opacity', (heroAppear * (1 - smooth(0.02, 0.14, progress))).toFixed(3));
 
-  // Resolve toward the theme field while the camera keeps moving: a dissolve, biased so that in
-  // Day the light arrives first at the lamp and in Night the navy arrives first at the edges.
-  // Drawn in the DOM so its colour is exactly the Hub field's.
-  _ndc.copy(_headlight).project(camera);
-  const x = ((_ndc.x + 1) / 2) * 100;
-  const y = ((1 - _ndc.y) / 2) * 100;
-  const lead = smooth(0.25, 0.9, resolve);  // the leading region
-  const lag = smooth(0.45, 1, resolve);     // the trailing region
-  write(resolveLayer, 'rx', '--x', `${x.toFixed(2)}%`);
-  write(resolveLayer, 'ry', '--y', `${y.toFixed(2)}%`);
-  write(resolveLayer, 'rl', '--lead', `${(lead * 100).toFixed(2)}%`);
-  write(resolveLayer, 'rg', '--lag', `${(lag * 100).toFixed(2)}%`);
+  // Only paint is colour-matched, and only once the physical fender fills the screen.
+  // It is exact before SEG.hub starts, making the DOM field handoff invisible.
+  surfaceUniforms.match.value = resolve;
+  _field.getRGB(surfaceUniforms.field.value, THREE.SRGBColorSpace);
   hubPresence = hub;
 
   // ---- experience edge -----------------------------------------------------------
@@ -542,10 +556,11 @@ export function renderLanding() {
   const target = renderer.getRenderTarget();
   const face = renderer.getActiveCubeFace();
   const mip = renderer.getActiveMipmapLevel();
-  const resolve = smooth(...SEG.resolve, progress);
-  // Day burns out to white the way light does (highlights first); Night sinks into the dark.
-  const day = Math.exp(Math.log(7) * Math.pow(resolve, 1.5));
-  const night = 0.88 * Math.exp(Math.log(0.25) * resolve);
+  // A close softbox reflection lifts the white livery; Night retains the deep blue paint.
+  // The last few percent are matched on the paint shader, never across the screen.
+  const closeLight = smooth(0.78, 0.925, progress);
+  const day = THREE.MathUtils.lerp(1, 2.4, closeLight);
+  const night = THREE.MathUtils.lerp(0.88, 0.065, closeLight);
   renderer.toneMappingExposure = THREE.MathUtils.lerp(day, night, themeMix.value);
   try {
     renderer.setRenderTarget(null);

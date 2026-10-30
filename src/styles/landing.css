@@ -47,48 +47,39 @@
   transition: color 700ms var(--ease);
 }
 
-:root { --landing-type: clamp(210px, 26vw, 600px); }
+/* Cap by height on wide desktops so the label clears the car; 1440×900 stays exact. */
+:root { --landing-type: clamp(201px, min(24.89vw, 39.824vh), 574px); }
 
-/* Oversized and anchored low-left; the hero floats above it to the right (a diagonal, not a
-   lockup). The line box is cut to the cap height so the baseline sits on the margin. */
+/* Owner canvas: a centred vertical stack. Centre with the box, because the scroll recede
+   writes transform every frame. The label follows the wordmark line box at every size. */
 .landing-wordmark {
   position: absolute;
-  left: 4.4vw;
-  bottom: 5.5vh;
-  margin-left: -0.045em;
+  left: 0;
+  top: 21.11vh;
+  width: 100%;
+  text-align: center;
+  padding-right: 0.06em; /* balance the final negative tracking space optically */
   font-family: var(--font-display);
   font-size: var(--landing-type);
   font-weight: 500;
   line-height: 0.74;
   letter-spacing: -0.06em;
-  transform-origin: 0% 100%;
+  transform-origin: 50% 50%;
   will-change: transform, opacity;
 }
 
 .landing-eyebrow {
   position: absolute;
-  left: 4.4vw;
-  bottom: calc(5.5vh + var(--landing-type) * 0.74 + 22px);
+  left: 0;
+  top: calc(21.11vh + var(--landing-type) * 0.74 + 32.8px);
+  width: 100%;
+  text-align: center;
   font-family: var(--font-ui);
   font-size: 12px;
   font-weight: 500;
   letter-spacing: 0.24em;
   text-transform: uppercase;
-  color: var(--landing-muted);
-}
-
-.landing-caption {
-  position: absolute;
-  left: 66.5%;
-  top: 59vh;
-  transform: translateX(-50%);
-  font-family: var(--font-mono);
-  font-size: 11px;
-  font-weight: 400;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--landing-muted);
-  opacity: 0;
+  color: rgb(89 126 179 / 52%);
 }
 
 .landing-cue {
@@ -101,7 +92,7 @@
   gap: 12px;
   transform: translateX(-50%);
   font-family: var(--font-ui);
-  font-size: 10px;
+  font-size: 13px;
   font-weight: 500;
   letter-spacing: 0.22em;
   text-transform: uppercase;
@@ -110,8 +101,8 @@
 
 .landing-cue__track {
   position: relative;
-  width: 1px;
-  height: 30px;
+  width: 8px;
+  height: 33px;
   overflow: hidden;
   background: color-mix(in srgb, var(--landing-ink) 14%, transparent);
 }
@@ -120,7 +111,7 @@
   position: absolute;
   left: 0;
   top: -14px;
-  width: 1px;
+  width: 8px;
   height: 14px;
   background: var(--landing-ink);
   animation: landing-cue 2.4s var(--ease) infinite;
@@ -129,31 +120,7 @@
 @keyframes landing-cue {
   0% { transform: translateY(0); opacity: 0; }
   25% { opacity: 1; }
-  100% { transform: translateY(44px); opacity: 0; }
-}
-
-/* Resolve toward the field: a scroll-driven dissolve with a wide radial bias (landing.js sets
-   --lead and --lag, 0..100 %). Day: light leads at the headlight. Night: navy leads at the edges. */
-#landing-resolve {
-  --x: 50%;
-  --y: 50%;
-  --lead: 0%;
-  --lag: 0%;
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-}
-
-:root[data-theme='day'] #landing-resolve {
-  background: radial-gradient(circle at var(--x) var(--y),
-    color-mix(in srgb, var(--landing-field) var(--lead), transparent) 0,
-    color-mix(in srgb, var(--landing-field) var(--lag), transparent) 85vmax);
-}
-
-:root[data-theme='night'] #landing-resolve {
-  background: radial-gradient(circle at var(--x) var(--y),
-    color-mix(in srgb, var(--landing-field) var(--lag), transparent) 0,
-    color-mix(in srgb, var(--landing-field) var(--lead), transparent) 85vmax);
+  100% { transform: translateY(47px); opacity: 0; }
 }
 
 /* ---- PROVISIONAL Hub (Phase 5 replaces this) ----------------------------- */

@@ -77,6 +77,9 @@ text/HUD/player UI. One fixed canvas behind it, one shared `WebGLRenderer`.
       finishSequence.js route-end hero transition + completion hero car [new]
       finishLine.js   finish at FINISH_T → bounded 3D gantry with traffic lights (Phase 3
                       closure, SPEC §18); finishSequence may later reuse it [evolve]
+    landing/
+      landing.js      Landing scene on the shared renderer: hero, composition, scroll-driven
+                      surface-push transition to the Hub field [done, Phase 4]
     montage/
       studio.js       montage studio (own renderer — sanctioned exception, see below) [keep]
       choreography.js 5-shot camera timeline [keep]

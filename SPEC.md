@@ -79,13 +79,15 @@ Empty, restrained composition. **Pure white in Day. Deep navy in Night.** Same c
 
 Use: large `GT3`, a small floating hero car (provisionally the McLaren 720S GT3, below), substantial negative space, a persistent audio control. No floor, scenery, platform, card, stats, large navigation, or visible primary CTA.
 
-**Landing hero car — owner decision (2026-10-24).** The provisional Landing hero is the **McLaren 720S GT3** (roster index 6); its final visual acceptance belongs to the owner. The Lexus RC F GT3 stays the Grand Tour starting car (roster index 0) and the discovered-at-start car; the McLaren's Landing presence is a featured presentation, not an unlock, and changes no Tour progression or discovery rule (§18, §26). *(History, 2026-10-06: the Landing hero was to replace the Lexus; Ferrari, Lamborghini, Porsche and McLaren were candidates.)*
+**Landing hero car — owner decision (2026-10-24), accepted (2026-10-30).** The Landing hero is the **McLaren 720S GT3** (roster index 6), human-accepted with Phase 4. The Lexus RC F GT3 stays the Grand Tour starting car (roster index 0) and the discovered-at-start car; the McLaren's Landing presence is a featured presentation, not an unlock, and changes no Tour progression or discovery rule (§18, §26). *(History, 2026-10-06: the Landing hero was to replace the Lexus; Ferrari, Lamborghini, Porsche and McLaren were candidates.)*
 
 Scrolling progresses the experience. The hero car rotates extremely slowly, reacts subtly to cursor yaw/pitch, and may have subtle lighting response; it stays small enough to preserve the composition.
 
 ## Landing → Hub signature transition
 
 Downward scroll: (1) the hero car's idle settles, (2) car rotates toward a deliberate front-three-quarter, (3) `GT3` recedes/fades, (4) camera pushes toward a bright automotive front/headlight/body detail, (5) reflections/bodywork increasingly fill the viewport, (6) frame resolves toward the active theme's base field (white in Day, deep navy in Night), (7) Grand Tour Hub emerges from that same field. Reverse cleanly when scrolling upward. No hard cut. Exact automotive detail is implementation-level.
+
+**As accepted (owner, 2026-10-30; Phase 4).** The composition is the owner's Claude Design edit: a centred stack (`GT3`, "A Grand Tour", the McLaren, the Scroll cue). The resolve is physical: the camera pushes into the McLaren's own surfaces until the car overtakes the viewport, with no visible graphic fade. Day uses the white front-fender livery resolving into the white field; Night uses the adjacent blue paint resolving into navy. A small paint-only colour match lands exactly on the field before the Hub appears. The Hub shipped with Phase 4 is provisional and deliberately minimal (field + START RACE); §5 remains the Phase 5 target. Render profiles (`?version=`) affect the Grand Tour only; the Landing and Hub are identical under both.
 
 ---
 
@@ -829,7 +831,7 @@ Raised during Phase 3 review, owned by later phases, and **not to be implemented
 | Spinning 3D car in the Grand Tour bottom-left, with hover/proximity response like the Landing car | R | Phase 6 | §20, §11 |
 | Click the spinning car → dedicated standalone presentation of that car, preserving relevant Showcase function, replacing the awkward selection flow | R | Phase 6 | §11, §25 |
 | Substantially better rotating-car presentation: materials, lighting, animation, composition (also informs the Phase 7 completion hero) | R | Phase 6 (→ 7) | §11, §21 |
-| Landing hero car replaces Lexus — provisionally the McLaren 720S GT3 (owner, 2026-10-24); Tour starter stays Lexus; final visual acceptance with the owner | R | Phase 4 | §4 |
+| Landing hero car replaces Lexus — McLaren 720S GT3 (owner, 2026-10-24; HUMAN-ACCEPTED with Phase 4, 2026-10-30); Tour starter stays Lexus | R | Phase 4 (done) | §4 |
 | Independent master-volume and music-volume sliders with separate mutes | R | Phase 5 (Hub player pass) | §7 |
 | Full loading UX: 0–100 % progress, no early interaction, prominent Start Race | D | designed with the page/navigation flow (Phases 4–5) | §25 |
 | Authored elevation: grades, crests/compressions, banked turns, terrain-integrated road (supersedes "modest circuit elevation") | E | Phase 8 | §17, §16 |

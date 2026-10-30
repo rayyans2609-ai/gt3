@@ -1,6 +1,6 @@
 # Phase 4 Landing — owner review (2026-10-24)
 
-**Status: IMPLEMENTED and machine-VERIFIED on M4. Not HUMAN-ACCEPTED.** Branch `p4-landing`. No visual changes since the 2026-10-24 checkpoint, by owner instruction.
+**Status: HUMAN-ACCEPTED (owner, 2026-10-30)** and integrated into `main` (fast-forward from `p4-landing`). Accepted implementation: `23887af` (Landing, design v1 composition and physical surface-push transition, provisional Hub). The sections below are the 2026-10-24 review record; the final design changes are in `design/DELTA-v1.md`.
 
 ## Try it live
 ```

@@ -787,3 +787,14 @@ The owner accepted the Phase 3 MVP: fixed DPR1 + SMAA performance/quality tradeo
 Owner final lock-in: Unlocked QualityDPR2 default/preferred; explicitSmoothDPR1.5; NeutralDay/ACESNight, mediumreflections, quarterDaycarspecular, SMAA, stabilizedshadows, existing loading/image-integrity/glass/minimap improvements. Locked/no-version unchanged. One default-selector change;7full-export configuration equality cases, syntax/whitespace and final Vite production build PASS. Prior Locked/default23-state pixel identity, functional and W3–W6/minimap evidence reused; no new campaign/agents/Claude.
 
 Owner explicitly accepts deferred final integrated600sSmooth+600sQuality M4 qualification for closure; they are NOT passed. Historical diagnostic numbers and all host-guard-interrupted evidence remain preserved in docs/review/p3u/. No safeguards weakened, benchmarks retried or Mac restart. Local main integration completed by the merge commit containing this entry, without conflicts; no push. Review/limitations: docs/review/p3u/OWNER-REVIEW.md. Phase8 Night lighting stays future work; Phase4/further development not started.
+
+
+## Phase 4 Landing — HUMAN-ACCEPTED (owner, 2026-10-30)
+
+Owner accepted the Landing, the McLaren surface-push transition, the Claude Design composition, the provisional Hub and the Grand Tour integration; Phase 4 integrated into `main` by fast-forward from `p4-landing` (accepted implementation `23887af`). Measured on M4 16 GB, Chrome 155, ANGLE Metal (host-scoped; Intel unmeasured):
+- Landing steady pacing (headless, after readiness): p50/p99 16.7/16.8 ms at DPR 2 and 1 ; final surface push (headful DPR 2): p50 16.7 ms, p99 17.7 ms, GPU p95 ≈ 15 ms.
+- Warm-up under the Landing: a 4 ms per-frame budget while the Landing is visible improves Unlocked loading median 33.4 → 16.7 ms; Locked readiness 3.06 → 3.47 s while the visitor is still on the Landing (accepted trade). Single cold first-use draws (66–91 ms) remain.
+- Retained Landing payload while in the Tour ≈ 161 MiB (estimate; M4 shows no pressure; Intel unverified).
+- Landing/Hub render-profile parity: 58/58 (pixel diff, Day/Night, DPR 1 and 2, after a Tour round trip and a refresh).
+- Flow harness 15/15; Phase 3 cone (pre-ready input, route persistence, load recovery, controls) pass; Tour first frame identical to `main@1fe20db`.
+Evidence: `docs/review/p4/` (OWNER-REVIEW, W1-ENGINEERING, design/DELTA-v1) and m4-local `local/evidence/`.

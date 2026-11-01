@@ -32,7 +32,7 @@ These documents are **binding execution instructions** in their domains. `SPEC.m
 
 - `docs/ai/codex-cli-invocation.md`: Codex (Sol, Terra, Luna, Astra). Always run through `scripts/codex-route.sh` with an explicit model **and** reasoning effort (sandbox `-s read-only|workspace|full`; run/task `-R <run> -T <task>`).
 - `docs/ai/claude-cli-invocation.md`: headless Claude workers (Opus, Sonnet, Haiku). Always run through `scripts/claude-route.sh` with explicit model, effort and permission mode, on the owner's subscription only.
-- `docs/ai/opencode-invocation.md`: free OpenCode routes (Muse, DeepSeek, Bunny). Always run through `scripts/opencode-route.sh` with an explicit model. Paid Token Harbor routes are refused.
+- `docs/ai/opencode-invocation.md`: free OpenCode Zen routes (GLM, DeepSeek). Always run through `scripts/opencode-route.sh` with an explicit model. Paid Token Harbor routes are refused.
 - `docs/ai/cloud-opus-invocation.md`: Cloud Opus reviewer. Push the branch (owner-authorized) and confirm the exact SHA before any launch.
 - `docs/ai/routing-evidence.md`: log material model work here (§15).
 - `scripts/gt3-run.sh`: run record, claim/release, checkpoints. `scripts/host-check.mjs`: host profile and pre-flight. `scripts/with-verification-server.sh`: owned, provenance-stamped Vite for runtime evidence.

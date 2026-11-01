@@ -1,8 +1,8 @@
 # GT3 — OpenCode Invocation (canonical)
 
-Execution-specific layer only. Which worker gets which task (Muse, DeepSeek, Bunny, MiMo) lives in [`docs/ai/model-routing.md`](./model-routing.md) — do not duplicate it here. Codex execution is in [`codex-cli-invocation.md`](./codex-cli-invocation.md).
+Execution-specific layer only. Which worker gets which task (GLM, DeepSeek, Bunny, MiMo) lives in [`docs/ai/model-routing.md`](./model-routing.md) — do not duplicate it here. Codex execution is in [`codex-cli-invocation.md`](./codex-cli-invocation.md).
 
-**Status (2026-10-16, M4):** `opencode v2.0.30`. `opencode auth list` reports **no authenticated integrations**, so Token Harbor routes (DeepSeek, MiMo) are **unavailable on the M4** until the owner logs in there. The live catalog lists `opencode/muse-spark-1.3-contributor-free`, `opencode/space-bunny-free`, `opencode/mimo-v2.6-flash-free` and a Zen `opencode/deepseek-v4.1-flash-free`. The Zen DeepSeek ID is untested and **not** an approved substitute. Route availability is per host (`operating-contract.md` §10.3). Earlier status: verified 2026-10-04 against a locally installed `opencode v2.0.22` (`~/.opencode/bin/opencode`, macOS). The route IDs below were also used throughout the GT3 model benchmark (2026-10-03/04). Re-verify at the start of a session that depends on them — see "This file drifts".
+**Status (2026-11-01, Intel):** `opencode v2.1.2`, binary at `~/.opencode/bin/opencode` (not on the default shell PATH; put `~/.opencode/bin` on PATH for the call, the wrapper execs `opencode`). Owner decision: **Muse is withdrawn and replaced by GLM 5.3 Flash Free and DeepSeek V4.1 Flash Free, both on OpenCode Zen.** Live catalog: `opencode/glm-5.3-flash-free` and `opencode/deepseek-v4.1-flash-free` listed and INVOCATION VERIFIED (`opencode-route.sh`, trivial prompt, exit 0, header `> build · <model>`, zero spend). `opencode/muse-spark-1.3-contributor-free` and `opencode/space-bunny-free` are no longer listed. Token Harbor is no longer used for DeepSeek, as active route or fallback. Earlier status, kept as history — **(2026-10-16, M4):** `opencode v2.0.30`. `opencode auth list` reports **no authenticated integrations**, so Token Harbor routes (DeepSeek, MiMo) are **unavailable on the M4** until the owner logs in there. The live catalog lists `opencode/muse-spark-1.3-contributor-free`, `opencode/space-bunny-free`, `opencode/mimo-v2.6-flash-free` and a Zen `opencode/deepseek-v4.1-flash-free`. The Zen DeepSeek ID is untested and **not** an approved substitute. Route availability is per host (`operating-contract.md` §10.3). Earlier status: verified 2026-10-04 against a locally installed `opencode v2.0.22` (`~/.opencode/bin/opencode`, macOS). The route IDs below were also used throughout the GT3 model benchmark (2026-10-03/04). Re-verify at the start of a session that depends on them — see "This file drifts".
 
 ## Required invocation path: `scripts/opencode-route.sh`
 
@@ -28,16 +28,18 @@ opencode run --standalone --auto -m <provider/model> "<prompt>" < /dev/null
 
 **Live-run verification (2026-10-04):** `scripts/opencode-route.sh -m opencode/muse-spark-1.3-contributor-free "<trivial prompt>"` from a scratch directory: exit 0, the expected reply on stdout, and stderr showing `> build · muse-spark-1.3-contributor-free`. Zero spend (free Zen route). The refusal paths (missing model, non-`provider/model`, paid Token Harbor IDs including `#variant` forms, missing prompt or brief file) were tested against a stub binary.
 
-## Benchmark-proven free routes
+## Approved free routes
 
-| Role (see `model-routing.md`) | Exact model ID | Provider | Live catalog 2026-10-04 |
+| Role (see `model-routing.md`) | Exact model ID | Provider | Status |
 |---|---|---|---|
-| Muse Spark 1.3 | `opencode/muse-spark-1.3-contributor-free` | Zen (OpenCode) | listed; executed OK |
-| Space Bunny | `opencode/space-bunny-free` | Zen (OpenCode) | listed |
-| DeepSeek V4.1 Flash Free | `tokenharbor/deepseek-v4.1-flash:free` | Token Harbor | listed |
-| MiMo V2.6 Flash Free — **experimental, no default lane** | `tokenharbor/mimo-v2.6-flash:free` | Token Harbor | listed |
+| GLM 5.3 Flash Free (replaced Muse) | `opencode/glm-5.3-flash-free` | Zen (OpenCode) | listed + executed OK 2026-11-01 (Intel) |
+| DeepSeek V4.1 Flash Free | `opencode/deepseek-v4.1-flash-free` | Zen (OpenCode) | listed + executed OK 2026-11-01 (Intel) |
+| Space Bunny | `opencode/space-bunny-free` | Zen (OpenCode) | **unavailable**: not listed 2026-11-01 |
+| MiMo V2.6 Flash Free — **experimental, no default lane** | `tokenharbor/mimo-v2.6-flash:free` | Token Harbor | listed 2026-11-01; not re-tested |
 
-Only these IDs are approved GT3 routes. Other entries in the catalog (OpenRouter, Nvidia, Poolside and similar, plus `opencode/mimo-v2.6-flash-free`, a Zen MiMo listing the benchmark did not test) are not routes. Use them only on explicit user request.
+**Retired routes (history).** `opencode/muse-spark-1.3-contributor-free` (Muse; benchmark-proven 2026-10-04, withdrawn from the catalog by 2026-11-01) and `tokenharbor/deepseek-v4.1-flash:free` (the benchmark's DeepSeek listing; retired by the owner 2026-11-01, not a fallback). Their evidence stays in `routing-evidence.md` and `model-routing.md` §15.
+
+Only these IDs are approved GT3 routes. Other entries in the catalog (OpenRouter, Nvidia, Poolside and similar, other Zen `*-free` models, `opencode/mimo-v2.6-flash-free`, and paid `tokenharbor/glm-5.3*` listings) are not routes. Use them only on explicit user request.
 
 **Token Harbor `:free` is mandatory.** Token Harbor lists paid siblings next to the free IDs: `tokenharbor/deepseek-v4.1-flash` and `tokenharbor/mimo-v2.6-flash`, and paid `claude-*`/`gpt-*` entries too. Never drop the suffix, never substitute a sibling, never spend money or top up a provider without explicit user approval. The wrapper refuses any `tokenharbor/` ID that doesn't end in `:free`.
 
@@ -66,14 +68,14 @@ Never:
 opencode --version
 opencode service status                  # background server URL
 opencode auth list                       # provider names + "stored"; no secrets
-script -q /dev/null opencode models | grep -E 'muse-spark-1.3-contributor-free|space-bunny-free|deepseek-v4.1-flash|mimo-v2.6-flash'
+script -q /dev/null opencode models | grep -E 'glm-5.3-flash-free|deepseek-v4.1-flash-free|space-bunny-free|mimo-v2.6-flash'
 ```
 
 `opencode models` prints **nothing** when stdout isn't a terminal (observed on v2.0.22). Wrap it in `script` as above when calling it from an agent. The command exactly as written was verified 2026-10-04. A variant piping `script` output with stdin redirected from `/dev/null` printed nothing, so keep the form above. `opencode run` is not affected.
 
 ## Dedicated worktree rule
 
-Like Codex jobs, routed OpenCode jobs run with auto-approved edits and commands in their launch directory. Launch them from a manager-created worktree on the job's branch, never the user's main checkout. `scripts/lib/route-guard.sh` **enforces** this: it refuses the main checkout and branch `main`. Under `GT3_CONFIG=sol-led`, only Muse is allowed. The host limits in `operating-contract.md` §6 apply to OpenCode workers too: inference is remote, but their builds, browsers and tests run locally and count host-wide.
+Like Codex jobs, routed OpenCode jobs run with auto-approved edits and commands in their launch directory. Launch them from a manager-created worktree on the job's branch, never the user's main checkout. `scripts/lib/route-guard.sh` **enforces** this: it refuses the main checkout and branch `main`. Under `GT3_CONFIG=sol-led`, only GLM and DeepSeek (Zen) are allowed. The host limits in `operating-contract.md` §6 apply to OpenCode workers too: inference is remote, but their builds, browsers and tests run locally and count host-wide.
 
 ## This file drifts
 

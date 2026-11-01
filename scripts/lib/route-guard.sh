@@ -14,7 +14,7 @@
 #      host; epoch and configuration are taken from the record (a conflicting GT3_EPOCH or
 #      GT3_CONFIG in the environment is refused). GT3_TASK is required. Only the seat holder's
 #      host can dispatch for a run.
-#   4. Roster: configuration sol-led allows only the seven Sol-led models.
+#   4. Roster: configuration sol-led allows only the eight Sol-led models (model-routing.md §11b).
 #   5. The wrapper calls route_log just before exec, so only real launches are logged.
 # Run and task may be given as GT3_RUN/GT3_TASK or as wrapper flags -R <run> -T <task>. Prefer
 # the flags: a command that starts with the wrapper path matches the project execpolicy
@@ -73,7 +73,7 @@ route_guard() {
 
   if [[ "${GT3_CONFIG:-}" == sol-led ]]; then
     case "$model" in
-      gpt-6.1-sol|gpt-6.1-terra|gpt-5.6-terra|gpt-6-luna|opencode/muse-spark-1.3-contributor-free|\
+      gpt-6.1-sol|gpt-6.1-terra|gpt-5.6-terra|gpt-6-luna|opencode/glm-5.3-flash-free|opencode/deepseek-v4.1-flash-free|\
       claude-opus-5-5|claude-sonnet-5-5|claude-haiku-5-5) ;;
       *) route_guard_die "model '$model' is not in the Sol-led roster (model-routing.md §11b)" ;;
     esac

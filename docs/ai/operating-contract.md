@@ -27,6 +27,7 @@ This file owns what is shared by every manager configuration and every host: hos
 
 - **Run:** `scripts/gt3-run.sh claim <run> <manager>@<host> --branch <b>` before dispatching, `status` to check, `release` when done or handing off. Epoch and configuration live in the record.
 - **Workers:** `scripts/<codex|claude|opencode>-route.sh -R <run> -T <task> -m … -r … -s … @local/briefs/<task>.md`. Start the command with the wrapper path, with no `VAR=` prefix and no inline nested quoting; otherwise the Codex `allow` rule doesn't match, the wrapper runs sandboxed and the seat guard refuses it (fail-closed). Briefs go in the worktree's git-ignored `local/briefs/`.
+- **Effort:** the launch lines show a typical manager starting level; choose effort per session and per task by `model-routing.md` §12 (efficiency first, never fixed by model).
 - **Host:** `node scripts/host-check.mjs preflight <agent|heavy|heavy2|browser|perf>` before spawning or changing class; exit 75 = wait.
 - **Evidence:** the worker's output, its exit code and one line in the record's Tasks table. Runtime evidence goes through `scripts/with-verification-server.sh` (provenance). Nothing more by default.
 - **Owner-only:** push, any integration into `main`, commits on `main`, scope or phase changes, new paid spend, cross-host claims (`--owner-confirmed`), unattended runs.
@@ -156,7 +157,7 @@ Only layer 4 holds off-host. Owner-approved integrations stay possible through e
 | `claude-route.sh -s read-only` | `--tools Read,Grep,Glob` | Claude Code tool set | reads only | specialist analysis or review; any checkout |
 | `claude-route.sh -s edit` | `acceptEdits` + Bash allowlist, prompts denied | Claude Code permissions | edits inside the worktree, `git status/diff/log/show`, `node --check`, `npm run build` (verified 2026-10-16: `/tmp` write, outside write, `git push` and subagent all refused) | bounded implementation; the manager commits |
 | `claude-route.sh -s auto` | auto mode, prompts denied | Claude Code classifier | classifier-approved commands | Anchor-class work that must run things |
-| `opencode-route.sh` | `--auto` | — | broad | Muse/DeepSeek/Bunny; requires a worktree |
+| `opencode-route.sh` | `--auto` | — | broad | GLM/DeepSeek (Zen); requires a worktree |
 
 **Rules (policy unless marked):**
 - Use the narrowest mode that can reach acceptance.
@@ -380,6 +381,8 @@ Vocabulary: PROPOSED · DOCUMENTED · IMPLEMENTED · STATICALLY VERIFIED · INVO
 | Token Harbor DeepSeek `tokenharbor/deepseek-v4.1-flash:free` (Opus-led lane) | **BLOCKED on the M4**: `opencode auth list` shows no Token Harbor login. A Zen `opencode/deepseek-v4.1-flash-free` is listed but untested and unapproved |
 | Claude Opus / Sonnet / Haiku via `claude-route.sh` | INVOCATION VERIFIED (M4) |
 | Cloud Opus | reviewer only; needs an authorized push (`cloud-opus-invocation.md`) |
+
+**Intel update (2026-11-01, history above preserved).** OpenCode v2.1.2 (binary at `~/.opencode/bin`, not on the default shell PATH): `opencode/glm-5.3-flash-free` and `opencode/deepseek-v4.1-flash-free` INVOCATION VERIFIED; Muse and Space Bunny no longer listed; Token Harbor DeepSeek retired as a route (owner). Codex v0.166.0: `gpt-6.1-terra` listed and INVOCATION VERIFIED.
 
 ## 11. Quota and accounts
 

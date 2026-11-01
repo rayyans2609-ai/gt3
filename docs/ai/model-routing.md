@@ -7,14 +7,14 @@ GT3 runs under one of **two manager configurations**, Opus-led (§11) and Sol-le
 Execution-specific detail lives separately, and this file does not duplicate it:
 
 - [`codex-cli-invocation.md`](./codex-cli-invocation.md): Codex models (Luna, Terra, Sol, Astra), verified slugs, reasoning-effort values, invocation. Route through `scripts/codex-route.sh`.
-- [`opencode-invocation.md`](./opencode-invocation.md): OpenCode free routes (Muse, DeepSeek, Bunny, MiMo), exact model IDs, credential isolation, route health. Route through `scripts/opencode-route.sh`.
+- [`opencode-invocation.md`](./opencode-invocation.md): OpenCode free routes (GLM, DeepSeek, Bunny, MiMo), exact model IDs, credential isolation, route health. Route through `scripts/opencode-route.sh`.
 - [`claude-cli-invocation.md`](./claude-cli-invocation.md): headless Claude workers (Opus, Sonnet, Haiku) with explicit model, effort and permission mode, on the owner's subscription. Route through `scripts/claude-route.sh`.
 - [`cloud-opus-invocation.md`](./cloud-opus-invocation.md): Cloud Opus (independent senior reviewer in a Claude cloud session), the push-and-SHA-confirm rule, launcher `scripts/cloud-opus-launch.exp`.
 - [`routing-evidence.md`](./routing-evidence.md): the running record of material model work that §15 learns from.
 
 **Two layers.** Part I is general principle, written to transfer beyond GT3. Part II is the current GT3 model map, which is evidence-based and revisable. When a model name changes, Part II changes; Part I should not need to.
 
-**Status:** current evidence-based default, not permanent doctrine. Roles change only when measured GT3 work shows better (§15). Agents must not rewrite this mid-run because they prefer something else; propose changes in the handoff instead. Revised 2026-10-05: efficiency-doctrine migration (scarcity-adjusted routing, net-leverage delegation, least-privilege context, risk-based review, Sol as execution lead, Muse/DeepSeek/Bunny lanes), then right-sized verification (§5), which replaced default-exhaustive verification after Phase 3 closure. Revised 2026-10-16 (owner-approved operating-system review): two selectable manager configurations, the Sol-led seven-model roster (§11b), per-call Claude effort for headless workers (§12), and configuration-dependent delegation (§13).
+**Status:** current evidence-based default, not permanent doctrine. Roles change only when measured GT3 work shows better (§15). Agents must not rewrite this mid-run because they prefer something else; propose changes in the handoff instead. Revised 2026-10-05: efficiency-doctrine migration (scarcity-adjusted routing, net-leverage delegation, least-privilege context, risk-based review, Sol as execution lead, Muse/DeepSeek/Bunny lanes), then right-sized verification (§5), which replaced default-exhaustive verification after Phase 3 closure. Revised 2026-10-16 (owner-approved operating-system review): two selectable manager configurations, the Sol-led seven-model roster (§11b), per-call Claude effort for headless workers (§12), and configuration-dependent delegation (§13). Revised 2026-11-01 (owner): efficiency-first reasoning effort chosen per task, not per model (§12); Muse withdrawn and replaced by GLM 5.3 Flash Free and DeepSeek V4.1 Flash Free on OpenCode Zen (§11, §11b; Sol-led roster now eight models); Token Harbor DeepSeek retired; Bunny route unavailable.
 
 ---
 
@@ -50,7 +50,7 @@ delegation value = parent work avoided − briefing − coordination − integra
 
 Delegate only when that is meaningfully positive. In practice that means the subtask is separable, big enough to justify a handoff, briefable in a compact packet, actually avoids the parent repeating the reasoning, likely to succeed without heavy supervision, and either preserves scarce capacity or enables useful parallelism. Otherwise the current owner keeps it.
 
-- **Prefer the shallowest tree that creates real leverage.** Opus → Sol → Muse is sometimes right. So are Opus → Sol, Opus doing its own Anchor Task (§11), and Sol finishing a tightly coupled supporting change itself. The model hierarchy is not mandatory bureaucracy.
+- **Prefer the shallowest tree that creates real leverage.** Opus → Sol → GLM is sometimes right. So are Opus → Sol, Opus doing its own Anchor Task (§11), and Sol finishing a tightly coupled supporting change itself. The model hierarchy is not mandatory bureaucracy.
 - **Silent ownership.** Once a worker cleanly owns a task, it owns it until complete, blocked, materially off course, or resource-constrained. The parent does not poll, reread the same files, re-solve the task, or reason in parallel unless an event justifies it. Deliberate duplication needs a stated reason: competing hypotheses, verification, model comparison, or recovery.
 - **Batch low-value work.** Several mechanical checks go in one Luna batch, and several bounded inspections go in one packet. Don't batch tasks that need different context or ownership.
 
@@ -61,7 +61,7 @@ Every delegator sends **the minimum sufficient context plus a small safety margi
 | Hop | Packet |
 |---|---|
 | Manager → execution lead (Opus → Sol) | phase objective, relevant architecture, key dependencies, constraints, boundaries, acceptance conditions, only the history that materially matters |
-| Lead → bounded worker (Sol → Muse / Terra / DeepSeek) | exact bounded objective, relevant files/interfaces, local constraints, dependencies, expected evidence, explicit exclusions |
+| Lead → bounded worker (Sol → GLM / DeepSeek / Terra) | exact bounded objective, relevant files/interfaces, local constraints, dependencies, expected evidence, explicit exclusions |
 | Any → mechanical worker (→ Luna) | exact procedure/check, expected observable result, output format; little or no strategy |
 
 **Carry intent downward; shed irrelevant context downward. Carry evidence upward; shed execution noise upward.** Downward runs strategy → bounded objective → procedure. Upward runs raw execution → evidence/result → managerial implication. Less context often improves quality as well as cost, because it reduces distraction, scope creep and anchoring on stale history.
@@ -105,9 +105,9 @@ These are defaults, not bureaucracy. Judgment and failure signals override them.
 
 **Diagnose before retrying.** Classify the failure: wrong model, insufficient reasoning, missing context or evidence, wrong assumption, poor decomposition, ambiguous requirement, implementation mistake, architecture misunderstanding, verification failure, tooling/provider problem, or genuine capability limit. Then change that variable. Same model + same prompt + same context + no new evidence is not a legitimate retry.
 
-**Explicit lane boundaries.** A worker that has crossed its lane stops and reports instead of burning tokens pretending. Examples: Muse finds architecture-level ambiguity. DeepSeek makes one serious debugging attempt but can't reproduce or resolve the issue. Terra finds that a "bounded" change spans global systems. Sol hits product-intent ambiguity or a project-wide architecture tradeoff. The pattern is **checkpoint → preserve useful work → escalate**, never heroic persistence or retry loops.
+**Explicit lane boundaries.** A worker that has crossed its lane stops and reports instead of burning tokens pretending. Examples: GLM finds architecture-level ambiguity. DeepSeek makes one serious debugging attempt but can't reproduce or resolve the issue. Terra finds that a "bounded" change spans global systems. Sol hits product-intent ambiguity or a project-wide architecture tradeoff. The pattern is **checkpoint → preserve useful work → escalate**, never heroic persistence or retry loops.
 
-**Escalation is evidence-based.** Bad: "this seems hard." Good: "Muse attempted X, runtime showed Y, Sol tested hypothesis Z and disproved it, and the remaining failure spans A/B/C." Compress prior findings so the stronger model doesn't rediscover them. Workers report upward. Only a parent reassigns or escalates (§13).
+**Escalation is evidence-based.** Bad: "this seems hard." Good: "GLM attempted X, runtime showed Y, Sol tested hypothesis Z and disproved it, and the remaining failure spans A/B/C." Compress prior findings so the stronger model doesn't rediscover them. Workers report upward. Only a parent reassigns or escalates (§13).
 
 ## 7. Parallelism must be earned
 
@@ -133,7 +133,7 @@ Escalate to the user, never to a bigger model, when a decision materially change
 
 **Economics depend on the configuration.** Quota is per provider account, not per Mac (`operating-contract.md` §11). The paragraphs below describe the **Opus-led** configuration. Under **Sol-led**, see §11b: the manager runs on Codex, so Codex capacity protects management continuity, while Claude capacity buys specialist work (Opus Anchor Tasks, Sonnet, Haiku) and is still priced as scarce.
 
-**Claude is the scarcest resource.** Claude-side worker usage (Sonnet, Opus worker instances) competes directly with the Opus manager's ability to keep operating, so every Sonnet task carries an opportunity cost against future Opus capacity. Terra or a free worker can rationally beat Sonnet even where Sonnet is somewhat stronger in isolation. That prices Sonnet correctly without banning it. **Codex** is metered but normally available. Use Sol and Terra normally when they fit. Astra is the exception (§11). **Free OpenCode routes** (Muse, DeepSeek, Bunny) are **normal capacity, not emergency fallback**. Using them well reduces premium burn before conservation is ever needed. Don't choose a weaker worker merely to save quota when rework would cost more.
+**Claude is the scarcest resource.** Claude-side worker usage (Sonnet, Opus worker instances) competes directly with the Opus manager's ability to keep operating, so every Sonnet task carries an opportunity cost against future Opus capacity. Terra or a free worker can rationally beat Sonnet even where Sonnet is somewhat stronger in isolation. That prices Sonnet correctly without banning it. **Codex** is metered but normally available. Use Sol and Terra normally when they fit. Astra is the exception (§11). **Free OpenCode routes** (GLM, DeepSeek; Bunny while available) are **normal capacity, not emergency fallback**. Using them well reduces premium burn before conservation is ever needed. Don't choose a weaker worker merely to save quota when rework would cost more.
 
 **Free-route health.** The preference holds only while the exact route is healthy, available and genuinely free. A provider/route failure is not a capability failure: re-check the live catalog (`opencode-invocation.md`), don't loop on a broken route, and fall through per §14. Never silently substitute a paid sibling, and never spend or top up without explicit user approval.
 
@@ -142,7 +142,7 @@ Escalate to the user, never to a bigger model, when a decision materially change
 | Mode | Behavior |
 |---|---|
 | **Normal** | Opus manages; Opus Anchor Tasks and specialist Sonnet use allowed when justified; Astra selective |
-| **Conservation** (Claude trajectory unsafe) | protect Opus; minimize Claude-worker use; execution shifts to Muse / DeepSeek / Terra / Sol / Luna; Astra even more selective; no optional broad Claude work |
+| **Conservation** (Claude trajectory unsafe) | protect Opus; minimize Claude-worker use; execution shifts to GLM / DeepSeek / Terra / Sol / Luna; Astra even more selective; no optional broad Claude work |
 | **Critical reserve** | Claude only for manager actions that genuinely need Opus; Sol carries more technical continuity; no optional Claude work; checkpoint Claude-side state cleanly; keep recovery/integration capacity |
 
 **Keep a reserve.** Never plan to consume 100 % of frontier quota. Hold some back for integration problems, recovery, blockers, final managerial decisions and continuation/handoff. The reserve is a judgment call, not a fixed percentage, until evidence supports thresholds. Session-level economics the user states (for example a short Claude-heavy window before a reset) are session overrides and are never written into canonical docs.
@@ -155,11 +155,11 @@ Escalate to the user, never to a bigger model, when a decision materially change
 |---|---|
 | **Claude Opus** | primary manager + intelligence apex; 0–2 Anchor Tasks per phase when justified |
 | **GPT-6.1 Sol** | main heavyweight engineering worker; execution lead for substantial batches |
-| **Muse Spark 1.3** (free, OpenCode) | major free general-purpose worker for bounded implementation |
+| **GLM 5.3 Flash Free** (OpenCode Zen) | major free general-purpose worker for bounded implementation (replaced Muse 2026-11-01; on GT3 trial) |
 | **GPT-5.6 Terra** | reliable bounded paid worker |
 | **GPT-6 Luna** | mechanical / deterministic execution |
-| **DeepSeek V4.1 Flash Free** (OpenCode) | free debugging specialist + reserve |
-| **Space Bunny** (free, OpenCode) | experimental support/scouting: fact retrieval and evidence gathering; on probation |
+| **DeepSeek V4.1 Flash Free** (OpenCode Zen) | free debugging specialist + free bounded-implementation reserve |
+| **Space Bunny** (free, OpenCode) | experimental support/scouting; **route unavailable** (not in the live catalog, 2026-11-01) |
 | **Claude Sonnet** | specialist exception; needs a positive task-specific reason |
 | **GPT-6 Astra** | rare, event-triggered senior independent escalation |
 
@@ -173,7 +173,7 @@ Decomposition, routing, broad project synthesis, integration judgment, resolving
 ### GPT-6.1 Sol — heavyweight engineering + execution lead
 Difficult implementation and debugging, complex integration, camera/3D/math, rendering and performance-sensitive work, state/lifecycle/race conditions, technically uncertain engineering, and major technical decisions below the project-wide layer. Sol should solve the overwhelming majority of hard GT3 engineering without Astra. A hard bounded problem gets Sol at higher reasoning, not a stronger model (§12).
 
-For substantial engineering batches Sol may act as **execution lead** under Opus (User → Opus → Sol → bounded workers). It delegates bounded subproblems by preference to: Muse (capable free generalist work), Luna (mechanical), Terra (stronger bounded reliability), DeepSeek (debugging/root-cause subproblems), Bunny (fact retrieval for a child's packet). **Sol is not required to spawn anything.** If it already holds the context and can finish a coupled subtask more cheaply than briefing and integrating a child, it does it. Sol is a lead when useful, not a mandatory middle-management layer.
+For substantial engineering batches Sol may act as **execution lead** under Opus (User → Opus → Sol → bounded workers). It delegates bounded subproblems by preference to: GLM (capable free generalist work), Luna (mechanical), Terra (stronger bounded reliability), DeepSeek (debugging/root-cause subproblems, and free generalist reserve), Bunny (fact retrieval for a child's packet, while its route is available). **Sol is not required to spawn anything.** If it already holds the context and can finish a coupled subtask more cheaply than briefing and integrating a child, it does it. Sol is a lead when useful, not a mandatory middle-management layer.
 
 **Who decides the split.** Opus hands Sol the engineering objective, constraints and acceptance conditions, not an internal worker allocation. On receiving the task, Sol decides from the current repo state whether to execute directly or delegate.
 - Sol delegates only when total expected cost/time plus integration risk beats doing it itself (§3).
@@ -188,34 +188,32 @@ For substantial engineering batches Sol may act as **execution lead** under Opus
 
 Benchmark nuance: an early Sol performance run self-reported ~84 % improvement, but the manager-owned grader measured ~59 % under the same conditions. Sol still clearly beat the free alternatives. The lesson is to verify performance claims, not to distrust Sol.
 
-### Muse Spark 1.3 — major free general-purpose worker
-A genuine high-volume execution resource, not a free helper for ceremonial tasks. It handles small/medium bounded implementation, contained UI work (component/CSS), isolated features, straightforward refactors, utilities, tests, bounded bug fixes (including audio and UI state), asset integration, code/docs synchronization, semi-mechanical repo work, and checks that need modest reasoning beyond Luna. It overlaps Luna where a mechanical-looking task needs some interpretation. In the benchmark it was the strongest free bounded worker, with small relevant patches and good self-verification. **Candidate scope beyond UI, under evidence-based trial:**
-- bounded engineering that would otherwise go to Terra;
-- routine watchdog judgment (stuck vs. legitimate wait);
-- lightweight code review;
-- log interpretation and anomaly assessment.
+### GLM 5.3 Flash Free — major free general-purpose worker (replaced Muse, 2026-11-01)
+Muse Spark 1.3 was withdrawn from the free catalog; the owner replaced it with GLM 5.3 Flash Free and DeepSeek V4.1 Flash Free, both on OpenCode Zen. GLM inherits Muse's **lane**, not Muse's evidence: small/medium bounded implementation, contained UI work (component/CSS), isolated features, straightforward refactors, utilities, tests, bounded bug fixes (including audio and UI state), asset integration, code/docs synchronization, semi-mechanical repo work, and checks that need modest reasoning beyond Luna. The same candidate scope Muse was trialling (bounded engineering that would otherwise go to Terra, routine watchdog judgment, lightweight code review, log interpretation) is open to GLM under the same evidence rule.
 
-It is a serious economical default candidate, not an automatic replacement for Terra or Luna. Trial it on suitable real tasks, not a dedicated campaign. Widen its scope only where `routing-evidence.md` rows show first-pass acceptance with low rework and acceptable overhead (first evidence: the Phase 3 HUD, 2026-10-06). **Not for** open-ended or frontier systems work (send that to Sol), and it escalates on architecture ambiguity (§6). Material Muse tasks are always tracked.
+GLM has **no GT3 rows yet**, so it starts as a trial: suitable real tasks, not a dedicated campaign. Widen or narrow its scope only from `routing-evidence.md` rows showing first-pass acceptance, rework and overhead. DeepSeek is its free reserve when the GLM route is down or GLM is meaningfully riskier for the task. **Not for** open-ended or frontier systems work (send that to Sol), and it escalates on architecture ambiguity (§6). Material GLM tasks are always tracked. Muse's historical evidence stays in §15 and `routing-evidence.md`.
 
 ### GPT-5.6 Terra — reliable bounded paid worker
-Clear-contract implementation, tooling, deterministic changes, tests, straightforward engineering, bounded decisions, targeted checks. It fits where Muse would be meaningfully riskier but Sol is unnecessary, where the free routes are unhealthy, or where a native, low-latency Codex path is operationally better. **Prefer Terra over Sonnet** for ordinary paid bounded work because of Claude scarcity (§10). Don't use Terra where Muse or Luna would reach the same accepted result for materially less. Keep Terra where its engineering reliability or native Codex path is the reason, for example where a Muse trial on that kind of work has needed rework.
+Clear-contract implementation, tooling, deterministic changes, tests, straightforward engineering, bounded decisions, targeted checks. It fits where GLM or DeepSeek would be meaningfully riskier but Sol is unnecessary, where the free routes are unhealthy, or where a native, low-latency Codex path is operationally better. **Prefer Terra over Sonnet** for ordinary paid bounded work because of Claude scarcity (§10). Don't use Terra where GLM, DeepSeek or Luna would reach the same accepted result for materially less. Keep Terra where its engineering reliability or native Codex path is the reason, for example where a free-route trial on that kind of work has needed rework.
 
 ### GPT-6 Luna — mechanical / deterministic execution
-Known harnesses, browser and DOM checks, screenshots/captures, log extraction, file/command repetition, routine evidence collection, mechanical verification, renames, boilerplate, deterministic housekeeping, mechanical liveness checks. Small scope, explicit procedure, clear expected output. Luna is the default for browser/test execution and mechanical investigation, but not an absolute rule: when a "mechanical" task needs modest interpretation (including watchdog judgment), Muse may be the better buy. Pure completion detection is a script, not Luna (§8). Don't spawn Luna for trivia a single command answers. **Not for** ambiguous features, architecture, hard debugging, UI judgment, complex state or 3D.
+Known harnesses, browser and DOM checks, screenshots/captures, log extraction, file/command repetition, routine evidence collection, mechanical verification, renames, boilerplate, deterministic housekeeping, mechanical liveness checks. Small scope, explicit procedure, clear expected output. Luna is the default for browser/test execution and mechanical investigation, but not an absolute rule: when a "mechanical" task needs modest interpretation (including watchdog judgment), GLM may be the better buy. Pure completion detection is a script, not Luna (§8). Don't spawn Luna for trivia a single command answers. **Not for** ambiguous features, architecture, hard debugging, UI judgment, complex state or 3D.
 
 ### DeepSeek V4.1 Flash Free — free debugging specialist + reserve
-When the central question is **"why is this broken?"**, consider DeepSeek first. Its work includes failure reproduction, stack traces, state tracing, working-vs-broken comparisons, root-cause hypotheses, targeted debugging, minimal-fix investigation, and challenging another worker's diagnosis. It is also the free reserve when Muse's route is down. In the benchmark it accepted on bounded debugging and (with a fix) bounded implementation. On an open-ended performance task it timed out, missed the target and regressed normal driving with a broad, noisy diff. **Escalate to Sol** once debugging turns architecture-heavy, deeply interconnected, highly consequential, or fails after one serious attempt. Never loop. Always use the exact `:free` route. Material DeepSeek tasks are always tracked.
+When the central question is **"why is this broken?"**, consider DeepSeek first. Its work includes failure reproduction, stack traces, state tracing, working-vs-broken comparisons, root-cause hypotheses, targeted debugging, minimal-fix investigation, and challenging another worker's diagnosis. It is also the free reserve for bounded implementation when GLM's route is down or GLM is meaningfully riskier. In the benchmark it accepted on bounded debugging and (with a fix) bounded implementation. On an open-ended performance task it timed out, missed the target and regressed normal driving with a broad, noisy diff. **Escalate to Sol** once debugging turns architecture-heavy, deeply interconnected, highly consequential, or fails after one serious attempt. Never loop. Always use the exact Zen route `opencode/deepseek-v4.1-flash-free` (since 2026-11-01; the earlier benchmark evidence was on the Token Harbor `:free` listing of the same model, which is retired and is not a fallback). Material DeepSeek tasks are always tracked.
 
 ### Space Bunny — experimental support/scouting (on probation)
+**Route unavailable:** `opencode/space-bunny-free` is not in the live catalog (2026-11-01). Until it returns, fact retrieval goes to Luna (Codex side) or Haiku (Claude side), as under Sol-led. The rest of this section applies only if the route returns.
+
 Bunny has **not yet earned a permanent architectural role**. In the benchmark it read and critiqued well but completed poorly as primary implementer, so it is never the primary patch owner.
 
-- **With lower-tier workers (Luna / Muse / Terra):** repo investigation, factual search, locating files, dependency/state tracing, evidence gathering, bounded preliminary analysis, context preparation. Use it especially when the child's task would otherwise be riskier. The parent may run Bunny to assemble the child's packet.
+- **With lower-tier workers (Luna / GLM / DeepSeek / Terra):** repo investigation, factual search, locating files, dependency/state tracing, evidence gathering, bounded preliminary analysis, context preparation. Use it especially when the child's task would otherwise be riskier. The parent may run Bunny to assemble the child's packet.
 - **With Sol / Opus:** retrieval only. Bunny supplies code locations, diffs, references, history, measurements, implementation facts and repo state, and the premium model does the reasoning. Never let Bunny solve, compress a conclusion, and have Sol/Opus rubber-stamp it.
 
 Track every material Bunny use (`routing-evidence.md`): usefulness, factual accuracy, missed context, whether it lightened another worker's load or improved first-pass acceptance, or merely added a model to the chain. A stronger niche comes only from that evidence.
 
 ### Claude Sonnet — specialist exception
-Available and worth using when a task is **extremely well suited to Sonnet** and that advantage justifies its Claude scarcity cost (§10). Sonnet is not default implementation capacity, not where medium work goes for being medium, not a routine reviewer, and not a watchdog. Each use needs a positive, task-specific reason to beat Muse/Terra/Sol routing. Its GT3 niches are to be identified empirically (`routing-evidence.md`). Sonnet is not a stop between the bounded lanes and Sol. Clearly serious engineering goes straight to Sol. When Codex is unavailable, Sonnet becomes the only paid bounded lane, which can itself be the positive reason (`autonomous-mode.md` §5).
+Available and worth using when a task is **extremely well suited to Sonnet** and that advantage justifies its Claude scarcity cost (§10). Sonnet is not default implementation capacity, not where medium work goes for being medium, not a routine reviewer, and not a watchdog. Each use needs a positive, task-specific reason to beat GLM/DeepSeek/Terra/Sol routing. Its GT3 niches are to be identified empirically (`routing-evidence.md`). Sonnet is not a stop between the bounded lanes and Sol. Clearly serious engineering goes straight to Sol. When Codex is unavailable, Sonnet becomes the only paid bounded lane, which can itself be the positive reason (`autonomous-mode.md` §5).
 
 ### GPT-6 Astra — rare senior independent escalation
 Astra is token-hungry and expensive. It is an **independent senior supervisory/escalation layer**: event-triggered, never routine, and **never a manager**. It is not the standing manager, not a temporary manager, and not the failover path. Opus manages, and when Opus/Claude is constrained, Sol is the temporary continuity manager (§13). Use Astra only when independent frontier-level judgment has clear expected value:
@@ -227,58 +225,46 @@ Astra is token-hungry and expensive. It is an **independent senior supervisory/e
 
 ## 11b. Roles — Configuration B: Sol-led
 
-GPT-6.1 Sol is the **native manager in Codex**. This is not Sol as execution lead under Opus (§11), and not the temporary continuity manager (§13). The owner selects it (`operating-contract.md` §2). Its default roster is **exactly seven models**. Astra, DeepSeek, Bunny and MiMo are **not** in it: their evidence is preserved and they remain Opus-led lanes. `scripts/lib/route-guard.sh` enforces the roster when `GT3_CONFIG=sol-led`.
+GPT-6.1 Sol is the **native manager in Codex**. This is not Sol as execution lead under Opus (§11), and not the temporary continuity manager (§13). The owner selects it (`operating-contract.md` §2). Its default roster is **exactly eight models**. Astra, Bunny and MiMo are **not** in it: their evidence is preserved and they remain Opus-led lanes. `scripts/lib/route-guard.sh` enforces the roster when `GT3_CONFIG=sol-led`.
 
 | Model | Role under Sol-led | Route (status 2026-10-16, M4) |
 |---|---|---|
 | **GPT-6.1 Sol** | manager: decomposition, allocation, delegation, engineering coordination, integration, evidence assessment, quota and resource choices, scheduling, checkpointing, recovery, handoff. Also does tightly coupled engineering itself | native Codex session; `gpt-6.1-sol` listed |
 | **Claude Opus 5.5** | highest-tier specialist: Anchor Tasks, highest-difficulty engineering, complex integration, high-consequence architecture, unresolved contradictions | `claude-route.sh -m claude-opus-5-5`: INVOCATION VERIFIED |
-| **Claude Sonnet 5.5** | demanding, clearly bounded implementation or debugging where it has an expected advantage over Muse/Terra | `claude-route.sh -m claude-sonnet-5-5`: INVOCATION VERIFIED |
-| **Muse Spark 1.3** | free bounded implementation capacity | `opencode-route.sh -m opencode/muse-spark-1.3-contributor-free`: listed; free-route health applies (§10) |
+| **Claude Sonnet 5.5** | demanding, clearly bounded implementation or debugging where it has an expected advantage over GLM/DeepSeek/Terra | `claude-route.sh -m claude-sonnet-5-5`: INVOCATION VERIFIED |
+| **GLM 5.3 Flash Free** | free bounded implementation capacity (replaced Muse) | `opencode-route.sh -m opencode/glm-5.3-flash-free`: INVOCATION VERIFIED (Intel, 2026-11-01); free-route health applies (§10) |
+| **DeepSeek V4.1 Flash Free** | free bounded implementation reserve (replaced Muse with GLM); bounded debugging | `opencode-route.sh -m opencode/deepseek-v4.1-flash-free`: INVOCATION VERIFIED (Intel, 2026-11-01); free-route health applies (§10) |
 | **GPT-5.6 Terra** | reliable Codex-native bounded engineering and tooling | `codex-route.sh -m gpt-5.6-terra` |
 | **GPT-6 Luna** | mechanical execution and verification, browser/harness runs | `codex-route.sh -m gpt-6-luna`: INVOCATION VERIFIED (read-only) |
 | **Claude Haiku 5.5** | lightweight Claude-side mechanical tasks (retrieval, summarizing, simple checks) when Claude-side context or tools help | `claude-route.sh -m claude-haiku-5-5`: INVOCATION VERIFIED |
 
-**Economics under Sol-led.** Codex carries the manager, so protect Codex trajectory for management continuity. Prefer Terra and Luna, which are native and low overhead, and Muse, which is free, for bounded work. Claude routes are a scarce specialist budget: Opus for work that genuinely needs it, Sonnet only with a positive task-specific reason, and Haiku when Claude-side tooling or context is the point rather than for volume Luna handles. Luna and Haiku are complementary: Luna for Codex-side harness runs, Haiku for small Claude-side reads and summaries. Neither is a watchdog; completion detection is a script (§8). Quota modes (§10) apply by analogy: if Codex trajectory is unsafe, Sol checkpoints and may hand the seat to Opus. If Claude is exhausted, Claude routes are BLOCKED and Sol continues on Codex and Muse.
+**Economics under Sol-led.** Codex carries the manager, so protect Codex trajectory for management continuity. Prefer Terra and Luna, which are native and low overhead, and GLM and DeepSeek, which are free, for bounded work. Claude routes are a scarce specialist budget: Opus for work that genuinely needs it, Sonnet only with a positive task-specific reason, and Haiku when Claude-side tooling or context is the point rather than for volume Luna handles. Luna and Haiku are complementary: Luna for Codex-side harness runs, Haiku for small Claude-side reads and summaries. Neither is a watchdog; completion detection is a script (§8). Quota modes (§10) apply by analogy: if Codex trajectory is unsafe, Sol checkpoints and may hand the seat to Opus. If Claude is exhausted, Claude routes are BLOCKED and Sol continues on Codex and the free Zen routes.
 
 **Opus under Sol is a worker.** A Sol manager may delegate bounded, substantial work to Opus **without transferring management**. The packet states scope, permission mode, worktree, acceptance criteria and reporting contract (`done / evidence / unverified / blocked`). Opus does not decompose or dispatch unrelated work and does not assume authority. `claude-route.sh` marks it `GT3 ROLE: worker` and denies the Agent tool and route launches. If the problem turns out to need project-wide management, Opus **reports** that, and the owner decides whether to move the seat (`operating-contract.md` §4).
 
 **Sol managing Sol.** A Sol manager may launch a separate Sol worker through `codex-route.sh` when context separation is worth it. Native Codex multi-agent stays disabled (`--disable multi_agent`) so every worker is accounted for, rostered and host-counted. No recursive Sol chains: workers never launch managers.
 
-**Minimum viable Sol-led roster.** Sol + Terra + Luna. If an optional route is down (Muse provider, Claude quota, a missing model), Sol-led keeps operating within the verified subset, marks the route BLOCKED, and stops only the tasks that need it.
+**Minimum viable Sol-led roster.** Sol + Terra + Luna. If an optional route is down (a free Zen route, Claude quota, a missing model), Sol-led keeps operating within the verified subset, marks the route BLOCKED, and stops only the tasks that need it.
 
 **Evaluating Sol as manager** is separate from evaluating Sol as engineer. Record `manage` rows in `routing-evidence.md`: tasks briefed, children's first-pass acceptance, rework, integration defects, owner interventions, wall-clock and coordination overhead, and whether Opus specialist calls were needed. Compare against an Opus-led baseline of comparable difficulty and verification. One run is an anecdote.
 
 ## 12. Reasoning effort (separate from model choice)
 
-Use the lowest level likely to complete the role reliably, raising it for uncertainty, context load, coordination burden, consequence or rework risk. Never maximize it by default.
+**Principle: efficiency and total leverage.** Choose the **lowest effort likely to reach an accepted outcome efficiently**. Weigh uncertainty, complexity, consequence, expected first-pass success and rework, latency, token cost, verification burden and manager/integration overhead. Raise effort only when its expected reduction in errors, retries or integration cost outweighs the extra reasoning expense. Don't raise it just because a task is described as hard, and don't drop it just because a task looks simple.
 
-| Model | Normal policy |
-|---|---|
-| **Luna** | `low`/`medium` as appropriate |
-| **Terra** | `medium`; higher only when the task is still clearly Terra-class but benefits from extra care |
-| **Sol** | `medium` default for substantial engineering; `high`/`xhigh` when bounded work genuinely needs it; `max`/`ultra` only exceptionally. Catalog default is `low`, so never leave it implicit |
-| **Astra** | explicit selection **required** (low catalog default); usage itself stays exceptional |
-| **OpenCode workers** | the explicit model ID is the whole routing decision; no per-call reasoning variant in current policy |
+- **Three separate decisions.** Match the task to the model first (§2, §11–§14), then choose effort, then size verification (§5). Effort is chosen per task, never by model identity: Terra, Sol or Opus being assigned is not itself a reason for `xhigh` or `max`.
+- **Every level is a choice, not a tier.** `medium`, `high`, `xhigh` and `max` are the usual range; `low` and `ultra` stay available where the provider supports them and the task justifies them. None is an automatic default for any model or mode.
+- **Effort is not escalation.** If an attempt fails, diagnose it first (§6). Raise effort when the diagnosis is "insufficient reasoning"; change the model when it is a capability or lane limit. Neither substitutes for diagnosis.
+- **Calibrate from evidence.** Record the actual effort and an under / ok / over verdict in material `routing-evidence.md` rows (§15, `autonomous-mode.md` §13), and let accumulated rows, not fixed tables, shape future choices.
+- **Owner overrides.** The owner specifies a model or effort only to deliberately override this policy (for example a model trial); the override applies to the task it names.
 
-### Autonomous Mode preferred levels
+**Provider limits and safety (unchanged facts):**
+- `ultra` exists only where the verified Codex catalog lists it: currently every routed Codex model except Luna (`codex-cli-invocation.md`). `scripts/codex-route.sh` accepts `ultra` for any model, so the catalog, not the script, is the check, and the wrapper refuses `ultra` for workers.
+- Sol and Astra have a `low` catalog default, so an omitted effort would silently under-reason; never leave it implicit.
+- OpenCode workers: the explicit model ID is the routing decision; no per-call reasoning variant is used in current policy.
+- Claude-side: an **in-session** subagent (Agent tool) inherits the session's level unless it uses an agent definition (`.claude/agents/*.md`), and GT3 has none yet. A **headless** Claude worker launched through `scripts/claude-route.sh` sets its level per call (`--effort`, required). Record the **actual** level, not the intended one.
 
-Inside Autonomous Mode, prefer these levels. They are defaults, not doctrine; refine them from actual efforts and verdicts in `routing-evidence.md` rows.
-
-| Model | Preferred levels |
-|---|---|
-| **Luna** | `high` for lighter mechanical work and liveness checks; usually `xhigh`/`max`. `max` is fine for dense clerical/browser/harness/evidence work where omissions cause rework |
-| **Terra** | `medium`/`high`/`xhigh` for normal bounded engineering; `max` only when coordinating many Luna agents or unusually broad scope |
-| **Sol** | `medium`/`high` routine serious engineering; `xhigh` difficult implementation/debug/integration; `max`/`ultra` when leading many sub-agents, acting as continuity manager (§13), or doing higher-level integration/decision work |
-| **Astra** | `high` default; `xhigh` for unusually hard contradictions or high-consequence global judgment |
-| **Opus** | `high` default as manager; `xhigh` when parallelism, context or coordination load rises; `max` only for genuinely intricate, high-stakes problems |
-| **Sonnet** | `high`/`xhigh` when a Sonnet-specific task justifies it |
-
-`ultra` is valid only where the verified Codex catalog lists it: currently every routed Codex model except Luna (`codex-cli-invocation.md`). `scripts/codex-route.sh` accepts `ultra` for any model, so the catalog, not the script, is the check.
-
-Claude-side levels: an **in-session** subagent (Agent tool) inherits the session's level unless it uses an agent definition (`.claude/agents/*.md`), and GT3 has none yet. A **headless** Claude worker launched through `scripts/claude-route.sh` sets its level per call (`--effort`, required). Defaults there: Opus `high` (`xhigh` for genuinely intricate Anchor work), Sonnet `high`, Haiku `low`/`medium`. Record the **actual** level, not the intended one.
-
-Every routed job passes its model explicitly, and every Codex job also passes reasoning effort explicitly (`codex-cli-invocation.md` §"Default-fallback protection"). Never rely on a global or default model or effort.
+Every routed job passes its model explicitly, and every Codex and headless Claude job also passes reasoning effort explicitly (`codex-cli-invocation.md` §"Default-fallback protection"). Never rely on a global or default model or effort.
 
 ## 13. Delegation direction and continuity
 
@@ -286,9 +272,9 @@ Who may hand work to whom. This governs *who spawns*. §11 governs *which model 
 
 - **The seat holder manages.** Only the session holding the run's seat dispatches and integrates (`operating-contract.md` §1, §4).
 - **Opus-led:** Opus (manager) may invoke any appropriate worker, and may invoke Astra on a §11 trigger. **Sol, while temporary continuity manager,** may also invoke Astra on a §11 trigger.
-- **Opus-led, Sol as lead or worker:** Sol may delegate to Muse / DeepSeek / Terra / Bunny / Luna through the same wrappers, from its own worktree. In this configuration Sol does not spend Claude capacity: a subtask that genuinely needs Sonnet or Opus goes back up to the manager.
-- **Sol-led:** Sol (manager) may invoke any §11b roster model through the wrappers, including Opus, Sonnet and Haiku via `claude-route.sh`. It never invokes Astra, DeepSeek, Bunny or MiMo (roster). Claude workers it launches do not delegate further.
-- **Muse / DeepSeek / Terra** may use Bunny or Luna. **Bunny and Luna** delegate to no one. **Astra** is advisory and dispatches no execution work. It may only use read-only evidence workers (below).
+- **Opus-led, Sol as lead or worker:** Sol may delegate to GLM / DeepSeek / Terra / Bunny / Luna through the same wrappers, from its own worktree. In this configuration Sol does not spend Claude capacity: a subtask that genuinely needs Sonnet or Opus goes back up to the manager.
+- **Sol-led:** Sol (manager) may invoke any §11b roster model through the wrappers, including Opus, Sonnet and Haiku via `claude-route.sh`. It never invokes Astra, Bunny or MiMo (roster). Claude workers it launches do not delegate further.
+- **GLM / DeepSeek / Terra** may use Bunny or Luna. **Bunny and Luna** delegate to no one. **Astra** is advisory and dispatches no execution work. It may only use read-only evidence workers (below).
 - **Workers never self-escalate.** Hitting a lane boundary or a model/tool/route limit means checkpoint and report upward (done, evidence, what blocks it). Only a parent reassigns or escalates (§6).
 - **Opus worker instances are workers**, not the manager: bounded scope, no manager authority, report upward. Use one for an Anchor Task that benefits from context separation, or for Sol-level work while Codex is unavailable.
 - **Support/evidence workers attached to a review or decision** (for example Bunny or Luna gathering facts) are **read-only by default**: no tracked-file edits, commits or heavy local jobs unless the manager schedules them.
@@ -304,13 +290,13 @@ Enter at the branch that matches the task's dominant bottleneck, not its size. T
 ```
 TASK
 ├─ Deterministic tooling can answer it?                       → tooling / script
-├─ Mechanical / repetitive / known procedure?                  → Luna   (Muse if it needs modest interpretation)
-├─ Bounded implementation, clear contract?                     → Muse   (free + healthy)
-│     Muse route down, or Muse meaningfully riskier here      → Terra
+├─ Mechanical / repetitive / known procedure?                  → Luna   (GLM if it needs modest interpretation)
+├─ Bounded implementation, clear contract?                     → GLM    (free + healthy; DeepSeek as free reserve)
+│     free routes down, or both meaningfully riskier here     → Terra
 ├─ "Why is this broken?" (bounded debugging / root cause)?     → DeepSeek (free) — escalate to Sol after one serious failed attempt
-├─ Facts needed first (locate, trace, gather) for a worker?    → Bunny retrieves → that worker reasons   [experimental]
+├─ Facts needed first (locate, trace, gather) for a worker?    → Bunny retrieves → that worker reasons   [experimental; route unavailable 2026-11-01 → Luna/Haiku]
 ├─ Serious engineering: hard debug, 3D/camera, perf, complex
-│  state, integration, bounded architecture, or a batch to lead? → Sol (medium; high/xhigh when needed)
+│  state, integration, bounded architecture, or a batch to lead? → Sol    (effort per §12)
 ├─ Exceptionally Sonnet-suited, worth Claude scarcity?         → Sonnet (positive reason required)
 ├─ Project-wide decomposition / architecture / integration /
 │  acceptance, or a broad × ambiguous × consequential Anchor?   → Opus
@@ -320,17 +306,17 @@ TASK
 ```
 
 **Sol-led substitution (§11b).** The same tree applies, with the roster swapped:
-- "why is this broken?" goes to Terra (bounded) or Sol, not DeepSeek;
+- "why is this broken?" goes to DeepSeek or Terra (bounded) or Sol;
 - fact retrieval goes to Luna or Haiku, not Bunny;
 - "exceptionally Sonnet-suited" is unchanged;
 - the Opus branch becomes an **Opus specialist worker**, whose project-wide decisions stay with the Sol seat;
 - the Astra branch becomes Opus specialist analysis (the manager still decides).
 
-Examples: an obvious rename goes to Luna. A contained CSS/component change or contained audio bug goes to Muse. A subtle bounded regression goes to DeepSeek, and to Sol if one serious attempt fails. A tiny native patch where OpenCode overhead is silly goes to Terra. A Grand Tour camera/render/perf issue goes to Sol. A multi-part engineering batch goes to Sol as lead, delegating only the separable pieces. A project-wide architecture tradeoff is Opus, possibly as an Anchor Task. Conflicting Sol investigations that Opus cannot reconcile are an Astra judgment.
+Examples: an obvious rename goes to Luna. A contained CSS/component change or contained audio bug goes to GLM. A subtle bounded regression goes to DeepSeek, and to Sol if one serious attempt fails. A tiny native patch where OpenCode overhead is silly goes to Terra. A Grand Tour camera/render/perf issue goes to Sol. A multi-part engineering batch goes to Sol as lead, delegating only the separable pieces. A project-wide architecture tradeoff is Opus, possibly as an Anchor Task. Conflicting Sol investigations that Opus cannot reconcile are an Astra judgment.
 
 ## 15. Routing learns from GT3
 
-This map is a strong prior, not permanent truth. **Track material model work, not every command**, in [`routing-evidence.md`](./routing-evidence.md). Every material Muse, DeepSeek and Bunny task gets a row, as do other models where useful (always for Sonnet and Astra, since their scarcity needs justifying). The key metrics are **first-pass acceptance and rework**, not raw completion. Over time this builds a GT3-specific skill matrix: what Muse is unusually good at, where Terra is reliably enough, which bugs DeepSeek cracks, where Sonnet earns its cost, whether Bunny helps. Model reputation is not GT3 performance. Change routing only on repeated evidence, never on one anecdote.
+This map is a strong prior, not permanent truth. **Track material model work, not every command**, in [`routing-evidence.md`](./routing-evidence.md). Every material GLM, DeepSeek and Bunny task gets a row, as do other models where useful (always for Sonnet and Astra, since their scarcity needs justifying). The key metrics are **first-pass acceptance and rework**, not raw completion. Over time this builds a GT3-specific skill matrix: what Muse is unusually good at, where Terra is reliably enough, which bugs DeepSeek cracks, where Sonnet earns its cost, whether Bunny helps. Model reputation is not GT3 performance. Change routing only on repeated evidence, never on one anecdote.
 
 **2026-10-04 benchmark (complete; archived separately as `gt3-model-benchmark`; not reopened during ordinary development).** It ran standardized debugging, bounded-implementation and one open-ended performance (Frontier) task, graded by the manager under the same conditions:
 

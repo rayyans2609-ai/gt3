@@ -27,8 +27,7 @@ source "$(dirname "${BASH_SOURCE[0]}")/lib/route-guard.sh"
 usage() {
   echo "Usage: $0 -m <provider/model> <prompt|@brief-file>" >&2
   echo "  proven routes as of docs/ai/opencode-invocation.md:" >&2
-  echo "    opencode/muse-spark-1.3-contributor-free opencode/space-bunny-free" >&2
-  echo "    tokenharbor/deepseek-v4.1-flash:free" >&2
+  echo "    opencode/glm-5.3-flash-free opencode/deepseek-v4.1-flash-free" >&2
   exit 2
 }
 

@@ -1,6 +1,6 @@
 # GT3 — Codex CLI Invocation (canonical)
 
-Execution-specific layer only. Role/escalation/reasoning-*policy* doctrine lives in [`docs/ai/model-routing.md`](./model-routing.md) — do not duplicate it here. OpenCode free-route execution (Muse, DeepSeek, Bunny) is in [`docs/ai/opencode-invocation.md`](./opencode-invocation.md).
+Execution-specific layer only. Role/escalation/reasoning-*policy* doctrine lives in [`docs/ai/model-routing.md`](./model-routing.md) — do not duplicate it here. OpenCode free-route execution (GLM, DeepSeek) is in [`docs/ai/opencode-invocation.md`](./opencode-invocation.md).
 
 **Status (2026-10-16, M4):** `codex-cli 0.163.0` (npm, `~/.npm-global/bin/codex`), ChatGPT login. Catalog `fetched_at` 2026-10-16 lists the same routing slugs and effort levels as below. The ChatGPT desktop app bundles its **own** Codex (0.162.0-alpha.17.2), so a desktop-app manager and its wrapper-launched workers can run different Codex versions: record both via `node scripts/host-check.mjs identity`. The Intel is unverified (owner check in `operating-contract.md` §11). Earlier status: model catalog re-verified 2026-10-04 against a locally installed `codex-cli 0.160.0` (catalog `fetched_at` 2026-10-04); config/wrapper behavior below was verified on `0.157.1` (2026-09-26/27). Re-verify against `codex doctor` / `codex --version` / `~/.codex/models_cache.json` at the start of a new working session rather than trusting this file indefinitely — see "This file drifts" below. `scripts/codex-route.sh` itself was verified end-to-end by a live routed job on 2026-09-27 (see "Live-run verification").
 
@@ -68,7 +68,7 @@ From `~/.codex/models_cache.json` (Codex's own catalog, `fetched_at` 2026-10-04,
 | `gpt-5.6-sol` | Older generation workhorse model | true / list | none |
 | `gpt-5.6-luna` | Older fast and efficient model | true / list | none |
 
-Use `gpt-6.1-sol` for Sol; `gpt-6-sol` is the previous generation and is no longer the Sol route. `gpt-5.6-terra` stays in active routing as the reliable bounded paid worker, preferred over Sonnet for ordinary paid bounded work; much bounded work goes to the free Muse route first (`opencode-invocation.md`). (`gpt-5.5`, listed as "Legacy coding model", and hidden internal entries such as `gpt-reserve` and `codex-auto-review` are not part of the routing set.)
+Use `gpt-6.1-sol` for Sol; `gpt-6-sol` is the previous generation and is no longer the Sol route. `gpt-5.6-terra` stays in active routing as the reliable bounded paid worker, preferred over Sonnet for ordinary paid bounded work; much bounded work goes to the free GLM/DeepSeek Zen routes first (`opencode-invocation.md`). (`gpt-5.5`, listed as "Legacy coding model", and hidden internal entries such as `gpt-reserve` and `codex-auto-review` are not part of the routing set.)
 
 ## Verified reasoning-effort values
 

@@ -48,7 +48,7 @@ The manager writes a run plan to the ledger (§11): objective, done criteria, wo
 The **seat holder** manages: Opus under Opus-led (role and Anchor Task allowance in `model-routing.md` §11), Sol under Sol-led (`model-routing.md` §11b). The run is claimed with `scripts/gt3-run.sh claim` before any dispatch (`operating-contract.md` §4). The manager owns: objective, done criteria, decomposition, routing, briefs, escalation, integration, evidence reconciliation, scope, git/repo safety, host/resource decisions, quota mode, stop/continue, and the handoff.
 
 - **Route by net leverage**, not because workers exist (`model-routing.md` §3). Choose the execution tree with the lowest expected total cost-to-acceptance. For a substantial engineering batch that may be Opus → Sol as execution lead. For a coupled change it may be Sol alone. For a broad, ambiguous, consequential problem it may be an Opus Anchor Task. "Autonomous" never means "spawn as many workers as possible".
-- **Prioritize by expected value per scarce resource**, within scope and dependencies. Weigh critical path, user value, dependency unlocking, model scarcity, likelihood of acceptance, and available free capacity. If an optional premium-heavy task blocks nothing, a batch of valuable cheap Muse tasks may reasonably go first. This is a heuristic, not a scheduler.
+- **Prioritize by expected value per scarce resource**, within scope and dependencies. Weigh critical path, user value, dependency unlocking, model scarcity, likelihood of acceptance, and available free capacity. If an optional premium-heavy task blocks nothing, a batch of valuable cheap GLM/DeepSeek tasks may reasonably go first. This is a heuristic, not a scheduler.
 - **Silent ownership.** After a clean handoff the worker owns its task until it completes, blocks, goes materially off course, or hits a resource limit (§7). The manager does not poll it, reread its files, or solve the same problem in parallel.
 - **Batch low-value work** into one packet per compatible owner to cut startup, context and status overhead.
 - **Light brief check** before dispatching a meaningful brief: objective, scope, packet sized to least privilege (`model-routing.md` §4), file/system ownership, exclusions, expected evidence, acceptance condition, host fit (§6). This is a check by the manager itself, not a review task.
@@ -99,10 +99,10 @@ Quota exhaustion is an expected autonomous state, not an implementation failure.
 
 **Codex exhausted, Claude available.** Claude is the scarcer resource, so conserve it.
 - **Reset soon** (roughly < 30 min): prefer waiting, light/static work, planning and handoff prep over spending Claude on work Codex can resume shortly.
-- **Otherwise, conservation mode on the Claude side.** Opus stays manager. New bounded work goes to the free OpenCode workers (Muse, DeepSeek for debugging) while their routes are healthy. Sonnet takes bounded paid work only where the free routes can't (that is its positive reason here). Sol-level work runs in a bounded Opus worker instance only if it is critical-path. Batch or defer clerical work rather than spend Claude on it. Do less total work, prioritize critical-path completion and state preservation, and skip optional work.
+- **Otherwise, conservation mode on the Claude side.** Opus stays manager. New bounded work goes to the free OpenCode workers (GLM, DeepSeek; DeepSeek first for debugging) while their routes are healthy. Sonnet takes bounded paid work only where the free routes can't (that is its positive reason here). Sol-level work runs in a bounded Opus worker instance only if it is critical-path. Batch or defer clerical work rather than spend Claude on it. Do less total work, prioritize critical-path completion and state preservation, and skip optional work.
 
 **Sol-led runs** mirror the above:
-- **Claude exhausted:** Opus/Sonnet/Haiku routes are BLOCKED and Sol continues with Terra, Luna and Muse.
+- **Claude exhausted:** Opus/Sonnet/Haiku routes are BLOCKED and Sol continues with Terra, Luna, GLM and DeepSeek.
 - **Codex exhausted:** the manager itself is constrained. Sol checkpoints and releases. Continuing under Opus in a single unattended run is not automatic; the owner may hand the seat to Opus (`operating-contract.md` §4).
 
 Changing Macs does not help when quota is account-level (`operating-contract.md` §11).
@@ -138,9 +138,9 @@ Supervision wakes on **events**. Clocks are only a fallback liveness mechanism.
 **When a model is genuinely needed to judge progress** (deterministic signals are ambiguous: stuck vs. legitimate wait, loop, scope creep), route it by scarcity:
 - No model for completion detection, timeouts, PID/log/marker checks, host sampling or notifications: those are scripts (`model-routing.md` §8).
 - Luna for browser/test execution and known health checks.
-- Muse for watchdog judgment that needs modest interpretation, log/anomaly reading or light evidence synthesis (trial scope, `model-routing.md` §11).
+- GLM for watchdog judgment that needs modest interpretation, log/anomaly reading or light evidence synthesis (trial scope, `model-routing.md` §11).
 - Terra when a stronger bounded interpretation is worth paid capacity.
-- Bunny experimentally for factual status or repo-state reading (tracked).
+- Bunny experimentally for factual status or repo-state reading (tracked), while its route is available (unavailable since 2026-11-01).
 - Sonnet only with a clear task-specific advantage that justifies Claude capacity.
 
 The manager never polls workers itself. If observability already makes state obvious, don't create a watchdog task. **Classify** what you find as legitimate wait / process hang / harness failure / host degradation / tool outage / quota exhaustion, and log only meaningful interventions.

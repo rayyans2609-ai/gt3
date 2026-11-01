@@ -3,6 +3,7 @@ import puppeteer from 'puppeteer-core';
 import path from 'node:path';
 import { mkdirSync } from 'node:fs';
 import assert from 'node:assert/strict';
+import { fileURLToPath } from 'node:url';
 
 const base = process.env.GT3_URL || 'http://127.0.0.1:5261';
 const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
@@ -23,7 +24,7 @@ function instrument() {
   const gate = new Promise(resolve => { release = resolve; });
   window.__audioRelease = () => release();
   const encoded = new WeakMap(), decoded = new WeakMap(), links = new WeakMap();
-  const sources = [], contexts = [], media = [], gains = [];
+  const sources = [], contexts = [], media = [], gains = [], gainEvents = [];
   const originalFetch = window.fetch;
   window.fetch = async (...args) => {
     if (held && /\/audios\/(coin|coin_approach|engine_start|finish|idle)\.mp3/.test(String(args[0]))) await gate;
@@ -52,12 +53,20 @@ function instrument() {
   AudioNode.prototype.disconnect = function(...args) { if (!args.length) links.delete(this); return disconnect.apply(this, args); };
   const create = AC.prototype.createBufferSource;
   const createGain = AC.prototype.createGain;
-  AC.prototype.createGain = function() { const node = createGain.call(this); gains.push(node); return node; };
+  AC.prototype.createGain = function() {
+    const node = createGain.call(this), index = gains.length;
+    gains.push(node);
+    for (const method of ['setValueAtTime', 'linearRampToValueAtTime']) {
+      const original = node.gain[method].bind(node.gain);
+      node.gain[method] = (...args) => { gainEvents.push({ index, method, args, at: this.currentTime }); return original(...args); };
+    }
+    return node;
+  };
   AC.prototype.createBufferSource = function() {
     const node = create.call(this), record = { node, name: null, started: false, ended: false, stopCalls: 0 };
     sources.push(record);
     const start = node.start.bind(node), stop = node.stop.bind(node);
-    node.start = (...args) => { record.name = decoded.get(node.buffer) || 'unknown'; record.started = true; return start(...args); };
+    node.start = (...args) => { record.name = decoded.get(node.buffer) || 'unknown'; record.started = true; record.startedAt = performance.now(); return start(...args); };
     node.stop = (...args) => { record.stopCalls++; return stop(...args); };
     node.addEventListener('ended', () => { record.ended = true; });
     return node;
@@ -76,26 +85,28 @@ function instrument() {
   window.__audioProbe = () => ({
     contexts: contexts.map(c => c.state),
     sources: sources.filter(s => s.started).map(s => ({ name: s.name, loop: s.node.loop,
-      live: !s.ended, stopCalls: s.stopCalls, gain: gain(s.node) })),
+      live: !s.ended, stopCalls: s.stopCalls, gain: gain(s.node), rate: s.node.playbackRate.value, startedAt: s.startedAt })),
     media: media.map(m => ({ src: m.currentSrc, paused: m.paused, time: m.currentTime, ready: m.readyState })),
     buses: Object.fromEntries(['master', 'music', 'sfx', 'engine', 'voice'].map((name, i) => [name, gains[i] ? gain(gains[i]) : null])),
     gains: window.__gt3audio?.gains(),
+    gainEvents,
   });
 }
 
 let browser;
 try {
-  mkdirSync(path.resolve('local/tmp'), { recursive: true });
+  const tmp = fileURLToPath(new URL('../local/tmp/', import.meta.url));
+  mkdirSync(tmp, { recursive: true });
   browser = await puppeteer.launch({ executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
     headless: 'new', pipe: true, timeout: 300000, protocolTimeout: 300000,
     args: ['--enable-gpu', '--use-angle=metal', '--hide-scrollbars', '--no-first-run',
-      `--user-data-dir=${path.resolve('local/tmp', `gt3-audio-${process.pid}`)}`],
+      `--user-data-dir=${path.join(tmp, `gt3-audio-${process.pid}`)}`],
     defaultViewport: { width: 1440, height: 900, deviceScaleFactor: 1 } });
   const page = await browser.newPage();
   await page.evaluateOnNewDocument(instrument);
   await page.goto(base, { waitUntil: 'domcontentloaded', timeout: 120000 });
   await until(() => page.evaluate(() => window.__gt3?.landing?.loaded() && ['ready', 'degraded'].includes(window.__gt3?.readiness?.status)), 'ready');
-  const run = async (name, fn) => { try { report.cases[name] = { pass: true, ...(await fn()) }; } catch (e) { report.cases[name] = { pass: false, error: String(e), observed: await page.evaluate(() => window.__audioProbe()) }; } };
+  const run = async (name, fn) => { try { report.cases[name] = { pass: true, ...(await fn()) }; } catch (e) { report.cases[name] = { pass: false, error: String(e), observed: await page.evaluate(() => window.__audioProbe()) }; } console.error(`${name}: ${report.cases[name].pass ? 'PASS' : 'FAIL'}`); };
   await run('1-landing-gesture', async () => {
     await page.click('.audio-speaker');
     await until(() => page.evaluate(async () => (await import('/src/core/state.js')).state.audioReady), 'audio ready');
@@ -123,13 +134,24 @@ try {
   const ready = () => until(() => page.evaluate(() => window.__gt3 && ['ready', 'degraded'].includes(window.__gt3.readiness?.status)), 'app ready');
   const reload = async () => { await page.reload({ waitUntil: 'domcontentloaded', timeout: 120000 }); await ready(); };
   const activate = async () => { await page.click('.audio-speaker'); await until(async () => (await state()).audioReady, 'audio ready'); await wait(350); };
-  const clean = async () => { await page.evaluate(() => sessionStorage.clear()); await reload(); };
+  // Route persistence flushes on pagehide; reset after that flush, before the next document.
+  const reset = async entries => {
+    await page.evaluate(values => window.addEventListener('pagehide', () => {
+      sessionStorage.clear();
+      for (const [key, value] of Object.entries(values)) sessionStorage.setItem(key, value);
+    }, { once: true }), entries);
+    await reload();
+  };
+  const clean = () => reset({});
 
   await run('3-active-enter-tour', async () => {
-    await hub(); await tour(); const p = await probe();
-    assert.equal(started(p, 'engine_start.mp3').length, 1);
+    await hub(); const before = await probe(); await tour(); const p = await probe();
+    assert.equal(started(p, 'engine_start.mp3').length - started(before, 'engine_start.mp3').length, 1, 'Tour entry did not start a new engine sound');
     assert.equal(live(p, 'idle.mp3').length, 1);
-    return { observed: p };
+    await wait(3100); const settled = await probe();
+    assert.ok(Math.abs(live(settled, 'idle.mp3')[0].gain - 0.15) < 0.02, 'idle gain did not settle');
+    assert.ok(Math.abs(live(settled, 'idle.mp3')[0].rate - 1) < 0.03, 'stationary idle rate');
+    return { before, observed: p, settled };
   });
   await run('5-tour-to-hub-music-continuity', async () => {
     await wait(1200); const before = await probe(); await home(); await wait(1200); const after = await probe();
@@ -192,21 +214,22 @@ try {
     await page.evaluate(async () => { const a = await import('/src/audio/audioManager.js'); a.playCheckpointCross(); a.setCoinApproach(1); a.playFinish(); a.onMontageStart(0); });
     await wait(200); const dormant = await probe(); noRace(dormant);
     await tour();
-    await page.evaluate(async () => { const a = await import('/src/audio/audioManager.js'); a.playCheckpointCross(); a.setCoinApproach(1); a.playFinish(); });
+    const checkpointAt = await page.evaluate(async () => { const a = await import('/src/audio/audioManager.js'); const at = performance.now(); a.playCheckpointCross(); a.setCoinApproach(1); return at; });
+    await wait(150); const approach = await probe();
+    assert.ok(started(approach, 'coin.mp3').length && live(approach, 'coin_approach.mp3').length);
+    const finishAt = await page.evaluate(async () => { const a = await import('/src/audio/audioManager.js'); const at = performance.now(); a.playFinish(); return at; });
     await wait(150); const active = await probe();
-    assert.ok(started(active, 'coin.mp3').length && live(active, 'coin_approach.mp3').length && started(active, 'finish.mp3').length);
+    assert.ok(started(active, 'finish.mp3').length);
+    assert.ok(started(active, 'coin.mp3').at(-1).startedAt - checkpointAt < 100);
+    assert.ok(started(active, 'finish.mp3').at(-1).startedAt - finishAt < 100);
     await home(); const stopped = await probe(); noRace(stopped);
     const voice = await page.evaluate(async () => { const a = await import('/src/audio/audioManager.js'); const ok = await a.playVoice(0); a.pauseVoice(); const resumed = await a.resumeVoice(); a.stopVoice(); return { ok, resumed }; });
     assert.ok(voice.ok && voice.resumed, 'voice play/pause/resume failed');
-    return { dormant, active, stopped, voice, afterVoice: await probe() };
+    return { dormant, checkpointAt, approach, finishAt, active, stopped, voice, afterVoice: await probe() };
   });
   await run('9b-delayed-preload-after-return', async () => {
-    await page.evaluate(() => {
-      sessionStorage.clear();
-      sessionStorage.setItem('audio-harness-fault', JSON.stringify({ audioHang: true, audioTimeoutMs: 1200 }));
-      sessionStorage.setItem('audio-harness-hold', '1');
-    });
-    await reload(); await hub(); await page.click('.audio-speaker');
+    await reset({ 'audio-harness-fault': JSON.stringify({ audioHang: true, audioTimeoutMs: 1200 }), 'audio-harness-hold': '1' });
+    await hub(); await page.click('.audio-speaker');
     assert.equal((await state()).audioReady, false);
     await tour(); await home();
     await page.evaluate(() => window.__audioRelease());
@@ -215,11 +238,8 @@ try {
     return { observed: p, readiness: await page.evaluate(() => window.__gt3.readiness) };
   });
   await run('9c-preload-rejection-recovery', async () => {
-    await page.evaluate(() => {
-      sessionStorage.clear();
-      sessionStorage.setItem('audio-harness-fault', JSON.stringify({ audioReject: true }));
-    });
-    await reload(); await hub(); await activate(); const p = await probe(); noRace(p);
+    await reset({ 'audio-harness-fault': JSON.stringify({ audioReject: true }) });
+    await hub(); await activate(); const p = await probe(); noRace(p);
     assert.equal(p.sources.length, 0); assert.ok(p.media.some(m => !m.paused));
     return { observed: p, readiness: await page.evaluate(() => window.__gt3.readiness) };
   });

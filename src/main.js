@@ -585,7 +585,9 @@ async function boot() {
       dispatchedApproachIndex = index;
       dispatchedApproachStep = step;
     }
-    if (step !== dispatchedAudioApproachStep) {
+    if (state.experience !== 'tour' && state.experience !== 'complete') {
+      dispatchedAudioApproachStep = -1;
+    } else if (step !== dispatchedAudioApproachStep) {
       dispatchedAudioApproachStep = step;
       audio.setCoinApproach(proximity);
     }

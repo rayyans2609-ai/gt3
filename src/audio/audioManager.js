@@ -57,6 +57,7 @@ let coinApproachSource = null;
 let coinApproachGain = null;
 let coinProximity = 0;
 let idlePlaybackRate = 1;
+const raceOneShots = new Set();
 
 let montageActive = false;
 let activeVoice = null;
@@ -202,13 +203,20 @@ function makeLoop(buffer, destination) {
 
 function playOneShot(buffer, destination) {
   if (!raceStarted || !context || !buffer || !destination || context.state !== 'running') return;
+  let source;
   try {
-    const source = context.createBufferSource();
+    source = context.createBufferSource();
     source.buffer = buffer;
     source.connect(destination);
-    source.addEventListener('ended', () => source.disconnect(), { once: true });
+    raceOneShots.add(source);
+    source.addEventListener('ended', () => {
+      raceOneShots.delete(source);
+      source.disconnect();
+    }, { once: true });
     source.start();
   } catch (error) {
+    raceOneShots.delete(source);
+    source?.disconnect();
     console.debug('[audio] Could not play a sound.', error);
   }
 }
@@ -274,7 +282,7 @@ function startCoinApproachLoop() {
 }
 
 function startRaceSources() {
-  if (raceStarted || !context || context.state !== 'running') return;
+  if (!inTour() || raceStarted || !context || context.state !== 'running') return;
   raceStarted = true;
   const now = context.currentTime;
 
@@ -283,16 +291,18 @@ function startRaceSources() {
       const startGain = context.createGain();
       setInitialGain(startGain, 1);
       startGain.connect(engineBus);
-      engineStartSource = context.createBufferSource();
-      engineStartSource.buffer = raceBuffers.engineStart;
-      engineStartSource.connect(startGain);
+      const source = context.createBufferSource();
+      engineStartSource = source;
+      source.buffer = raceBuffers.engineStart;
+      source.connect(startGain);
       startGain.gain.linearRampToValueAtTime(0, now + 3);
-      engineStartSource.addEventListener('ended', () => {
-        engineStartSource = null;
+      source.addEventListener('ended', () => {
+        if (engineStartSource === source) engineStartSource = null;
+        source.disconnect();
         startGain.disconnect();
       }, { once: true });
-      engineStartSource.start(now);
-      engineStartSource.stop(now + 3.05);
+      source.start(now);
+      source.stop(now + 3.05);
     } catch (error) {
       engineStartSource = null;
       console.debug('[audio] The engine-start sound could not start.', error);
@@ -305,6 +315,11 @@ function startRaceSources() {
       setInitialGain(idleGain, 0);
       idleGain.connect(engineBus);
       idleSource = makeLoop(raceBuffers.idle, idleGain);
+      const source = idleSource;
+      source.addEventListener('ended', () => {
+        source.disconnect();
+        idleGain.disconnect();
+      }, { once: true });
       idleGain.gain.linearRampToValueAtTime(IDLE_GAIN, now + 3);
     } catch (error) {
       idleSource = null;
@@ -313,6 +328,34 @@ function startRaceSources() {
   }
 
   startCoinApproachLoop();
+}
+
+function inTour() {
+  return state.experience === 'tour' || state.experience === 'complete';
+}
+
+function stopRaceSources() {
+  raceStarted = false;
+  coinProximity = 0;
+  stopCoinApproachLoop();
+  const sources = [engineStartSource, idleSource, ...raceOneShots];
+  engineStartSource = null;
+  idleSource = null;
+  raceOneShots.clear();
+  idlePlaybackRate = 1;
+  for (const source of sources) {
+    if (!source) continue;
+    try { source.stop(); } catch { /* Already stopped or ended. */ }
+    try { source.disconnect(); } catch { /* Already disconnected. */ }
+  }
+  if (montageActive) {
+    montageActive = false;
+    rampGain(musicBus, desiredMusicGain(), 1.4);
+    if (engineBus && context) {
+      engineBus.gain.cancelScheduledValues(context.currentTime);
+      engineBus.gain.setValueAtTime(1, context.currentTime);
+    }
+  }
 }
 
 function musicDuration() {
@@ -387,7 +430,7 @@ function ensureMusicElement() {
   loadSelectedTrack();
 }
 
-/** Open the autoplay gate and begin the continuous race mix. Idempotent. */
+/** Open the autoplay gate; the current experience owns the race mix. Idempotent. */
 export function startAudio() {
   // Reuse an attempt only while audio is actually usable. A failed trusted activation can
   // leave resume() pending, and a context can stop running after a successful start; in
@@ -403,8 +446,8 @@ export function startAudio() {
       ensureMusicElement();
       targetGain(masterGain, state.masterMuted ? 0 : 1, 0.02);
       targetGain(musicMuteGain, state.musicMuted ? 0 : 1, 0.02);
-      startRaceSources();
       set('audioReady', true);
+      startRaceSources();
       tryPlayMusic();
       return true;
     } catch (error) {
@@ -436,6 +479,7 @@ export function playCheckpointCross() {
 }
 
 export function setCoinApproach(proximity) {
+  if (!inTour()) return;
   const numeric = Number.isFinite(proximity) ? proximity : 0;
   coinProximity = Math.min(1, Math.max(0, numeric));
 
@@ -461,12 +505,14 @@ function desiredMusicGain() {
 
 export function onMontageStart(carIndex) {
   void carIndex;
+  if (!inTour()) return;
   montageActive = true;
   rampGain(musicBus, desiredMusicGain(), 1.2);
   rampGain(engineBus, 0.35, 1.2);
 }
 
 export function onMontageEnd() {
+  if (!montageActive) return;
   montageActive = false;
   rampGain(musicBus, desiredMusicGain(), 1.4);
   rampGain(engineBus, 1, 1.4);
@@ -576,7 +622,7 @@ export async function playVoice(carIndex) {
   const index = Number.isInteger(carIndex) ? carIndex : -1;
   if (index < 0 || index >= VOICE_FILES.length) return false;
 
-  if (!raceStarted) return false;
+  if (!state.audioReady || context?.state !== 'running') return false;
 
   resetActiveVoice({ invalidateRequest: false });
   const requestId = ++voiceRequestId;
@@ -730,6 +776,13 @@ export function getMusicStatus() {
 
 subscribe('masterMuted', (muted) => targetGain(masterGain, muted ? 0 : 1, 0.02));
 subscribe('musicMuted', (muted) => targetGain(musicMuteGain, muted ? 0 : 1, 0.02));
+subscribe('experience', () => {
+  if (inTour()) {
+    if (state.audioReady) startRaceSources();
+  } else {
+    stopRaceSources();
+  }
+});
 
 if (typeof window !== 'undefined') {
   window.__gt3audio = Object.freeze({

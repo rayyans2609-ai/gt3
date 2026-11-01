@@ -73,7 +73,7 @@ route_guard() {
 
   if [[ "${GT3_CONFIG:-}" == sol-led ]]; then
     case "$model" in
-      gpt-6.1-sol|gpt-5.6-terra|gpt-6-luna|opencode/muse-spark-1.3-contributor-free|\
+      gpt-6.1-sol|gpt-6.1-terra|gpt-5.6-terra|gpt-6-luna|opencode/muse-spark-1.3-contributor-free|\
       claude-opus-5-5|claude-sonnet-5-5|claude-haiku-5-5) ;;
       *) route_guard_die "model '$model' is not in the Sol-led roster (model-routing.md §11b)" ;;
     esac

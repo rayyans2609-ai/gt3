@@ -62,6 +62,7 @@ From `~/.codex/models_cache.json` (Codex's own catalog, `fetched_at` 2026-10-04,
 | `gpt-6.1-sol` | Latest workhorse model for coding and everyday work | true / list | **GPT-6.1 Sol** — heavyweight engineering / execution lead |
 | `gpt-6-astra` | Frontier intelligence for the most demanding work | true / list | GPT-6 Astra — rare, event-triggered senior escalation |
 | `gpt-6-luna` | Fast and affordable model for easier tasks | true / list | GPT-6 Luna — mechanical / deterministic execution |
+| `gpt-6.1-terra` | GPT-6.1 Terra Codex model (catalog `fetched_at` 2026-11-01, client 0.166.0; live probe exit 0) | true / list | GPT-6.1 Terra — **owner-authorized trial** (2026-11-01, audio lifecycle task); not yet the default Terra route |
 | `gpt-5.6-terra` | Older balanced model for straightforward work | true / list | GPT-5.6 Terra — reliable bounded paid worker |
 | `gpt-6-sol` | Previous generation workhorse model | true / list | none (superseded by `gpt-6.1-sol`) |
 | `gpt-5.6-sol` | Older generation workhorse model | true / list | none |
@@ -71,7 +72,7 @@ Use `gpt-6.1-sol` for Sol; `gpt-6-sol` is the previous generation and is no long
 
 ## Verified reasoning-effort values
 
-All routing-set models accept: `low`, `medium`, `high`, `xhigh`, `max`. `gpt-6.1-sol`, `gpt-6-astra`, `gpt-5.6-terra`, `gpt-6-sol` and `gpt-5.6-sol` additionally accept `ultra` ("maximum reasoning with automatic task delegation"); the Luna models do not.
+All routing-set models accept: `low`, `medium`, `high`, `xhigh`, `max`. `gpt-6.1-sol`, `gpt-6-astra`, `gpt-6.1-terra`, `gpt-5.6-terra`, `gpt-6-sol` and `gpt-5.6-sol` additionally accept `ultra` ("maximum reasoning with automatic task delegation"); the Luna models do not.
 
 Per-model catalog defaults (what the model would use if nothing else specified an effort — see the caveat immediately below): `gpt-6.1-sol`, `gpt-6-astra` and `gpt-5.6-sol` default to `low`; `gpt-6-luna`, `gpt-5.6-terra`, `gpt-6-sol` and `gpt-5.6-luna` default to `medium`. Note that the current Sol defaults to `low`, unlike `gpt-6-sol`, so an omitted effort would silently under-reason serious work.
 

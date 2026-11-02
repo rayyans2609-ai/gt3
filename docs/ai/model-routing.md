@@ -38,6 +38,8 @@ The target is not maximum AI usage, delegation, parallelism, review, use of the 
 - **Capability ranking ≠ routing ranking.** A somewhat weaker worker on a less scarce resource can be the right route (§10).
 - **Direct routing, no staircase.** An obviously hard task goes straight to the lane that can handle it. Never run a model expected to be underpowered just "to try the cheap tier first".
 - **Cheap-first is not cheap-forever.** Once a lane's capability boundary is shown, escalate (§6) instead of looping.
+- **De-escalate just as readily.** When a cheaper route is sufficient (Luna for mechanical work, GLM or DeepSeek for bounded free work), use it, including for follow-up work once a stronger model has resolved the hard part. A stronger model already being on the task is not a reason to keep it there.
+- **Keep routine routing light.** For routine tasks the obvious §14 route and effort is the decision, stated in one line. Deliberate further only when uncertainty, consequence or cost is material.
 - Model choice and reasoning-effort choice are separate decisions (§12). Never maximize thinking just because a higher setting exists.
 
 ## 3. Delegation is leverage, not ritual
@@ -252,6 +254,7 @@ GPT-6.1 Sol is the **native manager in Codex**. This is not Sol as execution lea
 
 **Principle: efficiency and total leverage.** Choose the **lowest effort likely to reach an accepted outcome efficiently**. Weigh uncertainty, complexity, consequence, expected first-pass success and rework, latency, token cost, verification burden and manager/integration overhead. Raise effort only when its expected reduction in errors, retries or integration cost outweighs the extra reasoning expense. Don't raise it just because a task is described as hard, and don't drop it just because a task looks simple.
 
+- **Universal.** This applies to every model and provider that exposes an effort setting (Codex, headless Claude, any future route), in both configurations and in Autonomous Mode.
 - **Three separate decisions.** Match the task to the model first (§2, §11–§14), then choose effort, then size verification (§5). Effort is chosen per task, never by model identity: Terra, Sol or Opus being assigned is not itself a reason for `xhigh` or `max`.
 - **Every level is a choice, not a tier.** `medium`, `high`, `xhigh` and `max` are the usual range; `low` and `ultra` stay available where the provider supports them and the task justifies them. None is an automatic default for any model or mode.
 - **Effort is not escalation.** If an attempt fails, diagnose it first (§6). Raise effort when the diagnosis is "insufficient reasoning"; change the model when it is a capability or lane limit. Neither substitutes for diagnosis.

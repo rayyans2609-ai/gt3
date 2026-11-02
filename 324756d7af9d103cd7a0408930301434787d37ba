@@ -1,0 +1,47 @@
+run: audio-lifecycle
+config: opus-led
+seat: opus@intel
+epoch: 1
+state: released
+branch: worktree-audio-lifecycle-terra61
+sha: 324756d7af9d103cd7a0408930301434787d37ba
+updated: 2026-11-02T02:47:32Z
+---
+## Objective and scope (owner-verbatim, with date)
+2026-11-01 owner: "GT3 — Audio Lifecycle Audit & Fix / GPT-6.1 Terra Trial" — fix Landing/Hub sound-button engine leak; audit other audio leakages; GPT-6.1 Terra owns diagnosis/impl/self-verification; required regression list 1–10 + existing harnesses + build; Intel, locked profile; branch/worktree only; "Stop after implementation and verification for my review. No push, merge or Phase 5 execution."
+2026-11-01 owner (mid-run): "add in a deepseek v4.1 flash and glm 5.3 flash route to replace muse as muse not exist anymore and they replaced it".
+2026-11-01 owner (mid-run): "Both GLM 5.3 Flash Free and DeepSeek V4.1 Flash Free must use OpenCode Zen, not Token Harbor." Do not retain Token Harbor as active DeepSeek route or fallback; preserve history.
+2026-11-01 owner (mid-run): effort chosen per task by efficiency/total leverage (lowest effort likely to reach an accepted outcome); make it repo policy in model-routing.md §12 + wherever relevant, after the Terra verification run; no personal-memory copy. Then "continue on autonomous mode".
+Autonomous: opus-led, failover none, branch worktree-audio-lifecycle-terra61, commits yes, push no, main forbidden. Done = fix runtime-verified (red on base, green on fix), regressions + build pass or classified, effort-policy doc committed, routing-evidence row, handoff. Horizon ~4h. Human-review: final acceptance.
+
+## Tasks
+| id | owner (model@effort) | worktree / branch | epoch | status | evidence |
+|---|---|---|---|---|---|
+| routing-61terra | opus@high (fast path: 3-line allow-list) | worktree-audio-lifecycle-terra61 | 1 | done 3ad35a1 | live catalog 2026-11-01 + probe exit 0 |
+| terra-audio | gpt-6.1-terra@xhigh (owner override) | same | 1 | done 07cc074, runtime UNVERIFIED (preflight 75 paging) | local/evidence/audio-lifecycle/REPORT.md |
+| terra-audio-verify | gpt-6.1-terra@xhigh (in flight before effort correction; harness never validated + possible rework) | same | 1 | done 17b9a4b: red 11/12 fail on base, green 12/12; build PASS; landing-flow+controls PASS; 5 harnesses fail identically on base (pre-existing) | local/evidence/audio-lifecycle/REPORT.md |
+| effort-policy-doc | opus@high (doctrine owner edit, fast path) | same | 1 | done cee4e10 | §12 rewritten; §14 + manager card defer to §12 |
+| free-route-swap | opus@high (fast path; coupled doctrine wording with §12; review≈edit cost) | same | 1 | done cee4e10; probes exit 0 (GLM, DeepSeek Zen): Muse+Bunny unlisted 2026-11-01 (opencode v2.1.2); owner correction: BOTH via Zen — opencode/glm-5.3-flash-free + opencode/deepseek-v4.1-flash-free; Token Harbor DeepSeek retired as active route and not a fallback (history preserved); probe both live after verify (Intel 2-agent limit) | catalog listing 2026-11-01 |
+| routing-evidence + handoff | opus@high | same | 1 | done 324756d | routing-evidence.md 3 rows |
+
+## Evidence (claim → artifact · valid? · available@host)
+- audio fix runtime-verified → local/evidence/audio-lifecycle/revised-{red,green}-stdout.log + provenance · valid at 324756d (no src/harness diff since 17b9a4b) · intel
+- regressions + build → local/evidence/audio-lifecycle/*-{fixed,base}-stdout.log, build-stdout.log · valid · intel
+
+## Blocked routes / quota
+- opencode/muse-spark-1.3-contributor-free, opencode/space-bunny-free: not in live catalog 2026-11-01 (owner: Muse withdrawn, replaced by GLM 5.3 Flash + DeepSeek V4.1 Flash).
+
+## Human decisions (NEEDS HUMAN VERIFICATION)
+- Audible check of Grand Tour engine/SFX mix and real route-crossing checkpoint/finish timing (machine evidence = node/gain level only) → branch worktree-audio-lifecycle-terra61 @324756d, default (locked) URL.
+- Owner acceptance of the fix and of the routing-doc changes (cee4e10).
+
+## Proposals (recorded, not implemented)
+- Refresh stale harnesses that assume Tour-boot (route-persistence, preready-input, timer-finish, hud, checkpoints): fail identically on base since P4 Landing boot.
+- Put ~/.opencode/bin on Intel PATH (or have opencode-route.sh resolve it) — outside repo / owner call.
+
+## Next step
+Stopped for owner review. No push/merge. Owner: review branch; decide on harness-refresh proposal.
+
+## Handoff history
+- 2026-11-01T20:02:50Z e1 claimed by opus@intel at 3ad35a14d80e705fb22c90ac5e1d87dd338fdf81
+- 2026-11-02T02:47:32Z e1 released by opus@intel at 324756d7af9d103cd7a0408930301434787d37ba

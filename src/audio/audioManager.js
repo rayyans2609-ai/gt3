@@ -8,8 +8,8 @@ const MUSIC_VOICE_GAIN = MUSIC_BASE_GAIN * 0.35;
 const IDLE_GAIN = 0.15;
 
 const RACE_FILES = Object.freeze({
-  // Checkpoint crossing one-shot (SPEC §18). The file predates gates; only its name is legacy.
-  checkpointCross: 'coin.mp3',
+  // Checkpoint crossing one-shot (SPEC §18).
+  checkpointCross: 'checkpoint.mp3',
   coinApproach: 'coin_approach.mp3',
   engineStart: 'engine_start.mp3',
   finish: 'finish.mp3',

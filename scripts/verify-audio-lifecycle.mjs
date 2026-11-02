@@ -216,11 +216,11 @@ try {
     await tour();
     const checkpointAt = await page.evaluate(async () => { const a = await import('/src/audio/audioManager.js'); const at = performance.now(); a.playCheckpointCross(); a.setCoinApproach(1); return at; });
     await wait(150); const approach = await probe();
-    assert.ok(started(approach, 'coin.mp3').length && live(approach, 'coin_approach.mp3').length);
+    assert.ok(started(approach, 'checkpoint.mp3').length && live(approach, 'coin_approach.mp3').length);
     const finishAt = await page.evaluate(async () => { const a = await import('/src/audio/audioManager.js'); const at = performance.now(); a.playFinish(); return at; });
     await wait(150); const active = await probe();
     assert.ok(started(active, 'finish.mp3').length);
-    assert.ok(started(active, 'coin.mp3').at(-1).startedAt - checkpointAt < 100);
+    assert.ok(started(active, 'checkpoint.mp3').at(-1).startedAt - checkpointAt < 100);
     assert.ok(started(active, 'finish.mp3').at(-1).startedAt - finishAt < 100);
     await home(); const stopped = await probe(); noRace(stopped);
     const voice = await page.evaluate(async () => { const a = await import('/src/audio/audioManager.js'); const ok = await a.playVoice(0); a.pauseVoice(); const resumed = await a.resumeVoice(); a.stopVoice(); return { ok, resumed }; });

@@ -8,7 +8,7 @@ const cases = [
   { name: 'healthy', phases: ['ready', 'ready', 'ready'], reason: null, car: 'car-lexus' },
   { name: 'glb-404', missing: '/models/tour/lexus_rcf_gt3.glb',
     phases: ['degraded', 'ready', 'ready'], reason: 'model-placeholder', car: 'car-lexus-load-error' },
-  { name: 'audio-404', missing: '/audios/coin.mp3',
+  { name: 'audio-404', missing: '/audios/checkpoint.mp3',
     phases: ['ready', 'degraded', 'ready'], reason: 'audio-file-unavailable', car: 'car-lexus' },
   { name: 'model-rejection', holdModels: true, faults: { modelReject: true },
     phases: ['degraded', 'ready', 'ready'], reason: 'model-rejection', car: 'car-lexus-load-error' },

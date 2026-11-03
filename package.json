@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "gsap": "^3.15.0",
+    "lucide": "^1.67.0",
     "poly2tri": "^1.5.0",
     "three": "^0.180.0"
   },

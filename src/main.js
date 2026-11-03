@@ -646,6 +646,18 @@ async function boot() {
   }
 
   requestAnimationFrame(frame);
+
+  // Opt-in Theatre.js animation authoring (dev server only): ?theatre or ?theatre=play. The
+  // DEV guard is replaced by `false` in production builds, so the import and its packages are
+  // dropped from the bundle. Theatre ticks from registerUpdate; see ARCHITECTURE.md.
+  if (import.meta.env.DEV) {
+    const theatreMode = new URLSearchParams(location.search).get('theatre');
+    if (theatreMode !== null) {
+      import('./authoring/theatre.js')
+        .then((m) => m.initTheatre({ registerUpdate, mode: theatreMode === 'play' ? 'play' : 'studio' }))
+        .catch((error) => console.error('[gt3:theatre] failed to start', error));
+    }
+  }
 }
 
 boot().catch((err) => {

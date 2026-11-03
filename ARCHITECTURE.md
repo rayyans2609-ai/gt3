@@ -43,6 +43,10 @@ text/HUD/player UI. One fixed canvas behind it, one shared `WebGLRenderer`.
                       retired coin/montage/F-key Tour harnesses removed
   src/
     main.js           bootstrap, module wiring, single RAF loop [evolve]
+    authoring/        Theatre.js animation authoring, DEV-ONLY, opt-in (`?theatre`); see "Animation authoring"
+      theatre.js      Studio + proof sheet, bindObject3D(), JSON export/save [new, dev-only]
+      timelineFile.js versioned timeline JSON wrapper (pure) [new]
+      timelines/      saved timelines `<projectId>.v1.json`, the source of truth [new]
     core/
       state.js        central store + pub/sub [keep pattern, evolve keys]
       clock.js        delta time [keep]
@@ -132,6 +136,44 @@ text/HUD/player UI. One fixed canvas behind it, one shared `WebGLRenderer`.
   the Tour, and the Tour's fixed DPR is restored on entry. The hero (McLaren 720S GT3, owner
   2026-10-24) is one extra load of its full-resolution GLB (`cars.loadFullResolutionCar`, same
   verified normalisation), falling back to the roster clone. The Hub is DOM over the resolved field.
+
+## Animation authoring (Theatre.js, dev-only)
+Theatre.js is an **optional visual authoring tool** for hand-keyframed curves. It complements
+GSAP and replaces nothing. Nothing here ships: `@theatre/studio` is a devDependency, and the only
+import of `src/authoring/theatre.js` sits behind `import.meta.env.DEV` in `main.js`, so the
+production bundle contains no Theatre code (verified 2026-11-04: `vite build` output is
+byte-identical with and without this feature, zero "theatre" strings).
+- **Open it:** `npm run dev`, then `/?theatre` (Studio + proof sheet, sequence editor opens once a
+  prop is sequenced) or `/?theatre=play` (core only: replays the saved JSON with no Studio).
+  `Alt+\` hides/shows Studio. Normal GT3 URLs are unaffected.
+- **Proof:** sheet `proof`, object `Proof probe` (position, rotationDeg, scale) drives an
+  **off-scene** `THREE.Object3D`: no renderer, scene or visual is touched. `bindObject3D(sheet,
+  name, object3d, driver)` is the reusable binding for real targets.
+- **One loop:** Theatre ticks through a custom `rafDriver` that `main.js`'s `registerUpdate` calls
+  every frame (`__gt3.theatre.stats.ticks` counts it); the module never calls
+  `requestAnimationFrame`. Studio's UI chrome uses Theatre's default raf and renders no GT3
+  content. Studio's wheel/touch/key events stop at its root, so they never reach `scrollDrive`.
+  Studio's `updates.theatrejs.com` poll is blocked locally (no option exists; it is a CORS error).
+- **Persistence = JSON in the repo, never localStorage** (`usePersistentStorage: false`). Format
+  `{format:'gt3-theatre-timeline', version:1, projectId, theatre, state}` in
+  `src/authoring/timelines/<projectId>.v1.json` (`timelineFile.js`; unknown versions are ignored
+  with a warning, never half-loaded). Edits live in memory until saved: top-left toolbar floppy
+  icon (save to repo) or arrow icon (browser download), or `__gt3.theatre.saveToRepo()` /
+  `exportJSON()`. Saving POSTs to the dev-server-only plugin `scripts/vite-theatre-save.mjs`
+  (custom header, validated id, one directory). `state` is Theatre's opaque format: never hand-edit.
+- **Claude can control** (dev only): `window.__gt3.theatre` = `sheet, obj, probe, studio, stats,
+  play()/pause()/seek(s), exportJSON()/saveToRepo()`. Verified workflow: right-click a prop group in
+  Studio, "Sequence all" (one-time UI step, scriptable with Playwright piercing the shadow root);
+  then `seek(t)` + `studio.transaction(({set}) => set(obj.props.rotationDeg, {x,y,z}))` writes a
+  keyframe at the playhead, `saveToRepo()` persists it. Easing/curve handles and sequence length
+  are edited in the Studio UI. Harness: `scripts/verify-theatre-proof.mjs` (dev server, `GT3_URL`).
+- **GSAP vs Theatre:** GSAP stays for code-driven, state/scroll/event-driven motion (UI, Flip,
+  SplitText, tweens that react to input). Theatre earns its place for **scrubbable, hand-tuned,
+  multi-property authored sequences** whose feel is judged visually: camera/hero moves, light and
+  material choreography, the Phase 6 emblem flourish. If a motion is two numbers and an ease, use
+  GSAP. Before binding a real object, check who drives it today (animation ownership): bind only
+  properties no other system writes in the same frame. Production playback is a separate,
+  reviewed change (it needs `@theatre/core` and the JSON in the bundle).
 
 ## Experiences and scroll ownership
 Native document scroll with passive listeners throughout (threaded scrolling preserved). As built

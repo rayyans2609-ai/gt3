@@ -15,6 +15,7 @@
 |---|---|
 | Every manager session | this file; the **Manager card** at the top of `docs/ai/operating-contract.md`; `docs/ai/model-routing.md` Part II for your configuration (§11 Opus-led or §11b Sol-led, plus §10, §12–§14) |
 | Product work (any GT3 feature, UX, rendering or phase task) | add `GT3_MASTER_CONTEXT.md` and the relevant `SPEC.md` sections (`SPEC.md` is product truth) |
+| Animation or motion authoring (Theatre.js, GSAP) | `ARCHITECTURE.md` "Animation authoring (Theatre.js, dev-only)" |
 | Autonomous Mode invoked | add `docs/ai/autonomous-mode.md` |
 | Handoffs, host transfer, routing principles, provider syntax | the relevant section of `operating-contract.md`, `model-routing.md` Part I, or the invocation doc, when needed |
 

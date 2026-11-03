@@ -1,0 +1,310 @@
+{
+  "format": "gt3-theatre-timeline",
+  "version": 1,
+  "projectId": "gt3-proof",
+  "theatre": "0.7.2",
+  "state": {
+    "sheetsById": {
+      "proof": {
+        "staticOverrides": {
+          "byObject": {}
+        },
+        "sequence": {
+          "subUnitsPerUnit": 30,
+          "length": 10,
+          "type": "PositionalSequence",
+          "tracksByObject": {
+            "Proof probe": {
+              "trackData": {
+                "Qt6B78AwOe": {
+                  "type": "BasicKeyframedTrack",
+                  "__debugName": "Proof probe:[\"rotationDeg\",\"x\"]",
+                  "keyframes": [
+                    {
+                      "id": "0bmi9DRfyy",
+                      "position": 0,
+                      "connectedRight": true,
+                      "handles": [
+                        0.5,
+                        1,
+                        0.5,
+                        0
+                      ],
+                      "type": "bezier",
+                      "value": 0
+                    },
+                    {
+                      "id": "_3R5w57zYe",
+                      "position": 1.5,
+                      "connectedRight": true,
+                      "handles": [
+                        0.5,
+                        1,
+                        0.5,
+                        0
+                      ],
+                      "type": "bezier",
+                      "value": 20
+                    },
+                    {
+                      "id": "FF25MkupJE",
+                      "position": 3,
+                      "connectedRight": true,
+                      "handles": [
+                        0.5,
+                        1,
+                        0.5,
+                        0
+                      ],
+                      "type": "bezier",
+                      "value": 0
+                    }
+                  ]
+                },
+                "We54S_hiqs": {
+                  "type": "BasicKeyframedTrack",
+                  "__debugName": "Proof probe:[\"rotationDeg\",\"y\"]",
+                  "keyframes": [
+                    {
+                      "id": "YbdyyubkSC",
+                      "position": 0,
+                      "connectedRight": true,
+                      "handles": [
+                        0.5,
+                        1,
+                        0.5,
+                        0
+                      ],
+                      "type": "bezier",
+                      "value": 0
+                    },
+                    {
+                      "id": "NzYLl7kX40",
+                      "position": 1.5,
+                      "connectedRight": true,
+                      "handles": [
+                        0.5,
+                        1,
+                        0.5,
+                        0
+                      ],
+                      "type": "bezier",
+                      "value": 180
+                    },
+                    {
+                      "id": "vtIkxfSIVA",
+                      "position": 3,
+                      "connectedRight": true,
+                      "handles": [
+                        0.5,
+                        1,
+                        0.5,
+                        0
+                      ],
+                      "type": "bezier",
+                      "value": 360
+                    }
+                  ]
+                },
+                "sEm5al5igg": {
+                  "type": "BasicKeyframedTrack",
+                  "__debugName": "Proof probe:[\"rotationDeg\",\"z\"]",
+                  "keyframes": [
+                    {
+                      "id": "Di0A5kSXho",
+                      "position": 0,
+                      "connectedRight": true,
+                      "handles": [
+                        0.5,
+                        1,
+                        0.5,
+                        0
+                      ],
+                      "type": "bezier",
+                      "value": 0
+                    },
+                    {
+                      "id": "yKD5smYYgZ",
+                      "position": 1.5,
+                      "connectedRight": true,
+                      "handles": [
+                        0.5,
+                        1,
+                        0.5,
+                        0
+                      ],
+                      "type": "bezier",
+                      "value": 0
+                    },
+                    {
+                      "id": "dOgcpjF2jy",
+                      "position": 3,
+                      "connectedRight": true,
+                      "handles": [
+                        0.5,
+                        1,
+                        0.5,
+                        0
+                      ],
+                      "type": "bezier",
+                      "value": 0
+                    }
+                  ]
+                },
+                "bvqSMskjFQ": {
+                  "type": "BasicKeyframedTrack",
+                  "__debugName": "Proof probe:[\"position\",\"x\"]",
+                  "keyframes": [
+                    {
+                      "id": "xDxtYkXKFP",
+                      "position": 0,
+                      "connectedRight": true,
+                      "handles": [
+                        0.5,
+                        1,
+                        0.5,
+                        0
+                      ],
+                      "type": "bezier",
+                      "value": 0
+                    },
+                    {
+                      "id": "yFpM209zi8",
+                      "position": 1.5,
+                      "connectedRight": true,
+                      "handles": [
+                        0.5,
+                        1,
+                        0.5,
+                        0
+                      ],
+                      "type": "bezier",
+                      "value": 2
+                    },
+                    {
+                      "id": "FM5cbjVEBZ",
+                      "position": 3,
+                      "connectedRight": true,
+                      "handles": [
+                        0.5,
+                        1,
+                        0.5,
+                        0
+                      ],
+                      "type": "bezier",
+                      "value": 0
+                    }
+                  ]
+                },
+                "0zo61Hmnp6": {
+                  "type": "BasicKeyframedTrack",
+                  "__debugName": "Proof probe:[\"position\",\"y\"]",
+                  "keyframes": [
+                    {
+                      "id": "a8A-rqOr2c",
+                      "position": 0,
+                      "connectedRight": true,
+                      "handles": [
+                        0.5,
+                        1,
+                        0.5,
+                        0
+                      ],
+                      "type": "bezier",
+                      "value": 0
+                    },
+                    {
+                      "id": "Tjjgjv8l0M",
+                      "position": 1.5,
+                      "connectedRight": true,
+                      "handles": [
+                        0.5,
+                        1,
+                        0.5,
+                        0
+                      ],
+                      "type": "bezier",
+                      "value": 1
+                    },
+                    {
+                      "id": "2vkGcgL7i8",
+                      "position": 3,
+                      "connectedRight": true,
+                      "handles": [
+                        0.5,
+                        1,
+                        0.5,
+                        0
+                      ],
+                      "type": "bezier",
+                      "value": 0
+                    }
+                  ]
+                },
+                "AXfUfIJxzg": {
+                  "type": "BasicKeyframedTrack",
+                  "__debugName": "Proof probe:[\"position\",\"z\"]",
+                  "keyframes": [
+                    {
+                      "id": "Fh14tzeGf9",
+                      "position": 0,
+                      "connectedRight": true,
+                      "handles": [
+                        0.5,
+                        1,
+                        0.5,
+                        0
+                      ],
+                      "type": "bezier",
+                      "value": 0
+                    },
+                    {
+                      "id": "Qjt_1Vf-_v",
+                      "position": 1.5,
+                      "connectedRight": true,
+                      "handles": [
+                        0.5,
+                        1,
+                        0.5,
+                        0
+                      ],
+                      "type": "bezier",
+                      "value": 0
+                    },
+                    {
+                      "id": "YD4Pvujkmu",
+                      "position": 3,
+                      "connectedRight": true,
+                      "handles": [
+                        0.5,
+                        1,
+                        0.5,
+                        0
+                      ],
+                      "type": "bezier",
+                      "value": 0
+                    }
+                  ]
+                }
+              },
+              "trackIdByPropPath": {
+                "[\"rotationDeg\",\"x\"]": "Qt6B78AwOe",
+                "[\"rotationDeg\",\"y\"]": "We54S_hiqs",
+                "[\"rotationDeg\",\"z\"]": "sEm5al5igg",
+                "[\"position\",\"x\"]": "bvqSMskjFQ",
+                "[\"position\",\"y\"]": "0zo61Hmnp6",
+                "[\"position\",\"z\"]": "AXfUfIJxzg"
+              }
+            }
+          }
+        }
+      }
+    },
+    "definitionVersion": "0.4.0",
+    "revisionHistory": [
+      "PZjiwJiwnFWwjw0_",
+      "ZBHDUfgVZue3YU0U",
+      "_zZj4OjywVwXm_Vn"
+    ]
+  }
+}

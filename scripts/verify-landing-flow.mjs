@@ -458,6 +458,17 @@ const cases = [
         datasetTheme: document.documentElement.dataset.theme,
         bodyBackground: getComputedStyle(document.body).backgroundColor,
       }));
+      // The field transition is 700 ms of CSS; under main-thread load it can run late. Wait for the
+      // final colour (bounded) instead of a fixed sleep; the assertions below judge the last reading.
+      const settle = async (p, target, cap = 4000) => {
+        const t0 = Date.now(); let last;
+        while (Date.now() - t0 < cap) {
+          last = await touch(p);
+          if (last.bodyBackground === target) break;
+          await wait(50);
+        }
+        return { ...last, settleMs: Date.now() - t0 };
+      };
       const p2 = await open(browser, 'theme');
       try {
         await until(p2, async p => { const s = await snap(p); return s.landing?.loaded ? s : null; },
@@ -466,16 +477,14 @@ const cases = [
         await p2.evaluate(() => window.__gt3.landing.seek(0.5));
         await wait(250); // let the seek land before the click
         await p2.click('.theme-segmented__option[data-value="night"]');
-        await wait(1000); // the field transition is 700 ms
-        const night = await touch(p2);
+        const night = await settle(p2, 'rgb(12, 25, 48)');
         const nightState = await snap(p2);
         // The same switch at the Hub edge and again inside the Landing field.
         await p2.evaluate(() => window.__gt3.landing.seek(0.97));
         await wait(300);
         await p2.evaluate(() => window.__gt3.landing.seek(0.2));
         await p2.click('.theme-segmented__option[data-value="day"]');
-        await wait(1000);
-        const day = await touch(p2);
+        const day = await settle(p2, 'rgb(255, 255, 255)');
         const dayState = await snap(p2);
         const newErrors = rawErrors.filter(e => !isNoise(e.text)).slice(errors0);
         if (night.datasetTheme !== 'night' || nightState.theme !== 'night') {
@@ -495,8 +504,8 @@ const cases = [
         }
         if (newErrors.length) throw new Error(`new page errors: ${JSON.stringify(newErrors.map(e => e.text))}`);
         return { dayBefore, night: { datasetTheme: night.datasetTheme, bodyBackground: night.bodyBackground,
-            landingActive: nightState.landing?.active },
-          day: { datasetTheme: day.datasetTheme, bodyBackground: day.bodyBackground },
+            landingActive: nightState.landing?.active, settleMs: night.settleMs },
+          day: { datasetTheme: day.datasetTheme, bodyBackground: day.bodyBackground, settleMs: day.settleMs },
           newPageErrors: newErrors.length };
       } finally { await p2.close().catch(() => {}); }
     },

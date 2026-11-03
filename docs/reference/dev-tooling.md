@@ -1,6 +1,6 @@
 # Dev tooling (outside GT3's production dependencies)
 
-What is installed, where, how it was verified (2026-11-04, Intel 8 GB Mac), and what is *not* done. Per-host: the Spector setup lives in the user's home, not in this repo, so the M4 needs its own install.
+When to reach for these and for other creative tools: `creative-tooling.md`. This note covers what is installed, where, how it was verified (2026-11-04, Intel 8 GB Mac), and what is *not* done. Per-host: the Spector setup lives in the user's home, not in this repo, so the M4 needs its own install.
 
 ## Spector.js MCP — Claude Code, global (installed)
 

@@ -8,7 +8,7 @@
  */
 import puppeteer from 'puppeteer-core';
 
-const base = process.argv[2] || 'http://127.0.0.1:5198/';
+const base = process.env.GT3_URL || process.argv[2] || 'http://127.0.0.1:5198/';
 const wait = ms => new Promise(r => setTimeout(r, ms));
 const assert = (c, m) => { if (!c) throw new Error(m); };
 const errors = [];
@@ -18,8 +18,7 @@ const snap = page => page.evaluate(async () => {
   const { state } = await import('/src/core/state.js');
   return { progress: state.progress, started: state.started, locked: state.scrollLocked,
     active: state.activeCarIndex, ready: window.__gt3?.readiness?.status ?? 'none',
-    startVisible: !document.querySelector('#start-screen')?.hidden
-      && !document.querySelector('#start-screen')?.classList.contains('is-leaving'),
+    startVisible: !!document.querySelector('.entry-scroll:not([hidden]):not(.is-leaving)'),
     sfx: { ...(window.__gt3SfxLog || { checkpointCross: 0, audible: 0 }) } };
 });
 const isReady = s => s.ready === 'ready' || s.ready === 'degraded';
@@ -66,6 +65,10 @@ try {
   page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
   await page.mouse.move(800, 450);
   await page.evaluateOnNewDocument(() => {
+    // This harness targets Tour readiness; fresh visitors otherwise boot the Landing.
+    if (!sessionStorage.getItem('gt3.session.v1')) {
+      sessionStorage.setItem('gt3.session.v1', JSON.stringify({ experience: 'tour', routeProgress: 0 }));
+    }
     const log = window.__gt3Probe = [];
     let prev = '';
     const tick = async () => {
@@ -83,7 +86,10 @@ try {
   // A — fresh session, input streamed across readiness.
   await page.goto(base, { waitUntil: 'domcontentloaded', timeout: 120000 });
   const { sent, maxGapMs, s: atStop } = await streamUntilAfterReady(page, 0);
-  await wait(600); // > unlock quiet window
+  await page.waitForFunction(async () => {
+    const { state } = await import('/src/core/state.js');
+    return !state.scrollLocked && !!document.querySelector('.entry-scroll:not([hidden])');
+  }, { timeout: 20000 }); // cover + red phase + quiet-input gate
   const settled = await snap(page);
   const probe = await page.evaluate(() => window.__gt3Probe);
   report.cases.A = { wheelEventsSent: sent, maxGapMs, atStop, settled, probe };
@@ -99,7 +105,7 @@ try {
   report.cases.A.postReadyInputStarted = settled.started;
   if (!settled.started) {
     assert(settled.progress === 0, `pre-ready input moved the car: progress=${settled.progress}`);
-    assert(settled.startVisible, 'start screen dismissed without any post-ready gesture');
+    assert(settled.startVisible, 'entry control dismissed without any post-ready gesture');
   }
   assert(!settled.locked, 'drive still locked after input went quiet');
   await page.mouse.wheel({ deltaY: 200 });
@@ -137,7 +143,9 @@ try {
   await page.reload({ waitUntil: 'domcontentloaded', timeout: 120000 });
   await streamUntilAfterReady(page, 600);
   await page.evaluate(() => { window.__gt3StopMomentum = true; });
-  await wait(700);
+  await page.waitForFunction(async () => !(await import('/src/core/state.js')).state.scrollLocked,
+    { timeout: 20000 });
+  await wait(400);
   const restored = await snap(page);
   const gate = await page.evaluate(() => {
     const unlock = window.__gt3Probe.find(l => /\|locked=false\|/.test(l) && !/^\d+ none/.test(l));

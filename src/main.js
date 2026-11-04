@@ -130,6 +130,7 @@ async function boot() {
   const player = await import('./ui/player.js');
   const soundCue = await import('./ui/soundCue.js');
   const startScreen = await import('./ui/startScreen.js');
+  const entrySequence = await import('./ui/entrySequence.js');
   const finishScreen = await import('./ui/finishScreen.js');
   const hub = await import('./ui/hub.js');
   const homeControl = await import('./ui/homeControl.js');
@@ -448,8 +449,14 @@ async function boot() {
       // The page held the Landing's scroll until now; put it back on the start line.
       scrollDrive.seekTo(0, { instant: true });
     }
-    // Unlock only once any gesture begun during loading has finished (SPEC §14).
-    if (unlock) scrollDrive.unlockScrollWhenQuiet(); // a finish restore below re-locks (V1) and cancels it
+    // Refresh entry waits for the loading field to part, then runs the same locked entry.
+    if (unlock && !restoreFinish) {
+      void startScreen.revealTour().then(() => {
+        if (state.experience === 'tour' && !state.transition) {
+          void entrySequence.runEntry({ standingStart: state.progress === 0 });
+        }
+      });
+    }
     if (restoreFinish) {
       startScreen.dismissStartScreenForRestore(); // no gesture will come; keep it (and its sound cue) out of the finish card
       finishScreen.restoreFinishScreen();
@@ -483,8 +490,11 @@ async function boot() {
       await yieldToBrowser();
       await hub.leaveHub();
       completeTransition();
-      scrollDrive.unlockScrollWhenQuiet();
+      if (state.mode === 'race') {
+        void entrySequence.runEntry({ standingStart: state.progress === 0 });
+      }
     } catch (error) {
+      entrySequence.cancelEntry();
       console.error('[gt3] Tour entry failed; returning to the Hub', error);
       tourArmed = wasArmed;
       cancelTransition();
@@ -505,6 +515,7 @@ async function boot() {
    */
   async function leaveTour() {
     if (entering || state.experience !== 'tour' || state.transition || state.mode !== 'race') return;
+    entrySequence.cancelEntry();
     entering = true;
     try {
       scrollDrive.lockScroll();

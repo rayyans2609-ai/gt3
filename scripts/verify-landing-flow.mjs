@@ -48,6 +48,8 @@ const snap = page => page.evaluate(async () => {
       ? { loaded: landing.loaded(), progress: landing.progress(), active: landing.active() }
       : null,
     startScreen: [...(document.getElementById('start-screen')?.classList ?? [])],
+    coverHidden: !!document.getElementById('start-screen')?.hidden,
+    entryPhase: document.getElementById('entry-sequence')?.dataset.phase,
     session: (() => { try { return JSON.parse(sessionStorage.getItem('gt3.session.v1') || 'null'); } catch { return null; } })(),
   };
 });
@@ -220,8 +222,8 @@ const cases = [
       const carried = samples.filter(x => x.progress !== 0);
       if (carried.length) throw new Error(`carried-over input: ${JSON.stringify(carried)}`);
       if (entry.activeCarIndex !== 0) throw new Error(`starter car changed: ${entry.activeCarIndex}`);
-      if (!entry.startScreen.includes('is-prompt-only')) {
-        throw new Error(`start screen not prompt-only: ${JSON.stringify(entry.startScreen)}`);
+      if (!entry.coverHidden || entry.entryPhase !== 'reds' || !entry.locked) {
+        throw new Error(`Hub launch must hide the refresh cover and begin locked lamps: ${JSON.stringify(entry)}`);
       }
       return { entryMs, wheelMomentumSent: 8,
         progressSamples: samples.map(x => x.progress), activeCarIndex: entry.activeCarIndex,
@@ -253,7 +255,7 @@ const cases = [
       await page.mouse.move(720, 450).catch(() => {});
       const restored = await until(page, async p => {
         const s = await snap(p);
-        return s.world === 'tour' && s.experience === 'tour' && readyOk(s) ? s : null;
+        return s.world === 'tour' && s.experience === 'tour' && readyOk(s) && !s.locked ? s : null;
       }, { cap: 60000, step: 250, label: 'tour restore ready/degraded' });
       const delta = Math.abs(restored.progress - saved);
       if (delta > 0.002) {

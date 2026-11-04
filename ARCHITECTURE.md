@@ -150,6 +150,28 @@ text/HUD/player UI. One fixed canvas behind it, one shared `WebGLRenderer`.
   2026-10-24) is one extra load of its full-resolution GLB (`cars.loadFullResolutionCar`, same
   verified normalisation), falling back to the roster clone. The Hub is DOM over the resolved field.
 
+## Hub (Phase 5 A/B candidates; branch `p5-hub-candidate`, not accepted)
+Two complete Hub candidates share one core: `?hub=a` (Precision Plan, flat SVG drawing) and `?hub=b` (Dimensional Circuit, a lit maquette on the shared renderer). No parameter means A, which is a harness default, not a preference.
+- **Core** (`src/ui/hub/hubCore.js`): main.js's contract is unchanged (`initHub`, `setHubReadiness`, `setHubPresence`, `updateHub`, `resetHub`, `prepareLeave`, `leaveHub`, `coverHub`, plus `renderHub(force)`).
+  - Owns the non-persisted UI state `race | cars | listening`, which resets to `race` at every major transition, plus readiness, reveal, discovery from `state.unlocked`, keyboard and focus.
+  - Presenter interface: JSDoc at the top of the file. Presenters are `presenterA.js` and `presenterB.js` (with `dimensional/ribbon.js`).
+- **Circuit data** (`circuitGeometry.js`): the real asphalt edges from `trackProfile.asphaltEdgeAt`, the checkpoints (car i+1 at `CHECKPOINT_ROUTE_T[i]`; Lexus has none) and the grid. Both candidates draw the same circuit and the same progression data.
+- **Launch seam** (`circuitCamera.js`):
+  - Rest pose per variant: A top-down (pitch 90°, Tour yaw), B the Tour orientation with a longer lens. Framed into the presenter's slot by distance plus principal-point shift.
+  - `poseAt(z, rest, live)` interpolates log-distance, quaternion slerp, FOV and shift, so z = 1 **is** the live Tour camera (`main.js` `tourPose()`, captured after `armTour` + `aerialCamera.snap()`).
+  - Both presenters drive the real Tour camera along these poses through `aerialCamera.setPoseOverride`, which is inert unless injected and is cleared after every launch and Home.
+  - The drawn edges therefore land on the rendered road: < 0.001 px measured against the `track-asphalt` mesh vertices on the M4 (`scripts/verify-hub-launch.mjs`, `scripts/check-circuit-camera.mjs`).
+- **Canvas ownership:**
+  - A draws nothing on the canvas.
+  - B renders on demand through `renderHub()`: 0 draws at a settled rest. It keeps the canvas through its timed edge while `#hub[data-canvas-owner="hub"]`, then hands it to the Tour.
+  - The Tour is never rendered under a settled Hub.
+- **Player** (`src/ui/hubPlayer.js`, `styles/hubPlayer.css`): one object with collapsed, expanded and Listening presentations (Flip into `#hub-listening`) and A/B skins.
+  - Master mute lives in the player in every presentation, reusing `soundControl.js`'s gesture-safe path. The global speaker isn't part of the Hub composition.
+  - Levels sit behind a disclosure.
+- **Showcase contract:** `main.js` `requestShowcase({ carIndex })` returns `{ available: false, reason: 'phase-6' }`; Cars selection writes `showcaseCarIndex` ★. Phase 6 replaces the availability decision; nothing navigates today.
+- **Marker colour:** the Hub marker is the minimap chevron in a theme- and variant-coded colour. Only the Grand Tour minimap marker is red (`--tour-marker`); the Tour edge controls use `--control-accent`.
+- **DOM/test hooks:** `#hub[data-variant][data-hub-state]`, `[data-checkpoint="1".."9"]`, `[data-hub-player]`, `[data-control=…]`, `window.__gt3.hub.debug()` (harnesses `verify-hub-states`, `verify-hub-launch`, `verify-hub-captures`).
+
 ## Animation authoring (Theatre.js, dev-only)
 Theatre.js is an **optional visual authoring tool** for hand-keyframed curves. It complements
 GSAP and replaces nothing. Nothing here ships: `@theatre/studio` is a devDependency, and the only

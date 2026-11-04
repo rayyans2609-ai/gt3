@@ -39,6 +39,37 @@ export const aerial = {
 };
 
 let camera;
+// Dev-only Hub measurement seam. Inert until main.js explicitly injects an override.
+let poseOverride = null;
+let overrideLens = null;
+function restoreOverrideLens() {
+  if (!overrideLens || !camera) return;
+  Object.assign(camera, overrideLens);
+  camera.updateProjectionMatrix();
+  overrideLens = null;
+}
+export function setPoseOverride(fn) {
+  poseOverride = fn;
+  if (!fn && overrideLens) { restoreOverrideLens(); snap(); }
+}
+export function applyPoseOverride() {
+  const pose = poseOverride?.();
+  if (!pose) { restoreOverrideLens(); return false; }
+  overrideLens ??= { fov: camera.fov, aspect: camera.aspect, near: camera.near,
+    far: camera.far, zoom: camera.zoom, view: camera.view ? { ...camera.view } : null,
+    filmGauge: camera.filmGauge, filmOffset: camera.filmOffset };
+  camera.position.fromArray(pose.position);
+  camera.quaternion.fromArray(pose.quaternion);
+  Object.assign(camera, { fov: pose.fov, aspect: pose.aspect, near: pose.near,
+    far: pose.far, zoom: pose.zoom ?? 1, view: pose.view ? { ...pose.view } : null,
+    filmGauge: pose.filmGauge ?? 35, filmOffset: pose.filmOffset ?? 0 });
+  camera.updateProjectionMatrix();
+  camera.projectionMatrix.elements[8] -= pose.shift?.[0] ?? 0;
+  camera.projectionMatrix.elements[9] -= pose.shift?.[1] ?? 0;
+  camera.projectionMatrixInverse.copy(camera.projectionMatrix).invert();
+  camera.updateMatrixWorld();
+  return true;
+}
 /** Drive position: logical progress plus the V1 finish run-out (finishTail.js). */
 const driveP = () => state.progress + state.finishTailMeters / TOUR_LENGTH;
 let lastProgress = null;
@@ -141,6 +172,7 @@ export function initAerialCamera(raceCamera) {
 
 export function update(dt) {
   if (!camera) return;
+  if (applyPoseOverride()) return;
   if (CORRIDOR) { aerial.frames++; corridorUpdate(false); return; }
   if (SECTOR) { sectorUpdate(dt); return; }
   aerial.frames++;

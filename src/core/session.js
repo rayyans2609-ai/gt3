@@ -7,6 +7,7 @@ const STORAGE_KEY = 'gt3.session.v1';
 const VALID_SESSION_VALUES = Object.freeze({
   theme: new Set(['day', 'night']),
   experience: new Set(EXPERIENCES),
+  showcaseCarIndex: { has: value => Number.isInteger(value) && value >= 0 && value < CARS.length },
   masterMuted: { has: (value) => typeof value === 'boolean' },
   masterVolume: { has: (value) => Number.isFinite(value) && value >= 0 && value <= 1 },
   musicMuted: { has: (value) => typeof value === 'boolean' },

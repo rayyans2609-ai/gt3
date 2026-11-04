@@ -77,6 +77,11 @@ export function onResize(fn) {
   return () => resizeHandlers.delete(fn);
 }
 
+/** Phase 5 selection seam. Phase 6 will replace this availability decision. */
+export function requestShowcase({ carIndex } = {}) {
+  return { available: false, reason: 'phase-6' };
+}
+
 window.addEventListener('resize', () => {
   window.clearTimeout(resizeTimer);
   resizeTimer = window.setTimeout(() => {
@@ -232,6 +237,8 @@ async function boot() {
   motion.installMotion(registerUpdate);
   hub.initHub({
     onStartRace: () => { void enterTour(); },
+    requestShowcase,
+    setPoseOverride: aerialCamera.setPoseOverride,
     // The Hub's circuit plan is drawn through the Tour camera's fixed orientation.
     camera: { yawDeg: aerialCamera.TUNE.yawDeg, pitchDeg: aerialCamera.TUNE.pitchDeg },
   });
@@ -490,6 +497,26 @@ async function boot() {
       return { x: (projected.x + 1) / 2 * window.innerWidth, y: (1 - projected.y) / 2 * window.innerHeight };
     });
   }
+  function tourPose() {
+    camera.updateMatrixWorld();
+    return { position: camera.position.toArray(), quaternion: camera.quaternion.toArray(),
+      fov: camera.fov, aspect: camera.aspect, near: camera.near, far: camera.far,
+      zoom: camera.zoom, filmGauge: camera.filmGauge, filmOffset: camera.filmOffset,
+      view: camera.view ? { ...camera.view } : null, distance: aerialCamera.TUNE.distance };
+  }
+  // Independent alignment evidence: read the actual rendered mesh's edge vertices,
+  // not the Hub geometry helper. Asphalt has five vertices across each spline ring.
+  if (import.meta.env.DEV) window.__gt3.hubRoadEdges = () => {
+    const mesh = scene.getObjectByName('track-asphalt');
+    mesh.updateWorldMatrix(true, false);
+    const position = mesh.geometry.getAttribute('position');
+    const left = [], right = [], p = new THREE.Vector3();
+    for (let i = 0; i < position.count; i += 5) {
+      right.push(p.fromBufferAttribute(position, i).applyMatrix4(mesh.matrixWorld).toArray());
+      left.push(p.fromBufferAttribute(position, i + 4).applyMatrix4(mesh.matrixWorld).toArray());
+    }
+    return { left, right };
+  };
 
   let entering = false;
   async function enterTour() {
@@ -510,7 +537,8 @@ async function boot() {
       // Two paints under the field; bounded yields also settle in a hidden tab without rAF.
       await yieldToBrowser();
       await yieldToBrowser();
-      await hub.leaveHub({ progress: state.progress, project: projectRoute });
+      aerialCamera.snap(); // settled rail pose is the exact, immutable endpoint of this dive
+      await hub.leaveHub({ progress: state.progress, project: projectRoute, pose: tourPose });
       completeTransition();
       if (state.mode === 'finish') setExperience('complete'); // finished route restored by armTour
       if (state.mode === 'race') {
@@ -526,6 +554,7 @@ async function boot() {
       landing.activateLanding({ atHub: true });
       hub.resetHub(1, true);
     } finally {
+      aerialCamera.setPoseOverride(null);
       entering = false;
     }
   }
@@ -549,7 +578,7 @@ async function boot() {
       scrollDrive.lockScroll();
       persistRouteProgress(state.progress, { flush: true });
       if (!beginTransition('hub')) { scrollDrive.unlockScroll(); return; }
-      await hub.coverHub({ progress: state.progress, project: projectRoute });
+      await hub.coverHub({ progress: state.progress, project: projectRoute, pose: tourPose });
       scrollDrive.setDriveDormant(true);
       if (!landing) {
         landing = await import('./landing/landing.js');
@@ -569,6 +598,7 @@ async function boot() {
       hub.resetHub(0, false);
       scrollDrive.unlockScrollWhenQuiet();
     } finally {
+      aerialCamera.setPoseOverride(null);
       entering = false;
     }
   }
@@ -641,7 +671,12 @@ async function boot() {
   registerUpdate(audio.updateAudio);
   registerUpdate(player.updatePlayer);
   registerUpdate(hub.updateHub);
-  registerUpdate(sceneSetup.updateScene);
+  registerUpdate((dt) => {
+    sceneSetup.updateScene(dt);
+    // Projection feedback runs after the normal aerial update. The opt-in measurement
+    // override must be the final camera writer so SVG and rendered road share one pose.
+    aerialCamera.applyPoseOverride();
+  });
 
   onResize((w, h) => {
     // Scene resize runs first. Solve/cached lookup in the debounced resize task,
@@ -655,7 +690,10 @@ async function boot() {
 
     // The legacy montage remains available for a later manual-unlock flow.
     const landingOwns = Boolean(landing?.landingActive());
+    const hubOwns = state.experience === 'hub' && !state.transition
+      && (landing?.landingHubPresence() ?? 1) >= 0.999;
     try {
+      if (hubOwns) hub.renderHub();
       if (gpuWarmup && !gpuWarmup.done && readiness.gpu === 'pending') {
         // While the visitor moves through the Landing transition the warm-up waits a moment,
         // so its first-use stalls never land on the signature shot. Its draws are then covered
@@ -670,7 +708,10 @@ async function boot() {
           }
           settle('gpu', 'ready');
         }
-        if (landingOwns) landing.renderLanding();
+        if (landingOwns && !hubOwns) landing.renderLanding();
+      } else if (hubOwns) {
+        // A is DOM/SVG and needs no canvas draw. B may render through the shared renderer.
+        // Never render the Tour underneath this rest state.
       } else if (landingOwns) landing.renderLanding();
       else if (studio.isMontagePlaying()) studio.renderMontage();
       else {

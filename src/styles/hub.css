@@ -1,7 +1,4 @@
-/* Grand Tour Hub, Phase 5 candidate (SPEC §5, §9). Two directions for review (src/ui/hub.js):
-   `plan` (default) — the circuit as an architectural plan is the hero; `launch` — kinetic type.
-   Theme comes only from the Landing-world tokens (SPEC §13); nothing hardcodes a theme.
-   Motion is GSAP (motion.js, ticked by main.js); CSS here owns layout, colour and focus. */
+/* Shared Hub shell and SVG presenters. Theme comes from state.theme; motion.js owns GSAP. */
 
 #hub {
   --hub-field: var(--landing-field);
@@ -45,7 +42,6 @@
 /* ---- the circuit plan (direction: plan) ------------------------------------------------------ */
 
 .hub-plan-frame { position: absolute; left: var(--m); right: var(--m); top: 24vh; bottom: 29vh; pointer-events: none; }
-#hub[data-direction='launch'] .hub-plan-frame { display: none; }
 
 .hub-plan { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
 .hub-plan__edge,
@@ -115,13 +111,7 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* Launch direction: one word edge to edge on the lower third. */
-#hub[data-direction='launch'] .hub-start-wrap { left: calc(var(--m) * .55); right: calc(var(--m) * .55); bottom: 7vh; }
-#hub[data-direction='launch'] .hub-start { font-size: 14.6vw; letter-spacing: -0.05em; word-spacing: 0.16em; line-height: .8; }
-#hub[data-direction='launch'] .hub-start:disabled .hub-start__word { color: inherit; }
-#hub[data-direction='launch'] .hub-start__char { color: color-mix(in srgb, var(--hub-ink) 14%, transparent); transition: color 500ms var(--ease); }
-#hub[data-direction='launch'] .hub-start__char.is-solid { color: var(--hub-ink); }
-#hub[data-direction='launch'] .hub-status { margin-left: .4vw; }
+
 
 /* ---- Cars ------------------------------------------------------------------------------------ */
 
@@ -185,7 +175,7 @@
   grid-template-areas: "cover meta transport" "list list list";
   column-gap: 14px;
 }
-/* Column shape (launch): cover above its controls. */
+/* Optional column player shape: cover above its controls. */
 .hub-player[data-shape='column'] {
   --cover: clamp(176px, 13.6vw, 216px);
   width: var(--cover);
@@ -314,3 +304,15 @@
 @media (prefers-reduced-motion: reduce) {
   #hub *, #hub *::before, #hub *::after { transition-duration: 1ms !important; animation: none !important; }
 }
+
+/* Presenter seams: each variant owns marker colour; the lap light uses --hub-accent. */
+#hub[data-variant='a'] { --hub-marker: #196f68; }
+#hub[data-variant='b'] { --hub-marker: #6844a0; }
+:root[data-theme='night'] #hub[data-variant='a'] { --hub-marker: #7ce1cb; }
+:root[data-theme='night'] #hub[data-variant='b'] { --hub-marker: #cab3ff; }
+#hub[data-canvas-field='true'] .hub-field { background: transparent; }
+.hub-plan__marker { fill: var(--hub-marker); stroke: var(--hub-field); stroke-width: .7px; }
+.hub-plan__checker { fill: none; stroke: var(--hub-ink); stroke-width: 5px; stroke-dasharray: 3px 3px; }
+.hub-plan__grid { fill: none; stroke: var(--hub-line); stroke-width: 1px; }
+.hub-plan__car[tabindex='0'] { cursor: pointer; }
+.hub-plan__car:focus-visible, .hub-plan__car.is-hovered, .hub-plan__car.is-selected { fill: var(--hub-marker); text-decoration: underline; outline: none; }

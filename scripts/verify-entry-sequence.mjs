@@ -6,7 +6,14 @@ import puppeteer from 'puppeteer-core';
 import path from 'node:path';
 import { mkdir, writeFile } from 'node:fs/promises';
 
-const base = process.env.GT3_URL || process.argv[2] || 'http://127.0.0.1:5243';
+const hubVariant = process.argv.find(arg => arg.startsWith('--hub='))?.split('=')[1] || process.env.GT3_HUB;
+if (hubVariant && !['a', 'b'].includes(hubVariant)) throw new Error('Expected --hub=a or --hub=b');
+const withHub = value => {
+  if (!hubVariant) return value;
+  const next = new URL(value); next.searchParams.set('hub', hubVariant); return next.href;
+};
+
+const base = withHub(process.env.GT3_URL || process.argv.slice(2).find(arg => !arg.startsWith('--')) || 'http://127.0.0.1:5243');
 const out = path.resolve(process.env.GT3_OUT || 'local/evidence/p5/entry');
 const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
 const assert = (ok, message) => { if (!ok) throw new Error(message); };

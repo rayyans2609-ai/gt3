@@ -10,6 +10,7 @@ export const state = {
   speed01: 0,
   started: false,
   activeCarIndex: 0,
+  showcaseCarIndex: 0,
   unlocked: new Set([0]),
   mode: 'race',
   scrollLocked: false,

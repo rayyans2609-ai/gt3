@@ -9,7 +9,14 @@
 import puppeteer from 'puppeteer-core';
 import path from 'node:path';
 
-const url = process.env.GT3_URL;
+const hubVariant = process.argv.find(arg => arg.startsWith('--hub='))?.split('=')[1] || process.env.GT3_HUB;
+if (hubVariant && !['a', 'b'].includes(hubVariant)) throw new Error('Expected --hub=a or --hub=b');
+const withHub = value => {
+  if (!hubVariant) return value;
+  const next = new URL(value); next.searchParams.set('hub', hubVariant); return next.href;
+};
+
+const url = withHub(process.env.GT3_URL);
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const report = { pass: false, checks: {} };
 let browser;
@@ -39,7 +46,7 @@ try {
       });
     };
   });
-  await page.goto(`${url}/`, { waitUntil: 'domcontentloaded' });
+  await page.goto(url, { waitUntil: 'domcontentloaded' });
   await page.waitForFunction(() => document.querySelector('#hub.is-interactive')
     && ['ready', 'degraded'].includes(window.__gt3?.readiness?.status), { timeout: 150000 });
   await sleep(2500);

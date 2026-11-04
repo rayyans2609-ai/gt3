@@ -5,7 +5,14 @@ import { mkdirSync } from 'node:fs';
 import assert from 'node:assert/strict';
 import { fileURLToPath } from 'node:url';
 
-const base = process.env.GT3_URL || 'http://127.0.0.1:5261';
+const hubVariant = process.argv.find(arg => arg.startsWith('--hub='))?.split('=')[1] || process.env.GT3_HUB;
+if (hubVariant && !['a', 'b'].includes(hubVariant)) throw new Error('Expected --hub=a or --hub=b');
+const withHub = value => {
+  if (!hubVariant) return value;
+  const next = new URL(value); next.searchParams.set('hub', hubVariant); return next.href;
+};
+
+const base = withHub(process.env.GT3_URL || 'http://127.0.0.1:5261');
 const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
 const report = { base, cases: {} };
 const until = async (fn, label, ms = 90000) => {

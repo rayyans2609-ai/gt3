@@ -14,6 +14,13 @@ const GO_EXIT_MS = 320;
 const CONTROL_DELAY_MS = 150;
 const CONTROL_FADE_MS = 400;
 
+/** DEV-only evidence holds (harness screenshots outlast a lamp hold on slow hosts). */
+function devMs(key, fallback) {
+  if (!import.meta.env.DEV) return fallback;
+  const value = globalThis.window?.__gt3TestFaults?.[key];
+  return Number.isFinite(value) ? value : fallback;
+}
+
 let root;
 let housing;
 let go;
@@ -160,7 +167,7 @@ export function runEntry({ standingStart }) {
       housing.setAttribute('aria-label', `${i + 1} of 5 start lights red`);
       if (i < lamps.length - 1 && !await wait(run, LAMP_INTERVAL_MS)) return;
     }
-    if (!await wait(run, HOLD_MIN_MS + Math.random() * (HOLD_MAX_MS - HOLD_MIN_MS))) return;
+    if (!await wait(run, devMs('entryHoldMs', HOLD_MIN_MS + Math.random() * (HOLD_MAX_MS - HOLD_MIN_MS)))) return;
     // One task removes all reds and requests the quiet unlock. No red-phase input is banked.
     lamps.forEach(lamp => lamp.classList.remove('is-on'));
     root.dataset.phase = 'go';
@@ -169,7 +176,7 @@ export function runEntry({ standingStart }) {
     go.hidden = false;
     arm();
     void wait(run, CONTROL_DELAY_MS).then(alive => { if (alive) showControl(run); });
-    if (!await wait(run, GO_ENTER_MS + GO_HOLD_MS)) return;
+    if (!await wait(run, GO_ENTER_MS + devMs('entryGoHoldMs', GO_HOLD_MS))) return;
     go.classList.add('is-leaving');
     if (!await wait(run, GO_EXIT_MS)) return;
     go.hidden = true;

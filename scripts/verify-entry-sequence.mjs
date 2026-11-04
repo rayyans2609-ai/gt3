@@ -121,6 +121,8 @@ try {
         if (!sessionStorage.getItem('gt3.session.v1')) {
           sessionStorage.setItem('gt3.session.v1', JSON.stringify({ experience: 'hub', theme: selectedTheme, routeProgress: 0 }));
         }
+        // DEV-only evidence holds: a screenshot on the Intel host outlasts the real lamp/GO holds.
+        window.__gt3TestFaults = { ...(window.__gt3TestFaults || {}), entryHoldMs: 5000, entryGoHoldMs: 3500 };
       }, theme);
       await page.goto(base, { waitUntil: 'domcontentloaded', timeout: 120000 });
       await page.mouse.move(800, 450);

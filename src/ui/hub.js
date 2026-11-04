@@ -1,56 +1,54 @@
 /**
  * hub.js — the Grand Tour Hub (SPEC §5, §9, §25), Phase 5 candidate.
  *
- * One idea organises the surface: the start line. A single hairline crosses the field; START RACE
- * stands on it, the cover art rests on it, and everything secondary hangs below it. The short
- * checker strip under START RACE is the restrained checkered accent SPEC §5 allows, and it is
- * also the loading indicator (SPEC §25): it paints in column by column while the route prepares,
- * and START RACE commits only once it is complete.
- *
- * The field is two shutters meeting at the line. START RACE parts them (the upper one carries the
- * words away) to reveal the Grand Tour's opening frame underneath; the home control closes them
- * again. All motion is CSS transitions or WAAPI: no extra frame loop (ARCHITECTURE single RAF).
- *
- * Provisional review alternatives (owner's visual call): `?hub=line` (default, editorial left
- * stack) or `?hub=centre` (symmetric, continuing the Landing's centred stack); `?entry=fade`
- * restores the Phase 4 field fade for comparison; `?cars=static` shows Cars as a roster glyph
- * only (owner decision D6: what Cars does before the Phase 6 Showcase exists).
+ * Two creative directions are kept for the owner's visual review (neither is accepted):
+ *  - `plan` (default): GT3's own circuit, drawn as an architectural plan through the Grand Tour
+ *    camera's eyes, is the Hub's hero. It draws itself as the route prepares, previews a lap
+ *    when START RACE is under the pointer, carries the Cars view on its checkpoints, and on
+ *    START RACE dives onto the visitor's place on the road before the live frame takes over.
+ *  - `launch` (`?hub=launch`): typographic. START RACE runs edge to edge as one kinetic word
+ *    that leans toward the pointer and leaves the screen letter by letter, like a grid getting
+ *    away; the field follows it out.
+ * Shared here: readiness, Landing presence and reveal, the launch/return contract with main.js,
+ * Cars, and the integrated player (hubPlayer.js). Motion runs on GSAP ticked by main.js's one
+ * RAF (motion.js); CSS handles only hover colour and focus states.
  */
 
 import { state, subscribe } from '../core/state.js';
 import { CARS } from '../data/cars.js';
 import { initHubPlayer, resetHubPlayer, updateHubPlayer } from './hubPlayer.js';
+import { gsap, reducedMotion, SplitText } from './motion.js';
+import * as plan from './hubPlan.js';
 
 const params = new URLSearchParams(window.location.search);
-const LAYOUT = params.get('hub') === 'centre' ? 'centre' : 'line';
-const ENTRY = params.get('entry') === 'fade' ? 'fade' : 'shutter';
-const CARS_MODE = params.get('cars') === 'static' ? 'static' : 'roster';
-const CHECK = 5; // px per checker square; the strip is two rows (matches --check in hub.css)
-const RECEDE_MS = 300;
-const OPEN_MS = 940;
-const CLOSE_MS = 760;
-const FADE_MS = 520;
-const SETTLE_MS = 1100; // reveal length; after it, hover timings apply (hub.css is-settled)
+const DIRECTION = params.get('hub') === 'launch' ? 'launch' : 'plan';
 
 let root = null;
-let shutterTop;
-let shutterBottom;
+let field;
+let frame;
+let planSvg = null;
+let mark;
 let startButton;
 let startWord;
-let strip;
+let split = null;
+let chars = [];
 let status;
 let carsToggle;
-let roster;
 let ticks = [];
+let roster = null;
+let stagePieces = [];
 let ready = false;
+let progress = 0;
 let onStart = null;
 let presence = -1;
 let interactive = null;
-let rosterOpen = false;
+let revealed = false;
+let carsOpen = false;
 let lastReadiness = '';
-let timers = [];
-let settleTimer = 0;
-const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)');
+let revealTl = null;
+let leanTl = null;
+let proximity = [];
+const html = document.documentElement;
 
 function el(tag, className, text) {
   const node = document.createElement(tag);
@@ -59,157 +57,203 @@ function el(tag, className, text) {
   return node;
 }
 
-function later(fn, ms) {
-  const id = window.setTimeout(() => {
-    timers = timers.filter((t) => t !== id);
-    fn();
-  }, ms);
-  timers.push(id);
-  return id;
-}
-
-function clearTimers() {
-  for (const id of timers) window.clearTimeout(id);
-  timers = [];
-}
-
-function quick() {
-  return ENTRY === 'fade' || reduceMotion.matches;
-}
-
-/** Keep the strip exactly as wide as the words above it, in whole checker columns. */
-function measure() {
-  if (!startWord) return;
-  const width = startWord.getBoundingClientRect().width;
-  if (!width) return;
-  const columns = Math.max(8, Math.round(width / CHECK));
-  root.style.setProperty('--strip-cols', String(columns));
-  root.style.setProperty('--check', `${CHECK}px`);
-  renderStrip(Number(root.dataset.progress || 0));
-}
-
-function renderStrip(progress) {
-  const columns = Number(root.style.getPropertyValue('--strip-cols')) || 0;
-  const filled = Math.round(Math.min(1, Math.max(0, progress)) * columns);
-  root.style.setProperty('--strip-filled', String(filled));
-}
+// ---------------------------------------------------------------------------------------------
+// Cars: the roster glyph (ten ticks) everywhere; names live on the plan or in a short roster.
 
 function buildCars() {
   const wrap = el('div', 'hub-cars');
+  carsToggle = el('button', 'hub-cars__toggle');
+  carsToggle.type = 'button';
+  carsToggle.setAttribute('aria-expanded', 'false');
+  const name = el('span', 'hub-cars__name', 'Cars');
   const glyph = el('span', 'hub-cars__ticks');
   glyph.setAttribute('aria-hidden', 'true');
   ticks = CARS.map(() => glyph.appendChild(el('i')));
-  const name = el('span', 'hub-cars__name', 'Cars');
-  if (CARS_MODE === 'static') {
-    const label = el('div', 'hub-cars__toggle is-static');
-    label.append(name, glyph);
-    wrap.append(label);
-  } else {
-    carsToggle = el('button', 'hub-cars__toggle');
-    carsToggle.type = 'button';
-    carsToggle.setAttribute('aria-expanded', 'false');
-    carsToggle.setAttribute('aria-controls', 'hub-roster');
-    carsToggle.append(name, glyph);
+  carsToggle.append(name, glyph);
+  wrap.append(carsToggle);
+  if (DIRECTION === 'launch') {
     roster = el('ol', 'hub-roster');
     roster.id = 'hub-roster';
     roster.inert = true;
-    CARS.forEach((car, index) => {
-      const item = el('li', 'hub-roster__car');
-      item.style.setProperty('--i', String(index));
-      roster.append(item);
-    });
-    carsToggle.addEventListener('click', () => setRoster(!rosterOpen));
-    wrap.append(carsToggle, roster);
+    CARS.forEach(() => roster.append(el('li', 'hub-roster__car')));
+    carsToggle.setAttribute('aria-controls', roster.id);
+    wrap.append(roster);
   }
-  renderCars();
+  carsToggle.addEventListener('click', () => setCars(!carsOpen));
   return wrap;
 }
 
-/** Discovery is monotonic (SPEC §26); undiscovered identities stay concealed as `?` (§11). */
 function renderCars() {
   const found = state.unlocked;
   ticks.forEach((tick, index) => tick.classList.toggle('is-found', found.has(index)));
   const count = CARS.filter((_, index) => found.has(index)).length;
-  const label = `Cars, ${count} of ${CARS.length} discovered`;
-  if (carsToggle) carsToggle.setAttribute('aria-label', label);
-  if (!roster) return;
-  CARS.forEach((car, index) => {
-    const item = roster.children[index];
-    const known = found.has(index);
-    item.classList.toggle('is-found', known);
-    item.textContent = known ? `${car.manufacturer} ${car.model}` : '?';
-    item.setAttribute('aria-label', known ? car.displayName || `${car.manufacturer} ${car.model}` : 'Undiscovered car');
-  });
+  carsToggle.setAttribute('aria-label', `Cars, ${count} of ${CARS.length} discovered`);
+  if (DIRECTION === 'plan') plan.renderDiscovery(found);
+  if (roster) {
+    CARS.forEach((car, index) => {
+      const item = roster.children[index];
+      const known = found.has(index);
+      item.classList.toggle('is-found', known);
+      item.textContent = known ? `${car.manufacturer} ${car.model}` : '?';
+    });
+  }
 }
 
-function setRoster(open) {
-  if (!roster) return;
-  rosterOpen = open;
-  roster.inert = !open;
-  root.classList.toggle('is-roster-open', open);
+function setCars(open) {
+  carsOpen = open;
   carsToggle.setAttribute('aria-expanded', String(open));
+  root.classList.toggle('is-cars-open', open);
+  if (DIRECTION === 'plan') { plan.showCarLabels(open); return; }
+  roster.inert = !open;
+  gsap.killTweensOf(roster.children);
+  if (reducedMotion.matches) { gsap.set(roster.children, { opacity: open ? 1 : 0, y: 0 }); return; }
+  gsap.to(roster.children, open
+    ? { opacity: 1, y: 0, duration: 0.42, ease: 'gt3.out', stagger: 0.03 }
+    : { opacity: 0, y: -4, duration: 0.16, ease: 'gt3' });
 }
+
+// ---------------------------------------------------------------------------------------------
+// START RACE type
+
+function splitStart() {
+  split?.revert();
+  split = SplitText.create(startWord, {
+    type: 'chars', charsClass: 'hub-start__char', mask: 'chars', aria: 'none',
+  });
+  chars = split.chars;
+  if (!revealed) gsap.set(chars, { yPercent: 112 });
+  renderLoadingChars();
+  if (DIRECTION === 'launch') buildProximity();
+}
+
+/** Launch direction: letters become solid as the route prepares (SPEC §25 loading). */
+function renderLoadingChars() {
+  if (DIRECTION !== 'launch' || !chars.length) return;
+  const solid = ready ? chars.length : Math.floor(progress * chars.length);
+  chars.forEach((c, i) => c.classList.toggle('is-solid', i < solid));
+}
+
+function lean(on) {
+  if (reducedMotion.matches || !chars.length || !ready) return;
+  leanTl?.kill();
+  leanTl = gsap.to(chars, on
+    ? { skewX: -9, duration: 0.3, ease: 'gt3.out', stagger: 0.012, transformOrigin: '0% 100%' }
+    : { skewX: 0, duration: 0.55, ease: 'gt3.out', stagger: { each: 0.01, from: 'end' } });
+}
+
+/** Launch direction: letters near the pointer lean forward, like speed passing through them. */
+function buildProximity() {
+  proximity = chars.map((c) => ({
+    el: c,
+    skew: gsap.quickTo(c, 'skewX', { duration: 0.45, ease: 'gt3.out' }),
+    lift: gsap.quickTo(c, 'yPercent', { duration: 0.5, ease: 'gt3.out' }),
+  }));
+}
+
+function onPointerMove(event) {
+  if (DIRECTION !== 'launch' || !revealed || !ready || reducedMotion.matches) return;
+  for (const p of proximity) {
+    const r = p.el.getBoundingClientRect();
+    const dx = (event.clientX - (r.left + r.width / 2)) / Math.max(120, r.width * 1.4);
+    const dy = Math.max(0, Math.abs(event.clientY - (r.top + r.height / 2)) - r.height * 0.6) / 260;
+    const k = Math.exp(-(dx * dx) - dy * dy * 4);
+    p.skew(-14 * k);
+    p.lift(-4 * k);
+  }
+}
+
+function relaxProximity() {
+  for (const p of proximity) { p.skew(0); p.lift(0); }
+}
+
+/** Where the plan's start leader leaves the words: just past the top of the last letter. */
+function leaderOrigin() {
+  const last = chars[chars.length - 1];
+  if (!last) return null;
+  const r = last.getBoundingClientRect();
+  return { x: r.right + 14, y: r.top + r.height * 0.18 };
+}
+
+// ---------------------------------------------------------------------------------------------
+// Build
 
 function build() {
   root.replaceChildren();
-  root.dataset.layout = LAYOUT;
-  root.dataset.entry = ENTRY;
-
-  shutterTop = el('div', 'hub-shutter hub-shutter--top');
-  shutterBottom = el('div', 'hub-shutter hub-shutter--bottom');
-
-  const mark = el('span', 'hub-mark', 'GT3');
+  root.dataset.direction = DIRECTION;
+  field = el('div', 'hub-field');
+  field.setAttribute('aria-hidden', 'true');
+  frame = el('div', 'hub-plan-frame');
+  frame.setAttribute('aria-hidden', 'true');
+  mark = el('span', 'hub-mark', 'GT3');
   mark.setAttribute('aria-hidden', 'true');
   const startWrap = el('div', 'hub-start-wrap');
   startButton = el('button', 'hub-start');
   startButton.type = 'button';
   startButton.disabled = true;
+  startButton.setAttribute('aria-label', 'Start race');
   startWord = el('span', 'hub-start__word', 'Start race');
   startButton.append(startWord);
-  startWrap.append(startButton);
-  shutterTop.append(mark, startWrap);
-
-  const line = el('span', 'hub-line');
-  line.setAttribute('aria-hidden', 'true');
-  strip = el('div', 'hub-strip');
-  strip.setAttribute('aria-hidden', 'true');
-  strip.append(el('span', 'hub-strip__base'), el('span', 'hub-strip__fill'));
   status = el('p', 'hub-status');
   status.setAttribute('aria-live', 'polite');
-  shutterBottom.append(line, strip, status, buildCars());
-
+  startWrap.append(status, startButton);
+  const cars = buildCars();
   const playerSlot = el('div', 'hub-player-slot');
-  initHubPlayer(playerSlot);
+  root.append(field, frame, mark, cars, playerSlot, startWrap);
+  initHubPlayer(playerSlot, { shape: DIRECTION === 'plan' ? 'row' : 'column' });
+  if (DIRECTION === 'plan') {
+    planSvg = plan.buildPlan(root, frame, { yawDeg: planCamera.yawDeg, pitchDeg: planCamera.pitchDeg });
+    root.insertBefore(planSvg, mark);
+  }
+  stagePieces = [mark, cars, playerSlot, status];
+  gsap.set(stagePieces, { autoAlpha: 0, y: 10 });
 
-  root.append(shutterTop, shutterBottom, playerSlot);
   startButton.addEventListener('click', () => { if (ready && interactive) onStart?.(); });
+  startButton.addEventListener('pointerenter', () => {
+    if (!revealed) return;
+    if (DIRECTION === 'plan') { lean(true); plan.startLeader(true, leaderOrigin()); plan.lapLight(true); }
+  });
+  startButton.addEventListener('pointerleave', () => {
+    if (DIRECTION === 'plan') { lean(false); plan.startLeader(false); plan.lapLight(false); }
+  });
+  startButton.addEventListener('focus', () => { if (revealed && DIRECTION === 'plan') lean(true); });
+  startButton.addEventListener('blur', () => { if (DIRECTION === 'plan') lean(false); });
+  root.addEventListener('pointermove', onPointerMove);
+  root.addEventListener('pointerleave', relaxProximity);
   root.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape' && rosterOpen) {
-      setRoster(false);
-      carsToggle?.focus();
-    }
+    if (event.key === 'Escape' && carsOpen) { setCars(false); carsToggle.focus(); }
   });
 
-  if (typeof ResizeObserver === 'function') new ResizeObserver(measure).observe(startWord);
-  document.fonts?.ready.then(measure);
+  document.fonts?.ready.then(splitStart);
+  splitStart();
+  renderCars();
   subscribe('unlocked', renderCars);
+  let resizeTimer = 0;
+  window.addEventListener('resize', () => {
+    window.clearTimeout(resizeTimer);
+    resizeTimer = window.setTimeout(() => { if (DIRECTION === 'plan') plan.relayoutPlan(); }, 80);
+  });
 }
 
-export function initHub({ onStartRace }) {
+let planCamera = { yawDeg: 75, pitchDeg: 52 };
+
+export function initHub({ onStartRace, camera } = {}) {
   root = document.getElementById('hub');
   if (!root) throw new Error('Expected #hub');
   onStart = onStartRace;
+  if (camera) planCamera = camera;
   build();
   root.inert = true;
-  measure();
 }
 
-/** Mirror the one Tour readiness decision (main.js) on START RACE and the strip. */
+// ---------------------------------------------------------------------------------------------
+// Readiness, presence, reveal
+
+/** Mirror the one Tour readiness decision (main.js) on START RACE and the loading drawing. */
 export function setHubReadiness(readiness) {
   if (!root) return;
   const loading = readiness.status === 'loading';
   const failed = readiness.status === 'failed';
-  const progress = loading ? readiness.progress : failed ? 0 : 1;
+  progress = loading ? readiness.progress : failed ? 0 : 1;
   const percent = Math.round(progress * 100);
   const key = `${readiness.status}:${percent}`;
   if (key === lastReadiness) return;
@@ -218,10 +262,47 @@ export function setHubReadiness(readiness) {
   startButton.disabled = !ready;
   startButton.setAttribute('aria-busy', String(loading));
   root.dataset.readiness = loading ? 'loading' : failed ? 'failed' : 'ready';
-  root.dataset.progress = String(progress);
-  renderStrip(progress);
   status.textContent = failed ? 'Route unavailable. Reload the page to try again.'
     : loading ? `Preparing the grid ${String(percent).padStart(2, '0')}%` : '';
+  renderLoadingChars();
+  if (revealed && DIRECTION === 'plan') plan.drawToProgress(progress);
+}
+
+function reveal() {
+  revealed = true;
+  revealTl?.kill();
+  if (DIRECTION === 'plan') {
+    plan.setRoutePosition(state.progress > 0 ? state.progress : null);
+    plan.relayoutPlan();
+  }
+  if (reducedMotion.matches) {
+    gsap.set(stagePieces, { autoAlpha: 1, y: 0 });
+    gsap.set(chars, { yPercent: 0, x: 0, skewX: 0, autoAlpha: 1 });
+    if (DIRECTION === 'plan') plan.drawToProgress(progress, { animate: false });
+    return;
+  }
+  revealTl = gsap.timeline();
+  revealTl.fromTo(chars, { yPercent: 112, x: 0, skewX: 0, autoAlpha: 1 },
+    { yPercent: 0, duration: DIRECTION === 'launch' ? 1.05 : 0.9, ease: 'gt3.out', stagger: 0.032 }, 0.12);
+  revealTl.to(stagePieces, { autoAlpha: 1, y: 0, duration: 0.7, ease: 'gt3.out', stagger: 0.07 }, 0.32);
+  // The circuit draws itself on arrival from the Landing; after a Tour return it is already drawn.
+  if (DIRECTION === 'plan') revealTl.add(() => plan.drawToProgress(progress), 0);
+}
+
+function unreveal() {
+  revealed = false;
+  revealTl?.kill();
+  leanTl?.kill();
+  relaxProximity();
+  gsap.to(stagePieces, { autoAlpha: 0, y: 10, duration: 0.18, ease: 'gt3' });
+  gsap.to(chars, { yPercent: 112, skewX: 0, duration: 0.22, ease: 'gt3' });
+  if (DIRECTION === 'plan') {
+    plan.startLeader(false);
+    plan.lapLight(false);
+    plan.showCarLabels(false);
+    // Erase once the field has given way, so the next arrival draws the circuit again.
+    gsap.delayedCall(0.3, () => { if (!revealed) plan.eraseDrawing(); });
+  }
 }
 
 /**
@@ -235,21 +316,19 @@ export function setHubPresence(value, canInteract) {
     presence = next;
     root.style.opacity = String(next);
     root.hidden = next <= 0;
-    if (next > 0) delete document.documentElement.dataset.boot;
+    if (next > 0) delete html.dataset.boot;
   }
   if (canInteract !== interactive) {
     interactive = canInteract;
     root.inert = !canInteract;
     root.classList.toggle('is-interactive', canInteract);
-    root.classList.toggle('is-revealed', canInteract);
-    root.classList.remove('is-settled');
-    window.clearTimeout(settleTimer);
     if (canInteract) {
-      document.documentElement.classList.remove('is-hub-covering');
-      settleTimer = window.setTimeout(() => root.classList.add('is-settled'), SETTLE_MS);
+      html.classList.remove('is-hub-covering');
+      reveal();
     } else {
-      setRoster(false);
+      if (carsOpen) setCars(false);
       resetHubPlayer();
+      if (revealed) unreveal();
     }
   }
 }
@@ -261,95 +340,121 @@ export function updateHub() {
 
 /** Restore a settled field after an interrupted handoff, including cached DOM state. */
 export function resetHub(value, canInteract) {
-  clearTimers();
-  root.classList.remove('is-launching', 'is-open', 'is-instant');
-  document.documentElement.classList.remove('is-hub-covering');
+  gsap.killTweensOf([field, planSvg, root]);
+  gsap.set([field, planSvg].filter(Boolean), { clearProps: 'opacity,clipPath' });
+  if (DIRECTION === 'plan') plan.resetPlanView();
+  html.classList.remove('is-hub-covering');
   root.style.transition = '';
   presence = -1;
   interactive = null;
+  revealed = false;
   setHubPresence(value, canInteract);
 }
 
 /** Call before the world switches to the Tour, so its HUD never shows over the closed field. */
 export function prepareLeave() {
-  document.documentElement.classList.add('is-hub-covering');
+  html.classList.add('is-hub-covering');
+}
+
+// ---------------------------------------------------------------------------------------------
+// Hub -> Grand Tour and back
+
+function hideHub() {
+  root.hidden = true;
+  presence = 0;
+  root.style.opacity = '0';
+  revealed = false;
+  gsap.set([field, planSvg].filter(Boolean), { clearProps: 'opacity,clipPath' });
+  gsap.set(stagePieces, { autoAlpha: 0, y: 10 });
+  gsap.set(chars, { yPercent: 112, x: 0, skewX: 0 });
+  if (DIRECTION === 'plan') { plan.showCarLabels(false); plan.resetPlanView(); }
+  html.classList.remove('is-hub-covering');
+}
+
+function fadeOut(resolve) {
+  gsap.timeline({ onComplete: () => { hideHub(); resolve(); } })
+    .to(root, { opacity: 0, duration: 0.52, ease: 'gt3' })
+    .add(() => html.classList.remove('is-hub-covering'), 0.26);
 }
 
 /**
- * Hub -> Grand Tour. START RACE leans into its launch, the secondary composition steps back,
- * then the field parts along the start line onto the Tour's opening frame (already drawn
- * underneath by main.js). Resolves when the Tour is fully uncovered.
+ * Hub -> Grand Tour. `tour` (from main.js) gives the live frame's geometry: `progress` and
+ * `project(samples)` → screen points of route positions in the Tour camera, already settled
+ * under the field. Resolves when the Tour is fully uncovered.
  */
-export function leaveHub() {
+export function leaveHub(tour = {}) {
   return new Promise((resolve) => {
-    clearTimers();
     interactive = false;
     root.inert = true;
-    root.classList.remove('is-interactive', 'is-settled');
-    window.clearTimeout(settleTimer);
-    setRoster(false);
+    root.classList.remove('is-interactive');
+    if (carsOpen) setCars(false);
     resetHubPlayer();
-    const html = document.documentElement;
-    html.classList.add('is-hub-covering');
-    const finish = () => {
-      root.hidden = true;
-      presence = 0;
-      root.style.transition = '';
-      root.style.opacity = '0';
-      root.classList.remove('is-launching', 'is-open', 'is-revealed');
-      html.classList.remove('is-hub-covering');
-      resolve();
-    };
-    if (quick()) {
-      root.style.transition = `opacity ${FADE_MS}ms var(--ease)`;
-      root.style.opacity = '0';
-      later(() => { html.classList.remove('is-hub-covering'); }, FADE_MS * 0.5);
-      later(finish, FADE_MS);
+    revealTl?.kill();
+    leanTl?.kill();
+    relaxProximity();
+    if (DIRECTION === 'plan') { plan.startLeader(false); plan.lapLight(false); plan.showCarLabels(false); }
+    if (reducedMotion.matches) { fadeOut(resolve); return; }
+    const tl = gsap.timeline({ onComplete: () => { hideHub(); resolve(); } });
+    tl.to(stagePieces, { autoAlpha: 0, y: -6, duration: 0.26, ease: 'gt3', stagger: 0.03 }, 0);
+
+    if (DIRECTION === 'plan' && tour.project) {
+      const samples = plan.fitSamples(tour.progress ?? 0);
+      const projected = tour.project(samples);
+      tl.to(chars, { yPercent: -112, skewX: -10, duration: 0.5, ease: 'power3.in', stagger: 0.022 }, 0.02);
+      tl.add(plan.zoom({ samples, projected, progress: tour.progress ?? 0, direction: 1, duration: 1.55 }), 0.22);
+      tl.to(field, { opacity: 0, duration: 0.5, ease: 'gt3' }, 1.32);
+      tl.add(() => html.classList.remove('is-hub-covering'), 1.45);
+      tl.to(planSvg, { opacity: 0, duration: 0.5, ease: 'gt3' }, 1.62);
       return;
     }
-    root.classList.add('is-launching');
-    later(() => {
-      root.classList.add('is-open');
-      // The Tour HUD rises as the gap opens, not after it.
-      later(() => html.classList.remove('is-hub-covering'), OPEN_MS * 0.45);
-    }, RECEDE_MS);
-    later(finish, RECEDE_MS + OPEN_MS);
+
+    // Launch direction (and the plan's fallback without geometry): the letters get away to the
+    // right one after another and the field follows them out.
+    tl.to(chars, {
+      x: () => window.innerWidth * 1.1, skewX: -22, duration: 0.95, ease: 'gt3.launch',
+      stagger: { each: 0.045, from: 'start' },
+    }, 0.04);
+    tl.fromTo(field, { clipPath: 'inset(0 0 0 0%)' }, { clipPath: 'inset(0 0 0 100%)', duration: 0.95, ease: 'gt3.launch' }, 0.32);
+    if (planSvg) tl.to(planSvg, { opacity: 0, duration: 0.4, ease: 'gt3' }, 0.2);
+    tl.add(() => html.classList.remove('is-hub-covering'), 0.7);
   });
 }
 
 /**
- * Grand Tour -> Hub. The two halves close over the Tour and meet on the line; the Hub's
- * composition then reveals itself once main.js hands the screen to the Hub.
+ * Grand Tour -> Hub: the same move backwards. Resolves once the field covers the Tour; the
+ * composition reveals itself when main.js hands the screen to the Hub.
  */
-export function coverHub() {
+export function coverHub(tour = {}) {
   return new Promise((resolve) => {
-    clearTimers();
     interactive = false;
+    revealed = false;
     root.inert = true;
-    root.classList.remove('is-interactive', 'is-revealed');
+    root.classList.remove('is-interactive');
     root.hidden = false;
-    root.style.transition = 'none';
-    const html = document.documentElement;
+    root.style.opacity = '1';
     html.classList.add('is-hub-covering');
-    const done = () => {
-      root.style.transition = '';
-      root.classList.remove('is-open', 'is-instant');
-      presence = 1;
-      resolve(); // is-hub-covering stays until the Hub owns the screen (setHubPresence)
-    };
-    if (quick()) {
-      root.style.opacity = '0';
-      void root.offsetWidth;
-      root.style.transition = `opacity ${FADE_MS}ms var(--ease)`;
-      root.style.opacity = '1';
-      later(done, FADE_MS);
+    gsap.set(stagePieces, { autoAlpha: 0, y: 10 });
+    gsap.set(chars, { yPercent: 112, x: 0, skewX: 0 });
+    const done = () => { presence = 1; resolve(); };
+    if (reducedMotion.matches) {
+      gsap.fromTo(root, { opacity: 0 }, { opacity: 1, duration: 0.52, ease: 'gt3', onComplete: done });
       return;
     }
-    // Start parted with no transition, then let the shutters travel home.
-    root.classList.add('is-instant', 'is-open');
-    root.style.opacity = '1';
-    void root.offsetWidth;
-    root.classList.remove('is-instant', 'is-open');
-    later(done, CLOSE_MS);
+    const tl = gsap.timeline({ onComplete: done });
+    if (DIRECTION === 'plan' && tour.project) {
+      const samples = plan.fitSamples(tour.progress ?? 0);
+      const projected = tour.project(samples);
+      plan.setRoutePosition(tour.progress > 0 ? tour.progress : null);
+      plan.drawToProgress(1, { animate: false });
+      gsap.set(field, { opacity: 0 });
+      gsap.set(planSvg, { opacity: 0 });
+      tl.to(planSvg, { opacity: 1, duration: 0.3, ease: 'gt3' }, 0);
+      tl.to(field, { opacity: 1, duration: 0.45, ease: 'gt3' }, 0.18);
+      tl.add(plan.zoom({ samples, projected, progress: tour.progress ?? 0, direction: -1, duration: 1.35, ease: 'gt3.out' }), 0.5);
+      return;
+    }
+    if (planSvg) gsap.set(planSvg, { opacity: 0 });
+    tl.fromTo(field, { clipPath: 'inset(0 0 0 100%)' }, { clipPath: 'inset(0 0 0 0%)', duration: 0.8, ease: 'gt3.launch' }, 0);
+    if (planSvg) tl.to(planSvg, { opacity: 1, duration: 0.3, ease: 'gt3' }, 0.7);
   });
 }

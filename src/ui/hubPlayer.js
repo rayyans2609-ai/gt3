@@ -1,32 +1,28 @@
 /**
  * hubPlayer.js — the Hub presentation of the one global player (SPEC §7, §9).
  *
- * Same engine as the compact player (audioManager.js); this module is only a view. The cover
- * art rests on the Hub's start line; transport, seek and levels sit below it. Opening the
- * track list recomposes the same object instead of growing it: the cover recedes to a small
- * thumbnail and the six tracks take the space it left (SPEC §9 "recomposition, not growth").
+ * A view over audioManager.js only. Its parts are flat siblings laid out by CSS grid, so the
+ * track-list `+` can recompose the same object (SPEC §9 "recomposition, not growth"): the cover
+ * recedes to a thumbnail, the six tracks take the space it frees, the outer bounds stay put.
+ * GSAP Flip animates between the two layouts and reverses from wherever it is when toggled.
+ * Two shapes serve the Hub directions: `row` (cover beside its controls) and `column`.
  *
- * Nothing here can start audio except an explicit control press that already starts it in the
- * compact player (play or a track choice, SPEC §10). Volume levels never touch the context.
+ * Nothing here starts audio except play or a track choice, which already do in the compact
+ * player (SPEC §10). Levels come from the shared audioLevels.js and never touch the context.
  */
 
 import { createElement, Music4, Pause, Play, Plus, SkipBack, SkipForward, X } from 'lucide';
 import {
-  getMusicStatus, nextTrack, pauseMusic, playMusic, previousTrack, seekMusic, selectTrack,
-  setMusicMuted,
+  getMusicStatus, nextTrack, pauseMusic, playMusic, previousTrack, seekMusic, selectTrack, setMusicMuted,
 } from '../audio/audioManager.js';
-import { buildLevels } from './audioLevels.js';
 import { playlist } from '../data/playlist.js';
 import { state } from '../core/state.js';
-
-const EASE = 'cubic-bezier(.22, .61, .36, 1)';
-const OPEN_MS = 420;
-const CLOSE_MS = 340;
+import { buildLevels } from './audioLevels.js';
+import { Flip, gsap, reducedMotion } from './motion.js';
 
 let root = null;
-let art;
+let parts = [];
 let cover;
-let coverToken = 0;
 let list;
 let label;
 let clock;
@@ -37,9 +33,9 @@ let listButton;
 let dragging = false;
 let dragStartValue = null;
 let listOpen = false;
-let coverAnimation = null;
+let flip = null;
+let coverToken = 0;
 const shown = new Map();
-const reduceMotion = typeof matchMedia === 'function' ? matchMedia('(prefers-reduced-motion: reduce)') : null;
 
 function show(key, value, write) {
   if (shown.get(key) === value) return;
@@ -76,17 +72,14 @@ function setCover(index) {
   const swap = () => {
     if (token !== coverToken) return;
     cover.src = src;
-    const reveal = () => {
-      if (token !== coverToken) return;
-      cover.classList.remove('is-swapping');
-    };
+    const reveal = () => { if (token === coverToken) cover.classList.remove('is-swapping'); };
     if (cover.complete) reveal();
     else {
       cover.addEventListener('load', reveal, { once: true });
       cover.addEventListener('error', reveal, { once: true });
     }
   };
-  if (first || reduceMotion?.matches) { swap(); return; }
+  if (first || reducedMotion.matches) { swap(); return; }
   cover.classList.add('is-swapping');
   window.setTimeout(swap, 140);
 }
@@ -132,53 +125,55 @@ function renderStatus() {
   });
 }
 
-/**
- * FLIP the cover between its two compositions. The first rect is read from wherever the
- * cover is drawn right now, so a toggle mid-animation reverses from that point, never snaps.
- */
-function recompose(open) {
-  const first = cover.getBoundingClientRect();
-  coverAnimation?.cancel();
+function applyOpen(open) {
   listOpen = open;
   root.classList.toggle('is-list-open', open);
   list.inert = !open;
   listButton.setAttribute('aria-expanded', String(open));
   listButton.setAttribute('aria-label', open ? 'Hide track list' : 'Show track list');
-  if (reduceMotion?.matches || typeof cover.animate !== 'function') return;
-  const last = cover.getBoundingClientRect();
-  if (!last.width || !first.width) return;
-  const dx = first.left - last.left;
-  const dy = first.top - last.top;
-  const sx = first.width / last.width;
-  const sy = first.height / last.height;
-  coverAnimation = cover.animate([
-    { transformOrigin: '0 0', transform: `translate(${dx}px, ${dy}px) scale(${sx}, ${sy})` },
-    { transformOrigin: '0 0', transform: 'none' },
-  ], { duration: open ? OPEN_MS : CLOSE_MS, easing: EASE });
-  coverAnimation.onfinish = () => { coverAnimation = null; };
 }
 
-export function initHubPlayer(container) {
+/** Recompose with Flip; a toggle mid-flight starts from the current, in-between layout. */
+function recompose(open) {
+  if (reducedMotion.matches) { applyOpen(open); return; }
+  const before = Flip.getState(parts);
+  flip?.kill();
+  gsap.killTweensOf(list.children);
+  applyOpen(open);
+  flip = Flip.from(before, {
+    targets: parts,
+    duration: open ? 0.52 : 0.42,
+    ease: 'gt3.out',
+    scale: true,
+    absolute: true,
+    onEnter: (els) => gsap.fromTo(els, { opacity: 0 }, { opacity: 1, duration: 0.3, delay: 0.16, ease: 'gt3' }),
+    onLeave: (els) => gsap.to(els, { opacity: 0, duration: 0.14, ease: 'gt3' }),
+    onComplete: () => { flip = null; },
+  });
+  if (open) {
+    gsap.fromTo(list.children, { opacity: 0, x: -8 },
+      { opacity: 1, x: 0, duration: 0.42, ease: 'gt3.out', stagger: 0.035, delay: 0.16 });
+  }
+}
+
+export function initHubPlayer(container, { shape = 'column' } = {}) {
   if (root) return root;
   root = document.createElement('section');
   root.className = 'hub-player';
+  root.dataset.shape = shape;
   root.setAttribute('aria-label', 'Music');
 
-  // ---- above the line: artwork, or thumbnail + track list ----
-  art = document.createElement('div');
-  art.className = 'hub-player__art';
   cover = document.createElement('img');
   cover.className = 'hub-player__cover';
   cover.alt = '';
   cover.decoding = 'async';
   cover.draggable = false;
+
   list = document.createElement('ol');
   list.className = 'hub-player__list';
   list.id = 'hub-player-tracks';
-  list.inert = true;
   playlist.forEach((track, index) => {
     const item = document.createElement('li');
-    item.style.setProperty('--i', String(index));
     const button = document.createElement('button');
     button.type = 'button';
     button.className = 'hub-player__track';
@@ -194,11 +189,6 @@ export function initHubPlayer(container) {
     item.append(button);
     list.append(item);
   });
-  art.append(cover, list);
-
-  // ---- below the line: label + clock, seek, transport, levels ----
-  const body = document.createElement('div');
-  body.className = 'hub-player__body';
 
   const meta = document.createElement('div');
   meta.className = 'hub-player__meta';
@@ -226,16 +216,16 @@ export function initHubPlayer(container) {
   muteButton = control('hub-player__mute', 'Mute music', Music4);
   listButton = control('hub-player__list-toggle', 'Show track list', Plus, X);
   listButton.setAttribute('aria-controls', list.id);
-  listButton.setAttribute('aria-expanded', 'false');
   const spacer = document.createElement('span');
   spacer.className = 'hub-player__spacer';
   transport.append(previous, playButton, next, spacer, muteButton, listButton);
 
   const levels = buildLevels({ className: 'hub-player__levels', prefix: 'hub-level', rangeClass: 'hub-range' });
 
-  body.append(meta, seek, transport, levels);
-  root.append(art, body);
+  parts = [cover, list, meta, seek, transport, levels];
+  root.append(...parts);
   container.append(root);
+  applyOpen(false);
 
   previous.addEventListener('click', () => { previousTrack(); renderStatus(); });
   next.addEventListener('click', () => { nextTrack(); renderStatus(); });
@@ -290,11 +280,8 @@ export function updateHubPlayer() {
 /** Leaving the Hub resets the list to its resting composition (SPEC §25 player-state rule). */
 export function resetHubPlayer() {
   if (!root || !listOpen) return;
-  coverAnimation?.cancel();
-  coverAnimation = null;
-  listOpen = false;
-  root.classList.remove('is-list-open');
-  list.inert = true;
-  listButton.setAttribute('aria-expanded', 'false');
-  listButton.setAttribute('aria-label', 'Show track list');
+  flip?.kill();
+  flip = null;
+  gsap.set([...parts, ...list.children], { clearProps: 'all' });
+  applyOpen(false);
 }

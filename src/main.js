@@ -133,6 +133,8 @@ async function boot() {
   const entrySequence = await import('./ui/entrySequence.js');
   const finishScreen = await import('./ui/finishScreen.js');
   const hub = await import('./ui/hub.js');
+  const motion = await import('./ui/motion.js');
+  const trackCurve = await import('./scene/trackCurve.js');
   const homeControl = await import('./ui/homeControl.js');
 
   perfMark('imports:end');
@@ -225,7 +227,13 @@ async function boot() {
       landing.activateLanding({ atHub: state.experience === 'hub' });
     });
   }
-  hub.initHub({ onStartRace: () => { void enterTour(); } });
+  // GSAP UI motion ticks inside this file's one RAF loop (no independent GSAP frame loop).
+  motion.installMotion(registerUpdate);
+  hub.initHub({
+    onStartRace: () => { void enterTour(); },
+    // The Hub's circuit plan is drawn through the Tour camera's fixed orientation.
+    camera: { yawDeg: aerialCamera.TUNE.yawDeg, pitchDeg: aerialCamera.TUNE.pitchDeg },
+  });
   // The edge row recomposes while the Hub owns the screen (its player replaces the + launcher).
   const markExperience = () => { document.documentElement.dataset.experience = state.experience; };
   subscribe('experience', markExperience);
@@ -469,6 +477,19 @@ async function boot() {
    * so the canvas switches to the Tour underneath it; the field then fades away and the drive
    * unlocks once any momentum from the Hub has died away. No input crosses the handoff.
    */
+  /**
+   * Screen points of route positions in the live Tour frame (Hub plan <-> road handoff). Uses
+   * the same route geometry the Hub's plan is drawn from (trackCurve.offsetPointAt).
+   */
+  const projected = new THREE.Vector3();
+  function projectRoute(samples) {
+    camera.updateMatrixWorld();
+    return samples.map(({ t, lateral }) => {
+      trackCurve.offsetPointAt(t, lateral, 0, projected).project(camera);
+      return { x: (projected.x + 1) / 2 * window.innerWidth, y: (1 - projected.y) / 2 * window.innerHeight };
+    });
+  }
+
   let entering = false;
   async function enterTour() {
     if (entering || state.experience !== 'hub' || state.transition ||
@@ -488,7 +509,7 @@ async function boot() {
       // Two paints under the field; bounded yields also settle in a hidden tab without rAF.
       await yieldToBrowser();
       await yieldToBrowser();
-      await hub.leaveHub();
+      await hub.leaveHub({ progress: state.progress, project: projectRoute });
       completeTransition();
       if (state.mode === 'race') {
         void entrySequence.runEntry({ standingStart: state.progress === 0 });
@@ -521,7 +542,7 @@ async function boot() {
       scrollDrive.lockScroll();
       persistRouteProgress(state.progress, { flush: true });
       if (!beginTransition('hub')) { scrollDrive.unlockScroll(); return; }
-      await hub.coverHub();
+      await hub.coverHub({ progress: state.progress, project: projectRoute });
       scrollDrive.setDriveDormant(true);
       if (!landing) {
         landing = await import('./landing/landing.js');

@@ -1,0 +1,47 @@
+run: p5-hub
+config: opus-led
+seat: opus@intel
+epoch: 1
+state: transferred
+branch: p5-hub-candidate
+sha: 320a6002a8484bc2db658dc18aa7b781b3999280
+updated: 2026-11-04T16:40:00Z
+---
+## Objective and scope (owner-verbatim, with date)
+2026-11-04 owner: "Begin GT3 Phase 5 — Grand Tour Hub development." "Objective: Transform the provisional Hub into a distinctive, production-quality motorsport control surface consistent with GT3's premium editorial direction." Priorities: composition/hierarchy/negative space/typography/identity; "A compelling START RACE interaction, Cars navigation, global Day/Night controls and coherent transitions into the accepted Grand Tour"; "A fully realized Hub music player with supplied cover artwork, polished controls, track-list expansion/recomposition, seeking and appropriate volume controls"; "Preserve the established Landing→Hub scroll behavior, session persistence and audio lifecycle"; "Implement Phase 5's applicable audio and loading/entry requirements without inventing unresolved product decisions." "Treat subjective visual direction as provisional until my review ... preserve a small number of clear alternatives." "Commits are permitted; no push, merge or changes to main without my approval." "Do not expand into Phase 6 Showcase, Phase 7 completion, Phase 8 scenery, or the separately proposed Phase 4 Landing revision." "Do not declare Phase 5 human-accepted." SPEC.md canonical; escalate genuine product-direction conflicts.
+
+2026-11-04 owner (mid-run clarification): "Music and Engine must have separate, independently adjustable volume sliders. Music volume controls the existing six-track playlist globally; Engine volume controls the Grand Tour engine audio. Neither slider should affect the other's level." "Preserve existing master mute, music mute, playback functionality and session persistence. The music tracks and their order stay exactly the same." "a modest audio-mixing pass so music, engine sounds and checkpoint/SFX feedback feel better balanced" "Keep the system easy to update without prematurely selecting new sounds" "Treat the separate Music/Engine sliders as the priority. Additional SFX controls are secondary, not a reason to delay the Hub." "Coordinate this with Terra's current task rather than duplicating or restarting its work."
+
+## Tasks
+| id | owner (model@effort) | worktree / branch | epoch | status | evidence |
+|---|---|---|---|---|---|
+| T0-covers | opus (manager fast path) | p5-hub-candidate | 1 | done 7b91f6b | git renames, playlist.js cover field |
+| T1-volume | gpt-5.6-terra@medium workspace | p5-hub-candidate | 1 | accepted ba30e26 | build 0, pure-node setter check; first pass |
+| T2-engine-mix | gpt-5.6-terra@medium workspace | p5-hub-candidate | 1 | stopped by manager (TERM pid 2320) after plumbing done; levels set by manager from measurement; committed 5ce4f30 | build 0; afconvert+node gated RMS table (manager) |
+| T3-entry | gpt-6.1-sol@high workspace | p5-hub-candidate | 1 | accepted ece4f8d | gate on ece4f8d (manager-run, provenance local/evidence/p5/entry/vite.log.provenance.json): landing-flow PASS, preready PASS, route-persistence PASS; verify-entry-sequence FAIL = harness capture timing (Intel screenshot > lamp hold), not product |
+| A1-hub | opus (Anchor: Hub composition/player/motion) | p5-hub-candidate | 1 | v1 (2de1f30..8d17a9a) retired after owner correction; fresh directions ee36f13, ce48cc0, d96be4c | design captures local/evidence/p5/design (provenance per server-*.log) |
+| V3-hub-gate | opus (manager-run; classifier refusal) | p5-hub-candidate | 1 | PASS | entry (r4), landing-flow, audio-lifecycle 12/12, controls, motion-ticker PASS; local/evidence/p5/gate2, motion |
+| B1-finish-home | opus (manager fast path, owner-requested bug fix) | p5-hub-candidate | 1 (after release) | done 2ccdd17 | scripts/verify-finish-home.mjs: Finish->Home and Finish->Replay PASS (local/evidence/p5/finishhome/after.json); build PASS; other flow/audio/controls checks NOT re-run after this fix |
+| R1-routing-fix | opus (owner-requested routing/tooling fix) | p5-hub-candidate | 1 (after release) | done 320a600 | scripts/run-harness.sh + claude-route -s verify; real routed Luna (workspace) and Haiku (verify) runs executed a browser harness via the executor (local/tmp/route-test, local/evidence/adhoc/V5-*); docs updated |
+
+## Evidence (claim → artifact · valid? · available@host)
+
+## Blocked routes / quota
+- RESOLVED 320a600 (see docs/ai/model-routing.md section 6, codex-cli-invocation.md): workers now run browser harnesses via scripts/run-harness.sh under -s workspace / claude-route -s verify. Original entry: 2026-11-04: Claude Code auto-mode classifier refused launching a Codex worker with `-s full` (sandbox bypassed). Not worked around. Codex workers run `-s workspace` (edit + build, no browser); all browser harness runs and captures are executed by the manager through scripts/with-verification-server.sh (permitted). Deviation from "Opus doesn't run harnesses": forced by the refusal, recorded here.
+- T2: Terra's brief named `afconvert ... LEI16@44100`, which fails; `-d LEI16` works. Terra then spent time on decoder workarounds, so the manager stopped it once the plumbing was complete and measured levels itself (one deterministic script; cheaper than another worker round-trip).
+
+## Human decisions (NEEDS HUMAN VERIFICATION)
+2026-11-04 owner correction: old Hub boards/mockups/concepts are historical only; Hub creative direction to be reconsidered from the ground up with fresh directions and alternatives; architecture preserved. GSAP not to be excluded for its default ticker: integrate via the single RAF (gsap.updateRoot / manual tick), ensure no independent ticking.
+
+## Proposals (recorded, not implemented)
+- (superseded 2026-11-04 by owner correction) GSAP IS used for the Hub, ticked by main.js's single RAF via src/ui/motion.js; harness scripts/verify-motion-ticker.mjs proves no GSAP-owned frame.
+
+## Next step
+Cross-host: the M4 becomes the active Phase 5 development host (owner, 2026-11-04). Incoming seat follows operating-contract.md 4.2: fetch origin and refs/notes/gt3-run, `gt3-run.sh import`/status (tip must equal the SHA above), then `claim p5-hub opus@m4 --owner-confirmed`; epoch becomes 2. No worker is running; Intel worktree is intact and inactive.
+Then, before any acceptance: owner visual review on the M4 of docs/review/p5/OWNER-REVIEW.md (direction A Plan vs B Launch, Cars before Showcase, Master/Music/Engine levels, mix by ear, entry timing, copy); re-run verify-preready-input, verify-route-persistence, verify-landing-flow, verify-audio-lifecycle, verify-controls and verify-motion-ticker after the Hub rework + finish fix (preready/persistence last passed on the entry commit ece4f8d only); measure Plan-dive frame pacing; Launch direction is screenshot-checked only; verify-motion-ticker has a timing-sensitive Flip width assertion (58.6 vs 56 px under load, passes otherwise); run-harness.sh and its preflight are unverified on the M4. No merge or push to main without owner approval. Phase 5 NOT accepted.
+
+## Handoff history
+- 2026-11-04T04:35:02Z e1 claimed by opus@intel at f18a4058892fc31ef8ca92bf3c10cc51ab0a9734
+- 2026-11-04T05:58:50Z e1 released by opus@intel at 5364ff1286d96a8144dbe547881a8c2a90b1f1da
+- 2026-11-04T16:40:00Z e1 record brought current by the manager at the owner's request: two commits (2ccdd17 Finish->Home fix, 320a600 routing/executor) were made AFTER the 05:58Z release at 5364ff1 and carry Claude-Session trailers, not GT3-Run trailers (the seat was released, GT3_RUN was not used). Recorded sha updated 5364ff1 -> 320a6002a8484bc2db658dc18aa7b781b3999280 so checkpoint/claim can proceed. Source branch pushed non-force by owner authorization; origin/p5-hub-candidate == 320a6002a8484bc2db658dc18aa7b781b3999280. No workers running.
+- 2026-11-04T14:51:39Z e1 exported for another host at 320a6002a8484bc2db658dc18aa7b781b3999280

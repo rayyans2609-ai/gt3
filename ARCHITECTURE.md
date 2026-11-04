@@ -93,12 +93,15 @@ text/HUD/player UI. One fixed canvas behind it, one shared `WebGLRenderer`.
       studio.js       montage studio (own renderer — sanctioned exception, see below) [keep]
       choreography.js 5-shot camera timeline [keep]
     ui/
-      hub.js          Grand Tour Hub (Phase 5 candidate, not accepted): start-line composition,
-                      START RACE + checker-strip loading, Cars roster glyph/preview, shutter
-                      Hub<->Tour transition; ?hub=centre / ?entry=fade / ?cars=static review
-                      alternatives [evolve]
+      hub.js          Grand Tour Hub (Phase 5 candidate, not accepted): two review directions,
+                      `plan` (default) and `launch` (?hub=launch); readiness, reveal, Cars,
+                      Hub<->Tour handoff [evolve]
+      hubPlan.js      `plan` direction: the circuit drawn through the Tour camera's orientation;
+                      loading draw, lap light, Cars labels, fitted dive onto the live road [new]
       hubPlayer.js    Hub presentation of the global player: cover, seek, transport, music mute,
-                      in-place track-list recomposition (WAAPI FLIP), levels [new, Phase 5]
+                      in-place track-list recomposition (GSAP Flip), levels; row/column [new]
+      motion.js       GSAP + plugins ticked by main.js's single RAF (no GSAP-owned loop) [new]
+      entrySequence.js standing-start lamps, GO, SCROLL TO RACE (SPEC §25) [new, Phase 5]
       audioLevels.js  Master / Music / Engine level rows shared by both players [new, Phase 5]
       homeControl.js  Grand Tour back/home control → Hub (SPEC §25) [done, Phase 4]
       showcase.js     Showcase scene + DOM (already uses shared renderer) [evolve]
@@ -177,10 +180,13 @@ byte-identical with and without this feature, zero "theatre" strings).
   then `seek(t)` + `studio.transaction(({set}) => set(obj.props.rotationDeg, {x,y,z}))` writes a
   keyframe at the playhead, `saveToRepo()` persists it. Easing/curve handles and sequence length
   are edited in the Studio UI. Harness: `scripts/verify-theatre-proof.mjs` (dev server, `GT3_URL`).
-- **UI motion without a second frame loop:** GSAP's ticker requests its own
-  `requestAnimationFrame` while tweens run (`gsap-core.js` `_req(_tick)`), which this file's
-  single-RAF rule excludes unless the ticker is driven from `main.js`. The Phase 5 Hub therefore
-  uses CSS transitions and WAAPI (compositor-driven, no JS loop, interruptible).
+- **GSAP on the single RAF** (`src/ui/motion.js`, Phase 5): GSAP's ticker would otherwise run its
+  own `requestAnimationFrame` loop and restart it whenever a tween is created. motion.js puts the
+  ticker to sleep at module evaluation (cancelling GSAP's import-time frame before it runs),
+  replaces `ticker.wake` with a counted no-op, and main.js calls `gsap.ticker.tick()` once per
+  frame (`installMotion(registerUpdate)`). Registered plugins: Flip, SplitText, DrawSVG,
+  CustomEase (eases `gt3`, `gt3.out`, `gt3.launch`). `scripts/verify-motion-ticker.mjs` proves no
+  GSAP-owned frame runs. CSS transitions still own hover colour and focus states.
 - **GSAP vs Theatre:** GSAP stays for code-driven, state/scroll/event-driven motion (UI, Flip,
   SplitText, tweens that react to input). Theatre earns its place for **scrubbable, hand-tuned,
   multi-property authored sequences** whose feel is judged visually: camera/hero moves, light and

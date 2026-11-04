@@ -4,7 +4,8 @@
  * GSAP normally drives itself with its own requestAnimationFrame loop, and it restarts that loop
  * whenever a tween is created (gsap-core `_ticker.wake()`). Removing `updateRoot` from the ticker
  * (the documented manual mode) would still leave that empty loop running, so instead:
- *   1. the ticker is put to sleep (cancels the frame GSAP requested at import),
+ *   1. when this module evaluates, the ticker is put to sleep (cancelling the frame GSAP requested
+ *      at import, before it can run),
  *   2. its `wake` is replaced with a no-op, so new tweens never restart an independent loop,
  *   3. main.js calls `gsap.ticker.tick()` once per GT3 frame (`installMotion(registerUpdate)`),
  *      which runs GSAP's own listeners (updateRoot) with its normal frame count and lag smoothing.
@@ -26,20 +27,23 @@ CustomEase.create('gt3.launch', '0.7, 0, 0.18, 1');
 
 let installed = false;
 const stats = { ticks: 0, wakeRequests: 0 };
+const ticker = gsap.ticker;
+
+// At module evaluation, in the same task as GSAP's own import-time wake: cancel the frame it
+// just requested and make every later wake (each new tween calls it) a counted no-op.
+ticker.sleep();
+ticker.wake = () => { stats.wakeRequests += 1; };
 
 export function installMotion(registerUpdate) {
   if (installed) return gsap;
   installed = true;
-  const ticker = gsap.ticker;
-  ticker.sleep();
-  ticker.wake = () => { stats.wakeRequests += 1; };
   registerUpdate(() => {
     stats.ticks += 1;
     ticker.tick();
   });
   if (typeof window !== 'undefined') {
     window.__gt3 = window.__gt3 || {};
-    window.__gt3.motion = { stats, gsap };
+    window.__gt3.motion = { stats, gsap, installedAt: performance.now() };
   }
   return gsap;
 }

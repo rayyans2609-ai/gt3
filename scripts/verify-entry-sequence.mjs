@@ -185,13 +185,17 @@ try {
       await wait(1000);
       const saved = await snap(page);
       await page.reload({ waitUntil: 'domcontentloaded', timeout: 120000 });
+      // During boot, session restore sets experience before the drive locks, so `armed` can be
+      // momentarily true before the cover exists. Wait for the real readiness first.
+      await page.waitForFunction(() => ['ready', 'degraded'].includes(window.__gt3?.readiness?.status),
+        { timeout: 150000 });
       await armed(page);
       const restored = await snap(page);
       const coverLog = await page.evaluate(() => window.__coverLog);
       const parting = coverLog.find(sample => sample.leaving && !sample.hidden);
       const parted = coverLog.find(sample => sample.leaving && sample.hidden);
       assert(coverLog.some(sample => sample.readiness === 'loading' && !sample.hidden && !sample.leaving),
-        'refresh never displayed the loading cover');
+        `refresh never displayed the loading cover: ${JSON.stringify(coverLog)}`);
       assert(parting && ['ready', 'degraded'].includes(parting.readiness)
         && parted && parted.at - parting.at >= 880, `cover did not part for 900ms after readiness: ${JSON.stringify(coverLog)}`);
       assert(restored.phase === 'resume' && restored.coverHidden && restored.control

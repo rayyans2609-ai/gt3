@@ -149,7 +149,8 @@ try {
     assert.equal(started(p, 'engine_start.mp3').length - started(before, 'engine_start.mp3').length, 1, 'Tour entry did not start a new engine sound');
     assert.equal(live(p, 'idle.mp3').length, 1);
     await wait(3100); const settled = await probe();
-    assert.ok(Math.abs(live(settled, 'idle.mp3')[0].gain - 0.15) < 0.02, 'idle gain did not settle');
+    // Phase 5 mix (audioManager MIX.idle, measured 2026-11-04): idle settles at 0.26, was 0.15.
+    assert.ok(Math.abs(live(settled, 'idle.mp3')[0].gain - 0.26) < 0.02, 'idle gain did not settle');
     assert.ok(Math.abs(live(settled, 'idle.mp3')[0].rate - 1) < 0.03, 'stationary idle rate');
     return { before, observed: p, settled };
   });

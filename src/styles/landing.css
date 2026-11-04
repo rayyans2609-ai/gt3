@@ -1,4 +1,4 @@
-/* Phase 4 Landing (SPEC §4) and the PROVISIONAL Hub field (Phase 5 replaces #hub).
+/* Phase 4 Landing (SPEC §4). The Hub (Phase 5) lives in hub.css.
    :root[data-world] names which world owns the screen and the page scroll: 'landing' (Landing
    and Hub) or 'tour'. index.html sets it before first paint; main.js switches it at handoff. */
 
@@ -121,61 +121,6 @@
   0% { transform: translateY(0); opacity: 0; }
   25% { opacity: 1; }
   100% { transform: translateY(47px); opacity: 0; }
-}
-
-/* ---- PROVISIONAL Hub (Phase 5 replaces this) ----------------------------- */
-
-#hub {
-  position: fixed;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  background: var(--landing-field);
-  color: var(--landing-ink);
-  opacity: 0;
-  pointer-events: none;
-  transition: background-color 700ms var(--ease), color 700ms var(--ease);
-}
-
-#hub[hidden] { display: none; }
-#hub.is-interactive { pointer-events: auto; }
-
-.hub-stack {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 14px;
-}
-
-.hub-start {
-  min-width: 233px;
-  height: 65px;
-  padding: 0 34px;
-  border: 1px solid var(--landing-ink);
-  border-radius: 26px;
-  background: var(--landing-ink);
-  color: var(--landing-field);
-  font-family: var(--font-ui);
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  cursor: pointer;
-  transition: background-color 200ms var(--ease), color 200ms var(--ease), opacity 200ms var(--ease);
-}
-
-.hub-start:hover { background: transparent; color: var(--landing-ink); }
-.hub-start:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
-.hub-start:disabled { opacity: 0.32; cursor: default; }
-.hub-start:disabled:hover { background: var(--landing-ink); color: var(--landing-field); }
-
-.hub-status {
-  min-height: 14px;
-  font-family: var(--font-mono);
-  font-size: 10.5px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--landing-muted);
 }
 
 /* Grand Tour back/home control: one quiet circle beside the Day/Night pill (SPEC §25). */

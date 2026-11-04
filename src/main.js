@@ -225,6 +225,10 @@ async function boot() {
     });
   }
   hub.initHub({ onStartRace: () => { void enterTour(); } });
+  // The edge row recomposes while the Hub owns the screen (its player replaces the + launcher).
+  const markExperience = () => { document.documentElement.dataset.experience = state.experience; };
+  subscribe('experience', markExperience);
+  markExperience();
   homeControl.initHomeControl({ onHome: () => { void leaveTour(); } });
   hub.setHubReadiness(readiness);
   // initScene creates window.__gt3; these handles were previously attached after the full build.
@@ -468,6 +472,7 @@ async function boot() {
       if (!beginTransition('tour')) return;
       scrollDrive.setDriveDormant(false);
       scrollDrive.lockScroll(); // swallow wheel and keys through the handoff
+      hub.prepareLeave(); // keep the Tour HUD hidden until the field parts
       landing?.deactivateLanding();
       sceneSetup.resizeScene(window.innerWidth, window.innerHeight); // the Tour's fixed DPR again
       document.documentElement.dataset.world = 'tour';
@@ -476,7 +481,7 @@ async function boot() {
       // Two paints under the field; bounded yields also settle in a hidden tab without rAF.
       await yieldToBrowser();
       await yieldToBrowser();
-      await hub.leaveHub(520);
+      await hub.leaveHub();
       completeTransition();
       scrollDrive.unlockScrollWhenQuiet();
     } catch (error) {
@@ -505,7 +510,7 @@ async function boot() {
       scrollDrive.lockScroll();
       persistRouteProgress(state.progress, { flush: true });
       if (!beginTransition('hub')) { scrollDrive.unlockScroll(); return; }
-      await hub.coverHub(420);
+      await hub.coverHub();
       scrollDrive.setDriveDormant(true);
       if (!landing) {
         landing = await import('./landing/landing.js');
@@ -596,6 +601,7 @@ async function boot() {
   registerUpdate(finishScreen.update);
   registerUpdate(audio.updateAudio);
   registerUpdate(player.updatePlayer);
+  registerUpdate(hub.updateHub);
   registerUpdate(sceneSetup.updateScene);
 
   onResize((w, h) => {

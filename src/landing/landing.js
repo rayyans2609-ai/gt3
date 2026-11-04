@@ -7,9 +7,8 @@
  * the Tour is never drawn behind it. Landing scroll is native window scroll over
  * #landing-spacer; the Tour drive is dormant meanwhile (scrollDrive.setDriveDormant).
  *
- * Every frame is a pure function of three inputs: the (lightly damped) landing scroll
- * progress, the damped pointer, and idle time — and idle time only advances at rest. Scrolling
- * back up therefore reconstructs exactly the same frames in reverse.
+ * The shared RAF integrates inspection only at rest. Scroll settles that pose into the
+ * accepted hero framing before the surface push; no separate animation loop owns input.
  *
  * The hero is a featured presentation only (owner, 2026-10-24: McLaren 720S GT3). It never
  * touches the Tour roster, its starter car, discovery state or progression.
@@ -46,10 +45,18 @@ const TUNE = {
   bobSeconds: 7.5,
   idleDegPerSecond: 4.2,      // "extremely slowly": one turn in ~86 s
   heroAzimuthDeg: 34,         // deliberate front-three-quarter, from the nose toward car-left
-  pointerYaw: 0.13,
-  pointerPitch: 0.045,
-  pointerEnvYaw: 0.32,        // restrained lighting response to the pointer
-  pointerDamping: 3.2,        // 1/s
+  pointerYaw: 0.18,
+  pointerPitch: 0.055,
+  pointerEnvYaw: 0.42,        // restrained lighting response to the pointer
+  pointerDamping: 5,        // 1/s
+  keyLightSway: 1.9,
+  dragYawPerPixel: 0.008,
+  dragPitchPerPixel: 0.004,
+  dragPitchLimit: THREE.MathUtils.degToRad(8),
+  dragMaxSpeed: 1.6,         // rad/s, combined yaw + pitch velocity
+  dragResponse: 20,          // 1/s, smooth input rather than applying event jumps
+  dragFriction: 6,           // 1/s, <0.01 rad/s within 0.85 s after release
+  idleResume: 2.5,           // 1/s
   scrollDamping: 9,           // 1/s: smooths wheel steps; never runs on after input ends
   // Measured on the GLB's near front fender, canonical coordinates minus the 0.58 m
   // pivot offset. Both are EXT_Carpaint_Inst: white livery (255/255/255) beside blue paint
@@ -101,6 +108,8 @@ let lastInputAt = -Infinity;
 let idleYaw = THREE.MathUtils.degToRad(TUNE.openingYawDeg - TUNE.heroAzimuthDeg);
 let lastYawDelta = 0;
 const pointer = { x: 0, y: 0, tx: 0, ty: 0 };
+const drag = { id: null, x: 0, y: 0, dx: 0, dy: 0, yawVelocity: 0, pitchVelocity: 0, pitch: 0 };
+let idleWeight = 1;
 const themeMix = { value: 0, target: 0 }; // 0 day, 1 night
 
 // DOM.
@@ -338,6 +347,39 @@ function onPointerLeave() {
   pointer.ty = 0;
 }
 
+// Capture only presses on the canvas near the hero. UI overlays cannot bubble into this
+// listener, and touch retains the browser's native pan/scroll behavior (no touch-action override).
+function onDragStart(event) {
+  if (!active || !heroReady || Math.max(progress, targetProgress) > 0.02
+    || drag.id !== null || event.button !== 0 || !event.isPrimary || event.pointerType === 'touch') return;
+  const rect = renderer.domElement.getBoundingClientRect();
+  const x = (event.clientX - rect.left) / rect.width;
+  const y = (event.clientY - rect.top) / rect.height;
+  if (x < 0.25 || x > 0.75 || y < 0.48 || y > 0.82) return;
+  drag.id = event.pointerId;
+  drag.x = event.clientX;
+  drag.y = event.clientY;
+  drag.dx = drag.dy = drag.yawVelocity = drag.pitchVelocity = 0;
+  idleWeight = 0;
+  renderer.domElement.setPointerCapture(event.pointerId);
+}
+
+function onDragMove(event) {
+  if (event.pointerId !== drag.id) return;
+  drag.dx += (event.clientX - drag.x) * TUNE.dragYawPerPixel;
+  drag.dy += (event.clientY - drag.y) * TUNE.dragPitchPerPixel;
+  drag.x = event.clientX;
+  drag.y = event.clientY;
+}
+
+function endDrag(event) {
+  if (event && event.pointerId !== drag.id) return;
+  const id = drag.id;
+  drag.id = null;
+  drag.dx = drag.dy = 0;
+  if (id !== null && renderer.domElement.hasPointerCapture(id)) renderer.domElement.releasePointerCapture(id);
+}
+
 // ---------------------------------------------------------------------------
 // DOM writes (only when a value actually changes)
 // ---------------------------------------------------------------------------
@@ -389,6 +431,13 @@ export function initLanding(sharedRenderer, { onHub, onLanding } = {}) {
   cue = document.querySelector('.landing-cue');
 
   resize();
+  const canvas = renderer.domElement;
+  canvas.addEventListener('pointerdown', onDragStart, { passive: true });
+  canvas.addEventListener('pointermove', onDragMove, { passive: true });
+  for (const type of ['pointerup', 'pointercancel', 'lostpointercapture']) {
+    canvas.addEventListener(type, endDrag, { passive: true });
+  }
+  window.addEventListener('blur', () => endDrag(), { passive: true });
   window.addEventListener('scroll', onScroll, { passive: true });
   window.addEventListener('pointermove', onPointer, { passive: true });
   document.documentElement.addEventListener('pointerleave', onPointerLeave, { passive: true });
@@ -418,6 +467,8 @@ export function activateLanding({ atHub = false } = {}) {
 
 /** Give the screen back. The caller restores the Tour's resolution (sceneSetup.resizeScene). */
 export function deactivateLanding() {
+  endDrag();
+  drag.yawVelocity = drag.pitchVelocity = 0;
   active = false;
 }
 
@@ -456,6 +507,15 @@ export function seekLanding(p) {
   progress = targetProgress = readScroll();
 }
 
+/** Dev read handle; copied values only, with velocities in radians/second. */
+function landingPose() {
+  return { yaw: pivot?.rotation.y ?? 0, pitch: pivot?.rotation.x ?? 0,
+    angularVelocity: Math.hypot(drag.yawVelocity, drag.pitchVelocity),
+    yawVelocity: drag.yawVelocity, pitchVelocity: drag.pitchVelocity,
+    dragging: drag.id !== null, progress, pitchLimit: TUNE.dragPitchLimit,
+    velocityCap: TUNE.dragMaxSpeed };
+}
+
 /** Per-frame update. Runs only while the Landing owns the screen. */
 export function updateLanding(dt) {
   if (!active) return;
@@ -486,16 +546,44 @@ export function updateLanding(dt) {
   const hub = smooth(...SEG.hub, progress);
   const rest = 1 - settle;
 
+  // main.js registers its landing handle after initLanding; attach here on the shared RAF.
+  if (import.meta.env.DEV && window.__gt3?.landing) window.__gt3.landing.pose = landingPose;
+
+  if (Math.max(progress, targetProgress) > 0.02) endDrag();
+  const inspecting = drag.id !== null;
+  const damping = Math.exp(-TUNE.dragFriction * safeDt);
+  if (inspecting && safeDt > 0) {
+    let vx = drag.dx / safeDt, vy = drag.dy / safeDt;
+    const scale = Math.min(1, TUNE.dragMaxSpeed / (Math.hypot(vx, vy) || 1));
+    vx *= scale;
+    vy *= scale;
+    const follow = 1 - Math.exp(-TUNE.dragResponse * safeDt);
+    drag.yawVelocity += (vx - drag.yawVelocity) * follow;
+    drag.pitchVelocity += (vy - drag.pitchVelocity) * follow;
+  } else {
+    drag.yawVelocity *= damping;
+    drag.pitchVelocity *= damping;
+  }
+  drag.dx = drag.dy = 0;
+  // The same settle envelope removes pitch and momentum before the accepted surface push.
+  drag.yawVelocity *= rest;
+  drag.pitchVelocity *= rest;
+  drag.pitch = THREE.MathUtils.clamp(drag.pitch + drag.pitchVelocity * safeDt,
+    -TUNE.dragPitchLimit, TUNE.dragPitchLimit) * rest;
+  idleWeight += ((inspecting ? 0 : 1) - idleWeight) * (1 - Math.exp(-TUNE.idleResume * safeDt));
+
   // ---- hero pose -----------------------------------------------------------
   // Idle turntable advances only at rest, so any scrolled frame is reproducible.
-  idleYaw = wrapPi(idleYaw + THREE.MathUtils.degToRad(TUNE.idleDegPerSecond) * safeDt * rest * rest);
+  idleYaw = wrapPi(idleYaw + THREE.MathUtils.degToRad(TUNE.idleDegPerSecond) * safeDt * rest * rest * idleWeight
+    + drag.yawVelocity * safeDt);
   // Turn to the hero angle by the shortest way, without ever flipping branch mid-turn.
   let delta = wrapPi(heroYaw - idleYaw);
   if (Math.abs(delta - lastYawDelta) > Math.PI) delta += delta < lastYawDelta ? 2 * Math.PI : -2 * Math.PI;
   lastYawDelta = delta;
   const turn = THREE.MathUtils.smootherstep(settle, 0, 1);
   pivot.rotation.y = idleYaw + delta * turn + pointer.x * TUNE.pointerYaw * rest;
-  pivot.rotation.x = pointer.y * TUNE.pointerPitch * rest;
+  pivot.rotation.x = THREE.MathUtils.clamp((pointer.y * TUNE.pointerPitch + drag.pitch) * rest,
+    -TUNE.dragPitchLimit, TUNE.dragPitchLimit);
   const bob = Math.sin(performance.now() / 1000 * 2 * Math.PI / TUNE.bobSeconds) * TUNE.bobAmplitude;
   pivot.position.y = TUNE.floatHeight + bob * rest;
 
@@ -528,7 +616,7 @@ export function updateLanding(dt) {
   rimLight.intensity = 2.6 * night;
   const lamps = smooth(...SEG.lamps, progress);
   for (const material of lampGlows) material.emissiveIntensity = 1 + lamps * 4;
-  keyLight.position.set(-4 + pointer.x * 1.5 * rest, 9, -6);
+  keyLight.position.set(-4 + pointer.x * TUNE.keyLightSway * rest, 9, -6);
   scene.background.copy(_field.copy(FIELD.day).lerp(FIELD.night, night));
 
   // ---- DOM ---------------------------------------------------------------------

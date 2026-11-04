@@ -1,287 +1,194 @@
 /**
- * hubPlayer.js — the Hub presentation of the one global player (SPEC §7, §9).
- *
- * A view over audioManager.js only. Its parts are flat siblings laid out by CSS grid, so the
- * track-list `+` can recompose the same object (SPEC §9 "recomposition, not growth"): the cover
- * recedes to a thumbnail, the six tracks take the space it frees, the outer bounds stay put.
- * GSAP Flip animates between the two layouts and reverses from wherever it is when toggled.
- * Two shapes serve the Hub directions: `row` (cover beside its controls) and `column`.
- *
- * Nothing here starts audio except play or a track choice, which already do in the compact
- * player (SPEC §10). Levels come from the shared audioLevels.js and never touch the context.
+ * Hub player: one view over audioManager, with collapsed, expanded and listening
+ * presentations. It deliberately owns no audio graph and no RAF; GSAP is driven
+ * by motion.js' shared ticker.
  */
-
-import { createElement, Music4, Pause, Play, Plus, SkipBack, SkipForward, X } from 'lucide';
+import { createElement, ChevronDown, ChevronUp, Music4, Pause, Play, SkipBack, SkipForward, Volume2, VolumeX, X } from 'lucide';
 import {
   getMusicStatus, nextTrack, pauseMusic, playMusic, previousTrack, seekMusic, selectTrack, setMusicMuted,
 } from '../audio/audioManager.js';
 import { playlist } from '../data/playlist.js';
-import { state } from '../core/state.js';
+import { state, subscribe } from '../core/state.js';
 import { buildLevels } from './audioLevels.js';
+import { isMasterAudioPending, toggleMasterAudio } from './soundControl.js';
 import { Flip, gsap, reducedMotion } from './motion.js';
 
 let root = null;
-let parts = [];
-let cover;
-let list;
-let label;
-let clock;
-let seek;
-let playButton;
-let muteButton;
-let listButton;
+let slot = null;
+let listeningLayer = null;
+let coverButton, coverImage, sheen, label, elapsed, duration, seek, playButton, musicMute, masterMute;
+let expandButton, levelsButton, levels, trackList, closeButton, previous, next;
+let presentation = 'collapsed';
+let beforeListening = 'collapsed';
+let levelsOpen = false;
 let dragging = false;
-let dragStartValue = null;
-let listOpen = false;
 let flip = null;
+let emit = () => {};
 let coverToken = 0;
+let tiltX, tiltY;
 const shown = new Map();
 
-function show(key, value, write) {
+const writeIfChanged = (key, value, write) => {
   if (shown.get(key) === value) return;
-  shown.set(key, value);
-  write(value);
-}
-
-function icon(def) {
-  return createElement(def, { 'stroke-width': 1.5, 'aria-hidden': 'true', focusable: 'false' });
-}
-
-function control(className, ariaLabel, ...icons) {
-  const button = document.createElement('button');
-  button.type = 'button';
-  button.className = `hub-player__control ${className}`;
-  button.setAttribute('aria-label', ariaLabel);
-  for (const def of icons) button.append(icon(def));
-  return button;
-}
-
-function time(seconds) {
+  shown.set(key, value); write(value);
+};
+const icon = def => createElement(def, { 'stroke-width': 1.5, 'aria-hidden': 'true', focusable: 'false' });
+const time = seconds => {
   if (!Number.isFinite(seconds) || seconds < 0) return '0:00';
   const whole = Math.floor(seconds);
   return `${Math.floor(whole / 60)}:${String(whole % 60).padStart(2, '0')}`;
+};
+function button(className, ariaLabel, dataControl, ...icons) {
+  const node = document.createElement('button');
+  node.type = 'button'; node.className = `hub-player__control ${className}`;
+  node.setAttribute('aria-label', ariaLabel);
+  if (dataControl) node.dataset.control = dataControl;
+  icons.forEach(def => node.append(icon(def)));
+  return node;
 }
 
-/** Swap the artwork without a hard cut: a short dip, the new image, a short rise. */
 function setCover(index) {
   const src = playlist[index]?.cover;
-  if (!src || cover.dataset.src === src) return;
-  const token = ++coverToken;
-  const first = !cover.dataset.src;
-  cover.dataset.src = src;
+  if (!src || coverImage.dataset.src === src) return;
+  const token = ++coverToken; const first = !coverImage.dataset.src;
+  coverImage.dataset.src = src;
   const swap = () => {
     if (token !== coverToken) return;
-    cover.src = src;
-    const reveal = () => { if (token === coverToken) cover.classList.remove('is-swapping'); };
-    if (cover.complete) reveal();
-    else {
-      cover.addEventListener('load', reveal, { once: true });
-      cover.addEventListener('error', reveal, { once: true });
-    }
+    coverImage.src = src;
+    const reveal = () => { if (token === coverToken) coverImage.classList.remove('is-swapping'); };
+    if (coverImage.complete) reveal();
+    else { coverImage.addEventListener('load', reveal, { once: true }); coverImage.addEventListener('error', reveal, { once: true }); }
   };
-  if (first || reducedMotion.matches) { swap(); return; }
-  cover.classList.add('is-swapping');
-  window.setTimeout(swap, 140);
+  if (first || reducedMotion.matches) swap();
+  else { coverImage.classList.add('is-swapping'); window.setTimeout(swap, 140); }
 }
 
 function renderStatus() {
-  const status = getMusicStatus();
-  const duration = status.duration > 0 ? status.duration : 0;
+  if (!root) return;
+  const status = getMusicStatus(); const total = Math.max(0, status.duration || 0);
   setCover(status.trackIndex);
-  show('label', status.id, (v) => { label.textContent = v; });
-  show('seekDisabled', duration <= 0, (v) => { seek.disabled = v; });
-  show('seekMax', String(duration), (v) => { seek.max = v; });
+  writeIfChanged('label', status.id, value => { label.textContent = value; });
+  writeIfChanged('seek-max', String(total), value => { seek.max = value; seek.disabled = total <= 0; });
   if (!dragging) {
-    const second = Math.floor(Math.min(status.currentTime, duration || status.currentTime));
-    show('clock', `${time(second)}|${duration > 0 ? time(duration) : '--:--'}`, (v) => {
-      const [now, total] = v.split('|');
-      clock.firstChild.textContent = now;
-      clock.lastChild.textContent = total;
-    });
-    show('seekValue', `${status.trackIndex}:${second}:${duration}`, () => {
-      const value = Math.min(status.currentTime, duration);
-      seek.value = String(value);
-      seek.style.setProperty('--fill', duration > 0 ? String(value / duration) : '0');
+    const current = Math.min(status.currentTime, total || status.currentTime);
+    writeIfChanged('time', `${Math.floor(current)}:${total}`, () => {
+      elapsed.textContent = time(current); duration.textContent = total > 0 ? time(total) : '--:--';
+      seek.value = String(current); seek.style.setProperty('--fill', total ? String(current / total) : '0');
     });
   }
-  show('playing', status.playing, (playing) => {
-    playButton.setAttribute('aria-label', playing ? 'Pause music' : 'Play music');
-    playButton.setAttribute('aria-pressed', String(playing));
+  writeIfChanged('playing', status.playing, playing => {
     playButton.dataset.state = playing ? 'playing' : 'paused';
-    root.classList.toggle('is-playing', playing);
+    playButton.setAttribute('aria-label', playing ? 'Pause music' : 'Play music');
+    playButton.setAttribute('aria-pressed', String(playing)); root.classList.toggle('is-playing', playing);
   });
-  show('musicMuted', state.musicMuted, (muted) => {
-    muteButton.setAttribute('aria-pressed', String(muted));
-    muteButton.setAttribute('aria-label', muted ? 'Unmute music' : 'Mute music');
-    root.classList.toggle('is-music-muted', muted);
+  writeIfChanged('music-muted', state.musicMuted, muted => {
+    musicMute.setAttribute('aria-pressed', String(muted));
+    musicMute.setAttribute('aria-label', muted ? 'Unmute music' : 'Mute music'); root.classList.toggle('is-music-muted', muted);
   });
-  show('track', status.trackIndex, (current) => {
-    for (const item of list.children) {
-      const button = item.firstChild;
-      const selected = Number(button.dataset.trackIndex) === current;
-      item.classList.toggle('is-current', selected);
-      button.setAttribute('aria-current', selected ? 'true' : 'false');
-    }
+  writeIfChanged('master-muted', `${state.masterMuted}:${state.audioReady}:${isMasterAudioPending()}`, () => {
+    const pending = isMasterAudioPending(); const muted = state.masterMuted;
+    masterMute.disabled = pending;
+    masterMute.setAttribute('aria-pressed', String(!muted && state.audioReady));
+    masterMute.setAttribute('aria-label', pending ? 'Starting sound' : !state.audioReady ? 'Start sound' : muted ? 'Unmute all sound' : 'Mute all sound');
+    masterMute.dataset.sound = pending ? 'starting' : !state.audioReady ? 'idle' : muted ? 'muted' : 'on';
+  });
+  writeIfChanged('current-track', status.trackIndex, current => {
+    [...trackList.children].forEach((row, index) => {
+      const active = index === current; row.classList.toggle('is-current', active);
+      row.firstChild.setAttribute('aria-current', active ? 'true' : 'false');
+    });
   });
 }
 
-function applyOpen(open) {
-  listOpen = open;
-  root.classList.toggle('is-list-open', open);
-  list.inert = !open;
-  listButton.setAttribute('aria-expanded', String(open));
-  listButton.setAttribute('aria-label', open ? 'Hide track list' : 'Show track list');
+function setLevels(open) {
+  levelsOpen = open;
+  root.classList.toggle('is-levels-open', open);
+  levels.hidden = !open;
+  levelsButton.setAttribute('aria-expanded', String(open));
+}
+function applyPresentation(next) {
+  presentation = next;
+  root.dataset.hubPlayer = next;
+  root.classList.toggle('is-expanded', next === 'expanded');
+  root.classList.toggle('is-listening', next === 'listening');
+  if (next === 'collapsed') setLevels(false);
+  expandButton.setAttribute('aria-expanded', String(next === 'expanded'));
+  expandButton.setAttribute('aria-label', next === 'expanded' ? 'Collapse music player' : 'Expand music player');
+  trackList.inert = next === 'collapsed';
+  root.inert = false;
+}
+function recompose(next) {
+  if (next === presentation) return;
+  const before = reducedMotion.matches ? null : Flip.getState(root);
+  flip?.kill(); applyPresentation(next);
+  if (before) flip = Flip.from(before, { duration: 0.58, ease: 'gt3.out', absolute: true, onComplete: () => { flip = null; } });
+}
+function moveToListening() {
+  if (!root || presentation === 'listening') return;
+  beforeListening = presentation;
+  const before = reducedMotion.matches ? null : Flip.getState(root);
+  listeningLayer.append(root); applyPresentation('listening'); listeningLayer.hidden = false;
+  if (before) flip = Flip.from(before, { duration: 0.62, ease: 'gt3.out', absolute: true, onComplete: () => { flip = null; } });
+  emit('listen', { previous: beforeListening });
+}
+function returnFromListening() {
+  if (!root || presentation !== 'listening') return;
+  const before = reducedMotion.matches ? null : Flip.getState(root);
+  slot.append(root); applyPresentation(beforeListening); listeningLayer.hidden = true;
+  if (before) flip = Flip.from(before, { duration: 0.46, ease: 'gt3.out', absolute: true, onComplete: () => { flip = null; } });
+  emit('close-listening', { previous: beforeListening });
+}
+function pointerTilt(event) {
+  if (reducedMotion.matches || !coverButton) return;
+  const box = coverButton.getBoundingClientRect();
+  const dx = event.clientX - (box.left + box.width / 2), dy = event.clientY - (box.top + box.height / 2);
+  const distance = Math.hypot(dx, dy); const radius = 240;
+  if (distance > radius) { tiltX(0); tiltY(0); return; }
+  const max = root.dataset.variant === 'a' ? 2 : 5; const strength = (1 - distance / radius) * max;
+  tiltX(-dy / radius * strength); tiltY(dx / radius * strength);
+  sheen.style.setProperty('--sheen-x', `${50 + dx / Math.max(1, box.width) * 100}%`);
+  sheen.style.setProperty('--sheen-y', `${50 + dy / Math.max(1, box.height) * 100}%`);
 }
 
-/** Recompose with Flip; a toggle mid-flight starts from the current, in-between layout. */
-function recompose(open) {
-  if (reducedMotion.matches) { applyOpen(open); return; }
-  const before = Flip.getState(parts);
-  flip?.kill();
-  gsap.killTweensOf(list.children);
-  applyOpen(open);
-  flip = Flip.from(before, {
-    targets: parts,
-    duration: open ? 0.52 : 0.42,
-    ease: 'gt3.out',
-    scale: true,
-    absolute: true,
-    onEnter: (els) => gsap.fromTo(els, { opacity: 0 }, { opacity: 1, duration: 0.3, delay: 0.16, ease: 'gt3' }),
-    onLeave: (els) => gsap.to(els, { opacity: 0, duration: 0.14, ease: 'gt3' }),
-    onComplete: () => { flip = null; },
-  });
-  if (open) {
-    gsap.fromTo(list.children, { opacity: 0, x: -8 },
-      { opacity: 1, x: 0, duration: 0.42, ease: 'gt3.out', stagger: 0.035, delay: 0.16 });
-  }
-}
-
-export function initHubPlayer(container, { shape = 'column' } = {}) {
+export function initHubPlayer(container, { variant = 'a', onEvent } = {}) {
   if (root) return root;
-  root = document.createElement('section');
-  root.className = 'hub-player';
-  root.dataset.shape = shape;
-  root.setAttribute('aria-label', 'Music');
+  slot = container; emit = typeof onEvent === 'function' ? onEvent : () => {};
+  listeningLayer = document.createElement('div'); listeningLayer.id = 'hub-listening'; listeningLayer.hidden = true;
+  listeningLayer.setAttribute('aria-label', 'Listening'); document.getElementById('hub').append(listeningLayer);
+  root = document.createElement('section'); root.className = 'hub-player'; root.dataset.variant = variant; root.dataset.hubPlayer = 'collapsed'; root.setAttribute('aria-label', 'Music player');
 
-  cover = document.createElement('img');
-  cover.className = 'hub-player__cover';
-  cover.alt = '';
-  cover.decoding = 'async';
-  cover.draggable = false;
-
-  list = document.createElement('ol');
-  list.className = 'hub-player__list';
-  list.id = 'hub-player-tracks';
-  playlist.forEach((track, index) => {
-    const item = document.createElement('li');
-    const button = document.createElement('button');
-    button.type = 'button';
-    button.className = 'hub-player__track';
-    button.dataset.trackIndex = String(index);
-    const name = document.createElement('span');
-    name.textContent = track.id;
-    const bars = document.createElement('span');
-    bars.className = 'hub-player__eq';
-    bars.setAttribute('aria-hidden', 'true');
-    bars.append(document.createElement('i'), document.createElement('i'), document.createElement('i'));
-    button.append(name, bars);
-    button.addEventListener('click', () => { selectTrack(index); renderStatus(); });
-    item.append(button);
-    list.append(item);
-  });
-
-  const meta = document.createElement('div');
-  meta.className = 'hub-player__meta';
-  label = document.createElement('strong');
-  label.className = 'hub-player__label';
-  clock = document.createElement('span');
-  clock.className = 'hub-player__clock';
-  clock.append(document.createElement('span'), document.createElement('span'));
-  meta.append(label, clock);
-
-  seek = document.createElement('input');
-  seek.type = 'range';
-  seek.className = 'hub-range hub-player__seek';
-  seek.min = '0';
-  seek.max = '0';
-  seek.step = '0.1';
-  seek.value = '0';
-  seek.setAttribute('aria-label', 'Seek music');
-
-  const transport = document.createElement('div');
-  transport.className = 'hub-player__transport';
-  const previous = control('hub-player__previous', 'Previous track', SkipBack);
-  playButton = control('hub-player__play', 'Play music', Play, Pause);
-  const next = control('hub-player__next', 'Next track', SkipForward);
-  muteButton = control('hub-player__mute', 'Mute music', Music4);
-  listButton = control('hub-player__list-toggle', 'Show track list', Plus, X);
-  listButton.setAttribute('aria-controls', list.id);
-  const spacer = document.createElement('span');
-  spacer.className = 'hub-player__spacer';
-  transport.append(previous, playButton, next, spacer, muteButton, listButton);
-
-  const levels = buildLevels({ className: 'hub-player__levels', prefix: 'hub-level', rangeClass: 'hub-range' });
-
-  parts = [cover, list, meta, seek, transport, levels];
-  root.append(...parts);
-  container.append(root);
-  applyOpen(false);
-
-  previous.addEventListener('click', () => { previousTrack(); renderStatus(); });
-  next.addEventListener('click', () => { nextTrack(); renderStatus(); });
-  playButton.addEventListener('click', () => {
-    if (getMusicStatus().playing) pauseMusic();
-    else void playMusic();
-    renderStatus();
-  });
-  muteButton.addEventListener('click', () => { setMusicMuted(!state.musicMuted); renderStatus(); });
-  listButton.addEventListener('click', () => recompose(!listOpen));
-  root.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape' && listOpen) {
-      recompose(false);
-      listButton.focus();
-    }
-  });
-
-  seek.addEventListener('input', () => {
-    dragging = true;
-    const max = Number(seek.max) || 0;
-    seek.style.setProperty('--fill', max > 0 ? String(Number(seek.value) / max) : '0');
-    clock.firstChild.textContent = time(Number(seek.value));
-  });
-  seek.addEventListener('change', () => {
-    seekMusic(Number(seek.value));
-    dragging = false;
-    shown.delete('seekValue');
-    shown.delete('clock');
-    renderStatus();
-  });
-  seek.addEventListener('pointerdown', () => { dragStartValue = seek.value; });
-  const endDrag = () => {
-    if (dragStartValue !== null && seek.value === dragStartValue) {
-      dragging = false;
-      shown.delete('seekValue');
-      shown.delete('clock');
-    }
-    dragStartValue = null;
-  };
-  seek.addEventListener('pointerup', endDrag);
-  seek.addEventListener('pointercancel', endDrag);
-
-  renderStatus();
+  coverButton = document.createElement('button'); coverButton.type = 'button'; coverButton.className = 'hub-player__cover'; coverButton.dataset.control = 'cover'; coverButton.setAttribute('aria-label', 'Open listening view');
+  coverImage = document.createElement('img'); coverImage.alt = ''; coverImage.decoding = 'async'; coverImage.draggable = false;
+  sheen = document.createElement('span'); sheen.className = 'hub-player__sheen'; sheen.setAttribute('aria-hidden', 'true'); coverButton.append(coverImage, sheen);
+  tiltX = gsap.quickTo(coverButton, 'rotationX', { duration: .22, ease: 'gt3' });
+  tiltY = gsap.quickTo(coverButton, 'rotationY', { duration: .22, ease: 'gt3' });
+  const meta = document.createElement('div'); meta.className = 'hub-player__meta'; label = document.createElement('strong'); label.className = 'hub-player__label';
+  const clock = document.createElement('span'); clock.className = 'hub-player__clock'; elapsed = document.createElement('span'); duration = document.createElement('span'); clock.append(elapsed, duration); meta.append(label, clock);
+  seek = document.createElement('input'); seek.type = 'range'; seek.className = 'hub-range hub-player__seek'; seek.dataset.control = 'seek'; seek.min = '0'; seek.max = '0'; seek.step = '.1'; seek.value = '0'; seek.setAttribute('aria-label', 'Seek music');
+  const transport = document.createElement('div'); transport.className = 'hub-player__transport';
+  previous = button('hub-player__previous', 'Previous track', null, SkipBack); playButton = button('hub-player__play', 'Play music', null, Play, Pause); next = button('hub-player__next', 'Next track', null, SkipForward);
+  musicMute = button('hub-player__mute', 'Mute music', 'music-mute', Music4); masterMute = button('hub-player__master', 'Start sound', 'master-mute', Volume2, VolumeX); expandButton = button('hub-player__expand', 'Expand music player', null, ChevronDown, ChevronUp);
+  transport.append(previous, playButton, next, musicMute, masterMute, expandButton);
+  levelsButton = document.createElement('button'); levelsButton.type = 'button'; levelsButton.className = 'hub-player__levels-toggle'; levelsButton.dataset.control = 'levels'; levelsButton.textContent = 'Levels'; levelsButton.setAttribute('aria-expanded', 'false');
+  levels = buildLevels({ className: 'hub-player__levels', prefix: 'hub-level', rangeClass: 'hub-range' }); levels.hidden = true;
+  trackList = document.createElement('ol'); trackList.className = 'hub-player__list'; trackList.dataset.control = 'track-list';
+  playlist.forEach((track, index) => { const row = document.createElement('li'); const trackButton = document.createElement('button'); trackButton.type = 'button'; trackButton.dataset.track = String(index + 1); trackButton.textContent = track.id; trackButton.addEventListener('click', () => { selectTrack(index); renderStatus(); }); row.append(trackButton); trackList.append(row); });
+  closeButton = button('hub-player__close', 'Close listening view', 'listening-close', X);
+  root.append(coverButton, meta, seek, transport, levelsButton, levels, trackList, closeButton); slot.append(root); applyPresentation('collapsed'); renderStatus();
+  previous.addEventListener('click', () => { previousTrack(); renderStatus(); }); next.addEventListener('click', () => { nextTrack(); renderStatus(); });
+  playButton.addEventListener('click', () => { if (getMusicStatus().playing) pauseMusic(); else void playMusic(); renderStatus(); });
+  musicMute.addEventListener('click', () => { setMusicMuted(!state.musicMuted); renderStatus(); });
+  masterMute.addEventListener('click', async () => { const pending = toggleMasterAudio(); shown.delete('master-muted'); renderStatus(); await pending; shown.delete('master-muted'); renderStatus(); });
+  expandButton.addEventListener('click', () => recompose(presentation === 'expanded' ? 'collapsed' : 'expanded'));
+  levelsButton.addEventListener('click', () => setLevels(!levelsOpen)); coverButton.addEventListener('click', moveToListening); closeButton.addEventListener('click', returnFromListening);
+  seek.addEventListener('input', () => { dragging = true; const max = Number(seek.max) || 0; seek.style.setProperty('--fill', max ? String(Number(seek.value) / max) : '0'); elapsed.textContent = time(Number(seek.value)); });
+  seek.addEventListener('change', () => { seekMusic(Number(seek.value)); dragging = false; shown.delete('time'); renderStatus(); });
+  root.addEventListener('keydown', event => { if (event.key === 'Escape' && presentation === 'listening') { event.preventDefault(); returnFromListening(); } });
+  document.addEventListener('pointermove', pointerTilt, { passive: true });
+  subscribe('masterMuted', () => { shown.delete('master-muted'); renderStatus(); }); subscribe('audioReady', () => { shown.delete('master-muted'); renderStatus(); }); subscribe('musicMuted', renderStatus); subscribe('trackIndex', renderStatus);
   return root;
 }
-
-/** Per frame while the Hub is on screen (main.js RAF); writes only changed values. */
-export function updateHubPlayer() {
-  if (root) renderStatus();
-}
-
-/** Leaving the Hub resets the list to its resting composition (SPEC §25 player-state rule). */
-export function resetHubPlayer() {
-  if (!root || !listOpen) return;
-  flip?.kill();
-  flip = null;
-  gsap.set([...parts, ...list.children], { clearProps: 'all' });
-  applyOpen(false);
-}
+export function updateHubPlayer() { renderStatus(); }
+export function resetHubPlayer() { if (!root) return; flip?.kill(); flip = null; if (presentation === 'listening') { slot.append(root); listeningLayer.hidden = true; } applyPresentation('collapsed'); setLevels(false); gsap.set(root, { clearProps: 'transform,opacity' }); }
+export function closeHubListening() { returnFromListening(); }
+export function getHubPlayerDebug() { return { presentation, levelsOpen, listening: presentation === 'listening', track: getMusicStatus().trackIndex }; }

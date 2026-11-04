@@ -6,6 +6,30 @@ let speaker;
 let launcher;
 let pending = false;
 
+/**
+ * The one trusted-gesture path for master audio. Hub's player imports this rather
+ * than creating a second audio policy: muting remains independent from music
+ * mute, and only an explicit click is allowed to initialise Web Audio.
+ */
+export async function toggleMasterAudio() {
+  if (pending) return false;
+  if (state.audioReady) {
+    setMasterMuted(!state.masterMuted);
+    return true;
+  }
+  setMasterMuted(false);
+  pending = true;
+  render();
+  try {
+    return await startAudio();
+  } finally {
+    pending = false;
+    render();
+  }
+}
+
+export function isMasterAudioPending() { return pending; }
+
 const speakerIcon = `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 9h4l5-4v14l-5-4H4z"/><path class="speaker-wave" d="M16 9a4 4 0 0 1 0 6m2-9a8 8 0 0 1 0 12"/><path class="speaker-slash" d="M17 9l5 6m0-6l-5 6"/></svg>`;
 
 function render() {
@@ -43,22 +67,7 @@ export function initSoundControl() {
   anchor.append(speaker, launcher);
   layer.append(anchor);
 
-  speaker.addEventListener('click', async () => {
-    if (pending) return;
-    if (state.audioReady) {
-      setMasterMuted(!state.masterMuted);
-      return;
-    }
-    setMasterMuted(false);
-    pending = true;
-    render();
-    try {
-      await startAudio();
-    } finally {
-      pending = false;
-      render();
-    }
-  });
+  speaker.addEventListener('click', () => { void toggleMasterAudio(); });
   launcher.addEventListener('click', () => set('playerOpen', !state.playerOpen));
   subscribe('audioReady', render);
   subscribe('masterMuted', render);

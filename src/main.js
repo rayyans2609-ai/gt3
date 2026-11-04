@@ -692,8 +692,12 @@ async function boot() {
     const landingOwns = Boolean(landing?.landingActive());
     const hubOwns = state.experience === 'hub' && !state.transition
       && (landing?.landingHubPresence() ?? 1) >= 0.999;
+    // Candidate B keeps the canvas through its timed launch/Home edge until it hands it to the Tour.
+    const hubElement = document.getElementById('hub');
+    const bHandoff = Boolean(state.transition && hubElement && !hubElement.hidden
+      && hubElement.dataset.variant === 'b' && hubElement.dataset.canvasOwner === 'hub');
+    const hubCanvasOwns = hubOwns || bHandoff;
     try {
-      if (hubOwns) hub.renderHub();
       if (gpuWarmup && !gpuWarmup.done && readiness.gpu === 'pending') {
         // While the visitor moves through the Landing transition the warm-up waits a moment,
         // so its first-use stalls never land on the signature shot. Its draws are then covered
@@ -708,10 +712,12 @@ async function boot() {
           }
           settle('gpu', 'ready');
         }
-        if (landingOwns && !hubOwns) landing.renderLanding();
-      } else if (hubOwns) {
-        // A is DOM/SVG and needs no canvas draw. B may render through the shared renderer.
-        // Never render the Tour underneath this rest state.
+        if (hubCanvasOwns) hub.renderHub(true);
+        else if (landingOwns) landing.renderLanding();
+      } else if (hubCanvasOwns) {
+        // A is DOM/SVG and draws nothing. B renders on demand through the shared renderer and
+        // keeps the previous canvas at a settled rest. Never render the Tour underneath it.
+        hub.renderHub();
       } else if (landingOwns) landing.renderLanding();
       else if (studio.isMontagePlaying()) studio.renderMontage();
       else {

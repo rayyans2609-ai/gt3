@@ -1,0 +1,46 @@
+/* B owns its field, label and console composition. */
+#hub[data-variant='b'] {
+  --m: clamp(48px, 4.4vw, 72px); --hub-ground: #f2f3f5;
+  --hub-muted: color-mix(in srgb, var(--hub-ink) 52%, transparent);
+  --hub-hair: color-mix(in srgb, var(--hub-ink) 15%, transparent);
+  --hub-marker: #3f68a6; --hub-light-x: -2.5px; --hub-light-y: 3px; isolation: isolate;
+}
+#hub[data-variant='b'][data-canvas-field='true'] { --hub-marker: #3f68a6; }
+#hub[data-variant='b'][data-theme='night'][data-canvas-field='true'] { --hub-marker: #e2c25a; }
+#hub[data-variant='b'] .hub-field { background: linear-gradient(180deg, transparent 38%, color-mix(in srgb, var(--hub-ground) 45%, transparent)); pointer-events: none; }
+#hub[data-variant='b'] .hub-b-veil { position: absolute; inset: 0; background: var(--hub-field); opacity: 0; pointer-events: none; }
+#hub[data-variant='b'] .hub-b-overlay { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+#hub[data-variant='b'] .hub-b-leader { fill: none; stroke: var(--hub-marker); stroke-width: 1px; opacity: 0; }
+#hub[data-variant='b'] .hub-b-marker { position: absolute; width: 12px; height: 12px; transform: translate(-50%, -50%); pointer-events: none; }
+#hub[data-variant='b'] .hub-plan-frame { left: 16%; right: 16%; top: 39%; bottom: 13%; }
+#hub[data-variant='b'] .hub-start-wrap { left: 50%; top: 36%; bottom: auto; transform: translateX(-50%); text-align: center; display: flex; flex-direction: column-reverse; align-items: center; gap: 18px; perspective: 1000px; }
+#hub[data-variant='b'] .hub-start { font-size: clamp(70px, calc(6.25vw - 10px), 80px); font-weight: 700; letter-spacing: -0.01em; word-spacing: 0; line-height: 1; text-shadow: var(--hub-light-x) var(--hub-light-y) 9px color-mix(in srgb, var(--hub-ink) 13%, transparent); }
+#hub[data-variant='b'] .hub-b-letter { display: inline-block; transform-style: preserve-3d; }
+#hub[data-variant='b'] .hub-status { margin: 0; font-family: var(--font-ui); font-size: 13px; letter-spacing: 0; }
+#hub[data-variant='b'] .hub-mark { top: 40px; font-size: 21px; font-weight: 700; cursor: pointer; }
+#hub[data-variant='b'] .hub-cars { top: 79px; }
+#hub[data-variant='b'] .hub-cars__toggle { font-family: var(--font-ui); font-size: 15px; font-weight: 400; letter-spacing: 0; padding: 5px 0; }
+#hub[data-variant='b'] .hub-cars__ticks { display: none; }
+#hub[data-variant='b'] [data-control='showcase'] { position: absolute; left: var(--m); top: 115px; padding: 5px 0; border: 0; background: none; color: var(--hub-ink); font-family: var(--font-ui); font-size: 15px; cursor: pointer; }
+#hub[data-variant='b'] .hub-b-index-active::before, #hub[data-variant='b'] .hub-cars__toggle[aria-pressed='true']::before { content: ''; position: absolute; left: -14px; top: 2px; bottom: 2px; width: 2px; background: var(--hub-accent); }
+#hub[data-variant='b'] [data-showcase-status] { position: absolute; top: 150px; left: var(--m); max-width: 235px; margin: 0; font: 13px/1.45 var(--font-ui); color: var(--hub-muted); }
+#hub[data-variant='b'] .hub-b-console { position: absolute; bottom: var(--m); right: var(--m); display: flex; align-items: center; gap: 16px; min-height: 64px; padding: 8px 12px 8px 16px; border-radius: 14px; border: 1px solid var(--hub-hair); border-top-color: color-mix(in srgb, var(--hub-field) 85%, var(--hub-ink)); background: color-mix(in srgb, var(--hub-field) 94%, var(--hub-ink)); box-shadow: var(--hub-light-x) calc(var(--hub-light-y) * 2) 24px color-mix(in srgb, var(--hub-ink) 9%, transparent), inset 0 1px 0 color-mix(in srgb, var(--hub-field) 90%, transparent); }
+#hub[data-variant='b'] .hub-b-console .hub-player-slot { position: relative; top: auto; right: auto; bottom: auto; left: auto; }
+#hub[data-variant='b'] .hub-b-console .theme-segmented { margin: 0; }
+#hub[data-variant='b'] .hub-b-console [data-control='theme'] { position: relative; inset: auto; margin: 0; flex-shrink: 0; }
+#hub[data-variant='b'] .hub-b-theme { display: flex; padding: 3px; border-radius: 9px; border: 1px solid var(--hub-hair); box-shadow: inset 0 1px 4px color-mix(in srgb, var(--hub-ink) 8%, transparent); }
+#hub[data-variant='b'] .hub-b-theme__option { width: 32px; height: 32px; border: 0; border-radius: 6px; background: none; color: var(--hub-muted); font-size: 21px; cursor: pointer; }
+#hub[data-variant='b'] .hub-b-theme__option[aria-checked='true'] { background: var(--hub-field); color: var(--hub-ink); box-shadow: 0 1px 3px color-mix(in srgb, var(--hub-ink) 17%, transparent); }
+#hub[data-variant='b'] .hub-b-checkpoint { position: absolute; transform: translate(-50%, -100%); min-width: 32px; min-height: 30px; padding: 7px; border: 0; background: none; color: var(--hub-muted); font: 11px/1 var(--font-mono); cursor: pointer; }
+#hub[data-variant='b'] .hub-b-checkpoint.is-hovered, #hub[data-variant='b'] .hub-b-checkpoint.is-selected { color: var(--hub-accent); }
+#hub[data-variant='b'] .hub-b-checkpoint[hidden], #hub[data-variant='b'] .hub-b-detail[hidden], #hub[data-variant='b'] .hub-b-detail__link[hidden] { display: none; }
+#hub[data-variant='b'] .hub-b-detail { position: absolute; max-width: 225px; padding: 12px 16px; border-left: 1px solid var(--hub-hair); background: color-mix(in srgb, var(--hub-field) 92%, transparent); font: 15px/1.4 var(--font-ui); }
+#hub[data-variant='b'] .hub-b-detail__name { font-weight: 500; }
+#hub[data-variant='b'] .hub-b-detail__model { color: var(--hub-muted); }
+#hub[data-variant='b'] .hub-b-detail__status { color: var(--hub-muted); font-size: 12px; }
+#hub[data-variant='b'] .hub-b-detail__link { display: block; border: 0; border-bottom: 1px solid var(--hub-hair); padding: 0 0 3px; margin-top: 10px; background: none; color: var(--hub-ink); font: 13px var(--font-ui); cursor: pointer; }
+#hub[data-variant='b'] button:focus-visible, #hub[data-variant='b'] .hub-mark:focus-visible { outline: 2px solid var(--hub-accent); outline-offset: 4px; }
+#hub[data-variant='b'][data-hub-state='listening'] .hub-start-wrap, #hub[data-variant='b'][data-hub-state='cars'] .hub-start-wrap { pointer-events: none; }
+#hub[data-variant='b'] #hub-listening { background: transparent; }
+#hub[data-variant='b'] #hub-listening .hub-player[data-variant='b'] { --player-shadow: calc(var(--hub-light-x) * 5) calc(var(--hub-light-y) * 5) 30px color-mix(in srgb, var(--hub-ink) 18%, transparent); }
+@media (prefers-reduced-motion: reduce) { #hub[data-variant='b'] .hub-b-letter { transform: none !important; } }

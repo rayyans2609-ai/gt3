@@ -346,7 +346,7 @@
   cursor: pointer;
   transition: color 180ms var(--ease), background-color 180ms var(--ease), transform 160ms var(--ease);
 }
-.hub-player__control svg { grid-area: 1 / 1; width: 18px; height: 18px; transition: opacity 180ms var(--ease), transform 220ms var(--hub-out); }
+.hub-player__control svg { grid-area: 1 / 1; width: 18px; height: 18px; transition: opacity 250ms ease-in-out, transform 250ms ease-in-out, filter 250ms ease-in-out; }
 .hub-player__control:hover { background: var(--hub-faint); }
 .hub-player__control:active { transform: scale(.92); }
 .hub-player__control:focus-visible { outline: 2px solid var(--hub-accent); outline-offset: 1px; }
@@ -354,9 +354,9 @@
 .hub-player__play svg { width: 17px; height: 17px; }
 /* Two real glyph states inside one control (play/pause, plus/close). */
 .hub-player__play svg:last-child,
-.hub-player__list-toggle svg:last-child { opacity: 0; transform: scale(.6) rotate(-45deg); }
+.hub-player__list-toggle svg:last-child { opacity: 0; transform: scale(.6) rotate(-45deg); filter: blur(2px); }
 .hub-player__play[data-state='playing'] svg:first-child,
-.hub-player__list-toggle[aria-expanded='true'] svg:first-child { opacity: 0; transform: scale(.6) rotate(45deg); }
+.hub-player__list-toggle[aria-expanded='true'] svg:first-child { opacity: 0; transform: scale(.6) rotate(45deg); filter: blur(2px); }
 .hub-player__play[data-state='playing'] svg:last-child,
 .hub-player__list-toggle[aria-expanded='true'] svg:last-child { opacity: 1; transform: none; }
 .hub-player__mute::after {
@@ -418,22 +418,24 @@
 
 /* ---- reveal: everything is born from the line (Hub at rest) ------------------------------- */
 
-#hub.is-revealed .hub-line { transform: none; transition: transform 1100ms var(--hub-out), background-color 240ms var(--ease); }
-#hub.is-revealed .hub-start__word { transform: none; transition: transform 1050ms var(--hub-out) 140ms, color 600ms var(--ease); }
-#hub.is-revealed .hub-strip { clip-path: inset(0); transition: clip-path 900ms var(--hub-out) 380ms; }
-#hub.is-revealed .hub-player__art { clip-path: inset(0); transition: clip-path 1050ms var(--hub-out) 260ms; }
-#hub.is-revealed .hub-mark { opacity: 1; transition: opacity 900ms var(--ease) 600ms; }
-#hub.is-revealed .hub-status { opacity: 1; transition: opacity 600ms var(--ease) 620ms; }
+#hub.is-revealed .hub-line { transform: none; transition: transform 900ms var(--hub-out), background-color 240ms var(--ease); }
+#hub.is-revealed .hub-start__word { transform: none; transition: transform 850ms var(--hub-out) 120ms, color 600ms var(--ease); }
+/* After the reveal, START RACE answers the pointer directly: no reveal delay on hover-out. */
+#hub.is-settled .hub-start__word { transition: transform 380ms var(--hub-out), color 600ms var(--ease); }
+#hub.is-revealed .hub-strip { clip-path: inset(0); transition: clip-path 700ms var(--hub-out) 300ms; }
+#hub.is-revealed .hub-player__art { clip-path: inset(0); transition: clip-path 850ms var(--hub-out) 200ms; }
+#hub.is-revealed .hub-mark { opacity: 1; transition: opacity 600ms var(--ease) 460ms; }
+#hub.is-revealed .hub-status { opacity: 1; transition: opacity 500ms var(--ease) 460ms; }
 #hub.is-revealed .hub-cars,
 #hub.is-revealed .hub-player__body { opacity: 1; transform: none; }
-#hub.is-revealed .hub-cars { transition: opacity 700ms var(--ease) 560ms, transform 900ms var(--hub-out) 560ms; }
-#hub.is-revealed .hub-player__body { transition: opacity 700ms var(--ease) 480ms, transform 900ms var(--hub-out) 480ms; }
+#hub.is-revealed .hub-cars { transition: opacity 500ms var(--ease) 420ms, transform 640ms var(--hub-out) 420ms; }
+#hub.is-revealed .hub-player__body { transition: opacity 500ms var(--ease) 360ms, transform 640ms var(--hub-out) 360ms; }
 
 /* START RACE leans forward on intent: the selective oblique of SPEC §12, nothing louder. */
 #hub.is-revealed .hub-start:not(:disabled):hover .hub-start__word,
 #hub.is-revealed .hub-start:not(:disabled):focus-visible .hub-start__word {
   transform: skewX(-8deg);
-  transition: transform 420ms var(--hub-out), color 600ms var(--ease);
+  transition: transform 240ms var(--hub-out), color 600ms var(--ease);
 }
 #hub.is-revealed:has(.hub-start:not(:disabled):hover) .hub-line,
 #hub.is-launching .hub-line { background: var(--hub-accent); }
@@ -443,7 +445,8 @@
 
 /* ---- launch: START RACE commits, the rest steps back, the field parts --------------------- */
 
-#hub.is-launching .hub-start__word { transform: skewX(-11deg) translateX(0.04em); transition: transform 300ms var(--hub-out); }
+#hub.is-launching .hub-start__word,
+#hub.is-launching.is-revealed .hub-start:not(:disabled):hover .hub-start__word { transform: skewX(-11deg) translateX(0.04em); transition: transform 300ms var(--hub-out); }
 #hub.is-launching .hub-mark,
 #hub.is-launching .hub-status,
 #hub.is-launching .hub-cars,

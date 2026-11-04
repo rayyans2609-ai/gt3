@@ -30,6 +30,7 @@ const RECEDE_MS = 300;
 const OPEN_MS = 940;
 const CLOSE_MS = 760;
 const FADE_MS = 520;
+const SETTLE_MS = 1100; // reveal length; after it, hover timings apply (hub.css is-settled)
 
 let root = null;
 let shutterTop;
@@ -48,6 +49,7 @@ let interactive = null;
 let rosterOpen = false;
 let lastReadiness = '';
 let timers = [];
+let settleTimer = 0;
 const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)');
 
 function el(tag, className, text) {
@@ -240,8 +242,12 @@ export function setHubPresence(value, canInteract) {
     root.inert = !canInteract;
     root.classList.toggle('is-interactive', canInteract);
     root.classList.toggle('is-revealed', canInteract);
-    if (canInteract) document.documentElement.classList.remove('is-hub-covering');
-    else {
+    root.classList.remove('is-settled');
+    window.clearTimeout(settleTimer);
+    if (canInteract) {
+      document.documentElement.classList.remove('is-hub-covering');
+      settleTimer = window.setTimeout(() => root.classList.add('is-settled'), SETTLE_MS);
+    } else {
       setRoster(false);
       resetHubPlayer();
     }
@@ -279,7 +285,8 @@ export function leaveHub() {
     clearTimers();
     interactive = false;
     root.inert = true;
-    root.classList.remove('is-interactive');
+    root.classList.remove('is-interactive', 'is-settled');
+    window.clearTimeout(settleTimer);
     setRoster(false);
     resetHubPlayer();
     const html = document.documentElement;

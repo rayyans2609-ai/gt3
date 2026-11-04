@@ -1,0 +1,64 @@
+/* Precision Plan: all rules deliberately stay inside the A presenter boundary. */
+#hub[data-variant='a'] { --hub-marker: #111416; --hub-a-line: color-mix(in srgb, var(--hub-ink) 85%, transparent); --hub-a-hair: color-mix(in srgb, var(--hub-ink) 15%, transparent); }
+:root[data-theme='night'] #hub[data-variant='a'] { --hub-marker: #d8b94f; --hub-a-hair: color-mix(in srgb, var(--hub-ink) 18%, transparent); }
+#hub[data-variant='a'] .hub-field { transition: background-color 520ms var(--ease), opacity 500ms var(--ease); }
+#hub[data-variant='a'] .precision-plan__svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
+#hub[data-variant='a'] .precision-plan__edge, #hub[data-variant='a'] .precision-plan__lap, #hub[data-variant='a'] .precision-plan__checker, #hub[data-variant='a'] .precision-plan__grid, #hub[data-variant='a'] .precision-plan__tick, #hub[data-variant='a'] .precision-plan__start-leader { fill: none; vector-effect: non-scaling-stroke; stroke-linecap: square; stroke-linejoin: miter; }
+#hub[data-variant='a'] .precision-plan__edge { stroke: var(--hub-a-line); stroke-width: 1px; }
+#hub[data-variant='a'] .precision-plan__lap { stroke: var(--hub-accent); stroke-width: 1.5px; opacity: 0; }
+:root[data-theme='night'] #hub[data-variant='a'] .precision-plan__lap { stroke: color-mix(in srgb, var(--hub-ink) 70%, transparent); }
+#hub[data-variant='a'] .precision-plan__checker { stroke: var(--hub-ink); stroke-width: 6px; stroke-dasharray: 3px 3px; }
+#hub[data-variant='a'] .precision-plan__grid { stroke: var(--hub-a-hair); stroke-width: 1px; }
+#hub[data-variant='a'] .precision-plan__tick { stroke: var(--hub-a-line); stroke-width: 1px; opacity: 0; transition: opacity 180ms var(--ease), stroke 160ms var(--ease), stroke-width 160ms var(--ease); }
+#hub[data-variant='a'] .precision-plan__tick.is-drawn { opacity: 1; }
+#hub[data-variant='a'] .precision-plan__tick.is-found { stroke: var(--hub-accent); stroke-width: 1.4px; }
+#hub[data-variant='a'] .precision-plan__number { fill: var(--hub-muted); font: 10px var(--font-mono); letter-spacing: .02em; }
+#hub[data-variant='a'] .precision-plan__marker { fill: var(--hub-marker); stroke: var(--hub-field); stroke-width: 2px; paint-order: stroke; }
+:root[data-theme='night'] #hub[data-variant='a'] .precision-plan__marker { stroke: none; }
+#hub[data-variant='a'] .precision-plan__start-leader { stroke: var(--hub-accent); stroke-width: 1px; opacity: 0; }
+#hub[data-variant='a'] .hub-start-wrap { z-index: 4; margin: 0; }
+#hub[data-variant='a'] .hub-start { font-size: clamp(64px, 5vw, 72px); line-height: .9; letter-spacing: -.02em; text-transform: uppercase; }
+#hub[data-variant='a'] .hub-status { margin: 11px 0 0 3px; font: 13px/1.2 var(--font-ui); letter-spacing: 0; }
+#hub[data-variant='a'] .precision-start__char { display: inline-block; will-change: transform, font-style; }
+#hub[data-variant='a'] .precision-plan__overlay { position: absolute; inset: 0; z-index: 5; pointer-events: none; }
+#hub[data-variant='a'] .precision-checkpoint { position: absolute; display: grid; width: 44px; height: 44px; place-items: center; padding: 0; border: 0; background: transparent; color: transparent; cursor: crosshair; pointer-events: auto; }
+#hub[data-variant='a'] .precision-checkpoint::after { width: 1px; height: 22px; background: var(--hub-a-line); content: ''; transition: height 140ms var(--ease), background-color 160ms var(--ease); }
+#hub[data-variant='a'] .precision-checkpoint:hover::after, #hub[data-variant='a'] .precision-checkpoint.is-hovered::after, #hub[data-variant='a'] .precision-checkpoint.is-selected::after { height: 40px; background: var(--hub-accent); }
+#hub[data-variant='a'] .precision-checkpoint:focus-visible { outline: 2px solid var(--hub-accent); outline-offset: -3px; }
+#hub[data-variant='a'] .precision-callout { position: absolute; width: max-content; max-width: 220px; pointer-events: auto; color: var(--hub-ink); }
+#hub[data-variant='a'] .precision-callout__name { display: flex; gap: 9px; margin: 0; font: 500 15px/1.15 var(--font-ui); }
+#hub[data-variant='a'] .precision-callout__index { color: var(--hub-muted); font: 10px/1.4 var(--font-mono); }
+#hub[data-variant='a'] .precision-callout__detail, #hub[data-variant='a'] .precision-callout__model { margin: 3px 0 0; color: var(--hub-muted); font: 11px/1.2 var(--font-ui); }
+#hub[data-variant='a'] .precision-callout__showcase { margin: 8px 0 0; padding: 0 0 2px; border: 0; border-bottom: 1px solid var(--hub-accent); background: none; color: var(--hub-ink); font: 13px var(--font-ui); cursor: pointer; }
+#hub[data-variant='a'] .precision-callout__showcase:focus-visible { outline: 2px solid var(--hub-accent); outline-offset: 3px; }
+#hub[data-variant='a'] .precision-title { position: absolute; right: clamp(48px, 4.4vw, 72px); bottom: clamp(48px, 4.4vw, 72px); z-index: 8; display: grid; grid-template-columns: 70px 78px 116px 82px minmax(232px, 310px); height: 56px; border-top: 1px solid var(--hub-a-hair); border-bottom: 1px solid var(--hub-a-hair); }
+#hub[data-variant='a'] .precision-title__cell { position: relative; display: flex; align-items: center; min-width: 0; border-left: 1px solid var(--hub-a-hair); }
+#hub[data-variant='a'] .precision-title__cell:last-of-type { border-right: 1px solid var(--hub-a-hair); }
+#hub[data-variant='a'] .precision-title .hub-mark { position: static; font-size: 21px; }
+#hub[data-variant='a'] .precision-title .hub-cars { position: static; }
+#hub[data-variant='a'] .precision-title .hub-cars__toggle { padding: 0 16px; font: 500 15px var(--font-ui); }
+#hub[data-variant='a'] .precision-title .hub-cars__ticks { display: none; }
+#hub[data-variant='a'] .precision-title__identity { padding-left: 16px; }
+#hub[data-variant='a'] .precision-title__showcase { padding: 0 16px; background: transparent; color: var(--hub-ink); font: 15px var(--font-ui); cursor: pointer; }
+#hub[data-variant='a'] .precision-title__showcase:focus-visible { outline: 2px solid var(--hub-accent); outline-offset: -3px; }
+#hub[data-variant='a'] .precision-theme { justify-content: center; gap: 3px; }
+#hub[data-variant='a'] .precision-theme__option { position: relative; z-index: 1; display: grid; width: 26px; height: 28px; place-items: center; color: var(--hub-ink); font-size: 15px; cursor: pointer; }
+#hub[data-variant='a'] .precision-theme__option input { position: absolute; opacity: 0; }
+#hub[data-variant='a'] .precision-theme__option:has(input:focus-visible) { outline: 2px solid var(--hub-accent); outline-offset: 1px; }
+#hub[data-variant='a'] .precision-theme__thumb { position: absolute; left: 15px; width: 25px; height: 28px; border-radius: 2px; background: var(--hub-ink); mix-blend-mode: difference; transition: transform 200ms var(--ease); }
+:root[data-theme='night'] #hub[data-variant='a'] .precision-theme__thumb { transform: translateX(29px); }
+#hub[data-variant='a'] .precision-title__player { padding: 0 12px; }
+#hub[data-variant='a'] .precision-title__player .hub-player-slot { position: static; width: 100%; }
+#hub[data-variant='a'] .precision-title__player .hub-player { width: 100%; height: 54px; grid-template-columns: 38px 1fr; grid-template-rows: 25px 24px; grid-template-areas: 'cover meta' 'cover transport'; column-gap: 9px; }
+#hub[data-variant='a'] .precision-title__player .hub-player__cover { width: 38px; height: 38px; }
+#hub[data-variant='a'] .precision-title__player .hub-player__seek, #hub[data-variant='a'] .precision-title__player .hub-player__levels { display: none; }
+#hub[data-variant='a'] .precision-title__player .hub-player__label { font-size: 13px; }
+#hub[data-variant='a'] .precision-title__player .hub-player__transport { gap: 0; margin: 0; transform: scale(.78); transform-origin: left center; }
+#hub[data-variant='a'] .precision-showcase-status { position: absolute; right: 0; bottom: 66px; margin: 0; padding: 6px 0; background: var(--hub-field); color: var(--hub-muted); font: 12px var(--font-ui); white-space: nowrap; }
+#hub[data-variant='a'] .precision-theme-sweep { position: absolute; inset: 0 auto auto 0; z-index: 20; width: 100%; height: 1px; background: var(--hub-accent); pointer-events: none; transform: scaleX(0); }
+#hub[data-variant='a'].precision-plan--cars .precision-title { grid-template-columns: 70px 78px 116px 82px minmax(220px, 280px); }
+#hub[data-variant='a'].precision-plan--cars .precision-plan__number { opacity: 1; }
+#hub[data-variant='a'].precision-plan--listening .precision-plan__svg { transform: translate(calc(50vw - 172px), 16px) scale(.26); transform-origin: center top; transition: transform 620ms var(--ease); }
+#hub[data-variant='a'].precision-plan--listening .precision-title__identity, #hub[data-variant='a'].precision-plan--listening .precision-title__cars, #hub[data-variant='a'].precision-plan--listening .precision-title__showcase, #hub[data-variant='a'].precision-plan--listening .precision-theme { opacity: .35; }
+@media (max-width: 1320px) { #hub[data-variant='a'] .precision-title { right: 48px; bottom: 38px; grid-template-columns: 64px 70px 106px 76px 244px; } }
+@media (prefers-reduced-motion: reduce) { #hub[data-variant='a'] .precision-plan__svg { transition: none; } }

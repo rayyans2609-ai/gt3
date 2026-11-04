@@ -38,8 +38,10 @@ const voiceEndedListeners = new Set();
 let context = null;
 let contextUnavailable = false;
 let masterGain = null;
+let masterLevelGain = null;
 let musicBus = null;
 let musicMuteGain = null;
+let musicLevelGain = null;
 let musicElement = null;
 let musicRequestId = 0;
 let lastPositionWriteAt = -Infinity;
@@ -68,6 +70,10 @@ function setInitialGain(node, value) {
   node.gain.setValueAtTime(value, context.currentTime);
 }
 
+function volumeGain(value) {
+  return value * value;
+}
+
 function ensureGraph() {
   if (context) return true;
   if (contextUnavailable) return false;
@@ -86,12 +92,14 @@ function ensureGraph() {
       if (context.state !== 'running') set('audioReady', false);
     });
     masterGain = context.createGain();
+    masterLevelGain = context.createGain();
     musicBus = context.createGain();
     sfxBus = context.createGain();
     engineBus = context.createGain();
     voiceBus = context.createGain();
 
     setInitialGain(masterGain, state.masterMuted ? 0 : 1);
+    setInitialGain(masterLevelGain, volumeGain(state.masterVolume));
     setInitialGain(musicBus, MUSIC_BASE_GAIN);
     setInitialGain(sfxBus, 1);
     setInitialGain(engineBus, 1);
@@ -101,11 +109,13 @@ function ensureGraph() {
     sfxBus.connect(masterGain);
     engineBus.connect(masterGain);
     voiceBus.connect(masterGain);
-    masterGain.connect(context.destination);
+    masterGain.connect(masterLevelGain);
+    masterLevelGain.connect(context.destination);
     return true;
   } catch (error) {
     context = null;
     masterGain = null;
+    masterLevelGain = null;
     musicBus = null;
     sfxBus = null;
     engineBus = null;
@@ -411,8 +421,11 @@ function loadSelectedTrack() {
 function ensureMusicElement() {
   if (musicElement) return;
   musicMuteGain = context.createGain();
+  musicLevelGain = context.createGain();
   setInitialGain(musicMuteGain, state.musicMuted ? 0 : 1);
-  musicMuteGain.connect(musicBus);
+  setInitialGain(musicLevelGain, volumeGain(state.musicVolume));
+  musicMuteGain.connect(musicLevelGain);
+  musicLevelGain.connect(musicBus);
   const element = new Audio();
   element.preload = 'auto';
   context.createMediaElementSource(element).connect(musicMuteGain);
@@ -706,12 +719,22 @@ export function setMasterMuted(muted) {
   set('masterMuted', Boolean(muted));
 }
 
+export function setMasterVolume(value) {
+  if (!Number.isFinite(value)) return;
+  set('masterVolume', Math.min(1, Math.max(0, value)));
+}
+
 export function isMuted() {
   return state.masterMuted;
 }
 
 export function setMusicMuted(muted) {
   set('musicMuted', Boolean(muted));
+}
+
+export function setMusicVolume(value) {
+  if (!Number.isFinite(value)) return;
+  set('musicVolume', Math.min(1, Math.max(0, value)));
 }
 
 export function playMusic() {
@@ -776,6 +799,8 @@ export function getMusicStatus() {
 
 subscribe('masterMuted', (muted) => targetGain(masterGain, muted ? 0 : 1, 0.02));
 subscribe('musicMuted', (muted) => targetGain(musicMuteGain, muted ? 0 : 1, 0.02));
+subscribe('masterVolume', (volume) => targetGain(masterLevelGain, volumeGain(volume), 0.03));
+subscribe('musicVolume', (volume) => targetGain(musicLevelGain, volumeGain(volume), 0.03));
 subscribe('experience', () => {
   if (inTour()) {
     if (state.audioReady) startRaceSources();
@@ -788,8 +813,10 @@ if (typeof window !== 'undefined') {
   window.__gt3audio = Object.freeze({
     gains: () => ({
       master: masterGain?.gain.value ?? null,
+      masterLevel: masterLevelGain?.gain.value ?? null,
       music: musicBus?.gain.value ?? null,
       musicMute: musicMuteGain?.gain.value ?? null,
+      musicLevel: musicLevelGain?.gain.value ?? null,
     }),
   });
 }

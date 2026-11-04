@@ -116,7 +116,7 @@ export function initHub({ onStartRace, camera, requestShowcase: showcase, setPos
   gsap.set(chrome, { autoAlpha: 0, y: 10 });
   carsToggle.addEventListener('click', event => {
     setUIState(uiState === 'cars' ? 'race' : 'cars');
-    if (uiState === 'cars' && event.detail === 0) checkpointElements.get(selected ?? 0)?.focus();
+    if (uiState === 'cars' && event.detail === 0) checkpointElements.get(selected ?? [...checkpointElements.keys()][0])?.focus();
   });
   startButton.addEventListener('click', () => { if (ready && interactive) onStart?.(); });
   for (const event of ['pointerenter', 'focus']) startButton.addEventListener(event, () => { if (revealed) presenter.hoverStart(true); });
@@ -127,7 +127,9 @@ export function initHub({ onStartRace, camera, requestShowcase: showcase, setPos
       if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); selectCheckpoint(checkpoint); }
       if (event.key === 'ArrowRight' || event.key === 'ArrowLeft') {
         event.preventDefault();
-        checkpointElements.get((checkpoint + (event.key === 'ArrowRight' ? 1 : CARS.length - 1)) % CARS.length)?.focus();
+        const keys = [...checkpointElements.keys()];
+        const step = event.key === 'ArrowRight' ? 1 : -1;
+        checkpointElements.get(keys[(keys.indexOf(checkpoint) + step + keys.length) % keys.length])?.focus();
       }
     }
     if (event.key === 'Escape' && uiState === 'listening') {
@@ -161,7 +163,8 @@ export function initHub({ onStartRace, camera, requestShowcase: showcase, setPos
         markerScreen: { x: marker.x ?? 0, y: marker.y ?? 0 },
         checkpointsScreen: [...checkpointElements].map(([car, node]) => {
           const box = node.getBoundingClientRect(); return { car, x: box.x, y: box.y };
-        }), drawsLastFrame: draw.frames ?? 0, renderedFramesLastSecond: draw.frames ?? 0 };
+        }), drawsLastFrame: draw.drawsLastFrame ?? debug.drawsLastFrame ?? 0,
+        renderedFramesLastSecond: draw.renderedFramesLastSecond ?? debug.renderedFramesLastSecond ?? 0 };
     },
     get lastDive() { return debug.lastDive; },
     get pose() { return presenter.debug?.pose; },
@@ -211,7 +214,7 @@ export function updateHub(dt) {
   if (!root || root.hidden || presence <= 0) return;
   updateHubPlayer(); presenter.update(dt);
 }
-export function renderHub() { return presenter?.render?.() ?? false; }
+export function renderHub(force = false) { return presenter?.render?.(force) ?? false; }
 export function resetHub(value, canInteract) {
   edgeTl?.kill(); presenter.reset?.(); resetUI();
   gsap.killTweensOf(root); root.style.transition = '';

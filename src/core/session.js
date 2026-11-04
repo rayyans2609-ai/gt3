@@ -11,6 +11,7 @@ const VALID_SESSION_VALUES = Object.freeze({
   masterVolume: { has: (value) => Number.isFinite(value) && value >= 0 && value <= 1 },
   musicMuted: { has: (value) => typeof value === 'boolean' },
   musicVolume: { has: (value) => Number.isFinite(value) && value >= 0 && value <= 1 },
+  engineVolume: { has: (value) => Number.isFinite(value) && value >= 0 && value <= 1 },
   trackIndex: { has: (value) => Number.isInteger(value) && value >= 0 && value < 6 },
   trackPosition: { has: (value) => Number.isFinite(value) && value >= 0 },
   playIntent: { has: (value) => typeof value === 'boolean' },

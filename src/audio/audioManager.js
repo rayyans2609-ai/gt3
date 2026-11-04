@@ -2,10 +2,6 @@ import { set, state, subscribe } from '../core/state.js';
 import { playlist } from '../data/playlist.js';
 
 const AUDIO_ROOT = '/audios/';
-const MUSIC_BASE_GAIN = 0.42;
-const MUSIC_MONTAGE_GAIN = MUSIC_BASE_GAIN * 1.15;
-const MUSIC_VOICE_GAIN = MUSIC_BASE_GAIN * 0.35;
-const IDLE_GAIN = 0.15;
 
 const RACE_FILES = Object.freeze({
   // Checkpoint crossing one-shot (SPEC §18).
@@ -14,6 +10,32 @@ const RACE_FILES = Object.freeze({
   engineStart: 'engine_start.mp3',
   finish: 'finish.mp3',
   idle: 'idle.mp3',
+});
+
+// One place for the mix (Phase 5, provisional; the owner judges by ear). Levels were set from
+// measured asset loudness (gated RMS, 2026-11-04): playlist ≈ -9.8 dBFS → ≈ -17.3 dBFS after
+// musicBase; per-sound keys match RACE_FILES, so swapping a sound = its filename + its level.
+const MIX = Object.freeze({
+  // Playlist bus level under everything else (unchanged).
+  musicBase: 0.42,
+  // Playlist lift while a montage plays (unchanged).
+  musicMontageMultiplier: 1.15,
+  // Playlist duck under Showcase narration (unchanged).
+  musicVoiceMultiplier: 0.35,
+  // Crossing one-shot: was ≈ 10 dB under the music and easily lost; now level with it (+8.3 dB).
+  checkpointCross: 2.6,
+  // Proximity loop at full proximity: ≈ 8 dB under the music (unchanged).
+  coinApproach: 0.5,
+  // Engine start: was ≈ 2 dB over the music; now ≈ 2 dB under it (-4.4 dB).
+  engineStart: 0.6,
+  // Engine-start fade into the idle loop (unchanged).
+  engineStartFadeSeconds: 3,
+  // Finish one-shot: brought level with the checkpoint (+1.6 dB).
+  finish: 1.2,
+  // Engine idle loop: was ≈ 13 dB under the music; now ≈ 7.5 dB under it (+4.8 dB).
+  idle: 0.26,
+  // Engine duck while a montage plays (unchanged).
+  engineMontageMultiplier: 0.35,
 });
 
 const VOICE_FILES = Object.freeze([
@@ -47,6 +69,7 @@ let musicRequestId = 0;
 let lastPositionWriteAt = -Infinity;
 let sfxBus = null;
 let engineBus = null;
+let engineLevelGain = null;
 let voiceBus = null;
 
 let preloadPromise = null;
@@ -96,18 +119,21 @@ function ensureGraph() {
     musicBus = context.createGain();
     sfxBus = context.createGain();
     engineBus = context.createGain();
+    engineLevelGain = context.createGain();
     voiceBus = context.createGain();
 
     setInitialGain(masterGain, state.masterMuted ? 0 : 1);
     setInitialGain(masterLevelGain, volumeGain(state.masterVolume));
-    setInitialGain(musicBus, MUSIC_BASE_GAIN);
+    setInitialGain(musicBus, MIX.musicBase);
     setInitialGain(sfxBus, 1);
     setInitialGain(engineBus, 1);
+    setInitialGain(engineLevelGain, volumeGain(state.engineVolume));
     setInitialGain(voiceBus, 1);
 
     musicBus.connect(masterGain);
     sfxBus.connect(masterGain);
-    engineBus.connect(masterGain);
+    engineBus.connect(engineLevelGain);
+    engineLevelGain.connect(masterGain);
     voiceBus.connect(masterGain);
     masterGain.connect(masterLevelGain);
     masterLevelGain.connect(context.destination);
@@ -119,6 +145,7 @@ function ensureGraph() {
     musicBus = null;
     sfxBus = null;
     engineBus = null;
+    engineLevelGain = null;
     voiceBus = null;
     contextUnavailable = true;
     console.debug('[audio] Web Audio is unavailable; continuing silently.', error);
@@ -211,22 +238,28 @@ function makeLoop(buffer, destination) {
   return source;
 }
 
-function playOneShot(buffer, destination) {
+function playOneShot(buffer, destination, gainValue = 1) {
   if (!raceStarted || !context || !buffer || !destination || context.state !== 'running') return;
   let source;
+  let gain;
   try {
+    gain = context.createGain();
+    setInitialGain(gain, gainValue);
+    gain.connect(destination);
     source = context.createBufferSource();
     source.buffer = buffer;
-    source.connect(destination);
+    source.connect(gain);
     raceOneShots.add(source);
     source.addEventListener('ended', () => {
       raceOneShots.delete(source);
       source.disconnect();
+      gain.disconnect();
     }, { once: true });
     source.start();
   } catch (error) {
     raceOneShots.delete(source);
     source?.disconnect();
+    gain?.disconnect();
     console.debug('[audio] Could not play a sound.', error);
   }
 }
@@ -284,7 +317,7 @@ function startCoinApproachLoop() {
       source.disconnect();
       gain.disconnect();
     }, { once: true });
-    targetGain(gain, coinProximity * 0.5);
+    targetGain(gain, coinProximity * MIX.coinApproach);
   } catch (error) {
     stopCoinApproachLoop();
     console.debug('[audio] Could not start the coin approach loop.', error);
@@ -299,20 +332,20 @@ function startRaceSources() {
   if (raceBuffers.engineStart) {
     try {
       const startGain = context.createGain();
-      setInitialGain(startGain, 1);
+      setInitialGain(startGain, MIX.engineStart);
       startGain.connect(engineBus);
       const source = context.createBufferSource();
       engineStartSource = source;
       source.buffer = raceBuffers.engineStart;
       source.connect(startGain);
-      startGain.gain.linearRampToValueAtTime(0, now + 3);
+      startGain.gain.linearRampToValueAtTime(0, now + MIX.engineStartFadeSeconds);
       source.addEventListener('ended', () => {
         if (engineStartSource === source) engineStartSource = null;
         source.disconnect();
         startGain.disconnect();
       }, { once: true });
       source.start(now);
-      source.stop(now + 3.05);
+      source.stop(now + MIX.engineStartFadeSeconds + 0.05);
     } catch (error) {
       engineStartSource = null;
       console.debug('[audio] The engine-start sound could not start.', error);
@@ -330,7 +363,7 @@ function startRaceSources() {
         source.disconnect();
         idleGain.disconnect();
       }, { once: true });
-      idleGain.gain.linearRampToValueAtTime(IDLE_GAIN, now + 3);
+      idleGain.gain.linearRampToValueAtTime(MIX.idle, now + MIX.engineStartFadeSeconds);
     } catch (error) {
       idleSource = null;
       console.debug('[audio] The idle loop could not start.', error);
@@ -488,7 +521,7 @@ export function playCheckpointCross() {
   }
   stopCoinApproachLoop();
   coinProximity = 0;
-  playOneShot(raceBuffers.checkpointCross, sfxBus);
+  playOneShot(raceBuffers.checkpointCross, sfxBus, MIX.checkpointCross);
 }
 
 export function setCoinApproach(proximity) {
@@ -502,18 +535,22 @@ export function setCoinApproach(proximity) {
   }
 
   startCoinApproachLoop();
-  if (coinApproachGain) targetGain(coinApproachGain, coinProximity * 0.5);
+  if (coinApproachGain) targetGain(coinApproachGain, coinProximity * MIX.coinApproach);
 }
 
 export function playFinish() {
   stopCoinApproachLoop();
   coinProximity = 0;
-  playOneShot(raceBuffers.finish, sfxBus);
+  playOneShot(raceBuffers.finish, sfxBus, MIX.finish);
 }
 
 function desiredMusicGain() {
-  if (activeVoice && !activeVoice.paused && !activeVoice.ended) return MUSIC_VOICE_GAIN;
-  return montageActive ? MUSIC_MONTAGE_GAIN : MUSIC_BASE_GAIN;
+  if (activeVoice && !activeVoice.paused && !activeVoice.ended) {
+    return MIX.musicBase * MIX.musicVoiceMultiplier;
+  }
+  return montageActive
+    ? MIX.musicBase * MIX.musicMontageMultiplier
+    : MIX.musicBase;
 }
 
 export function onMontageStart(carIndex) {
@@ -521,7 +558,7 @@ export function onMontageStart(carIndex) {
   if (!inTour()) return;
   montageActive = true;
   rampGain(musicBus, desiredMusicGain(), 1.2);
-  rampGain(engineBus, 0.35, 1.2);
+  rampGain(engineBus, MIX.engineMontageMultiplier, 1.2);
 }
 
 export function onMontageEnd() {
@@ -647,7 +684,7 @@ export async function playVoice(carIndex) {
   try {
     entry.element.currentTime = 0;
     const result = entry.element.play();
-    rampGain(musicBus, MUSIC_VOICE_GAIN, 0.35);
+    rampGain(musicBus, MIX.musicBase * MIX.musicVoiceMultiplier, 0.35);
     try {
       await Promise.resolve(result);
       return activeVoice === entry.element;
@@ -681,7 +718,7 @@ export function resumeVoice() {
     const element = activeVoice;
     const index = activeVoiceIndex;
     const result = element.play();
-    rampGain(musicBus, MUSIC_VOICE_GAIN, 0.35);
+    rampGain(musicBus, MIX.musicBase * MIX.musicVoiceMultiplier, 0.35);
     return Promise.resolve(result).then(() => true).catch((error) => {
       if (activeVoice === element) rampGain(musicBus, desiredMusicGain(), 0.35);
       if (error?.name === 'NotSupportedError' || element.error) {
@@ -735,6 +772,11 @@ export function setMusicMuted(muted) {
 export function setMusicVolume(value) {
   if (!Number.isFinite(value)) return;
   set('musicVolume', Math.min(1, Math.max(0, value)));
+}
+
+export function setEngineVolume(value) {
+  if (!Number.isFinite(value)) return;
+  set('engineVolume', Math.min(1, Math.max(0, value)));
 }
 
 export function playMusic() {
@@ -801,6 +843,7 @@ subscribe('masterMuted', (muted) => targetGain(masterGain, muted ? 0 : 1, 0.02))
 subscribe('musicMuted', (muted) => targetGain(musicMuteGain, muted ? 0 : 1, 0.02));
 subscribe('masterVolume', (volume) => targetGain(masterLevelGain, volumeGain(volume), 0.03));
 subscribe('musicVolume', (volume) => targetGain(musicLevelGain, volumeGain(volume), 0.03));
+subscribe('engineVolume', (volume) => targetGain(engineLevelGain, volumeGain(volume), 0.03));
 subscribe('experience', () => {
   if (inTour()) {
     if (state.audioReady) startRaceSources();
@@ -817,6 +860,8 @@ if (typeof window !== 'undefined') {
       music: musicBus?.gain.value ?? null,
       musicMute: musicMuteGain?.gain.value ?? null,
       musicLevel: musicLevelGain?.gain.value ?? null,
+      engine: engineBus?.gain.value ?? null,
+      engineLevel: engineLevelGain?.gain.value ?? null,
     }),
   });
 }

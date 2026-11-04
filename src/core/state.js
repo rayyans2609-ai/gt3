@@ -19,6 +19,7 @@ export const state = {
   masterVolume: 1,
   musicMuted: false,
   musicVolume: 1,
+  engineVolume: 1,
   trackIndex: 0,
   trackPosition: 0,
   playIntent: true,

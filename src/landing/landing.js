@@ -17,6 +17,7 @@
 import * as THREE from 'three';
 import { state, subscribe } from '../core/state.js';
 import { loadFullResolutionCar, carsReady, cloneCarModel } from '../scene/cars.js';
+import { gsap, SplitText } from '../ui/motion.js';
 
 export const HERO_INDEX = 6; // McLaren 720S GT3 (roster order unchanged; SPEC §1a)
 
@@ -116,6 +117,9 @@ const themeMix = { value: 0, target: 0 }; // 0 day, 1 night
 let wordmark = null;
 let eyebrow = null;
 let cue = null;
+let wordmarkChars = [];
+let eyebrowChars = [];
+let wordmarkExit = 0;
 let lastStyle = {};
 
 // Scratch.
@@ -390,6 +394,26 @@ function write(node, key, property, value) {
   else node.style[property] = value;
 }
 
+/** SplitText supplies the letter geometry; progress remains the only animation clock. */
+function splitExitText(node, charClass) {
+  if (!node) return [];
+  const split = new SplitText(node, { type: 'chars', charsClass });
+  return split.chars.map(char => {
+    const mask = document.createElement('span');
+    mask.className = `${charClass}-mask`;
+    char.parentNode.insertBefore(mask, char);
+    mask.append(char);
+    return char;
+  });
+}
+
+function writeExit(chars, start, end, stagger, value) {
+  chars.forEach((char, index) => {
+    // gsap.set only writes this progress-derived pose; it creates no tween or independent clock.
+    gsap.set(char, { yPercent: -110 * smooth(start + index * stagger, end + index * stagger, value) });
+  });
+}
+
 // ---------------------------------------------------------------------------
 // Public API
 // ---------------------------------------------------------------------------
@@ -429,6 +453,9 @@ export function initLanding(sharedRenderer, { onHub, onLanding } = {}) {
   wordmark = document.querySelector('.landing-wordmark');
   eyebrow = document.querySelector('.landing-eyebrow');
   cue = document.querySelector('.landing-cue');
+  wordmarkChars = splitExitText(wordmark, 'landing-wordmark__char');
+  eyebrowChars = splitExitText(eyebrow, 'landing-eyebrow__char');
+  if (cue) cue.querySelector('span')?.replaceChildren('Scroll to enter');
 
   resize();
   const canvas = renderer.domElement;
@@ -513,7 +540,7 @@ function landingPose() {
     angularVelocity: Math.hypot(drag.yawVelocity, drag.pitchVelocity),
     yawVelocity: drag.yawVelocity, pitchVelocity: drag.pitchVelocity,
     dragging: drag.id !== null, progress, pitchLimit: TUNE.dragPitchLimit,
-    velocityCap: TUNE.dragMaxSpeed };
+    velocityCap: TUNE.dragMaxSpeed, wordmarkExit };
 }
 
 /** Per-frame update. Runs only while the Landing owns the screen. */
@@ -541,6 +568,7 @@ export function updateLanding(dt) {
 
   const settle = smooth(...SEG.settle, progress);
   const typeOut = smooth(...SEG.type, progress);
+  wordmarkExit = smooth(0.03, 0.20, progress);
   const push = smooth(...SEG.push, progress);
   const resolve = smooth(...SEG.resolve, progress);
   const hub = smooth(...SEG.hub, progress);
@@ -623,7 +651,10 @@ export function updateLanding(dt) {
   write(wordmark, 'wo', 'opacity', (1 - typeOut).toFixed(3));
   write(wordmark, 'wt', 'transform',
     `translate3d(${(-2.2 * typeOut).toFixed(3)}vw, ${(-1.2 * typeOut).toFixed(3)}vh, 0) scale(${(1 - 0.07 * typeOut).toFixed(4)})`);
-  write(eyebrow, 'eo', 'opacity', (1 - smooth(...SEG.type, progress * 1.25)).toFixed(3));
+  // The subtitle leads the wordmark by .02 landing progress; both poses are exact on reverse.
+  writeExit(wordmarkChars, 0.03, 0.20, 0.015, progress);
+  writeExit(eyebrowChars, 0.01, 0.18, 0.015, progress);
+  write(eyebrow, 'eo', 'opacity', (1 - smooth(0.01, 0.30, progress)).toFixed(3));
   write(cue, 'co', 'opacity', (1 - smooth(0, 0.05, progress)).toFixed(3));
 
   // Only paint is colour-matched, and only once the physical fender fills the screen.

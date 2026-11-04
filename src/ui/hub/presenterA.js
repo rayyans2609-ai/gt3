@@ -65,7 +65,7 @@ export function createPresenter() {
   const geometry = buildCircuitGeometry();
   const framing = [...geometry.left, ...geometry.right];
   let root, ctx, svg, edgeLeft, edgeRight, centreLine, checker, grid, marker, startLeader, sweep;
-  let checkpointGroup, checkpointTicks = [], checkpointNums = [], checkpointButtons = [], checkpointCallouts = [];
+  let checkpointGroup, checkpointTicks = [], checkpointNums = [], checkpointButtons = [], checkpointCallouts = [], calloutSignatures = [];
   let rest, current, viewport, progress = 0, readiness = 0, stateName = 'race', hoverStart = false;
   let found = new Set(), hovered = null, selected = null, moving = false, revealDone = false;
   let hoverTimeline, lapTimeline, edgeTimeline, titleBlock, showcaseStatus;
@@ -156,6 +156,12 @@ export function createPresenter() {
     const callout = checkpointCallouts[i];
     const carIndex = geometry.checkpoints[i].carIndex; // tick i belongs to car i + 1 (Lexus starts the Tour)
     const car = CARS[carIndex], isFound = found.has(carIndex);
+    // Hover/focus churn re-renders every callout. Replacing children while a child is the
+    // mousedown target detaches it before mouseup, which cancels the click. Only rebuild when
+    // the content actually changes so a callout action stays clickable.
+    const signature = `${isFound}:${selected === carIndex}:${carIndex}`;
+    if (calloutSignatures[i] === signature) return;
+    calloutSignatures[i] = signature;
     callout.replaceChildren();
     const heading = html('p', 'precision-callout__name', isFound ? car.displayName : '?');
     const index = html('span', 'precision-callout__index', String(carIndex).padStart(2, '0'));

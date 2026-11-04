@@ -11,6 +11,12 @@
   --surface: rgba(255, 255, 255, 0.72);
   --accent: #65521d;
   --route-done: #c58f00;
+  /* Grand Tour edge controls (Day/Night toggle, speaker, launcher, player):
+     cool steel blue instead of the brown --accent. --accent stays untouched
+     for the rest of the Tour. */
+  --control-accent: #3f68a6;
+  --control-accent-soft: color-mix(in srgb, var(--control-accent) 18%, transparent);
+  --tour-marker: #e0322b;
 }
 
 :root[data-theme="night"] {
@@ -21,4 +27,7 @@
   --surface: rgba(19, 36, 62, 0.78);
   --accent: #d8b94f;
   --route-done: #e8c34a;
+  --control-accent: #d8b94f;
+  --control-accent-soft: color-mix(in srgb, var(--control-accent) 18%, transparent);
+  --tour-marker: #ff4a3d;
 }

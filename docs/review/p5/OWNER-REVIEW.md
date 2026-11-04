@@ -58,7 +58,7 @@ Gate on the reworked Hub (`ce48cc0` + harness-only fixes `2bda009`):
 - The Plan dive re-rasterises the SVG each frame for about 1.5 s. Frame pacing during the dive is unmeasured on the Intel GPU; at rest it costs nothing.
 - The Launch direction (`?hub=launch`) was exercised by captures, not by the flow harnesses, which use the default direction.
 - `verify-preready-input` and `verify-route-persistence` were not re-run after the Hub rework. The refresh paths they cover were re-exercised by landing-flow and entry on the new code.
-- Reduced-motion paths are implemented but not harness-tested. The production preview and bundle size were not re-measured after adding GSAP plugins.
+- Reduced-motion paths are implemented but not harness-tested. The production preview was not run. The production build adds one `motion` chunk (GSAP core, Flip, SplitText, DrawSVG, CustomEase), 113 KB raw, loaded during boot.
 - Not done (needs your input or assets): a separate SFX level control (you called it secondary), engine-sound improvements and replacement SFX, and the Phase 6 Showcase that Cars will eventually open.
 
 ## Decisions for you (visual judgement or product)

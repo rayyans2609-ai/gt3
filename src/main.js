@@ -101,6 +101,7 @@ async function boot() {
   let landing = bootIntoTour ? null : await import('./landing/landing.js');
   landing?.preloadHero();
   subscribe('mode', (mode) => {
+    if (state.transition) return; // a timed edge owns experience; enterTour re-syncs after it
     if (mode === 'finish') setExperience('complete');
     else if (mode === 'race' && state.experience === 'complete') setExperience('tour');
   });
@@ -511,6 +512,7 @@ async function boot() {
       await yieldToBrowser();
       await hub.leaveHub({ progress: state.progress, project: projectRoute });
       completeTransition();
+      if (state.mode === 'finish') setExperience('complete'); // finished route restored by armTour
       if (state.mode === 'race') {
         void entrySequence.runEntry({ standingStart: state.progress === 0 });
       }
@@ -535,10 +537,15 @@ async function boot() {
    * the page scroll underneath it, at the Hub's rest point. Discoveries are untouched.
    */
   async function leaveTour() {
-    if (entering || state.experience !== 'tour' || state.transition || state.mode !== 'race') return;
+    // Home also works from the finished state ('complete' / mode 'finish'), without Replay.
+    if (entering || !['tour', 'complete'].includes(state.experience) || state.transition) return;
     entrySequence.cancelEntry();
     entering = true;
     try {
+      if (state.mode === 'finish') {
+        finishScreen.suspendFinishScreen();
+        set('mode', 'race'); // maps complete -> tour, so the timed tour -> hub edge applies
+      }
       scrollDrive.lockScroll();
       persistRouteProgress(state.progress, { flush: true });
       if (!beginTransition('hub')) { scrollDrive.unlockScroll(); return; }

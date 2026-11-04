@@ -260,7 +260,7 @@ Kill only proven owned PIDs. Re-check `ps -o lstart,command` immediately before 
 - **Classify failures** before touching product code: app / wrong checkout / harness / provider / host saturation / browser-backend difference / invalid timing comparison.
 - **Host-scoped performance:** every perf or visual result names its host profile, browser and backend. Comparisons happen only within one profile. All Phase 3 measurements are Intel UHD 617 (ANGLE/Metal) and are **not** M4 baselines.
 - **Validity ≠ availability.** Cite local evidence as `host:path (sha256)`. A receiving manager reports unreachable evidence as **VALID-UNAVAILABLE**, not missing and not failed. Portable evidence is either committed under `docs/review/` or transferred.
-- Rendering profile, host capability and manager configuration are independent. Neither host nor manager selects a visual mode automatically without a later explicit policy; either Mac may render any profile it can technically support. `?version=locked|unlocked` is future work (`SPEC.md` §31). The accepted Tour baseline remains fixed DPR1 + SMAA.
+- Rendering profile, host capability and manager configuration are independent. Neither host nor manager selects a visual mode automatically without a later explicit policy; either Mac may render any profile it can technically support. `?version=locked|unlocked` is implemented and HUMAN-ACCEPTED (2026-10-17, `SPEC.md` §31): no parameter or `locked` keeps the accepted fixed DPR1 + SMAA, `unlocked` defaults to DPR2. Its final M4 qualification is deferred and not passed. A Locked optimisation must not silently degrade Unlocked.
 
 ## 8. Cross-host Git continuity
 

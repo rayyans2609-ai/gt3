@@ -2,7 +2,7 @@
 
 Durable guidance for visually relevant work: Phase 5 onward and any substantial revision of an earlier phase. It says **which external techniques and tools exist for GT3, what state each is in, and when one earns its place.** It is not a checklist, a design stage or an execution policy. Product truth stays in `SPEC.md`. Who does the work and how it is verified stays in `docs/ai/model-routing.md` and `operating-contract.md`. Technical how-to stays in the notes linked below.
 
-Status reconciled 2026-11-04 against the `p5-hub` branch and the Intel host. Re-check before relying on a row; installs are per host.
+Status reconciled 2026-11-04 against `main` (after the `p5-hub` tooling integration) and the Intel host. Re-check before relying on a row; installs are per host.
 
 ## Principle
 
@@ -16,9 +16,9 @@ Status labels: **installed** = present and wired, with a consumer or proof; **in
 
 | Capability | Status (2026-11-04) | Use it for | Details |
 |---|---|---|---|
-| **GSAP** core, **Flip**, **SplitText** | Installed dependency on `p5-hub` (`gsap ^3.15.0`); no source file imports it yet | Code-driven UI motion: choreography, state/scroll/event-driven tweens, layout transitions (Flip), text reveals (SplitText) | `ARCHITECTURE.md` "Animation authoring" (GSAP vs Theatre) |
+| **GSAP** core, **Flip**, **SplitText** | Installed dependency (`gsap ^3.15.0`); verified in a built bundle in Chrome (core tween, Flip, SplitText); no GT3 source imports it yet | Code-driven UI motion: choreography, state/scroll/event-driven tweens, layout transitions (Flip), text reveals (SplitText) | `ARCHITECTURE.md` "Animation authoring" (GSAP vs Theatre) |
 | **Theatre.js** | Installed and tested as dev-only authoring (`@theatre/studio` dev, `@theatre/core` dep); `?theatre` proof drives an off-scene probe only; no production playback | Scrubbable, hand-tuned, multi-property sequences judged by eye: camera and hero moves, light and material choreography | `ARCHITECTURE.md` "Animation authoring (Theatre.js, dev-only)" |
-| **Lucide** | Installed dependency on `p5-hub`, unused | Selected icons for new UI (Phase 5 Hub player). Per-icon imports at stroke 1.5; accepted hand-written icons stay | `docs/reference/dev-tooling.md` "Lucide" |
+| **Lucide** | Installed dependency, unused | Selected icons for new UI (Phase 5 Hub player). Per-icon imports at stroke 1.5; accepted hand-written icons stay | `docs/reference/dev-tooling.md` "Lucide" |
 | **Transitions.dev** skills (`transitions-dev`, `transitions-polish`, `transitions-ui-generation`) | Available: user-level Claude Code skills (`~/.claude/skills/` → `~/.agents/skills/`), auto-discovered by intent or invoked by name. Not used on GT3 yet. Intel host only until installed on the M4 | CSS transition recipes and motion tokens for UI states; polishing existing timing and easing. `ui-generation` ("AI is generating this") is off-brand for GT3 by default | Skill files; license allows use, not redistribution of the library |
 | **Anthropic `frontend-design`** | Available: user-scope plugin (`frontend-design@anthropic-plugin-directory`), skill `frontend-design:frontend-design`. Intel host; check the M4 | Pushing UI work away from template defaults: typography, composition, intent | Plugin skill |
 | **Penpot MCP** | Available: user-scope HTTP MCP (`penpot`, hosted `design.penpot.app`; the registration carries a personal token, so never copy it into the repo). Tools load in new sessions. Not exercised on GT3 | Optional editable workspace when structured layout or component exploration clearly pays off. Not a mandatory design stage; the running app is still the acceptance surface | — |
@@ -35,6 +35,8 @@ When a row's status changes (first real use, an install on the M4, a promotion o
 ## Phase application
 
 These are emphases, not requirements. The phase's `SPEC.md` sections govern scope.
+
+- **Phase 4 Landing revision (PROPOSED, owner review required; not scheduled).** Directions and open choices are recorded in `GT3_MASTER_CONTEXT.md` "Current phase". Relevant tools if it is opened: GSAP and Transitions.dev for motion and type polish, `frontend-design` for hierarchy, existing-renderer shader work for any material experiment (not Metal FX or a second pipeline).
 
 - **Phase 5 — Hub.** Priorities: coherent composition, typography, navigation, player interactions and polished motion. GSAP (Flip for player expand/recompose, SplitText for restrained type motion), Transitions.dev for state transitions and timing polish, `frontend-design` for compositional intent, and selectively adapted mechanisms from the reference libraries. Lucide for new player and controls icons, matched to the accepted icon grammar.
 - **Phase 6 — Showcase.** Unlocked-car quality is the focus, and the locked/unlocked difference must be visually meaningful. Explore physically based paint (clearcoat), glass, metallic surfaces, realistic reflections and carefully authored studio lighting, with an HDRI (Poly Haven) as a **reflection/lighting source only**, following the existing car-only reflection pattern. Theatre.js is suited to deliberate camera and lighting choreography. Keep the canonical direction (SPEC §11): hero car, substantial negative space, pale Day and deep navy Night fields, no garage, floor, plinth or clutter. The HDRI must not become a visible background. Final lighting and material treatment is the owner's call.
@@ -54,7 +56,6 @@ These are emphases, not requirements. The phase's `SPEC.md` sections govern scop
 
 ## Known limitations (2026-11-04)
 
-- GSAP, Lucide and Theatre.js exist on `p5-hub`, which is not merged to `main`.
 - GSAP, Lucide, Transitions.dev, `frontend-design` and Penpot have not been used on GT3 yet. Spector has not captured a GT3 scene. Theatre has not driven a real scene object or shipped playback.
 - The Spector, Transitions.dev, `frontend-design` and Penpot setups are user-level on the Intel host. The M4 needs its own installs (Spector reinstall steps are in `dev-tooling.md`).
 - Blender and glTF Transform are not installed. No HDRI or external PBR asset has been evaluated in GT3.

@@ -40,7 +40,7 @@ The root `dist/spector.bundle.js` that the server injects is committed upstream,
 
 **Host limits:** one headless browser at a time. Run `node scripts/host-check.mjs preflight browser` first and wait on exit 75. Serve test pages from loopback only and stop the server afterwards. Use the owned verification server (`scripts/with-verification-server.sh`) if you point it at GT3.
 
-## Lucide — vanilla-JS icons (installed as a dependency on `p5-hub`, unused)
+## Lucide — vanilla-JS icons (installed dependency, unused)
 
 | | |
 |---|---|

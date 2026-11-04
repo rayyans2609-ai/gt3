@@ -48,12 +48,24 @@ export async function identity(command = run) {
   const profile = arch === 'arm64' && /Apple M4/.test(brand ?? '') && ramGB >= 16 ? 'm4-16gb'
     : arch === 'x86_64' && /Intel/.test(brand ?? '') && ramGB != null && ramGB <= 8 ? 'intel-8gb' : 'unknown';
   const version = async bin => (await run(bin, ['--version']))?.split('\n')[0] ?? null;
+  // Agent CLIs are often installed off the non-interactive PATH (OpenCode in ~/.opencode/bin on the
+  // Intel, Codex in ~/.npm-global/bin on the M4). Probe known locations before reporting a route
+  // missing; `null` still means "not found anywhere", never "not on PATH".
+  const home = process.env.HOME ?? '';
+  const cli = async (name, dirs) => {
+    for (const bin of [process.env[`GT3_${name.toUpperCase()}_BIN`], name, ...dirs.map(d => `${home}/${d}/${name}`)]) {
+      const v = bin ? await version(bin) : null;
+      if (v) return bin === name ? v : `${v} (${bin.replace(home, '~')})`;
+    }
+    return null;
+  };
+  const known = ['.local/bin', '.npm-global/bin', '.opencode/bin'];
   const chromeBin = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
   const result = {
     profile, arch, cpu: brand, ramGB, model, cores: { performance: positive(pcores), efficiency: positive(ecores) },
     gpu: gpu?.match(/Chipset Model:\s*(.+)/)?.[1] ?? null, macos: os,
-    versions: { node: process.version, claude: await version('claude'), codex: await version('codex'),
-      opencode: await version('opencode'), chrome: await version(chromeBin) },
+    versions: { node: process.version, claude: await cli('claude', known), codex: await cli('codex', known),
+      opencode: await cli('opencode', known), chrome: await version(chromeBin) },
   };
   result.unavailable = Object.entries({ arch, cpu: brand, ramGB, model, macos: os, gpu: result.gpu,
     'cores.performance': result.cores.performance, 'cores.efficiency': result.cores.efficiency,

@@ -798,3 +798,11 @@ Owner accepted the Landing, the McLaren surface-push transition, the Claude Desi
 - Landing/Hub render-profile parity: 58/58 (pixel diff, Day/Night, DPR 1 and 2, after a Tour round trip and a refresh).
 - Flow harness 15/15; Phase 3 cone (pre-ready input, route persistence, load recovery, controls) pass; Tour first frame identical to `main@1fe20db`.
 Evidence: `docs/review/p4/` (OWNER-REVIEW, W1-ENGINEERING, design/DELTA-v1) and m4-local `local/evidence/`.
+
+## Audio scope — HUMAN-ACCEPTED (owner, 2026-11-02)
+
+Race audio scoped to the Grand Tour (`07cc074`, `17b9a4b`): Landing/Hub play music only, leaving the Tour stops engine/SFX with music uninterrupted, no duplicate or orphaned loops on re-entry. `scripts/verify-audio-lifecycle.mjs` fails 11/12 on the pre-fix base and passes 12/12 after (Intel; details in `docs/ai/routing-evidence.md`, 2026-11-01). Checkpoint sound replaced by the owner's `checkpoint.mp3` (`b3554be`). Mix not final; separate Music/Engine/SFX controls deferred to Phase 5.
+
+## Development-tooling baseline — integrated 2026-11-04 (technically verified; no product use)
+
+GSAP 3.15 (core, Flip, SplitText) and Lucide added as dependencies with no consumer; Theatre.js 0.7 as dev-only opt-in authoring (production bundle byte-identical with and without it); vite 7.3.7, puppeteer-core 25.16; `npm audit` 0. Integration verification is recorded in the merge commit and `local/runs/toolbase-integration/` (Intel). Known, pre-existing: `verify-hud` is stale since the Phase 4 Landing-first boot (not a regression).

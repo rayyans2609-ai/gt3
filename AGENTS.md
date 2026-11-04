@@ -9,20 +9,22 @@
 
 **Principle: constrain risks, not managerial intelligence.** Within an owner-authorized objective, you plan, decompose, choose workers, investigate, make routine reversible decisions and size verification yourself. Owner-only actions are listed in the manager card.
 
-**Read by need (tiered), not everything every time:**
+**Session start: role → read → apply.** Loading a document is not the step; applying it is. Before the first substantive action or delegation, load the rows below that match the task, then state in one line your configuration, the documents you loaded, and the route for the first task. Read by need (tiered), not everything every time:
 
 | When | Read |
 |---|---|
 | Every manager session | this file; the **Manager card** at the top of `docs/ai/operating-contract.md`; `docs/ai/model-routing.md` Part II for your configuration (§11 Opus-led or §11b Sol-led, plus §10, §12–§14) |
-| Product work (any GT3 feature, UX, rendering or phase task) | add `GT3_MASTER_CONTEXT.md` and the relevant `SPEC.md` sections (`SPEC.md` is product truth) |
+| Product work (any GT3 feature, UX, rendering or phase task) | add `GT3_MASTER_CONTEXT.md`, the relevant `SPEC.md` sections (`SPEC.md` is product truth) and the relevant `ARCHITECTURE.md` sections |
+| Tooling, dependencies, verification, Git integration, docs | `GT3_MASTER_CONTEXT.md` "Current phase" for state, plus the doc that owns the area: `operating-contract.md` §5–§8 (workers, hosts, verification, Git), `model-routing.md` §5 (verification depth), the invocation doc, `docs/reference/` |
 | Animation or motion authoring (Theatre.js, GSAP) | `ARCHITECTURE.md` "Animation authoring (Theatre.js, dev-only)" |
 | Visually relevant work, Phase 5 onward or a substantial revision (UI motion, materials, lighting, assets, WebGL diagnosis) | `docs/reference/creative-tooling.md`: tool status, phase emphases, adoption discipline |
 | Autonomous Mode invoked | add `docs/ai/autonomous-mode.md` |
+| Briefing a worker | give it the minimum packet (`model-routing.md` §4) and the `GT3 ROLE: worker` line, not this reading list |
 | Handoffs, host transfer, routing principles, provider syntax | the relevant section of `operating-contract.md`, `model-routing.md` Part I, or the invocation doc, when needed |
 
 These documents are **binding execution instructions** in their domains. `SPEC.md` and `GT3_MASTER_CONTEXT.md` do not govern execution policy. Current explicit owner instructions and current repository state take precedence. Re-read the routing file and the manager card instead of relying on memory, because they change. `node scripts/host-check.mjs identity` tells you which Mac you're on.
 
-**Before each substantive task, decide in one line:** its owner (model @ effort), and why that owner is the cheapest route to an accepted result (`model-routing.md` §2–§3, §10–§14; Sol-led roster §11b). Then decide its verification depth and who executes it (§5). In Autonomous Mode these lines are the run plan (`autonomous-mode.md` §1). This is a decision, not a status report or an approval gate.
+**Before each substantive task, decide in one line:** its owner (model @ effort), and why that owner is the cheapest route to an accepted result (`model-routing.md` §2–§3, §10–§14; Sol-led roster §11b). For delegated work under Opus-led, Codex (Sol, Terra, Luna) gets strong first consideration (Sol-led economics: §11b), the free GLM/DeepSeek routes are used strategically rather than by ritual, and in-session Agent/Explore subagents count as Claude workers (§10). A route is unavailable only if `node scripts/host-check.mjs identity` (which also probes off-PATH installs) finds no binary or a live wrapper call fails; a `command -v` miss proves nothing. Then decide its verification depth and who executes it (§5). In Autonomous Mode these lines are the run plan (`autonomous-mode.md` §1). This is a decision, not a status report or an approval gate.
 
 **Manager boundary.** The manager manages, integrates, decides, and owns at most 0–2 justified Anchor Tasks per phase (Opus-led §11; under Sol-led, Sol does tightly coupled engineering itself and sends Anchor-class work to an Opus specialist, §11b). A fast path is allowed when delegating would genuinely cost more. It is bounded (§9): the patch plus at most a quick static/build check. Browser harnesses, captures, repeated runs and mechanical follow-up go to the cheapest suitable worker. Specialist delegation never transfers the seat.
 

@@ -6,7 +6,12 @@ they disagree, `SPEC.md` wins and this file is wrong. Module status tags:
 **[retire]** removed once its replacement lands. The tags below describe the V3 target;
 the current implementation checkpoint is stated here to avoid treating future modules as live.
 
-**Current on `phase3-integration` (2026-09-28):** Phases 1–3 and the typography slice
+**Current on `main` (2026-11-04):** Phases 3 and 4 are HUMAN-ACCEPTED and integrated; the app
+boots into the Landing (Phase 4), with a provisional Hub and the accepted Tour. Locked/Unlocked
+Tour rendering profiles are accepted (SPEC §31). Phase 5 has its tooling baseline (GSAP, Lucide,
+dev-only Theatre) but no Hub implementation. The paragraph below is the 2026-09-28 snapshot.
+
+**Historical, on `phase3-integration` (2026-09-28):** Phases 1–3 and the typography slice
 are implemented. The live flow is still legacy start screen → Grand Tour → legacy finish;
 Landing, Hub, dedicated Showcase and completion hero are later work. The Tour has a
 closed-loop circuit, route-led world-space aerial camera, nine ceremony-free checkpoints,
@@ -224,7 +229,7 @@ Theme / audio
 - `trackIndex` ★, `trackPosition` ★, `playIntent` ★  playlist state; restored playback
                    still waits for a genuine user gesture (SPEC §10, §24)
 - `playerOpen`     expanded-player UI state; reset to false on every major transition (SPEC §25)
-- `audioReady`     true once the single AudioContext exists
+- `audioReady`     true only while the single AudioContext is running after a successful start (see Audio graph)
 
 Retired keys: `timeOfDay` (Phase 1a). `mode` and `started` are **transitional** legacy
 keys still used by the start/finish flow; a marked bridge in `main.js` maps the running
@@ -269,7 +274,11 @@ voice <audio> → MediaElementSource ──────────────�
 - `audioReady` is true only after a successful `startAudio()` with the context `running`, and
   drops to false whenever the context stops running. Explicit controls retry through
   `startAudio()` / `playMusic()`.
-- Real artist/title names never reach the UI; shipped playlist files use `track_N` aliases.
+- Real artist/title names never appear as GT3 interface text; shipped playlist files use `track_N`
+  aliases. Supplied cover artwork may carry its own embedded text (owner, 2026-11-03; SPEC §6).
+- Race audio (engine, Grand Tour SFX) is scoped to the Grand Tour: Landing/Hub play music only,
+  leaving the Tour stops engine/SFX while music continues (SPEC §10; HUMAN-ACCEPTED 2026-11-02;
+  `scripts/verify-audio-lifecycle.mjs`).
 - SFX set: existing files only (`coin_approach.mp3` reused as checkpoint approach cue; others
   kept as currently wired). Voices: exactly the 10 `voice_XX` files, played ONLY in Showcase.
 
@@ -331,9 +340,9 @@ history entries. Audio: the existing SFX + the 10 voice files + the 6 playlist t
 
 ## Phase 3 closure — technical touchpoints (SPEC §30.9, 2026-10-06)
 Only the implications that touch module boundaries or shared systems; product truth is in SPEC.
-- **Crossing SFX:** `audioManager.playCoin()` (`coin.mp3`, sfxBus) still exists but lost its caller
-  when `coins.js` was retired. Re-wire it from the checkpoint crossing path; no new audio files,
-  and never an audio-init path.
+- **Crossing SFX:** re-wired from the checkpoint crossing path in Phase 3 (sfxBus, never an
+  audio-init path). Since 2026-11-02 it plays the owner-supplied `checkpoint.mp3`, replacing
+  `coin.mp3` (SPEC §18).
 - **No input before ready:** gate route input in `scrollDrive.js` (the sole scroll owner) until
   readiness. Restored `routeProgress` must still apply exactly. This is shared input state, so
   verification is high blast radius (scroll + route persistence).
@@ -374,6 +383,6 @@ Only the implications that touch module boundaries or shared systems; product tr
 - Playlist tracks shipped in Phase 2a (`public/audios/playlist/`). Track covers remain
   unshipped in `audios/background_playlist/audiocover_NOTaudios/` until Phase 5 (Hub player).
   `car_cover.glb` is not yet in `public/` (Showcase, Phase 6).
-- McLaren → Aston grass-occlusion fix awaits user visual sign-off (SPEC §30.6).
+- McLaren → Aston grass-occlusion fix: owner visual sign-off given (2026-10-09, SPEC §30.6).
 - Neue Haas Grotesk `-Trial` licensing (SPEC §30.5) is a local-asset concern, not a build or
   deployment blocker for this project.

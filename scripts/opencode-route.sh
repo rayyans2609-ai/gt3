@@ -78,4 +78,13 @@ fi
 route_guard opencode "$route" full
 
 route_log opencode "$route" full
-exec opencode run --standalone --auto -m "$model" "$prompt" < /dev/null
+# Resolve the binary: GT3_OPENCODE_BIN, then PATH, then the standard installer location
+# (~/.opencode/bin is off the non-interactive PATH on the Intel; a PATH miss is not "not installed").
+opencode_bin="${GT3_OPENCODE_BIN:-}"
+[[ -z "$opencode_bin" ]] && opencode_bin="$(command -v opencode || true)"
+[[ -z "$opencode_bin" && -x "$HOME/.opencode/bin/opencode" ]] && opencode_bin="$HOME/.opencode/bin/opencode"
+if [[ -z "$opencode_bin" ]]; then
+  echo "opencode-route: opencode not found (checked GT3_OPENCODE_BIN, PATH, ~/.opencode/bin)" >&2
+  exit 127
+fi
+exec "$opencode_bin" run --standalone --auto -m "$model" "$prompt" < /dev/null

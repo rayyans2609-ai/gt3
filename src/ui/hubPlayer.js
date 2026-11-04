@@ -13,10 +13,11 @@
 import { createElement, Music4, Pause, Play, Plus, SkipBack, SkipForward, X } from 'lucide';
 import {
   getMusicStatus, nextTrack, pauseMusic, playMusic, previousTrack, seekMusic, selectTrack,
-  setEngineVolume, setMasterVolume, setMusicMuted, setMusicVolume,
+  setMusicMuted,
 } from '../audio/audioManager.js';
+import { buildLevels } from './audioLevels.js';
 import { playlist } from '../data/playlist.js';
-import { state, subscribe } from '../core/state.js';
+import { state } from '../core/state.js';
 
 const EASE = 'cubic-bezier(.22, .61, .36, 1)';
 const OPEN_MS = 420;
@@ -33,9 +34,6 @@ let seek;
 let playButton;
 let muteButton;
 let listButton;
-let masterSlider;
-let musicSlider;
-let engineSlider;
 let dragging = false;
 let dragStartValue = null;
 let listOpen = false;
@@ -66,35 +64,6 @@ function time(seconds) {
   if (!Number.isFinite(seconds) || seconds < 0) return '0:00';
   const whole = Math.floor(seconds);
   return `${Math.floor(whole / 60)}:${String(whole % 60).padStart(2, '0')}`;
-}
-
-function level(name, ariaLabel, initial, onInput) {
-  const wrap = document.createElement('label');
-  wrap.className = 'hub-level';
-  const text = document.createElement('span');
-  text.className = 'hub-level__name';
-  text.textContent = name;
-  const input = document.createElement('input');
-  input.type = 'range';
-  input.className = 'hub-range hub-level__input';
-  input.min = '0';
-  input.max = '1';
-  input.step = '0.01';
-  input.value = String(initial);
-  input.setAttribute('aria-label', ariaLabel);
-  input.style.setProperty('--fill', String(initial));
-  input.addEventListener('input', () => {
-    input.style.setProperty('--fill', input.value);
-    onInput(Number(input.value));
-  });
-  wrap.append(text, input);
-  return { wrap, input };
-}
-
-function syncLevel(input, value) {
-  if (Number(input.value) === value) return;
-  input.value = String(value);
-  input.style.setProperty('--fill', String(value));
 }
 
 /** Swap the artwork without a hard cut: a short dip, the new image, a short rise. */
@@ -262,16 +231,7 @@ export function initHubPlayer(container) {
   spacer.className = 'hub-player__spacer';
   transport.append(previous, playButton, next, spacer, muteButton, listButton);
 
-  const levels = document.createElement('div');
-  levels.className = 'hub-player__levels';
-  const master = level('Master', 'Master volume', state.masterVolume, setMasterVolume);
-  const music = level('Music', 'Music volume', state.musicVolume, setMusicVolume);
-  // Engine is heard only in the Grand Tour (SPEC §10); its level is set here for the next drive.
-  const engine = level('Engine', 'Engine volume', state.engineVolume, setEngineVolume);
-  masterSlider = master.input;
-  musicSlider = music.input;
-  engineSlider = engine.input;
-  levels.append(master.wrap, music.wrap, engine.wrap);
+  const levels = buildLevels({ className: 'hub-player__levels', prefix: 'hub-level', rangeClass: 'hub-range' });
 
   body.append(meta, seek, transport, levels);
   root.append(art, body);
@@ -318,9 +278,6 @@ export function initHubPlayer(container) {
   seek.addEventListener('pointerup', endDrag);
   seek.addEventListener('pointercancel', endDrag);
 
-  subscribe('masterVolume', (value) => syncLevel(masterSlider, value));
-  subscribe('musicVolume', (value) => syncLevel(musicSlider, value));
-  subscribe('engineVolume', (value) => syncLevel(engineSlider, value));
   renderStatus();
   return root;
 }

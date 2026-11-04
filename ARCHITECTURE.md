@@ -33,8 +33,7 @@ text/HUD/player UI. One fixed canvas behind it, one shared `WebGLRenderer`.
   package.json
   models/             SOURCE glb files (do not ship, do not modify)
                       incl. car_cover_model (glb data, no extension — SPEC §30.3)
-  audios/             SOURCE audio (sfx, voices/); background_playlist/audiocover_NOTaudios/
-                      holds the six track covers (unshipped, deferred to Phase 5)
+  audios/             SOURCE audio (sfx, voices/)
   font/               Neue Haas Grotesk — local project asset (gitignored), referenced
                       directly from CSS and bundled by Vite; not fetched, not committed
   reference _images/  design references (literal space in name), never shipped
@@ -42,7 +41,8 @@ text/HUD/player UI. One fixed canvas behind it, one shared `WebGLRenderer`.
     models/           compressed car glbs [keep]; car_cover.glb [new]
     audios/           sfx + voices [keep]; background.mp3 [retired, Phase 2a]
     audios/playlist/  track_1..6.mp3, ALIASED filenames (moved from audios/background_playlist/
-                      in Phase 2a, git renames, byte-identical) [done]; covers join in Phase 5
+                      in Phase 2a, git renames, byte-identical) [done]; covers/track_N.* (Phase 5,
+                      git renames, shown as supplied) [done]
     images/<carId>/   manufacturer imagery / badges [keep]
   scripts/            build-time + current Phase 3 browser/perf harnesses [keep];
                       retired coin/montage/F-key Tour harnesses removed
@@ -93,8 +93,13 @@ text/HUD/player UI. One fixed canvas behind it, one shared `WebGLRenderer`.
       studio.js       montage studio (own renderer — sanctioned exception, see below) [keep]
       choreography.js 5-shot camera timeline [keep]
     ui/
-      hub.js          PROVISIONAL Hub (Phase 4): theme field + START RACE only; the real Hub
-                      (Cars, integrated player) is Phase 5 [done provisional / evolve]
+      hub.js          Grand Tour Hub (Phase 5 candidate, not accepted): start-line composition,
+                      START RACE + checker-strip loading, Cars roster glyph/preview, shutter
+                      Hub<->Tour transition; ?hub=centre / ?entry=fade / ?cars=static review
+                      alternatives [evolve]
+      hubPlayer.js    Hub presentation of the global player: cover, seek, transport, music mute,
+                      in-place track-list recomposition (WAAPI FLIP), levels [new, Phase 5]
+      audioLevels.js  Master / Music / Engine level rows shared by both players [new, Phase 5]
       homeControl.js  Grand Tour back/home control → Hub (SPEC §25) [done, Phase 4]
       showcase.js     Showcase scene + DOM (already uses shared renderer) [evolve]
       selector.js     bottom ten-car selector, ?/badge states [new]
@@ -116,7 +121,7 @@ text/HUD/player UI. One fixed canvas behind it, one shared `WebGLRenderer`.
     data/
       cars.js         roster data (10 cars, locked order) + narration copy [keep]
       carImages.js    [keep]
-      playlist.js     track_1..6 alias → shipped file [done, Phase 2a]; cover field in Phase 5
+      playlist.js     track_1..6 alias → shipped file [done, Phase 2a]; cover field [done, Phase 5]
     styles/
       tokens.css      design tokens, Day/Night via :root[data-theme] [done, Phase 1]
       base.css + per-experience sheets [evolve; montage.css keep]
@@ -172,6 +177,10 @@ byte-identical with and without this feature, zero "theatre" strings).
   then `seek(t)` + `studio.transaction(({set}) => set(obj.props.rotationDeg, {x,y,z}))` writes a
   keyframe at the playhead, `saveToRepo()` persists it. Easing/curve handles and sequence length
   are edited in the Studio UI. Harness: `scripts/verify-theatre-proof.mjs` (dev server, `GT3_URL`).
+- **UI motion without a second frame loop:** GSAP's ticker requests its own
+  `requestAnimationFrame` while tweens run (`gsap-core.js` `_req(_tick)`), which this file's
+  single-RAF rule excludes unless the ticker is driven from `main.js`. The Phase 5 Hub therefore
+  uses CSS transitions and WAAPI (compositor-driven, no JS loop, interruptible).
 - **GSAP vs Theatre:** GSAP stays for code-driven, state/scroll/event-driven motion (UI, Flip,
   SplitText, tweens that react to input). Theatre earns its place for **scrubbable, hand-tuned,
   multi-property authored sequences** whose feel is judged visually: camera/hero moves, light and
@@ -271,6 +280,13 @@ voice <audio> → MediaElementSource ──────────────�
   track_1→…→track_6→track_1, auto-advance on `ended`.
 - `masterMuted` → masterGain; `musicMuted` → musicMuteGain. Montage and narration ducking stay
   on musicBus. No SFX-only mute.
+- Levels (Phase 5): `masterVolume` → masterLevelGain (after masterGain), `musicVolume` →
+  musicLevelGain (after musicMuteGain), `engineVolume` → engineLevelGain (after engineBus, so the
+  montage duck on engineBus stays separate). Squared taper, default 1 = the pre-Phase-5 mix;
+  persisted; setters never create or resume the context. Mutes and levels stay independent.
+- One `MIX` table in audioManager.js holds every per-sound and bus level, keyed like
+  `RACE_FILES`, so swapping a sound is its filename plus its level. Phase 5 levels were set from
+  measured gated RMS and are provisional until the owner listens.
 - `audioReady` is true only after a successful `startAudio()` with the context `running`, and
   drops to false whenever the context stops running. Explicit controls retry through
   `startAudio()` / `playMusic()`.
@@ -361,8 +377,8 @@ Only the implications that touch module boundaries or shared systems; product tr
   renderer, and no HUD canvas with its own context. The click-through to a single-car
   presentation is a new user-initiated `tour → showcase`-family transition that preserves route
   state; its state shape is decided in Phase 6.
-- Volume sliders (Phase 5) map onto the existing `masterGain` / `musicMuteGain` chain as separate
-  level gains, so mute and level stay independent. New persisted keys land with that phase.
+- Volume sliders (Phase 5): implemented as separate level gains (see Audio graph); persisted keys
+  `masterVolume`, `musicVolume`, `engineVolume`.
 - Landing hero decoupled from roster index 0 (Phase 4, owner 2026-10-24): the Landing loads its
   own hero copy; nothing in the Tour, discovery or session reads the hero choice.
 
@@ -380,9 +396,8 @@ Only the implications that touch module boundaries or shared systems; product tr
   shading (no sliver-triangle creases), one layer, route-agnostic, performance-safe. It must
   not bake green-grass assumptions into terrain geometry or data, so Phase 8 can re-material
   it without rebuilding it. Night uses the same pale environment revealed by light (§13a).
-- Playlist tracks shipped in Phase 2a (`public/audios/playlist/`). Track covers remain
-  unshipped in `audios/background_playlist/audiocover_NOTaudios/` until Phase 5 (Hub player).
-  `car_cover.glb` is not yet in `public/` (Showcase, Phase 6).
+- Playlist tracks shipped in Phase 2a (`public/audios/playlist/`); covers shipped in Phase 5
+  (`public/audios/playlist/covers/`). `car_cover.glb` is not yet in `public/` (Showcase, Phase 6).
 - McLaren → Aston grass-occlusion fix: owner visual sign-off given (2026-10-09, SPEC §30.6).
 - Neue Haas Grotesk `-Trial` licensing (SPEC §30.5) is a local-asset concern, not a build or
   deployment blocker for this project.

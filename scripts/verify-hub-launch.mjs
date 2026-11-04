@@ -22,6 +22,16 @@ const softwareGL = process.env.GT3_SOFTWARE_GL === '1';
 const report = { base, runs, dive, source: process.env.GT3_SOURCE,
   renderer: softwareGL ? 'SwiftShader fallback' : 'ANGLE/Metal', cases: [], pass: false };
 const assert = (condition, message) => { if (!condition) throw new Error(message); };
+async function clickStart(page) {
+  const box = await page.waitForFunction(() => {
+    const el = document.querySelector('.hub-start');
+    if (!el) return null;
+    const r = el.getBoundingClientRect();
+    const x = r.x + r.width / 2, y = r.y + r.height / 2;
+    return el.contains(document.elementFromPoint(x, y)) ? { x, y } : null;
+  }, { timeout: 15000, polling: 50 }).then(handle => handle.jsonValue());
+  await page.mouse.click(box.x, box.y);
+}
 const distribution = values => {
   const sorted = [...values].sort((a, b) => a - b);
   const q = p => sorted[Math.min(sorted.length - 1, Math.floor((sorted.length - 1) * p))] ?? null;
@@ -116,7 +126,7 @@ try {
         }
         requestAnimationFrame(frame);
       });
-      await page.click('.hub-start');
+      await clickStart(page);
       await page.waitForFunction(async () => {
         const { state } = await import('/src/core/state.js');
         return state.experience === 'tour' && !state.transition && !state.scrollLocked;
@@ -148,7 +158,9 @@ try {
         camera.updateMatrixWorld(); camera.updateProjectionMatrix();
         camera.projectionMatrix.elements[8] -= pose.shift?.[0] ?? 0;
         camera.projectionMatrix.elements[9] -= pose.shift?.[1] ?? 0;
-        const t = routeTAt(state.progress), p = offsetPointAt(t, 0, surfaceOffsetAt(t, 0)).project(camera);
+        const t = routeTAt(state.progress), p = offsetPointAt(t, 0, surfaceOffsetAt(t, 0));
+        if (snapshot.variant === 'b') p.y += 1.2; // Hub B raises its marker above the track surface.
+        p.project(camera);
         const markerErrorPx = Math.hypot(snapshot.marker.x - (p.x+1)*innerWidth/2, snapshot.marker.y - (1-p.y)*innerHeight/2);
         return { progress: state.progress, marker: snapshot.marker, markerErrorPx,
           frames: window.__hubLaunchProbe.frames.hub, drawStats: snapshot.drawStats,

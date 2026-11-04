@@ -20,6 +20,17 @@ const assert = (ok, message) => { if (!ok) throw new Error(message); };
 const report = { base, cases: {}, errors: [] };
 let browser;
 
+async function clickStart(page) {
+  const box = await page.waitForFunction(() => {
+    const el = document.querySelector('.hub-start');
+    if (!el) return null;
+    const r = el.getBoundingClientRect();
+    const x = r.x + r.width / 2, y = r.y + r.height / 2;
+    return el.contains(document.elementFromPoint(x, y)) ? { x, y } : null;
+  }, { timeout: 15000, polling: 50 }).then(handle => handle.jsonValue());
+  await page.mouse.click(box.x, box.y);
+}
+
 const snap = page => page.evaluate(async () => {
   const { state } = await import('/src/core/state.js');
   const entry = document.getElementById('entry-sequence');
@@ -134,7 +145,7 @@ try {
       await page.goto(base, { waitUntil: 'domcontentloaded', timeout: 120000 });
       await page.mouse.move(800, 450);
       await hubReady(page);
-      await page.click('.hub-start');
+      await clickStart(page);
       await phase(page, 'reds');
       await page.waitForFunction(() => document.querySelectorAll('.entry-lamp.is-on').length >= 1,
         { timeout: 5000 });
@@ -150,7 +161,7 @@ try {
         'cancelled entry left a delayed visual or unlock');
 
       await record(page);
-      await page.click('.hub-start');
+      await clickStart(page);
       await phase(page, 'reds');
       const redSamples = [];
       for (let count = 1; count <= 5; count++) {
@@ -214,7 +225,7 @@ try {
       await page.click('.home-control');
       await hubReady(page);
       const resumeAt = (await snap(page)).progress;
-      await page.click('.hub-start');
+      await clickStart(page);
       await armed(page);
       const resumed = await snap(page);
       assert(!resumed.control && resumed.lamps.every(on => !on) && Math.abs(resumed.progress - resumeAt) < 1e-6,

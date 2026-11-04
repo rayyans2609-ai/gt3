@@ -20,6 +20,17 @@ const dsf = Number(process.env.PARITY_DSF || 2);
 const wait = ms => new Promise(r => setTimeout(r, ms));
 fs.mkdirSync(out, { recursive: true });
 
+async function clickStart(page) {
+  const box = await page.waitForFunction(() => {
+    const el = document.querySelector('.hub-start');
+    if (!el) return null;
+    const r = el.getBoundingClientRect();
+    const x = r.x + r.width / 2, y = r.y + r.height / 2;
+    return el.contains(document.elementFromPoint(x, y)) ? { x, y } : null;
+  }, { timeout: 15000, polling: 50 }).then(handle => handle.jsonValue());
+  await page.mouse.click(box.x, box.y);
+}
+
 // Progress points that are time-deterministic (idle turntable and bob are frozen via the tuning
 // handle; progress >= .25 has no idle motion anyway).
 const POINTS = [0, 0.3, 0.55, 0.75, 0.88, 0.94, 1];
@@ -132,7 +143,7 @@ try {
       run.hubState = await dump(page);
 
       // Hub -> Tour: the Tour must be on its own profile's settings.
-      await page.click('.hub-start');
+      await clickStart(page);
       await page.waitForFunction(() => document.documentElement.dataset.world === 'tour', { timeout: 15000 });
       await wait(2500);
       run.tourState = await dump(page);

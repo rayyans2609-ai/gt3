@@ -21,6 +21,22 @@ const until = async (fn, label, ms = 90000) => {
   throw new Error(`timeout: ${label}`);
 };
 
+async function clickStart(page) {
+  const box = await page.waitForFunction(() => {
+    const el = document.querySelector('.hub-start');
+    if (!el) return null;
+    const r = el.getBoundingClientRect();
+    const x = r.x + r.width / 2, y = r.y + r.height / 2;
+    return el.contains(document.elementFromPoint(x, y)) ? { x, y } : null;
+  }, { timeout: 15000, polling: 50 }).then(handle => handle.jsonValue());
+  await page.mouse.click(box.x, box.y);
+}
+
+async function clickAudioControl(page) {
+  const inHub = await page.evaluate(async () => (await import('/src/core/state.js')).state.experience === 'hub');
+  await page.click(inHub ? '[data-control="master-mute"]' : '.audio-speaker');
+}
+
 // Instrument the browser's real audio graph before application code runs. Buffers are tagged
 // at fetch/decode; actual ended events, not scheduled stop calls, determine live source counts.
 function instrument() {
@@ -133,14 +149,14 @@ try {
     const s = await state(); return s.experience === name && !s.transition && s;
   }, name);
   const hub = async () => { await page.evaluate(() => window.__gt3.landing.seek(1)); await experience('hub'); await wait(500); };
-  const tour = async () => { await page.click('.hub-start'); await experience('tour'); await wait(300); };
+  const tour = async () => { await clickStart(page); await experience('tour'); await wait(300); };
   const home = async () => { await page.click('.home-control'); await experience('hub'); await wait(300); };
   const started = (p, name) => p.sources.filter(s => s.name === name);
   const live = (p, name) => started(p, name).filter(s => s.live);
   const noRace = p => assert.equal(p.sources.filter(s => s.live).length, 0, 'race source still live');
   const ready = () => until(() => page.evaluate(() => window.__gt3 && ['ready', 'degraded'].includes(window.__gt3.readiness?.status)), 'app ready');
   const reload = async () => { await page.reload({ waitUntil: 'domcontentloaded', timeout: 120000 }); await ready(); };
-  const activate = async () => { await page.click('.audio-speaker'); await until(async () => (await state()).audioReady, 'audio ready'); await wait(350); };
+  const activate = async () => { await clickAudioControl(page); await until(async () => (await state()).audioReady, 'audio ready'); await wait(350); };
   // Route persistence flushes on pagehide; reset after that flush, before the next document.
   const reset = async entries => {
     await page.evaluate(values => window.addEventListener('pagehide', () => {
@@ -179,9 +195,9 @@ try {
   });
   await run('7-independent-mutes', async () => {
     await page.evaluate(async () => (await import('/src/audio/audioManager.js')).setMusicMuted(true));
-    await page.click('.audio-speaker'); await wait(300); const muted = await probe();
+    await clickAudioControl(page); await wait(300); const muted = await probe();
     assert.ok(muted.gains.master < 0.02 && muted.gains.musicMute < 0.02);
-    await tour(); await home(); await page.click('.audio-speaker'); await wait(300);
+    await tour(); await home(); await clickAudioControl(page); await wait(300);
     const hubUnmuted = await probe(); noRace(hubUnmuted);
     assert.ok(hubUnmuted.gains.master > 0.98 && hubUnmuted.gains.musicMute < 0.02);
     await page.evaluate(async () => (await import('/src/audio/audioManager.js')).setMusicMuted(false));
@@ -237,7 +253,7 @@ try {
   });
   await run('9b-delayed-preload-after-return', async () => {
     await reset({ 'audio-harness-fault': JSON.stringify({ audioHang: true, audioTimeoutMs: 1200 }), 'audio-harness-hold': '1' });
-    await hub(); await page.click('.audio-speaker');
+    await hub(); await clickAudioControl(page);
     assert.equal((await state()).audioReady, false);
     await tour(); await home();
     await page.evaluate(() => window.__audioRelease());

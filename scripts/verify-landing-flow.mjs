@@ -30,6 +30,16 @@ const withHub = value => {
 
 const base = withHub(process.env.GT3_URL || process.argv.slice(2).find(arg => !arg.startsWith('--')) || 'http://127.0.0.1:5243');
 const wait = ms => new Promise(r => setTimeout(r, ms));
+async function clickStart(page) {
+  const box = await page.waitForFunction(() => {
+    const el = document.querySelector('.hub-start');
+    if (!el) return null;
+    const r = el.getBoundingClientRect();
+    const x = r.x + r.width / 2, y = r.y + r.height / 2;
+    return el.contains(document.elementFromPoint(x, y)) ? { x, y } : null;
+  }, { timeout: 15000, polling: 50 }).then(handle => handle.jsonValue());
+  await page.mouse.click(box.x, box.y);
+}
 /** Favicon noise and the known three.js warm-up warning ('fog' on THREE.MeshDepthMaterial). */
 const isNoise = text => /favicon/i.test(text)
   || (/fog/i.test(text) && /MeshDepthMaterial/i.test(text));
@@ -213,7 +223,7 @@ const cases = [
     run: async page => {
       for (let i = 0; i < 8; i++) { await page.mouse.wheel({ deltaY: 300 }); await wait(25); }
       const clickedAt = Date.now();
-      await page.click('.hub-start');
+      await clickStart(page);
       const entry = await until(page, async p => {
         const s = await snap(p);
         return s.world === 'tour' && s.experience === 'tour' ? s : null;
@@ -378,7 +388,7 @@ const cases = [
       const target = shared.reentryProgress
         ?? await page.evaluate(async () => (await import('/src/scene/trackCurve.js')).CHECKPOINT_T[0] + 0.01);
       const clickedAt = Date.now();
-      await page.click('.hub-start');
+      await clickStart(page);
       const entry = await until(page, async p => {
         const s = await snap(p);
         return s.world === 'tour' && s.experience === 'tour' && !s.transition ? s : null;

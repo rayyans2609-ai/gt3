@@ -19,6 +19,17 @@ const tempRoot = path.resolve('local/tmp', `gt3-hub-captures-${process.pid}`);
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 const manifest = { gitSha: null, note: 'headless Chrome screencast, Metal; timing approximate', files: [] };
 
+async function clickStart(page) {
+  const box = await page.waitForFunction(() => {
+    const el = document.querySelector('.hub-start');
+    if (!el) return null;
+    const r = el.getBoundingClientRect();
+    const x = r.x + r.width / 2, y = r.y + r.height / 2;
+    return el.contains(document.elementFromPoint(x, y)) ? { x, y } : null;
+  }, { timeout: 15000, polling: 50 }).then(handle => handle.jsonValue());
+  await page.mouse.click(box.x, box.y);
+}
+
 function session(theme = 'day', experience = 'hub', overrides = {}) {
   return {
     theme, experience, routeProgress: 0, routeMapping: 'grid-v1', routeGridDistance: 0,
@@ -145,7 +156,7 @@ async function clip(browser, name, setup, action) {
 async function clips(browser) {
   for (const variant of ['a', 'b']) {
     await clip(browser, `${variant}-launch-home`, { variant, theme: 'day' }, async page => {
-      await page.hover('[data-control="start"]'); await sleep(1500); await page.click('[data-control="start"]');
+      await page.hover('[data-control="start"]'); await sleep(1500); await clickStart(page);
       await until(() => page.evaluate(async () => { const { state } = await import('/src/core/state.js'); return state.experience === 'tour' && !state.transition && !state.scrollLocked; }), 'Tour after launch', 35000);
       await page.click('.home-control'); await hubState(page, 'race'); await settle();
     });

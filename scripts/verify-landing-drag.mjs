@@ -96,7 +96,7 @@ try {
   await wheelTo(page, 300, p => p.progress >= 0.999, 'wheel to Hub');
   const hub = await page.evaluate(async () => {
     const { state } = await import('/src/core/state.js');
-    return { experience: state.experience, landingT: state.landingT, tourProgress: state.progress };
+    return { experience: state.experience, landingT: window.__gt3.landing.progress(), tourProgress: state.progress };
   });
   assert.equal(hub.experience, 'hub');
   assert.ok(hub.landingT >= 0.99);

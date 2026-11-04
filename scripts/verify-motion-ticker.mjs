@@ -53,16 +53,28 @@ try {
   const before = await page.evaluate(() => ({
     raf: JSON.parse(JSON.stringify(window.__rafCounts)), motion: { ...window.__gt3.motion.stats },
   }));
+  const variant = await page.evaluate(() => window.__gt3.hub.debug().variant);
   await page.hover('.hub-start');
-  await sleep(1200);
-  const lapMid = await page.evaluate(() => getComputedStyle(document.querySelector('.hub-plan__lap')).strokeDasharray);
+  await sleep(300);
+  const hubMotionDuringTween = await page.evaluate(() => window.__gt3.hub.debug());
+  const lapMid = variant === 'a'
+    ? await page.evaluate(() => getComputedStyle(document.querySelector('.precision-plan__lap')).strokeDasharray)
+    : hubMotionDuringTween.renderedFramesLastSecond;
   await page.mouse.move(700, 40);
-  await page.click('.hub-player__list-toggle');
+  await sleep(1200);
+  const hubMotionAtRest = await page.evaluate(() => window.__gt3.hub.debug());
+  // The track list recomposes the player with GSAP Flip; the cover must reach its new size, which
+  // only happens if GT3's loop ticks the tween.
+  const coverBefore = await page.evaluate(() => document.querySelector('.hub-player__cover').getBoundingClientRect().width);
+  await page.click('.hub-player__expand');
   await sleep(900);
-  const flipped = await page.evaluate(() => document.querySelector('.hub-player__cover').getBoundingClientRect().width);
+  const coverAfter = await page.evaluate(() => document.querySelector('.hub-player__cover').getBoundingClientRect().width);
+  const flipped = { before: coverBefore, after: coverAfter };
   await page.click('.hub-cars__toggle');
   await sleep(900);
-  const labelOpacity = await page.evaluate(() => Number(getComputedStyle(document.querySelector('.hub-plan__car')).opacity));
+  const labelOpacity = variant === 'a'
+    ? await page.evaluate(() => (document.querySelectorAll('.precision-checkpoint:not([hidden])').length === 9 ? 1 : 0))
+    : hubMotionDuringTween.renderedFramesLastSecond;
   const after = await page.evaluate(() => ({
     raf: JSON.parse(JSON.stringify(window.__rafCounts)), motion: { ...window.__gt3.motion.stats },
   }));
@@ -77,6 +89,9 @@ try {
     callerStacks: after.raf.stacks,
     motionTicks: after.motion.ticks - before.motion.ticks,
     suppressedWakes: after.motion.wakeRequests,
+    hubVariant: variant,
+    hubRenderedFramesDuringTween: hubMotionDuringTween.renderedFramesLastSecond,
+    hubRenderedFramesAtRest: hubMotionAtRest.renderedFramesLastSecond,
     lapDasharrayDuringHover: lapMid,
     coverWidthAfterFlip: flipped,
     carLabelOpacity: labelOpacity,
@@ -88,9 +103,10 @@ try {
   const ok = gsapFrames === 0 && lateGsap.length === 0 && report.checks.gsapCallbacksRun === 0
     && report.checks.motionTicks > 60
     && report.checks.suppressedWakes > 0
-    && lapMid && lapMid !== 'none'
-    && Math.abs(flipped - 56) < 1
-    && labelOpacity > 0.9;
+    && (variant === 'a' ? lapMid && lapMid !== 'none' && labelOpacity > 0.9
+      : hubMotionDuringTween.renderedFramesLastSecond > 0 && hubMotionAtRest.renderedFramesLastSecond === 0)
+    && Math.abs(flipped.after - flipped.before) > 4
+    && (variant !== 'a' || labelOpacity > 0.9);
   report.pass = ok;
   console.log(JSON.stringify(report, null, 2));
   process.exitCode = ok ? 0 : 1;

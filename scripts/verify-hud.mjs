@@ -19,7 +19,7 @@ import { pathToFileURL } from 'node:url';
 import { resolve } from 'node:path';
 import { execFileSync } from 'node:child_process';
 
-const base = (process.argv[2] || 'http://127.0.0.1:5194/').replace(/\/?$/, '/');
+const base = (process.env.GT3_URL || process.argv[2] || 'http://127.0.0.1:5194/').replace(/\/?$/, '/');
 const outDir = (process.argv[3] || new URL('../local/evidence/verify-hud/', import.meta.url).pathname).replace(/\/?$/, '/');
 const softwareGL = process.env.GT3_SOFTWARE_GL === '1';
 await mkdir(outDir, { recursive: true });
@@ -303,12 +303,12 @@ try {
     const iArrow = order.indexOf('hud-route__marker');
     assert(iPath >= 0 && iPath < iDone && iDone < iFirstDot && iFirstDot < iArrow,
       `map z-order wrong (route→trail→dots→arrow): ${JSON.stringify(order.filter((v, i) => order.indexOf(v) === i))}`);
-    const promptLabel = await read(page, () => document.querySelector('.start-prompt__label')?.textContent);
+    const promptLabel = await read(page, () => document.querySelector('.entry-scroll__label')?.textContent);
     assert(promptLabel === 'Scroll to race', `start prompt "${promptLabel}" != "Scroll to race"`);
     assert(!(await cueState(page)).present, 'sound cue present before Tour entry');
     const pre = await layout(page);
     const promptBox = await read(page, () => {
-      const r = document.querySelector('.start-prompt').getBoundingClientRect();
+      const r = document.querySelector('.entry-scroll').getBoundingClientRect();
       return { x: r.x, y: r.y, width: r.width, height: r.height, vw: innerWidth, vh: innerHeight };
     });
     assert(Math.abs((promptBox.x + promptBox.width / 2) - promptBox.vw / 2) <= 8,
@@ -318,7 +318,7 @@ try {
         `start prompt overlaps ${name}: ${JSON.stringify({ promptBox, box })}`);
     }
     const cueLineWidth = await read(page, () =>
-      Number.parseFloat(getComputedStyle(document.querySelector('.start-prompt__cue')).width));
+      Number.parseFloat(getComputedStyle(document.querySelector('.entry-scroll__capsule')).width));
     assert(cueLineWidth >= 1.9, `prompt cue line not thicker: ${cueLineWidth}px`);
 
     // Monitor: the cue must never be visible while the start screen is still on screen.

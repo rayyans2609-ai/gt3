@@ -7,7 +7,7 @@
 import puppeteer from 'puppeteer-core';
 import { mkdir, writeFile } from 'node:fs/promises';
 
-const base = process.argv[2] || 'http://127.0.0.1:5196/';
+const base = process.env.GT3_URL || process.argv[2] || 'http://127.0.0.1:5196/';
 const outDir = process.argv[3] || new URL('../local/evidence/verify-controls/', import.meta.url).pathname;
 const softwareGL = process.env.GT3_SOFTWARE_GL === '1';
 await mkdir(outDir, { recursive: true });

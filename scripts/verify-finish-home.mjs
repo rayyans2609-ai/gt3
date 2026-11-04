@@ -10,6 +10,16 @@ const url = process.env.GT3_URL;
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const report = { pass: false, cases: {} };
 let browser;
+async function clickStart(page) {
+  const box = await page.waitForFunction(() => {
+    const el = document.querySelector('.hub-start');
+    if (!el) return null;
+    const r = el.getBoundingClientRect();
+    const x = r.x + r.width / 2, y = r.y + r.height / 2;
+    return el.contains(document.elementFromPoint(x, y)) ? { x, y } : null;
+  }, { timeout: 15000, polling: 50 }).then(handle => handle.jsonValue());
+  await page.mouse.click(box.x, box.y);
+}
 async function finished(browser) {
   const ctx = await browser.createBrowserContext();
   const page = await ctx.newPage();
@@ -55,7 +65,7 @@ try {
     // Hub -> START RACE again: finished state restored, finish card back, no deadlock
     if (ok) {
       await page.waitForFunction(() => document.querySelector('#hub.is-interactive'), { timeout: 15000 });
-      await page.click('.hub-start');
+      await clickStart(page);
       await sleep(4500);
       const back = await snap(page);
       report.cases.finishToHome.reenter = back;

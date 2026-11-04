@@ -50,6 +50,26 @@ async function noOverlap(page, state) {
   });
   assert(!collisions.length, `${state}: overlapping controls ${JSON.stringify(collisions)}`);
 }
+async function waitForPlayerRest(page) {
+  const settled = await page.evaluate(() => new Promise(resolve => {
+    const deadline = performance.now() + 800;
+    let previous, stillFrames = 0;
+    const sample = () => {
+      const root = document.querySelector('[data-hub-player]');
+      if (!root) return resolve(false);
+      const r = root.getBoundingClientRect();
+      const current = [r.x, r.y, r.width, r.height];
+      if (previous && current.every((value, index) => Math.abs(value - previous[index]) < .01)) stillFrames++;
+      else stillFrames = 0;
+      if (stillFrames >= 2) return resolve(true);
+      if (performance.now() >= deadline) return resolve(false);
+      previous = current;
+      requestAnimationFrame(sample);
+    };
+    requestAnimationFrame(sample);
+  }));
+  assert(settled, 'Hub player did not settle within 800ms');
+}
 async function runCase(browser, variant, theme) {
   const page = await seedAndOpen(browser, variant, theme);
   try {
@@ -59,7 +79,7 @@ async function runCase(browser, variant, theme) {
       debug: window.__gt3?.hub?.debug?.(),
     }));
     assert(observed.root === 'race', `expected race, got ${observed.root}`); assert(observed.marker, 'route marker missing at progress 0');
-    await noOverlap(page, 'race');
+    await waitForPlayerRest(page); await noOverlap(page, 'race');
 
     await page.click('[data-control="cars"]');
     await until(() => page.evaluate(() => document.getElementById('hub')?.dataset.hubState === 'cars'), 'cars state');
@@ -72,7 +92,7 @@ async function runCase(browser, variant, theme) {
     const found = checkpoints.filter(item => item.found === 'true').map(item => item.id).sort((a, b) => a - b);
     assert(JSON.stringify(found) === JSON.stringify([2, 5]), `seeded discovery mismatch: ${JSON.stringify(found)}`);
     checkpoints.filter(item => item.found === 'false').forEach(item => assert(!/lexus|nissan|audi|bmw|mercedes|ferrari|mclaren|aston|lamborghini|porsche/i.test(item.html), `locked checkpoint ${item.id} exposes a car name`));
-    await page.hover('[data-checkpoint="1"]'); await page.click('[data-checkpoint="1"]'); await noOverlap(page, 'cars');
+    await page.hover('[data-checkpoint="1"]'); await page.click('[data-checkpoint="1"]'); await waitForPlayerRest(page); await noOverlap(page, 'cars');
     await page.click('[data-control="showcase"]');
     const showcase = await page.evaluate(async () => { const { state } = await import('/src/core/state.js'); return { text: document.querySelector('[data-showcase-status]')?.textContent, experience: state.experience }; });
     assert(showcase.text === 'Showcase opens in the next build.', `Showcase status wrong: ${showcase.text}`); assert(showcase.experience === 'hub', 'Showcase navigated away from Hub');
@@ -86,9 +106,9 @@ async function runCase(browser, variant, theme) {
     await page.click('.hub-player__expand'); await until(() => page.evaluate(() => document.querySelector('[data-hub-player]')?.dataset.hubPlayer === 'expanded'), 'expanded player');
     const tracks = await page.evaluate(() => [...document.querySelectorAll('[data-track]')].map(node => node.textContent.trim()));
     assert(JSON.stringify(tracks) === JSON.stringify(['track_1', 'track_2', 'track_3', 'track_4', 'track_5', 'track_6']), `track list wrong: ${JSON.stringify(tracks)}`);
-    assert(await page.$('[data-control="levels"]'), 'Levels disclosure missing'); await noOverlap(page, 'expanded');
+    assert(await page.$('[data-control="levels"]'), 'Levels disclosure missing'); await waitForPlayerRest(page); await noOverlap(page, 'expanded');
     await page.click('[data-control="cover"]'); await until(() => page.evaluate(() => document.getElementById('hub')?.dataset.hubState === 'listening' && !!document.querySelector('[data-hub-player="listening"]')), 'listening player');
-    await noOverlap(page, 'listening'); await page.keyboard.press('Escape'); await until(() => page.evaluate(() => document.getElementById('hub')?.dataset.hubState === 'race'), 'Escape return');
+    await waitForPlayerRest(page); await noOverlap(page, 'listening'); await page.keyboard.press('Escape'); await until(() => page.evaluate(() => document.getElementById('hub')?.dataset.hubState === 'race'), 'Escape return');
     const beforeTheme = await page.evaluate(async () => (await import('/src/core/state.js')).state.theme);
     await page.click('[data-control="theme"] [role="radio"][aria-checked="false"]');
     const afterTheme = await page.evaluate(async () => { const { state } = await import('/src/core/state.js'); return { theme: state.theme, rootTheme: document.getElementById('hub')?.dataset.theme }; });

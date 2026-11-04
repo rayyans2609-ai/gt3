@@ -67,8 +67,10 @@ async function runCase(browser, variant, theme) {
       id: Number(node.dataset.checkpoint), found: node.dataset.found, text: node.textContent, aria: node.getAttribute('aria-label'), html: node.outerHTML,
     })));
     assert(checkpoints.length === 9, `expected 9 checkpoints, got ${checkpoints.length}`);
-    const found = checkpoints.filter(item => item.found === 'true').map(item => item.id - 1).sort((a, b) => a - b);
-    assert(JSON.stringify(found) === JSON.stringify([0, 2, 5]), `seeded discovery mismatch: ${JSON.stringify(found)}`);
+    // data-checkpoint is the car index (1-9); Lexus (0) starts the Tour and has no checkpoint,
+    // so the seeded discoveries {0,2,5} show as found checkpoints 2 and 5.
+    const found = checkpoints.filter(item => item.found === 'true').map(item => item.id).sort((a, b) => a - b);
+    assert(JSON.stringify(found) === JSON.stringify([2, 5]), `seeded discovery mismatch: ${JSON.stringify(found)}`);
     checkpoints.filter(item => item.found === 'false').forEach(item => assert(!/lexus|nissan|audi|bmw|mercedes|ferrari|mclaren|aston|lamborghini|porsche/i.test(item.html), `locked checkpoint ${item.id} exposes a car name`));
     await page.hover('[data-checkpoint="1"]'); await page.click('[data-checkpoint="1"]'); await noOverlap(page, 'cars');
     await page.click('[data-control="showcase"]');

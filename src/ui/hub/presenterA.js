@@ -130,11 +130,12 @@ export function createPresenter() {
       checkpointNums[i].setAttribute('x', point.x + 10); checkpointNums[i].setAttribute('y', point.y - 12);
       const bend = calloutPoint(point);
       callout.style.left = `${bend.endX + bend.flip * 8}px`; callout.style.top = `${bend.endY - 22}px`;
-      const isOpen = hovered === i || selected === i;
+      const carIndex = geometry.checkpoints[i].carIndex;
+      const isOpen = hovered === carIndex || selected === carIndex;
       callout.hidden = !isOpen || stateName !== 'cars';
       if (isOpen) tick.dataset.leader = `M${point.x} ${point.y}L${bend.x1} ${point.y}L${bend.x1} ${bend.y1}L${bend.endX} ${bend.endY}M${bend.endX} ${bend.endY - 3}L${bend.endX} ${bend.endY + 3}`;
     });
-    const leaderPath = hovered !== null || selected !== null ? checkpointTicks[hovered ?? selected]?.dataset.leader : '';
+    const leaderPath = hovered !== null || selected !== null ? checkpointTicks[(hovered ?? selected) - 1]?.dataset.leader : '';
     grid.setAttribute('d', `${svgPath(projected(geometry.grid))}${leaderPath || ''}`);
     drawStats.frames += 1;
     const elapsed = performance.now() - began;
@@ -153,19 +154,20 @@ export function createPresenter() {
 
   function setCalloutContent(i) {
     const callout = checkpointCallouts[i];
-    const car = CARS[i], isFound = found.has(i);
+    const carIndex = geometry.checkpoints[i].carIndex; // tick i belongs to car i + 1 (Lexus starts the Tour)
+    const car = CARS[carIndex], isFound = found.has(carIndex);
     callout.replaceChildren();
     const heading = html('p', 'precision-callout__name', isFound ? car.displayName : '?');
-    const index = html('span', 'precision-callout__index', String(i + 1).padStart(2, '0'));
+    const index = html('span', 'precision-callout__index', String(carIndex).padStart(2, '0'));
     heading.append(index); callout.append(heading);
     callout.append(html('p', 'precision-callout__detail', isFound ? car.year : 'Not yet discovered'));
-    if (selected === i) {
+    if (selected === carIndex) {
       if (isFound) callout.append(html('p', 'precision-callout__model', car.model));
       const action = html('button', 'precision-callout__showcase', 'View in Showcase');
       action.type = 'button'; action.dataset.control = 'showcase';
       action.addEventListener('click', event => {
         event.stopPropagation();
-        ctx.requestShowcase({ carIndex: i });
+        ctx.requestShowcase({ carIndex });
         showcaseStatus.hidden = false; showcaseStatus.textContent = 'Showcase opens in the next build.';
         window.setTimeout(() => { showcaseStatus.hidden = true; }, 2400);
       });
@@ -257,13 +259,14 @@ export function createPresenter() {
       startLeader = make('path', { class: 'precision-plan__start-leader' }, svg);
       sweep = html('i', 'precision-theme-sweep'); root.append(sweep);
       const overlay = html('div', 'precision-plan__overlay'); root.append(overlay);
-      checkpointButtons = CARS.map((car, i) => {
-        const button = html('button', 'precision-checkpoint'); button.type = 'button'; button.dataset.checkpoint = String(i + 1);
-        button.addEventListener('pointerenter', () => ctx.hoverCheckpoint(i)); button.addEventListener('pointerleave', () => ctx.hoverCheckpoint(null));
-        button.addEventListener('focus', () => ctx.hoverCheckpoint(i)); button.addEventListener('blur', () => ctx.hoverCheckpoint(null));
-        button.addEventListener('click', () => ctx.selectCheckpoint(i)); overlay.append(button); ctx.registerCheckpoint(i, button); return button;
+      // Nine checkpoints, one per car 1-9 (contract: data-checkpoint is the car index).
+      checkpointButtons = geometry.checkpoints.map(({ carIndex }) => {
+        const button = html('button', 'precision-checkpoint'); button.type = 'button'; button.dataset.checkpoint = String(carIndex);
+        button.addEventListener('pointerenter', () => ctx.hoverCheckpoint(carIndex)); button.addEventListener('pointerleave', () => ctx.hoverCheckpoint(null));
+        button.addEventListener('focus', () => ctx.hoverCheckpoint(carIndex)); button.addEventListener('blur', () => ctx.hoverCheckpoint(null));
+        button.addEventListener('click', () => ctx.selectCheckpoint(carIndex)); overlay.append(button); ctx.registerCheckpoint(carIndex, button); return button;
       });
-      checkpointCallouts = CARS.map(() => { const node = html('aside', 'precision-callout'); overlay.append(node); return node; });
+      checkpointCallouts = geometry.checkpoints.map(() => { const node = html('aside', 'precision-callout'); overlay.append(node); return node; });
       splitStart(); queueMicrotask(titleBlockSetup); layout();
     },
     layout,
@@ -305,14 +308,15 @@ export function createPresenter() {
     setDiscovery(next) {
       found = next;
       checkpointButtons.forEach((button, i) => {
-        const isFound = found.has(i); button.dataset.found = String(isFound);
-        button.setAttribute('aria-label', isFound ? CARS[i].displayName : 'Not yet discovered'); button.textContent = isFound ? String(i + 1).padStart(2, '0') : '?';
+        const carIndex = geometry.checkpoints[i].carIndex;
+        const isFound = found.has(carIndex); button.dataset.found = String(isFound);
+        button.setAttribute('aria-label', isFound ? CARS[carIndex].displayName : 'Not yet discovered'); button.textContent = isFound ? String(carIndex).padStart(2, '0') : '?';
         checkpointTicks[i].classList.toggle('is-found', isFound); setCalloutContent(i);
       });
     },
     setRoutePosition(value) { progress = value; marker.dataset.progress = String(value); if (!moving) draw(); },
-    hoverCheckpoint(index) { hovered = index; checkpointButtons.forEach((button, i) => button.classList.toggle('is-hovered', i === index)); checkpointCallouts.forEach((_, i) => setCalloutContent(i)); draw(); },
-    selectCheckpoint(index) { selected = index; checkpointButtons.forEach((button, i) => button.classList.toggle('is-selected', i === index)); checkpointCallouts.forEach((_, i) => setCalloutContent(i)); draw(); },
+    hoverCheckpoint(index) { hovered = index; checkpointButtons.forEach((button, i) => button.classList.toggle('is-hovered', geometry.checkpoints[i].carIndex === index)); checkpointCallouts.forEach((_, i) => setCalloutContent(i)); draw(); },
+    selectCheckpoint(index) { selected = index; checkpointButtons.forEach((button, i) => button.classList.toggle('is-selected', geometry.checkpoints[i].carIndex === index)); checkpointCallouts.forEach((_, i) => setCalloutContent(i)); draw(); },
     setTheme(theme) {
       root.dataset.theme = theme; titleBlock?.querySelectorAll('input').forEach(input => { input.checked = input.value === theme; });
       gsap.fromTo(sweep, { scaleX: 0, transformOrigin: '0 50%' }, { scaleX: 1, duration: reducedMotion.matches ? 0 : .52, ease: 'gt3.out', onComplete: () => gsap.set(sweep, { scaleX: 0, transformOrigin: '100% 50%' }) });

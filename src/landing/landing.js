@@ -397,7 +397,7 @@ function write(node, key, property, value) {
 /** SplitText supplies the letter geometry; progress remains the only animation clock. */
 function splitExitText(node, charClass) {
   if (!node) return [];
-  const split = new SplitText(node, { type: 'chars', charsClass });
+  const split = new SplitText(node, { type: 'chars', charsClass: charClass });
   return split.chars.map(char => {
     const mask = document.createElement('span');
     mask.className = `${charClass}-mask`;

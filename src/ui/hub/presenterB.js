@@ -7,6 +7,7 @@ import { CARS } from '../../data/cars.js';
 import { gsap, reducedMotion } from '../motion.js';
 import { buildCircuitGeometry, routePosition } from './circuitGeometry.js';
 import { restPose as fitPose, poseAt, project, orientation } from './circuitCamera.js';
+import { infieldPoint } from './composition.js';
 import { createRibbon, createContactShadow, createPin, resourceSizes, disposeCarClone } from './dimensional/ribbon.js';
 import '../../styles/hub-b.css';
 
@@ -21,7 +22,7 @@ const node = (tag, className, parent, text) => {
 };
 const palette = {
   top: [color('#f4f2ee'), color('#13264a')], bevel: [color('#ffffff'), color('#d8b94f')],
-  side: [color('#e2dfd9'), color('#0a1730')], field: [color('#ffffff'), color('#0c1930')],
+  side: [color('#c9c3b9'), color('#0a1730')], field: [color('#ffffff'), color('#0c1930')],
   pin: [color('#3f68a6'), color('#e2c25a')], key: [color('#fff5e6'), color('#b9cce9')],
 };
 
@@ -147,7 +148,7 @@ export function createPresenter() {
     pin.material.opacity = motion.surface;
     ribbon.edges.material.color.copy(color('#2a2e33')).lerp(color('#a4b2ca'), t); ribbon.edges.material.opacity = (0.5 - t * 0.28) * reveal * motion.surface;
     const opacity = reveal * motion.surface; for (const m of ribbon.materials) m.opacity = opacity;
-    shadow.mesh.material.opacity = (0.12 + t * 0.23) * opacity;
+    shadow.mesh.material.opacity = (0.2 + t * 0.15) * opacity;
     shadow.mesh.position.copy(shadow.origin).addScaledVector(shadowDirection, 6 + t * 12);
     mix(key.color, palette.key); key.intensity = (2.6 - t * 0.5) * reveal; fill.intensity = (1.8 - t * 1.05) * reveal;
     key.target.position.fromArray(rest?.target ?? [0, 0, 0]);
@@ -185,7 +186,17 @@ export function createPresenter() {
     // cannot resolve a .25 m bevel in a normal depth buffer. Tighten only depth range.
     rest.near = Math.max(0.5, rest.distance * 0.1);
     poseSignature = materialSignature = undefined;
-    makePose(); invalidate();
+    makePose(); invalidate(); placeStart();
+  }
+  // START RACE floats in the maquette's infield, optically above its centre, measured from the
+  // rest pose. GSAP owns the wrapper's transform (reveal/state tweens), so centre with
+  // xPercent/yPercent rather than a CSS transform.
+  function placeStart() {
+    const at = pts => project(pts, rest, viewport);
+    const wrap = ctx.startButton.parentElement;
+    const clear = infieldPoint(at(road.centre), [...at(road.left), ...at(road.right)],
+      { box: { width: wrap.offsetWidth + 40, height: wrap.offsetHeight + 24 }, lift: 0.08 });
+    if (clear) gsap.set(wrap, { left: Math.round(clear.x), top: Math.round(clear.y), bottom: 'auto', xPercent: -50, yPercent: -50 });
   }
   function anchorDOM() {
     const signature = [progress, uiState, hovered, selected, motion.gateLift, motion.reveal, hover].join('|');

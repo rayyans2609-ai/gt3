@@ -42,10 +42,11 @@
 #hub[data-variant='a'] .precision-title__showcase { padding: 0 16px; background: transparent; color: var(--hub-ink); font: 15px var(--font-ui); cursor: pointer; }
 #hub[data-variant='a'] .precision-title__showcase:focus-visible { outline: 2px solid var(--hub-accent); outline-offset: -3px; }
 #hub[data-variant='a'] .precision-theme { justify-content: center; gap: 3px; }
-#hub[data-variant='a'] .precision-theme__option { position: relative; z-index: 1; display: grid; width: 26px; height: 28px; place-items: center; color: var(--hub-ink); font-size: 15px; cursor: pointer; }
+#hub[data-variant='a'] .precision-theme__option { position: relative; z-index: 1; display: grid; width: 26px; height: 28px; place-items: center; color: var(--hub-ink); cursor: pointer; transition: color 200ms var(--ease); }
+#hub[data-variant='a'] .precision-theme__option:has(input:checked) { color: var(--hub-field); }
 #hub[data-variant='a'] .precision-theme__option input { position: absolute; opacity: 0; }
 #hub[data-variant='a'] .precision-theme__option:has(input:focus-visible) { outline: 2px solid var(--hub-accent); outline-offset: 1px; }
-#hub[data-variant='a'] .precision-theme__thumb { position: absolute; left: 15px; width: 25px; height: 28px; border-radius: 2px; background: var(--hub-ink); mix-blend-mode: difference; transition: transform 200ms var(--ease); }
+#hub[data-variant='a'] .precision-theme__thumb { position: absolute; z-index: 0; left: 15px; width: 25px; height: 28px; border-radius: 2px; background: var(--hub-ink); pointer-events: none; transition: transform 200ms var(--ease); }
 :root[data-theme='night'] #hub[data-variant='a'] .precision-theme__thumb { transform: translateX(29px); }
 #hub[data-variant='a'] .precision-title__player { padding: 0 12px; }
 #hub[data-variant='a'] .precision-title__player .hub-player-slot { position: static; width: 100%; }
@@ -62,3 +63,6 @@
 #hub[data-variant='a'].precision-plan--listening .precision-title__identity, #hub[data-variant='a'].precision-plan--listening .precision-title__cars, #hub[data-variant='a'].precision-plan--listening .precision-title__showcase, #hub[data-variant='a'].precision-plan--listening .precision-theme { opacity: .35; }
 @media (max-width: 1320px) { #hub[data-variant='a'] .precision-title { right: 48px; bottom: 38px; grid-template-columns: 64px 70px 106px 76px 244px; } }
 @media (prefers-reduced-motion: reduce) { #hub[data-variant='a'] .precision-plan__svg { transition: none; } }
+
+/* The title block's own switch is candidate A's Day/Night control; the global edge pill is not part of A's Hub composition. */
+:root[data-experience='hub']:has(#hub[data-variant='a']:not([hidden]).is-interactive) .theme-segmented { visibility: hidden; opacity: 0; pointer-events: none; }

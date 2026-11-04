@@ -3,11 +3,13 @@
  * This presenter owns only the A drawing and its DOM; hubCore owns navigation/state.
  */
 import '../../styles/hub-a.css';
+import { createElement, Moon, Sun } from 'lucide';
 import { gsap, reducedMotion } from '../motion.js';
 import { CARS } from '../../data/cars.js';
 import { state, set } from '../../core/state.js';
 import { buildCircuitGeometry, routePosition } from './circuitGeometry.js';
 import { poseAt, project, restPose } from './circuitCamera.js';
+import { infieldPoint } from './composition.js';
 
 // motion.js owns the GSAP instance/ticker. Named eases live on that instance so
 // the presenter never creates a second animation clock.
@@ -39,28 +41,6 @@ const svgPath = points => {
 const distance = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
 
 /** Returns the most generous point inside the projected ring, biased gently upward. */
-function largestClearPoint(left, right, bounds) {
-  let best = { x: (bounds.minX + bounds.maxX) / 2, y: (bounds.minY + bounds.maxY) / 2, score: -Infinity };
-  const edges = [...left, ...right].filter(Boolean);
-  for (let y = bounds.minY + 32; y < bounds.maxY - 28; y += 18) {
-    for (let x = bounds.minX + 54; x < bounds.maxX - 54; x += 20) {
-      let nearest = Infinity;
-      for (let i = 0; i < edges.length; i += 9) nearest = Math.min(nearest, distance({ x, y }, edges[i]));
-      // The title should sit a little above the geometric centre of a viable infield.
-      const score = nearest - Math.abs(x - (bounds.minX + bounds.maxX) / 2) * .025
-        - Math.max(0, y - (bounds.minY + bounds.maxY) / 2) * .08;
-      if (score > best.score) best = { x, y, score };
-    }
-  }
-  return best;
-}
-
-function boxOf(points) {
-  const valid = points.filter(Boolean);
-  return { minX: Math.min(...valid.map(p => p.x)), maxX: Math.max(...valid.map(p => p.x)),
-    minY: Math.min(...valid.map(p => p.y)), maxY: Math.max(...valid.map(p => p.y)) };
-}
-
 export function createPresenter() {
   const geometry = buildCircuitGeometry();
   const framing = [...geometry.left, ...geometry.right];
@@ -74,15 +54,18 @@ export function createPresenter() {
 
   function projected(points) { return project(points, current, viewport); }
 
-  function setStartPosition(left, right) {
-    const bounds = boxOf([...left, ...right]);
-    const clear = largestClearPoint(left, right, bounds);
-    // 5% of the available circuit height is the requested optical lift.
-    const liftedY = clear.y - (bounds.maxY - bounds.minY) * .05;
-    ctx.startButton.parentElement.style.left = `${Math.round(clear.x)}px`;
-    ctx.startButton.parentElement.style.top = `${Math.round(liftedY)}px`;
-    ctx.startButton.parentElement.style.bottom = 'auto';
-    ctx.startButton.parentElement.style.transform = 'translate(-50%, -50%)';
+  // START RACE lives in the infield's negative space at the resting composition only, so it is
+  // measured from the rest pose (never per dive frame). GSAP owns the wrapper's transform
+  // (reveal tweens its y), so centring uses xPercent/yPercent instead of an inline transform.
+  function placeStart() {
+    if (!rest || stateName !== 'race') return;
+    const at = pts => project(pts, rest, viewport);
+    const wrap = ctx.startButton.parentElement;
+    const clear = infieldPoint(at(geometry.centre), [...at(geometry.left), ...at(geometry.right)],
+      { box: { width: wrap.offsetWidth + 32, height: wrap.offsetHeight + 16 }, lift: .05 });
+    if (!clear) return;
+    gsap.set(wrap, { left: Math.round(clear.x), top: Math.round(clear.y), bottom: 'auto',
+      right: 'auto', xPercent: -50, yPercent: -50 });
   }
 
   function calloutPoint(anchor) {
@@ -101,7 +84,6 @@ export function createPresenter() {
     centreLine.setAttribute('d', svgPath(projected(geometry.centre)));
     checker.setAttribute('d', svgPath(projected(geometry.start)));
     grid.setAttribute('d', svgPath(projected(geometry.grid)));
-    setStartPosition(left, right);
 
     const at = routePosition(progress);
     const [position, ahead] = projected([at.position, at.ahead]);
@@ -149,7 +131,7 @@ export function createPresenter() {
       ? { left: 140, top: 70, width: Math.max(780, viewport.width - 280), height: Math.max(520, viewport.height - 140) }
       : { left: viewport.width * .21, top: viewport.height * .122, width: viewport.width * .60, height: viewport.height * .622 };
     rest = restPose({ points: framing, slot, viewport, variant: 'a', ...ctx.camera });
-    if (!moving) { current = rest; draw(); }
+    if (!moving) { current = rest; draw(); placeStart(); }
   }
 
   function setCalloutContent(i) {
@@ -210,7 +192,10 @@ export function createPresenter() {
       const input = document.createElement('input'); input.type = 'radio'; input.name = 'precision-theme'; input.value = mode;
       input.checked = state.theme === mode; input.setAttribute('aria-label', mode === 'day' ? 'Day theme' : 'Night theme');
       input.addEventListener('change', () => { if (input.checked) set('theme', mode); });
-      const label = html('label', 'precision-theme__option', index ? '☾' : '☀'); label.append(input); theme.append(label);
+      // Both choices stay visible (SPEC §13): Lucide glyphs at stroke 1.5, the checked one inverted on the thumb.
+      const label = html('label', 'precision-theme__option');
+      label.append(createElement(index ? Moon : Sun, { width: 15, height: 15, 'stroke-width': 1.5, 'aria-hidden': 'true' }), input);
+      theme.append(label);
     });
     theme.append(html('i', 'precision-theme__thumb'));
     const playerCell = html('div', 'precision-title__cell precision-title__player'); playerCell.append(slot);

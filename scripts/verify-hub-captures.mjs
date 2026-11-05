@@ -79,7 +79,17 @@ async function open(browser, { variant, theme = 'day', experience = 'hub', seed 
 async function close(opened) { await opened.context.close(); }
 async function chooseTheme(page, theme) {
   const current = await page.evaluate(() => document.querySelector('#hub')?.dataset.theme);
-  if (current !== theme) await page.click('[data-control="theme"] [role="radio"][aria-checked="false"]');
+  if (current !== theme) await page.evaluate(() => {
+    // Drive the rendered theme control: A hosts native radios and hides the global pill.
+    const group = [...document.querySelectorAll('[data-control="theme"]')].find(node => {
+      const style = getComputedStyle(node);
+      return style.visibility !== 'hidden' && style.pointerEvents !== 'none' && node.getClientRects().length > 0;
+    });
+    if (!group) throw new Error('no visible theme control');
+    const radio = group.querySelector('[role="radio"][aria-checked="false"]') || group.querySelector('input[type="radio"]:not(:checked)');
+    if (!radio) throw new Error('no inactive theme option');
+    radio.click();
+  });
   await until(() => page.evaluate(value => document.querySelector('#hub')?.dataset.theme === value, theme), `${theme} theme`);
 }
 async function hubState(page, state) {
@@ -112,8 +122,8 @@ async function stills(browser) {
 
     opened = await open(browser, { variant, theme, seed: { unlocked: [0, 2, 5] } });
     await opened.page.click('[data-control="cars"]'); await hubState(opened.page, 'cars');
-    // Contract IDs are one-based; persisted discovery index 2 is checkpoint 3.
-    await opened.page.click('[data-checkpoint="3"]'); await opened.page.hover('[data-checkpoint="4"]'); await settle();
+    // data-checkpoint is the car index (contract): found car 2 is checkpoint 2, locked car 4 is 4.
+    await opened.page.click('[data-checkpoint="2"]'); await opened.page.hover('[data-checkpoint="4"]'); await settle();
     await captureStill(opened.page, `${variant}-${theme}-cars`, 'Hub cars; unlocked 0,2,5; checkpoint 2 selected; checkpoint 4 hovered'); await close(opened);
 
     opened = await open(browser, { variant, theme }); await opened.page.click('[data-control="cover"]'); await hubState(opened.page, 'listening'); await settle();
@@ -175,7 +185,7 @@ async function clips(browser) {
       await page.click('.home-control'); await hubState(page, 'race'); await settle();
     });
     await clip(browser, `${variant}-states`, { variant, theme: 'night', seed: { unlocked: [0, 2, 5] } }, async page => {
-      await page.click('[data-control="cars"]'); await hubState(page, 'cars'); await page.hover('[data-checkpoint="3"]'); await page.click('[data-checkpoint="3"]'); await sleep(500);
+      await page.click('[data-control="cars"]'); await hubState(page, 'cars'); await page.hover('[data-checkpoint="2"]'); await page.click('[data-checkpoint="2"]'); await sleep(500);
       await page.click('[data-control="cars"]'); await hubState(page, 'race'); await expanded(page); await sleep(400); await page.click('[data-control="cover"]'); await hubState(page, 'listening'); await sleep(500); await page.keyboard.press('Escape'); await hubState(page, 'race'); await sleep(500);
     });
     await clip(browser, `${variant}-theme`, { variant, theme: 'day' }, async page => {

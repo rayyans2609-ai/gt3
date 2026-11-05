@@ -65,8 +65,10 @@ async function open(browser, { variant, theme = 'day', experience = 'hub', seed 
   if (experience === 'hub') {
     await until(() => page.evaluate(() => {
       const hub = document.querySelector('#hub');
-      return hub?.classList.contains('is-interactive') && hub.dataset.hubState === 'race' && !hub.inert;
-    }), 'interactive Hub');
+      return hub?.classList.contains('is-interactive') && hub.dataset.hubState === 'race' && !hub.inert
+        && ['ready', 'degraded'].includes(window.__gt3?.readiness?.status) && !document.querySelector('.hub-start')?.disabled;
+    }), 'interactive, ready Hub');
+    await sleep(1800); // the arrival reveal (circuit draw, START, title block / console) completes
   } else if (experience === 'tour') {
     await until(() => page.evaluate(() => document.querySelector('.home-control') && document.querySelector('canvas')), 'Grand Tour');
   } else {
@@ -83,8 +85,20 @@ async function chooseTheme(page, theme) {
 async function hubState(page, state) {
   await until(() => page.evaluate(value => document.querySelector('#hub')?.dataset.hubState === value, state), `Hub ${state}`);
 }
+// Click a control at its rendered centre once it is actually hit-testable (reveals and Flip
+// transitions move controls; Puppeteer's element click can land beside them).
+async function clickRendered(page, selector) {
+  const point = await page.waitForFunction(sel => {
+    const el = [...document.querySelectorAll(sel)].find(node => node.getClientRects().length);
+    if (!el) return null;
+    const r = el.getBoundingClientRect();
+    const hit = document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2);
+    return el.contains(hit) ? { x: r.x + r.width / 2, y: r.y + r.height / 2 } : null;
+  }, { timeout: 15000, polling: 50 }, selector).then(h => h.jsonValue());
+  await page.mouse.click(point.x, point.y);
+}
 async function expanded(page) {
-  await page.click('.hub-player__expand');
+  await clickRendered(page, '.hub-player__expand');
   await until(() => page.evaluate(() => document.querySelector('[data-hub-player]')?.dataset.hubPlayer === 'expanded'), 'expanded player');
 }
 

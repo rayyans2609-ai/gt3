@@ -1,0 +1,209 @@
+{
+  "gitSha": "4d8f78a84cedcc9f5fbafa4af3a37151be48fc2c",
+  "note": "headless Chrome screencast, Metal; timing approximate",
+  "files": [
+    {
+      "file": "stills/a-day-race.jpg",
+      "pixels": "1440x900",
+      "bytes": 51694,
+      "url": "http://127.0.0.1:5300/?hub=a",
+      "state": "Hub race, player collapsed"
+    },
+    {
+      "file": "stills/a-day-race-expanded.jpg",
+      "pixels": "1440x900",
+      "bytes": 61920,
+      "url": "http://127.0.0.1:5300/?hub=a",
+      "state": "Hub race, track list open"
+    },
+    {
+      "file": "stills/a-day-cars.jpg",
+      "pixels": "1440x900",
+      "bytes": 57162,
+      "url": "http://127.0.0.1:5300/?hub=a",
+      "state": "Hub cars; unlocked 0,2,5; checkpoint 2 selected; checkpoint 4 hovered"
+    },
+    {
+      "file": "stills/a-day-listening.jpg",
+      "pixels": "1440x900",
+      "bytes": 40933,
+      "url": "http://127.0.0.1:5300/?hub=a",
+      "state": "Hub listening"
+    },
+    {
+      "file": "stills/a-night-race.jpg",
+      "pixels": "1440x900",
+      "bytes": 52153,
+      "url": "http://127.0.0.1:5300/?hub=a",
+      "state": "Hub race, player collapsed"
+    },
+    {
+      "file": "stills/a-night-race-expanded.jpg",
+      "pixels": "1440x900",
+      "bytes": 63041,
+      "url": "http://127.0.0.1:5300/?hub=a",
+      "state": "Hub race, track list open"
+    },
+    {
+      "file": "stills/a-night-cars.jpg",
+      "pixels": "1440x900",
+      "bytes": 57455,
+      "url": "http://127.0.0.1:5300/?hub=a",
+      "state": "Hub cars; unlocked 0,2,5; checkpoint 2 selected; checkpoint 4 hovered"
+    },
+    {
+      "file": "stills/a-night-listening.jpg",
+      "pixels": "1440x900",
+      "bytes": 40159,
+      "url": "http://127.0.0.1:5300/?hub=a",
+      "state": "Hub listening"
+    },
+    {
+      "file": "stills/b-day-race.jpg",
+      "pixels": "1440x900",
+      "bytes": 59402,
+      "url": "http://127.0.0.1:5300/?hub=b",
+      "state": "Hub race, player collapsed"
+    },
+    {
+      "file": "stills/b-day-race-expanded.jpg",
+      "pixels": "1440x900",
+      "bytes": 62359,
+      "url": "http://127.0.0.1:5300/?hub=b",
+      "state": "Hub race, track list open"
+    },
+    {
+      "file": "stills/b-day-cars.jpg",
+      "pixels": "1440x900",
+      "bytes": 63587,
+      "url": "http://127.0.0.1:5300/?hub=b",
+      "state": "Hub cars; unlocked 0,2,5; checkpoint 2 selected; checkpoint 4 hovered"
+    },
+    {
+      "file": "stills/b-day-listening.jpg",
+      "pixels": "1440x900",
+      "bytes": 53093,
+      "url": "http://127.0.0.1:5300/?hub=b",
+      "state": "Hub listening"
+    },
+    {
+      "file": "stills/b-night-race.jpg",
+      "pixels": "1440x900",
+      "bytes": 52399,
+      "url": "http://127.0.0.1:5300/?hub=b",
+      "state": "Hub race, player collapsed"
+    },
+    {
+      "file": "stills/b-night-race-expanded.jpg",
+      "pixels": "1440x900",
+      "bytes": 56686,
+      "url": "http://127.0.0.1:5300/?hub=b",
+      "state": "Hub race, track list open"
+    },
+    {
+      "file": "stills/b-night-cars.jpg",
+      "pixels": "1440x900",
+      "bytes": 56910,
+      "url": "http://127.0.0.1:5300/?hub=b",
+      "state": "Hub cars; unlocked 0,2,5; checkpoint 2 selected; checkpoint 4 hovered"
+    },
+    {
+      "file": "stills/b-night-listening.jpg",
+      "pixels": "1440x900",
+      "bytes": 48679,
+      "url": "http://127.0.0.1:5300/?hub=b",
+      "state": "Hub listening"
+    },
+    {
+      "file": "stills/a-day-race-1280.jpg",
+      "pixels": "1280x800",
+      "bytes": 45873,
+      "url": "http://127.0.0.1:5300/?hub=a",
+      "state": "Hub race, player collapsed"
+    },
+    {
+      "file": "stills/b-day-race-1280.jpg",
+      "pixels": "1280x800",
+      "bytes": 49844,
+      "url": "http://127.0.0.1:5300/?hub=b",
+      "state": "Hub race, player collapsed"
+    },
+    {
+      "file": "stills/landing-day.jpg",
+      "pixels": "1440x900",
+      "bytes": 52618,
+      "url": "http://127.0.0.1:5300/",
+      "state": "Landing day"
+    },
+    {
+      "file": "stills/tour-day.jpg",
+      "pixels": "1440x900",
+      "bytes": 111452,
+      "url": "http://127.0.0.1:5300/",
+      "state": "Grand Tour midpoint day; edge controls and red minimap marker"
+    },
+    {
+      "file": "stills/landing-night.jpg",
+      "pixels": "1440x900",
+      "bytes": 47913,
+      "url": "http://127.0.0.1:5300/",
+      "state": "Landing night"
+    },
+    {
+      "file": "stills/tour-night.jpg",
+      "pixels": "1440x900",
+      "bytes": 90349,
+      "url": "http://127.0.0.1:5300/",
+      "state": "Grand Tour midpoint night; edge controls and red minimap marker"
+    },
+    {
+      "file": "clips/a-launch-home.mp4",
+      "pixels": "1280x800 (scaled)",
+      "bytes": 311968,
+      "url": "http://127.0.0.1:5300",
+      "state": "motion clip"
+    },
+    {
+      "file": "clips/a-states.mp4",
+      "pixels": "1280x800 (scaled)",
+      "bytes": 106403,
+      "url": "http://127.0.0.1:5300",
+      "state": "motion clip"
+    },
+    {
+      "file": "clips/a-theme.mp4",
+      "pixels": "1280x800 (scaled)",
+      "bytes": 56741,
+      "url": "http://127.0.0.1:5300",
+      "state": "motion clip"
+    },
+    {
+      "file": "clips/b-launch-home.mp4",
+      "pixels": "1280x800 (scaled)",
+      "bytes": 286895,
+      "url": "http://127.0.0.1:5300",
+      "state": "motion clip"
+    },
+    {
+      "file": "clips/b-states.mp4",
+      "pixels": "1280x800 (scaled)",
+      "bytes": 163642,
+      "url": "http://127.0.0.1:5300",
+      "state": "motion clip"
+    },
+    {
+      "file": "clips/b-theme.mp4",
+      "pixels": "1280x800 (scaled)",
+      "bytes": 99410,
+      "url": "http://127.0.0.1:5300",
+      "state": "motion clip"
+    },
+    {
+      "file": "clips/landing-drag-scroll.mp4",
+      "pixels": "1280x800 (scaled)",
+      "bytes": 251722,
+      "url": "http://127.0.0.1:5300",
+      "state": "motion clip"
+    }
+  ]
+}

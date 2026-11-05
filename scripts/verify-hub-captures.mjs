@@ -70,7 +70,12 @@ async function open(browser, { variant, theme = 'day', experience = 'hub', seed 
     }), 'interactive, ready Hub');
     await sleep(1800); // the arrival reveal (circuit draw, START, title block / console) completes
   } else if (experience === 'tour') {
-    await until(() => page.evaluate(() => document.querySelector('.home-control') && document.querySelector('canvas')), 'Grand Tour');
+    // The Tour still must show the edge controls and the minimap, so wait for the route to be
+    // ready and the loading cover to part, not just for the canvas.
+    await until(() => page.evaluate(() => document.querySelector('.home-control') && document.querySelector('canvas')
+      && ['ready', 'degraded'].includes(window.__gt3?.readiness?.status)
+      && document.querySelector('.hud-route__marker')), 'Grand Tour ready');
+    await sleep(2500);
   } else {
     await until(() => page.evaluate(() => document.querySelector('#landing') && !document.querySelector('#landing')?.hidden), 'Landing');
   }

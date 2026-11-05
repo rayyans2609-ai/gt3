@@ -182,3 +182,7 @@
 :root[data-world='landing'] .theme-segmented__option[aria-checked='true'] {
   color: var(--accent);
 }
+
+/* The exit masks hug a 0.74 line box with negative tracking, which clipped the G's top and the 3's
+   right side. Extend each clip box outward and cancel it with negative margins: same layout, no clip. */
+.landing-wordmark__char-mask { padding: 0.12em 0.08em 0.06em; margin: -0.12em -0.08em -0.06em; }

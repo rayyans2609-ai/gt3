@@ -159,7 +159,7 @@ export function createPresenter() {
     worldVeil.material.uniforms.opacity.value = 1 - motion.world;
     const screenShadow = shadowDirection.applyQuaternion(new THREE.Quaternion().fromArray(current?.quaternion ?? rest.quaternion).invert());
     root.style.setProperty('--hub-light-x', `${(screenShadow.x * 4).toFixed(2)}px`); root.style.setProperty('--hub-light-y', `${(-screenShadow.y * 4).toFixed(2)}px`);
-    veil.style.opacity = String(motion.listen * 0.4);
+    veil.style.opacity = String(motion.listen * 0.82); // the maquette recedes to a faint ghost behind the cover and list
   }
   function makePose() {
     if (!rest || moving) return;

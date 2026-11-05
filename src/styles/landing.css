@@ -80,16 +80,19 @@
 }
 
 .landing-eyebrow {
+  /* The accepted Phase 4 position (just under the wordmark, clear of the car) and its tracked
+     uppercase identity, strengthened in size, weight and contrast (owner, 2026-11-04). */
   position: absolute;
   left: 0;
-  top: calc(21.11vh + var(--landing-type) * 0.9768);
+  top: calc(21.11vh + var(--landing-type) * 0.74 + 28px);
   width: 100%;
   text-align: center;
   font-family: 'Neue Haas Grotesk Text', var(--font-ui);
-  font-size: 17px;
-  font-weight: 500;
-  letter-spacing: 0;
-  color: rgb(89 126 179 / 52%);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgb(89 126 179 / 82%);
 }
 
 .landing-cue {

@@ -67,3 +67,11 @@
 :root[data-experience='hub'] #audio-layer { visibility: hidden; opacity: 0; pointer-events: none; }
 @media (max-width: 900px) { #hub-listening .hub-player[data-variant='a'], #hub-listening .hub-player[data-variant='b'] { grid-template-columns: minmax(260px, 42vw) 1fr; } #hub-listening .hub-player__cover { width: min(420px, 42vw); height: min(420px, 42vw); } }
 @media (prefers-reduced-motion: reduce) { .hub-player, .hub-player * { transition-duration: 1ms !important; } }
+
+/* A's track "schedule": each row is a real grid row (a display:contents row has no box, so its
+   counter never advanced and its generated number was auto-placed onto the next row). */
+.hub-player[data-variant='a'] .hub-player__list { counter-reset: gt3-track; }
+.hub-player[data-variant='a'] .hub-player__list li { display: grid; grid-column: 1 / -1; grid-template-columns: 44px 1fr; align-items: center; border-bottom: 1px solid var(--hub-hair); counter-increment: gt3-track; }
+.hub-player[data-variant='a'] .hub-player__list li::after { content: none; }
+.hub-player[data-variant='a'] .hub-player__list li::before { content: counter(gt3-track, decimal-leading-zero); padding: 8px 9px; color: var(--hub-muted); font: 11px var(--font-mono); }
+.hub-player[data-variant='a'] .hub-player__list button { grid-column: 2; }

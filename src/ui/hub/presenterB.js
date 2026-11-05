@@ -50,7 +50,7 @@ export function createPresenter() {
     transparent: true, depthTest: false, depthWrite: false, toneMapped: false,
   }));
   worldVeil.frustumCulled = false; worldVeil.renderOrder = -10; worldVeil.visible = false; scene.add(worldVeil);
-  let root, ctx, viewport, rest, current, uiState = 'race', moving = false, disposed = false;
+  let root, ctx, viewport, rest, carsRest, current, uiState = 'race', moving = false, disposed = false;
   let dirty = true, readiness = 0, progress = 0, hovered = null, selected = null, discovered = new Set();
   let overlay, markerHook, leader, veil, labels = [], detail, detailName, detailLine, detailLink, previewStatus;
   let shellMounted = false, ownTheme, ownShowcase, consoleStrip, shellReveal, themeControls = [], startChars = [];
@@ -167,9 +167,12 @@ export function createPresenter() {
     if (signature === poseSignature) return;
     poseSignature = signature;
     const quaternion = orientation((ctx.camera?.yawDeg ?? 75) + motion.parallaxX, (ctx.camera?.pitchDeg ?? 52) + motion.cars * 6 + motion.parallaxY);
-    const distance = rest.distance * (1 - motion.cars * 0.25 + motion.listen * 0.28);
+    const to = carsRest ?? rest, m = motion.cars, mix = (a, b) => a + (b - a) * m;
+    const distance = mix(rest.distance, to.distance) * (1 + motion.listen * 0.28);
+    const target = rest.target.map((v, i) => mix(v, to.target[i]));
+    const shift = [mix(rest.shift?.[0] ?? 0, to.shift?.[0] ?? 0), mix(rest.shift?.[1] ?? 0, to.shift?.[1] ?? 0)];
     const back = new THREE.Vector3(0, 0, 1).applyQuaternion(new THREE.Quaternion().fromArray(quaternion));
-    current = { ...rest, quaternion, distance, position: new THREE.Vector3().fromArray(rest.target).addScaledVector(back, distance).toArray() };
+    current = { ...rest, quaternion, distance, target, shift, position: new THREE.Vector3().fromArray(target).addScaledVector(back, distance).toArray() };
   }
   function applyCamera() {
     if (!current) return;
@@ -185,6 +188,10 @@ export function createPresenter() {
     // The pure fit's .1 m near plane is for projection math. At this long lens it
     // cannot resolve a .25 m bevel in a normal depth buffer. Tighten only depth range.
     rest.near = Math.max(0.5, rest.distance * 0.1);
+    // Cars is framed deliberately (not just "25% closer" around the rest lens shift, which ran the
+    // ribbon under the console): a larger slot that ends above the console, pitched 6 degrees higher.
+    carsRest = fitPose({ points: framing, slot: { left: viewport.width * 0.07, top: viewport.height * 0.17, width: viewport.width * 0.86, height: viewport.height * 0.6 },
+      viewport, variant: 'b', ...ctx.camera, pitchDeg: (ctx.camera?.pitchDeg ?? 52) + 6 });
     poseSignature = materialSignature = undefined;
     makePose(); invalidate(); placeStart();
   }

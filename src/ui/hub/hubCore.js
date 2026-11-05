@@ -55,7 +55,7 @@ function selectCheckpoint(index) {
   set('showcaseCarIndex', index);
   presenter.selectCheckpoint(index);
   const result = requestShowcase({ carIndex: index });
-  if (!result.available) status.textContent = 'Showcase coming later.';
+  if (!result.available) status.textContent = 'Showcase opens in the next build.';
   return result;
 }
 function resetUI() {

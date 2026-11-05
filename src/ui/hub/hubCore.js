@@ -24,7 +24,7 @@ import { createPresenter as createB } from './presenterB.js';
 let root, field, frame, startButton, status, carsToggle, playerSlot, chrome, presenter;
 let ready = false, readinessProgress = 0, presence = -1, interactive = null, revealed = false;
 let uiState = 'race', stateBeforeListening = 'race', selected = null, hovered = null, onStart, requestShowcase;
-let routeEstablished = false, focusOnReveal = false;
+let routeEstablished = false, focusOnReveal = false, escapeBound = false;
 let discovery = new Set(), ticks = [], revealTl, edgeTl;
 const html = document.documentElement;
 const debug = { lastDive: null, variant: 'a', state: 'race', selected: null, hovered: null };
@@ -68,6 +68,14 @@ function renderDiscovery() {
   presenter.setDiscovery(new Set(discovery));
   ticks.forEach((tick, i) => tick.classList.toggle('is-found', discovery.has(i)));
   carsToggle.setAttribute('aria-label', `Cars, ${discovery.size} of ${CARS.length} discovered`);
+}
+function handleEscape(event) {
+  if (event.key !== 'Escape') return;
+  if (uiState === 'listening') { closeHubListening(); event.preventDefault(); return; }
+  if (uiState !== 'race') {
+    const target = uiState === 'cars' ? carsToggle : startButton;
+    resetUI(); target?.focus(); event.preventDefault();
+  }
 }
 export function initHub({ onStartRace, camera, requestShowcase: showcase, setPoseOverride } = {}) {
   root = document.getElementById('hub');
@@ -132,14 +140,18 @@ export function initHub({ onStartRace, camera, requestShowcase: showcase, setPos
         checkpointElements.get(keys[(keys.indexOf(checkpoint) + step + keys.length) % keys.length])?.focus();
       }
     }
-    if (event.key === 'Escape' && uiState === 'listening') {
-      closeHubListening(); event.preventDefault(); return;
-    }
-    if (event.key === 'Escape' && uiState !== 'race') {
-      const target = uiState === 'cars' ? carsToggle : startButton;
-      resetUI(); target?.focus(); event.preventDefault();
-    }
+    handleEscape(event);
   });
+  // Moving the player into #hub-listening with append() blurs its focused control, so a later
+  // Escape can land on <body> and never bubble through #hub. Listening is modal: the key must
+  // close it wherever focus sits inside the Hub.
+  if (!escapeBound) {
+    escapeBound = true;
+    document.addEventListener('keydown', event => {
+      if (!root || root.hidden || root.inert || event.defaultPrevented) return;
+      if (!event.target || !root.contains(event.target)) handleEscape(event);
+    });
+  }
   let resizeTimer;
   window.addEventListener('resize', () => {
     window.clearTimeout(resizeTimer);

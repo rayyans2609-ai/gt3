@@ -31,7 +31,7 @@
 #hub[data-variant='a'] .precision-callout__detail, #hub[data-variant='a'] .precision-callout__model { margin: 3px 0 0; color: var(--hub-muted); font: 11px/1.2 var(--font-ui); }
 #hub[data-variant='a'] .precision-callout__showcase { margin: 8px 0 0; padding: 0 0 2px; border: 0; border-bottom: 1px solid var(--hub-accent); background: none; color: var(--hub-ink); font: 13px var(--font-ui); cursor: pointer; }
 #hub[data-variant='a'] .precision-callout__showcase:focus-visible { outline: 2px solid var(--hub-accent); outline-offset: 3px; }
-#hub[data-variant='a'] .precision-title { position: absolute; right: clamp(48px, 4.4vw, 72px); bottom: clamp(48px, 4.4vw, 72px); z-index: 8; display: grid; grid-template-columns: 70px 78px 116px 82px minmax(232px, 310px); height: 56px; border-top: 1px solid var(--hub-a-hair); border-bottom: 1px solid var(--hub-a-hair); }
+#hub[data-variant='a'] .precision-title { position: absolute; right: clamp(48px, 4.4vw, 72px); bottom: clamp(48px, 4.4vw, 72px); z-index: 8; display: grid; grid-template-columns: 70px 78px 116px 82px minmax(232px, 310px); grid-template-rows: 56px; height: 56px; border-top: 1px solid var(--hub-a-hair); border-bottom: 1px solid var(--hub-a-hair); }
 #hub[data-variant='a'] .precision-title__cell { position: relative; display: flex; align-items: center; min-width: 0; border-left: 1px solid var(--hub-a-hair); }
 #hub[data-variant='a'] .precision-title__cell:last-of-type { border-right: 1px solid var(--hub-a-hair); }
 #hub[data-variant='a'] .precision-title .hub-mark { position: static; font-size: 21px; }

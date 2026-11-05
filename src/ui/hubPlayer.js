@@ -129,6 +129,9 @@ function moveToListening() {
   const before = reducedMotion.matches ? null : Flip.getState(root);
   listeningLayer.append(root); applyPresentation('listening'); listeningLayer.hidden = false;
   if (before) flip = Flip.from(before, { duration: 0.62, ease: 'gt3.out', absolute: true, onComplete: () => { flip = null; } });
+  // append() blurs the cover while it moves into the layer; keep focus inside the modal so
+  // Escape (and the rest of the dialog's keys) still reach a handler.
+  closeButton.focus({ preventScroll: true });
   emit('listen', { previous: beforeListening });
 }
 function returnFromListening() {
@@ -136,6 +139,7 @@ function returnFromListening() {
   const before = reducedMotion.matches ? null : Flip.getState(root);
   slot.append(root); applyPresentation(beforeListening); listeningLayer.hidden = true;
   if (before) flip = Flip.from(before, { duration: 0.46, ease: 'gt3.out', absolute: true, onComplete: () => { flip = null; } });
+  coverButton.focus({ preventScroll: true });
   emit('close-listening', { previous: beforeListening });
 }
 function pointerTilt(event) {

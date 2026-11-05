@@ -11,6 +11,9 @@
 .hub-player[data-hub-player='collapsed'] { grid-template-columns: 42px auto auto auto; grid-template-areas: 'cover meta transport expand'; }
 .hub-player[data-hub-player='expanded'] { grid-template-columns: 72px minmax(220px, 1fr) auto; grid-template-areas: 'cover meta transport' 'seek seek seek' 'levels-toggle levels-toggle levels-toggle' 'levels levels levels' 'list list list'; width: min(420px, calc(100vw - 2 * var(--m))); padding: 10px; border: 1px solid var(--hub-hair); background: var(--hub-player-surface); border-radius: var(--player-radius); }
 .hub-player__cover { grid-area: cover; position: relative; width: 42px; height: 42px; padding: 0; overflow: hidden; border: 0; border-radius: 1px; background: var(--hub-faint); cursor: pointer; transform-style: preserve-3d; perspective: 1200px; }
+/* Expanded has a 72px cover column; the cover must actually take it so the Flip recomposition
+   changes the object's size instead of leaving the enlarged column empty. */
+.hub-player[data-hub-player='expanded'] .hub-player__cover { width: 72px; height: 72px; }
 .hub-player__cover img { display: block; width: 100%; height: 100%; object-fit: cover; transition: opacity 160ms var(--ease); }
 .hub-player__cover img.is-swapping { opacity: 0; }
 .hub-player__sheen { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(circle at var(--sheen-x, 35%) var(--sheen-y, 28%), rgba(255,255,255,.38), transparent 36%); mix-blend-mode: screen; opacity: .45; }
@@ -38,6 +41,13 @@
 #hub[data-variant='a'] .precision-title__player .hub-player[data-hub-player='expanded'] { height: auto; grid-template-columns: 72px minmax(160px, 1fr) auto; grid-template-rows: auto auto auto auto auto; grid-template-areas: 'cover meta transport' 'seek seek seek' 'levels-toggle levels-toggle levels-toggle' 'levels levels levels' 'list list list'; column-gap: 10px; }
 #hub[data-variant='a'] .precision-title__player .hub-player[data-hub-player='expanded'] .hub-player__seek { display: block; }
 #hub[data-variant='a'] .precision-title__player .hub-player[data-hub-player='expanded'] .hub-player__levels { display: grid; }
+#hub[data-variant='a'] .precision-title__player .hub-player[data-hub-player='expanded'] .hub-player__cover { width: 72px; height: 72px; }
+/* Expanded is a popover anchored above the title block. In flow, its 423px height stretched the
+   title block's single grid row and vertically centred the Cars control at y≈984 — 84px below
+   the 900px viewport, so `[data-control="cars"]` was genuinely unclickable. */
+#hub[data-variant='a'] .precision-title__player .hub-player[data-hub-player='expanded'] {
+  position: absolute; right: 0; bottom: calc(100% + 10px);
+}
 
 #hub-listening { position: fixed; z-index: 10; inset: 0; display: grid; align-items: center; padding: clamp(48px, 8vw, 150px) var(--m); background: color-mix(in srgb, var(--hub-field) 92%, transparent); }
 #hub-listening[hidden] { display: none; }

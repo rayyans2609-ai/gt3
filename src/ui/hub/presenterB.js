@@ -346,6 +346,9 @@ export function createPresenter() {
     },
     setState(next) {
       uiState = next; root.dataset.hubState = next; mountShell(); root.querySelector('.hub-mark')?.classList.toggle('hub-b-index-active', next === 'race');
+      // Listening is modal and the full player card covers the sheet; take START RACE out of the
+      // render and the tab order (A already does this through its setState).
+      ctx.startButton.parentElement.hidden = next === 'listening';
       root.querySelector('.hub-cars__toggle')?.setAttribute('aria-pressed', String(next === 'cars')); labels.forEach(button => { button.tabIndex = next === 'cars' ? 0 : -1; });
       if (next !== 'cars') { hovered = null; clearCar(); }
       presenter.hoverStart(false); hoverTween?.kill(); stateTween?.kill(); stateTween = gsap.timeline({ onUpdate: invalidate });
@@ -396,9 +399,12 @@ export function createPresenter() {
     update(dt) {
       mountShell(); hostSharedTheme();
       if (!moving && !reducedMotion.matches) {
-        const factor = 1 - Math.exp(-Math.min(dt, 0.05) * 11);
+        // Pointer parallax is a follow, not an animation: reach the target in a few frames so
+        // the scene is genuinely idle (and draws nothing) about a tenth of a second after the
+        // pointer stops. A long exponential tail kept re-rendering the whole maquette.
+        const factor = 1 - Math.exp(-Math.min(dt, 0.05) * 26);
         for (const [axis, target] of [['parallaxX', pointer.x], ['parallaxY', pointer.y]]) {
-          const delta = target - motion[axis]; if (delta !== 0) { motion[axis] = Math.abs(delta) < 0.002 ? target : motion[axis] + delta * factor; invalidate(); }
+          const delta = target - motion[axis]; if (delta !== 0) { motion[axis] = Math.abs(delta) < 0.02 ? target : motion[axis] + delta * factor; invalidate(); }
         }
       }
       if (car && uiState === 'cars' && !reducedMotion.matches) { car.rotation.y += THREE.MathUtils.degToRad(12) * Math.min(dt, 0.1); invalidate(); }

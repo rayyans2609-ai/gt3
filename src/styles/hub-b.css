@@ -26,6 +26,13 @@
 #hub[data-variant='b'] [data-showcase-status] { position: absolute; top: 150px; left: var(--m); max-width: 235px; margin: 0; font: 13px/1.45 var(--font-ui); color: var(--hub-muted); }
 #hub[data-variant='b'] .hub-b-console { position: absolute; bottom: var(--m); right: var(--m); display: flex; align-items: center; gap: 16px; min-height: 64px; padding: 8px 12px 8px 16px; border-radius: 14px; border: 1px solid var(--hub-hair); border-top-color: color-mix(in srgb, var(--hub-field) 85%, var(--hub-ink)); background: color-mix(in srgb, var(--hub-field) 94%, var(--hub-ink)); box-shadow: var(--hub-light-x) calc(var(--hub-light-y) * 2) 24px color-mix(in srgb, var(--hub-ink) 9%, transparent), inset 0 1px 0 color-mix(in srgb, var(--hub-field) 90%, transparent); }
 #hub[data-variant='b'] .hub-b-console .hub-player-slot { position: relative; top: auto; right: auto; bottom: auto; left: auto; }
+/* The expanded grid's 220px meta track plus the six-button transport needed 500px inside the
+   player's own 420px box, so the track list painted under the theme switch. Let the meta track
+   take whatever the transport leaves; the list then stays inside the console strip. */
+#hub[data-variant='b'] .hub-b-console .hub-player[data-hub-player='expanded'] { grid-template-columns: 72px minmax(0, 1fr) auto; }
+/* Two rows of three keep the expanded console the same height as before the 72px cover, so it
+   still clears START RACE above it while the list stays inside the console strip. */
+#hub[data-variant='b'] .hub-b-console .hub-player__list { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 #hub[data-variant='b'] .hub-b-console .theme-segmented { margin: 0; }
 #hub[data-variant='b'] .hub-b-console [data-control='theme'] { position: relative; inset: auto; margin: 0; flex-shrink: 0; }
 #hub[data-variant='b'] .hub-b-theme { display: flex; padding: 3px; border-radius: 9px; border: 1px solid var(--hub-hair); box-shadow: inset 0 1px 4px color-mix(in srgb, var(--hub-ink) 8%, transparent); }
@@ -41,6 +48,9 @@
 #hub[data-variant='b'] .hub-b-detail__link { display: block; border: 0; border-bottom: 1px solid var(--hub-hair); padding: 0 0 3px; margin-top: 10px; background: none; color: var(--hub-ink); font: 13px var(--font-ui); cursor: pointer; }
 #hub[data-variant='b'] button:focus-visible, #hub[data-variant='b'] .hub-mark:focus-visible { outline: 2px solid var(--hub-accent); outline-offset: 4px; }
 #hub[data-variant='b'][data-hub-state='listening'] .hub-start-wrap, #hub[data-variant='b'][data-hub-state='cars'] .hub-start-wrap { pointer-events: none; }
+/* Listening is modal: the full player card covers the sheet, so START RACE leaves the render and
+   the tab order (presenterB sets `hidden`) instead of sitting under the layer as a focusable box. */
+#hub[data-variant='b'] .hub-start-wrap[hidden] { display: none; }
 #hub[data-variant='b'] #hub-listening { background: transparent; }
 #hub[data-variant='b'] #hub-listening .hub-player[data-variant='b'] { --player-shadow: calc(var(--hub-light-x) * 5) calc(var(--hub-light-y) * 5) 30px color-mix(in srgb, var(--hub-ink) 18%, transparent); }
 @media (prefers-reduced-motion: reduce) { #hub[data-variant='b'] .hub-b-letter { transform: none !important; } }

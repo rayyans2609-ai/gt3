@@ -48,7 +48,7 @@ export function createPresenter() {
   let checkpointGroup, checkpointTicks = [], checkpointNums = [], checkpointButtons = [], checkpointCallouts = [], calloutSignatures = [];
   let rest, current, viewport, progress = 0, readiness = 0, stateName = 'race', hoverStart = false;
   let found = new Set(), hovered = null, selected = null, moving = false, revealDone = false;
-  let hoverTimeline, lapTimeline, edgeTimeline, titleBlock, showcaseStatus;
+  let hoverTimeline, lapTimeline, edgeTimeline, titleBlock, showcaseStatus, linework;
   const drawStats = { frames: 0, totalMs: 0, maxMs: 0 };
   const markerSnapshot = { progress: 0, x: 0, y: 0, angle: 0 };
 
@@ -81,6 +81,10 @@ export function createPresenter() {
     const began = performance.now();
     const left = projected(geometry.left), right = projected(geometry.right);
     edgeLeft.setAttribute('d', svgPath(left)); edgeRight.setAttribute('d', svgPath(right));
+    // Keep the frame the SVG was just drawn from (same index order as the geometry; the path
+    // itself rounds to 2 decimals). The launch harness reads it through __gt3.hub.lastDive,
+    // exactly as Hub B publishes its last dive.
+    linework = { pose: current, progress, left, right };
     centreLine.setAttribute('d', svgPath(projected(geometry.centre)));
     checker.setAttribute('d', svgPath(projected(geometry.start)));
     grid.setAttribute('d', svgPath(projected(geometry.grid)));
@@ -220,7 +224,8 @@ export function createPresenter() {
     const proxy = { amount: reverse ? 1 : 0 };
     const apply = () => { current = poseAt(proxy.amount, rest, live); draw(); ctx.setPoseOverride?.(() => current); };
     const clean = () => { moving = false; ctx.setPoseOverride?.(null); if (reverse) { current = rest; draw(); } };
-    edgeTimeline = gsap.timeline({ onComplete: clean, onInterrupt: clean });
+    const publish = () => { if (!reverse && linework) ctx.setDebug?.({ lastDive: structuredClone(linework) }); };
+    edgeTimeline = gsap.timeline({ onComplete: () => { publish(); clean(); }, onInterrupt: clean });
     gsap.set(svg, { opacity: reverse ? 0 : 1 }); gsap.set(ctx.field, { opacity: reverse ? 0 : 1 }); apply();
     if (reverse) {
       edgeTimeline.to([svg, ctx.field], { opacity: 1, duration: .28 }, 0);
@@ -269,12 +274,16 @@ export function createPresenter() {
       if (drawn >= 1 && !revealDone) {
         revealDone = true;
         const chars = ctx.startButton.querySelectorAll('.precision-start__char');
-        gsap.set(chars, { yPercent: 36, autoAlpha: 0 }); gsap.set(titleBlock?.children ?? [], { y: 10, autoAlpha: 0 });
+        // The player cell is the Hub's audio anchor. §145/contract: the master speaker must not
+        // vanish in an interactive state, so it joins the immediate chrome reveal instead of the
+        // 1.03 s title-block stagger (which also left it hidden to hit-testing).
+        const cells = [...(titleBlock?.children ?? [])].filter(cell => !cell.classList.contains('precision-title__player'));
+        gsap.set(chars, { yPercent: 36, autoAlpha: 0 }); gsap.set(cells, { y: 10, autoAlpha: 0 });
         gsap.timeline()
           .fromTo([edgeLeft, edgeRight], { drawSVG: '0% 0%' }, { drawSVG: '0% 100%', duration: reducedMotion.matches ? 0 : 1.2, ease: 'gt3.out' }, 0)
           .to(checkpointTicks, { autoAlpha: 1, duration: reducedMotion.matches ? 0 : .18, stagger: .07 }, .55)
           .to(chars, { yPercent: 0, autoAlpha: 1, duration: reducedMotion.matches ? 0 : .38, ease: 'gt3.out', stagger: .012 }, .86)
-          .to(titleBlock?.children ?? [], { y: 0, autoAlpha: 1, duration: reducedMotion.matches ? 0 : .32, ease: 'gt3.out', stagger: .045 }, 1.03);
+          .to(cells, { y: 0, autoAlpha: 1, duration: reducedMotion.matches ? 0 : .32, ease: 'gt3.out', stagger: .045 }, 1.03);
       }
     },
     setState(next) {

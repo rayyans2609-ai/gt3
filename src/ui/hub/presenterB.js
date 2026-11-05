@@ -286,7 +286,9 @@ export function createPresenter() {
     const cleanup = () => { ctx.setPoseOverride?.(null); moving = false; };
     edgeTween = gsap.timeline({ onComplete: () => {
       if (!reverse) {
-        proxy.z = 1; apply(); ctx.debug.lastDive = { pose: structuredClone(current), progress, viewport: { ...viewport }, left: project(road.left, current, viewport), right: project(road.right, current, viewport) };
+        proxy.z = 1; apply();
+        // Harness evidence only (projects ~9k points): dev builds alone pay for it.
+        if (import.meta.env.DEV) ctx.debug.lastDive = { pose: structuredClone(current), progress, viewport: { ...viewport }, left: project(road.left, current, viewport), right: project(road.right, current, viewport) };
       }
       cleanup(); if (reverse) { current = rest; motion.surface = 1; motion.world = 0; root.dataset.canvasOwner = 'hub'; ctx.field.style.opacity = '1'; invalidate(); }
     }, onInterrupt: cleanup });

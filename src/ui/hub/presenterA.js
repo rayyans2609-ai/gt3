@@ -224,7 +224,8 @@ export function createPresenter() {
     const proxy = { amount: reverse ? 1 : 0 };
     const apply = () => { current = poseAt(proxy.amount, rest, live); draw(); ctx.setPoseOverride?.(() => current); };
     const clean = () => { moving = false; ctx.setPoseOverride?.(null); if (reverse) { current = rest; draw(); } };
-    const publish = () => { if (!reverse && linework) ctx.setDebug?.({ lastDive: structuredClone(linework) }); };
+    // Harness evidence only: cloning ~9k projected points costs a frame, so dev builds alone pay it.
+    const publish = () => { if (import.meta.env.DEV && !reverse && linework) ctx.setDebug?.({ lastDive: structuredClone(linework) }); };
     edgeTimeline = gsap.timeline({ onComplete: () => { publish(); clean(); }, onInterrupt: clean });
     gsap.set(svg, { opacity: reverse ? 0 : 1 }); gsap.set(ctx.field, { opacity: reverse ? 0 : 1 }); apply();
     if (reverse) {

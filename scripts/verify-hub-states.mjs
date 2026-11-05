@@ -110,7 +110,22 @@ async function runCase(browser, variant, theme) {
     await page.click('[data-control="cover"]'); await until(() => page.evaluate(() => document.getElementById('hub')?.dataset.hubState === 'listening' && !!document.querySelector('[data-hub-player="listening"]')), 'listening player');
     await waitForPlayerRest(page); await noOverlap(page, 'listening'); await page.keyboard.press('Escape'); await until(() => page.evaluate(() => document.getElementById('hub')?.dataset.hubState === 'race'), 'Escape return');
     const beforeTheme = await page.evaluate(async () => (await import('/src/core/state.js')).state.theme);
-    await page.click('[data-control="theme"] [role="radio"][aria-checked="false"]');
+    // Hub A hosts its own .precision-theme and hides the global .theme-segmented (which still
+    // carries data-control="theme"). Drive the rendered group: role="radio" buttons (B, via the
+    // adopted HUD control) or A's native radio inputs. A real state flip is still required below.
+    const flipped = await page.evaluate(() => {
+      const group = [...document.querySelectorAll('[data-control="theme"]')].find(node => {
+        const style = getComputedStyle(node);
+        return style.visibility !== 'hidden' && style.pointerEvents !== 'none' && node.getClientRects().length > 0;
+      });
+      if (!group) throw new Error('no visible theme control');
+      const radio = group.querySelector('[role="radio"][aria-checked="false"]');
+      if (radio) { radio.click(); return radio.dataset.value || radio.getAttribute('aria-label'); }
+      const input = group.querySelector('input[type="radio"]:not(:checked)');
+      if (!input) throw new Error('no inactive theme option');
+      input.click(); return input.value;
+    });
+    assert(flipped, 'theme control had no inactive option');
     const afterTheme = await page.evaluate(async () => { const { state } = await import('/src/core/state.js'); return { theme: state.theme, rootTheme: document.getElementById('hub')?.dataset.theme }; });
     assert(afterTheme.theme !== beforeTheme, 'theme did not flip');
     return { variant, theme, observed, checkpoints: checkpoints.length, themeAfter: afterTheme.theme };

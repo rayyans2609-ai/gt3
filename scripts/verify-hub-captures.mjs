@@ -201,7 +201,13 @@ async function clips(browser) {
     const canvas = await page.$('canvas'); if (!canvas) throw new Error('Landing canvas missing');
     const box = await canvas.boundingBox(); if (!box) throw new Error('Landing canvas has no bounds');
     await page.mouse.move(box.x + box.width * .55, box.y + box.height * .52); await page.mouse.down(); await page.mouse.move(box.x + box.width * .25, box.y + box.height * .52, { steps: 18 }); await page.mouse.move(box.x + box.width * .78, box.y + box.height * .52, { steps: 24 }); await page.mouse.up();
-    await page.mouse.wheel({ deltaY: 1600 }); await until(() => page.evaluate(() => document.querySelector('#hub')?.classList.contains('is-interactive')), 'Hub after Landing scroll'); await sleep(600);
+    // The Landing transition is a damped, reversible scroll: wheel in steps (like a hand would)
+    // until the Hub is interactive, as verify-landing-drag does.
+    for (let i = 0; i < 80; i++) {
+      await page.mouse.wheel({ deltaY: 260 }); await sleep(70);
+      if (await page.evaluate(() => document.querySelector('#hub')?.classList.contains('is-interactive'))) break;
+    }
+    await until(() => page.evaluate(() => document.querySelector('#hub')?.classList.contains('is-interactive')), 'Hub after Landing scroll', 20000); await sleep(600);
   });
 }
 

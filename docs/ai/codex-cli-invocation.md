@@ -28,11 +28,19 @@ codex exec --dangerously-bypass-approvals-and-sandbox --skip-git-repo-check --di
 |---|---|---|
 | `read-only` | `--sandbox read-only -c approval_policy="never"` | Live Luna run: header `sandbox: read-only`, `approval: never`; a shell write failed with "operation not permitted". May run from any checkout. |
 | `workspace` | `--sandbox workspace-write -c approval_policy="never"` | Live Luna worker (2026-10-16): header `sandbox: workspace-write [workdir, /tmp, $TMPDIR]`; in-worktree create/append allowed; writes to the main checkout, home or repo root denied; `git add`/`commit` denied (index lock outside the worktree); push and curl failed DNS. The manager committed the diff. Earlier `codex sandbox -P :workspace` probe (no model): writes inside the worktree and `/tmp` succeed; writes to the main checkout or home are denied; **no network** (DNS fails); **localhost bind denied** (no Vite/browser); **git commit fails** in a linked worktree (its git dir lives in the main `.git`). Reads are unrestricted, including `~/.codex`. A `writable_roots` override did not enable commits in that probe. Use for editing-only workers; the manager commits. |
-| `full` (default) | `--dangerously-bypass-approvals-and-sandbox` | Proven Phase 1–3 path; needed for builds, Vite and browsers. |
+| `full` (default) | `--dangerously-bypass-approvals-and-sandbox` | Proven Phase 1–3 path. **From a Claude Code manager in auto mode it is refused** (classifier category "Create Unsafe Agents"; reproduced 2026-11-04, intermittent earlier). Do not use it from an Opus session; use `workspace` plus the harness executor below. Remains valid for an owner-run or Sol-led session where the bypass is the owner's own launch. |
 
 - `--disable multi_agent` is always passed: Codex's native multi-agent feature (stable, on by default in 0.163.0) would let a worker spawn unaccounted sub-agents.
 - `ultra` ("maximum reasoning with automatic task delegation") is refused unless `GT3_LAUNCH_ROLE=manager`.
 - `scripts/lib/route-guard.sh` also refuses writing modes in the main checkout or on `main`, refuses `OPENAI_API_KEY`/`OPENAI_BASE_URL`/`OPENAI_API_BASE`, enforces the Sol-led roster under `GT3_CONFIG=sol-led`, and logs launches under `GT3_RUN` (`operating-contract.md` §5).
+
+### Browser harnesses from a confined worker (verified 2026-11-04, codex-cli 0.166.0)
+
+Chrome cannot start inside Codex's workspace-write Seatbelt sandbox (probed: `SIGABRT` on every flag variant, `--no-sandbox` and software GL included, with network access on). So a confined worker cannot launch a harness itself, and launching the whole worker with `-s full` is what the classifier refuses. The fix is one narrow door: `scripts/run-harness.sh` is the only command the project execpolicy (`.codex/rules/gt3.rules`) lets a sandboxed worker run outside its sandbox for this purpose.
+
+- **Brief:** `scripts/run-harness.sh -R <run> -T <task> scripts/verify-NAME.mjs [args]` under `-s workspace`. Tell the worker the run takes minutes, prints `still running` every 20 s, and that it must keep polling until the `exit=` line, because ending its turn kills the run (a Luna run that ended at Codex's ~30 s tool yield lost the harness; with the heartbeat and this line it completed).
+- **Guards:** harness path must be exactly `scripts/verify-<name>.mjs`, tracked and unmodified vs `HEAD` (commit a worker's new harness first); linked worktree on a non-main branch; seat check when `-R` is given; `host-check.mjs preflight browser` (exit 75 is reported as BLOCKED, not bypassed); owned Vite and provenance via `with-verification-server.sh`. It prints a short summary and keeps full output and the provenance file under `local/evidence/<run>/<task>/`.
+- **Verified:** real `codex-route.sh -m gpt-6-luna -s workspace` launches ran the executor outside the sandbox, reported a host-busy refusal faithfully, then ran the browser harness to completion. Matching rules in the execpolicy apply only to commands that start with the script path, so use the `-R/-T` flags, not leading `VAR=value`.
 
 ### Native Codex manager (Sol-led)
 

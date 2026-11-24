@@ -1,5 +1,6 @@
 import { getMusicStatus, nextTrack, pauseMusic, playMusic, previousTrack, seekMusic, selectTrack, setMusicMuted } from '../audio/audioManager.js';
 import { state, set, subscribe } from '../core/state.js';
+import { buildLevels } from './audioLevels.js';
 
 let player;
 let label;
@@ -153,7 +154,9 @@ export function initPlayer() {
     item.addEventListener('click', () => { selectTrack(i); renderStatus(); });
     list.append(item);
   }
-  player.append(heading, transport, timeline, footer, list);
+  // Master / Music / Engine levels (SPEC §7, §31; owner 2026-11-04). Engine is audible here.
+  const levels = buildLevels({ className: 'music-player__levels', prefix: 'music-level', rangeClass: 'music-player__range' });
+  player.append(heading, transport, timeline, levels, footer, list);
   layer.append(player);
 
   previous.addEventListener('click', () => { previousTrack(); renderStatus(); });

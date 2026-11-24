@@ -107,7 +107,7 @@ The Hub player treatment (§9) is visually more substantial here than anywhere e
 
 # 6. Global playlist — source and integrity check
 
-Shipped location: `public/audios/playlist/track_1.mp3 … track_6.mp3`. The six source tracks were moved and renamed there in Phase 2a (2026-09-27): git renames, byte-identical by MD5, with no duplicate copies. The original folder `audios/background_playlist/` now holds only the six covers, in `audiocover_NOTaudios/`, which stay there until the Hub player needs them in Phase 5.
+Shipped location: `public/audios/playlist/track_1.mp3 … track_6.mp3`. The six source tracks were moved and renamed there in Phase 2a (2026-09-27): git renames, byte-identical by MD5, with no duplicate copies. The original folder `audios/background_playlist/` then held only the six covers, in `audiocover_NOTaudios/`, until the Hub player needed them. *Update (Phase 5, 2026-11-04):* the covers moved to `public/audios/playlist/covers/` (git renames, bytes unchanged) and `src/data/playlist.js` carries a `cover` per track; the aliases, order and pairings are unchanged.
 
 **Verified state at spec time:** 6 audio files, all carrying explicit `(name this track_X)` markers, and 6 cover images (in a subfolder — see Open Issues §30.2). This matches the brief's expected state. The table below records the original source filenames for provenance only.
 
@@ -135,6 +135,8 @@ One shared player system, global. A refined, contemporary interpretation of a si
 Core controls: play, pause, previous, next, current/total runtime, progress/seek bar with direct scrub, current `track_x` label, music-only mute/unmute, a `+` playlist/track-list expansion revealing all six tracks with direct selection.
 
 **Volume — future requirement (2026-10-06, §31).** Independent **master-volume** and **music-volume** sliders, each keeping its separate mute behaviour (§8). Sliders set level; mutes still silence without losing the set level. Not Phase 3 work.
+
+**Owner clarification (2026-11-04).** Music and Engine must have separate, independently adjustable volume sliders: Music controls the six-track playlist globally, Engine controls the Grand Tour engine audio, and neither affects the other's level. Existing master mute, music mute, playback and session persistence are preserved; the tracks and their order stay exactly the same. A modest mixing pass should balance music, engine sounds and checkpoint/SFX feedback without unnecessarily changing established audio behaviour. Replacement SFX (engine sounds in particular) are intended but not yet chosen, so the system stays easy to update without pre-selecting sounds or becoming a major audio redesign. The Music/Engine sliders are the priority; additional SFX controls are secondary.
 
 ---
 
@@ -737,7 +739,7 @@ A fresh implementation agent should be able to determine, from this file alone: 
 # 30. Open Issues / Repo Mismatches
 
 1. **`reference_images/` is actually `reference _images/`** (with a literal space) at the repo root. All paths in this spec use the real on-disk name. `camera_angles/`, `scenery/`, and `showcase_ref.jpeg` are all present and were opened successfully.
-2. **Playlist cover images are not directly inside `audios/background_playlist/`** as assumed by the source brief — they live one level deeper, in `audios/background_playlist/audiocover_NOTaudios/`. All six covers are present and correctly named by GT3 alias (extensions per the §6 table after the 2026-10-14 owner-ordered renumbering, which preserved each song/cover pairing); the mapping itself is not ambiguous, only the folder depth differs from expectation. *Update (Phase 2a, 2026-09-27):* the six tracks have moved to `public/audios/playlist/` (§6). The covers intentionally remain at this path, unshipped, until Phase 5 (Hub cover-art player).
+2. **Playlist cover images are not directly inside `audios/background_playlist/`** as assumed by the source brief — they live one level deeper, in `audios/background_playlist/audiocover_NOTaudios/`. All six covers are present and correctly named by GT3 alias (extensions per the §6 table after the 2026-10-14 owner-ordered renumbering, which preserved each song/cover pairing); the mapping itself is not ambiguous, only the folder depth differs from expectation. *Update (Phase 2a, 2026-09-27):* the six tracks have moved to `public/audios/playlist/` (§6). The covers intentionally remained at this path, unshipped, until Phase 5. *Update (Phase 5, 2026-11-04):* shipped to `public/audios/playlist/covers/` (§6).
 3. **`models/car_cover_model` has no file extension** in its literal filename, though `file` confirms it is a valid glTF-Binary (.glb) blob (874 KB). Present but differently named — reference it by its literal name, or add an explicit `.glb` extension during the build step.
 4. **`audios/background.mp3`** (the current single background loop referenced by `src/audio/audioManager.js`'s `RACE_FILES.background`) is deleted from the working tree (uncommitted, per `git status`). This is consistent with retiring the single-track system in favor of the playlist (§6). **RESOLVED (Phase 2a, 2026-09-27):** the shipped copy `public/audios/background.mp3`, byte-identical to `track_1`, was deleted, and `RACE_FILES.background` was removed from `audioManager.js`.
 5. **Font licensing status is unresolved.** Every weight file under `font/` (all four Neue Haas Grotesk families) is named with a `-Trial` suffix (e.g. `NeueHaasGrotDisp-65Medium-Trial.otf`). Use this asset per §12, but confirm licensing/weight-completeness before shipping — do not assume "Trial" naming is cosmetic.
@@ -837,7 +839,7 @@ Raised during Phase 3 review, owned by later phases, and **not to be implemented
 | Substantially better rotating-car presentation: materials, lighting, animation, composition (also informs the Phase 7 completion hero) | R | Phase 6 (→ 7) | §11, §21 |
 | Landing hero car replaces Lexus — McLaren 720S GT3 (owner, 2026-10-24; HUMAN-ACCEPTED with Phase 4, 2026-10-30); Tour starter stays Lexus | R | Phase 4 (done) | §4 |
 | Independent master-volume and music-volume sliders with separate mutes | R | Phase 5 (Hub player pass) | §7 |
-| Separate Music / Engine / SFX controls, engine-sound improvements and mixing changes (owner, 2026-11-02; details not yet specified) | R | Phase 5 | §7, §10 |
+| Separate Music / Engine / SFX controls, engine-sound improvements and mixing changes (owner, 2026-11-02). *Clarified 2026-11-04:* separate, independent Music and Engine sliders are the priority; a modest mixing pass; replacement engine/SFX assets not yet chosen; extra SFX controls secondary (§7) | R | Phase 5 | §7, §10 |
 | Full loading UX: 0–100 % progress, no early interaction, prominent Start Race | D | designed with the page/navigation flow (Phases 4–5) | §25 |
 | Authored elevation: grades, crests/compressions, banked turns, terrain-integrated road (supersedes "modest circuit elevation") | E | Phase 8 | §17, §16 |
 | Standing-start five-lamp overlay + single SCROLL TO RACE control | R | Phases 4–5 | §25 |

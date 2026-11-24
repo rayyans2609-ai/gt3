@@ -4,7 +4,7 @@
 import puppeteer from 'puppeteer-core';
 import { mkdir, writeFile } from 'node:fs/promises';
 
-const base = process.argv[2] || 'http://127.0.0.1:5198/';
+const base = process.env.GT3_URL || process.argv[2] || 'http://127.0.0.1:5198/';
 const root = process.env.GT3_OUT || '/tmp/gt3-route-persistence';
 const softwareGL = process.env.GT3_SOFTWARE_GL === '1';
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -34,6 +34,10 @@ function attachErrors(page, label) {
 
 async function installRestoreActivityProbe(page) {
   await page.evaluateOnNewDocument(() => {
+    // Isolate Tour persistence from the fresh-session Landing/Hub journey.
+    if (!sessionStorage.getItem('gt3.session.v1')) {
+      sessionStorage.setItem('gt3.session.v1', JSON.stringify({ experience: 'tour', routeProgress: 0 }));
+    }
     const activity = { morphFrames: 0, gateFrames: 0, samples: 0 };
     window.__gt3RoutePersistenceActivity = activity;
     let morphModule;
@@ -58,6 +62,10 @@ async function waitReady(page) {
     && ['ready', 'degraded'].includes(window.__gt3.readiness.status)
     && window.__gt3.scene?.getObjectByName('car-rig')
     && document.querySelector('#start-screen.is-ready'), { timeout: 120000 });
+  await page.waitForFunction(async () => {
+    const { state } = await import('/src/core/state.js');
+    return state.mode === 'finish' || !state.scrollLocked;
+  }, { timeout: 20000 }); // cover and standing start must complete before wheel assertions
 }
 
 async function snapshot(page) {
@@ -219,6 +227,7 @@ try {
     try {
       const freshPage = await freshContext.newPage();
       attachErrors(freshPage, 'fresh');
+      await installRestoreActivityProbe(freshPage);
       await freshPage.goto(base, { waitUntil: 'domcontentloaded', timeout: 120000 });
       await waitReady(freshPage);
       const fresh = await snapshot(freshPage);

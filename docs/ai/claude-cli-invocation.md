@@ -15,7 +15,7 @@ scripts/claude-route.sh -m <model> -r <effort> -s <mode> @path/to/brief.md
 |---|---|---|
 | `-m` | `claude-opus-5-5`, `claude-sonnet-5-5`, `claude-haiku-5-5` | Full IDs only; aliases are refused. |
 | `-r` | `low` `medium` `high` `xhigh` `max` | Passed as `--effort`. Unlike in-session subagents, headless workers **can** set effort per call. |
-| `-s` | `read-only`, `edit`, `auto` | Required. See modes below. |
+| `-s` | `read-only`, `edit`, `verify`, `auto` | Required. See modes below. |
 | `-R`, `-T` | run id, task id | Optional. Same as `GT3_RUN`/`GT3_TASK`. With a run, the seat guard requires the record to be active on this host, and epoch/configuration come from it. Prefer the flags: a command that starts with the wrapper path matches the Codex project `allow` rule. |
 
 The wrapper refuses to run, before any model call, if:
@@ -43,6 +43,7 @@ claude -p --model <m> --effort <r> --output-format json --no-session-persistence
 |---|---|---|
 | `read-only` | `--tools Read,Grep,Glob` | Opus, Sonnet and Haiku each returned the expected reply; `modelUsage` named the exact model |
 | `edit` | `acceptEdits` + Bash allowlist (`git status/diff/log/show`, `node --check`, `bash -n`, `npm run build`, `ls`); `--permission-prompts none` denies everything else | Haiku: in-worktree write and `git status` allowed; `/tmp` touch, write outside the worktree, `git push --dry-run` and subagent launch all **denied** (`permission_denials` lists them); filesystem confirmed |
+| `verify` | `--tools Read,Grep,Glob,Bash` with `--allowedTools "Bash(scripts/run-harness.sh:*)"` (the only command; no edits) | Haiku (2026-11-04): ran `scripts/run-harness.sh` on `verify-motion-ticker.mjs` to completion, reported `"pass":true`, 2 turns, about $0.003. Use for mechanical harness runs and captures when a Claude worker fits (Haiku first; Sonnet only if the output needs judgment). The Bash tool's default timeout still applies, so keep each harness within it or have the worker re-poll |
 | `auto` | Claude Code auto-mode classifier; prompts denied | not exercised |
 
 The disallow list (Agent tool, push, merge, rebase, reset, checkout of main, `codex`/`opencode`/`claude` CLIs and route scripts) is best-effort pattern matching. `edit` and `read-only` are the enforced boundaries. In `auto`, shell indirection could evade a pattern.

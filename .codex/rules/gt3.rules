@@ -11,6 +11,10 @@ prefix_rule(pattern = ["scripts/codex-route.sh"], decision = "allow", justificat
 prefix_rule(pattern = ["scripts/claude-route.sh"], decision = "allow", justification = "guarded worker route")
 prefix_rule(pattern = ["scripts/opencode-route.sh"], decision = "allow", justification = "guarded worker route")
 prefix_rule(pattern = ["scripts/gt3-run.sh"], decision = "allow", justification = "run record; never pushes")
+# The only way a sandboxed worker runs a browser harness: tracked, unmodified scripts/verify-*.mjs
+# behind the host preflight and an owned server (Chrome cannot start inside the Seatbelt sandbox, and
+# a whole worker launched with `-s full` is refused by Claude Code's auto-mode classifier).
+prefix_rule(pattern = ["scripts/run-harness.sh"], decision = "allow", justification = "guarded, tracked-harness-only executor")
 prefix_rule(pattern = ["node", "scripts/host-check.mjs"], decision = "allow", justification = "host identity is hidden inside the sandbox")
 # Worktree creation and manager commits (a linked worktree's index lock lives in the main .git).
 prefix_rule(pattern = ["git", "worktree", "add"], decision = "allow", justification = "objective worktrees")

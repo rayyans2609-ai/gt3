@@ -101,6 +101,7 @@ async function boot() {
   let landing = bootIntoTour ? null : await import('./landing/landing.js');
   landing?.preloadHero();
   subscribe('mode', (mode) => {
+    if (state.transition) return; // a timed edge owns experience; enterTour re-syncs after it
     if (mode === 'finish') setExperience('complete');
     else if (mode === 'race' && state.experience === 'complete') setExperience('tour');
   });
@@ -130,8 +131,11 @@ async function boot() {
   const player = await import('./ui/player.js');
   const soundCue = await import('./ui/soundCue.js');
   const startScreen = await import('./ui/startScreen.js');
+  const entrySequence = await import('./ui/entrySequence.js');
   const finishScreen = await import('./ui/finishScreen.js');
   const hub = await import('./ui/hub.js');
+  const motion = await import('./ui/motion.js');
+  const trackCurve = await import('./scene/trackCurve.js');
   const homeControl = await import('./ui/homeControl.js');
 
   perfMark('imports:end');
@@ -224,7 +228,17 @@ async function boot() {
       landing.activateLanding({ atHub: state.experience === 'hub' });
     });
   }
-  hub.initHub({ onStartRace: () => { void enterTour(); } });
+  // GSAP UI motion ticks inside this file's one RAF loop (no independent GSAP frame loop).
+  motion.installMotion(registerUpdate);
+  hub.initHub({
+    onStartRace: () => { void enterTour(); },
+    // The Hub's circuit plan is drawn through the Tour camera's fixed orientation.
+    camera: { yawDeg: aerialCamera.TUNE.yawDeg, pitchDeg: aerialCamera.TUNE.pitchDeg },
+  });
+  // The edge row recomposes while the Hub owns the screen (its player replaces the + launcher).
+  const markExperience = () => { document.documentElement.dataset.experience = state.experience; };
+  subscribe('experience', markExperience);
+  markExperience();
   homeControl.initHomeControl({ onHome: () => { void leaveTour(); } });
   hub.setHubReadiness(readiness);
   // initScene creates window.__gt3; these handles were previously attached after the full build.
@@ -444,8 +458,14 @@ async function boot() {
       // The page held the Landing's scroll until now; put it back on the start line.
       scrollDrive.seekTo(0, { instant: true });
     }
-    // Unlock only once any gesture begun during loading has finished (SPEC §14).
-    if (unlock) scrollDrive.unlockScrollWhenQuiet(); // a finish restore below re-locks (V1) and cancels it
+    // Refresh entry waits for the loading field to part, then runs the same locked entry.
+    if (unlock && !restoreFinish) {
+      void startScreen.revealTour().then(() => {
+        if (state.experience === 'tour' && !state.transition) {
+          void entrySequence.runEntry({ standingStart: state.progress === 0 });
+        }
+      });
+    }
     if (restoreFinish) {
       startScreen.dismissStartScreenForRestore(); // no gesture will come; keep it (and its sound cue) out of the finish card
       finishScreen.restoreFinishScreen();
@@ -458,6 +478,19 @@ async function boot() {
    * so the canvas switches to the Tour underneath it; the field then fades away and the drive
    * unlocks once any momentum from the Hub has died away. No input crosses the handoff.
    */
+  /**
+   * Screen points of route positions in the live Tour frame (Hub plan <-> road handoff). Uses
+   * the same route geometry the Hub's plan is drawn from (trackCurve.offsetPointAt).
+   */
+  const projected = new THREE.Vector3();
+  function projectRoute(samples) {
+    camera.updateMatrixWorld();
+    return samples.map(({ t, lateral }) => {
+      trackCurve.offsetPointAt(t, lateral, 0, projected).project(camera);
+      return { x: (projected.x + 1) / 2 * window.innerWidth, y: (1 - projected.y) / 2 * window.innerHeight };
+    });
+  }
+
   let entering = false;
   async function enterTour() {
     if (entering || state.experience !== 'hub' || state.transition ||
@@ -468,6 +501,7 @@ async function boot() {
       if (!beginTransition('tour')) return;
       scrollDrive.setDriveDormant(false);
       scrollDrive.lockScroll(); // swallow wheel and keys through the handoff
+      hub.prepareLeave(); // keep the Tour HUD hidden until the field parts
       landing?.deactivateLanding();
       sceneSetup.resizeScene(window.innerWidth, window.innerHeight); // the Tour's fixed DPR again
       document.documentElement.dataset.world = 'tour';
@@ -476,10 +510,14 @@ async function boot() {
       // Two paints under the field; bounded yields also settle in a hidden tab without rAF.
       await yieldToBrowser();
       await yieldToBrowser();
-      await hub.leaveHub(520);
+      await hub.leaveHub({ progress: state.progress, project: projectRoute });
       completeTransition();
-      scrollDrive.unlockScrollWhenQuiet();
+      if (state.mode === 'finish') setExperience('complete'); // finished route restored by armTour
+      if (state.mode === 'race') {
+        void entrySequence.runEntry({ standingStart: state.progress === 0 });
+      }
     } catch (error) {
+      entrySequence.cancelEntry();
       console.error('[gt3] Tour entry failed; returning to the Hub', error);
       tourArmed = wasArmed;
       cancelTransition();
@@ -499,13 +537,19 @@ async function boot() {
    * the page scroll underneath it, at the Hub's rest point. Discoveries are untouched.
    */
   async function leaveTour() {
-    if (entering || state.experience !== 'tour' || state.transition || state.mode !== 'race') return;
+    // Home also works from the finished state ('complete' / mode 'finish'), without Replay.
+    if (entering || !['tour', 'complete'].includes(state.experience) || state.transition) return;
+    entrySequence.cancelEntry();
     entering = true;
     try {
+      if (state.mode === 'finish') {
+        finishScreen.suspendFinishScreen();
+        set('mode', 'race'); // maps complete -> tour, so the timed tour -> hub edge applies
+      }
       scrollDrive.lockScroll();
       persistRouteProgress(state.progress, { flush: true });
       if (!beginTransition('hub')) { scrollDrive.unlockScroll(); return; }
-      await hub.coverHub(420);
+      await hub.coverHub({ progress: state.progress, project: projectRoute });
       scrollDrive.setDriveDormant(true);
       if (!landing) {
         landing = await import('./landing/landing.js');
@@ -596,6 +640,7 @@ async function boot() {
   registerUpdate(finishScreen.update);
   registerUpdate(audio.updateAudio);
   registerUpdate(player.updatePlayer);
+  registerUpdate(hub.updateHub);
   registerUpdate(sceneSetup.updateScene);
 
   onResize((w, h) => {

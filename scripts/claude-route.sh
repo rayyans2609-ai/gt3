@@ -16,6 +16,9 @@
 #     edit       acceptEdits inside the worktree; Bash limited to an allowlist of
 #                read/check/build commands; anything else is denied, never prompted.
 #                Commits are left to the manager.
+#     verify     read-only tools plus exactly one command, scripts/run-harness.sh (tracked verify-*.mjs
+#                under the owned server and host preflight). For mechanical harness runs and captures;
+#                no edits. Prefer Haiku, Sonnet if the output needs judging.
 #     auto       Claude Code auto mode (classifier-gated actions) for Anchor-class work
 #                that must run commands; still denied push/merge/route launches below.
 #
@@ -32,7 +35,7 @@ ROUTE_GUARD_NAME=claude-route
 source "$(dirname "${BASH_SOURCE[0]}")/lib/route-guard.sh"
 
 usage() {
-  echo "Usage: $0 -m <claude-opus-5-5|claude-sonnet-5-5|claude-haiku-5-5> -r <low|medium|high|xhigh|max> -s <read-only|edit|auto> <prompt|@brief-file>" >&2
+  echo "Usage: $0 -m <claude-opus-5-5|claude-sonnet-5-5|claude-haiku-5-5> -r <low|medium|high|xhigh|max> -s <read-only|edit|verify|auto> <prompt|@brief-file>" >&2
   exit 2
 }
 
@@ -70,9 +73,11 @@ case "$mode" in
     mode_args=(--permission-mode acceptEdits --allowedTools
       "Bash(git status:*)" "Bash(git diff:*)" "Bash(git log:*)" "Bash(git show:*)"
       "Bash(node --check:*)" "Bash(bash -n:*)" "Bash(npm run build:*)" "Bash(ls:*)") ;;
+  verify)
+    mode_args=(--tools "Read,Grep,Glob,Bash" --permission-mode default --allowedTools "Bash(scripts/run-harness.sh:*)") ;;
   auto)
     mode_args=(--permission-mode auto) ;;
-  "") echo "claude-route: -s <mode> is required (read-only | edit | auto)" >&2; usage ;;
+  "") echo "claude-route: -s <mode> is required (read-only | edit | verify | auto)" >&2; usage ;;
   *)  echo "claude-route: unrecognized mode '$mode'" >&2; usage ;;
 esac
 

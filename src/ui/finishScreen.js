@@ -37,6 +37,7 @@ let initialized = false;
 let visible = false;
 let runFinished = false;
 let replayHandler = null;
+let suspended = false; // card put away by Home; the next Tour entry restores it
 let unsubscribeProgress = null;
 let unsubscribeTail = null;
 let root = null;
@@ -128,6 +129,7 @@ function replayRoute() {
   hideFinishScreen();
 
   runFinished = false;
+  suspended = false;
 
   if (typeof replayHandler === 'function') {
     try {
@@ -245,7 +247,8 @@ export function showFinishScreen() {
 /** Reconstruct the completed-route UI after refresh without replaying finish audio. */
 export function restoreFinishScreen() {
   if (!initialized) initFinishScreen();
-  if (visible || runFinished) return;
+  if (visible || (runFinished && !suspended)) return;
+  suspended = false;
 
   visible = true;
   runFinished = true;
@@ -271,6 +274,19 @@ export function hideFinishScreen() {
   root.setAttribute('aria-hidden', 'true');
   if (state.mode === 'finish') set('mode', 'race');
   if (state.scrollLocked) unlockScroll();
+}
+
+/**
+ * Leaving to the Hub from the finished state (Home): put the card away without touching scroll or
+ * progress, so re-entering the Tour restores the finished state exactly like a refresh does
+ * (restoreFinishScreen). Unlike hideFinishScreen this does not release the scroll lock.
+ */
+export function suspendFinishScreen() {
+  if (!root || !visible) return;
+  visible = false;
+  suspended = true; // runFinished stays set: the card must not re-trigger while parked at p=1
+  root.classList.remove('is-visible');
+  root.setAttribute('aria-hidden', 'true');
 }
 
 /** Frame-loop fallback; the progress subscription also makes the trigger deterministic. */

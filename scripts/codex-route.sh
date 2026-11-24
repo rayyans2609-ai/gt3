@@ -15,6 +15,9 @@
 #              commits in a linked worktree fail. The worker leaves a diff; the manager
 #              reviews and commits it (docs/ai/operating-contract.md §5).
 #   full       --dangerously-bypass-approvals-and-sandbox. Needed for builds, Vite, browsers.
+#              Refused by Claude Code's auto-mode classifier ("Create Unsafe Agents") when launched from a
+#              Claude manager. For browser harnesses use `-s workspace` and have the worker call
+#              scripts/run-harness.sh (docs/ai/codex-cli-invocation.md).
 #
 # Workers run with Codex native multi-agent disabled so nested agents cannot bypass host
 # accounting; `ultra` (automatic task delegation) is refused unless GT3_LAUNCH_ROLE=manager.

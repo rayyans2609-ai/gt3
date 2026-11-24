@@ -6,6 +6,8 @@
 @import './screens.css';
 @import './player.css';
 @import './landing.css';
+@import './hub.css';
+@import './entry.css';
 
 :root {
   --ink: #0b0b0c;

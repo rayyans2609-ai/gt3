@@ -1,11 +1,13 @@
 /**
- * audioLevels.js — the Master / Music / Engine level sliders, shared by the Hub player and the
- * compact global player (SPEC §7, §31; owner clarification 2026-11-04: Music and Engine are
+ * audioLevels.js — the Master / Music / Engine / SFX level sliders, shared by the Hub player and
+ * the compact global player (SPEC §7, §31; owner clarification 2026-11-04: Music and Engine are
  * separate and independent). Levels are session state; mutes stay separate (SPEC §8), so a
  * slider never mutes and a mute never moves a slider. Setting a level never starts audio.
  */
 
-import { setEngineVolume, setMasterVolume, setMusicVolume } from '../audio/audioManager.js';
+import {
+  setEngineVolume, setMasterVolume, setMusicVolume, setSfxVolume,
+} from '../audio/audioManager.js';
 import { state, subscribe } from '../core/state.js';
 
 const LEVELS = Object.freeze([
@@ -13,6 +15,8 @@ const LEVELS = Object.freeze([
   { key: 'musicVolume', name: 'Music', label: 'Music volume', set: setMusicVolume },
   // Engine is heard only in the Grand Tour (SPEC §10); elsewhere it sets the next drive's level.
   { key: 'engineVolume', name: 'Engine', label: 'Engine volume', set: setEngineVolume },
+  // Crossings, finish and proximity feedback; independent of the engine channel.
+  { key: 'sfxVolume', name: 'SFX', label: 'Sound effects volume', set: setSfxVolume },
 ]);
 
 /**

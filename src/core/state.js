@@ -20,6 +20,7 @@ export const state = {
   musicMuted: false,
   musicVolume: 1,
   engineVolume: 1,
+  sfxVolume: 1,
   trackIndex: 0,
   trackPosition: 0,
   playIntent: true,

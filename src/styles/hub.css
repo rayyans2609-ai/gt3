@@ -174,7 +174,8 @@
    line and the six tracks take the freed space as a 3 x 2 grid; the footprint does not change. */
 .hub-player[data-shape='row'] {
   width: calc(var(--cover) + 18px + 248px);
-  height: var(--cover);
+  /* The four level rows need more than a narrow cover at 1440; let the row grow, never clip. */
+  min-height: var(--cover);
   grid-template-columns: var(--cover) 1fr;
   grid-template-rows: auto auto auto 1fr;
   grid-template-areas: "cover meta" "cover seek" "cover transport" "cover levels";

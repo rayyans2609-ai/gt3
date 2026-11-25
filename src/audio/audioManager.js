@@ -68,6 +68,7 @@ let musicElement = null;
 let musicRequestId = 0;
 let lastPositionWriteAt = -Infinity;
 let sfxBus = null;
+let sfxLevelGain = null;
 let engineBus = null;
 let engineLevelGain = null;
 let voiceBus = null;
@@ -118,6 +119,7 @@ function ensureGraph() {
     masterLevelGain = context.createGain();
     musicBus = context.createGain();
     sfxBus = context.createGain();
+    sfxLevelGain = context.createGain();
     engineBus = context.createGain();
     engineLevelGain = context.createGain();
     voiceBus = context.createGain();
@@ -126,12 +128,14 @@ function ensureGraph() {
     setInitialGain(masterLevelGain, volumeGain(state.masterVolume));
     setInitialGain(musicBus, MIX.musicBase);
     setInitialGain(sfxBus, 1);
+    setInitialGain(sfxLevelGain, volumeGain(state.sfxVolume));
     setInitialGain(engineBus, 1);
     setInitialGain(engineLevelGain, volumeGain(state.engineVolume));
     setInitialGain(voiceBus, 1);
 
     musicBus.connect(masterGain);
-    sfxBus.connect(masterGain);
+    sfxBus.connect(sfxLevelGain);
+    sfxLevelGain.connect(masterGain);
     engineBus.connect(engineLevelGain);
     engineLevelGain.connect(masterGain);
     voiceBus.connect(masterGain);
@@ -144,6 +148,7 @@ function ensureGraph() {
     masterLevelGain = null;
     musicBus = null;
     sfxBus = null;
+    sfxLevelGain = null;
     engineBus = null;
     engineLevelGain = null;
     voiceBus = null;
@@ -779,6 +784,11 @@ export function setEngineVolume(value) {
   set('engineVolume', Math.min(1, Math.max(0, value)));
 }
 
+export function setSfxVolume(value) {
+  if (!Number.isFinite(value)) return;
+  set('sfxVolume', Math.min(1, Math.max(0, value)));
+}
+
 export function playMusic() {
   set('playIntent', true);
   if (!state.audioReady) return startAudio();
@@ -844,6 +854,7 @@ subscribe('musicMuted', (muted) => targetGain(musicMuteGain, muted ? 0 : 1, 0.02
 subscribe('masterVolume', (volume) => targetGain(masterLevelGain, volumeGain(volume), 0.03));
 subscribe('musicVolume', (volume) => targetGain(musicLevelGain, volumeGain(volume), 0.03));
 subscribe('engineVolume', (volume) => targetGain(engineLevelGain, volumeGain(volume), 0.03));
+subscribe('sfxVolume', (volume) => targetGain(sfxLevelGain, volumeGain(volume), 0.03));
 subscribe('experience', () => {
   if (inTour()) {
     if (state.audioReady) startRaceSources();
@@ -860,6 +871,8 @@ if (typeof window !== 'undefined') {
       music: musicBus?.gain.value ?? null,
       musicMute: musicMuteGain?.gain.value ?? null,
       musicLevel: musicLevelGain?.gain.value ?? null,
+      sfx: sfxBus?.gain.value ?? null,
+      sfxLevel: sfxLevelGain?.gain.value ?? null,
       engine: engineBus?.gain.value ?? null,
       engineLevel: engineLevelGain?.gain.value ?? null,
     }),

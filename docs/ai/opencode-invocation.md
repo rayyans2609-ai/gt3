@@ -77,6 +77,38 @@ script -q /dev/null opencode models | grep -E 'glm-5.3-flash-free|deepseek-v4.1-
 
 Like Codex jobs, routed OpenCode jobs run with auto-approved edits and commands in their launch directory. Launch them from a manager-created worktree on the job's branch, never the user's main checkout. `scripts/lib/route-guard.sh` **enforces** this: it refuses the main checkout and branch `main`. Under `GT3_CONFIG=sol-led`, only GLM and DeepSeek (Zen) are allowed. The host limits in `operating-contract.md` §6 apply to OpenCode workers too: inference is remote, but their builds, browsers and tests run locally and count host-wide.
 
+## Browser verification from OpenCode workers (verified 2026-11-25, Intel, opencode v2.4.1)
+
+An OpenCode worker must **never launch Chrome and never use `open`**. Verify in the dedicated attach-only browser below. The Codex-side equivalent (a narrow door out of the Seatbelt sandbox) is `codex-cli-invocation.md` "Browser harnesses from a confined worker"; OpenCode needs no door because the browser is already running.
+
+**Why the other paths fail** (diagnosed 2026-11-25 from OpenCode session logs and reproduced):
+
+| Symptom | Cause |
+|---|---|
+| Playwright MCP or a direct Chrome launch dies with Crashpad `bootstrap_check_in … unknown error code (141)` → `SIGABRT` | A process started inside an agent or sandboxed context cannot register Crashpad's Mach port. A Seatbelt profile denying Mach registration reproduces it (exit 134); the same Chrome launches fine from a plain shell. It is the same class as Codex's `workspace-write` failure, and a long-lived `opencode serve --service` started from such a context carries it into every later session. |
+| `open` fails: `LSCopyApplicationURLsForBundleIdentifier() failed`, `kLSNoExecutableErr`, "Unable to find application" | LaunchServices lookups are denied in the same context. Not a missing app. |
+| `browse` MCP: "The tab went away" / "The user dismissed the browser's debugging bar" | Chrome sends a debugger detach (`target.detached reason=released-by-user` in `~/.local/state/browse/logs/relay.log`) about 1 s after `browse` attaches in the owner's real profile, with no human action; reproduced 2026-11-25. Relay, pairing and extension all report healthy. **Not fixable from the agent side; the Chrome-side trigger was not identified.** `browse` stays installed for tasks that need the owner's logged-in tabs, but is not a verification route. |
+
+**The route: `chrome-devtools-verify`.** A Chrome DevTools MCP (`chrome-devtools-mcp@1.14.0 --browserUrl=http://127.0.0.1:9333`) attached over CDP to a headless Chrome that **launchd owns** (LaunchAgent `dev.opencode.verify-chrome`, parent PID 1, bound to 127.0.0.1 only, own profile `~/.local/share/opencode-verify-browser/profile`, `KeepAlive`, about 350 MB resident idle, real Metal-backed WebGL on the Intel GPU). Because the agent only attaches, no agent process ever starts Chrome. These pieces live in the owner's home, **outside the repo and per host**; nothing here installs them, and the M4 needs them recreated:
+
+| Piece | Location |
+|---|---|
+| LaunchAgent | `~/Library/LaunchAgents/dev.opencode.verify-chrome.plist`: Chrome with `--headless=new --remote-debugging-port=9333 --remote-debugging-address=127.0.0.1 --user-data-dir=<profile> --no-first-run --no-default-browser-check --window-size=1440,900 --enable-unsafe-swiftshader` |
+| MCP entry (additive; other servers untouched) | `~/.config/opencode/opencode.json` → `mcp.servers.chrome-devtools-verify` (backup `opencode.json.pre-verify-browser`) |
+| Control | `~/.local/bin/opencode-verify-browser start\|stop\|restart\|reset\|status\|health\|selftest` |
+| Self-test | `~/.config/opencode/browser/selftest.mjs [--url <dev url>]`: spawns the configured MCP command and **executes** navigate, DOM snapshot, JS evaluation, screenshot and animation sampling; connection status alone is not evidence |
+| Worker guidance | `~/.config/opencode/AGENTS.md` and skill `browser-verify` |
+
+**Worker rules** (also in the global `AGENTS.md`, so a brief only needs "use `chrome-devtools-verify`"):
+
+- `new_page {url}` → take `pageId` from the `[selected]` line → pass `pageId` to **every** later tool (omitting it is the common first-call error). Close only your own pages; the browser is shared.
+- `emulate {pageId, prefersReducedMotion:"no-preference"}` before sampling GT3 motion. GT3 correctly disables its animations under `prefers-reduced-motion: reduce`; a 2026-11-25 worker misread that as a regression. The dedicated browser reports `no-preference` by default.
+- Sample motion inside **one** async `evaluate_script` (timers or rAF, return an array); separate tool calls are too slow to sample. Screenshot `filePath` must be under the OS temp dir.
+- Dev servers are reached at `http://127.0.0.1:<port>/`. GT3's harness rules still apply: owned, provenance-stamped Vite (`with-verification-server.sh`) for runtime evidence, and the host preflight (`host-check.mjs preflight browser`) before heavy runs. The idle browser counts toward the 8 GB host budget (`operating-contract.md` §6); `opencode-verify-browser stop` frees it.
+- If the tools report connection refused: `opencode-verify-browser start`. If it is genuinely unusable, report BLOCKED with the exact error. Do not retry-loop and do not try other launch methods (that is the failure this section exists to end).
+
+**Verified 2026-11-25:** the self-test's 11 checks pass against a fixture and a live GT3 Vite page, including from inside a Seatbelt profile where the old launch-its-own-Chrome `chrome-devtools` entry fails ("Target closed"). A real `opencode run --standalone --auto -m opencode/hy4-flash-free` loaded the skill on its own, ran the MCP end to end (5 distinct animation samples, a PNG screenshot, page closed), and the browser restarted itself 15 s after being killed. Logged in `routing-evidence.md`. The `playwright` and `chrome-devtools` entries in `opencode.json` still launch their own Chrome and still fail in agent contexts; they are kept only so existing setups do not break. `opencode/hy4-flash-free` is not an approved GT3 route (see "Approved free routes"); it was used as the probe because it is the model that reported the failures. Token Harbor `:free` routes additionally need the owner to confirm free-model data sharing in the provider dashboard; an unconfirmed route fails with that message, which is an owner action, not a worker fault.
+
 ## This file drifts
 
 Free-route IDs, providers and pricing are operational data, not permanent truth. They were valid during the benchmark (2026-10-03/04) and in the live catalog on 2026-10-04. Re-verify against `opencode models` when a job fails or a session starts relying on them, and update this file when they change.

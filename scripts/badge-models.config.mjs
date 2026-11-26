@@ -1,5 +1,8 @@
 // Editable source/candidate selection. Angles are radians, applied after source world transforms.
 export const packFile = 'automobile_badges_-_main_brands.glb';
+// Match occupied face area to BMW (1.0), subject to the Collection span limits.
+// Sparse rings/wings cannot attain equal area within their allowed footprint.
+export const opticalScaling = { reference: 'bmw', areaExponent: 1 / 2, min: .9, max: 1.35, wideMax: 1.3, wideAspect: 2.5 };
 export const credits = {
  pack: ['Automobile Badges - Main Brands', 'Kryox Shade', 'https://skfb.ly/pEOrA'],
  lexus: ['Lexus Logo', 'mothomas744', 'https://skfb.ly/pC9UK'],
@@ -25,14 +28,17 @@ export const finishes = {
 };
 const pack = (range, extra={}) => ({ file: packFile, meshRange: range, ...extra });
 export const models = {
- lexus: { chosen:'standalone', backing:true, candidates:{ standalone:{file:'lexus_logo.glb', materialOverrides:{object_0:'chrome'}} } },
+ lexus: { chosen:'standalone', backing:true, candidates:{ standalone:{file:'lexus_logo.glb', componentAboveY:2.4, backingScale:.992, materialOverrides:{object_0:'chrome'}} } },
  nissan: { chosen:'standalone', backing:true, candidates:{ standalone:{file:'gt-r_logo 2.glb', materialOverrides:{chrome:'chrome',Red_Metal:'red'}}, pack:pack([162,168]) } },
  audi: { chosen:'standalone', candidates:{ standalone:{file:'audi-emblem.glb', materialOverrides:{'Chrome rings':'chrome','Graphite mount':'graphite'}}, pack:pack([254,254],{backing:true}) } },
  bmw: { chosen:'standalone', candidates:{ standalone:{file:'bmw_emblem.glb', alignNode:'Circle.004_Material.029_0', materialOverrides:{'Material.029':'satin','Material.025':'chrome','Material.026':'blue','Material.027':'white','Material.028':'black','White.004':'white'}}, pack:pack([1,6],{materialOverrides:{'SVGMat.002':'white','Material':'blue'}}) } },
- mercedes: { chosen:'standalone', backing:true, candidates:{ standalone:{file:'mercedes_benz_3d_logo_and_car_symbol_silver.glb',nodes:['polySurface1_aiStandardSurface1_0'],materialOverrides:{aiStandardSurface1:'chrome'}} } },
+ mercedes: { chosen:'standalone', backing:true, candidates:{ standalone:{file:'mercedes_benz_3d_logo_and_car_symbol_silver.glb',nodes:['polySurface1_aiStandardSurface1_0','polySurface2_aiStandardSurface1_0'],materialOverrides:{aiStandardSurface1:'chrome'}} } },
  ferrari: { chosen:'standalone', target:16000, candidates:{ standalone:{file:'ferrari_logo.glb', materialOverrides:{'Materiale.001':'black','Materiale.004':'black','Materiale.008':'white','Materiale.009':{color:[.005,.48,.04,1],metalness:0,roughness:.28},'Materiale.010':'red','Materiale.011':'yellow'}}, pack:pack([51,151],{target:14000,excludeMeshes:[52,53,54],materialOverrides:{'Material.013':'yellow','Material.008':'red','Material.016':'green','Material.007':'black','SVGMat.1322':'black','SVGMat.1325':'black','SVGMat.1398':'black','SVGMat.1401':'black','SVGMat.002':'white'}}) } },
  aston: { chosen:'standalone', candidates:{ standalone:{file:'AM badge.stl', panel:{x:[90.4,129.6],y:[109,116.2],letterHeight:2.5},removeLoop:{x:[106.6,113.4],aboveY:116.3}}, pack:pack([15,18],{materialOverrides:{'Material.005':'green'}}) } },
- lamborghini: { chosen:'standalone', candidates:{ standalone:{file:'lamborghini_emblem.glb',nodes:['Emblem_Emblem_0','Emblem_Emblem 2_0'],rotation:[0,Math.PI,0],materialOverrides:{Emblem:{metalness:0,roughness:.28},Emblem_2:'black'}} } },
+ // The shield already faces +Z after closed-shell winding repair. A Y half-turn
+ // exposes its black rear. Gold is a detached cursive wordmark, not the bull;
+ // the shield's baseColor/metallicRoughness/normal maps contain its gold relief.
+ lamborghini: { chosen:'standalone', candidates:{ standalone:{file:'lamborghini_emblem.glb',nodes:['Emblem_Emblem_0','Emblem_Emblem 2_0'],preserveUVs:true,materialOverrides:{Emblem:{metalness:1,roughness:.28},Emblem_2:'black'}} } },
  porsche: { chosen:'standalone', target:30000, candidates:{ standalone:{file:'detailed_porsche_logo/scene.gltf', pearlTriangles:8,materialOverrides:{'Opacity.003':'gold','Yellow_Pearl.002':'gold','Red_pearl_.001':'red','Gold.002':'gold','Black.003':'black','Red_base.002':'red','Yellow_base.001':'gold'}}, pack:pack([216,248],{materialOverrides:{'Material.004':'gold','Material.006':'gold'}}) } },
 };
 // Full pack inventory, including brands not selected for runtime. Inclusive mesh ranges.

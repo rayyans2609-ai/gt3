@@ -76,6 +76,28 @@ function normalize(records) {
   }
   return { span, center: c.toArray(), dimensions: size.toArray() };
 }
+// Filter whole position-welded components before simplification. The Lexus
+// source combines an oval/L and a separate wordmark in one primitive.
+function componentsAboveY(records, minY) {
+  const size = bounds(records).getSize(new T.Vector3());
+  const a = analyseTriangles(records, Math.max(size.x, size.y, size.z) * 1e-8), minima = new Map();
+  for (const f of a.faces) for (const id of f.ids) minima.set(f.root, Math.min(minima.get(f.root) ?? Infinity, a.vertices[id][1]));
+  const kept = new Set([...minima].filter(([, y]) => y > minY).map(([root]) => root));
+  if (!kept.size || kept.size === minima.size) throw new Error('Component selection did not separate emblem and wordmark');
+  const groups = new Map();
+  let removedTriangles = 0;
+  for (const f of a.faces) {
+    if (!kept.has(f.root)) { removedTriangles++; continue; }
+    const { r, j } = f;
+    if (!groups.has(r)) groups.set(r, { positions: [], normals: [], uv: [], uv1: [], material: r.material });
+    const g = groups.get(r);
+    g.positions.push(...r.positions.slice(j, j + 9));
+    g.normals.push(...r.normals.slice(j, j + 9));
+    if (r.uv) g.uv.push(...r.uv.slice(j / 3 * 2, j / 3 * 2 + 6));
+    if (r.uv1) g.uv1.push(...r.uv1.slice(j / 3 * 2, j / 3 * 2 + 6));
+  }
+  return { records: [...groups.values()].map((g) => ({ ...g, positions: Float32Array.from(g.positions), normals: Float32Array.from(g.normals), uv: g.uv.length ? Float32Array.from(g.uv) : null, uv1: g.uv1.length ? Float32Array.from(g.uv1) : null })), report: { method: 'position-welded component minimum +Y in source world units', minY, components: minima.size, keptComponents: kept.size, removedTriangles } };
+}
 function faceCoverage(records, resolution = 256) {
   const mask = new Uint8Array(resolution * resolution);
   for (const r of records) for (let j = 0; j < r.positions.length; j += 9) {
@@ -92,15 +114,17 @@ function faceCoverage(records, resolution = 256) {
 }
 // Mirror only open components behind the original mesh; connect each boundary edge.
 // The tiny rear inset prevents zero-area walls along purely vertical source edges.
-function finishBacks(records, material, { backing = false } = {}) {
+function finishBacks(records, material, { backing = false, backingScale = 1.014 } = {}) {
   const a = analyseTriangles(records), backZ = bounds(records).min.z - 2e-3, groups = /* @__PURE__ */ new Map(), rear = [];
-  const add = (mat, ps, ns, uv) => {
-    if (!groups.has(mat)) groups.set(mat, { positions: [], normals: [], uv: [], material: mat, hasUV: false });
+  const add = (mat, ps, ns, uv, uv1) => {
+    if (!groups.has(mat)) groups.set(mat, { positions: [], normals: [], uv: [], uv1: [], material: mat, hasUV: false, hasUV1: false });
     const g = groups.get(mat);
     g.positions.push(...ps);
     g.normals.push(...ns);
     g.uv.push(...uv ?? [0, 0, 0, 0, 0, 0]);
     g.hasUV ||= !!uv;
+    g.uv1.push(...uv1 ?? [0, 0, 0, 0, 0, 0]);
+    g.hasUV1 ||= !!uv1;
   };
   const tri = (ps) => {
     const n = new T.Vector3(...ps.slice(3, 6)).sub(new T.Vector3(...ps.slice(0, 3))).cross(new T.Vector3(...ps.slice(6, 9)).sub(new T.Vector3(...ps.slice(0, 3)))).normalize().toArray();
@@ -110,16 +134,17 @@ function finishBacks(records, material, { backing = false } = {}) {
   const flipped = /* @__PURE__ */ new Set();
   for (const f of a.faces) {
     const { r, j } = f;
-    let p = f.ids.flatMap((id) => a.vertices[id]), n = Array.from(r.normals.slice(j, j + 9)), uv = r.uv ? Array.from(r.uv.slice(j / 3 * 2, j / 3 * 2 + 6)) : null;
+    let p = f.ids.flatMap((id) => a.vertices[id]), n = Array.from(r.normals.slice(j, j + 9)), uv = r.uv ? Array.from(r.uv.slice(j / 3 * 2, j / 3 * 2 + 6)) : null, uv1 = r.uv1 ? Array.from(r.uv1.slice(j / 3 * 2, j / 3 * 2 + 6)) : null;
     if (!a.openRoots.has(f.root) && (a.volumes.get(f.root) ?? 0) < -1e-12) {
       p = [...p.slice(0, 3), ...p.slice(6, 9), ...p.slice(3, 6)];
       n = [...n.slice(0, 3), ...n.slice(6, 9), ...n.slice(3, 6)].map((v) => -v);
       if (uv) uv = [...uv.slice(0, 2), ...uv.slice(4, 6), ...uv.slice(2, 4)];
+      if (uv1) uv1 = [...uv1.slice(0, 2), ...uv1.slice(4, 6), ...uv1.slice(2, 4)];
       flipped.add(f.root);
     }
     const fn = new T.Vector3(...p.slice(3, 6)).sub(new T.Vector3(...p.slice(0, 3))).cross(new T.Vector3(...p.slice(6, 9)).sub(new T.Vector3(...p.slice(0, 3)))).normalize();
     if (fn.dot(new T.Vector3(...n.slice(0, 3)).add(new T.Vector3(...n.slice(3, 6))).add(new T.Vector3(...n.slice(6, 9)))) < 0) n = [...fn.toArray(), ...fn.toArray(), ...fn.toArray()];
-    add(r.material, p, n, uv);
+    add(r.material, p, n, uv, uv1);
     if (a.openRoots.has(f.root)) {
       const ps = [0, 2, 1].flatMap((k) => [p[k * 3] * 0.9999, p[k * 3 + 1] * 0.9999, 2 * backZ - p[k * 3 + 2]]);
       tri(ps);
@@ -130,9 +155,9 @@ function finishBacks(records, material, { backing = false } = {}) {
     tri([...q, ...p, ...pb]);
     tri([...q, ...pb, ...qb]);
   }
-  let result = [...groups.values()].map((g) => ({ positions: Float32Array.from(g.positions), normals: Float32Array.from(g.normals), uv: g.hasUV ? Float32Array.from(g.uv) : null, material: g.material }));
+  let result = [...groups.values()].map((g) => ({ positions: Float32Array.from(g.positions), normals: Float32Array.from(g.normals), uv: g.hasUV ? Float32Array.from(g.uv) : null, uv1: g.hasUV1 ? Float32Array.from(g.uv1) : null, material: g.material }));
   if (backing) {
-    const clone = result.map((r) => ({ positions: Float32Array.from(r.positions, (v, i) => i % 3 === 2 ? v - 0.012 : v * 1.014), normals: r.normals, material }));
+    const clone = result.map((r) => ({ positions: Float32Array.from(r.positions, (v, i) => i % 3 === 2 ? v - 0.012 : v * backingScale), normals: r.normals, material }));
     result.push(...clone);
   }
   return { records: result, report: { before: a.summary, mirroredOpenComponents: a.openRoots.size, flippedComponents: flipped.size, backing: backing ? "silhouette-following graphite duplicate offset behind chrome" : "satin mirrored closures on open components; original closed backs retained" } };
@@ -175,19 +200,21 @@ function cleanTriangles(records) {
   const a = analyseTriangles(records), groups = /* @__PURE__ */ new Map();
   for (const f of a.faces) {
     const r = f.r;
-    if (!groups.has(r)) groups.set(r, { positions: [], normals: [], uv: [], material: r.material });
+    if (!groups.has(r)) groups.set(r, { positions: [], normals: [], uv: [], uv1: [], material: r.material });
     const g = groups.get(r);
     g.positions.push(...f.ids.flatMap((id) => a.vertices[id]));
     g.normals.push(...r.normals.slice(f.j, f.j + 9));
     if (r.uv) g.uv.push(...r.uv.slice(f.j / 3 * 2, f.j / 3 * 2 + 6));
+    if (r.uv1) g.uv1.push(...r.uv1.slice(f.j / 3 * 2, f.j / 3 * 2 + 6));
   }
-  return [...groups.values()].map((g) => ({ positions: Float32Array.from(g.positions), normals: Float32Array.from(g.normals), uv: g.uv.length ? Float32Array.from(g.uv) : null, material: g.material }));
+  return [...groups.values()].map((g) => ({ positions: Float32Array.from(g.positions), normals: Float32Array.from(g.normals), uv: g.uv.length ? Float32Array.from(g.uv) : null, uv1: g.uv1.length ? Float32Array.from(g.uv1) : null, material: g.material }));
 }
 export {
   analyseTriangles,
   bounds,
   capResidualSeams,
   cleanTriangles,
+  componentsAboveY,
   faceCoverage,
   finishBacks,
   normalize

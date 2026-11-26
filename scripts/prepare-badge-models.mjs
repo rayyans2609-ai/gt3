@@ -10,8 +10,8 @@ import draco3d from "draco3dgltf";
 import sharp from "sharp";
 import * as T from "three";
 import { STLLoader } from "three/addons/loaders/STLLoader.js";
-import { models, finishes, credits, packFile, packBrands } from "./badge-models.config.mjs";
-import { analyseTriangles, normalize, bounds, finishBacks, faceCoverage, capResidualSeams, cleanTriangles } from "./lib/badge-geometry.mjs";
+import { models, finishes, credits, packFile, packBrands, opticalScaling } from "./badge-models.config.mjs";
+import { analyseTriangles, normalize, bounds, finishBacks, faceCoverage, capResidualSeams, cleanTriangles, componentsAboveY } from "./lib/badge-geometry.mjs";
 // Shared offline IO used by preparation and the independent Node lifecycle check.
 async function badgeIO() {
   return new NodeIO().registerExtensions(ALL_EXTENSIONS).registerDependencies({ "draco3d.decoder": await draco3d.createDecoderModule(), "draco3d.encoder": await draco3d.createEncoderModule() });
@@ -63,8 +63,8 @@ function sourceQuality(doc) {
   return { units: "glTF metre convention; authoring units unspecified", worldBounds: { min: worldBounds.min.toArray(), max: worldBounds.max.toArray(), dimensions: worldBounds.getSize(new T.Vector3()).toArray() }, perPrimitiveTopology: total, note: "Per-primitive sums include legitimate material/UV seams; assembled selected geometry is analysed separately before and after repair." };
 }
 function expand(p, indices, matrix, material) {
-  const pos = p.getAttribute("POSITION").getArray(), norm = p.getAttribute("NORMAL")?.getArray(), uv = p.getAttribute("TEXCOORD_0")?.getArray();
-  const ps = new Float32Array(indices.length * 3), ns = new Float32Array(indices.length * 3), us = uv ? new Float32Array(indices.length * 2) : null, normalMatrix = new T.Matrix3().getNormalMatrix(matrix), v = new T.Vector3();
+  const pos = p.getAttribute("POSITION").getArray(), norm = p.getAttribute("NORMAL")?.getArray(), uv = p.getAttribute("TEXCOORD_0")?.getArray(), uv1 = p.getAttribute("TEXCOORD_1")?.getArray();
+  const ps = new Float32Array(indices.length * 3), ns = new Float32Array(indices.length * 3), us = uv ? new Float32Array(indices.length * 2) : null, us1 = uv1 ? new Float32Array(indices.length * 2) : null, normalMatrix = new T.Matrix3().getNormalMatrix(matrix), v = new T.Vector3();
   for (let i = 0; i < indices.length; i++) {
     const k = indices[i];
     v.fromArray(pos, k * 3).applyMatrix4(matrix).toArray(ps, i * 3);
@@ -73,13 +73,17 @@ function expand(p, indices, matrix, material) {
       us[i * 2] = uv[k * 2];
       us[i * 2 + 1] = uv[k * 2 + 1];
     }
+    if (uv1) {
+      us1[i * 2] = uv1[k * 2];
+      us1[i * 2 + 1] = uv1[k * 2 + 1];
+    }
   }
   if (!norm) {
     const g = new T.BufferGeometry().setAttribute("position", new T.BufferAttribute(ps, 3));
     g.computeVertexNormals();
     ns.set(g.attributes.normal.array);
   }
-  return { positions: ps, normals: ns, uv: us, material };
+  return { positions: ps, normals: ns, uv: us, uv1: us1, material };
 }
 function applyFinish(doc, m, override, cache) {
   if (!override) return m;
@@ -142,16 +146,18 @@ function emitGeometry(doc, records) {
     byMaterial.get(r.material).push(r);
   }
   for (const [mat, rs] of byMaterial) {
-    const total = rs.reduce((a, r) => a + r.positions.length, 0), ps = new Float32Array(total), ns = new Float32Array(total), hasUV = rs.some((r) => r.uv), uv = hasUV ? new Float32Array(total / 3 * 2) : null;
+    const total = rs.reduce((a, r) => a + r.positions.length, 0), ps = new Float32Array(total), ns = new Float32Array(total), hasUV = rs.some((r) => r.uv), uv = hasUV ? new Float32Array(total / 3 * 2) : null, uv1 = rs.some((r) => r.uv1) ? new Float32Array(total / 3 * 2) : null;
     let o = 0;
     for (const r of rs) {
       ps.set(r.positions, o);
       ns.set(r.normals, o);
       if (r.uv) uv.set(r.uv, o / 3 * 2);
+      if (r.uv1) uv1.set(r.uv1, o / 3 * 2);
       o += r.positions.length;
     }
     const prim = doc.createPrimitive().setMaterial(mat).setAttribute("POSITION", doc.createAccessor().setType("VEC3").setArray(ps).setBuffer(buffer)).setAttribute("NORMAL", doc.createAccessor().setType("VEC3").setArray(ns).setBuffer(buffer));
     if (uv) prim.setAttribute("TEXCOORD_0", doc.createAccessor().setType("VEC2").setArray(uv).setBuffer(buffer));
+    if (uv1) prim.setAttribute("TEXCOORD_1", doc.createAccessor().setType("VEC2").setArray(uv1).setBuffer(buffer));
     mesh.addPrimitive(prim);
   }
   scene.addChild(doc.createNode("Emblem +Z, up +Y").setMesh(mesh));
@@ -219,7 +225,9 @@ async function prepare({ source, output = "public/badges", only } = {}) {
             if (material.getMetallicFactor() > 0.7) material.setMetallicFactor(1);
           }
           let t = triangles(p), targetForPrim = c.pearlTriangles && /pearl/i.test(material?.getName()) ? c.pearlTriangles : Math.max(8, t * ratio);
-          let indices = simplifyIndices(p, targetForPrim);
+          // Component selection must precede reduction; Lexus' wordmark is most
+          // of its source primitive, but its emblem is already below the budget.
+          let indices = c.componentAboveY !== undefined ? Uint32Array.from(p.getIndices()?.getArray() ?? Array.from({ length: p.getAttribute("POSITION").getCount() }, (_, i) => i)) : simplifyIndices(p, targetForPrim);
           if (c.pearlTriangles && /pearl/i.test(p.getMaterial()?.getName()) && indices.length > 36) {
             const pos = p.getAttribute("POSITION").getArray();
             indices = MeshoptSimplifier.simplify(Uint32Array.from(p.getIndices().getArray()), pos, 3, 24, 1, ["Permissive"])[0];
@@ -228,23 +236,30 @@ async function prepare({ source, output = "public/badges", only } = {}) {
           records.push(expand(p, indices, matrix, material));
         }
       }
+      if (c.componentAboveY !== undefined) {
+        const selected = componentsAboveY(records, c.componentAboveY);
+        records = selected.records;
+        segmentation = selected.report;
+      }
       const sourceBounds = normalize(records);
       const satin = applyFinish(doc, doc.createMaterial("Satin metal backing"), model.backing || c.backing ? "graphite" : "satin", /* @__PURE__ */ new Map());
-      const finished = finishBacks(records, satin, { backing: model.backing || c.backing });
+      const finished = finishBacks(records, satin, { backing: model.backing || c.backing, backingScale: c.backingScale });
       records = finished.records;
       normalize(records);
       const seams = capResidualSeams(records, satin);
       records = seams.records;
       finished.report.cappedResidualEdges = seams.cappedEdges;
-      const coverage = faceCoverage(records), opticalScale = c.opticalScale ?? model.opticalScale ?? Number(Math.min(1.7, Math.max(0.9, Math.sqrt(0.55 / coverage))).toFixed(3));
+      const coverage = faceCoverage(records);
       let topology = analyseTriangles(records).summary;
       emitGeometry(doc, records);
-      await doc.transform(prune(), dedup(), join({ keepMeshes: true }), textureCompress({ encoder: sharp, targetFormat: "webp", resize: [1024, 1024], quality: 90 }), prune());
-      for (const ext of doc.getRoot().listExtensionsUsed()) if (!["KHR_materials_clearcoat", "EXT_texture_webp"].includes(ext.extensionName)) ext.dispose();
+      const pruneOptions = { keepAttributes: c.preserveUVs ?? false };
+      await doc.transform(prune(pruneOptions), dedup(), join({ keepMeshes: true }), textureCompress({ encoder: sharp, targetFormat: "webp", resize: [1024, 1024], quality: 90 }), prune(pruneOptions));
+      for (const ext of doc.getRoot().listExtensionsUsed()) if (!["KHR_materials_clearcoat", "KHR_texture_transform", "EXT_texture_webp"].includes(ext.extensionName)) ext.dispose();
       const credit = credits[c.file === packFile ? "pack" : id], originalAttribution = structuredClone(doc.getRoot().getAsset().extras ?? {});
       const modifications = [`Extracted ${candidate} candidate; world transforms baked; centred, +Z face, +Y up; larger face span 1`, "Merged by physical material zone; unused scene data removed; PBR finishes corrected", "WebP textures <=1024; Draco geometry compression", finished.report.backing];
-      if (model.target || before.selectedTriangles > 3e4) modifications.push("Meshoptimizer reduction preserving silhouette and raised relief");
-      if (segmentation) modifications.push("STL panel/letter/wing material segmentation; mounting loop removed");
+      if (c.componentAboveY === undefined && (model.target || before.selectedTriangles > 3e4)) modifications.push("Meshoptimizer reduction preserving silhouette and raised relief");
+      if (c.file.endsWith('.stl')) modifications.push("STL panel/letter/wing material segmentation; mounting loop removed");
+      if (c.componentAboveY !== undefined) modifications.push("Separated connected components; removed LEXUS wordmark; retained oval/L and graphite support");
       const licence = id === "aston" && candidate === "standalone" ? "unknown" : id === "audi" && candidate === "standalone" ? "GT3 own export" : "CC BY 4.0";
       doc.getRoot().getAsset().extras = { ...originalAttribution, originalAttribution, title: credit[0], author: credit[1] ?? "unknown", sourceUrl: credit[2], licence, modifications, canonical: { face: "+Z", up: "+Y", span: 1 }, topology };
       await doc.transform(draco({ quantizePosition: 24, quantizeNormal: 12, quantizeTexcoord: 14, quantizationVolume: "scene" }));
@@ -260,15 +275,16 @@ async function prepare({ source, output = "public/badges", only } = {}) {
         const fixed = capResidualSeams(cleanTriangles(rs), back);
         quantizationRepairs += fixed.cappedEdges;
         emitGeometry(decoded, fixed.records);
-        await decoded.transform(prune(), dedup(), join({ keepMeshes: true }), draco({ quantizePosition: 24, quantizeNormal: 12, quantizeTexcoord: 14, quantizationVolume: "scene" }));
+        await decoded.transform(prune(pruneOptions), dedup(), join({ keepMeshes: true }), draco({ quantizePosition: 24, quantizeNormal: 12, quantizeTexcoord: 14, quantizationVolume: "scene" }));
         await io.write(candidatePath, decoded);
       }
       finished.report.quantizationRepairs = quantizationRepairs;
       const finalDoc = await io.read(candidatePath);
-      topology = analyseTriangles(recordsFromDocument(finalDoc)).summary;
+      const finalRecords = recordsFromDocument(finalDoc), finalSize = bounds(finalRecords).getSize(new T.Vector3());
+      topology = analyseTriangles(finalRecords).summary;
       if (topology.boundaryEdges) throw new Error(`${id}-${candidate} still has ${topology.boundaryEdges} open edges after Draco`);
       const bytes = (await fs.stat(candidatePath)).size;
-      const report = { id, candidate, source: c.file, author: credit[1] ?? "unknown", sourceUrl: credit[2], licence, modifications, triangles: topology.triangles, meshes: finalDoc.getRoot().listMeshes().length, materials: finalDoc.getRoot().listMaterials().length, drawCalls: finalDoc.getRoot().listMeshes().reduce((a, m) => a + m.listPrimitives().length, 0), bytes, opticalScale, faceCoverage: Number(coverage.toFixed(4)), sourceBounds, topology, back: finished.report, segmentation, before: { triangles: before.selectedTriangles ?? before.triangles, meshes: before.meshes, drawCalls: before.selectedDrawCalls ?? before.meshes, materials: before.materials.length, bytes: before.bytes ?? await sourceBytes(originalFile) } };
+      const report = { id, candidate, source: c.file, author: credit[1] ?? "unknown", sourceUrl: credit[2], licence, modifications, triangles: topology.triangles, meshes: finalDoc.getRoot().listMeshes().length, materials: finalDoc.getRoot().listMaterials().length, drawCalls: finalDoc.getRoot().listMeshes().reduce((a, m) => a + m.listPrimitives().length, 0), bytes, faceCoverage: Number(coverage.toFixed(4)), faceSpan: Math.max(finalSize.x, finalSize.y), sourceBounds, topology, back: finished.report, segmentation, before: { triangles: before.selectedTriangles ?? before.triangles, meshes: before.meshes, drawCalls: before.selectedDrawCalls ?? before.meshes, materials: before.materials.length, bytes: before.bytes ?? await sourceBytes(originalFile) } };
       candidateReports.push(report);
       if (candidate === model.chosen) {
         await fs.copyFile(candidatePath, path.join(output, `${id}.glb`));
@@ -276,6 +292,20 @@ async function prepare({ source, output = "public/badges", only } = {}) {
       }
       console.log(`${id}-${candidate}: ${report.triangles} triangles, ${report.drawCalls} draws, ${bytes} bytes, ${topology.boundaryEdges} open edges`);
     }
+  }
+  let reference = candidateReports.find((r) => r.id === opticalScaling.reference && r.candidate === models[r.id].chosen);
+  if (!reference && only) reference = JSON.parse(await fs.readFile(path.join(output, "manifest.json"), "utf8")).find((r) => r.id === opticalScaling.reference);
+  if (!reference) throw new Error('BMW reference coverage is required for optical scaling');
+  for (const report of candidateReports) {
+    const [x, y] = report.sourceBounds.dimensions, aspect = Math.max(x, y) / Math.min(x, y);
+    const cap = aspect >= opticalScaling.wideAspect ? opticalScaling.wideMax : opticalScaling.max;
+    // Draco can decode a span a fraction above 1; floor the final bound so even
+    // the actual scaled geometry stays <=1.35, rather than just its metadata.
+    const spanCap = Math.floor(opticalScaling.max / report.faceSpan * 1000) / 1000;
+    report.opticalScale = Math.min(spanCap, Number(Math.min(cap, Math.max(opticalScaling.min, (reference.faceCoverage / report.faceCoverage) ** opticalScaling.areaExponent)).toFixed(3)));
+    report.opticalScaling = { reference: opticalScaling.reference, referenceCoverage: reference.faceCoverage, areaExponent: opticalScaling.areaExponent, cap };
+    const chosen = manifest.find((r) => r.id === report.id && r.candidate === report.candidate);
+    if (chosen) Object.assign(chosen, { opticalScale: report.opticalScale, opticalScaling: report.opticalScaling });
   }
   if (!only) {
     await fs.writeFile(path.join(output, "manifest.json"), JSON.stringify(manifest, null, 2) + "\n");
@@ -317,7 +347,7 @@ Licence metadata: ${JSON.stringify(i.asset?.extras ?? { author: i.author, licenc
   } catch {
     text += "No Porsche license.txt found.\n";
   }
-  text += "\nOther standalone GLBs and the pack retain embedded CC-BY-4.0 author/title/source metadata quoted above. Audi has no embedded licence metadata (GT3 own export). STL has no metadata; author and licence unknown. ZIP is an archive of the Porsche source; McLaren references are outside this task and were not processed.\n\n## Quality notes\n\nMercedes: second box-like support removed; first star retained. Lamborghini: separate detached wordmark omitted; textured crest retained and rotated to face +Z. Aston: one connected printable shell with a mounting loop; loop removed and cut boundaries closed. Porsche: thousands of bead shells simplified individually, then material zones merged. Source boundaries, duplicate triangles, normal disagreements and non-manifold edges are counted above; closed negative-volume components are reversed, open components mirrored with satin rears and edge walls. Intersecting relief shells are retained; this is a presentation mesh, not a boolean-unioned manufacturing solid. Remaining non-manifold edges are reported, never hidden.\n";
+  text += "\nOther standalone GLBs and the pack retain embedded CC-BY-4.0 author/title/source metadata quoted above. Audi has no embedded licence metadata (GT3 own export). STL has no metadata; author and licence unknown. ZIP is an archive of the Porsche source; McLaren references are outside this task and were not processed.\n\n## Quality notes\n\nLexus: connected-component bounds separate the oval/L from the lower LEXUS wordmark before reduction; only the emblem is retained and normalised. Mercedes: polySurface1 is the ring; polySurface2 is the star; both retained without reduction, with graphite silhouette support. Lamborghini: Gold is a separate detached cursive wordmark, omitted from the crest; its unused 2048 normal map is pruned. The crest retains its gold bull/border/lettering baseColor, metallicRoughness and 1024 normal maps, both UV sets, and texture transforms when present. No Y half-turn: the repaired crest already faces +Z. Aston: one connected printable shell with a mounting loop; loop removed and cut boundaries closed. Porsche: thousands of bead shells simplified individually, then material zones merged. Source boundaries, duplicate triangles, normal disagreements and non-manifold edges are counted above; closed negative-volume components are reversed, open components mirrored with satin rears and edge walls. Intersecting relief shells are retained; this is a presentation mesh, not a boolean-unioned manufacturing solid. Remaining non-manifold edges are reported, never hidden.\n";
   await fs.writeFile("local/showcase-badges/INVENTORY.md", text);
 }
 if (process.argv[1] === new URL(import.meta.url).pathname) {

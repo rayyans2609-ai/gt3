@@ -2,13 +2,15 @@ import * as THREE from 'three';
 import { SVGLoader } from 'three/addons/loaders/SVGLoader.js';
 import lexus from './lexus.svg?raw';
 import audi from './audi.svg?raw';
+import mclaren from './mclaren.svg?raw';
+import bmwUrl from './bmw.svg?url';
 
-const sources = { lexus, audi };
+const sources = { lexus, audi, mclaren, bmw: null };
 
 /** Create a self-contained, unlit-scene-agnostic badge. Caller supplies lights/environment. */
 export function createBadge({ manufacturer = 'lexus', color = 0x8fa6b6, theme = 'day', locked = false, onHover, onClick } = {}) {
   const source = sources[manufacturer];
-  if (!source) throw new Error(`Unknown badge: ${manufacturer}`);
+  if (!(manufacturer in sources)) throw new Error(`Unknown badge: ${manufacturer}`);
   const root = new THREE.Group();
   const motion = new THREE.Group();
   const art = new THREE.Group();
@@ -17,6 +19,24 @@ export function createBadge({ manufacturer = 'lexus', color = 0x8fa6b6, theme = 
   const metal = new THREE.MeshStandardMaterial({ color: 0xd9e0e5, metalness: 0.85, roughness: 0.24 });
   const accent = new THREE.Color(color);
   const geometries = [];
+  const ownedMaterials = [];
+  const textures = [];
+  if (manufacturer === 'bmw') {
+    const texture = new THREE.TextureLoader().load(bmwUrl);
+    texture.colorSpace = THREE.SRGBColorSpace;
+    textures.push(texture);
+    const backing = new THREE.CylinderGeometry(0.5, 0.5, 0.025, 48);
+    backing.rotateX(Math.PI / 2);
+    geometries.push(backing);
+    art.add(new THREE.Mesh(backing, metal));
+    const faceGeometry = new THREE.PlaneGeometry(1, 1);
+    geometries.push(faceGeometry);
+    const faceMaterial = new THREE.MeshStandardMaterial({ map: texture, transparent: true, roughness: 0.38, metalness: 0.05, polygonOffset: true, polygonOffsetFactor: -1 });
+    ownedMaterials.push(faceMaterial);
+    const face = new THREE.Mesh(faceGeometry, faceMaterial);
+    face.position.z = 0.014;
+    art.add(face);
+  } else {
   const svg = new DOMParser().parseFromString(source, 'image/svg+xml').documentElement;
   const viewBox = svg.getAttribute('viewBox')?.trim().split(/[ ,]+/).map(Number);
   const extent = viewBox?.length === 4 ? Math.max(viewBox[2], viewBox[3]) : Math.max(parseFloat(svg.getAttribute('width')), parseFloat(svg.getAttribute('height')));
@@ -29,14 +49,15 @@ export function createBadge({ manufacturer = 'lexus', color = 0x8fa6b6, theme = 
       art.add(new THREE.Mesh(geometry, metal));
     }
   }
-  art.scale.y = -1;
+  }
+  art.scale.y = manufacturer === 'bmw' ? 1 : -1;
   art.updateMatrixWorld(true);
   const box = new THREE.Box3().setFromObject(art);
   const size = box.getSize(new THREE.Vector3());
   const center = box.getCenter(new THREE.Vector3());
   const scale = 1 / Math.max(size.x, size.y);
   art.position.set(-center.x * scale, -center.y * scale, -center.z * scale);
-  art.scale.set(scale, -scale, scale);
+  art.scale.set(scale, manufacturer === 'bmw' ? scale : -scale, scale);
   const lockGeometry = new THREE.CylinderGeometry(0.25, 0.25, 0.025, 32);
   lockGeometry.rotateX(Math.PI / 2);
   const lockMaterial = new THREE.MeshStandardMaterial({ color: 0x899096, metalness: 0.65, roughness: 0.4 });
@@ -78,6 +99,6 @@ export function createBadge({ manufacturer = 'lexus', color = 0x8fa6b6, theme = 
       const s = THREE.MathUtils.lerp(root.scale.x, target, 1 - Math.exp(-7 * dt));
       root.scale.setScalar(s);
     },
-    dispose() { if (disposed) return; disposed = true; geometries.forEach(g => g.dispose()); metal.dispose(); lockGeometry.dispose(); lockMaterial.dispose(); hitGeometry.dispose(); hitMaterial.dispose(); root.removeFromParent(); },
+    dispose() { if (disposed) return; disposed = true; geometries.forEach(g => g.dispose()); ownedMaterials.forEach(m => m.dispose()); textures.forEach(t => t.dispose()); metal.dispose(); lockGeometry.dispose(); lockMaterial.dispose(); hitGeometry.dispose(); hitMaterial.dispose(); root.removeFromParent(); },
   };
 }

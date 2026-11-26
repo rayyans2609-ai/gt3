@@ -24,7 +24,7 @@ All manufacturer marks retain their respective trademark status. Commons labels 
 | --- | --- |
 | Lexus | [Lexus Logo.svg, Glebushko0703](https://commons.wikimedia.org/wiki/File:Lexus_Logo.svg). Open chrome emblem. Commons shows inconsistent public domain and CC0 metadata. |
 | Nissan | [Nissan 2020 logo.svg, Nissan Motor Corporation](https://commons.wikimedia.org/wiki/File:Nissan_2020_logo.svg). Open satin metal ring and lettering. |
-| Audi | [Audi-Logo 2016.svg, Strichpunkt / KMS Team](https://commons.wikimedia.org/wiki/File:Audi-Logo_2016.svg). Cutout chrome rings. |
+| Audi | [Audi-Logo 2016.svg, Strichpunkt / KMS Team](https://commons.wikimedia.org/wiki/File:Audi-Logo_2016.svg). Open chrome rings with a rounded machined cross-section and a separate graphite mounting layer. |
 | BMW | [BMW.svg, BMW via Brands of the World](https://commons.wikimedia.org/wiki/File:BMW.svg). Full-colour roundel set into a machined rim. |
 | Mercedes-AMG | [Mercedes-Benz (2025).svg, Mercedes-Benz](https://commons.wikimedia.org/wiki/File:Mercedes-Benz_(2025).svg). Uses the continuous three-pointed grille star path, the physical Mercedes emblem shared by AMG cars. |
 | Ferrari | [Ferrari Logo 2002, Ferrari via Logos Download](https://logos-download.com/brands/ferrari). Full-colour Prancing Horse bonnet emblem with a shallow metal edge. [Copyright note](https://commons.wikimedia.org/wiki/Category:Ferrari_logos). |

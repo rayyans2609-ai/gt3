@@ -94,8 +94,8 @@ export function initEntrySequence() {
   root.innerHTML = `<div class="entry-housing" role="img" aria-label="Standing start lights">
     ${'<span class="entry-lamp" aria-hidden="true"></span>'.repeat(5)}
     </div><div class="entry-go" role="status" hidden>GO</div>
-    <div class="entry-scroll" hidden><span class="entry-scroll__label">Scroll to race</span>
-    <span class="entry-scroll__capsule" aria-hidden="true"><span class="entry-scroll__segment"></span></span></div>`;
+    <div class="entry-scroll" hidden><span class="scroll-cue__label">Scroll to race</span>
+    <span class="scroll-cue__capsule" aria-hidden="true"><span class="scroll-cue__segment"></span></span></div>`;
   document.getElementById('overlay').append(root);
   housing = root.querySelector('.entry-housing');
   lamps = [...root.querySelectorAll('.entry-lamp')];

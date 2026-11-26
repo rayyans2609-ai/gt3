@@ -1,5 +1,7 @@
 :root {
   --ease: cubic-bezier(.22, .61, .36, 1);
+  /* Shared by both themes: a discovered checkpoint on the Tour minimap. */
+  --checkpoint-found: #2f9e62;
   transition: background-color 700ms var(--ease), color 700ms var(--ease);
 }
 
@@ -9,8 +11,9 @@
   --fg-muted: #5d6465;
   --line: rgba(18, 21, 23, 0.18);
   --surface: rgba(255, 255, 255, 0.72);
-  --accent: #65521d;
-  --route-done: #c58f00;
+  /* Hub blue (#597eb3): the Day Tour now shares the Landing/Hub accent language. */
+  --accent: #597eb3;
+  --route-done: #597eb3;
 }
 
 :root[data-theme="night"] {

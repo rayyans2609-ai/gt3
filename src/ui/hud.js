@@ -13,13 +13,14 @@
 
 import * as THREE from 'three';
 import { UNLOCKED } from '../core/renderProfile.js';
-import { state } from '../core/state.js';
+import { state, subscribe } from '../core/state.js';
 import { formatLapTime } from '../core/lapTimer.js';
 import { getCar } from '../data/cars.js';
 import { CHECKPOINT_ROUTE_T, GRID_T, GRID_GAP, routeTAt, pointAt } from '../scene/trackCurve.js';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
-// Keep in step with .hud-route in hud.css (170 px, ~15 % over the original 148).
+// The viewBox stays at 170 units; hud.css displays the SVG at 187 px (~10 % larger).
+// Keeping projection in viewBox units means every element scales together.
 const MAP_SIZE = 170;
 const MAP_PADDING = 9;
 const MAP_SAMPLES = 160;
@@ -44,6 +45,7 @@ let routePointB;
 const routeWorldA = new THREE.Vector3();
 const routeWorldB = new THREE.Vector3();
 let routeMarker;
+const checkpointDots = [];
 let trailSegs = [];
 const trailState = [];
 let trailBaseBeforeGantry;
@@ -190,7 +192,9 @@ function buildRouteMap(root) {
   svg.append(done);
   for (const t of CHECKPOINT_ROUTE_T) {
     const projected = routeProject(pointAt(t), { x: 0, y: 0 });
-    svg.append(svgElement('circle', { class: 'hud-route__checkpoint', cx: projected.x.toFixed(2), cy: projected.y.toFixed(2), r: 1.35 }));
+    const dot = svgElement('circle', { class: 'hud-route__checkpoint', cx: projected.x.toFixed(2), cy: projected.y.toFixed(2), r: 1.35 });
+    svg.append(dot);
+    checkpointDots.push(dot);
   }
   // Direction arrow: a small filled chevron (~8 px long in map units) pointing
   // along the route's forward tangent. It lives in a <g> so position and
@@ -200,6 +204,17 @@ function buildRouteMap(root) {
   svg.append(routeMarker);
   root.classList.add('hud-route');
   root.append(svg);
+}
+
+/**
+ * Grey until the matching car is discovered, then green. Checkpoint i unlocks
+ * car i+1 (CHECKPOINT_ROUTE_T parallels CARS[1..]); state.unlocked is persistent
+ * and only grows, so reversing across a gate never un-colours its marker.
+ */
+function syncCheckpoints() {
+  for (let i = 0; i < checkpointDots.length; i++) {
+    checkpointDots[i].classList.toggle('is-found', state.unlocked.has(i + 1));
+  }
 }
 
 function setIdentity(index, immediate = false) {
@@ -329,6 +344,8 @@ export function initHUD() {
   if (!topLeft || !topRight || !bottomLeft) throw new Error('[hud] Required HUD roots are missing.');
   buildIdentity(topLeft);
   buildRouteMap(topRight);
+  syncCheckpoints();
+  subscribe('unlocked', syncCheckpoints);
   timerElement = element('div', 'hud-lap-timer', formatLapTime(state.lapElapsedMs));
   timerElement.setAttribute('aria-label', 'Tour elapsed time');
   document.querySelector('#hud').append(timerElement);

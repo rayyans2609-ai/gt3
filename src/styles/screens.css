@@ -38,6 +38,17 @@
   width: 7px;
   height: 7px;
   background: color-mix(in srgb, var(--fg) 9%, transparent);
+  transition: background-color 480ms var(--ease), opacity 480ms var(--ease), transform 480ms var(--ease);
+}
+/* A short index-based delay lets a progress step land as a wave instead of a snap.
+   It only delays the paint of real progress — it never invents or withholds it. */
+.start-cover__column.is-filled i {
+  animation: checker-ignite 520ms var(--ease) both;
+  animation-delay: calc(var(--checker-i, 0) * 5ms);
+}
+@keyframes checker-ignite {
+  from { transform: translateY(-2px) scale(.82); opacity: .35; }
+  to { transform: none; opacity: 1; }
 }
 .start-cover__column:nth-child(odd) i:last-child,
 .start-cover__column:nth-child(even) i:first-child { background: transparent; }
@@ -294,7 +305,10 @@ body.gt3-showcase-open #finish-screen {
 
 @media (prefers-reduced-motion: reduce) {
   #finish-screen,
-  .finish-screen__panel {
+  .finish-screen__panel,
+  .start-cover__top,
+  .start-cover__bottom {
     transition-duration: 1ms;
   }
+  .start-cover__column i { transition: none; animation: none; }
 }

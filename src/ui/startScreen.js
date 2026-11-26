@@ -1,11 +1,18 @@
 import { state } from '../core/state.js';
 
 const COVER_PART_MS = 900;
+const CHECKER_COLUMNS = 40;
+// Checker easing follows real progress; it never runs ahead of it and snaps to
+// full the moment readiness settles, so the shutter opens on a complete grid.
+const PROGRESS_SMOOTH_MS = 260;
 let initialized = false;
 let root = null;
 let columns = [];
 let progressValue;
-let progress = 0;
+let targetProgress = 0;
+let displayedProgress = 0;
+let progressFrame = 0;
+let lastFrameAt = 0;
 let readiness = 'loading';
 let dismissComplete = false;
 let restoredSilently = false;
@@ -19,23 +26,68 @@ function element(tag, className, text) {
   return node;
 }
 
-function renderProgress() {
+function paintState() {
   if (!root) return;
-  const percent = Math.round(progress * 100);
-  columns.forEach((column, i) => column.classList.toggle('is-filled', i < Math.floor(progress * 40)));
-  progressValue.textContent = readiness === 'failed'
-    ? 'Route unavailable. Reload the page to try again.'
-    : `Preparing the grid ${String(percent).padStart(2, '0')}%`;
-  root.setAttribute('aria-valuenow', String(percent));
+  // Accessibility reports the real state, never the eased presentation.
+  root.setAttribute('aria-valuenow', String(Math.round(targetProgress * 100)));
   root.dataset.readiness = readiness;
   root.classList.toggle('is-ready', readiness === 'ready' || readiness === 'degraded');
 }
 
+function paintChecker(value) {
+  if (!root) return;
+  const filled = Math.floor(value * CHECKER_COLUMNS);
+  columns.forEach((column, i) => column.classList.toggle('is-filled', i < filled));
+  progressValue.textContent = readiness === 'failed'
+    ? 'Route unavailable. Reload the page to try again.'
+    : `Preparing the grid ${String(Math.round(value * 100)).padStart(2, '0')}%`;
+}
+
+function stopProgressAnimation() {
+  if (progressFrame) cancelAnimationFrame(progressFrame);
+  progressFrame = 0;
+}
+
+/** Ease the displayed checker toward real progress, never past it. */
+function stepProgress(now) {
+  const dt = Math.min(64, Math.max(0, now - lastFrameAt));
+  lastFrameAt = now;
+  const remaining = targetProgress - displayedProgress;
+  if (remaining <= 0.0005) {
+    displayedProgress = targetProgress;
+    paintChecker(displayedProgress);
+    progressFrame = 0;
+    return;
+  }
+  displayedProgress = Math.min(targetProgress,
+    displayedProgress + remaining * (1 - Math.exp(-dt / PROGRESS_SMOOTH_MS)));
+  paintChecker(displayedProgress);
+  progressFrame = requestAnimationFrame(stepProgress);
+}
+
+function renderProgress() {
+  paintState();
+  paintChecker(displayedProgress);
+}
+
 /** Main owns the one readiness decision used by this screen and the scroll lock. */
 export function setLoadState(next) {
-  progress = Math.min(1, Math.max(0, Number(next.progress) || 0));
+  targetProgress = Math.min(1, Math.max(0, Number(next.progress) || 0));
   readiness = next.status;
-  renderProgress();
+  paintState();
+  const stillLoading = readiness === 'loading';
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (!stillLoading || reduce) {
+    // Completion snaps to full: the shutter must never open on a partial grid.
+    stopProgressAnimation();
+    displayedProgress = targetProgress;
+    paintChecker(displayedProgress);
+    return;
+  }
+  if (!progressFrame) {
+    lastFrameAt = performance.now();
+    progressFrame = requestAnimationFrame(stepProgress);
+  }
 }
 
 export function onDismissComplete(fn) {
@@ -98,8 +150,9 @@ export function initStartScreen() {
   const loading = element('div', 'start-cover__loading');
   const checker = element('div', 'start-cover__checker');
   checker.setAttribute('aria-hidden', 'true');
-  columns = Array.from({ length: 40 }, () => {
+  columns = Array.from({ length: CHECKER_COLUMNS }, (_, i) => {
     const column = element('span', 'start-cover__column');
+    column.style.setProperty('--checker-i', String(i));
     column.append(element('i'), element('i'));
     checker.append(column);
     return column;

@@ -1,0 +1,43 @@
+/* Shared scroll cue: label + animated pill. One component, two environments.
+   The Landing and the Grand Tour entry use these classes directly so their
+   proportions, easing and timing cannot drift apart. */
+
+.scroll-cue { display: flex; flex-direction: column; align-items: center; }
+
+.scroll-cue__label {
+  font-family: var(--font-ui);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.scroll-cue__capsule {
+  position: relative;
+  width: 12px;
+  height: 52px;
+  overflow: hidden;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--cue-ink, var(--fg)) 14%, transparent);
+}
+
+.scroll-cue__segment {
+  position: absolute;
+  width: 12px;
+  height: 20px;
+  border-radius: 6px;
+  background: var(--cue-ink, var(--fg));
+  animation: scroll-cue-drift 2.2s var(--ease) infinite;
+}
+
+@keyframes scroll-cue-drift {
+  0% { transform: translateY(-20px); opacity: 0; }
+  20% { opacity: 1; }
+  80% { opacity: 1; }
+  100% { transform: translateY(52px); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scroll-cue__segment { animation: none; top: 16px; }
+}

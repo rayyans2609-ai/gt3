@@ -16,7 +16,6 @@
 
 import { state, subscribe } from '../core/state.js';
 import { CARS } from '../data/cars.js';
-import { initHubPlayer, resetHubPlayer, updateHubPlayer } from './hubPlayer.js';
 import { gsap, reducedMotion, SplitText } from './motion.js';
 import * as plan from './hubPlan.js';
 import { applyCarColor } from './carIdentity.js';
@@ -321,9 +320,8 @@ function build() {
   status.setAttribute('aria-live', 'polite');
   startWrap.append(status, startButton);
   const cars = buildCars();
-  const playerSlot = el('div', 'hub-player-slot');
-  root.append(field, frame, mark, cars, playerSlot, startWrap);
-  initHubPlayer(playerSlot, { shape: DIRECTION === 'plan' ? 'row' : 'column' });
+  // The player lives in the global edge drawer (edgeDrawer.js), not in the Hub composition.
+  root.append(field, frame, mark, cars, startWrap);
   if (DIRECTION === 'plan') {
     planSvg = plan.buildPlan(root, frame, {
       yawDeg: planCamera.yawDeg, pitchDeg: planCamera.pitchDeg, onLockedCar: resistCar,
@@ -331,7 +329,7 @@ function build() {
     root.insertBefore(planSvg, mark);
     carsToggle.setAttribute('aria-controls', 'hub-plan-cars');
   }
-  stagePieces = [mark, cars, playerSlot, status];
+  stagePieces = [mark, cars, status];
   gsap.set(stagePieces, { autoAlpha: 0, y: 10 });
 
   startButton.addEventListener('click', () => { if (ready && interactive) onStart?.(); });
@@ -463,16 +461,13 @@ export function setHubPresence(value, canInteract) {
       reveal();
     } else {
       if (carsOpen) setCars(false);
-      resetHubPlayer();
       if (revealed) unreveal();
     }
   }
 }
 
 /** Per frame from main.js while the Hub is on screen. */
-export function updateHub() {
-  if (root && !root.hidden && presence > 0) updateHubPlayer();
-}
+export function updateHub() {}
 
 /** Restore a settled field after an interrupted handoff, including cached DOM state. */
 export function resetHub(value, canInteract) {
@@ -524,7 +519,6 @@ export function leaveHub(tour = {}) {
     root.inert = true;
     root.classList.remove('is-interactive');
     if (carsOpen) setCars(false);
-    resetHubPlayer();
     revealTl?.kill();
     leanTl?.kill();
     relaxProximity();

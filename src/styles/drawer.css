@@ -13,7 +13,9 @@
 }
 .edge-drawer[hidden] { display: none; }
 :root[data-experience='tour'] .edge-drawer,
-:root[data-experience='complete'] .edge-drawer { display: none; }
+:root[data-experience='complete'] .edge-drawer,
+:root[data-world='tour'] .edge-drawer,
+:root[data-world='tour'] .edge-sound-notice { display: none; }
 .edge-drawer__shell {
   display: flex;
   align-items: center;

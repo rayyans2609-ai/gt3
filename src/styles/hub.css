@@ -131,8 +131,8 @@
 #hub[data-layout='vertical'] .hub-action--show .hub-action__caption { margin: 16px 0 0; }
 .hub-action__index { color: var(--hub-ink); }
 /* While loading, the status replaces the START RACE caption in its slot. */
-#hub[data-readiness='loading'] .hub-action--start .hub-action__caption,
-#hub[data-readiness='failed'] .hub-action--start .hub-action__caption { visibility: hidden; }
+#hub[data-readiness='loading'] .hub-action--start .hub-action__caption > span,
+#hub[data-readiness='failed'] .hub-action--start .hub-action__caption > span { visibility: hidden; }
 
 .hub-action__button {
   display: block;
@@ -189,10 +189,10 @@
 }
 /* The status sits in the START RACE caption slot (it lives inside that action)... */
 .hub-action .hub-status { top: 0; left: 2px; }
-#hub[data-layout='vertical'] .hub-action .hub-status { left: 50%; transform: translateX(-50%); }
+#hub[data-layout='vertical'] .hub-action .hub-status { left: 50%; }
 /* ...or, with the circuit loader, in the circuit's own negative space (positioned in hub.js). */
-#hub[data-loader='circuit'] .hub-status { bottom: auto !important; transform: translate(-50%, -50%); text-align: center; }
-#hub[data-loader='circuit'][data-readiness='loading'] .hub-action--start .hub-action__caption { visibility: visible; }
+#hub[data-loader='circuit'] .hub-status { text-align: center; }
+#hub[data-loader='circuit'][data-readiness='loading'] .hub-action--start .hub-action__caption > span { visibility: visible; }
 
 .hub-plan__head { fill: none; stroke: var(--hub-accent); stroke-width: 3px; stroke-linecap: round; vector-effect: non-scaling-stroke; opacity: 0; filter: drop-shadow(0 0 4px color-mix(in srgb, var(--hub-accent) 60%, transparent)); }
 .hub-plan__tick.is-preview,
@@ -249,7 +249,6 @@
   display: grid;
   justify-items: center;
   gap: 5px;
-  transform: translateX(-50%);
   pointer-events: none;
   white-space: nowrap;
 }

@@ -144,8 +144,9 @@ export function initCollection(sharedRenderer) {
   pmrem = new THREE.PMREMGenerator(renderer);
   envTarget = pmrem.fromScene(new RoomEnvironment(), 0.035);
   scene.environment = envTarget.texture;
-  scene.environmentIntensity = 0.95;
-  const key = new THREE.DirectionalLight(0xffffff, 1.6);
+  // Chrome reflects the room; on the white Day field a softer room and a firmer key keep its relief readable.
+  scene.environmentIntensity = 0.55;
+  const key = new THREE.DirectionalLight(0xffffff, 2.2);
   key.position.set(-0.4, 0.8, 1);
   const rim = new THREE.DirectionalLight(0xdfe8ff, 0.9);
   rim.position.set(0.8, -0.2, 0.6);
@@ -178,8 +179,10 @@ export function showCollection(on) {
   const tl = gsap.timeline({ onComplete: () => { if (!on) { active = false; setHovered(null); } } });
   const instant = reducedMotion.matches;
   items.forEach((item, i) => {
+    if (on && item.hover > 1) tl.to(item, { hover: 0, duration: instant ? 0 : 0.5, ease: 'gt3.out' }, 0);
     tl.to(item, { appear: on ? 1 : 0, duration: instant ? 0 : on ? 0.7 : 0.28, ease: on ? 'gt3.out' : 'gt3' }, instant ? 0 : on ? 0.06 * i : 0.02 * (items.length - i));
   });
+  if (flag && on && flag.hover > 1) tl.to(flag, { hover: 0, duration: instant ? 0 : 0.5, ease: 'gt3.out' }, 0);
   if (flag) tl.to(flag, { appear: on ? 1 : 0, duration: instant ? 0 : on ? 0.9 : 0.3, ease: on ? 'gt3.out' : 'gt3' }, instant ? 0 : on ? 0.25 : 0);
   return tl;
 }

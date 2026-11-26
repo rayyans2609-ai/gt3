@@ -865,6 +865,9 @@ subscribe('experience', () => {
 
 if (typeof window !== 'undefined') {
   window.__gt3audio = Object.freeze({
+    // Read-only Showcase verification; no playback or mix side effects.
+    voice: () => ({ index: activeVoiceIndex, playing: Boolean(activeVoice && !activeVoice.paused && !activeVoice.ended),
+      paused: Boolean(activeVoice?.paused), time: activeVoice?.currentTime ?? 0 }),
     gains: () => ({
       master: masterGain?.gain.value ?? null,
       masterLevel: masterLevelGain?.gain.value ?? null,

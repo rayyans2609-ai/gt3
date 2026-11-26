@@ -99,9 +99,12 @@ async function boot() {
   // experience it left: the Hub at rest, or the Grand Tour at its saved route position. Showcase
   // does not exist yet (Phase 6) and resolves to the Hub. index.html made the same decision
   // before first paint from the same session record.
-  const bootIntoTour = state.experience === 'tour' || state.experience === 'complete';
+  // Showcase V1 review entry (development only); a saved Tour must not override it.
+  const showcaseQuery = import.meta.env.DEV ? new URLSearchParams(location.search).get('showcase') : null;
+  const showcaseReview = showcaseQuery === 'full' || /^[0-9]$/.test(showcaseQuery ?? '');
+  const bootIntoTour = !showcaseReview && (state.experience === 'tour' || state.experience === 'complete');
   restoreExperience(bootIntoTour ? 'tour'
-    : state.experience === 'hub' || state.experience === 'showcase' ? 'hub' : 'landing');
+    : showcaseReview || state.experience === 'hub' || state.experience === 'showcase' ? 'hub' : 'landing');
   document.documentElement.dataset.world = bootIntoTour ? 'tour' : 'landing';
   // The Landing hero streams first; the Tour roster follows in the background. A session that
   // boots into the Tour loads the Landing only if the visitor goes back to the Hub.
@@ -136,6 +139,8 @@ async function boot() {
   const themeToggle = await import('./ui/themeToggle.js');
   const soundControl = await import('./ui/soundControl.js');
   const edgeDrawer = await import('./ui/edgeDrawer.js');
+  // ---- Showcase V1 module (worker S1, integrated) ----
+  const showcase = await import('./showcase/showcase.js');
   const player = await import('./ui/player.js');
   const soundCue = await import('./ui/soundCue.js');
   const startScreen = await import('./ui/startScreen.js');
@@ -533,6 +538,7 @@ async function boot() {
     const wasArmed = tourArmed;
     try {
       if (!beginTransition('tour')) return;
+      edgeDrawer.setDrawerOpen(false); // the Tour keeps its own edge controls; the drawer folds away
       scrollDrive.setDriveDormant(false);
       scrollDrive.lockScroll(); // swallow wheel and keys through the handoff
       hub.prepareLeave(); // keep the Tour HUD hidden until the field parts
@@ -608,10 +614,55 @@ async function boot() {
   }
   window.__gt3.leaveTour = leaveTour;
 
-  // ---- Showcase (placeholder until the Showcase V1 module is integrated) --------------------
-  async function enterShowcase({ index, mode, origin }) {
-    console.info('[gt3] showcase requested', { index, mode, origin });
+  // ---- Showcase V1 edges (owner brief 2026-11-26 §5-§6) --------------------------------------
+  // Collection → Showcase: the chosen emblem rises while the Collection recedes (hub.js), the Hub
+  // is suspended in place (its Collection state is kept), and the Showcase takes the canvas.
+  // Showcase → Collection/Hub: the Showcase fades, the Landing world takes the canvas back under
+  // the Hub and the Collection (or the Hub) is restored. Discovery and route state are untouched.
+  let showcaseEdge = false;
+  let showcaseEdgeVersion = 0;
+  async function enterShowcase({ index = 0, mode = 'full', origin = null } = {}) {
+    if (showcaseEdge || state.transition || state.experience !== 'hub') return;
+    showcaseEdge = true;
+    const version = ++showcaseEdgeVersion;
+    try {
+      if (!beginTransition('showcase')) return;
+      set('playerOpen', false);
+      await hub.leaveToShowcase(index, mode);
+      landing?.deactivateLanding();
+      hub.suspendHub();
+      await showcase.openShowcase({ index, mode, origin });
+      if (version === showcaseEdgeVersion && state.transition?.to === 'showcase') completeTransition();
+    } catch (error) {
+      if (version !== showcaseEdgeVersion) return;
+      console.error('[gt3] Showcase entry failed', error);
+      await showcase.closeShowcase();
+      cancelTransition();
+      landing?.activateLanding({ atHub: true });
+      hub.returnFromShowcase({ to: 'collection' });
+    } finally { if (version === showcaseEdgeVersion) showcaseEdge = false; }
   }
+  async function leaveShowcase({ to = 'collection' } = {}) {
+    // Back remains available while a full-resolution model is still streaming.
+    if (state.transition?.to === 'showcase' && showcase.isShowcaseOpen()) {
+      ++showcaseEdgeVersion;
+      completeTransition();
+      showcaseEdge = false;
+    }
+    if (showcaseEdge || state.transition || state.experience !== 'showcase') return;
+    showcaseEdge = true;
+    try {
+      if (!beginTransition('hub')) return;
+      set('playerOpen', false);
+      await showcase.closeShowcase();
+      landing?.activateLanding({ atHub: true });
+      completeTransition();
+      hub.returnFromShowcase({ to });
+    } finally { showcaseEdge = false; }
+  }
+  showcase.initShowcase({ renderer, registerUpdate, onExit: (destination) => { void leaveShowcase(destination); } });
+  window.__gt3.showcase = { open: enterShowcase, close: leaveShowcase, state: showcase.showcaseState };
+  // ---- end Showcase V1 edges --------------------------------------------------------------------
 
   // ---- wiring ------------------------------------------------------------
 
@@ -711,8 +762,10 @@ async function boot() {
           }
           settle('gpu', 'ready');
         }
-        if (landingOwns) { landing.renderLanding(); hubCollection.renderCollection(); }
-      } else if (landingOwns) { landing.renderLanding(); hubCollection.renderCollection(); }
+        if (showcase.isShowcaseOpen()) showcase.renderShowcase();
+        else if (landingOwns) { landing.renderLanding(); hubCollection.renderCollection(); }
+      } else if (showcase.isShowcaseOpen()) showcase.renderShowcase();
+      else if (landingOwns) { landing.renderLanding(); hubCollection.renderCollection(); }
       else if (studio.isMontagePlaying()) studio.renderMontage();
       else {
         sceneSetup.render(dt);
@@ -732,6 +785,18 @@ async function boot() {
   }
 
   requestAnimationFrame(frame);
+
+  // Showcase V1 review entry: wait for the real boot readiness, with no artificial entry delay.
+  if (showcaseReview) {
+    const enterWhenReady = () => {
+      if (!['ready', 'degraded'].includes(readiness.status) || state.experience !== 'hub') return;
+      window.removeEventListener('gt3:preload', enterWhenReady);
+      startScreen.dismissStartScreenForRestore();
+      void enterShowcase({ index: showcaseQuery === 'full' ? 0 : Number(showcaseQuery), mode: showcaseQuery === 'full' ? 'full' : 'single', origin: null });
+    };
+    window.addEventListener('gt3:preload', enterWhenReady);
+    enterWhenReady();
+  }
 
   // Opt-in Theatre.js animation authoring (dev server only): ?theatre or ?theatre=play. The
   // DEV guard is replaced by `false` in production builds, so the import and its packages are

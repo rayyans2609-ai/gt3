@@ -438,6 +438,9 @@ function build() {
   root.insertBefore(planSvg, runway);
   stagePieces = [mark, start.cap, show.cap, status];
   gsap.set(stagePieces, { autoAlpha: 0, y: 10 });
+  // Centred statuses keep their centring through GSAP's own transform (it owns `transform`).
+  if (LOADER === 'circuit') gsap.set(status, { xPercent: -50, yPercent: -50 });
+  else if (LAYOUT === 'vertical') gsap.set(status, { xPercent: -50 });
   gsap.set([back, fullLabel, carsWrap, emblemLabel], { autoAlpha: 0 });
   Object.assign(insets, targetInsets('hub'));
   applyInsets();
@@ -692,8 +695,13 @@ function placeCollectionDom() {
   if (hoverHit?.type === 'car') {
     const a = plan.checkpointAnchors(s.offset).find((item) => item.car === hoverHit.car);
     if (a) {
-      emblemLabel.style.left = `${a.x}px`;
-      emblemLabel.style.top = `${a.y + s.badge * 0.72}px`;
+      // The label sits on the emblem's outer side, away from the road, aligned to that side.
+      const gap = s.badge * 0.62 + 12;
+      const side = Math.abs(a.nx) > 0.6;
+      emblemLabel.style.left = `${a.x + a.nx * gap}px`;
+      emblemLabel.style.top = `${a.y + a.ny * gap}px`;
+      emblemLabel.style.justifyItems = side ? (a.nx > 0 ? 'start' : 'end') : 'center';
+      emblemLabel.style.translate = side ? `${a.nx > 0 ? '0' : '-100%'} -50%` : `-50% ${a.ny > 0 ? '0' : '-100%'}`;
     }
   }
 }
@@ -772,7 +780,6 @@ function enterCollection() {
   }
   tl.to(back, { autoAlpha: 1, duration: quick ? 0 : 0.5, ease: 'gt3' }, quick ? 0 : 0.7);
   tl.to(fullLabel, { autoAlpha: 1, duration: quick ? 0 : 0.6, ease: 'gt3' }, quick ? 0 : 1.0);
-  tl.add(() => back.focus({ preventScroll: true }), quick ? 0 : 0.8);
 }
 
 function exitCollection({ instant = false } = {}) {
@@ -836,20 +843,34 @@ export function leaveToShowcase(index, mode) {
   tl.add(collection.focusEmblem(mode === 'full' ? 'full' : index), 0);
   tl.to([back, fullLabel, carsWrap, emblemLabel, mark], { autoAlpha: 0, duration: 0.3, ease: 'gt3' }, 0);
   tl.to(planSvg, { opacity: 0.25, duration: 0.45, ease: 'gt3' }, 0.05);
-  return tl.then ? tl.then() : Promise.resolve();
+  return new Promise((resolve) => tl.eventCallback('onComplete', resolve));
+}
+
+/** The Showcase owns the screen: hide the Hub in place, keeping its Collection state. */
+export function suspendHub() {
+  root.hidden = true;
+  presence = 0;
+  interactive = false;
+  root.inert = true;
+  root.classList.remove('is-interactive');
 }
 
 /** Showcase → Collection (or Hub): the Hub is still mounted; restore it in the requested view. */
 export function returnFromShowcase({ to = 'collection' } = {}) {
   root.hidden = false;
   root.style.opacity = '1';
-  presence = 1;
   gsap.set(planSvg, { opacity: 1 });
   gsap.set(mark, { autoAlpha: 1 });
+  if (view !== 'collection') {
+    // Entered without the Collection (review URL): the next frame reveals the Hub as usual.
+    presence = -1;
+    interactive = null;
+    return;
+  }
+  presence = 1;
   interactive = true;
   root.inert = false;
   root.classList.add('is-interactive');
-  if (view !== 'collection') return;
   if (to === 'hub') {
     exitCollection();
     return;

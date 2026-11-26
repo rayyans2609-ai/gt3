@@ -202,16 +202,12 @@ function applyOpen(open) {
 /** Recompose with Flip; a toggle mid-flight starts from the current, in-between layout. */
 function recompose(open) {
   if (reducedMotion.matches) { applyOpen(open); return; }
-  // The cover's semantic size changes to the fixed 56px list thumbnail immediately.
-  // Do not leave its wrapper under a Flip scale transform, which makes its visual hit box
-  // temporarily larger than the thumbnail when a busy renderer drops frames.
-  const flipParts = parts.filter((part) => part !== cover);
-  const before = Flip.getState(flipParts);
+  const before = Flip.getState(parts);
   flip?.kill();
   gsap.killTweensOf(list.children);
   applyOpen(open);
   flip = Flip.from(before, {
-    targets: flipParts,
+    targets: parts,
     duration: open ? 0.52 : 0.42,
     ease: 'gt3.out',
     scale: true,

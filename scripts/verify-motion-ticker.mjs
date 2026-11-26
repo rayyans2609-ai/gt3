@@ -51,8 +51,14 @@ try {
   const lapMid = await page.evaluate(() => getComputedStyle(document.querySelector('.hub-plan__lap')).strokeDasharray);
   await page.mouse.move(700, 40);
   await page.click('.hub-player__list-toggle');
-  await sleep(900);
-  const flipped = await page.evaluate(() => document.querySelector('.hub-player__cover').getBoundingClientRect().width);
+  // Wait for the Flip to settle rather than sampling a fixed delay: GSAP lag smoothing
+  // stretches the 0.52 s recomposition on a loaded host (a fixed 900 ms read 58.6 / 76 px).
+  let flipped = Infinity;
+  for (let t = 0; t < 4000; t += 100) {
+    await sleep(100);
+    flipped = await page.evaluate(() => document.querySelector('.hub-player__cover').getBoundingClientRect().width);
+    if (t >= 600 && Math.abs(flipped - 56) < 1) break;
+  }
   await page.click('.hub-cars__toggle');
   await sleep(900);
   const labelOpacity = await page.evaluate(() => Number(getComputedStyle(document.querySelector('.hub-plan__car')).opacity));

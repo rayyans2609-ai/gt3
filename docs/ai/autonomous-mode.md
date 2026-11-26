@@ -113,7 +113,7 @@ The handoff reports each affected route and its reset time if known.
 
 Host profiles, workload classes, concurrency limits, pre-flight, degradation, calibration and process cleanliness are canonical in `operating-contract.md` §6. They apply attended or not, and per host: Intel rules on the Intel, the provisional envelope on the M4. Unattended additions:
 
-- **Pre-flight is mandatory** before every heavy spawn or class change (`node scripts/host-check.mjs preflight <class>`; exit 75 = wait, never retry in a loop).
+- **Pre-flight is mandatory** before every heavy spawn or class change (`node scripts/host-check.mjs preflight <class>`; exit 75 = classify the cause first (`operating-contract.md` §6.4): wait a bounded time only for temporary degradation; report sustained contention from the owner's usage and defer the work rather than wait on it; never retry in a loop).
 - **The deterministic host monitor runs for the whole heavy window** and writes to the run's local ledger. It never counts as a task and needs no watcher.
 - **Before Vite or a harness**, use `scripts/with-verification-server.sh` with a run-specific `GT3_PORT` (`operating-contract.md` §7). A server from another worktree yields false evidence.
 - On degradation, unattended runs drop to light work and checkpoint before anything else. They do not wait for the owner.
@@ -147,7 +147,7 @@ The manager never polls workers itself. If observability already makes state obv
 
 ## 8. Verification, evidence, human-verification queue
 
-Verification follows **right-sized verification** in `model-routing.md` §5. That means blast-radius depth, dependency-cone scope, representative rather than combinatorial coverage, failure-driven escalation and the stop rule. Before launching a heavy verification task, answer §5's pre-verification questions in the ledger, because on this host every unnecessary browser sweep also costs swap and wall-clock (§6). Use the cheapest sufficient evidence, stop once it is sufficient, and move evidence upward in compressed form. If Luna already ran a valid browser check, nobody above re-runs it merely because authority moved up. Raw artifacts stay available for anomalies and disputes. Builds belong at meaningful checkpoints. Don't broad-rerun unaffected evidence.
+Verification follows `model-routing.md` §5: it must earn its cost, the default is the minimum sufficient evidence (possibly none beyond the diff), escalation is regression-driven, and nonessential browser checks on a constrained host are deferred, not run (§6). Unattended runs apply the same rule: don't fill the horizon with verification the owner's review or better hardware will settle more cheaply. Use the cheapest sufficient evidence, stop once it is sufficient, and move evidence upward in compressed form. If Luna already ran a valid browser check, nobody above re-runs it merely because authority moved up. Raw artifacts stay available for anomalies and disputes. Builds belong at meaningful checkpoints. Don't broad-rerun unaffected evidence.
 
 - **UNVERIFIED ≠ PASS. BLOCKED ≠ FAIL. NEEDS HUMAN VERIFICATION ≠ technical failure.** Static plausibility ≠ runtime proof. Build pass ≠ accepted. Worker finished ≠ accepted.
 - Inspect artifacts from interrupted runs before discarding them.
@@ -155,7 +155,7 @@ Verification follows **right-sized verification** in `model-routing.md` §5. Tha
 - Working behavior is a regression boundary. Gather evidence before modifying it.
 - When the same check recurs across tasks or runs, note it as a candidate for a deterministic script (`model-routing.md` §8).
 
-**Human-verification queue.** Settle without the user everything that machine evidence can usefully settle (to §5's stop rule, not exhaustively). For each genuine subjective judgment: record the item, preserve the exact artifact/state (capture path, commit, URL/state), mark it NEEDS HUMAN VERIFICATION, and continue independent work. Agents may gather and prune evidence, but they never record human acceptance. The run stops for human review only when remaining meaningful work depends on it. The human-verification sweep (§3) prunes the queue before handoff.
+**Human-verification queue.** Settle without the user only what machine evidence can settle at a justified cost (§5), not exhaustively. For each genuine subjective judgment: record the item, preserve the exact artifact/state (capture path, commit, URL/state), mark it NEEDS HUMAN VERIFICATION, and continue independent work. Agents may gather and prune evidence, but they never record human acceptance. The run stops for human review only when remaining meaningful work depends on it. The human-verification sweep (§3) prunes the queue before handoff.
 
 ## 9. Recovery, stop conditions, light work
 

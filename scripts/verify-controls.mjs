@@ -1,13 +1,13 @@
 /** Browser verification for W5a edge-row controls.
  * Usage: node scripts/verify-controls.mjs [baseUrl] [outDir]
- * Defaults: baseUrl http://127.0.0.1:5196/ — outDir local/evidence/verify-controls/
+ * Defaults: the owned verification server URL — outDir local/evidence/verify-controls/
  * Modelled on scripts/verify-checkpoints.mjs: puppeteer-core, same Chrome launch
  * settings, 1600x900, waits for readiness, dismisses the start screen with real
  * wheel input. Prints a JSON summary and exits non-zero if any check fails. */
 import puppeteer from 'puppeteer-core';
 import { mkdir, writeFile } from 'node:fs/promises';
 
-const base = process.argv[2] || 'http://127.0.0.1:5196/';
+const base = process.env.GT3_URL || process.argv[2] || 'http://127.0.0.1:5196/';
 const outDir = process.argv[3] || new URL('../local/evidence/verify-controls/', import.meta.url).pathname;
 const softwareGL = process.env.GT3_SOFTWARE_GL === '1';
 await mkdir(outDir, { recursive: true });

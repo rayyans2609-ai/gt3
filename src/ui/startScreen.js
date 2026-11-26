@@ -2,7 +2,7 @@ import { state } from '../core/state.js';
 
 const COVER_PART_MS = 900;
 const CHECKER_COLUMNS = 40;
-const FINAL_CHECKER_BEAT_MS = 160;
+const FINAL_CHECKER_SAFETY_MS = 300;
 // Checker easing follows real progress; it never runs ahead of it and snaps to
 // full the moment readiness settles, so the shutter opens on a complete grid.
 const PROGRESS_SMOOTH_MS = 260;
@@ -76,6 +76,36 @@ function renderProgress() {
   paintChecker(displayedProgress);
 }
 
+/**
+ * The shutter must follow the final cells, rather than merely racing their nominal duration.
+ * A short cap protects the entry path if a browser drops or cancels a CSS animation.
+ */
+function waitForFinalChecker() {
+  return new Promise((resolve) => {
+    let settled = false;
+    const finish = () => {
+      if (settled) return;
+      settled = true;
+      window.clearTimeout(safety);
+      resolve();
+    };
+    const safety = window.setTimeout(finish, FINAL_CHECKER_SAFETY_MS);
+    const observeAnimations = () => {
+      if (settled) return;
+      const animations = columns
+        .filter((column) => column.classList.contains('is-final-fill'))
+        .flatMap((column) => [...column.querySelectorAll('i')])
+        .flatMap((cell) => cell.getAnimations())
+        .map((animation) => animation.finished.catch(() => {}));
+      if (animations.length) Promise.all(animations).then(finish);
+      // CSS animation creation follows style resolution. Keep observing until that
+      // happens instead of treating the first pre-style frame as an instant finish.
+      else requestAnimationFrame(observeAnimations);
+    };
+    requestAnimationFrame(observeAnimations);
+  });
+}
+
 /** Main owns the one readiness decision used by this screen and the scroll lock. */
 export function setLoadState(next) {
   targetProgress = Math.min(1, Math.max(0, Number(next.progress) || 0));
@@ -90,9 +120,7 @@ export function setLoadState(next) {
     const finalSnap = !reduce && readiness !== 'failed';
     root.classList.toggle('is-completing', finalSnap);
     paintChecker(displayedProgress, { finalSnap });
-    finalCheckerPromise = finalSnap
-      ? new Promise(resolve => window.setTimeout(resolve, FINAL_CHECKER_BEAT_MS))
-      : Promise.resolve();
+    finalCheckerPromise = finalSnap ? waitForFinalChecker() : Promise.resolve();
     return;
   }
   if (!progressFrame) {

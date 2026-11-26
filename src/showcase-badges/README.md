@@ -6,7 +6,9 @@ In each private development checkout, run the following before starting Vite:
 python3 src/showcase-badges/prepare-crests.py
 ```
 
-The command prepares Ferrari, Lamborghini and Porsche SVG faces and their matching outlines in the ignored `local/showcase-badges/` directory. A checkout without those files can display locked badges. Unlocking a crest without its files raises a setup error. Builds made with these files present can include the artwork, so keep those builds private.
+The command prepares the Ferrari, Lamborghini and Porsche fallback artwork in the ignored `local/showcase-badges/` directory. It writes `<manufacturer>.face.svg` and `<manufacturer>.outline.svg` for each of `ferrari`, `lamborghini` and `porsche`. Run it from the M4 worktree or copy the six files into that worktree before starting Vite. Unlocking one of those crests without its files raises a setup error. Builds made with these files present can include the artwork, so keep those builds private.
+
+This checkpoint needs no downloaded GLB, glTF, OBJ, FBX or Blender files. Keep the acquired models and their attribution and licence records in ignored local storage during M4 preparation. The current procedural geometry and SVG crest faces remain available as the baseline for fallback behaviour when integrating the prepared meshes.
 
 `createBadge({ manufacturer, color, theme, locked, onHover, onClick })` returns `{ object, hitTarget, setLocked, update, setPointer, setHovered, click, setTheme, setColor, dispose }`. The manufacturer IDs match `src/data/cars.js`: `lexus`, `nissan`, `audi`, `bmw`, `mercedes`, `ferrari`, `mclaren`, `aston`, `lamborghini`, and `porsche`.
 

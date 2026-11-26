@@ -225,41 +225,54 @@
 .hub-back:hover { color: var(--hub-accent); }
 .hub-back:focus-visible { outline: 1px solid var(--hub-accent); outline-offset: 4px; }
 
-.hub-full {
+/* ENTER SHOWCASE: the full roster from car one, centred under the circuit (left set in JS). */
+.hub-enter { bottom: 4.6vh; align-items: center; text-align: center; translate: -50% 0; }
+.hub-enter .hub-action__button { font-size: clamp(34px, 3.3vw, 62px); }
+.hub-enter .hub-action__caption { margin: 0 0 12px; }
+.hub-enter .hub-action__checker { margin-left: auto; margin-right: auto; transform-origin: 50% 100%; }
+.hub-enter .hub-action__button:hover .hub-action__word,
+.hub-enter .hub-action__button:focus-visible .hub-action__word { color: var(--hub-accent); transition: color 200ms var(--ease); }
+
+/* The selected car's caption under its floating emblem (left/top set in JS; GSAP owns -50%). */
+.hub-pick {
   position: absolute;
   display: grid;
   justify-items: center;
-  gap: 8px;
-  padding: 6px 10px;
+  gap: 7px;
+  padding: 4px 10px;
   border: 0;
   background: none;
   color: var(--hub-ink);
   cursor: pointer;
-  transform: translateX(-50%);
-}
-.hub-full__title { font-family: var(--font-display); font-size: clamp(24px, 2.1vw, 36px); font-weight: 500; letter-spacing: -0.035em; line-height: 1; transition: color 200ms var(--ease); }
-.hub-full__meta { color: var(--hub-muted); font-family: var(--font-mono); font-size: 11px; letter-spacing: .04em; text-transform: uppercase; }
-.hub-full:hover .hub-full__title,
-.hub-full.is-hover .hub-full__title,
-.hub-full:focus-visible .hub-full__title { color: var(--hub-accent); }
-.hub-full:focus-visible { outline: 1px solid var(--hub-accent); outline-offset: 4px; }
-
-.hub-emblem-label {
-  position: absolute;
-  display: grid;
-  justify-items: center;
-  gap: 5px;
-  pointer-events: none;
   white-space: nowrap;
 }
-.hub-emblem-label__name { color: var(--car-ink, var(--hub-ink)); font-family: var(--font-display); font-size: 17px; font-weight: 500; letter-spacing: -0.015em; }
-.hub-emblem-label__meta { color: var(--hub-muted); font-family: var(--font-mono); font-size: 10.5px; letter-spacing: .05em; text-transform: uppercase; }
-.hub-emblem-label.is-locked .hub-emblem-label__name { color: var(--hub-muted); }
+.hub-pick__name { color: var(--car-ink, var(--hub-ink)); font-family: var(--font-display); font-size: clamp(18px, 1.45vw, 26px); font-weight: 500; letter-spacing: -0.02em; line-height: 1; }
+.hub-pick__go { color: var(--hub-muted); font-family: var(--font-mono); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; transition: color 200ms var(--ease); }
+.hub-pick__go::after { content: ' \2192'; display: inline-block; transition: transform 240ms var(--ease); }
+.hub-pick:hover .hub-pick__go,
+.hub-pick:focus-visible .hub-pick__go,
+#hub.is-pointing .hub-pick__go { color: var(--hub-ink); }
+.hub-pick:hover .hub-pick__go::after,
+#hub.is-pointing .hub-pick__go::after { transform: translateX(3px); }
+.hub-pick:focus-visible { outline: 1px solid var(--hub-accent); outline-offset: 4px; }
+.hub-pick-hint {
+  position: absolute;
+  margin: 0;
+  color: var(--hub-muted);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  pointer-events: none;
+  translate: 0 -50%;
+}
 #hub.is-pointing { cursor: pointer; }
-.hub-emblem-keys { display: contents; }
-.hub-emblem-key { position: absolute; display: none; padding: 0; border: 0; border-radius: 50%; background: none; transform: translate(-50%, -50%); pointer-events: none; }
-#hub[data-view='collection'][data-collection='emblems'] .hub-emblem-key { display: block; }
-.hub-emblem-key:focus-visible { outline: 1px solid var(--hub-accent); outline-offset: 6px; }
+
+/* Names mode: the circuit's names are the selector. A discovered name selects its car (its colour
+   holds while selected); an undiscovered checkpoint shows only a small anonymous "?". */
+#hub[data-view='collection'][data-collection='names'] .hub-plan__car { pointer-events: all; cursor: pointer; font-family: var(--font-display); font-size: 15px; letter-spacing: -0.01em; }
+#hub[data-view='collection'][data-collection='names'] .hub-plan__car:not(.is-found) { cursor: default; font-family: var(--font-mono); font-size: 11px; }
+.hub-plan__car.is-selected { fill: var(--car-ink); font-weight: 600; }
 
 /* The preserved Cars selector: Collection only, ?collection=cars. */
 .hub-cars { position: absolute; left: calc(var(--side) * .62); top: calc(22px + var(--mark-size) + 40px); display: grid; grid-template-columns: max-content; row-gap: 8px; }
@@ -288,3 +301,4 @@
 @media (prefers-reduced-motion: reduce) {
   #hub *, #hub *::before, #hub *::after { transition-duration: 1ms !important; animation: none !important; }
 }
+#hub .hub-enter { transform: none; }

@@ -119,11 +119,12 @@ function paintVoice() {
   voiceButton.disabled = voiceStatus === 'loading' || voiceStatus === 'unavailable';
   voiceButton.setAttribute('aria-pressed', String(voiceStatus === 'playing'));
 }
-async function narrate({ explicit = false } = {}) {
+/** Play this car's narration. Only ever called from the Listen button (explicit playback only). */
+async function narrate() {
   const index = activeIndex, request = ++voiceGeneration;
-  if (!opened || closing || loading || !state.unlocked.has(index)) return;
+  if (!opened || closing || !state.unlocked.has(index)) return;
   voiceStatus = 'loading'; paintVoice();
-  if (explicit && !state.audioReady) await startAudio();
+  if (!state.audioReady) await startAudio();
   if (!opened || request !== voiceGeneration || index !== activeIndex) return;
   const started = await playVoice(index);
   if (!opened || request !== voiceGeneration || index !== activeIndex) return;
@@ -137,7 +138,7 @@ async function toggleVoice() {
     if (request !== voiceGeneration || !opened) return;
     if (resumed) { voiceStatus = 'playing'; paintVoice(); return; }
   }
-  void narrate({ explicit: true });
+  void narrate();
 }
 function setDetails(open) {
   detailsOpen = open;
@@ -295,7 +296,7 @@ async function present(index, direction = 1, entry = false) {
     animate(root.querySelector('.sc-editorial'), { opacity: 1, startAt: { opacity: 0 }, duration: .4 }),
   ]);
   if (!opened || request !== generation || closing) return;
-  if (state.unlocked.has(activeIndex) && state.audioReady) void narrate();
+  // Narration never starts by itself (owner, Phase 6 §4): only the Listen button plays it.
   if (mounted) prefetch(direction);
 }
 function browse(direction) { if (!closing) void present(activeIndex + direction, direction); }

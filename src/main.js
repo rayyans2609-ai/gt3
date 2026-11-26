@@ -632,7 +632,8 @@ async function boot() {
       landing?.deactivateLanding();
       hub.suspendHub();
       // Full Showcase resumes at the car last inspected this visit (the roster start otherwise).
-      const start = mode === 'full' ? (showcase.showcaseState().index ?? index) : index;
+      // ENTER SHOWCASE always starts at car one (owner, Phase 6 §3); a single car opens itself.
+      const start = index;
       await showcase.openShowcase({ index: start, mode, origin });
       if (version === showcaseEdgeVersion && state.transition?.to === 'showcase') completeTransition();
     } catch (error) {

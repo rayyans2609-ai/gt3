@@ -49,6 +49,7 @@ let drawTween = null;
 let lapTween = null;
 let zoomTween = null;
 let labelsOn = false;
+let selectedCar = null;
 let routeT = null;
 let shapes = [];
 let perspective = null;
@@ -138,6 +139,22 @@ function placeLabels(v = view) {
   const centre = screenOf({ x: (bounds.minX + bounds.maxX) / 2, y: (bounds.minY + bounds.maxY) / 2 }, v);
   for (const label of carLabels) {
     const outer = screenOf(label.outer, v);
+    // The road's outward normal at the checkpoint: where it points mostly up or down, the name sits
+    // centred above/below the checkpoint instead of running along the road beside it.
+    const on = screenOf(planAt(label.t), v);
+    let nx = outer.x - on.x;
+    let ny = outer.y - on.y;
+    if ((on.x - centre.x) * nx + (on.y - centre.y) * ny < 0) { nx = -nx; ny = -ny; }
+    const nlen = Math.hypot(nx, ny) || 1;
+    nx /= nlen; ny /= nlen;
+    if (Math.abs(ny) > 0.82) {
+      // On a sloped stretch, anchor toward the normal's lean so the name clears the rising road.
+      const lean = ny > 0 || Math.abs(nx) < 0.22 ? 0 : Math.sign(nx);
+      label.el.setAttribute('x', (outer.x + lean * 4).toFixed(1));
+      label.el.setAttribute('y', (outer.y + (ny > 0 ? 18 : -10)).toFixed(1));
+      label.el.setAttribute('text-anchor', lean === 0 ? 'middle' : lean < 0 ? 'end' : 'start');
+      continue;
+    }
     const dx = outer.x - centre.x;
     const dy = outer.y - centre.y;
     const len = Math.hypot(dx, dy) || 1;
@@ -272,8 +289,17 @@ export function buildPlan(container, frame, { yawDeg = 75, pitchDeg = 52, onLock
       if (label.found) onCarSelect?.(car, el);
       else onLockedCar?.(car, el);
     };
-    el.addEventListener('pointerenter', pulse);
-    el.addEventListener('focus', () => { if (el.matches(':focus-visible')) pulse(); });
+    // Hovering (or keyboard-focusing) a discovered name also lights its checkpoint until it leaves,
+    // unless that car is the selected one, whose checkpoint stays lit.
+    const point = (on) => {
+      if (!labelsOn || !label.found) return;
+      if (on) pulse();
+      if (on || selectedCar !== car) highlightCheckpoint(car, on);
+    };
+    el.addEventListener('pointerenter', () => point(true));
+    el.addEventListener('pointerleave', () => point(false));
+    el.addEventListener('focus', () => { if (el.matches(':focus-visible')) point(true); });
+    el.addEventListener('blur', () => point(false));
     // A mouse press must not focus the name (that drew a button-like ring); the keyboard still can.
     el.addEventListener('mousedown', (event) => event.preventDefault());
     el.addEventListener('click', activate);
@@ -386,7 +412,7 @@ export function renderDiscovery(unlocked) {
     label.el.textContent = found ? `${car.manufacturer} ${car.model}` : '?';
     label.el.classList.toggle('is-found', found);
     label.el.setAttribute('aria-disabled', String(!found));
-    label.el.setAttribute('aria-label', found ? `${car.displayName}. Preview circuit` : `${label.car + 1}, undiscovered`);
+    label.el.setAttribute('aria-label', found ? car.displayName : 'Undiscovered car');
   }
 }
 
@@ -577,3 +603,23 @@ export function highlightCheckpoint(car, on) {
 }
 
 export function drawnFraction() { return drawn; }
+
+/** The Collection's selected car: its name holds the car colour and its checkpoint stays lit. */
+export function setSelectedCar(index) {
+  if (selectedCar === index) return;
+  if (selectedCar !== null) {
+    highlightCheckpoint(selectedCar, false);
+    carLabels.find((label) => label.car === selectedCar)?.el.classList.remove('is-selected');
+  }
+  selectedCar = index;
+  if (index === null) return;
+  const label = carLabels.find((item) => item.car === index);
+  if (!label?.found) { selectedCar = null; return; }
+  label.el.classList.add('is-selected');
+  highlightCheckpoint(index, true);
+}
+
+/** Screen position of a car's name label (for the resist feedback and focus handoff). */
+export function carLabelElement(index) {
+  return carLabels.find((label) => label.car === index)?.el ?? null;
+}

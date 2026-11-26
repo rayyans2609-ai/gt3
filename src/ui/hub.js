@@ -3,9 +3,10 @@
  *
  * GT3's own circuit, drawn as an architectural plan through the Grand Tour camera's eyes, is the
  * hero. Two equal primary actions sit with it: START RACE (dive onto the road, hubPlan.zoom) and
- * SHOWCASE (the Hub becomes the Collection: the circuit grows, manufacturer emblems float at their
- * checkpoints and a checkered flag in the middle opens the Full Showcase). Cars is no longer on
- * the main Hub; its selector survives as the `?collection=cars` alternative inside the Collection.
+ * SHOWCASE (the Hub becomes the Collection: the circuit grows and its discovered car names become
+ * the selector; selecting one floats that manufacturer's 3D emblem in the circuit's middle, and the
+ * emblem opens that car's Showcase; ENTER SHOWCASE opens the full roster from car one). Cars is no
+ * longer on the main Hub; its selector survives as the `?collection=cars` alternative.
  *
  * Review variants (none selected; owner review):
  *   ?layout=horizontal (default) START RACE bottom left, SHOWCASE bottom right
@@ -13,7 +14,9 @@
  *   ?loader=checker (default)    both checkered underlines fill from real loading progress
  *   ?loader=circuit              the circuit illuminates from the start line with real progress
  *   ?loader=strip                one checker strip spans START RACE→SHOWCASE, its middle drops out
- *   ?collection=emblems (default) | cars   (the preserved Cars selector inside the Collection)
+ *   ?collection=names (default)  name selector + one central emblem (Phase 6 brief §3)
+ *   ?collection=cars             the preserved Cars selector (bars + names open the Showcase directly)
+ *   (the checkpoint-emblem composition it replaces is recoverable at 00ba235)
  *
  * The player is the global edge drawer (edgeDrawer.js); the Hub only makes room for it: on
  * `gt3:drawer` the circuit frame narrows/widens in step with the drawer. The Hub→Tour dive
@@ -35,7 +38,7 @@ const pick = (key, options, fallback) => {
 };
 export const LAYOUT = pick('layout', ['horizontal', 'vertical'], 'horizontal');
 export const LOADER = pick('loader', ['checker', 'circuit', 'strip'], 'checker');
-export const COLLECTION = pick('collection', ['emblems', 'cars'], 'emblems');
+export const COLLECTION = pick('collection', ['names', 'cars'], 'names');
 const PROGRESS_SMOOTH_MS = 260;
 
 let root = null;
@@ -46,12 +49,13 @@ let mark;
 let back;
 let status;
 let runway;
-let fullLabel;
-let emblemLabel;
+let enter = null;     // ENTER SHOWCASE (the full roster, from car one)
+let pickCap;          // the selected car's caption under its emblem (also the keyboard route in)
+let pickHint;         // the centre's quiet prompt before anything is selected
+let selected = null;  // the Collection's selected car (names mode)
 let carsWrap;
 let carsToggle;
 let carsName;
-let emblemKeys = [];
 let ticks = [];
 let resistTl = null;
 let resisted = [];
@@ -77,7 +81,7 @@ let drawerSpace = 0;
 let frameTween = null;
 const insets = { top: 0, right: 0, bottom: 0, left: 0 };
 let planCamera = { yawDeg: 75, pitchDeg: 52 };
-let hoverHit = null;
+let pointing = false;
 const html = document.documentElement;
 
 function el(tag, className, text) {
@@ -99,7 +103,9 @@ function targetInsets(forView = view) {
   const tab = 56;
   const drawer = Math.max(tab, drawerSpace * 0.92);
   if (forView === 'collection') {
-    return { top: Math.max(118, H * 0.17), bottom: Math.max(64, H * 0.12), left: side * 1.05, right: side * 1.05 + drawer };
+    // The bottom clears ENTER SHOWCASE (measured), which sits centred under the circuit.
+    const enterRoom = enter ? H - enter.wrap.offsetTop + Math.max(18, H * 0.025) : 0;
+    return { top: Math.max(118, H * 0.17), bottom: Math.max(64, H * 0.12, enterRoom), left: side * 1.05, right: side * 1.05 + drawer };
   }
   // The Hub view measures its neighbours (layout boxes, not transforms) so the circuit always
   // fills exactly the space between the centred GT3 / SHOWCASE above and the actions below.
@@ -167,6 +173,16 @@ function layoutCheckers() {
     action.checker.style.width = `${action.count * cell}px`;
   }
   actions.start.columns = buildColumns(actions.start.checker, actions.start.count);
+  if (enter) {
+    // ENTER SHOWCASE is smaller than the Hub's actions: its cells follow its own type size.
+    const ecell = Math.max(5, Math.round((parseFloat(getComputedStyle(enter.button).fontSize) || 48) * 0.108));
+    enter.checker.style.setProperty('--cell', `${ecell}px`);
+    const width = enter.word.getBoundingClientRect().width;
+    enter.count = Math.max(8, Math.floor(width / ecell));
+    enter.checker.style.width = `${enter.count * ecell}px`;
+    enter.columns = buildColumns(enter.checker, enter.count);
+    fill(enter.columns, 1);
+  }
   // Fillers, measured after the underlines exist.
   runway.replaceChildren();
   runway.fillers = [];
@@ -302,12 +318,34 @@ function buildAction(key, label, caption) {
   return action;
 }
 
+/** ENTER SHOWCASE: the Collection's typographic way into the full roster, with a complete checker. */
+function buildEnter() {
+  const wrap = el('div', 'hub-action hub-enter');
+  const cap = el('p', 'hub-action__caption');
+  cap.append(el('span', 'hub-action__index', '10'), el('span', 'hub-action__text', ''));
+  const button = el('button', 'hub-action__button');
+  button.type = 'button';
+  button.setAttribute('aria-label', 'Enter Showcase: all cars, from the first');
+  const word = el('span', 'hub-action__word', 'Enter Showcase');
+  const checker = el('span', 'hub-checker hub-action__checker');
+  checker.setAttribute('aria-hidden', 'true');
+  button.append(word, checker);
+  wrap.append(cap, button);
+  return { key: 'enter', wrap, cap, button, word, checker, chars: [], split: null, leanTl: null, columns: [] };
+}
+
 function splitWords() {
   for (const action of Object.values(actions)) {
     action.split?.revert();
     action.split = SplitText.create(action.word, { type: 'chars', charsClass: 'hub-action__char', mask: 'chars', aria: 'none' });
     action.chars = action.split.chars;
     if (!revealed || view !== 'hub') gsap.set(action.chars, { yPercent: 112 });
+  }
+  if (enter) {
+    enter.split?.revert();
+    enter.split = SplitText.create(enter.word, { type: 'chars', charsClass: 'hub-action__char', mask: 'chars', aria: 'none' });
+    enter.chars = enter.split.chars;
+    if (view !== 'collection') gsap.set(enter.chars, { yPercent: 112 });
   }
   layoutCheckers();
 }
@@ -340,7 +378,10 @@ function setCaptions() {
   const found = CARS.filter((_, index) => state.unlocked.has(index)).length;
   actions.show.cap.lastChild.textContent = `Collection  ${found} / ${CARS.length}`;
   actions.start.cap.lastChild.textContent = 'Grand Tour';
-  if (fullLabel) fullLabel.lastChild.textContent = `${CARS.length} cars · ${found} discovered`;
+  if (enter) {
+    enter.cap.firstChild.textContent = String(CARS.length);
+    enter.cap.lastChild.textContent = `cars  ${found} discovered`;
+  }
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -396,8 +437,7 @@ function renderCars() {
     tick.setAttribute('aria-label', known ? `${CARS[index].displayName}, open its Showcase` : `${index + 1}, undiscovered`);
   });
   plan.renderDiscovery(found);
-  emblemKeys.forEach((key, index) => key.setAttribute('aria-label', found.has(index)
-    ? `${CARS[index].displayName}, open its Showcase` : `Undiscovered car, ${index === 0 ? 'start' : `checkpoint ${index}`}`));
+  if (selected !== null && !found.has(selected)) selectCar(null);
   setCaptions();
 }
 
@@ -428,40 +468,24 @@ function build() {
   runway = el('div', 'hub-runway');
   runway.setAttribute('aria-hidden', 'true');
   runway.fillers = [];
-  fullLabel = el('button', 'hub-full');
-  fullLabel.type = 'button';
-  fullLabel.append(el('span', 'hub-full__title', 'Full Showcase'), el('span', 'hub-full__meta', ''));
-  emblemLabel = el('div', 'hub-emblem-label');
-  emblemLabel.setAttribute('aria-hidden', 'true');
-  emblemLabel.append(el('span', 'hub-emblem-label__name'), el('span', 'hub-emblem-label__meta'));
+  enter = buildEnter();
+  // The selected car's caption under its emblem: its name in the car colour and the way in. It is
+  // the keyboard route to the emblem (Tab from the names, Enter opens the Showcase).
+  pickCap = el('button', 'hub-pick');
+  pickCap.type = 'button';
+  pickCap.append(el('span', 'hub-pick__name'), el('span', 'hub-pick__go', 'Open Showcase'));
+  pickHint = el('p', 'hub-pick-hint', 'Select a car');
+  pickHint.setAttribute('aria-hidden', 'true');
   const cars = buildCars();
-  // Keyboard access to the WebGL emblems: one invisible, focusable proxy per car, tracking its
-  // emblem. The mouse never hits them (it raycasts the real shapes); Tab/Enter does.
-  const keys = el('div', 'hub-emblem-keys');
-  emblemKeys = CARS.map((car, index) => {
-    const key = el('button', 'hub-emblem-key');
-    key.type = 'button';
-    key.addEventListener('focus', () => {
-      if (view !== 'collection') return;
-      collection.hoverCar(index);
-      showEmblemLabel(emblemHit(index));
-    });
-    key.addEventListener('blur', () => { collection.hoverCar(null); showEmblemLabel(null); });
-    key.addEventListener('click', () => {
-      if (view !== 'collection' || !interactive) return;
-      const hit = emblemHit(index);
-      if (hit.locked) collection.resistEmblem(index);
-      else openShowcase(index, 'single', { x: hit.x, y: hit.y });
-    });
-    return keys.appendChild(key);
-  });
-  root.append(field, frame, runway, mark, back, start.wrap, show.wrap, cars, keys, fullLabel, emblemLabel);
+  root.append(field, frame, runway, mark, back, start.wrap, show.wrap, cars, pickHint, pickCap, enter.wrap);
   // The status takes the START RACE caption slot, or the circuit's middle for the circuit loader.
   if (LOADER === 'circuit') root.append(status); else start.wrap.prepend(status);
   planSvg = plan.buildPlan(root, frame, {
     yawDeg: planCamera.yawDeg, pitchDeg: planCamera.pitchDeg,
     onLockedCar: resistCar,
     onCarSelect: (index, node) => {
+      // Names mode: a name selects (never enters); the emblem it reveals is the way in.
+      if (COLLECTION === 'names') { selectCar(index); return; }
       const r = node.getBoundingClientRect();
       openShowcase(index, 'single', { x: r.left + r.width / 2, y: r.top + r.height / 2 });
     },
@@ -473,7 +497,8 @@ function build() {
   // Centred statuses keep their centring through GSAP's own transform (it owns `transform`).
   if (LOADER === 'circuit') gsap.set(status, { xPercent: -50, yPercent: -50 });
   else if (LAYOUT === 'vertical') gsap.set(status, { xPercent: -50 });
-  gsap.set([back, fullLabel, carsWrap, emblemLabel], { autoAlpha: 0 });
+  gsap.set([back, carsWrap, pickCap, pickHint, enter.wrap], { autoAlpha: 0 });
+  gsap.set([pickCap, pickHint], { xPercent: -50 });
   Object.assign(insets, targetInsets('hub'));
   applyInsets();
 
@@ -485,11 +510,22 @@ function build() {
     else if (view === 'hub') onLanding?.();
   });
   back.addEventListener('click', () => { if (interactive && view === 'collection') exitCollection(); });
-  fullLabel.addEventListener('click', () => {
+  enter.button.addEventListener('click', () => {
     if (!interactive || view !== 'collection') return;
-    const c = plan.circuitCentre();
-    openShowcase(firstShowcaseIndex(), 'full', c);
+    openShowcase(firstShowcaseIndex(), 'full', plan.circuitCentre());
   });
+  enter.button.addEventListener('pointerenter', () => { if (view === 'collection') lean(enter, true); });
+  enter.button.addEventListener('pointerleave', () => lean(enter, false));
+  enter.button.addEventListener('focus', () => { if (view === 'collection') lean(enter, true); });
+  enter.button.addEventListener('blur', () => lean(enter, false));
+  pickCap.addEventListener('click', () => {
+    if (!interactive || view !== 'collection' || selected === null) return;
+    openShowcase(selected, 'single', collectionCentre());
+  });
+  pickCap.addEventListener('focus', () => collection.hoverEmblem(true));
+  pickCap.addEventListener('blur', () => collection.hoverEmblem(false));
+  pickCap.addEventListener('pointerenter', () => collection.hoverEmblem(true));
+  pickCap.addEventListener('pointerleave', () => collection.hoverEmblem(false));
   start.button.addEventListener('pointerenter', () => {
     if (!revealed || view !== 'hub') return;
     lean(start, true); plan.startLeader(true, leaderOrigin()); plan.lapLight(true);
@@ -506,7 +542,7 @@ function build() {
   show.button.addEventListener('blur', () => lean(show, false));
 
   root.addEventListener('pointermove', onPointerMove);
-  root.addEventListener('pointerleave', () => { collection.clearCollectionPointer(); showEmblemLabel(null); });
+  root.addEventListener('pointerleave', () => { collection.clearCollectionPointer(); setPointing(false); });
   root.addEventListener('click', onCollectionClick);
   root.addEventListener('keydown', (event) => {
     if (event.key === 'Escape' && view === 'collection') { event.preventDefault(); exitCollection(); }
@@ -574,10 +610,7 @@ export function initHub({ onStartRace, onLanding: returnToLanding, onShowcase: o
   onShowcase = openShowcaseView;
   if (camera) planCamera = camera;
   if (renderer) collection.initCollection(renderer);
-  collection.placeCollection({
-    anchors: (offset) => plan.checkpointAnchors(offset),
-    centre: () => plan.circuitCentre(),
-  });
+  collection.placeCollection({ centre: collectionCentre, size: emblemSize });
   build();
   root.inert = true;
 }
@@ -717,88 +750,81 @@ export function prepareLeave() {
 // ---------------------------------------------------------------------------------------------
 // The Collection (SHOWCASE)
 
-function sizesForCollection() {
-  const { w, h } = plan.circuitSize();
-  const base = Math.max(48, Math.min(84, Math.min(w, h) * 0.11));
-  return { badge: base, flagSize: Math.max(120, Math.min(220, h * 0.36)), offset: base * 0.95 };
+/** The emblem's place: the circuit's middle, lifted a little so its caption sits below it. */
+function collectionCentre() {
+  const c = plan.circuitCentre();
+  const { h } = plan.circuitSize();
+  return { x: c.x, y: c.y - h * 0.045 };
 }
 
-function emblemHit(index) {
-  const s = sizesForCollection();
-  const a = plan.checkpointAnchors(s.offset).find((item) => item.car === index);
-  return { type: 'car', car: index, locked: !state.unlocked.has(index), x: a?.x ?? 0, y: a?.y ?? 0, size: s.badge };
+/** The emblem's size (px per unit): as large as the circuit's negative space reasonably allows. */
+function emblemSize() {
+  const { w, h } = plan.circuitSize();
+  return Math.max(120, Math.min(440, h * 0.5, w * 0.3));
 }
 
 function placeCollectionDom() {
-  const c = plan.circuitCentre();
-  const s = sizesForCollection();
-  collection.placeCollection(s);
-  for (const a of plan.checkpointAnchors(s.offset)) {
-    const key = emblemKeys[a.car];
-    if (!key) continue;
-    key.style.left = `${a.x}px`;
-    key.style.top = `${a.y}px`;
-    key.style.width = key.style.height = `${s.badge * 1.1}px`;
-  }
-  fullLabel.style.left = `${c.x}px`;
-  fullLabel.style.top = `${c.y + s.flagSize * 0.42}px`;
-  if (hoverHit?.type === 'car') {
-    const a = plan.checkpointAnchors(s.offset).find((item) => item.car === hoverHit.car);
-    if (a) {
-      // The label sits on the emblem's outer side, away from the road, aligned to that side.
-      const gap = s.badge * 0.62 + 12;
-      const side = Math.abs(a.nx) > 0.6;
-      emblemLabel.style.left = `${a.x + a.nx * gap}px`;
-      emblemLabel.style.top = `${a.y + a.ny * gap}px`;
-      emblemLabel.style.justifyItems = side ? (a.nx > 0 ? 'start' : 'end') : 'center';
-      emblemLabel.style.translate = side ? `${a.nx > 0 ? '0' : '-100%'} -50%` : `-50% ${a.ny > 0 ? '0' : '-100%'}`;
-    }
-  }
+  const c = collectionCentre();
+  const size = emblemSize();
+  pickCap.style.left = `${c.x}px`;
+  pickCap.style.top = `${c.y + size * 0.56}px`;
+  pickHint.style.left = `${c.x}px`;
+  pickHint.style.top = `${c.y}px`;
+  // ENTER SHOWCASE stays centred under the circuit as the drawer narrows the stage.
+  enter.wrap.style.left = `${plan.circuitCentre().x}px`;
 }
 
-function showEmblemLabel(hit) {
-  const previous = hoverHit;
-  hoverHit = hit;
-  if (previous?.type === 'car' && (!hit || hit.car !== previous.car)) plan.highlightCheckpoint(previous.car, false);
-  root.classList.toggle('is-pointing', Boolean(hit && !(hit.type === 'car' && hit.locked)));
-  fullLabel.classList.toggle('is-hover', hit?.type === 'full');
-  if (!hit || hit.type !== 'car') { gsap.to(emblemLabel, { autoAlpha: 0, duration: 0.16, ease: 'gt3' }); return; }
-  if (previous?.type === 'car' && previous.car === hit.car) return;
-  const car = CARS[hit.car];
-  const [name, meta] = emblemLabel.children;
-  const checkpoint = hit.car === 0 ? 'Start' : `Checkpoint ${String(hit.car).padStart(2, '0')}`;
-  if (hit.locked) {
-    emblemLabel.classList.remove('car-identity');
-    emblemLabel.classList.add('is-locked');
-    name.textContent = 'Undiscovered';
-    meta.textContent = checkpoint;
-  } else {
-    applyCarColor(emblemLabel, car);
-    emblemLabel.classList.remove('is-locked');
-    name.textContent = car.displayName;
-    meta.textContent = `${checkpoint} · ${car.year}`;
-    plan.highlightCheckpoint(hit.car, true);
-    plan.lapLight(true, { car, once: true });
+function setPointing(on) {
+  if (pointing === on) return;
+  pointing = on;
+  root.classList.toggle('is-pointing', on);
+}
+
+/**
+ * Names mode: select one discovered car (its name in the car colour, its checkpoint lit, its emblem
+ * on stage). Never enters the Showcase. A locked car resists and reveals nothing.
+ */
+function selectCar(index) {
+  if (index !== null && !state.unlocked.has(index)) { resistCar(index, plan.carLabelElement(index)); return; }
+  if (index !== null && index === selected) return;
+  selected = index;
+  plan.setSelectedCar(index);
+  if (COLLECTION !== 'names') return;
+  collection.selectEmblem(index);
+  const quick = reducedMotion.matches;
+  if (index === null) {
+    gsap.to(pickCap, { autoAlpha: 0, duration: quick ? 0 : 0.2, ease: 'gt3' });
+    if (view === 'collection') gsap.to(pickHint, { autoAlpha: 1, duration: quick ? 0 : 0.4, ease: 'gt3' });
+    return;
   }
+  const car = CARS[index];
+  applyCarColor(pickCap, car);
+  pickCap.firstChild.textContent = car.displayName;
+  pickCap.setAttribute('aria-label', `${car.displayName}: open its Showcase`);
   placeCollectionDom();
-  gsap.fromTo(emblemLabel, { autoAlpha: 0, y: 6 }, { autoAlpha: 1, y: 0, duration: 0.28, ease: 'gt3.out' });
+  gsap.to(pickHint, { autoAlpha: 0, duration: quick ? 0 : 0.2, ease: 'gt3' });
+  gsap.fromTo(pickCap, { autoAlpha: 0, y: 8 }, { autoAlpha: 1, y: 0, duration: quick ? 0 : 0.5, ease: 'gt3.out', delay: quick ? 0 : 0.25 });
 }
 
 function onPointerMove(event) {
-  if (view !== 'collection' || !interactive || COLLECTION === 'cars') return;
-  if (event.target.closest?.('button')) { collection.clearCollectionPointer(); if (hoverHit) showEmblemLabel(null); return; }
+  if (view !== 'collection' || !interactive || COLLECTION !== 'names') return;
   const hit = collection.pointCollection(event.clientX, event.clientY);
-  const same = hit && hoverHit && hit.type === hoverHit.type && hit.car === hoverHit.car;
-  if (!same) showEmblemLabel(hit);
+  // Buttons and names keep their own cursor; the emblem itself shows it can be clicked.
+  const overControl = event.target.closest?.('button, [role="button"]');
+  setPointing(Boolean(hit) && !overControl);
 }
 
 function onCollectionClick(event) {
-  if (view !== 'collection' || !interactive || event.target.closest?.('button')) return;
+  if (view !== 'collection' || !interactive || COLLECTION !== 'names') return;
+  if (event.target.closest?.('button, [role="button"]')) return;
   const hit = collection.pointCollection(event.clientX, event.clientY);
-  if (!hit) return;
-  if (hit.type === 'full') { openShowcase(firstShowcaseIndex(), 'full', { x: hit.x, y: hit.y }); return; }
-  if (hit.locked) { collection.resistEmblem(hit.car); return; }
-  openShowcase(hit.car, 'single', { x: hit.x, y: hit.y });
+  if (hit?.type === 'emblem' && hit.car === selected && state.unlocked.has(hit.car)) {
+    openShowcase(hit.car, 'single', collectionCentre());
+  }
+}
+
+function collectionPieces() {
+  return COLLECTION === 'names' ? [back, enter.wrap] : [back, enter.wrap, carsWrap];
 }
 
 function enterCollection() {
@@ -820,15 +846,18 @@ function enterCollection() {
   tl.to(checkers, { scaleX: 0, duration: quick ? 0 : 0.4, ease: 'power3.in', transformOrigin: '50% 50%' }, 0.08);
   tl.to([actions.start.cap, actions.show.cap, status], { autoAlpha: 0, y: -6, duration: quick ? 0 : 0.24, ease: 'gt3' }, 0);
   tl.add(() => { moveFrame({ duration: quick ? 0 : 1.05, ease: 'gt3.out' }); }, quick ? 0 : 0.16);
-  if (COLLECTION === 'emblems') {
-    placeCollectionDom();
-    tl.add(() => collection.showCollection(true), quick ? 0 : 0.5);
+  tl.add(() => { plan.showCarLabels(true); }, quick ? 0 : 0.6);
+  if (COLLECTION === 'names') {
+    tl.add(() => { placeCollectionDom(); collection.showCollection(true); }, quick ? 0 : 0.5);
+    tl.to(selected === null ? pickHint : pickCap, { autoAlpha: 1, duration: quick ? 0 : 0.5, ease: 'gt3' }, quick ? 0 : 1.0);
   } else {
-    tl.add(() => { collection.showCollection(true); plan.showCarLabels(true); }, quick ? 0 : 0.6);
     tl.to(carsWrap, { autoAlpha: 1, duration: quick ? 0 : 0.5, ease: 'gt3' }, quick ? 0 : 0.7);
   }
   tl.to(back, { autoAlpha: 1, duration: quick ? 0 : 0.5, ease: 'gt3' }, quick ? 0 : 0.7);
-  tl.to(fullLabel, { autoAlpha: 1, duration: quick ? 0 : 0.6, ease: 'gt3' }, quick ? 0 : 1.0);
+  tl.set(enter.wrap, { autoAlpha: 1 }, quick ? 0 : 0.75);
+  tl.fromTo(enter.cap, { autoAlpha: 0, y: 6 }, { autoAlpha: 1, y: 0, duration: quick ? 0 : 0.5, ease: 'gt3.out' }, quick ? 0 : 0.8);
+  tl.fromTo(enter.chars, { yPercent: 112 }, { yPercent: 0, duration: quick ? 0 : 0.8, ease: 'gt3.out', stagger: quick ? 0 : 0.025 }, quick ? 0 : 0.78);
+  tl.fromTo(enter.checker, { scaleX: 0 }, { scaleX: 1, duration: quick ? 0 : 0.6, ease: 'gt3.out', transformOrigin: '50% 50%' }, quick ? 0 : 0.9);
 }
 
 function exitCollection({ instant = false } = {}) {
@@ -836,12 +865,13 @@ function exitCollection({ instant = false } = {}) {
   view = 'hub';
   setActionsInert(false);
   viewTl?.kill();
-  showEmblemLabel(null);
+  setPointing(false);
+  enter.leanTl?.kill();
   const quick = instant || reducedMotion.matches;
   const tl = gsap.timeline();
   viewTl = tl;
-  tl.to([back, fullLabel, carsWrap], { autoAlpha: 0, duration: quick ? 0 : 0.2, ease: 'gt3' }, 0);
-  if (COLLECTION === 'cars') plan.showCarLabels(false);
+  tl.to([...collectionPieces(), pickCap, pickHint], { autoAlpha: 0, duration: quick ? 0 : 0.2, ease: 'gt3' }, 0);
+  plan.showCarLabels(false);
   tl.add(collection.showCollection(false), 0);
   tl.add(() => {
     field.style.opacity = '';
@@ -863,10 +893,10 @@ function settleHubView() {
   view = 'hub';
   setActionsInert(false);
   root.dataset.view = 'hub';
-  showEmblemLabel(null);
+  setPointing(false);
   collection.showCollection(false).progress(1);
   field.style.opacity = '';
-  gsap.set([back, fullLabel, carsWrap, emblemLabel], { autoAlpha: 0 });
+  gsap.set([back, carsWrap, enter.wrap, pickCap, pickHint], { autoAlpha: 0 });
   gsap.set(Object.values(actions).map((action) => action.checker), { scaleX: 1 });
   plan.showCarLabels(false);
   moveFrame();
@@ -874,22 +904,24 @@ function settleHubView() {
 
 function openShowcase(index, mode, origin) {
   if (!interactive || !onShowcase) return;
-  showEmblemLabel(null);
+  if (mode === 'single' && !state.unlocked.has(index)) return;
+  setPointing(false);
   onShowcase({ index, mode, origin });
 }
 
 /**
- * Collection → Showcase: the chosen emblem (or the flag) rises while everything else recedes; the
- * Hub stays mounted underneath so the return is immediate. Resolves when the Showcase may cover.
+ * Collection → Showcase: the selected emblem rises (or, for ENTER SHOWCASE, steps back) while
+ * everything else recedes; the Hub stays mounted underneath so the return is immediate. Resolves
+ * when the Showcase may cover.
  */
 export function leaveToShowcase(index, mode) {
   interactive = false;
   root.inert = true;
   root.classList.remove('is-interactive');
   const tl = gsap.timeline();
-  tl.add(collection.focusEmblem(mode === 'full' ? 'full' : index), 0);
+  tl.add(collection.focusEmblem(mode === 'full' ? 'full' : 'single'), 0);
   // GT3 stays: the Showcase's mark sits exactly where the Hub's does, so it never blinks.
-  tl.to([back, fullLabel, carsWrap, emblemLabel], { autoAlpha: 0, duration: 0.3, ease: 'gt3' }, 0);
+  tl.to([...collectionPieces(), pickCap, pickHint], { autoAlpha: 0, duration: 0.3, ease: 'gt3' }, 0);
   tl.to(planSvg, { opacity: 0.25, duration: 0.45, ease: 'gt3' }, 0.05);
   return new Promise((resolve) => tl.eventCallback('onComplete', resolve));
 }
@@ -924,8 +956,10 @@ export function returnFromShowcase({ to = 'collection' } = {}) {
     return;
   }
   collection.showCollection(true);
-  gsap.to([back, fullLabel], { autoAlpha: 1, duration: 0.5, ease: 'gt3' });
-  if (COLLECTION === 'cars') gsap.to(carsWrap, { autoAlpha: 1, duration: 0.5, ease: 'gt3' });
+  collection.restoreEmblem();
+  const pieces = collectionPieces();
+  if (COLLECTION === 'names') pieces.push(selected === null ? pickHint : pickCap);
+  gsap.to(pieces, { autoAlpha: 1, duration: 0.5, ease: 'gt3' });
 }
 
 export function hubView() { return view; }

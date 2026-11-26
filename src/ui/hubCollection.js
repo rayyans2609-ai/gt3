@@ -1,16 +1,23 @@
 /**
- * hubCollection.js — the Hub's Collection view in WebGL (owner brief 2026-11-26 §5).
+ * hubCollection.js — the Collection's central emblem in WebGL (owner brief 2026-11-26, Phase 6 §3).
  *
- * Floating 3D manufacturer emblems at their checkpoints on the enlarged circuit plan, and a
- * floating checkered flag in the circuit's middle for the Full Showcase. Drawn on the one shared
- * renderer (SPEC §27) into the main canvas while the Hub field covers the Landing: the canvas
- * clears to the field colour and the Hub's SVG/DOM sit on top, so the plan lines, names and
- * controls stay crisp DOM. The camera maps the z = 0 plane 1:1 to CSS pixels, so emblems are
- * placed straight from the plan's screen-space anchors every frame (they follow any relayout).
+ * The circuit's discovered car names are the selector (DOM/SVG in hub.js / hubPlan.js). Selecting
+ * one reveals that manufacturer's emblem, large, in the circuit's central negative space. Clicking
+ * the emblem opens that car's Showcase. One emblem is on stage at a time; a new selection crossfades
+ * (the old one sinks and turns away, the new one rises into place).
  *
- * Emblems come from the showcase-badges components (worker branch showcase-badges); a
- * manufacturer without a component yet gets a neutral placeholder with the same interface.
- * A locked car is always the identical neutral disc and reports no identity.
+ * Motion reuses the pre-drag Landing McLaren (landing.js before e74f34c): an extremely slow
+ * continuous turn (4.2°/s), a 7.5 s float, and a damped pointer response (yaw/pitch, a small drift
+ * and the reflections turning with the cursor). There is deliberately no drag: emblems float, react
+ * to the cursor and are clicked. (The Showcase cars keep their drag-to-orbit.)
+ *
+ * Drawn on the one shared renderer (SPEC §27) into the main canvas while the Hub field covers the
+ * Landing: the canvas clears to the field colour and the Hub's SVG/DOM sit on top. The camera maps
+ * the z = 0 plane 1:1 to CSS pixels, so the emblem is placed straight from the plan's screen-space
+ * centre every frame and follows any relayout (drawer, resize).
+ *
+ * Identity safety: a locked car never gets an emblem. selectEmblem() refuses it here as well as in
+ * the caller, and nothing about a locked car is created, fetched or drawn.
  */
 
 import * as THREE from 'three';
@@ -19,61 +26,63 @@ import { CARS } from '../data/cars.js';
 import { state, subscribe } from '../core/state.js';
 import { gsap, reducedMotion } from './motion.js';
 import { createBadge } from '../showcase-badges/badge.js';
-import { createShowcaseFlag } from '../showcase-badges/flag.js';
 
 const FOV = 24;
+// Pre-drag Landing McLaren motion (landing.js TUNE at e74f34c^), adapted to a flat object.
+const MOTION = {
+  idleDegPerSecond: 4.2, // "extremely slowly": one turn in ~86 s
+  bobSeconds: 7.5,
+  bobFraction: 0.028,    // of the emblem's size (the car bobbed 0.035 m on ~1.2 m of height)
+  pointerYaw: 0.2,       // the car used 0.13 / 0.045; a flat emblem needs a little more to read
+  pointerPitch: 0.11,
+  pointerDrift: 0.035,   // of the emblem's size, toward the cursor
+  pointerEnvYaw: 0.32,   // reflections travel with the cursor (as the car's environment did)
+  pointerDamping: 3.2,   // 1/s
+  entryYaw: -0.55,       // a new emblem arrives turned slightly away and turns into view
+};
+
 let renderer = null;
 let scene;
 let camera;
 let envTarget = null;
 let pmrem = null;
-let items = [];
-let flag = null;
-let flagWrap;
 let active = false;
 let rendered = false;
-let anchorsFn = () => [];
+let stage = 0;              // the whole Collection stage (0 hidden … 1 shown)
+let selected = null;        // car index on stage
 let centreFn = () => ({ x: innerWidth / 2, y: innerHeight / 2 });
-let sizes = { badge: 64, flag: 150, offset: 54 };
-let hovered = null;
+let sizeFn = () => 240;
+let hovered = false;
 let elapsed = 0;
+const items = new Map();    // car index → { badge, holder, spinner, appear, hover, spin }
+const pointer = { x: 0, y: 0, tx: 0, ty: 0 };
 const raycaster = new THREE.Raycaster();
 const ndc = new THREE.Vector2();
 const fieldColor = new THREE.Color();
 const targetField = new THREE.Color();
 
-/** Placeholder until a real component exists: a brushed disc with a raised ring. */
-function createPlaceholder({ color, theme, locked }) {
+/** Fallback when a component cannot build: a brushed disc with a raised ring in the car colour. */
+function createPlaceholder({ color }) {
   const root = new THREE.Group();
-  const motion = new THREE.Group();
-  root.add(motion);
   const metal = new THREE.MeshStandardMaterial({ color: 0xd6dde2, metalness: 0.9, roughness: 0.3 });
   const enamel = new THREE.MeshStandardMaterial({ color, metalness: 0.2, roughness: 0.45 });
-  const lockMaterial = new THREE.MeshStandardMaterial({ color: 0x899096, metalness: 0.65, roughness: 0.4 });
   const disc = new THREE.CylinderGeometry(0.5, 0.5, 0.05, 64); disc.rotateX(Math.PI / 2);
   const ring = new THREE.TorusGeometry(0.42, 0.035, 12, 64);
   const face = new THREE.CircleGeometry(0.36, 64);
-  const lockGeometry = new THREE.CylinderGeometry(0.25, 0.25, 0.025, 32); lockGeometry.rotateX(Math.PI / 2);
-  const discMesh = new THREE.Mesh(disc, metal);
   const ringMesh = new THREE.Mesh(ring, metal); ringMesh.position.z = 0.03;
   const faceMesh = new THREE.Mesh(face, enamel); faceMesh.position.z = 0.027;
-  const art = new THREE.Group(); art.add(discMesh, ringMesh, faceMesh);
-  const lockMesh = new THREE.Mesh(lockGeometry, lockMaterial);
-  motion.add(art, lockMesh);
+  root.add(new THREE.Mesh(disc, metal), ringMesh, faceMesh);
   const hitGeometry = new THREE.PlaneGeometry(1.05, 1.05);
   const hitMaterial = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false, colorWrite: false });
   const hitTarget = new THREE.Mesh(hitGeometry, hitMaterial);
   root.add(hitTarget);
-  const setLocked = (value) => { art.visible = !value; lockMesh.visible = !!value; };
-  setLocked(locked);
   return {
-    object: root, hitTarget, setLocked,
+    object: root, hitTarget, setLocked() {},
     setTheme() {}, setColor(value) { enamel.color.set(value); },
-    setPointer() {}, setHovered() {}, click() {},
-    update() {},
+    setPointer() {}, setHovered() {}, click() {}, update() {},
     dispose() {
-      [disc, ring, face, lockGeometry, hitGeometry].forEach((g) => g.dispose());
-      [metal, enamel, lockMaterial, hitMaterial].forEach((m) => m.dispose());
+      [disc, ring, face, hitGeometry].forEach((g) => g.dispose());
+      [metal, enamel, hitMaterial].forEach((m) => m.dispose());
       root.removeFromParent();
     },
   };
@@ -83,54 +92,33 @@ function carColor(car) {
   return state.theme === 'night' && car.identityColorNight ? car.identityColorNight : car.identityColor;
 }
 
-function makeEmblem(index) {
+function unlocked(index) { return state.unlocked.has(index); }
+
+function makeItem(index) {
   const car = CARS[index];
-  const locked = !state.unlocked.has(index);
-  const options = { manufacturer: car.id, color: carColor(car), theme: state.theme, locked };
+  const options = { manufacturer: car.id, color: carColor(car), theme: state.theme, locked: false };
   let badge;
-  let placeholder = false;
-  try { badge = createBadge(options); } catch { badge = createPlaceholder(options); placeholder = true; }
-  const holder = new THREE.Group();
-  holder.add(badge.object);
-  scene.add(holder);
-  return { car: index, badge, holder, locked, placeholder, appear: 0, hover: 0, resist: 0, phase: index * 0.83, x: 0, y: 0 };
-}
-
-function buildItems() {
-  disposeItems();
-  items = CARS.map((_, index) => makeEmblem(index));
-  // Neutral cloth: an accent tint muddies the dark cells (Night gold read olive).
-  flag = createShowcaseFlag({ color: 0x000000, theme: state.theme });
-  flagWrap = new THREE.Group();
-  flagWrap.add(flag.object);
-  scene.add(flagWrap);
-  flag.appear = 0;
-  flag.hover = 0;
-}
-
-function disposeItems() {
-  for (const item of items) { item.badge.dispose(); item.holder.removeFromParent(); }
-  items = [];
-  if (flag) { flag.dispose(); flagWrap.removeFromParent(); flag = null; }
-}
-
-function refreshLocks() {
-  for (const item of items) {
-    const locked = !state.unlocked.has(item.car);
-    if (locked === item.locked) continue;
-    item.locked = locked;
-    try {
-      item.badge.setLocked(locked);
-    } catch (error) {
-      // A component that cannot build its emblem (e.g. private crest art not prepared in this
-      // checkout) falls back to the neutral placeholder rather than breaking discovery updates.
-      console.warn('[collection] emblem unavailable, using placeholder', error.message);
-      item.badge.dispose();
-      item.badge = createPlaceholder({ color: carColor(CARS[item.car]), theme: state.theme, locked });
-      item.holder.add(item.badge.object);
-      item.placeholder = true;
-    }
+  try { badge = createBadge(options); } catch (error) {
+    console.warn('[collection] emblem unavailable, using placeholder', error?.message);
+    badge = createPlaceholder(options);
   }
+  // holder: position + pointer tilt; spinner: the continuous idle turn.
+  const holder = new THREE.Group();
+  const spinner = new THREE.Group();
+  spinner.add(badge.object);
+  holder.add(spinner);
+  holder.visible = false;
+  scene.add(holder);
+  const item = { car: index, badge, holder, spinner, appear: 0, hover: 0, spin: MOTION.entryYaw };
+  items.set(index, item);
+  return item;
+}
+
+function disposeItem(item) {
+  gsap.killTweensOf(item);
+  try { item.badge.dispose(); } catch { /* never let disposal break the Collection */ }
+  item.holder.removeFromParent();
+  items.delete(item.car);
 }
 
 function readField() {
@@ -140,11 +128,19 @@ function readField() {
 
 function applyTheme() {
   readField();
-  for (const item of items) {
+  for (const item of items.values()) {
     item.badge.setTheme(state.theme);
     item.badge.setColor(carColor(CARS[item.car]));
   }
-  flag?.setTheme(state.theme);
+}
+
+/** Discovery only grows in play; a dev reset can re-lock, so drop anything no longer allowed. */
+function refreshLocks() {
+  for (const item of [...items.values()]) {
+    if (unlocked(item.car)) continue;
+    if (selected === item.car) selected = null;
+    disposeItem(item);
+  }
 }
 
 export function initCollection(sharedRenderer) {
@@ -154,7 +150,7 @@ export function initCollection(sharedRenderer) {
   pmrem = new THREE.PMREMGenerator(renderer);
   envTarget = pmrem.fromScene(new RoomEnvironment(), 0.035);
   scene.environment = envTarget.texture;
-  // Chrome reflects the room; on the white Day field a softer room and a firmer key keep its relief readable.
+  // Chrome reflects the room; on the white Day field a softer room and a firmer key keep relief readable.
   scene.environmentIntensity = 0.55;
   const key = new THREE.DirectionalLight(0xffffff, 2.2);
   key.position.set(-0.4, 0.8, 1);
@@ -167,36 +163,56 @@ export function initCollection(sharedRenderer) {
   subscribe('unlocked', refreshLocks);
 }
 
-/** Where things go: plan anchors (screen px), the circuit centre, and sizes in px. */
-export function placeCollection({ anchors, centre, badge, flagSize, offset }) {
-  if (anchors) anchorsFn = anchors;
+/** Where the emblem goes: the circuit's centre (screen px) and its size in px for 1 unit. */
+export function placeCollection({ centre, size } = {}) {
   if (centre) centreFn = centre;
-  if (badge) sizes.badge = badge;
-  if (flagSize) sizes.flag = flagSize;
-  if (offset !== undefined) sizes.offset = offset;
+  if (size) sizeFn = size;
 }
 
-/** Show the emblems and flag (staggered along the route) or send them away. Returns a timeline. */
+/** Show or hide the Collection stage (and the selected emblem with it). Returns a timeline. */
 export function showCollection(on) {
   if (on && !active) {
-    if (!items.length) buildItems();
     refreshLocks();
     applyTheme();
     fieldColor.copy(targetField);
     active = true;
     rendered = false;
   }
-  const tl = gsap.timeline({ onComplete: () => { if (!on) { active = false; setHovered(null); } } });
   const instant = reducedMotion.matches;
-  items.forEach((item, i) => {
-    if (on && item.hover > 1) tl.to(item, { hover: 0, duration: instant ? 0 : 0.5, ease: 'gt3.out' }, 0);
-    tl.to(item, { appear: on ? 1 : 0, duration: instant ? 0 : on ? 0.7 : 0.28, ease: on ? 'gt3.out' : 'gt3' }, instant ? 0 : on ? 0.06 * i : 0.02 * (items.length - i));
-  });
-  if (flag && on && flag.hover > 1) tl.to(flag, { hover: 0, duration: instant ? 0 : 0.5, ease: 'gt3.out' }, 0);
-  if (flag) tl.to(flag, { appear: on ? 1 : 0, duration: instant ? 0 : on ? 0.9 : 0.3, ease: on ? 'gt3.out' : 'gt3' }, instant ? 0 : on ? 0.25 : 0);
+  const tl = gsap.timeline({ onComplete: () => { if (!on) { active = false; hovered = false; } } });
+  const current = selected === null ? null : items.get(selected);
+  if (on && current && current.hover > 1) tl.to(current, { hover: 0, duration: instant ? 0 : 0.5, ease: 'gt3.out' }, 0);
+  tl.to({ v: stage }, {
+    v: on ? 1 : 0, duration: instant ? 0 : on ? 0.8 : 0.28, ease: on ? 'gt3.out' : 'gt3',
+    onUpdate() { stage = this.targets()[0].v; },
+  }, instant ? 0 : on ? 0.2 : 0);
   return tl;
 }
 
+/**
+ * Put one car's emblem on stage (or clear it with null). A locked car is refused: returns false.
+ * The previous emblem sinks and turns away while the new one rises and turns into view.
+ */
+export function selectEmblem(index) {
+  if (index !== null && !unlocked(index)) return false;
+  if (index === selected) return true;
+  const instant = reducedMotion.matches;
+  const previous = selected === null ? null : items.get(selected);
+  if (previous) {
+    gsap.killTweensOf(previous);
+    gsap.to(previous, { appear: 0, hover: 0, duration: instant ? 0 : 0.32, ease: 'gt3' });
+  }
+  selected = index;
+  hovered = false;
+  if (index === null) return true;
+  const item = items.get(index) ?? makeItem(index);
+  gsap.killTweensOf(item);
+  if (item.appear < 0.05) item.spin = MOTION.entryYaw;
+  gsap.to(item, { appear: 1, duration: instant ? 0 : 0.85, ease: 'gt3.out', delay: previous && !instant ? 0.14 : 0 });
+  return true;
+}
+
+export function selectedEmblem() { return selected; }
 export function collectionActive() { return active; }
 /** True once a frame has been drawn since showing (the DOM field may give way to the canvas). */
 export function collectionRendered() { return rendered; }
@@ -205,65 +221,54 @@ function screenToWorld(x, y, out) {
   return out.set(x - innerWidth / 2, innerHeight / 2 - y, 0);
 }
 
-function setHovered(next) {
-  if (hovered === next) return;
-  if (hovered && hovered !== 'full') hovered.badge.setHovered(false);
-  hovered = next;
-  if (hovered && hovered !== 'full') hovered.badge.setHovered(true);
-}
-
-/** Pointer over the canvas (client px). Returns what is under it, without revealing locked identity. */
+/**
+ * Pointer over the Hub (client px). Drives the emblem's tilt from anywhere on the page (as the
+ * Landing car did) and reports whether the emblem itself is under the pointer.
+ */
 export function pointCollection(clientX, clientY) {
   if (!active) return null;
+  pointer.tx = THREE.MathUtils.clamp(clientX / innerWidth * 2 - 1, -1, 1);
+  pointer.ty = THREE.MathUtils.clamp(clientY / innerHeight * 2 - 1, -1, 1);
+  const item = selected === null ? null : items.get(selected);
+  if (!item || item.appear < 0.6 || stage < 0.6) { hovered = false; return null; }
   ndc.set(clientX / innerWidth * 2 - 1, -(clientY / innerHeight) * 2 + 1);
   raycaster.setFromCamera(ndc, camera);
-  const targets = items.filter((item) => item.appear > 0.6).map((item) => item.badge.hitTarget);
-  const hit = raycaster.intersectObjects(targets, false)[0];
-  for (const item of items) {
-    const dx = (clientX - item.x) / 260;
-    const dy = (clientY - item.y) / 260;
-    item.badge.setPointer(THREE.MathUtils.clamp(dx, -1, 1), THREE.MathUtils.clamp(dy, -1, 1));
-  }
-  if (hit) {
-    const item = items.find((entry) => entry.badge.hitTarget === hit.object);
-    setHovered(item);
-    return { type: 'car', car: item.car, locked: item.locked, x: item.x, y: item.y, size: sizes.badge };
-  }
-  if (flag && flag.appear > 0.6) {
-    const c = centreFn();
-    const r = sizes.flag * 0.55;
-    if (Math.abs(clientX - c.x) < r && Math.abs(clientY - c.y) < r * 0.75) {
-      setHovered('full');
-      return { type: 'full', x: c.x, y: c.y, size: sizes.flag };
-    }
-  }
-  setHovered(null);
-  return null;
+  item.holder.updateMatrixWorld(true);
+  const hit = raycaster.intersectObject(item.badge.hitTarget, false)[0];
+  // The hit plane turns with the emblem; edge-on it is thin, so also accept a disc around the centre.
+  const c = centreFn();
+  const r = sizeFn() * 0.42;
+  const near = Math.hypot(clientX - c.x, clientY - c.y) < r;
+  hovered = Boolean(hit) || near;
+  return hovered ? { type: 'emblem', car: selected } : null;
 }
 
-export function clearCollectionPointer() { setHovered(null); }
-
-/** Keyboard focus on an emblem's proxy button: the same visual hover as the pointer gives. */
-export function hoverCar(car) {
-  setHovered(car === null ? null : car === 'full' ? 'full' : items.find((item) => item.car === car) ?? null);
+/** The pointer left the Hub: the emblem eases back to its idle motion. */
+export function clearCollectionPointer() {
+  pointer.tx = 0;
+  pointer.ty = 0;
+  hovered = false;
 }
 
-/** A locked emblem refuses with a short damped shake. */
-export function resistEmblem(car) {
-  const item = items.find((entry) => entry.car === car);
-  if (!item || reducedMotion.matches) return;
-  gsap.fromTo(item, { resist: 1 }, { resist: 0, duration: 0.6, ease: 'power2.out' });
-}
+/** Keyboard focus on the emblem's caption gives the same lift as the pointer. */
+export function hoverEmblem(on) { hovered = Boolean(on) && selected !== null; }
 
-/** The chosen emblem rises toward the viewer as the Showcase takes over (others recede). */
-export function focusEmblem(car) {
+/** Collection → Showcase: the emblem rises toward the viewer (single) or steps back (full). */
+export function focusEmblem(mode) {
   const tl = gsap.timeline();
-  items.forEach((item) => {
-    if (item.car === car) tl.to(item, { hover: 2.4, duration: 0.55, ease: 'gt3.launch' }, 0);
-    else tl.to(item, { appear: 0, duration: 0.3, ease: 'gt3' }, 0);
-  });
-  if (flag) tl.to(flag, { appear: car === 'full' ? 1 : 0, hover: car === 'full' ? 1.6 : 0, duration: 0.5, ease: 'gt3.launch' }, 0);
+  const item = selected === null ? null : items.get(selected);
+  if (!item) return tl;
+  if (mode === 'single') tl.to(item, { hover: 2.4, duration: 0.55, ease: 'gt3.launch' }, 0);
+  else tl.to(item, { appear: 0, duration: 0.32, ease: 'gt3' }, 0);
   return tl;
+}
+
+/** The Showcase returned to the Collection: bring the selected emblem back to rest. */
+export function restoreEmblem() {
+  const item = selected === null ? null : items.get(selected);
+  if (!item) return;
+  gsap.killTweensOf(item);
+  gsap.to(item, { appear: 1, hover: 0, duration: reducedMotion.matches ? 0 : 0.6, ease: 'gt3.out' });
 }
 
 const scratch = new THREE.Vector3();
@@ -272,36 +277,34 @@ export function updateCollection(dt) {
   const step = Math.min(0.1, Math.max(0, dt || 0));
   elapsed += step;
   fieldColor.lerp(targetField, 1 - Math.exp(-step * 6));
-  const anchors = anchorsFn(sizes.offset);
   const still = reducedMotion.matches;
-  for (const item of items) {
-    const anchor = anchors.find((a) => a.car === item.car);
-    if (!anchor) continue;
-    item.x = anchor.x; item.y = anchor.y;
-    const hoverTarget = hovered === item ? 1 : 0;
-    if (item.hover <= 1) item.hover += (hoverTarget - item.hover) * (1 - Math.exp(-step * 9));
-    const bob = still ? 0 : Math.sin(elapsed * 0.9 + item.phase) * 3;
-    screenToWorld(anchor.x, anchor.y + bob, scratch);
+  const kp = 1 - Math.exp(-MOTION.pointerDamping * step);
+  pointer.x += ((still ? 0 : pointer.tx) - pointer.x) * kp;
+  pointer.y += ((still ? 0 : pointer.ty) - pointer.y) * kp;
+  scene.environmentRotation.y = pointer.x * MOTION.pointerEnvYaw;
+  const c = centreFn();
+  const size = sizeFn();
+  for (const item of items.values()) {
+    const isSelected = item.car === selected;
+    if (item.hover <= 1) item.hover += ((isSelected && hovered ? 1 : 0) - item.hover) * (1 - Math.exp(-step * 8));
+    const shown = item.appear * stage;
+    item.holder.visible = shown > 0.001;
+    if (!item.holder.visible) continue;
+    if (!still) item.spin += THREE.MathUtils.degToRad(MOTION.idleDegPerSecond) * step;
+    const bob = still ? 0 : Math.sin(elapsed * 2 * Math.PI / MOTION.bobSeconds) * size * MOTION.bobFraction;
+    // Arrival and departure: the emblem rises a little as it appears and sinks as it leaves.
+    const travel = (1 - item.appear) * size * 0.12;
+    screenToWorld(
+      c.x + pointer.x * size * MOTION.pointerDrift,
+      c.y + pointer.y * size * MOTION.pointerDrift + bob + travel,
+      scratch,
+    );
     item.holder.position.copy(scratch);
-    const s = sizes.badge * (0.55 + 0.45 * item.appear) * (1 + 0.16 * item.hover) * item.appear;
-    item.holder.scale.setScalar(Math.max(0.0001, s));
-    // Slow, gentle turn (McLaren-presentation spirit); a hovered emblem squares up to the viewer.
-    const sway = still ? 0 : Math.sin(elapsed * 0.45 + item.phase) * 0.42;
-    item.holder.rotation.y = sway * (1 - Math.min(1, item.hover)) + (1 - item.appear) * 1.2;
-    item.holder.rotation.z = item.resist * Math.sin(elapsed * 46) * 0.12;
-    item.holder.visible = item.appear > 0.001;
+    const scale = size * (0.82 + 0.18 * shown) * (1 + 0.06 * item.hover) * shown;
+    item.holder.scale.setScalar(Math.max(0.0001, scale));
+    item.holder.rotation.set(pointer.y * MOTION.pointerPitch, pointer.x * MOTION.pointerYaw, 0);
+    item.spinner.rotation.y = item.spin - (1 - item.appear) * 0.8;
     item.badge.update(step);
-  }
-  if (flag) {
-    const c = centreFn();
-    flag.setHovered(hovered === 'full');
-    if (flag.hover <= 1) flag.hover += ((hovered === 'full' ? 1 : 0) - flag.hover) * (1 - Math.exp(-step * 8));
-    screenToWorld(c.x, c.y - sizes.flag * 0.08 + (still ? 0 : Math.sin(elapsed * 0.7) * 4), scratch);
-    flagWrap.position.copy(scratch);
-    flagWrap.scale.setScalar(Math.max(0.0001, sizes.flag * flag.appear * (1 + 0.08 * flag.hover)));
-    flagWrap.rotation.y = (still ? 0 : Math.sin(elapsed * 0.35) * 0.3) + (1 - flag.appear) * 1.4;
-    flagWrap.visible = flag.appear > 0.001;
-    flag.update(step);
   }
 }
 
@@ -331,4 +334,9 @@ export function renderCollection() {
     renderer.setRenderTarget(target);
   }
   return true;
+}
+
+/** Diagnostics for review/harness (never exposes a locked car: only on-stage, unlocked entries). */
+export function collectionState() {
+  return { active, stage, selected, emblems: [...items.keys()] };
 }

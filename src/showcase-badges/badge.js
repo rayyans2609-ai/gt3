@@ -6,13 +6,16 @@ import mclaren from './mclaren.svg?raw';
 import nissan from './nissan.svg?raw';
 import mercedes from './mercedes.svg?raw';
 import bmwUrl from './bmw.svg?url';
+import aston from './aston.svg?raw';
+import ferrari from './ferrari.svg?raw';
 
-const sources = { lexus, audi, mclaren, nissan, mercedes, bmw: null };
+const sources = { lexus, nissan, audi, bmw: null, mercedes, ferrari, mclaren, aston, lamborghini: null, porsche: null };
 
 /** Create a self-contained, unlit-scene-agnostic badge. Caller supplies lights/environment. */
 export function createBadge({ manufacturer = 'lexus', color = 0x8fa6b6, theme = 'day', locked = false, onHover, onClick } = {}) {
   const source = sources[manufacturer];
   if (!Object.hasOwn(sources, manufacturer)) throw new Error(`Unknown badge: ${manufacturer}`);
+  const substitute = !source && manufacturer !== 'bmw';
   const root = new THREE.Group();
   const motion = new THREE.Group();
   const art = new THREE.Group();
@@ -38,7 +41,7 @@ export function createBadge({ manufacturer = 'lexus', color = 0x8fa6b6, theme = 
     const face = new THREE.Mesh(faceGeometry, faceMaterial);
     face.position.z = 0.014;
     art.add(face);
-  } else {
+  } else if (source) {
   const svg = new DOMParser().parseFromString(source, 'image/svg+xml').documentElement;
   const viewBox = svg.getAttribute('viewBox')?.trim().split(/[ ,]+/).map(Number);
   const extent = viewBox?.length === 4 ? Math.max(viewBox[2], viewBox[3]) : Math.max(parseFloat(svg.getAttribute('width')), parseFloat(svg.getAttribute('height')));
@@ -52,22 +55,24 @@ export function createBadge({ manufacturer = 'lexus', color = 0x8fa6b6, theme = 
     }
   }
   }
-  art.scale.y = manufacturer === 'bmw' ? 1 : -1;
-  art.updateMatrixWorld(true);
-  const box = new THREE.Box3().setFromObject(art);
-  const size = box.getSize(new THREE.Vector3());
-  const center = box.getCenter(new THREE.Vector3());
-  const span = Math.max(size.x, size.y);
-  if (!Number.isFinite(span) || span <= 0) {
-    geometries.forEach(g => g.dispose());
-    ownedMaterials.forEach(m => m.dispose());
-    textures.forEach(t => t.dispose());
-    metal.dispose();
-    throw new Error(`Badge artwork has no measurable geometry: ${manufacturer}`);
+  if (!substitute) {
+    art.scale.y = manufacturer === 'bmw' ? 1 : -1;
+    art.updateMatrixWorld(true);
+    const box = new THREE.Box3().setFromObject(art);
+    const size = box.getSize(new THREE.Vector3());
+    const center = box.getCenter(new THREE.Vector3());
+    const span = Math.max(size.x, size.y);
+    if (!Number.isFinite(span) || span <= 0) {
+      geometries.forEach(g => g.dispose());
+      ownedMaterials.forEach(m => m.dispose());
+      textures.forEach(t => t.dispose());
+      metal.dispose();
+      throw new Error(`Badge artwork has no measurable geometry: ${manufacturer}`);
+    }
+    const scale = 1 / span;
+    art.position.set(-center.x * scale, -center.y * scale, -center.z * scale);
+    art.scale.set(scale, manufacturer === 'bmw' ? scale : -scale, scale);
   }
-  const scale = 1 / span;
-  art.position.set(-center.x * scale, -center.y * scale, -center.z * scale);
-  art.scale.set(scale, manufacturer === 'bmw' ? scale : -scale, scale);
   const lockGeometry = new THREE.CylinderGeometry(0.25, 0.25, 0.025, 32);
   lockGeometry.rotateX(Math.PI / 2);
   const lockMaterial = new THREE.MeshStandardMaterial({ color: 0x899096, metalness: 0.65, roughness: 0.4 });
@@ -78,7 +83,7 @@ export function createBadge({ manufacturer = 'lexus', color = 0x8fa6b6, theme = 
   const hitTarget = new THREE.Mesh(hitGeometry, hitMaterial);
   root.add(hitTarget);
   function setLocked(value) {
-    locked = !!value; art.visible = !locked; lockMesh.visible = locked;
+    locked = !!value; art.visible = !locked && !substitute; lockMesh.visible = locked || substitute;
     if (locked) { px = py = 0; }
   }
   let hovered = false, px = 0, py = 0, x = 0, y = 0, elapsed = 0, disposed = false;

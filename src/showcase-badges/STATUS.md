@@ -1,9 +1,5 @@
 # Worker checkpoint status
 
-Completed: reusable badge prototype and flag; Lexus, Nissan, Audi, BMW, Mercedes star and McLaren wordmark sources; neutral locked presentation and stable raycast target; day/night and identity accent API. The initial representative checkpoint was published at `4b95552`, with interaction refinement at `c12610e`.
+All ten roster IDs now construct a badge. This checkpoint adds Aston Martin's historical wings and the Ferrari script. Lamborghini and Porsche use a neutral temporary badge with the unlocked selection API. The physical crest artwork for those two marks and the Ferrari Prancing Horse is still pending.
 
-Next: source and implement Ferrari, Aston Martin, Lamborghini and Porsche with appropriate rights and authentic physical construction; evaluate all six existing prototypes for proportions, cutouts, materials and suitable model-era identity; verify the full ten-instance lifecycle and integration interface with a lightweight check.
-
-Uncertainties: all visuals are unreviewed. McLaren is a wordmark and Mercedes is the star rather than an AMG-specific badge. Lexus Commons metadata is inconsistent. Rights for detailed crests remain unresolved: [Porsche's own statement](https://newsroom.porsche.com/en/history/our-top-horse-in-the-stable-10891.html) says commercial use of its crest requires express approval; [Commons](https://commons.wikimedia.org/wiki/Category:Ferrari_logos) identifies Ferrari's prancing horse as copyrighted. Source and trademark notes for the present assets are in README.md. No assumption is made that repository or collection licensing grants rights to the marks.
-
-Lightweight evidence: parsed and constructed the five vector badges using Three.js with a Node XML DOM; exercised locked/unlocked callbacks and disposal, then created, updated and disposed ten mixed instances. BMW image loading was stubbed, so image decoding, appearance, renderer behaviour and GPU performance remain unverified. Flag lifecycle and source syntax were also checked.
+Next is the physical finish pass on the existing prototypes, including the switch from McLaren lettering to the Speedmark. Opus will assess the rendered badges in context during integration.

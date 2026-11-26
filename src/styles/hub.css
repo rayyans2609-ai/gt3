@@ -180,9 +180,8 @@
 .hub-cars__toggle:focus-visible { outline: 2px solid var(--hub-accent); outline-offset: 4px; border-radius: 2px; }
 .hub-cars__name { display: block; }
 .hub-cars__name.is-resisted { color: var(--hub-muted); }
-/* The ten bars are a stack of horizontal rules directly beneath the label, each as wide as "Cars" at rest.
-   Hover/focus extends a discovered bar outwards from its centre (scaleX in hub.js). */
-.hub-cars__ticks { display: flex; flex-direction: column; align-items: stretch; width: 100%; }
+/* Hover/focus extends a discovered bar outwards from its centre. */
+.hub-cars__ticks { display: flex; flex-direction: column; align-items: stretch; width: 38%; justify-self: center; }
 .hub-cars__bar { display: flex; align-items: center; justify-content: center; width: 100%; height: 12px; padding: 0; border: 0; background: none; color: var(--hub-ink); cursor: not-allowed; }
 .hub-cars__bar i { display: block; flex: none; width: 100%; height: 2px; border-radius: 1px; background: color-mix(in srgb, var(--hub-ink) 20%, transparent); transform-origin: 50% 50%; transition: background-color 180ms var(--ease), opacity 180ms var(--ease); }
 .hub-cars__bar.is-found { cursor: pointer; }

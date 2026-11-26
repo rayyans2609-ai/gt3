@@ -89,7 +89,7 @@ function resistCar(index, target = ticks[index]) {
 
 function expandBar(tick, index, on) {
   gsap.to(tick.firstChild, {
-    scaleX: on && state.unlocked.has(index) && !reducedMotion.matches ? 1.14 : 1,
+    scaleX: on && state.unlocked.has(index) && !reducedMotion.matches ? 1.5 : 1,
     duration: reducedMotion.matches ? 0 : on ? 0.22 : 0.3,
     ease: 'gt3.out', overwrite: true,
   });
@@ -116,9 +116,9 @@ function buildCars() {
       if (DIRECTION === 'plan' && state.unlocked.has(index)) plan.peekCar(index, on);
     };
     tick.addEventListener('pointerenter', () => engage(true));
-    tick.addEventListener('pointerleave', () => engage(tick.matches(':focus-visible')));
-    tick.addEventListener('focus', () => { if (tick.matches(':focus-visible')) engage(true); });
-    tick.addEventListener('blur', () => engage(tick.matches(':hover')));
+    tick.addEventListener('pointerleave', () => { if (!tick.matches(':focus-visible')) engage(false); });
+    tick.addEventListener('focus', () => { if (tick.matches(':focus-visible') && !tick.matches(':hover')) engage(true); });
+    tick.addEventListener('blur', () => { if (!tick.matches(':hover')) engage(false); });
     // Clicking a discovered bar is reserved for opening its Showcase (not built yet); a locked one resists.
     tick.addEventListener('click', () => { if (!state.unlocked.has(index)) resistCar(index); });
     return glyph.appendChild(tick);
@@ -151,7 +151,7 @@ function renderCars() {
     const known = found.has(index);
     tick.classList.toggle('is-found', known);
     tick.setAttribute('aria-disabled', String(!known));
-    tick.setAttribute('aria-label', known ? `${index + 1}, ${CARS[index].displayName}, discovered. Open Cars` : `${index + 1}, undiscovered`);
+    tick.setAttribute('aria-label', known ? `${index + 1}, ${CARS[index].displayName}, discovered` : `${index + 1}, undiscovered`);
   });
   const count = CARS.filter((_, index) => found.has(index)).length;
   carsToggle.setAttribute('aria-label', `Cars, ${count} of ${CARS.length} discovered`);

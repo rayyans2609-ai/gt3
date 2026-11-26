@@ -334,7 +334,7 @@ export function lapLight(on, { car = null, once = false } = {}) {
   lapTween?.kill();
   lapTween = null;
   gsap.killTweensOf(lap);
-  if (on && drawn < 1) return;
+  if (on && drawn < 1 && !car) return;
   if (on) {
     if (car) applyCarColor(lap, car);
     else {
@@ -382,10 +382,13 @@ export function showCarLabels(on) {
     el.setAttribute('aria-hidden', String(!on));
   });
   gsap.killTweensOf(els);
-  if (reducedMotion.matches) { gsap.set(els, { opacity: on ? 1 : 0 }); return; }
+  if (reducedMotion.matches) {
+    els.forEach((el) => gsap.set(el, { opacity: on || el.classList.contains('is-peek') ? 1 : 0 }));
+    return;
+  }
   gsap.to(els, on
     ? { opacity: 1, duration: 0.36, ease: 'gt3', stagger: { each: 0.035, from: 'start' } }
-    : { opacity: 0, duration: 0.16, ease: 'gt3' });
+    : { opacity: (index, el) => el.classList.contains('is-peek') ? 1 : 0, duration: 0.16, ease: 'gt3' });
 }
 
 /**

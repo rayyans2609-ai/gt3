@@ -11,6 +11,8 @@ import { CAR_IMAGES } from './carImages.js';
  * @property {string} year Model or homologation year
  * @property {string} displayName Full editorial display name
  * @property {string} modelFile GLB filename in the public model directory
+ * @property {string} identityColor Shared livery-derived Hub / Showcase accent (sRGB hex)
+ * @property {string} [identityColorNight] Optional same-hue Night contrast variant
  * @property {string} brandColor Deep marque-derived racing colour
  * @property {string} brandColorSoft Desaturated montage backdrop colour
  * @property {string} accentText Text colour readable against brandColor
@@ -40,6 +42,7 @@ export const CARS = [
     year: '2018',
     displayName: 'Lexus RC F GT3',
     modelFile: 'lexus_rcf_gt3.glb',
+    identityColor: '#7578d1', // Indigo paint; see docs/review/p5/CARS-REFINEMENT.md for sampling.
     brandColor: '#541F29',
     brandColorSoft: '#403236',
     accentText: '#F0E8E3',
@@ -85,6 +88,7 @@ export const CARS = [
     year: '2018',
     displayName: 'Nissan GT-R NISMO GT3',
     modelFile: 'nissan_gtr_gt3.glb',
+    identityColor: '#bd3057', // Secondary NISMO red, tuned toward crimson for separation.
     brandColor: '#293D52',
     brandColorSoft: '#394550',
     accentText: '#EDF0F2',
@@ -130,6 +134,7 @@ export const CARS = [
     year: '2020',
     displayName: 'Audi R8 LMS GT3 evo',
     modelFile: 'audi_r8_gt3.glb',
+    identityColor: '#cb2117', // Red exterior livery.
     brandColor: '#3C4247',
     brandColorSoft: '#484C50',
     accentText: '#F0EEEA',
@@ -175,6 +180,7 @@ export const CARS = [
     year: '2016',
     displayName: 'BMW M6 GT3',
     modelFile: 'bmw_m6_gt3.glb',
+    identityColor: '#338dae', // Light M blue body stripe / badge.
     brandColor: '#173D5C',
     brandColorSoft: '#344956',
     accentText: '#ECF0F1',
@@ -220,6 +226,7 @@ export const CARS = [
     year: '2016',
     displayName: 'Mercedes-AMG GT3',
     modelFile: 'mercedes_amg_gt3.glb',
+    identityColor: '#008655', // Green secondary exterior livery.
     brandColor: '#303437',
     brandColorSoft: '#44484A',
     accentText: '#F1EFEB',
@@ -265,6 +272,7 @@ export const CARS = [
     year: '2018',
     displayName: 'Ferrari 488 GT3',
     modelFile: 'ferrari_488_gt3.glb',
+    identityColor: '#d96165', // Coral-red exterior paint.
     brandColor: '#6D1E24',
     brandColorSoft: '#553238',
     accentText: '#F3EAE5',
@@ -310,6 +318,7 @@ export const CARS = [
     year: '2019',
     displayName: 'McLaren 720S GT3',
     modelFile: 'mclaren_720s_gt3.glb',
+    identityColor: '#0c69b4', // Blue exterior paint.
     brandColor: '#865034',
     brandColorSoft: '#664D3E',
     accentText: '#F3ECE6',
@@ -355,6 +364,7 @@ export const CARS = [
     year: '2019',
     displayName: 'Aston Martin Vantage GT3',
     modelFile: 'aston_vantage_gt3.glb',
+    identityColor: '#9d8207', // Bilstein yellow, darkened for Day text.
     brandColor: '#173B31',
     brandColorSoft: '#30483F',
     accentText: '#EEF0EB',
@@ -400,6 +410,7 @@ export const CARS = [
     year: '2023',
     displayName: 'Lamborghini Huracán GT3 EVO2',
     modelFile: 'lamborghini_huracan_gt3.glb',
+    identityColor: '#788b08', // Lime secondary exterior livery, darkened for Day text.
     brandColor: '#795033',
     brandColorSoft: '#604C3E',
     accentText: '#F3ECE5',
@@ -445,6 +456,7 @@ export const CARS = [
     year: '2023',
     displayName: 'Porsche 911 GT3 R',
     modelFile: 'porsche_911_gt3r.glb',
+    identityColor: '#9757bd', // Purple secondary exterior livery, lifted for Night text.
     brandColor: '#25211F',
     brandColorSoft: '#3C3733',
     accentText: '#F0EBE5',

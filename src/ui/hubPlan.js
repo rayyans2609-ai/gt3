@@ -18,6 +18,7 @@
 import { CHECKPOINT_ROUTE_T, offsetPointAt, routeTAt } from '../scene/trackCurve.js';
 import { CARS } from '../data/cars.js';
 import { gsap, reducedMotion } from './motion.js';
+import { applyCarColor } from './carIdentity.js';
 import { fitSimilarity, perspectiveMix, preparePerspective, perspectivePoint, perspectivePath } from './hubPlanProjection.js';
 
 const SVG = 'http://www.w3.org/2000/svg';
@@ -199,12 +200,12 @@ function setDrawn(value) {
   renderTicks();
 }
 
-export function buildPlan(container, frame, { yawDeg = 75, pitchDeg = 52 } = {}) {
+export function buildPlan(container, frame, { yawDeg = 75, pitchDeg = 52, onLockedCar } = {}) {
   basis = makeBasis(yawDeg, pitchDeg);
   bounds = { minX: Infinity, maxX: -Infinity, minY: Infinity, maxY: -Infinity };
   frameEl = frame;
-  svg = node('svg', { class: 'hub-plan', 'aria-hidden': 'true', focusable: 'false' });
-  world = node('g', { class: 'hub-plan__world' }, svg);
+  svg = node('svg', { class: 'hub-plan', role: 'group', 'aria-label': 'Grand Tour circuit', focusable: 'false' });
+  world = node('g', { class: 'hub-plan__world', 'aria-hidden': 'true' }, svg);
   labels = node('g', { class: 'hub-plan__labels' }, svg);
   shapes = [];
   pathsDeformed = false;
@@ -228,7 +229,7 @@ export function buildPlan(container, frame, { yawDeg = 75, pitchDeg = 52 } = {})
   // Start/finish: a small checker block in screen space, aligned to the road.
   const s0 = planAt(0);
   const s1 = planAt(0.002);
-  const g = node('g', { class: 'hub-plan__start' }, labels);
+  const g = node('g', { class: 'hub-plan__start', 'aria-hidden': 'true' }, labels);
   for (let col = 0; col < 2; col++) {
     for (let row = 0; row < 6; row++) {
       if ((col + row) % 2) continue;
@@ -239,10 +240,26 @@ export function buildPlan(container, frame, { yawDeg = 75, pitchDeg = 52 } = {})
   startMark = { el: g, at: s0, ahead: s1 };
 
   // Car labels for the Cars view: Lexus at the start, the others at their checkpoints.
+  const carGroup = node('g', { id: 'hub-plan-cars', role: 'group', 'aria-label': 'Cars' }, labels);
   const labelAt = (car, t) => {
     const a = planAt(t, -HALF_WIDTH_M - TICK_OUT_M);
     const b = planAt(t, HALF_WIDTH_M + TICK_OUT_M);
-    return { car, t, a, b, outer: a, el: node('text', { class: 'hub-plan__car' }, labels) };
+    const el = node('text', { class: 'hub-plan__car', role: 'button', tabindex: -1, 'aria-hidden': 'true' }, carGroup);
+    applyCarColor(el, CARS[car]);
+    const label = { car, t, a, b, outer: a, el, found: false };
+    const activate = () => {
+      if (!labelsOn) return;
+      if (label.found) lapLight(true, { car: CARS[car], once: true });
+      else onLockedCar?.(car, el);
+    };
+    el.addEventListener('click', activate);
+    el.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        if (!event.repeat) activate();
+      }
+    });
+    return label;
   };
   carLabels = [labelAt(0, 0), ...ticks.map((tick) => labelAt(tick.car, tick.t))];
   // Choose the tick end that points away from the circuit's middle for each label.
@@ -254,12 +271,13 @@ export function buildPlan(container, frame, { yawDeg = 75, pitchDeg = 52 } = {})
     label.outer = da > db ? label.a : label.b;
   }
 
-  here = node('circle', { class: 'hub-plan__here', r: 3.5, cx: -10, cy: -10 }, labels);
-  leader = node('path', { class: 'hub-plan__leader', d: 'M0 0' }, labels);
+  here = node('circle', { class: 'hub-plan__here', r: 3.5, cx: -10, cy: -10, 'aria-hidden': 'true' }, labels);
+  leader = node('path', { class: 'hub-plan__leader', d: 'M0 0', 'aria-hidden': 'true' }, labels);
   container.append(svg);
   layout();
   setDrawn(0);
   gsap.set(lap, { drawSVG: '0% 0%' });
+  reducedMotion.addEventListener?.('change', () => lapLight(false));
   return svg;
 }
 
@@ -303,21 +321,34 @@ export function startLeader(on, from) {
   }
 }
 
-/** One light lap while START RACE is under the pointer: a preview of the drive. */
-export function lapLight(on) {
-  if (reducedMotion.matches || drawn < 1) return;
+/** Shared lap: START RACE loops on hover; a discovered car plays once on activation. */
+export function lapLight(on, { car = null, once = false } = {}) {
+  lapTween?.kill();
+  lapTween = null;
+  gsap.killTweensOf(lap);
+  if (on && drawn < 1) return;
   if (on) {
-    if (lapTween) return;
+    if (car) applyCarColor(lap, car);
+    else {
+      lap.classList.remove('car-identity');
+      lap.style.removeProperty('--car-color');
+      lap.style.removeProperty('--car-color-night');
+    }
     gsap.set(lap, { opacity: 1 });
+    if (reducedMotion.matches) {
+      gsap.set(lap, { drawSVG: '0% 100%' });
+      lapTween = gsap.delayedCall(0.24, () => { gsap.set(lap, { opacity: 0 }); lapTween = null; });
+      return;
+    }
     lapTween = gsap.fromTo(lap, { drawSVG: '0% 0%' }, {
       keyframes: [{ drawSVG: '0% 6%', duration: 0.25, ease: 'none' }, { drawSVG: '94% 100%', duration: 2.3, ease: 'none' },
         { drawSVG: '100% 100%', duration: 0.25, ease: 'none' }],
-      repeat: -1,
+      repeat: once ? 0 : -1,
+      onComplete: () => { gsap.set(lap, { opacity: 0 }); lapTween = null; },
     });
   } else {
-    lapTween?.kill();
-    lapTween = null;
-    gsap.to(lap, { opacity: 0, duration: 0.3, ease: 'gt3', onComplete: () => gsap.set(lap, { drawSVG: '0% 0%' }) });
+    gsap.to(lap, { opacity: 0, duration: reducedMotion.matches ? 0 : 0.3, ease: 'gt3',
+      onComplete: () => gsap.set(lap, { drawSVG: '0% 0%' }) });
   }
 }
 
@@ -327,14 +358,21 @@ export function renderDiscovery(unlocked) {
   for (const label of carLabels) {
     const car = CARS[label.car];
     const found = unlocked.has(label.car);
+    label.found = found;
     label.el.textContent = found ? `${car.manufacturer} ${car.model}` : '?';
     label.el.classList.toggle('is-found', found);
+    label.el.setAttribute('aria-disabled', String(!found));
+    label.el.setAttribute('aria-label', found ? `${car.displayName}. Preview circuit` : `${label.car + 1}, undiscovered`);
   }
 }
 
 export function showCarLabels(on) {
   labelsOn = on;
   const els = carLabels.map((label) => label.el);
+  els.forEach((el) => {
+    el.setAttribute('tabindex', on ? '0' : '-1');
+    el.setAttribute('aria-hidden', String(!on));
+  });
   gsap.killTweensOf(els);
   if (reducedMotion.matches) { gsap.set(els, { opacity: on ? 1 : 0 }); return; }
   gsap.to(els, on
@@ -431,6 +469,7 @@ export function zoom({ samples, projected, project, progress, direction = 1, dur
 }
 
 export function resetPlanView() {
+  lapLight(false);
   zoomTween?.kill();
   zoomTween = null;
   perspective = null;

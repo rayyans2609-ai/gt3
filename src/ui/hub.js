@@ -19,6 +19,7 @@ import { CARS } from '../data/cars.js';
 import { initHubPlayer, resetHubPlayer, updateHubPlayer } from './hubPlayer.js';
 import { gsap, reducedMotion, SplitText } from './motion.js';
 import * as plan from './hubPlan.js';
+import { applyCarColor } from './carIdentity.js';
 
 const params = new URLSearchParams(window.location.search);
 const DIRECTION = params.get('hub') === 'launch' ? 'launch' : 'plan';
@@ -38,6 +39,9 @@ let split = null;
 let chars = [];
 let status;
 let carsToggle;
+let carsName;
+let resistTl = null;
+let resisted = [];
 let ticks = [];
 let roster = null;
 let stagePieces = [];
@@ -68,22 +72,64 @@ function el(tag, className, text) {
 // ---------------------------------------------------------------------------------------------
 // Cars: the roster glyph (ten ticks) everywhere; names live on the plan or in a short roster.
 
+function resistCar(index, target = ticks[index]) {
+  resistTl?.kill();
+  gsap.set(resisted, { x: 0 });
+  resisted.forEach((node) => node.classList.remove('is-resisted'));
+  resisted = [...new Set([ticks[index], carsName, target])];
+  resisted.forEach((node) => node.classList.add('is-resisted'));
+  const clear = () => resisted.forEach((node) => node.classList.remove('is-resisted'));
+  if (reducedMotion.matches) { resistTl = gsap.delayedCall(0.32, clear); return; }
+  resistTl = gsap.timeline({ onComplete: clear })
+    .to(resisted, { x: -4, duration: 0.08, ease: 'power2.out' })
+    .to(resisted, { x: 1.5, duration: 0.1, ease: 'power2.inOut' })
+    .to(resisted, { x: 0, duration: 0.14, ease: 'gt3.out' });
+}
+
+function expandBar(tick, index, on) {
+  gsap.to(tick.firstChild, {
+    scaleY: on && state.unlocked.has(index) && !reducedMotion.matches ? 1.45 : 1,
+    duration: reducedMotion.matches ? 0 : on ? 0.22 : 0.3,
+    ease: 'gt3.out', overwrite: true,
+  });
+}
+
 function buildCars() {
   const wrap = el('div', 'hub-cars');
   carsToggle = el('button', 'hub-cars__toggle');
   carsToggle.type = 'button';
   carsToggle.setAttribute('aria-expanded', 'false');
-  const name = el('span', 'hub-cars__name', 'Cars');
+  carsName = el('span', 'hub-cars__name', 'Cars');
   const glyph = el('span', 'hub-cars__ticks');
-  glyph.setAttribute('aria-hidden', 'true');
-  ticks = CARS.map(() => glyph.appendChild(el('i')));
-  carsToggle.append(name, glyph);
-  wrap.append(carsToggle);
+  glyph.setAttribute('role', 'group');
+  glyph.setAttribute('aria-label', 'Vehicle discoveries');
+  ticks = CARS.map((car, index) => {
+    const tick = el('button', 'hub-cars__bar');
+    tick.type = 'button';
+    tick.append(el('i'));
+    applyCarColor(tick, car);
+    tick.addEventListener('pointerenter', () => expandBar(tick, index, true));
+    tick.addEventListener('pointerleave', () => expandBar(tick, index, tick.matches(':focus-visible')));
+    tick.addEventListener('focus', () => expandBar(tick, index, true));
+    tick.addEventListener('blur', () => expandBar(tick, index, tick.matches(':hover')));
+    tick.addEventListener('click', () => state.unlocked.has(index) ? setCars(true) : resistCar(index));
+    return glyph.appendChild(tick);
+  });
+  carsToggle.append(carsName);
+  wrap.append(carsToggle, glyph);
   if (DIRECTION === 'launch') {
     roster = el('ol', 'hub-roster');
     roster.id = 'hub-roster';
     roster.inert = true;
-    CARS.forEach(() => roster.append(el('li', 'hub-roster__car')));
+    CARS.forEach((car, index) => {
+      const item = el('li', 'hub-roster__car');
+      const button = el('button', 'hub-roster__name');
+      button.type = 'button';
+      applyCarColor(button, car);
+      button.addEventListener('click', () => { if (!state.unlocked.has(index)) resistCar(index, button); });
+      item.append(button);
+      roster.append(item);
+    });
     carsToggle.setAttribute('aria-controls', roster.id);
     wrap.append(roster);
   }
@@ -93,7 +139,12 @@ function buildCars() {
 
 function renderCars() {
   const found = state.unlocked;
-  ticks.forEach((tick, index) => tick.classList.toggle('is-found', found.has(index)));
+  ticks.forEach((tick, index) => {
+    const known = found.has(index);
+    tick.classList.toggle('is-found', known);
+    tick.setAttribute('aria-disabled', String(!known));
+    tick.setAttribute('aria-label', known ? `${index + 1}, ${CARS[index].displayName}, discovered. Open Cars` : `${index + 1}, undiscovered`);
+  });
   const count = CARS.filter((_, index) => found.has(index)).length;
   carsToggle.setAttribute('aria-label', `Cars, ${count} of ${CARS.length} discovered`);
   if (DIRECTION === 'plan') plan.renderDiscovery(found);
@@ -102,7 +153,11 @@ function renderCars() {
       const item = roster.children[index];
       const known = found.has(index);
       item.classList.toggle('is-found', known);
-      item.textContent = known ? `${car.manufacturer} ${car.model}` : '?';
+      const button = item.firstChild;
+      button.classList.toggle('is-found', known);
+      button.textContent = known ? `${car.manufacturer} ${car.model}` : '?';
+      button.setAttribute('aria-disabled', String(!known));
+      button.setAttribute('aria-label', known ? car.displayName : `${index + 1}, undiscovered`);
     });
   }
 }
@@ -261,8 +316,11 @@ function build() {
   root.append(field, frame, mark, cars, playerSlot, startWrap);
   initHubPlayer(playerSlot, { shape: DIRECTION === 'plan' ? 'row' : 'column' });
   if (DIRECTION === 'plan') {
-    planSvg = plan.buildPlan(root, frame, { yawDeg: planCamera.yawDeg, pitchDeg: planCamera.pitchDeg });
+    planSvg = plan.buildPlan(root, frame, {
+      yawDeg: planCamera.yawDeg, pitchDeg: planCamera.pitchDeg, onLockedCar: resistCar,
+    });
     root.insertBefore(planSvg, mark);
+    carsToggle.setAttribute('aria-controls', 'hub-plan-cars');
   }
   stagePieces = [mark, cars, playerSlot, status];
   gsap.set(stagePieces, { autoAlpha: 0, y: 10 });
@@ -287,6 +345,12 @@ function build() {
   splitStart();
   renderCars();
   subscribe('unlocked', renderCars);
+  reducedMotion.addEventListener?.('change', () => {
+    resistTl?.kill();
+    gsap.set(resisted, { x: 0 });
+    resisted.forEach((node) => node.classList.remove('is-resisted'));
+    ticks.forEach((tick, index) => expandBar(tick, index, false));
+  });
   let resizeTimer = 0;
   window.addEventListener('resize', () => {
     window.clearTimeout(resizeTimer);

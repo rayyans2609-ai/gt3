@@ -57,7 +57,9 @@
   vector-effect: non-scaling-stroke;
 }
 .hub-plan__edge { stroke: var(--hub-line); stroke-width: 1.15px; transition: stroke 700ms var(--ease); }
-.hub-plan__lap { stroke: var(--hub-accent); stroke-width: 2.2px; opacity: 0; }
+.car-identity { --car-ink: var(--car-color); }
+:root[data-theme='night'] .car-identity { --car-ink: var(--car-color-night); }
+.hub-plan__lap { stroke: var(--car-ink, var(--hub-accent)); stroke-width: 2.2px; opacity: 0; }
 .hub-plan__tick { stroke: color-mix(in srgb, var(--hub-ink) 34%, transparent); stroke-width: 1px; opacity: 0; transition: opacity 260ms var(--ease), stroke 400ms var(--ease); }
 .hub-plan__tick.is-drawn { opacity: 1; }
 .hub-plan__tick.is-found { stroke: var(--hub-accent); stroke-width: 1.4px; }
@@ -70,12 +72,19 @@
 .hub-plan__car {
   fill: var(--hub-ink);
   font-family: var(--font-ui);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 500;
   letter-spacing: 0;
   opacity: 0;
+  transition: fill 180ms var(--ease);
 }
 .hub-plan__car:not(.is-found) { fill: var(--hub-muted); }
+#hub.is-cars-open .hub-plan__car { pointer-events: all; cursor: pointer; }
+#hub.is-cars-open .hub-plan__car:not(.is-found) { cursor: not-allowed; }
+.hub-plan__car.is-found:hover,
+.hub-plan__car.is-found:focus-visible { fill: var(--car-ink); }
+.hub-plan__car:focus-visible { outline: 1px solid var(--hub-ink); outline-offset: 5px; }
+.hub-plan__car.is-resisted { fill: var(--hub-muted); }
 
 /* ---- START RACE: the words are the control --------------------------------------------------- */
 
@@ -133,37 +142,47 @@
 
 /* ---- Cars ------------------------------------------------------------------------------------ */
 
-.hub-cars { position: absolute; left: var(--m); top: 92px; }
+.hub-cars { position: absolute; left: var(--m); top: 92px; display: grid; grid-template-columns: max-content max-content; align-items: center; column-gap: 24px; }
 .hub-cars__toggle {
   display: flex;
   align-items: center;
-  gap: 14px;
   padding: 6px 0;
   border: 0;
   background: none;
   color: var(--hub-ink);
   cursor: pointer;
   font-family: var(--font-display);
-  font-size: 19px;
+  font-size: clamp(36px, 3.1vw, 52px);
   font-weight: 500;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.045em;
   line-height: 1;
 }
 .hub-cars__name { transition: color 200ms var(--ease); }
 .hub-cars__toggle:hover .hub-cars__name,
 .hub-cars__toggle[aria-expanded='true'] .hub-cars__name { color: var(--hub-accent); }
 .hub-cars__toggle:focus-visible { outline: 2px solid var(--hub-accent); outline-offset: 4px; border-radius: 2px; }
-.hub-cars__ticks { display: flex; gap: 4px; align-items: center; }
-.hub-cars__ticks i { width: 3px; height: 12px; border-radius: 1px; background: color-mix(in srgb, var(--hub-ink) 16%, transparent); transition: background-color 400ms var(--ease); }
-.hub-cars__ticks i.is-found { background: var(--hub-ink); }
+.hub-cars__name { display: block; }
+.hub-cars__name.is-resisted { color: var(--hub-muted); }
+.hub-cars__ticks { display: flex; align-items: center; }
+.hub-cars__bar { display: grid; place-items: center; width: 18px; height: 44px; padding: 0; border: 0; background: none; color: var(--hub-ink); cursor: not-allowed; }
+.hub-cars__bar i { display: block; width: 2px; height: 16px; border-radius: 1px; background: color-mix(in srgb, var(--hub-ink) 20%, transparent); transform-origin: 50% 100%; transition: background-color 180ms var(--ease), opacity 180ms var(--ease); }
+.hub-cars__bar.is-found { cursor: pointer; }
+.hub-cars__bar.is-found i { width: 4px; height: 21px; background: var(--hub-ink); }
+.hub-cars__bar.is-found:hover i,
+.hub-cars__bar.is-found:focus-visible i { background: var(--car-ink); }
+.hub-cars__bar:not(.is-found):hover i,
+.hub-cars__bar:not(.is-found):focus-visible i { background: color-mix(in srgb, var(--hub-ink) 42%, transparent); }
+.hub-cars__bar:focus-visible { outline: 1px solid var(--hub-ink); outline-offset: -1px; border-radius: 2px; }
+.hub-cars__bar.is-resisted i { opacity: .4; }
 
 .hub-roster {
   display: grid;
+  grid-column: 1 / -1;
   grid-auto-flow: column;
   grid-template-rows: repeat(5, 23px);
   grid-template-columns: repeat(2, 176px);
   column-gap: 20px;
-  margin: 10px 0 0;
+  margin: 18px 0 0;
   padding: 0;
   list-style: none;
   font-family: var(--font-ui);
@@ -172,6 +191,18 @@
 }
 .hub-roster__car { opacity: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .hub-roster__car:not(.is-found) { color: var(--hub-muted); }
+.hub-roster__name { max-width: 100%; padding: 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: not-allowed; }
+.hub-roster__name.is-found { cursor: pointer; transition: color 180ms var(--ease); }
+.hub-roster__name.is-found:hover,
+.hub-roster__name.is-found:focus-visible { color: var(--car-ink); }
+.hub-roster__name:focus-visible { outline: 1px solid var(--hub-ink); outline-offset: -1px; }
+.hub-roster__name.is-resisted { color: var(--hub-muted); }
+
+@media (max-width: 700px) {
+  .hub-cars { column-gap: 16px; }
+  .hub-cars__toggle { font-size: 32px; }
+  .hub-cars__bar { width: 14px; }
+}
 
 /* ---- the player (SPEC §9): one object, two shapes, recomposed by Flip ------------------------- */
 

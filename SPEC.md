@@ -113,6 +113,8 @@ The Hub player treatment (§9) is visually more substantial here than anywhere e
 - **Navigation.** Clicking the Hub's top-left `GT3` returns directly to the Landing at rest without playing the reverse scroll transition. The forward Landing→Hub transition and all session state are unchanged.
 - **Player.** Changing tracks uses a smoother, more premium album-cover transition (preloaded, layered crossfade) while the player design, audio continuity, controls and layout stay unchanged.
 
+**Hub redesign (owner, 2026-11-26).** Adopted requirements; visual treatment provisional until owner review. START RACE and SHOWCASE are the Hub's two equal primary actions with checkered underlines; Cars leaves the Hub and survives as an alternative inside the Collection. `GT3` is centred on every global page. Music, Day/Night and sound live in a global right-edge drawer on the Landing, Hub and Showcase (the Tour keeps its own controls). SHOWCASE turns the Hub into the **Collection** (§11).
+
 **Scroll ownership — canonical product behavior, not implementation-tunable.** Landing → Hub is scroll-driven and reversible (§4). Once the Hub reaches its resting/control-surface state, downward scroll does **not** launch Grand Tour or advance to another experience — the Hub is intentionally a calm, click-driven control surface, and `START RACE` is the deliberate commitment into Grand Tour. Scrolling upward from the Hub reverses the Landing→Hub transition (§4). Grand Tour itself becomes scroll-driven only once explicitly entered (§14); Showcase is entered explicitly via Cars (§11, §25). This separation is intentional: Landing = introduction/desire, Hub = control/decision, Showcase = inspection, Grand Tour = driving. Only the transition choreography/timing is implementation-tunable — the interaction rule itself is fixed.
 
 ---
@@ -212,7 +214,18 @@ Primary orbit interaction is **pointer/mouse drag**: horizontal drag controls or
 
 **Dedicated single-car presentation — future requirement, Phase 6 (2026-10-06, §31).** Clicking the spinning HUD car (§20) opens a **dedicated standalone presentation of that specific car**, replacing the current awkward Showcase selection flow as the route to inspecting one car. Relevant existing Showcase functionality is preserved: orbit, identity, narration, optional deeper data, locked/unlocked behaviour and manual unlock. Whether this presentation is a mode of Showcase or a separate state is decided in Phase 6 (§31). Rotating-car presentation as a whole (materials, lighting, animation, composition) is to be substantially improved in Phase 6. The spinning car responds to **hover/proximity** in the same spirit as the Landing car's cursor response (§4).
 
-Selecting an unlocked car changes model, updates identity, starts its narration. Selecting a locked car shows `car_cover_model` and exposes discovery/unlock actions. Default information stays sparse: car → identity → narration → optional deeper data on request. Do not permanently surround the car with specifications.
+Selecting an unlocked car changes model, updates identity, starts its narration. *Superseded (owner, 2026-11-26, Phase 6):* narration is **user-initiated only**: play, pause, resume and replay from its control; it never starts on entering the Showcase or switching cars, never overlaps, and stops on switching or leaving. Whether the manual-unlock reveal (below, step 7) offers narration is decided when that flow is built. Selecting a locked car shows `car_cover_model` and exposes discovery/unlock actions. Default information stays sparse: car → identity → narration → optional deeper data on request. Do not permanently surround the car with specifications.
+
+## Collection and entry (owner, 2026-11-26; Phase 6)
+
+Adopted requirements; visual treatment provisional until owner review.
+- **The Collection** keeps the large circuit and centred `GT3`. Discovered cars' names sit beside their checkpoints; undiscovered checkpoints show only a small anonymous `?`. Identity colours, discovery state and lock restrictions are unchanged. Hovering a discovered name lights its checkpoint and sends its coloured circuit pulse.
+- **Selecting** a discovered name shows that manufacturer's **3D emblem**, large, in the circuit's central negative space. Selecting never enters the Showcase; another name transitions to its emblem. **Clicking the emblem** opens that car's Showcase. Keyboard access is equivalent.
+- **Emblems** are genuine physical objects (real meshes or GT3-modelled; chrome, enamel, brushed metal), legible in Day and Night, visually normalised in scale. They float, turn continuously at the pre-drag Landing McLaren's restrained speed and respond subtly to the cursor, then settle back. **No drag** on emblems; Showcase cars keep drag-to-orbit.
+- **ENTER SHOWCASE**, a typographic motorsport action, replaces the floating flag and opens the full ten-car browsing from car one. Both routes use the one shared inspection system.
+- **Locked identity** is never revealed in the Collection: no manufacturer, name, colour, emblem, model or narration.
+- The Cars selector stays recoverable (`?collection=cars`).
+- Asset rights: mesh licences (e.g. CC BY 4.0, with attribution kept) are distinct from manufacturer trademark rights. GT3 is private and non-commercial, and assets not cleared for redistribution stay out of the public repository (`docs/assets/`).
 
 ## Manual unlock
 

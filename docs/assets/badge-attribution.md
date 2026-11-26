@@ -23,14 +23,14 @@ All candidates have source world transforms baked, are centred with the face tow
 
 | Badge | Specific modifications |
 | --- | --- |
-| Lexus | Budget reduction; polished chrome; separate darker satin support follows the open L-and-oval silhouette. |
+| Lexus | Removed the separate wordmark and retained all oval-and-L triangles. Polished chrome and an inset darker satin support follow the emblem silhouette. |
 | GT-R (Nissan) | GT-R identity retained; chrome and dielectric red zones; budget reduction; mirrored rear/edge closures and graphite support. Generic Nissan exists only as a review candidate. |
 | Audi | Original GT3 rounded chrome rings and graphite mount retained; canonical normalization and PBR adjustment. Pack rings/wordmark also extracted with a darker support. |
 | BMW | Oblique source pose removed; blue/white quarters, black field, chrome and satin retained; open lettering/insert shells closed and merged by material. |
-| Mercedes-AMG | Silver Mercedes three-pointed star retained; separate box-like support removed; chrome and graphite silhouette support. There is no Mercedes pack alternative. |
+| Mercedes-AMG | The supplied ring and its three-pointed star form the silver emblem. Separate box-like support removed; chrome and graphite silhouette support. There is no Mercedes pack alternative. |
 | Ferrari | Horse tessellation reduced while retaining raised geometry; yellow field, black relief, Italian tricolour enamel retained; rear closure. Pack extraction omits the remote Mustang stripe meshes and merges grayscale horse zones into black. |
 | Aston Martin | One connected STL shell segmented by panel bounds, face normals and height: chrome wings/feathers, deep green-black enamel panel, raised chrome lettering. Mounting loop removed and cut boundaries closed. Pack alternative also prepared. |
-| Lamborghini | Detached display wordmark removed; textured crest and original normal/finish maps retained at reduced texture size; face rotated toward +Z; existing closed rear retained. No subdivision or extra crest tessellation. |
+| Lamborghini | Detached display wordmark removed. Corrected shell winding presents the shield face toward +Z. Both UV sets and the gold artwork, metallic/roughness and normal maps are retained at reduced texture size. The closed black enamel rear is retained. |
 | Porsche | 3.62-million-triangle source reduced using meshoptimizer, including eight-triangle relief beads; thousands of meshes merged into gold, black, red and satin zones; raised silhouette, lettering, horse, antlers, stripes and rim retained; backs/seams closed. Pack crest also extracted. |
 
 The original embedded author, source, title and `license` fields are retained at the top of each GLB's `asset.extras` and copied into `asset.extras.originalAttribution`. New metadata records the selected source, author, licence uncertainty, canonical axes and modifications. The generated manifest repeats attribution and modification details per runtime badge. The original Porsche `license.txt` is reproduced in the local inventory.

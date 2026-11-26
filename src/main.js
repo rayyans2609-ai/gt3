@@ -345,10 +345,12 @@ async function boot() {
       ? 'ready' : 'degraded';
     readiness.readyAt = performance.now();
     perfMark(`ready:${readiness.status}`);
-    // A restored Tour arms now. From the Landing world the drive stays dormant: the Hub's
-    // START RACE arms it (enterTour), so readiness alone never starts the Tour.
-    if (state.experience === 'tour') armTour({ unlock: true });
     reportProgress();
+    // Publish the final checker promise before a restored Tour asks the cover to part.
+    // Otherwise revealTour captures the initial resolved promise and can race its final fill.
+    // From the Landing world the drive stays dormant: the Hub's START RACE arms it
+    // (enterTour), so readiness alone never starts the Tour.
+    if (state.experience === 'tour') armTour({ unlock: true });
     console.info(`[gt3] ${readiness.status} — three r${THREE.REVISION}`,
       readiness.reasons);
   }

@@ -95,7 +95,9 @@ function targetInsets(forView = view) {
   const W = window.innerWidth;
   const H = window.innerHeight;
   const side = Math.max(48, W * 0.07);
-  const drawer = drawerSpace * 0.92;
+  // Always clear the closed drawer tab on the right edge; the open drawer adds its own width.
+  const tab = 56;
+  const drawer = Math.max(tab, drawerSpace * 0.92);
   if (forView === 'collection') {
     return { top: Math.max(118, H * 0.17), bottom: Math.max(64, H * 0.12), left: side * 1.05, right: side * 1.05 + drawer };
   }

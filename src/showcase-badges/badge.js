@@ -1,8 +1,9 @@
 import * as THREE from 'three';
 import { SVGLoader } from 'three/addons/loaders/SVGLoader.js';
 import lexus from './lexus.svg?raw';
+import audi from './audi.svg?raw';
 
-const sources = { lexus };
+const sources = { lexus, audi };
 
 /** Create a self-contained, unlit-scene-agnostic badge. Caller supplies lights/environment. */
 export function createBadge({ manufacturer = 'lexus', color = 0x8fa6b6, theme = 'day', onHover, onClick } = {}) {
@@ -14,10 +15,14 @@ export function createBadge({ manufacturer = 'lexus', color = 0x8fa6b6, theme = 
   const metal = new THREE.MeshStandardMaterial({ color: 0xd9e0e5, metalness: 0.85, roughness: 0.24 });
   const accent = new THREE.Color(color);
   const geometries = [];
+  const svg = new DOMParser().parseFromString(source, 'image/svg+xml').documentElement;
+  const viewBox = svg.getAttribute('viewBox')?.trim().split(/[ ,]+/).map(Number);
+  const extent = viewBox?.length === 4 ? Math.max(viewBox[2], viewBox[3]) : Math.max(parseFloat(svg.getAttribute('width')), parseFloat(svg.getAttribute('height')));
+  if (!Number.isFinite(extent) || extent <= 0) throw new Error(`Invalid SVG dimensions: ${manufacturer}`);
   const parsed = new SVGLoader().parse(source);
   for (const path of parsed.paths) {
     for (const shape of SVGLoader.createShapes(path)) {
-      const geometry = new THREE.ExtrudeGeometry(shape, { depth: 2, bevelEnabled: true, bevelThickness: 0.7, bevelSize: 0.55, bevelSegments: 2, curveSegments: 8, steps: 1 });
+      const geometry = new THREE.ExtrudeGeometry(shape, { depth: extent * 0.015, bevelEnabled: true, bevelThickness: extent * 0.004, bevelSize: extent * 0.003, bevelSegments: 2, curveSegments: 8, steps: 1 });
       geometries.push(geometry);
       art.add(new THREE.Mesh(geometry, metal));
     }

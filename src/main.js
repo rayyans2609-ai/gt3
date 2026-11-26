@@ -28,6 +28,13 @@ import { UNLOCKED } from './core/renderProfile.js';
 // module builds geometry. trackCurve.js also imports it, so order cannot regress.
 import { COMP } from './scene/composition.js';
 
+// Exploration (owner review pending): not adopted. Day-only warm fields, resolved once at module
+// load — before boot() and before landing.js reads it for its WebGL field. Other values ignored.
+const requestedPalette = new URLSearchParams(location.search).get('palette');
+if (requestedPalette === 'cream' || requestedPalette === 'ivory') {
+  document.documentElement.dataset.palette = requestedPalette;
+}
+
 // Boot instrumentation: User Timing entries prefixed `gt3:` (read with
 // performance.getEntriesByType('mark'|'measure')). Costs microseconds; kept on purpose.
 function perfMark(name) {

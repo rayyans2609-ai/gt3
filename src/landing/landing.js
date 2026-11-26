@@ -22,8 +22,15 @@ import { loadFullResolutionCar, carsReady, cloneCarModel } from '../scene/cars.j
 export const HERO_INDEX = 6; // McLaren 720S GT3 (roster order unchanged; SPEC §1a)
 
 // Theme base fields. Day is pure white and Night the deep navy of the global tokens (SPEC §4, §13);
-// the DOM field (--landing-field in landing.css) uses the same two values.
-const FIELD = { day: new THREE.Color('#ffffff'), night: new THREE.Color('#0c1930') };
+// the DOM field (--landing-field in landing.css) uses the same two values. The optional warm Day
+// field follows ?palette so the canvas and CSS agree; Night and all materials are untouched.
+// Exploration (owner review pending): not adopted.
+const PALETTE_DAY_FIELD = {
+  cream: new THREE.Color('#fffdf4'),
+  ivory: new THREE.Color('#fffae3'),
+};
+const palette = document.documentElement.dataset.palette;
+const FIELD = { day: PALETTE_DAY_FIELD[palette] ?? new THREE.Color('#ffffff'), night: new THREE.Color('#0c1930') };
 const THEME_SECONDS = 0.7; // matches the 700 ms CSS token transition
 const reducedMotionQuery = window.matchMedia?.('(prefers-reduced-motion: reduce)');
 

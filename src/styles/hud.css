@@ -52,7 +52,7 @@ body.is-player-open #hud-bottomright { right: calc(24px + var(--player-w, 274px)
    by a sliding filled thumb. Slightly larger and more opaque than the old text
    pill; theme-aware in both themes via CSS variables, never hard-coded. */
 .theme-segmented { position: relative; display: flex; align-items: stretch; height: 46px; padding: 3px; border: 1px solid var(--line); border-radius: 24px; pointer-events: auto; transition: background-color 700ms var(--ease), border-color 700ms var(--ease), box-shadow 280ms var(--ease); }
-:root[data-theme='day'] .theme-segmented { background: rgba(255, 255, 255, 0.94); box-shadow: 0 8px 26px rgba(18, 21, 23, 0.12); }
+:root[data-theme='day'] .theme-segmented { background: var(--surface-pill); box-shadow: 0 8px 26px rgba(18, 21, 23, 0.12); }
 :root[data-theme='night'] .theme-segmented { background: rgba(19, 36, 62, 0.94); box-shadow: 0 8px 26px rgba(0, 0, 0, 0.35); }
 .theme-segmented__thumb { position: absolute; top: 3px; bottom: 3px; left: 3px; width: calc(50% - 3px); border-radius: 20px; background: color-mix(in srgb, var(--accent) 22%, transparent); transition: transform 220ms var(--ease); }
 .theme-segmented[data-active='night'] .theme-segmented__thumb { transform: translateX(100%); }

@@ -12,6 +12,7 @@
   --fg-muted: #5d6465;
   --line: rgba(18, 21, 23, 0.18);
   --surface: rgba(255, 255, 255, 0.72);
+  --surface-pill: rgba(255, 255, 255, 0.94);
   /* Hub blue (#597eb3): the Day Tour now shares the Landing/Hub accent language. */
   --accent: #597eb3;
   --route-done: #597eb3;
@@ -25,4 +26,17 @@
   --surface: rgba(19, 36, 62, 0.78);
   --accent: #d8b94f;
   --route-done: #e8c34a;
+}
+
+/* Exploration (owner review pending): not adopted. */
+:root[data-palette="cream"][data-theme="day"] {
+  --field: #fbf8ec;
+  --surface: rgba(255, 253, 244, 0.72);
+  --surface-pill: rgba(255, 253, 244, 0.94);
+}
+/* Exploration (owner review pending): not adopted. */
+:root[data-palette="ivory"][data-theme="day"] {
+  --field: #f8f3de;
+  --surface: rgba(255, 250, 227, 0.72);
+  --surface-pill: rgba(255, 250, 227, 0.94);
 }

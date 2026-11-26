@@ -109,7 +109,7 @@
   pointer-events: auto;
   transition: color 180ms var(--ease), background-color 700ms var(--ease), border-color 700ms var(--ease);
 }
-:root[data-theme='day'] .home-control { background: rgba(255, 255, 255, 0.94); box-shadow: 0 8px 26px rgba(18, 21, 23, 0.12); }
+:root[data-theme='day'] .home-control { background: var(--surface-pill); box-shadow: 0 8px 26px rgba(18, 21, 23, 0.12); }
 :root[data-theme='night'] .home-control { background: rgba(19, 36, 62, 0.94); box-shadow: 0 8px 26px rgba(0, 0, 0, 0.35); }
 .home-control svg { width: 19px; height: 19px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
 .home-control:hover { color: var(--fg); }
@@ -124,6 +124,14 @@
    Night blue / white / yellow / cream. Scoped to the Landing world; the Grand Tour HUD is unchanged. */
 :root[data-world='landing'][data-theme='day'] {
   --accent: #597eb3;
+}
+/* Exploration (owner review pending): not adopted. */
+:root[data-palette="cream"][data-theme="day"] {
+  --landing-field: #fffdf4;
+}
+/* Exploration (owner review pending): not adopted. */
+:root[data-palette="ivory"][data-theme="day"] {
+  --landing-field: #fffae3;
 }
 :root[data-world='landing'] .theme-segmented__option,
 :root[data-world='landing'] .audio-speaker[data-sound='idle'],

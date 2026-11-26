@@ -94,11 +94,38 @@ function carColor(car) {
 
 function unlocked(index) { return state.unlocked.has(index); }
 
+// GT3's own sculpted McLaren Speedmark (no downloaded mesh exists). Optional: an empty glob until
+// the module is present, so the Collection never depends on it.
+const speedmarkModules = import.meta.glob('../showcase-badges/mclarenSpeedmark.js', { eager: true });
+const createSpeedmark = Object.values(speedmarkModules)[0]?.createSpeedmark ?? null;
+const SPEEDMARK_OPTICAL_SCALE = 1.2;
+
+/** Wrap the Speedmark in the badge interface the stage expects (hit plane, theme, dispose). */
+function createSpeedmarkBadge({ theme }) {
+  const mark = createSpeedmark({ theme });
+  const root = new THREE.Group();
+  // Optical normalisation: a wide, thin mark reads lighter than a roundel at the same span.
+  mark.object.scale.multiplyScalar(SPEEDMARK_OPTICAL_SCALE);
+  root.add(mark.object);
+  const hitGeometry = new THREE.PlaneGeometry(1.05, 1.05);
+  const hitMaterial = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false, colorWrite: false });
+  const hitTarget = new THREE.Mesh(hitGeometry, hitMaterial);
+  root.add(hitTarget);
+  return {
+    object: root, hitTarget, setLocked() {},
+    setTheme(value) { mark.setTheme?.(value); }, setColor() {},
+    setPointer() {}, setHovered() {}, click() {}, update() {},
+    dispose() { mark.dispose?.(); hitGeometry.dispose(); hitMaterial.dispose(); root.removeFromParent(); },
+  };
+}
+
 function makeItem(index) {
   const car = CARS[index];
   const options = { manufacturer: car.id, color: carColor(car), theme: state.theme, locked: false };
   let badge;
-  try { badge = createBadge(options); } catch (error) {
+  try {
+    badge = car.id === 'mclaren' && createSpeedmark ? createSpeedmarkBadge(options) : createBadge(options);
+  } catch (error) {
     console.warn('[collection] emblem unavailable, using placeholder', error?.message);
     badge = createPlaceholder(options);
   }

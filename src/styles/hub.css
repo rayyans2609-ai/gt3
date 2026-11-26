@@ -246,7 +246,7 @@
   cursor: pointer;
   white-space: nowrap;
 }
-.hub-pick__name { color: var(--car-ink, var(--hub-ink)); font-family: var(--font-display); font-size: clamp(18px, 1.45vw, 26px); font-weight: 500; letter-spacing: -0.02em; line-height: 1; }
+.hub-pick__name { color: var(--hub-ink); font-family: var(--font-display); font-size: clamp(18px, 1.45vw, 26px); font-weight: 500; letter-spacing: -0.02em; line-height: 1; }
 .hub-pick__go { color: var(--hub-muted); font-family: var(--font-mono); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; transition: color 200ms var(--ease); }
 .hub-pick__go::after { content: ' \2192'; display: inline-block; transition: transform 240ms var(--ease); }
 .hub-pick:hover .hub-pick__go,
@@ -272,7 +272,10 @@
    holds while selected); an undiscovered checkpoint shows only a small anonymous "?". */
 #hub[data-view='collection'][data-collection='names'] .hub-plan__car { pointer-events: all; cursor: pointer; font-family: var(--font-display); font-size: 15px; letter-spacing: -0.01em; }
 #hub[data-view='collection'][data-collection='names'] .hub-plan__car:not(.is-found) { cursor: default; font-family: var(--font-mono); font-size: 11px; }
-.hub-plan__car.is-selected { fill: var(--car-ink); font-weight: 600; }
+.hub-plan__car.is-selected { fill: var(--car-ink); }
+/* Monochrome at rest (owner 2026-11-26): in the Collection the discovered checkpoints are ink, not
+   accent; identity colour appears only on hover, selection and the circuit pulse. */
+#hub[data-view='collection'] .hub-plan__tick.is-found:not(.is-highlight):not(.is-preview) { stroke: var(--hub-ink); }
 
 /* The preserved Cars selector: Collection only, ?collection=cars. */
 .hub-cars { position: absolute; left: calc(var(--side) * .62); top: calc(22px + var(--mark-size) + 40px); display: grid; grid-template-columns: max-content; row-gap: 8px; }

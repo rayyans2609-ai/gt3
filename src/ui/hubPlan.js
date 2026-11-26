@@ -135,33 +135,92 @@ function screenOf(p, v = view) {
 }
 
 /** Labels live in screen space so type never scales with the drawing. */
+// The road's centreline in plan units, sampled once (labels and the Collection emblem test against it).
+const ROAD_SAMPLES = 480;
+let roadPlan = null;
+function roadPlanPoints() {
+  if (!roadPlan) roadPlan = Array.from({ length: ROAD_SAMPLES }, (_, i) => planAt(i / ROAD_SAMPLES));
+  return roadPlan;
+}
+
+/** Screen-space road centreline and its drawn half-width (px), for collision tests. */
+export function roadScreen(v = view) {
+  return { points: roadPlanPoints().map((p) => screenOf(p, v)), half: HALF_WIDTH_M * v.s };
+}
+
+/** True when a screen rectangle comes within `clear` px of the drawn road (either edge). */
+function rectHitsRoad(rect, road, clear) {
+  const pad = road.half + clear;
+  for (const p of road.points) {
+    if (p.x > rect.l - pad && p.x < rect.r + pad && p.y > rect.t - pad && p.y < rect.b + pad) {
+      const dx = Math.max(rect.l - p.x, 0, p.x - rect.r);
+      const dy = Math.max(rect.t - p.y, 0, p.y - rect.b);
+      if (Math.hypot(dx, dy) < pad) return true;
+    }
+  }
+  return false;
+}
+
+/**
+ * Labels live in screen space so type never scales with the drawing. Each name sits on the
+ * checkpoint's outward side; candidate placements step outward (and try centred/leaning anchors)
+ * until the text box clears both road edges, so names never touch or cross the road.
+ */
+let labelKey = '';
 function placeLabels(v = view) {
+  // The collision search is only redone when the view or the names change (it runs per frame
+  // during relayouts), and its result is identical otherwise.
+  const key = `${v.s.toFixed(4)}|${v.r.toFixed(4)}|${v.x.toFixed(1)}|${v.y.toFixed(1)}|`
+    + `${document.getElementById('hub')?.dataset.view}|${document.fonts?.status}|${carLabels.map((label) => label.el.textContent).join(',')}`;
+  if (key !== labelKey) { labelKey = key; positionCarLabels(v); }
+  placeStartMark(v);
+}
+
+function positionCarLabels(v) {
   const centre = screenOf({ x: (bounds.minX + bounds.maxX) / 2, y: (bounds.minY + bounds.maxY) / 2 }, v);
+  const road = roadScreen(v);
   for (const label of carLabels) {
     const outer = screenOf(label.outer, v);
-    // The road's outward normal at the checkpoint: where it points mostly up or down, the name sits
-    // centred above/below the checkpoint instead of running along the road beside it.
     const on = screenOf(planAt(label.t), v);
     let nx = outer.x - on.x;
     let ny = outer.y - on.y;
     if ((on.x - centre.x) * nx + (on.y - centre.y) * ny < 0) { nx = -nx; ny = -ny; }
     const nlen = Math.hypot(nx, ny) || 1;
     nx /= nlen; ny /= nlen;
-    if (Math.abs(ny) > 0.82) {
-      // On a sloped stretch, anchor toward the normal's lean so the name clears the rising road.
-      const lean = ny > 0 || Math.abs(nx) < 0.22 ? 0 : Math.sign(nx);
-      label.el.setAttribute('x', (outer.x + lean * 4).toFixed(1));
-      label.el.setAttribute('y', (outer.y + (ny > 0 ? 18 : -10)).toFixed(1));
-      label.el.setAttribute('text-anchor', lean === 0 ? 'middle' : lean < 0 ? 'end' : 'start');
-      continue;
+    const size = parseFloat(getComputedStyle(label.el).fontSize) || 13;
+    let width = 0;
+    try { width = label.el.getComputedTextLength(); } catch { width = 0; }
+    if (!width) width = label.el.textContent.length * size * 0.52;
+    const ascent = size * 0.74;
+    const descent = size * 0.22;
+    // Anchors to try: mostly-vertical normals prefer centred, then leaning; sideways normals
+    // prefer the outward side.
+    const vertical = Math.abs(ny) > 0.7;
+    const side = nx >= 0 ? 'start' : 'end';
+    const anchors = vertical ? ['middle', side, side === 'start' ? 'end' : 'start'] : [side, 'middle'];
+    let best = null;
+    for (let d = road.half + 6; d <= road.half + 64 && !best; d += 5) {
+      const px = on.x + nx * d;
+      const py = on.y + ny * d;
+      for (const anchor of anchors) {
+        const l = anchor === 'start' ? px : anchor === 'end' ? px - width : px - width / 2;
+        // Vertical placement: above/below hangs the text off the point; beside centres it on the point.
+        const baseline = vertical ? (ny > 0 ? py + ascent : py - descent) : py + (ascent - descent) / 2;
+        const rect = { l, r: l + width, t: baseline - ascent, b: baseline + descent };
+        if (!rectHitsRoad(rect, road, 5)) { best = { x: px, y: baseline, anchor }; break; }
+      }
     }
-    const dx = outer.x - centre.x;
-    const dy = outer.y - centre.y;
-    const len = Math.hypot(dx, dy) || 1;
-    label.el.setAttribute('x', (outer.x + dx / len * 10).toFixed(1));
-    label.el.setAttribute('y', (outer.y + dy / len * 10 + 4).toFixed(1));
-    label.el.setAttribute('text-anchor', dx >= 0 ? 'start' : 'end');
+    if (!best) {
+      const d = road.half + 64;
+      best = { x: on.x + nx * d, y: on.y + ny * d + 4, anchor: vertical ? 'middle' : side };
+    }
+    label.el.setAttribute('x', best.x.toFixed(1));
+    label.el.setAttribute('y', best.y.toFixed(1));
+    label.el.setAttribute('text-anchor', best.anchor);
   }
+}
+
+function placeStartMark(v) {
   let startAt = startMark.at, startAhead = startMark.ahead;
   let startVisible = true;
   if (perspective) {
@@ -232,6 +291,7 @@ export function setLoadingHead(on) {
 
 export function buildPlan(container, frame, { yawDeg = 75, pitchDeg = 52, onLockedCar, onCarSelect } = {}) {
   basis = makeBasis(yawDeg, pitchDeg);
+  roadPlan = null;
   bounds = { minX: Infinity, maxX: -Infinity, minY: Infinity, maxY: -Infinity };
   frameEl = frame;
   svg = node('svg', { class: 'hub-plan', role: 'group', 'aria-label': 'Grand Tour circuit', focusable: 'false' });

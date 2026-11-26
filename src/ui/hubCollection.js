@@ -50,8 +50,10 @@ let active = false;
 let rendered = false;
 let stage = 0;              // the whole Collection stage (0 hidden … 1 shown)
 let selected = null;        // car index on stage
-let centreFn = () => ({ x: innerWidth / 2, y: innerHeight / 2 });
-let sizeFn = () => 240;
+// The host fits each emblem individually into the circuit's real negative space: given the
+// emblem's visible extents (units), it returns where its visual centre goes and its px per unit.
+let fitFn = () => ({ x: innerWidth / 2, y: innerHeight / 2, size: 240 });
+const UNIT = { w: 1, h: 1, cx: 0, cy: 0 };
 let hovered = false;
 let elapsed = 0;
 const items = new Map();    // car index → { badge, holder, spinner, appear, hover, spin }
@@ -136,7 +138,8 @@ function makeItem(index) {
   holder.add(spinner);
   holder.visible = false;
   scene.add(holder);
-  const item = { car: index, badge, holder, spinner, appear: 0, hover: 0, spin: MOTION.entryYaw };
+  const item = { car: index, badge, holder, spinner, appear: 0, hover: 0, spin: MOTION.entryYaw,
+    extKey: '', ext: UNIT, layout: null };
   items.set(index, item);
   return item;
 }
@@ -190,10 +193,53 @@ export function initCollection(sharedRenderer) {
   subscribe('unlocked', refreshLocks);
 }
 
-/** Where the emblem goes: the circuit's centre (screen px) and its size in px for 1 unit. */
-export function placeCollection({ centre, size } = {}) {
-  if (centre) centreFn = centre;
-  if (size) sizeFn = size;
+/** How emblems are placed: fit(ext) → { x, y, size } (screen px of the visual centre, px per unit). */
+export function placeCollection({ fit } = {}) {
+  if (fit) fitFn = fit;
+}
+
+const boxScratch = new THREE.Box3();
+const matScratch = new THREE.Matrix4();
+/**
+ * The emblem's visible extents in its own units (the hit plane excluded), refreshed only when its
+ * meshes change: a downloaded model replacing the procedural one re-fits that emblem.
+ */
+function measure(item) {
+  const meshes = [];
+  item.badge.object.traverse((node) => {
+    if (node.isMesh && node !== item.badge.hitTarget && node.geometry) meshes.push(node);
+  });
+  const key = meshes.map((mesh) => mesh.uuid).join(',');
+  if (key === item.extKey) return item.ext;
+  item.extKey = key;
+  const box = new THREE.Box3();
+  for (const mesh of meshes) {
+    if (!mesh.geometry.boundingBox) mesh.geometry.computeBoundingBox();
+    // Transform relative to the badge root (its own scale, e.g. opticalScale, included).
+    mesh.updateMatrix();
+    matScratch.copy(mesh.matrix);
+    for (let node = mesh.parent; node && node !== item.badge.object.parent; node = node.parent) {
+      node.updateMatrix();
+      matScratch.premultiply(node.matrix);
+    }
+    box.union(boxScratch.copy(mesh.geometry.boundingBox).applyMatrix4(matScratch));
+  }
+  if (box.isEmpty()) { item.ext = UNIT; return item.ext; }
+  const size = box.getSize(new THREE.Vector3());
+  const centre = box.getCenter(new THREE.Vector3());
+  // The root's own transform is the host's to set; measure without it.
+  const root = item.badge.object;
+  const s = root.scale.x || 1;
+  item.ext = { w: size.x / s, h: size.y / s, cx: (centre.x - root.position.x) / s, cy: (centre.y - root.position.y) / s };
+  return item.ext;
+}
+
+/** The on-stage emblem's current screen layout (for its caption): centre, size and visual bottom. */
+export function emblemLayout() {
+  const item = selected === null ? null : items.get(selected);
+  if (!item?.layout) return null;
+  const { x, y, size } = item.layout;
+  return { x, y, size, bottom: y + item.ext.h * size / 2, half: Math.max(item.ext.w, item.ext.h) * size / 2 };
 }
 
 /** Show or hide the Collection stage (and the selected emblem with it). Returns a timeline. */
@@ -263,9 +309,8 @@ export function pointCollection(clientX, clientY) {
   item.holder.updateMatrixWorld(true);
   const hit = raycaster.intersectObject(item.badge.hitTarget, false)[0];
   // The hit plane turns with the emblem; edge-on it is thin, so also accept a disc around the centre.
-  const c = centreFn();
-  const r = sizeFn() * 0.42;
-  const near = Math.hypot(clientX - c.x, clientY - c.y) < r;
+  const layout = emblemLayout();
+  const near = layout ? Math.hypot(clientX - layout.x, clientY - layout.y) < layout.half * 0.85 : false;
   hovered = Boolean(hit) || near;
   return hovered ? { type: 'emblem', car: selected } : null;
 }
@@ -309,8 +354,7 @@ export function updateCollection(dt) {
   pointer.x += ((still ? 0 : pointer.tx) - pointer.x) * kp;
   pointer.y += ((still ? 0 : pointer.ty) - pointer.y) * kp;
   scene.environmentRotation.y = pointer.x * MOTION.pointerEnvYaw;
-  const c = centreFn();
-  const size = sizeFn();
+  const follow = 1 - Math.exp(-step * 5);
   for (const item of items.values()) {
     const isSelected = item.car === selected;
     if (item.hover <= 1) item.hover += ((isSelected && hovered ? 1 : 0) - item.hover) * (1 - Math.exp(-step * 8));
@@ -318,6 +362,21 @@ export function updateCollection(dt) {
     item.holder.visible = shown > 0.001;
     if (!item.holder.visible) continue;
     if (!still) item.spin += THREE.MathUtils.degToRad(MOTION.idleDegPerSecond) * step;
+    // Per-emblem fit: its own size and centre in the circuit's negative space, eased when the
+    // fit changes (a model arriving, a relayout) so it never jumps.
+    const ext = measure(item);
+    const target = fitFn(ext);
+    if (!item.layout || !item.holder.visible || item.appear < 0.02) item.layout = { ...target };
+    else {
+      item.layout.x += (target.x - item.layout.x) * follow;
+      item.layout.y += (target.y - item.layout.y) * follow;
+      item.layout.size += (target.size - item.layout.size) * follow;
+    }
+    const { size } = item.layout;
+    // The fit places the visual centre; the model is offset inside the spinner so it turns about
+    // its own visual centre rather than its file origin.
+    item.badge.object.position.set(-ext.cx, -ext.cy, 0);
+    const c = item.layout;
     const bob = still ? 0 : Math.sin(elapsed * 2 * Math.PI / MOTION.bobSeconds) * size * MOTION.bobFraction;
     // Arrival and departure: the emblem rises a little as it appears and sinks as it leaves.
     const travel = (1 - item.appear) * size * 0.12;

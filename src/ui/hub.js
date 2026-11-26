@@ -612,7 +612,7 @@ export function initHub({ onStartRace, onLanding: returnToLanding, onShowcase: o
   onShowcase = openShowcaseView;
   if (camera) planCamera = camera;
   if (renderer) collection.initCollection(renderer);
-  collection.placeCollection({ centre: collectionCentre, size: emblemSize });
+  collection.placeCollection({ fit: fitEmblem });
   build();
   root.inert = true;
 }
@@ -752,24 +752,102 @@ export function prepareLeave() {
 // ---------------------------------------------------------------------------------------------
 // The Collection (SHOWCASE)
 
-/** The emblem's place: the circuit's middle, lifted a little so its caption sits below it. */
+/** The emblem's place before anything is selected (the hint) and the Showcase transition origin. */
 function collectionCentre() {
-  const c = plan.circuitCentre();
-  const { h } = plan.circuitSize();
-  return { x: c.x, y: c.y - h * 0.045 };
+  const layout = collection.emblemLayout();
+  return layout ? { x: layout.x, y: layout.y } : plan.circuitCentre();
 }
 
-/** The emblem's size (px per unit): as large as the circuit's negative space reasonably allows. */
-function emblemSize() {
-  const { w, h } = plan.circuitSize();
-  return Math.max(120, Math.min(440, h * 0.5, w * 0.3));
+// Motion allowances as fractions of px-per-unit (hubCollection MOTION): float, cursor drift, tilt.
+const SWAY_Y = 2 * (0.028 + 0.035) + 0.05;
+const SWAY_X = 2 * 0.035 + 0.04;
+const CAPTION_GAP = 14;
+let fitKey = '';
+let fitValue = null;
+let refKey = '';
+let refSize = 240;
+// How far past the reference roundel an emblem may grow when its own shape has the room.
+const OPTICAL_HEADROOM = 1.12;
+
+/**
+ * Fit one emblem into the circuit's real negative space. Its visible extents (units) and the road
+ * (screen px) give a free vertical band at the emblem's columns and a free horizontal band at its
+ * rows; the emblem plus its caption grows as large as both allow (with clearance from the road
+ * and room for its float/tilt), then sits centred in the band so the space above and below is
+ * balanced. Each emblem gets its own size and centre.
+ */
+function fitEmblem(ext) {
+  const road = plan.roadScreen();
+  const c = plan.circuitCentre();
+  const { w: cw, h: ch } = plan.circuitSize();
+  const key = `${c.x.toFixed(1)}|${c.y.toFixed(1)}|${cw.toFixed(1)}|${ch.toFixed(1)}|${ext.w.toFixed(3)}|${ext.h.toFixed(3)}`;
+  if (key === fitKey && fitValue) return fitValue;
+  const clear = Math.max(16, ch * 0.032);
+  const capH = (pickCap.offsetHeight || 46) + CAPTION_GAP;
+  const pad = road.half + clear;
+  // Nearest road on each side of (cx, cy): above/below within columns [lo, hi] (axis 'y') or
+  // left/right within rows [lo, hi] (axis 'x').
+  const band = (axis, cx, cy, lo, hi) => {
+    let a = -Infinity, b = Infinity;
+    for (const p of road.points) {
+      const across = axis === 'y' ? p.x : p.y;
+      if (across < lo - pad || across > hi + pad) continue;
+      const along = axis === 'y' ? p.y : p.x;
+      const centre = axis === 'y' ? cy : cx;
+      if (along < centre) a = Math.max(a, along + pad); else b = Math.min(b, along - pad);
+    }
+    return [a, b];
+  };
+  const fitAt = (x) => {
+    let size = Math.min(520 / Math.max(ext.w, ext.h), (ch * 0.72) / ext.h, (cw * 0.42) / ext.w);
+    let top = c.y - ch / 2, bottom = c.y + ch / 2;
+    for (let i = 0; i < 18; i++) {
+      const wpx = (ext.w + SWAY_X) * size;
+      const hpx = (ext.h + SWAY_Y) * size;
+      [top, bottom] = band('y', x, c.y, x - wpx / 2, x + wpx / 2);
+      const midY = (top + bottom) / 2;
+      const [left, right] = band('x', x, midY, midY - (hpx + capH) / 2, midY + (hpx + capH) / 2);
+      const k = Math.min((bottom - top - capH) / hpx, (Math.min(right - x, x - left) * 2) / wpx);
+      if (k >= 0.995 && k <= 1.02) break;
+      size *= Math.max(0.8, Math.min(k, 1.05));
+    }
+    size = Math.max(90 / Math.max(ext.w, ext.h), size);
+    return { x, top, bottom, size };
+  };
+  // Optical normalisation: the space a 1-unit roundel gets here is the common reference; each
+  // emblem's own extents already carry its opticalScale, so it reads at a similar visual mass
+  // and only shrinks below that when its own shape does not fit.
+  const layoutKey = `${c.x.toFixed(1)}|${c.y.toFixed(1)}|${cw.toFixed(1)}|${ch.toFixed(1)}`;
+  if (layoutKey !== refKey) {
+    const saved = ext;
+    ext = { w: 1, h: 1 };
+    refKey = layoutKey;
+    refSize = fitAt(c.x).size;
+    ext = saved;
+  }
+  // Each emblem may slide a little sideways toward the roomiest part of the interior; staying
+  // central is preferred, so a shift has to buy real size.
+  let best = null;
+  for (const shift of [0, -0.04, 0.04, -0.08, 0.08]) {
+    const candidate = fitAt(c.x + shift * cw);
+    candidate.size = Math.min(candidate.size, refSize * OPTICAL_HEADROOM);
+    const score = candidate.size * Math.max(ext.w, ext.h) * (1 - 1.6 * Math.abs(shift));
+    if (!best || score > best.score + 0.5) best = { ...candidate, score };
+  }
+  // Balance: the emblem + caption stack sits centred between the road above and below it.
+  const hpx = ext.h * best.size;
+  fitKey = key;
+  fitValue = { x: best.x, y: (best.top + best.bottom) / 2 - (hpx + capH) / 2 + hpx / 2, size: best.size };
+  return fitValue;
 }
 
 function placeCollectionDom() {
-  const c = collectionCentre();
-  const size = emblemSize();
-  pickCap.style.left = `${c.x}px`;
-  pickCap.style.top = `${c.y + size * 0.56}px`;
+  const layout = collection.emblemLayout();
+  const c = plan.circuitCentre();
+  if (layout) {
+    pickCap.style.left = `${layout.x}px`;
+    pickCap.style.top = `${layout.bottom + CAPTION_GAP}px`;
+  }
   pickHint.style.left = `${c.x}px`;
   pickHint.style.top = `${c.y}px`;
   // ENTER SHOWCASE stays centred under the circuit as the drawer narrows the stage.

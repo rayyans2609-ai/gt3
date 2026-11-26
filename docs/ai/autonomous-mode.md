@@ -99,10 +99,10 @@ Quota exhaustion is an expected autonomous state, not an implementation failure.
 
 **Codex exhausted, Claude available.** Claude is the scarcer resource, so conserve it.
 - **Reset soon** (roughly < 30 min): prefer waiting, light/static work, planning and handoff prep over spending Claude on work Codex can resume shortly.
-- **Otherwise, conservation mode on the Claude side.** Opus stays manager. New bounded work goes to the free OpenCode workers (GLM, DeepSeek; DeepSeek first for debugging) while their routes are healthy. Sonnet takes bounded paid work only where the free routes can't (that is its positive reason here). Sol-level work runs in a bounded Opus worker instance only if it is critical-path. Batch or defer clerical work rather than spend Claude on it. Do less total work, prioritize critical-path completion and state preservation, and skip optional work.
+- **Otherwise, conservation mode on the Claude side.** Opus stays manager. Narrow, well-defined bounded work goes to the free HY4 route while it is healthy (`model-routing.md` §11). Sonnet takes bounded paid work only where the free routes can't (that is its positive reason here). Sol-level work runs in a bounded Opus worker instance only if it is critical-path. Batch or defer clerical work rather than spend Claude on it. Do less total work, prioritize critical-path completion and state preservation, and skip optional work.
 
 **Sol-led runs** mirror the above:
-- **Claude exhausted:** Opus/Sonnet/Haiku routes are BLOCKED and Sol continues with Terra, Luna, GLM and DeepSeek.
+- **Claude exhausted:** Opus/Sonnet/Haiku routes are BLOCKED and Sol continues with Terra, Luna and HY4.
 - **Codex exhausted:** the manager itself is constrained. Sol checkpoints and releases. Continuing under Opus in a single unattended run is not automatic; the owner may hand the seat to Opus (`operating-contract.md` §4).
 
 Changing Macs does not help when quota is account-level (`operating-contract.md` §11).
@@ -138,7 +138,7 @@ Supervision wakes on **events**. Clocks are only a fallback liveness mechanism.
 **When a model is genuinely needed to judge progress** (deterministic signals are ambiguous: stuck vs. legitimate wait, loop, scope creep), route it by scarcity:
 - No model for completion detection, timeouts, PID/log/marker checks, host sampling or notifications: those are scripts (`model-routing.md` §8).
 - Luna for browser/test execution and known health checks.
-- GLM for watchdog judgment that needs modest interpretation, log/anomaly reading or light evidence synthesis (trial scope, `model-routing.md` §11).
+- HY4 only for a narrow, explicit interpretation check (provisional scope, `model-routing.md` §11); otherwise Terra.
 - Terra when a stronger bounded interpretation is worth paid capacity.
 - Bunny experimentally for factual status or repo-state reading (tracked), while its route is available (unavailable since 2026-11-01).
 - Sonnet only with a clear task-specific advantage that justifies Claude capacity.

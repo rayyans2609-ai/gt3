@@ -66,7 +66,7 @@ route_guard() {
     if [[ -n "${GT3_HOST:-}" ]]; then host=$GT3_HOST; else
       case "$(uname -m)/$(sysctl -n hw.memsize 2>/dev/null)" in arm64/17179869184) host=m4 ;; x86_64/8589934592) host=intel ;; *) host=other ;; esac; fi
     [[ "$field_state" == active ]] || route_guard_die "run $GT3_RUN is '$field_state', not active: only an active seat dispatches"
-    [[ "${field_seat#*@}" == "$host" ]] || route_guard_die "run $GT3_RUN is held by $field_seat, not a seat on this host ($host)"
+    [[ "${field_seat#*@}" == "$host" ]] || route_guard_die "run $GT3_RUN is held by $field_seat, not a seat on this host ($host)$([[ $host == other ]] && echo '; host detection failed, usually because this ran inside a sandbox: start the command with the script path, alone and not chained after && or ;, so the project execpolicy runs it outside the sandbox')"
     [[ -z "${GT3_EPOCH:-}" || "$GT3_EPOCH" == "$field_epoch" ]] || route_guard_die "GT3_EPOCH=$GT3_EPOCH but the record is at epoch $field_epoch (stale manager?)"
     [[ -z "${GT3_CONFIG:-}" || "$GT3_CONFIG" == "$field_config" ]] || route_guard_die "GT3_CONFIG=$GT3_CONFIG but the record says $field_config"
     export GT3_EPOCH="$field_epoch" GT3_CONFIG="$field_config"
@@ -74,7 +74,7 @@ route_guard() {
 
   if [[ "${GT3_CONFIG:-}" == sol-led ]]; then
     case "$model" in
-      -|gpt-6.1-sol|gpt-6.1-terra|gpt-5.6-terra|gpt-6-luna|opencode/glm-5.3-flash-free|opencode/deepseek-v4.1-flash-free|\
+      -|gpt-6.1-sol|gpt-6.1-terra|gpt-5.6-terra|gpt-6-luna|opencode/hy4-flash-free|\
       claude-opus-5-5|claude-sonnet-5-5|claude-haiku-5-5) ;;
       *) route_guard_die "model '$model' is not in the Sol-led roster (model-routing.md §11b)" ;;
     esac

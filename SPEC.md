@@ -77,13 +77,17 @@ Do not add: mobile, opponents, traffic, racing AI, multiplayer, accounts, databa
 
 # 4. Page 1 — Landing
 
-Empty, restrained composition. **Pure white in Day. Deep navy in Night.** Same composition in both themes.
+Empty, restrained composition. **Pure white in Day. Deep navy in Night.** *(A cream/ivory Day field is under owner review as an exploration only, §13.)* Same composition in both themes.
 
 Use: large `GT3`, a small floating hero car (provisionally the McLaren 720S GT3, below), substantial negative space, a persistent audio control. No floor, scenery, platform, card, stats, large navigation, or visible primary CTA.
 
 **Landing hero car — owner decision (2026-10-24), accepted (2026-10-30).** The Landing hero is the **McLaren 720S GT3** (roster index 6), human-accepted with Phase 4. The Lexus RC F GT3 stays the Grand Tour starting car (roster index 0) and the discovered-at-start car; the McLaren's Landing presence is a featured presentation, not an unlock, and changes no Tour progression or discovery rule (§18, §26). *(History, 2026-10-06: the Landing hero was to replace the Lexus; Ferrari, Lamborghini, Porsche and McLaren were candidates.)*
 
 Scrolling progresses the experience. The hero car rotates extremely slowly, reacts subtly to cursor yaw/pitch, and may have subtle lighting response; it stays small enough to preserve the composition.
+
+**Interactive McLaren (owner, 2026-11-26).** Pointer dragging rotates the hero car. Horizontal drag turns it with controlled speed and sensitivity. Vertical drag allows a much smaller, clamped movement. It should feel smooth, intentional and premium, not like an unrestricted orbit viewer. The resting composition is preserved: the car returns to rest when idle and is at rest whenever the Landing→Hub transition runs. Dragging never interferes with page scrolling or navigation, respects reduced motion, and stays inside the one shared renderer and RAF.
+
+**Scroll cue (owner, 2026-11-26).** The Landing "Scroll" cue and the pre-tour "SCROLL TO RACE" prompt share one component (`src/styles/scrollCue.css`) with identical pill proportions, animation timing, easing and typography. The Landing version has no surrounding box or shadow; the pre-tour version keeps its card. Under reduced motion the pill is static.
 
 ## Landing → Hub signature transition
 
@@ -100,6 +104,14 @@ The functional home/control surface. Primary action: Grand Tour start (working l
 Do not add: track selection, modes, unnecessary stats, speed/distance, redundant race menus, dashboard clutter.
 
 The Hub player treatment (§9) is visually more substantial here than anywhere else in the app.
+
+**Phase 5 refinement (owner, 2026-11-26).** Adopted requirements. Visual treatment stays provisional until owner review.
+- **START RACE loader.** The Hub composition, circuit plan and START RACE typography stay. A persistent checkered-flag motif sits **directly beneath START RACE** and *is* the Hub's loading indicator. It fills progressively from real loading progress, beside the retained "Preparing the grid" status text, and stays fully filled beneath START RACE after load. When START RACE tilts on hover, the checker tilts with it as one composition. There is no separate checker above the status text, and the checker is not removed after completion. The standalone checkered loading cover and its opposing shutter reveal remain for other loading contexts (the Tour refresh cover): the completed checker is visibly resolved before the shutter opens, without an artificial delay.
+- **Hub → Grand Tour.** The circuit plan's design and geometry are preserved. On START RACE the plan scales and aligns precisely with the real Tour track, with no perceptible mismatch in scale, geometry, position or orientation at the handoff. A very slight perspective-angle change resolves the flat plan into the three-dimensional Tour. The movement is restrained and keeps the established camera direction. The hover leader line from START RACE ends at the car's **current persisted position** on the circuit, not at the grid, when a Tour is in progress.
+- **Cars prominence.** Vehicle discovery and the Showcase are major pillars, so Cars gets corresponding prominence through scale, typography, spacing and hierarchy, without disturbing the Hub composition, crowding the circuit or becoming a dashboard. *Locked bar:* hover communicates the car is unavailable; a click produces a restrained blocked/resisted motion of that bar **and** the Cars label. *Unlocked bar:* hover gives a smooth, subtle expansion and turns the bar the car's identity colour. With Cars expanded, hovering a car name colours its text, and **clicking** a name sends a pulse around the circuit in that colour (the START RACE hover pulse is the reference). Locked cars keep their distinction and restrictions, and discovery and selection logic is unchanged.
+- **Car identity colours.** Each car has one distinct identity colour, derived from its Grand Tour livery or model where possible. Black and white are never used (a predominantly black or white car uses a secondary livery colour or a brand accent). Colours are not repeated, and shades of one hue are allowed only when visibly distinct. The palette must be readable in both themes. One shared source of truth (`src/data/cars.js` / its colour module) serves the Hub now and the Showcase later.
+- **Navigation.** Clicking the Hub's top-left `GT3` returns directly to the Landing at rest without playing the reverse scroll transition. The forward Landing→Hub transition and all session state are unchanged.
+- **Player.** Changing tracks uses a smoother, more premium album-cover transition (preloaded, layered crossfade) while the player design, audio continuity, controls and layout stay unchanged.
 
 **Scroll ownership — canonical product behavior, not implementation-tunable.** Landing → Hub is scroll-driven and reversible (§4). Once the Hub reaches its resting/control-surface state, downward scroll does **not** launch Grand Tour or advance to another experience — the Hub is intentionally a calm, click-driven control surface, and `START RACE` is the deliberate commitment into Grand Tour. Scrolling upward from the Hub reverses the Landing→Hub transition (§4). Grand Tour itself becomes scroll-driven only once explicitly entered (§14); Showcase is entered explicitly via Cars (§11, §25). This separation is intentional: Landing = introduction/desire, Hub = control/decision, Showcase = inspection, Grand Tour = driving. Only the transition choreography/timing is implementation-tunable — the interaction rule itself is fixed.
 
@@ -236,6 +248,10 @@ Only two states exist — no five-state time-of-day architecture (replaces `src/
 
 **Day:** white/pale fields, dark typography/icons, pale architecture, sufficiently dark road for contrast.
 **Night:** deep navy, dark navy/near-black architecture, refined motorsport-yellow UI/type accents — not grey/black generic darkness, not neon.
+
+**Accents (owner, 2026-11-26).** Day accents are one consistent **blue** (`#597eb3`) across the Landing, Hub and Grand Tour, including the Day route trail (§20). Night keeps its **gold/yellow** accents.
+
+**Day palette exploration (owner review pending; not adopted).** Slightly creamier Day fields and neutrals, around `#FFFDF4` (`?palette=cream`) and `#FFFAE3` (`?palette=ivory`), are available for comparison only. The default stays the current white. Contrast, readability and the blue accents are preserved. Nothing is adopted without the owner's visual approval.
 
 One global theme state applies to **the entire site with no exceptions**: Landing, the Landing→Hub transition, Hub, Hub player, global speaker, expanded player, track list, Showcase, Grand Tour, Grand Tour HUD, circuit map, manual-unlock framing/overlays, completion, and any surface added during implementation. No component may hardcode a single theme; a theme change propagates everywhere at once via one shared state, with smooth interpolation. Pre-rendered montage content may keep its authored imagery, but its surrounding framing/overlays/transitions/controls stay theme-aware. The toggle can live wherever the final composition calls for it.
 
@@ -584,8 +600,9 @@ Both states are warmed, so a theme change never puts new GPU work on a crossing.
 **Intentionally sparse: composed and finished, never empty or unfinished.** Every element earns its place. The first Phase 3d build felt too bare in real use, and the frame, the bottom-left corner in particular, was underused.
 
 - **Top-right:** the closed-loop circuit map, with strong contrast, a sufficiently thick and readable line, and roughly 10–20 % more prominence than the first Phase 3d build, still restrained. *Phase 3 refinements (2026-10-06):*
-  - the position marker is a **directional arrow** showing the direction of travel, not a dot;
-  - **completed track sections are highlighted yellow**, through a subtle gradient trailing behind the car. It reverses with route state (§26) and stays readable in Day and Night.
+  - the position marker is a **directional arrow** showing the direction of travel, not a dot. *Owner, 2026-11-26:* it is **solid red with no outline**, the same red in Day and Night (`--route-marker`), keeping its shape, direction and tracking;
+  - **completed track sections are highlighted** through a subtle gradient trailing behind the car: **blue in Day, yellow in Night** (owner, 2026-11-26; supersedes the earlier yellow-only rule). It reverses with route state (§26) and stays readable in Day and Night;
+  - *Owner, 2026-11-26:* the map displays about **10 % larger** (one uniform scale: route, dots, arrow and trail). Checkpoint dots are **grey until discovered and green once discovered**. Discovery colouring is persistent and does not revert when the route is ridden backwards (discovery state, §26).
 - **Top-left — one consolidated car-identity hierarchy.** *Phase 3 refinement (2026-10-06):* the car information formerly shown bottom-left moves here. The car name leads, and the short car information sits beneath it in one hierarchy with **one unified colour treatment**, compact, never a large enclosing card. The content rules are unchanged: only existing roster data from `src/data/cars.js` (manufacturer, display name, BoP-aware figures, engine/chassis data, editorial headline/copy), never invented specifications; it updates with the swap. The current two lines (editorial line, then engine · power · BoP) are the starting point. The **manufacturer mark** sits beside the name once properly sourced marks exist (§30.8); until then, the name stands alone. A future **spinning 3D manufacturer emblem** belongs here (§31, not Phase 3).
 - **Bottom-left:** free in Phase 3 after the consolidation. It is the future home of a **spinning 3D car presentation** (§31): a later phase, on the one shared renderer only, and only if measurement proves it cheap (§27).
 - **First-use cue** (§14). *Phase 3 (owner, 2026-10-09):*
@@ -762,7 +779,7 @@ A fresh implementation agent should be able to determine, from this file alone: 
    - **Required HUD refinements (§20):**
      - consolidate car information into the top-left hierarchy with a unified colour;
      - a directional arrow on the minimap;
-     - a yellow completed-section trail;
+     - a yellow completed-section trail *(superseded 2026-11-26: blue in Day, yellow in Night, §20)*;
      - a clearer, more substantial moon crescent;
      - one non-redundant direction/"Scroll to Race" instruction, with better placement;
      - Day/Night readability throughout.
@@ -861,6 +878,28 @@ Raised during Phase 3 review, owned by later phases, and **not to be implemented
 | Grand Tour rendering-quality profiles — implemented and HUMAN-ACCEPTED (owner, 2026-10-17). No parameter / `?version=locked` preserves accepted fixedDPR1+SMAA. Explicit `?version=unlocked` defaults to QualityDPR2; `&mode=smooth` selects DPR1.5. NeutralDay/ACESNight, mediumreflections, quarterDaycarspecular, SMAA, stabilizedshadows and approved loading/image/glass/minimap retained. Final integrated600s/mode M4 qualification is deferred, explicitly accepted for closure and NOT passed. No automatic host-based profile selection. Unrelated to car discovery identities. **Owner, 2026-11-03:** both profiles' accepted behaviour is preserved; a performance optimisation aimed at Locked must not silently degrade Unlocked (any proposed Landing DPR change is Locked-only, see `GT3_MASTER_CONTEXT.md`). | R | Phase3 reopening complete; locally integrated | §27; docs/review/p3u/OWNER-REVIEW.md |
 | UI/UX craft uplift (hierarchy, interactions, transitions, modelling/lighting, delight) | R | every phase | §23 |
 | Custom site-wide cursor | dropped | — | §28 |
+| Interactive 3D manufacturer badges as the Cars → Showcase gateway (owner, 2026-11-26; **concept, not implemented**) | D | Phase 6 design review | §31a |
+| GT3 loading design language: checkered progress, "Preparing the grid", opposing shutter reveal (owner, 2026-11-26; reusable direction) | D | Phase 6 onward, where meaningful loading exists | §31b |
+
+## 31a. Future concept: interactive 3D manufacturer badges (owner, 2026-11-26; do not implement yet)
+
+Extend the car identity and circuit interactions with **floating, slowly rotating three-dimensional manufacturer badges**: real dimensional emblems, for example a metallic Lamborghini shield, with convincing depth, materials and restrained rotation. They are not flat SVG icons, not text labels and not miniature car models.
+
+- **Role.** Interacting with a car's representation in the expanded Cars experience could reveal its badge, a distinctive visual gateway to that manufacturer's vehicle. Clicking the badge takes the visitor to **that car's Showcase**.
+- **Integration.** Badges use the car identity colours (§5, one shared source), respect discovery restrictions (a locked car reveals no badge and gives no Showcase entry) and sit within the existing circuit composition without crowding it.
+- **Open for future design review:** placement, reveal animation, asset sourcing (properly sourced marks, §30.8), materials/lighting on the one shared renderer (§27), navigation treatment, reduced-motion behaviour.
+- **Relationship.** It is the Hub-side sibling of the spinning 3D emblem beside the Tour HUD car information (§20, §31).
+- **Out of scope until a phase opens it:** acquiring badge assets, implementing 3D logos, building Showcase navigation. Only the car-colour system is implemented (Phase 5, 2026-11-26).
+
+## 31b. Reusable direction: GT3 loading design language (owner, 2026-11-26)
+
+The original **checkered-flag progress indicator**, the **"Preparing the grid"** typography and the **opposing shutter-opening reveal** are GT3's preferred loading patterns.
+
+- **Reuse.** Future transitions with meaningful asset loading, particularly into the Showcase, should consider this language. The checker communicates **real** progress and reinforces the motorsport identity.
+- **Adaptable presentation.** It can be integrated into a control (as beneath START RACE in the Hub, §5) or shown as a standalone loading composition (the Tour refresh cover).
+- **Continuity.** Loading completion leads straight into the shutter reveal: the completed checker is visibly resolved first, without an artificial delay.
+- **Restraint.** No artificial loading delays, no unnecessary loading screens and no repetitive transitions. Respect reduced motion (the fill snaps to real progress and the shutter does not sweep).
+- This is a **design direction, not a mandate**: it does not introduce loading screens into every navigation path.
 
 **Placement clarifications (owner, 2026-10-06).** These are recorded as the working placements:
 1. **HUD-car click-through** is a deliberate, user-initiated exit from Grand Tour, like *Leaving Grand Tour mid-run*, not an interruption. It preserves route and discovery state and belongs to Phase 6 (§25).

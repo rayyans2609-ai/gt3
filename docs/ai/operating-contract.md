@@ -159,7 +159,7 @@ Only layer 4 holds off-host. Owner-approved integrations stay possible through e
 | `claude-route.sh -s read-only` | `--tools Read,Grep,Glob` | Claude Code tool set | reads only | specialist analysis or review; any checkout |
 | `claude-route.sh -s edit` | `acceptEdits` + Bash allowlist, prompts denied | Claude Code permissions | edits inside the worktree, `git status/diff/log/show`, `node --check`, `npm run build` (verified 2026-10-16: `/tmp` write, outside write, `git push` and subagent all refused) | bounded implementation; the manager commits |
 | `claude-route.sh -s auto` | auto mode, prompts denied | Claude Code classifier | classifier-approved commands | Anchor-class work that must run things |
-| `opencode-route.sh` | `--auto` | — | broad | GLM/DeepSeek (Zen); requires a worktree |
+| `opencode-route.sh` | `--auto` | — | broad | HY4 (Zen, provisional); requires a worktree |
 
 **Rules (policy unless marked):**
 - Use the narrowest mode that can reach acceptance.

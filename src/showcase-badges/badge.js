@@ -4,9 +4,10 @@ import lexus from './lexus.svg?raw';
 import audi from './audi.svg?raw';
 import mclaren from './mclaren.svg?raw';
 import nissan from './nissan.svg?raw';
+import mercedes from './mercedes.svg?raw';
 import bmwUrl from './bmw.svg?url';
 
-const sources = { lexus, audi, mclaren, nissan, bmw: null };
+const sources = { lexus, audi, mclaren, nissan, mercedes, bmw: null };
 
 /** Create a self-contained, unlit-scene-agnostic badge. Caller supplies lights/environment. */
 export function createBadge({ manufacturer = 'lexus', color = 0x8fa6b6, theme = 'day', locked = false, onHover, onClick } = {}) {

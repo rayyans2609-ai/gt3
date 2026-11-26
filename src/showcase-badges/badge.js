@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { SVGLoader } from 'three/addons/loaders/SVGLoader.js';
 import lexus from './lexus.svg?raw';
 import audi from './audi.svg?raw';
+import { makeAudiProfile } from './audiProfile.js';
 import mclaren from './mclaren.svg?raw';
 import nissan from './nissan.svg?raw';
 import mercedes from './mercedes.svg?raw';
@@ -19,7 +20,7 @@ const crestOutlines = import.meta.glob('../../local/showcase-badges/*.outline.sv
 const badges = {
   lexus: { source: lexus, metalness: 0.90, roughness: 0.22 },
   nissan: { source: nissan, metalness: 0.83, roughness: 0.30, bevel: 0.0009 },
-  audi: { source: audi, metalness: 0.86, roughness: 0.25, bevel: 0.0013 },
+  audi: { source: audi, metalness: 0.94, roughness: 0.20, pointerYaw: 0.13, pointerPitch: 0.045 },
   bmw: { metalness: 0.87, roughness: 0.26 },
   mercedes: { source: mercedes, metalness: 0.90, roughness: 0.23, pathLimit: 1 },
   ferrari: { crest: true, metalness: 0.83, roughness: 0.28, faceColor: 0xc9ab68 },
@@ -116,6 +117,7 @@ export function createBadge({ manufacturer = 'lexus', color = 0x8fa6b6, theme = 
     let shapes = paths.slice(0, design.pathLimit ?? paths.length).flatMap(path =>
       path.userData.style.fill === 'none' ? [] : SVGLoader.createShapes(path),
     );
+    if (manufacturer === 'audi') return makeAudiProfile(shapes[0], own, metal);
     if (manufacturer === 'aston') {
       // Leave the separate lettering below the wings in the source artwork.
       shapes = shapes.filter(shape => shapeBounds(shape).max.y < 110);
@@ -219,8 +221,8 @@ export function createBadge({ manufacturer = 'lexus', color = 0x8fa6b6, theme = 
       const damping = 1 - Math.exp(-3.2 * dt);
       x += (px - x) * damping;
       y += (py - y) * damping;
-      motion.rotation.y = Math.sin(elapsed * 0.55) * 0.025 + x * 0.055;
-      motion.rotation.x = Math.sin(elapsed * 0.43) * 0.012 - y * 0.025;
+      motion.rotation.y = Math.sin(elapsed * 0.55) * 0.025 + x * (design.pointerYaw ?? 0.055);
+      motion.rotation.x = Math.sin(elapsed * 0.43) * 0.012 - y * (design.pointerPitch ?? 0.025);
       motion.position.y = Math.sin(elapsed * 0.8) * 0.012;
       motion.scale.setScalar(THREE.MathUtils.lerp(motion.scale.x, hovered ? 1.035 : 1, 1 - Math.exp(-7 * dt)));
     },

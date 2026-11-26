@@ -32,7 +32,7 @@ opencode run --standalone --auto -m <provider/model> "<prompt>" < /dev/null
 
 | Role (see `model-routing.md`) | Exact model ID | Provider | Status |
 |---|---|---|---|
-| HY4 Flash Free — **provisional** (replaced Muse/GLM, owner 2026-11-26) | `opencode/hy4-flash-free` | Zen (OpenCode) | executed end to end 2026-11-25 (Intel); first bounded implementation trial 2026-11-25, Terra-reviewed |
+| HY4 Flash Free — **provisional**, isolated CSS/presentation scope (replaced Muse/GLM, owner 2026-11-26) | `opencode/hy4-flash-free` | Zen (OpenCode) | executed end to end 2026-11-25 (Intel); first bounded implementation trial 2026-11-25, Terra-reviewed |
 | Space Bunny | `opencode/space-bunny-free` | Zen (OpenCode) | **unavailable**: not listed 2026-11-01 |
 | MiMo V2.6 Flash Free — **experimental, no default lane** | `tokenharbor/mimo-v2.6-flash:free` | Token Harbor | listed 2026-11-01; not re-tested |
 

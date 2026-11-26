@@ -51,6 +51,7 @@ let emblemLabel;
 let carsWrap;
 let carsToggle;
 let carsName;
+let emblemKeys = [];
 let ticks = [];
 let resistTl = null;
 let resisted = [];
@@ -393,6 +394,8 @@ function renderCars() {
     tick.setAttribute('aria-label', known ? `${CARS[index].displayName}, open its Showcase` : `${index + 1}, undiscovered`);
   });
   plan.renderDiscovery(found);
+  emblemKeys.forEach((key, index) => key.setAttribute('aria-label', found.has(index)
+    ? `${CARS[index].displayName}, open its Showcase` : `Undiscovered car, ${index === 0 ? 'start' : `checkpoint ${index}`}`));
   setCaptions();
 }
 
@@ -430,7 +433,27 @@ function build() {
   emblemLabel.setAttribute('aria-hidden', 'true');
   emblemLabel.append(el('span', 'hub-emblem-label__name'), el('span', 'hub-emblem-label__meta'));
   const cars = buildCars();
-  root.append(field, frame, runway, mark, back, start.wrap, show.wrap, cars, fullLabel, emblemLabel);
+  // Keyboard access to the WebGL emblems: one invisible, focusable proxy per car, tracking its
+  // emblem. The mouse never hits them (it raycasts the real shapes); Tab/Enter does.
+  const keys = el('div', 'hub-emblem-keys');
+  emblemKeys = CARS.map((car, index) => {
+    const key = el('button', 'hub-emblem-key');
+    key.type = 'button';
+    key.addEventListener('focus', () => {
+      if (view !== 'collection') return;
+      collection.hoverCar(index);
+      showEmblemLabel(emblemHit(index));
+    });
+    key.addEventListener('blur', () => { collection.hoverCar(null); showEmblemLabel(null); });
+    key.addEventListener('click', () => {
+      if (view !== 'collection' || !interactive) return;
+      const hit = emblemHit(index);
+      if (hit.locked) collection.resistEmblem(index);
+      else openShowcase(index, 'single', { x: hit.x, y: hit.y });
+    });
+    return keys.appendChild(key);
+  });
+  root.append(field, frame, runway, mark, back, start.wrap, show.wrap, cars, keys, fullLabel, emblemLabel);
   // The status takes the START RACE caption slot, or the circuit's middle for the circuit loader.
   if (LOADER === 'circuit') root.append(status); else start.wrap.prepend(status);
   planSvg = plan.buildPlan(root, frame, {
@@ -530,6 +553,11 @@ function shiftActions() {
   start.wrap.style.transformOrigin = '0% 100%';
   show.wrap.style.transform = d ? `translateX(${(-d).toFixed(1)}px) scale(${k.toFixed(4)})` : '';
   show.wrap.style.transformOrigin = '100% 100%';
+}
+
+/** The Hub's actions leave the focus order while the Collection owns the stage. */
+function setActionsInert(on) {
+  for (const action of Object.values(actions)) action.wrap.inert = on;
 }
 
 function firstShowcaseIndex() {
@@ -693,10 +721,23 @@ function sizesForCollection() {
   return { badge: base, flagSize: Math.max(120, Math.min(220, h * 0.36)), offset: base * 0.95 };
 }
 
+function emblemHit(index) {
+  const s = sizesForCollection();
+  const a = plan.checkpointAnchors(s.offset).find((item) => item.car === index);
+  return { type: 'car', car: index, locked: !state.unlocked.has(index), x: a?.x ?? 0, y: a?.y ?? 0, size: s.badge };
+}
+
 function placeCollectionDom() {
   const c = plan.circuitCentre();
   const s = sizesForCollection();
   collection.placeCollection(s);
+  for (const a of plan.checkpointAnchors(s.offset)) {
+    const key = emblemKeys[a.car];
+    if (!key) continue;
+    key.style.left = `${a.x}px`;
+    key.style.top = `${a.y}px`;
+    key.style.width = key.style.height = `${s.badge * 1.1}px`;
+  }
   fullLabel.style.left = `${c.x}px`;
   fullLabel.style.top = `${c.y + s.flagSize * 0.42}px`;
   if (hoverHit?.type === 'car') {
@@ -762,6 +803,7 @@ function enterCollection() {
   if (view !== 'hub') return;
   view = 'collection';
   viewTl?.kill();
+  setActionsInert(true);
   plan.startLeader(false);
   plan.lapLight(false);
   plan.previewDiscoveries(false, state.unlocked);
@@ -790,6 +832,7 @@ function enterCollection() {
 function exitCollection({ instant = false } = {}) {
   if (view !== 'collection') return null;
   view = 'hub';
+  setActionsInert(false);
   viewTl?.kill();
   showEmblemLabel(null);
   const quick = instant || reducedMotion.matches;
@@ -816,6 +859,7 @@ function exitCollection({ instant = false } = {}) {
 function settleHubView() {
   viewTl?.kill();
   view = 'hub';
+  setActionsInert(false);
   root.dataset.view = 'hub';
   showEmblemLabel(null);
   collection.showCollection(false).progress(1);

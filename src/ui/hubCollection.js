@@ -243,6 +243,11 @@ export function pointCollection(clientX, clientY) {
 
 export function clearCollectionPointer() { setHovered(null); }
 
+/** Keyboard focus on an emblem's proxy button: the same visual hover as the pointer gives. */
+export function hoverCar(car) {
+  setHovered(car === null ? null : car === 'full' ? 'full' : items.find((item) => item.car === car) ?? null);
+}
+
 /** A locked emblem refuses with a short damped shake. */
 export function resistEmblem(car) {
   const item = items.find((entry) => entry.car === car);

@@ -256,6 +256,10 @@
 .hub-emblem-label__meta { color: var(--hub-muted); font-family: var(--font-mono); font-size: 10.5px; letter-spacing: .05em; text-transform: uppercase; }
 .hub-emblem-label.is-locked .hub-emblem-label__name { color: var(--hub-muted); }
 #hub.is-pointing { cursor: pointer; }
+.hub-emblem-keys { display: contents; }
+.hub-emblem-key { position: absolute; display: none; padding: 0; border: 0; border-radius: 50%; background: none; transform: translate(-50%, -50%); pointer-events: none; }
+#hub[data-view='collection'][data-collection='emblems'] .hub-emblem-key { display: block; }
+.hub-emblem-key:focus-visible { outline: 1px solid var(--hub-accent); outline-offset: 6px; }
 
 /* The preserved Cars selector: Collection only, ?collection=cars. */
 .hub-cars { position: absolute; left: calc(var(--side) * .62); top: calc(22px + var(--mark-size) + 40px); display: grid; grid-template-columns: max-content; row-gap: 8px; }

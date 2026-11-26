@@ -1,20 +1,12 @@
 # Showcase badges
 
-In each private development checkout, run the following before starting Vite:
+`createBadge({ manufacturer, color, theme, locked, onHover, onClick })` retains its existing return interface. Add `object` to a lit scene, raycast the invisible `hitTarget` plane, forward input and call `dispose()` on teardown. The host owns spin, float and tilt; `update(dt)` adds a subtle hover scale only.
 
-```sh
-python3 src/showcase-badges/prepare-crests.py
-```
+Nine manufacturers lazily load real 3D emblems from `/badges/manifest.json`. See [asset setup](../../docs/assets/badge-assets-setup.md) and [attribution](../../docs/assets/badge-attribution.md). The manifest is fetched once and no manifest/model work starts for an initially locked badge. Locked artwork is empty; the host supplies its DOM `?`. `badgeModelStatus(id)` reports `none`, `loading`, `ready` or `fallback`.
 
-The command prepares Ferrari, Lamborghini and Porsche SVG faces and their matching outlines in the ignored `local/showcase-badges/` directory. A checkout without those files can display locked badges. Unlocking a crest without its files raises a setup error. Builds made with these files present can include the artwork, so keep those builds private.
+During loading or after optional asset failure, the existing procedural artwork remains. Missing private crest SVGs fall back to a neutral metal disc without throwing. Private crest SVGs may still be prepared with `python3 src/showcase-badges/prepare-crests.py`. McLaren's procedural artwork and separate specialist workflow are untouched by the nine-model loader.
 
-`createBadge({ manufacturer, color, theme, locked, onHover, onClick })` returns `{ object, hitTarget, setLocked, update, setPointer, setHovered, click, setTheme, setColor, dispose }`. The manufacturer IDs match `src/data/cars.js`: `lexus`, `nissan`, `audi`, `bmw`, `mercedes`, `ferrari`, `mclaren`, `aston`, `lamborghini`, and `porsche`.
-
-Add `object` to a lit Three.js scene, with an environment map for the metallic finishes. The host controls its placement and scale. Raycast against `hitTarget`, forward hover with `setHovered(bool)` and pointer coordinates in the −1 to 1 range with `setPointer(x, y)`, and call `update(dt)` with seconds. The host forwards activation through `click(event)`. Callbacks receive `onHover(bool, manufacturer)` and `onClick(manufacturer, event)`. `setTheme` accepts `day` and `night`. Call `dispose()` on teardown.
-
-Locked cars share the same neutral disc. Their hover callback supplies `null` for the manufacturer and click callbacks are suppressed. An initially locked badge builds its emblem geometry on first unlock. The host owns surrounding labels and car data.
-
-`createShowcaseFlag({ color, theme, onHover, onClick })` from `flag.js` returns the same motion, theme and teardown methods. Raycast its mesh descendants or use host controls. Its hover callback receives a boolean and its click callback receives the event.
+`createShowcaseFlag` in `flag.js` retains its existing independent interface.
 
 ## Artwork sources
 

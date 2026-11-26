@@ -14,7 +14,7 @@ This file owns what is shared by every manager configuration and every host: hos
 
 ## Manager card (read this first; the rest is reference)
 
-**Principle: constrain risks, not managerial intelligence.** Within an owner-authorized objective, the manager plans, decomposes, picks workers (`model-routing.md`), investigates, makes routine reversible technical decisions and sizes verification without asking. Autonomous Mode adds only a horizon, a named failover successor, resource monitoring and stop rules (`autonomous-mode.md`).
+**Principle: constrain risks, not managerial intelligence.** Within an owner-authorized objective, the manager plans, decomposes, picks workers (`model-routing.md`), investigates, makes routine reversible technical decisions and sizes verification without asking. Autonomous Mode adds only a horizon, cooperative same-host failover, resource monitoring and stop rules (`autonomous-mode.md`).
 
 | | Opus-led | Sol-led |
 |---|---|---|
@@ -125,7 +125,7 @@ Beside it: `launches.log`, written by the route wrappers (pid, start time, run, 
 | Mobile disconnect mid-instruction | Nothing transfers. The seat stays with its holder, which keeps running locally, and the native session reconnects. A handoff happens only when the scripts' transitions actually run. |
 
 ### 4.5 Same-host failover (both directions)
-An Autonomous invocation may name a **failover successor** (`Failover: sol` or `Failover: opus`). When the seat holder hits quota or tool exhaustion, it releases, and the named successor on the same host claims. That is the ordinary release → claim, available Opus → Sol and Sol → Opus. Without a named successor, or across hosts, there is no automatic transfer: the run stops released, which is a safe pause.
+An authorized Autonomous run may cooperatively transfer the seat in either direction on the same host when quota or availability warrants it, and preferentially return to Opus after confirmed recovery, as specified in `autonomous-mode.md` §§4–5. The outgoing holder reconciles workers and releases before the successor claims. A failed claim is a safe pause. No automatic cross-host failover or forced claim is authorized; owner-confirmation safeguards remain in force.
 
 ## 5. Workers: isolation, permissions, provenance
 

@@ -24,7 +24,7 @@ Any clear phrasing invokes the mode when the active task is clear: "Enter GT3 Au
 
 ```
 Enter GT3 Autonomous Mode. Objective: <desired end state>.
-Configuration: opus-led|sol-led   Failover: none|opus|sol   Branch: <branch/worktree>  Commits: yes|no  Push: yes|no  main: forbidden
+Configuration: opus-led|sol-led   Failover: automatic|restricted by owner   Branch: <branch/worktree>  Commits: yes|no  Push: yes|no  main: forbidden
 Exclusions: …   Human-review boundaries: …   Horizon: …
 ```
 
@@ -70,44 +70,21 @@ While the user is away, an independent model view can stand in for the user's ju
 
 **One manager at a time.** The run record's seat and epoch are the authority (`operating-contract.md` §3–§4). Every change of manager is the ordinary `release` → `claim`.
 
-**Failover successor.** The invocation may name one (`Failover: sol` under Opus-led, `Failover: opus` under Sol-led). When the seat holder nears quota or tool exhaustion (a usage warning, rate-limit notice or known reset window, but not context pressure, which compaction handles) and meaningful in-scope work remains:
-1. It quiesces its workers: they finish, checkpoint, or are listed as transferred.
-2. It writes the continuation packet into the record: done criteria, branch/head, task states with accepted/unaccepted marked, key evidence, quota/host state, risks, exact next actions, the absolute deadline.
-3. It runs `release`.
-4. It starts the successor on the same host with the record as its brief:
-   - **Sol:** `codex exec` with the Sol-led manager flags from the manager card plus `-c approval_policy="never"`, detached;
-   - **Opus:** a Claude Code session started with the brief.
+**Cooperative continuity.** Within the authorized objective, host, horizon and permissions, an eligible same-host successor is Sol for Opus and Opus for Sol, unless the owner explicitly restricts it. Worker-only scarcity reroutes work; manager-provider scarcity triggers the thresholds in `model-routing.md` §10. Finish only immediately closable work once handoff is triggered. Reconcile workers (finish, checkpoint, or list transferred workers), update the continuation packet, release via `gt3-run.sh`, then launch the successor with the record as its brief. The successor checks status and claims before dispatching. If it cannot claim, remain released and stop. Cross-host transfer and forced recovery retain the owner-confirmation safeguards in `operating-contract.md` §4. A successor has only the existing objective and permissions; owner-only decisions remain owner-only.
 
-The successor `claim`s before doing anything. If no claim appears, the run stays released: a safe pause.
+Keep the packet current at meaningful checkpoints: objective and done criteria, branch and head, accepted and partial task states, workers and their ownership, evidence, outstanding requirements, known defects, quota and host state, risks, exact next actions and deadline. Weekly wind-down also identifies independently executable human or freelancer tasks; do not contact anyone. Commit and publish only when existing Git permissions permit.
 
-**Successor authority.** It is temporary and inside the same objective, scope and safety rules. It routes with its own configuration's roster (`model-routing.md` §11/§11b). On any scope-sensitive or consequential call, it takes the conservative option (checkpoint, or record it as blocked) and leaves it for the original manager or the owner.
+**Recovery and handback.** Opus is preferred. While Sol manages, retain the last known Claude five-hour and weekly percentages and reset times, including applicable model-specific limits, and detect when relevant windows are due to refresh. Prefer fresh supported telemetry. If inactive Claude sessions cannot supply it, a future implementation may perform a minimal bounded availability probe after the expected reset, without launching a competing manager or substantive work. Require confirmed sufficient headroom across relevant windows and buckets, accounting for shared account activity, before Sol finishes its current meaningful task boundary, checkpoints, releases and automatically launches Opus to claim. Apply equivalent recovery detection to Codex worker capacity so either manager can restore unavailable routes. Stale or missing data is unknown, not recovered; failed probes back off to a bounded next check or known reset, never loop. Record transition intent and outcome in the run record, deduplicate triggers by provider/window/reset and seat epoch, and require a meaningful headroom margin and stable recovery before handback to avoid oscillation. A returning manager never dispatches or claims an active seat; forced takeover still requires owner confirmation.
 
-**Handback.** A returning manager reads the record first. If the successor holds the seat, it records `handback requested` and dispatches nothing. The successor checks at task boundaries, writes a short run-over into the record, runs `release` and exits. The returning manager confirms with `status` and claims. If the holder died without releasing, the returning manager verifies its PID is gone, notes it, and the owner confirms before a forced claim.
+## 5. Quota trajectory, telemetry and limits
 
-No successor named, both providers exhausted, or a different host: checkpoint, release, stop (§9). There is no cross-host automatic failover.
+Apply `model-routing.md` §10 independently to each applicable provider window and bucket, using observed trajectory, active workers and resets. Weekly wind-down overrides short-window thresholds. A blocked route remains unavailable until confirmed recovered; no retry loops. If both frontier providers are exhausted, checkpoint and stop or wait for a known reset within the horizon. Never promote a free worker to manager. Account-level quota is shared across hosts; changing Macs does not restore it.
 
-## 5. Quota trajectory and limits
+**Telemetry design — not implemented.** Extend the existing run record and handoff mechanisms with a minimal deterministic provider-neutral snapshot available to either manager: provider, account/limit bucket and model applicability where exposed, used percentage, window duration, observation timestamp, reset timestamp, source, freshness and availability (including unknown). Preserve Claude's last known five-hour and weekly observations across manager changes. Claude Code's supported [statusline](https://code.claude.com/docs/en/statusline) exposes `rate_limits.five_hour.used_percentage`, `rate_limits.five_hour.resets_at`, `rate_limits.seven_day.used_percentage` and `rate_limits.seven_day.resets_at`; Codex [App Server](https://developers.openai.com/codex/app-server) documents `account/rateLimits/read` and `account/rateLimits/updated`, including `usedPercent`, `windowDurationMins`, `resetsAt` and multiple windows or buckets where exposed. Subscription quota is distinct from model context-window usage.
 
-Quota modes (Normal / Conservation / Critical reserve), Claude scarcity and reserve capacity are defined in `model-routing.md` §10. Unattended runs apply them **by trajectory**: remaining capacity + time to reset + burn rate + remaining expected work. If the current burn would exhaust a resource well before its reset while productive work remains, change mode immediately instead of waiting for the hard limit. Re-assess at natural boundaries (task completion, a usage warning, a rate-limit notice). Do not poll quota, and do not invent usage data that isn't exposed. **Never plan the run to consume 100 % of frontier quota.** Keep reserve for integration, recovery, blockers, final decisions and the handoff.
+Prefer passive events and inexpensive reads at meaningful boundaries; permit bounded deterministic refreshes and the recovery probe above when necessary. No model-based polling, excessive provider requests, invented usage estimates, undocumented subscription endpoints, automatic purchases, credits or plan changes. Preserve user configuration and credentials. Validate locally installed CLI versions and session capabilities before selecting an implementation: documented interfaces may not exist in every session, and telemetry may not interrupt an in-flight inference. Treat sparse, stale or missing observations conservatively; include concurrent workers and other hosts' account activity, without assuming local observations account for all consumption.
 
-Quota exhaustion is an expected autonomous state, not an implementation failure.
-
-- **Approaching a limit:** checkpoint, preserve evidence, prepare the reassignment packet.
-- **Exhausted:** no retry loops, no identical re-briefs. Mark the route **TEMPORARILY UNAVAILABLE / BLOCKED (not FAIL)** until reset or evidence of recovery, and reroute if a capable alternative exists.
-- **All heavy routes unavailable:** useful light work (§9), else wait or stop cleanly. Waiting is valid when the reset is known and within the horizon.
-- **Manager exhaustion:** §4.
-
-**Codex exhausted, Claude available.** Claude is the scarcer resource, so conserve it.
-- **Reset soon** (roughly < 30 min): prefer waiting, light/static work, planning and handoff prep over spending Claude on work Codex can resume shortly.
-- **Otherwise, conservation mode on the Claude side.** Opus stays manager. Narrow, well-defined bounded work goes to the free HY4 route while it is healthy (`model-routing.md` §11). Sonnet takes bounded paid work only where the free routes can't (that is its positive reason here). Sol-level work runs in a bounded Opus worker instance only if it is critical-path. Batch or defer clerical work rather than spend Claude on it. Do less total work, prioritize critical-path completion and state preservation, and skip optional work.
-
-**Sol-led runs** mirror the above:
-- **Claude exhausted:** Opus/Sonnet/Haiku routes are BLOCKED and Sol continues with Terra, Luna and HY4.
-- **Codex exhausted:** the manager itself is constrained. Sol checkpoints and releases. Continuing under Opus in a single unattended run is not automatic; the owner may hand the seat to Opus (`operating-contract.md` §4).
-
-Changing Macs does not help when quota is account-level (`operating-contract.md` §11).
-
-The handoff reports each affected route and its reset time if known.
+**Simulation verification before implementation is adopted.** Exercise Opus→Sol and Sol→Opus, worker-only exhaustion, simultaneous exhaustion and clean suspension, five-hour and weekly reset recovery, model-specific limits, missing/stale/sparse telemetry, failed probes and backoff, shared account activity, duplicate triggers, in-flight work, failed launch/claim and oscillation prevention. Verify the existing release→claim epoch fence, worker reconciliation, owner-only Git and forced-recovery safeguards, packet completeness, and no dispatch before claim. The 2026-11-26 Opus→Sol handoff on M4 demonstrated checkpoint, release and detached successor launch with a worker identified for transfer; the owner monitored usage manually at 94%. It does not demonstrate automatic quota detection or recovery.
 
 ## 6. Host and concurrency
 

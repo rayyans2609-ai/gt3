@@ -654,10 +654,11 @@ async function boot() {
     try {
       if (!beginTransition('hub')) return;
       set('playerOpen', false);
+      // Restore the Hub underneath first: the Showcase then fades over it (GT3 holds still).
+      hub.returnFromShowcase({ to });
       await showcase.closeShowcase();
       landing?.activateLanding({ atHub: true });
       completeTransition();
-      hub.returnFromShowcase({ to });
     } finally { showcaseEdge = false; }
   }
   showcase.initShowcase({ renderer, registerUpdate, onExit: (destination) => { void leaveShowcase(destination); } });

@@ -842,7 +842,8 @@ export function leaveToShowcase(index, mode) {
   root.classList.remove('is-interactive');
   const tl = gsap.timeline();
   tl.add(collection.focusEmblem(mode === 'full' ? 'full' : index), 0);
-  tl.to([back, fullLabel, carsWrap, emblemLabel, mark], { autoAlpha: 0, duration: 0.3, ease: 'gt3' }, 0);
+  // GT3 stays: the Showcase's mark sits exactly where the Hub's does, so it never blinks.
+  tl.to([back, fullLabel, carsWrap, emblemLabel], { autoAlpha: 0, duration: 0.3, ease: 'gt3' }, 0);
   tl.to(planSvg, { opacity: 0.25, duration: 0.45, ease: 'gt3' }, 0.05);
   return new Promise((resolve) => tl.eventCallback('onComplete', resolve));
 }

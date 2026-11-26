@@ -1,0 +1,78 @@
+run: p5-refine
+config: sol-led
+seat: sol@intel
+epoch: 2
+state: transferred
+branch: p5-refine
+sha: e055d34574c4870dc5a931061969485f6017f465
+updated: 2026-11-26T16:54:05Z
+---
+## Objective and scope (owner-verbatim, with date)
+
+## Tasks
+| id | owner (model@effort) | worktree / branch | epoch | status | evidence |
+|---|---|---|---|---|---|
+
+## Evidence (claim → artifact · valid? · available@host)
+
+## Blocked routes / quota
+
+## Human decisions (NEEDS HUMAN VERIFICATION)
+
+## Proposals (recorded, not implemented)
+
+## Next step
+
+## Handoff history
+- 2026-11-26T08:01:40Z e1 claimed by opus@intel at a4698b20fa4aaff36cd430b0ca3bec7790305657
+
+## Verification plan (manager, 2026-11-26)
+- V1 final verification on the candidate tip (Luna @ medium via run-harness.sh): landing-flow, audio-lifecycle, controls, preready-input, route-persistence, motion-ticker (existing suite, unchanged)
+  PLUS the W1 runtime checks skipped at fae2c92 (owner instruction 2026-11-26: "Carry W1's skipped reduced-motion and checker-completion runtime checks into final verification ... No need to interrupt W2 or broaden the regression suite."):
+  new targeted harness scripts/verify-checker-loading.mjs (H1, Terra @ medium, authored after W2, committed by manager before V1):
+  (1) Tour cover reduced motion: no checker-ignite on filled cells; (2) normal motion: 40/40 filled and no running cell animation at the instant is-leaving is added, beat <= 400 ms; (3) Hub START RACE checker 40/40 after ready and stable, no animation under reduce.
+
+## Tasks (manager, 2026-11-26)
+| id | owner (model@effort) | branch | epoch | status | evidence |
+|---|---|---|---|---|---|
+| C0 | manager (git) | p5-refine | 1 | done a4698b2 (DeepSeek SFX), c3e229c (HY4 import) | diff review |
+| W1 | gpt-5.6-terra@medium workspace | p5-refine | 1 | partial; fae2c92 | build; completion fix later corrected |
+| W2 | gpt-6.1-sol@high workspace | p5-refine | 1 | accepted 30324e0 | numeric residuals |
+| H1 | gpt-5.6-terra@medium | p5-refine | 1 | accepted edc8edf, diag 67bef55 (manager) | — |
+| W3 | gpt-6.1-sol@high | p5-refine | 1 | accepted e22c255 | palette table |
+| W4 | gpt-5.6-terra@medium | p5-refine | 1 | accepted e74f34c (yaw widened by manager) | manager build |
+| W5a | opencode/hy4-flash-free | p5-refine | 1 | accepted 4a005d2 (+clip fix) | diff |
+| W5b | opencode/hy4-flash-free | p5-refine | 1 | accepted b630a65 | contrast table |
+| D1 | manager | p5-refine | 1 | 900396a, 49ef9ec | — |
+| V1 | gpt-6-luna@medium | p5-refine | 1 | 3 pass / 4 fail on b630a65 | local/evidence/p5-refine/V1 |
+| R1 | gpt-5.6-terra@medium | p5-refine | 1 | partial 4e3f374 (landing retime declined; cover change later reverted) | — |
+| V2, V3 | gpt-6-luna@medium | p5-refine | 1 | controls, motion-ticker PASS (V2); checker FAIL, landing-flow FAIL (V3) | V2, V3 dirs |
+| R2 | gpt-5.6-terra@medium | p5-refine | 1 | accepted 30c97db; checker 3/3 PASS | R2 dir |
+| M1 | manager fast path | p5-refine | 1 | 56035e7 cover Flip restored + harness settle | — |
+| H2 | gpt-5.6-terra@medium | p5-refine | 1 | accepted eee37b3 (smoke harness, not run by owner direction) | — |
+| V4 | gpt-6-luna@medium | p5-refine | 1 | stopped by manager (TaskStop) during landing-flow on owner reduction; no evidence | — |
+| W6 | opencode/hy4-flash-free | — | 1 | cancelled by owner before launch | launches.log has no W6 |
+| M2 | manager fast path | p5-refine | 1 | b48a023 cover radius 5 px | diff |
+| V5 | gpt-6-luna@medium | p5-refine | 1 | route-persistence PASS 6/6; preready-input FAIL on one timing assertion (193 vs 200 ms after the harness stamp), classified as harness timing; not re-run | local/evidence/p5-refine/V5 |
+| D2 | manager | p5-refine | 1 | b059357 verification doctrine + host contention; c6ac2fb opportunity cost/sequencing; fb3f3e3 review package | — |
+
+## Next step (2026-11-26, manager)
+Candidate p5-refine @ 5feee59 (c6ac2fb + two owner-review refinement passes) is ready for owner visual review: docs/review/p5/REFINE-REVIEW.md (decisions 1-6, deferred list). Owner-only: push for M4 review, merge, Phase 6. After design acceptance: residual checks per the review package's Next section (landing-flow incl. START RACE timing, refine-smoke, hud, motion-ticker; preready optional), preferably on the M4. Unused baseline worktree p5-baseline removed. Phase 5 NOT accepted.
+- 2026-11-26T11:09:49Z e1 released by opus@intel at c6ac2fbbe6b9e925a138b91b549d1112a149ed1e
+- 2026-11-26 record brought current by the outgoing manager (opus@intel, at the owner's request) for a Sol claim: two refinement commits (194fc4d, 5feee59) were made after the e1 release at c6ac2fb as direct owner-directed fast-path edits (Claude-Session trailers, no GT3-Run); recorded sha c6ac2fb -> 5feee59. Seat released. No workers running. Handoff: local/handoffs/p5-refine-sol-handoff.md.
+- 2026-11-26T12:05:47Z e2 claimed by sol@intel at 5feee59c4eeff2c2faf0cf52197ddfad7ef9fbca (from opus@intel e1)
+
+## Current transfer handoff (supersedes older next-step text)
+
+# Handoff to Opus on M4 — 2026-11-26
+
+Outgoing seat sol@intel, epoch 2. Owner authorizes cross-host transfer and push of p5-refine and its run note. Phase 5 remains active owner-led visual refinement, not accepted or phase closure. Phase 6 is not open. Do not merge or advance phases without owner approval. Do not run deferred verification before owner approval. Prioritize rapid visual iteration and consequence-driven verification.
+
+Candidate e055d34574c4870dc5a931061969485f6017f465 includes the earlier candidate 5feee59 plus the latest direct Cars iteration: centered horizontal bars, resting width 38%, expansion 1.5x, bar-triggered matching name and pulse, name hover pulse, locked feedback, unlocked click reserved. A car pulse can run while the circuit is still drawing. On closing the Cars view a hovered name remains visible. Owner requested reliable behavior and has not yet accepted it. No runtime or visual verification of the latest changes; git diff --check and node --check for hub.js and hubPlan.js passed. Earlier visual choices and verification remain open as documented below and in docs/review/p5/REFINE-REVIEW.md. The prior local handoff is local/handoffs/p5-refine-sol-handoff.md on Intel and is superseded where it differs.
+
+The owner will launch a separate Codex worker on Intel for manufacturer badges. Opus on M4 owns management and integration. That future worker is not launched by this seat, and no worker under this run is being transferred. Coordinate its independent branch and exact commit with the owner. Do not assume its results are already available or integrated.
+
+Local-only: licensed font/ must exist in the M4 checkout and be copied to the worktree if missing. node_modules, local handoffs, raw evidence, host configs and sessions are not in Git. Raw evidence in Intel local/evidence/p5-refine is unavailable on M4 unless separately copied. Existing tracked review documents and this note carry the current status. Configure core.hooksPath to scripts/git-hooks on M4. Resume by importing the provided bundle, checking status, then claiming opus@m4 with --owner-confirmed, following operating-contract sections 4 and 8.
+
+- 2026-11-26T16:54:05Z e2 released by sol@intel at e055d34574c4870dc5a931061969485f6017f465
+- 2026-11-26T16:54:10Z e2 exported for another host at e055d34574c4870dc5a931061969485f6017f465

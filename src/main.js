@@ -228,7 +228,8 @@ async function boot() {
       if (landing.landingActive()) hub.setHubPresence(landing.landingHubPresence(), state.experience === 'hub');
     });
     window.__gt3.landing = { seek: landing.seekLanding, progress: landing.landingProgress,
-      loaded: landing.heroLoaded, active: landing.landingActive, tuning: landing.landingTuning };
+      loaded: landing.heroLoaded, active: landing.landingActive, tuning: landing.landingTuning,
+      drag: landing.landingDragState };
   }
   if (landing) {
     timed('init-landing', () => {

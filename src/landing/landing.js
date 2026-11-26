@@ -571,6 +571,17 @@ export function landingProgress() {
   return progress;
 }
 
+/** Read-only runtime probe for the bounded Landing drag interaction. */
+export function landingDragState() {
+  return {
+    yaw: drag.yaw,
+    pitch: drag.pitch,
+    active: drag.active,
+    yawLimit: TUNE.dragYawLimit,
+    pitchLimit: TUNE.dragPitchLimit,
+  };
+}
+
 /** How much of the screen the Hub field should cover now (0..1). */
 export function landingHubPresence() {
   return active ? hubPresence : 0;

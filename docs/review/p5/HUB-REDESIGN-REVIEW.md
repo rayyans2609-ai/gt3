@@ -34,6 +34,13 @@ Navigation: Landing → (scroll) Hub → **SHOWCASE** → Collection → emblem 
 | 6 | Showcase V1, recovered and adapted from the legacy Showcase: a large floating full-resolution car, horizontal orbit with inertia and restrained vertical inspection, ←/→ arrows and keys across all ten, dots, editorial name/headline, the story and technical archive panel with the existing paragraphs, specs, achievements and credited photographs, and existing ElevenLabs narration (autoplays only if sound is already on; stops on switch and on leave; never overlaps). Day/Night lighting rig. Checker/shutter loading with real byte progress. Locked slots show only `?`, the slot number and discovery copy. The car comes from the emblem's position and returns to it. Residency: a three-slot LRU, one serial load, full disposal on eviction. | `src/showcase/*` (worker S1, Sol) + manager integration |
 | 7 | Terra oversight: reviewed checkpoints 4b95552/f57cf5f and ac9689d. Its components are integrated by path, and corrections are below. | `src/showcase-badges/*` |
 
+### Since the first package (owner follow-up, 2026-11-26)
+
+- **GT3 is centred on every global page** (Hub, Collection, Showcase) and holds the same position across all three, so it never moves or blinks during Hub → Collection → Showcase and back. In the vertical layout SHOWCASE now sits below the centred mark, and the circuit frame is measured from the elements above and below it.
+- **Continuity:** returning from the Showcase crossfades into the Collection (the Hub is restored underneath first).
+- **Keyboard:** Tab reaches every Collection emblem (with the same name, colour and pulse as hover); Enter opens it and a locked one resists. The Hub actions leave the focus order while the Collection is shown.
+- **Full Showcase** resumes at the car last inspected this visit.
+
 ## Verification (consequence-driven; nothing skipped is reported as passed)
 
 | Check | Result | Covers |

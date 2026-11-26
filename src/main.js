@@ -631,7 +631,9 @@ async function boot() {
       await hub.leaveToShowcase(index, mode);
       landing?.deactivateLanding();
       hub.suspendHub();
-      await showcase.openShowcase({ index, mode, origin });
+      // Full Showcase resumes at the car last inspected this visit (the roster start otherwise).
+      const start = mode === 'full' ? (showcase.showcaseState().index ?? index) : index;
+      await showcase.openShowcase({ index: start, mode, origin });
       if (version === showcaseEdgeVersion && state.transition?.to === 'showcase') completeTransition();
     } catch (error) {
       if (version !== showcaseEdgeVersion) return;

@@ -18,8 +18,9 @@
 #showcase button { color: inherit; font: inherit; cursor: pointer; background: none; border: 0; }
 #showcase button:focus-visible, #showcase a:focus-visible { outline: 2px solid var(--car-ink, var(--accent)); outline-offset: 6px; }
 #showcase button:disabled { opacity: .55; cursor: wait; }
-.sc-header { position: absolute; top: 24px; left: var(--sc-margin); right: max(96px, var(--sc-margin)); display: flex; align-items: center; gap: 36px; z-index: 4; }
-#showcase .sc-mark { padding: 0; font: 500 clamp(52px, 4.3vw, 72px)/1 var(--font-display); letter-spacing: -.045em; pointer-events: auto; }
+.sc-header { position: absolute; top: 22px; min-height: clamp(52px, 4.3vw, 72px); left: var(--sc-margin); right: max(96px, var(--sc-margin)); display: flex; align-items: center; gap: 36px; z-index: 4; }
+/* GT3 sits exactly where the Hub's centred mark sits, so it holds still across Hub → Collection → Showcase. */
+#showcase .sc-mark { position: fixed; left: 50%; top: 22px; transform: translateX(-50%); padding: 0; font: 500 clamp(52px, 4.3vw, 72px)/1 var(--font-display); letter-spacing: -.045em; pointer-events: auto; }
 .sc-micro { font: 400 10px/1.5 var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--fg-muted); }
 .sc-page-label { margin-left: auto; }
 .sc-slot { margin-left: 18px; color: var(--car-ink, var(--fg-muted)); }

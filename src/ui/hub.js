@@ -23,7 +23,7 @@
 
 import { state, subscribe } from '../core/state.js';
 import { CARS } from '../data/cars.js';
-import { Flip, gsap, reducedMotion, SplitText } from './motion.js';
+import { gsap, reducedMotion, SplitText } from './motion.js';
 import * as plan from './hubPlan.js';
 import * as collection from './hubCollection.js';
 import { applyCarColor } from './carIdentity.js';
@@ -98,10 +98,16 @@ function targetInsets(forView = view) {
   if (forView === 'collection') {
     return { top: Math.max(118, H * 0.17), bottom: Math.max(64, H * 0.12), left: side * 1.05, right: side * 1.05 + drawer };
   }
-  if (LAYOUT === 'vertical') {
-    return { top: H * 0.27, bottom: H * 0.29, left: side, right: side + drawer };
+  // The Hub view measures its neighbours (layout boxes, not transforms) so the circuit always
+  // fills exactly the space between the centred GT3 / SHOWCASE above and the actions below.
+  const below = (node) => (node ? node.offsetTop + node.offsetHeight : 0);
+  const gap = Math.max(22, H * 0.035);
+  if (LAYOUT === 'vertical' && actions.show) {
+    return { top: below(actions.show.wrap) + gap, bottom: H - actions.start.wrap.offsetTop + gap, left: side, right: side + drawer };
   }
-  return { top: H * 0.13, bottom: H * 0.33, left: side * 0.9, right: side * 0.9 + drawer };
+  const top = mark ? below(mark) + gap : H * 0.13;
+  const bottom = actions.start ? H - actions.start.wrap.offsetTop + gap : H * 0.33;
+  return { top, bottom, left: side * 0.9, right: side * 0.9 + drawer };
 }
 
 function applyInsets() {
@@ -438,6 +444,7 @@ function build() {
   root.insertBefore(planSvg, runway);
   stagePieces = [mark, start.cap, show.cap, status];
   gsap.set(stagePieces, { autoAlpha: 0, y: 10 });
+  gsap.set(mark, { xPercent: -50 });
   // Centred statuses keep their centring through GSAP's own transform (it owns `transform`).
   if (LOADER === 'circuit') gsap.set(status, { xPercent: -50, yPercent: -50 });
   else if (LAYOUT === 'vertical') gsap.set(status, { xPercent: -50 });
@@ -759,9 +766,7 @@ function enterCollection() {
   plan.lapLight(false);
   plan.previewDiscoveries(false, state.unlocked);
   Object.values(actions).forEach((action) => action.leanTl?.kill());
-  const markState = Flip.getState(mark);
   root.dataset.view = 'collection';
-  Flip.from(markState, { duration: reducedMotion.matches ? 0 : 0.9, ease: 'gt3.out' });
   const chars = Object.values(actions).flatMap((action) => action.chars);
   const checkers = Object.values(actions).map((action) => action.checker);
   const tl = gsap.timeline();
@@ -795,9 +800,7 @@ function exitCollection({ instant = false } = {}) {
   tl.add(collection.showCollection(false), 0);
   tl.add(() => {
     field.style.opacity = '';
-    const markState = Flip.getState(mark);
     root.dataset.view = 'hub';
-    Flip.from(markState, { duration: quick ? 0 : 0.8, ease: 'gt3.out' });
     moveFrame({ duration: quick ? 0 : 0.95, ease: 'gt3.out' });
   }, quick ? 0 : 0.28);
   const checkers = Object.values(actions).map((action) => action.checker);
@@ -819,7 +822,6 @@ function settleHubView() {
   field.style.opacity = '';
   gsap.set([back, fullLabel, carsWrap, emblemLabel], { autoAlpha: 0 });
   gsap.set(Object.values(actions).map((action) => action.checker), { scaleX: 1 });
-  gsap.set(mark, { clearProps: 'transform' });
   plan.showCarLabels(false);
   moveFrame();
 }

@@ -112,7 +112,7 @@
 #hub[data-layout='horizontal'] .hub-action--show { right: calc(var(--side) * .9); bottom: 8.5vh; align-items: flex-end; text-align: right; }
 #hub[data-layout='vertical'] .hub-action { left: 50%; align-items: center; text-align: center; transform: translateX(-50%); }
 #hub[data-layout='vertical'] .hub-action--start { bottom: 7.5vh; }
-#hub[data-layout='vertical'] .hub-action--show { top: 6.5vh; flex-direction: column-reverse; }
+#hub[data-layout='vertical'] .hub-action--show { top: calc(22px + var(--mark-size) + 3.2vh); flex-direction: column-reverse; }
 
 .hub-action__caption {
   display: flex;
@@ -201,8 +201,8 @@
 
 /* ---- the Collection: GT3 centred, the circuit enlarged, emblems in WebGL underneath ----------- */
 
-.hub-mark { left: calc(var(--side) * .62); top: 22px; margin-left: 0; }
-#hub[data-view='collection'] .hub-mark { left: 50%; transform: translateX(-50%); }
+/* GT3 is centred on every global page (owner 2026-11-26); GSAP owns its -50% offset (xPercent). */
+.hub-mark { left: 50%; top: 22px; margin-left: 0; }
 .hub-back {
   position: absolute;
   left: calc(var(--side) * .62);

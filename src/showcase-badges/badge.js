@@ -12,7 +12,7 @@ const sources = { lexus, audi, mclaren, nissan, mercedes, bmw: null };
 /** Create a self-contained, unlit-scene-agnostic badge. Caller supplies lights/environment. */
 export function createBadge({ manufacturer = 'lexus', color = 0x8fa6b6, theme = 'day', locked = false, onHover, onClick } = {}) {
   const source = sources[manufacturer];
-  if (!(manufacturer in sources)) throw new Error(`Unknown badge: ${manufacturer}`);
+  if (!Object.hasOwn(sources, manufacturer)) throw new Error(`Unknown badge: ${manufacturer}`);
   const root = new THREE.Group();
   const motion = new THREE.Group();
   const art = new THREE.Group();
@@ -57,7 +57,15 @@ export function createBadge({ manufacturer = 'lexus', color = 0x8fa6b6, theme = 
   const box = new THREE.Box3().setFromObject(art);
   const size = box.getSize(new THREE.Vector3());
   const center = box.getCenter(new THREE.Vector3());
-  const scale = 1 / Math.max(size.x, size.y);
+  const span = Math.max(size.x, size.y);
+  if (!Number.isFinite(span) || span <= 0) {
+    geometries.forEach(g => g.dispose());
+    ownedMaterials.forEach(m => m.dispose());
+    textures.forEach(t => t.dispose());
+    metal.dispose();
+    throw new Error(`Badge artwork has no measurable geometry: ${manufacturer}`);
+  }
+  const scale = 1 / span;
   art.position.set(-center.x * scale, -center.y * scale, -center.z * scale);
   art.scale.set(scale, manufacturer === 'bmw' ? scale : -scale, scale);
   const lockGeometry = new THREE.CylinderGeometry(0.25, 0.25, 0.025, 32);

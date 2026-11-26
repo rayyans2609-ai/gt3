@@ -10,7 +10,11 @@
   right: 0;
   color: var(--fg);
   font-family: var(--font-ui);
+  /* The container keeps the open drawer's box even when closed: only the tab and panel take input. */
+  pointer-events: none;
 }
+.edge-drawer__tab, .edge-drawer__panel { pointer-events: auto; }
+:root:not([data-drawer='open']) .edge-drawer__panel { visibility: hidden; transition: visibility 0s linear .36s; }
 .edge-drawer[hidden] { display: none; }
 :root[data-experience='tour'] .edge-drawer,
 :root[data-experience='complete'] .edge-drawer,

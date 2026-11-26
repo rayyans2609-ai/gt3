@@ -22,6 +22,8 @@ import * as plan from './hubPlan.js';
 
 const params = new URLSearchParams(window.location.search);
 const DIRECTION = params.get('hub') === 'launch' ? 'launch' : 'plan';
+const CHECKER_COLUMNS = 40;
+const PROGRESS_SMOOTH_MS = 260;
 
 let root = null;
 let field;
@@ -30,6 +32,8 @@ let planSvg = null;
 let mark;
 let startButton;
 let startWord;
+let startChecker;
+let checkerColumns = [];
 let split = null;
 let chars = [];
 let status;
@@ -48,6 +52,10 @@ let lastReadiness = '';
 let revealTl = null;
 let leanTl = null;
 let proximity = [];
+let checkerProgress = 0;
+let checkerTarget = 0;
+let checkerFrame = 0;
+let checkerLastFrameAt = 0;
 const html = document.documentElement;
 
 function el(tag, className, text) {
@@ -133,12 +141,56 @@ function renderLoadingChars() {
   chars.forEach((c, i) => c.classList.toggle('is-solid', i < solid));
 }
 
+function paintStartChecker(value) {
+  const filled = Math.floor(value * CHECKER_COLUMNS);
+  checkerColumns.forEach((column, index) => column.classList.toggle('is-filled', index < filled));
+}
+
+function stopCheckerAnimation() {
+  if (checkerFrame) cancelAnimationFrame(checkerFrame);
+  checkerFrame = 0;
+}
+
+function stepStartChecker(now) {
+  const dt = Math.min(64, Math.max(0, now - checkerLastFrameAt));
+  checkerLastFrameAt = now;
+  const remaining = checkerTarget - checkerProgress;
+  if (remaining <= 0.0005) {
+    checkerProgress = checkerTarget;
+    paintStartChecker(checkerProgress);
+    checkerFrame = 0;
+    return;
+  }
+  checkerProgress = Math.min(checkerTarget,
+    checkerProgress + remaining * (1 - Math.exp(-dt / PROGRESS_SMOOTH_MS)));
+  paintStartChecker(checkerProgress);
+  checkerFrame = requestAnimationFrame(stepStartChecker);
+}
+
+function renderStartChecker(nextProgress, { snap = false } = {}) {
+  checkerTarget = Math.min(1, Math.max(0, nextProgress));
+  if (snap || reducedMotion.matches) {
+    stopCheckerAnimation();
+    checkerProgress = checkerTarget;
+    paintStartChecker(checkerProgress);
+    return;
+  }
+  if (!checkerFrame) {
+    checkerLastFrameAt = performance.now();
+    checkerFrame = requestAnimationFrame(stepStartChecker);
+  }
+}
+
 function lean(on) {
   if (reducedMotion.matches || !chars.length || !ready) return;
   leanTl?.kill();
-  leanTl = gsap.to(chars, on
+  leanTl = gsap.timeline();
+  leanTl.to(chars, on
     ? { skewX: -9, duration: 0.3, ease: 'gt3.out', stagger: 0.012, transformOrigin: '0% 100%' }
-    : { skewX: 0, duration: 0.55, ease: 'gt3.out', stagger: { each: 0.01, from: 'end' } });
+    : { skewX: 0, duration: 0.55, ease: 'gt3.out', stagger: { each: 0.01, from: 'end' } }, 0);
+  leanTl.to(startChecker, on
+    ? { skewX: -9, duration: 0.3, ease: 'gt3.out', transformOrigin: '0% 100%' }
+    : { skewX: 0, duration: 0.55, ease: 'gt3.out' }, 0);
 }
 
 /** Launch direction: letters near the pointer lean forward, like speed passing through them. */
@@ -192,7 +244,15 @@ function build() {
   startButton.disabled = true;
   startButton.setAttribute('aria-label', 'Start race');
   startWord = el('span', 'hub-start__word', 'Start race');
-  startButton.append(startWord);
+  startChecker = el('span', 'hub-start__checker');
+  startChecker.setAttribute('aria-hidden', 'true');
+  checkerColumns = Array.from({ length: CHECKER_COLUMNS }, () => {
+    const column = el('span', 'hub-start__checker-column');
+    column.append(el('i'), el('i'));
+    startChecker.append(column);
+    return column;
+  });
+  startButton.append(startWord, startChecker);
   status = el('p', 'hub-status');
   status.setAttribute('aria-live', 'polite');
   startWrap.append(status, startButton);
@@ -264,6 +324,7 @@ export function setHubReadiness(readiness) {
   root.dataset.readiness = loading ? 'loading' : failed ? 'failed' : 'ready';
   status.textContent = failed ? 'Route unavailable. Reload the page to try again.'
     : loading ? `Preparing the grid ${String(percent).padStart(2, '0')}%` : '';
+  renderStartChecker(progress, { snap: !loading });
   renderLoadingChars();
   if (revealed && DIRECTION === 'plan') plan.drawToProgress(progress);
 }

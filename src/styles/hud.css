@@ -46,7 +46,7 @@ body.is-player-open #hud-bottomright { right: calc(24px + var(--player-w, 274px)
 /* Direction arrow: the group carries position + rotation in one transform; the
    shape inherits the marker colour. Z-order in the SVG is route, trail,
    checkpoints, arrow — the trail never covers dots or arrow. */
-.hud-route__marker { fill: var(--accent); stroke: var(--field); stroke-width: 1.5px; vector-effect: non-scaling-stroke; }
+.hud-route__marker { fill: var(--route-marker); stroke: none; }
 
 /* Day/Night segmented control: two icon targets in one pill, the active side shown
    by a sliding filled thumb. Slightly larger and more opaque than the old text

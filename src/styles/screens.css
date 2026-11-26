@@ -46,6 +46,17 @@
   animation: checker-ignite 520ms var(--ease) both;
   animation-delay: calc(var(--checker-i, 0) * 5ms);
 }
+/* The final unresolved cells land together before the cover parts. */
+.start-cover__column.is-final-fill i {
+  animation: checker-ignite 160ms var(--ease) both;
+  animation-delay: 0ms;
+  transition: none;
+}
+/* Previously filled cells settle before the final cells take their shared beat. */
+.start-screen.is-completing .start-cover__column.is-filled:not(.is-final-fill) i {
+  animation: none;
+  transition: none;
+}
 @keyframes checker-ignite {
   from { transform: translateY(-2px) scale(.82); opacity: .35; }
   to { transform: none; opacity: 1; }
@@ -310,5 +321,6 @@ body.gt3-showcase-open #finish-screen {
   .start-cover__bottom {
     transition-duration: 1ms;
   }
-  .start-cover__column i { transition: none; animation: none; }
+  .start-cover__column.is-filled i,
+  .start-cover__column.is-final-fill i { transition: none; animation: none; }
 }

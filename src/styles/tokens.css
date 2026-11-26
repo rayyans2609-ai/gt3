@@ -2,6 +2,7 @@
   --ease: cubic-bezier(.22, .61, .36, 1);
   /* Shared by both themes: a discovered checkpoint on the Tour minimap. */
   --checkpoint-found: #2f9e62;
+  --route-marker: #d7262e;
   transition: background-color 700ms var(--ease), color 700ms var(--ease);
 }
 

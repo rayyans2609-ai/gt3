@@ -2,6 +2,7 @@ import { state } from '../core/state.js';
 
 const COVER_PART_MS = 900;
 const CHECKER_COLUMNS = 40;
+const FINAL_CHECKER_BEAT_MS = 160;
 // Checker easing follows real progress; it never runs ahead of it and snaps to
 // full the moment readiness settles, so the shutter opens on a complete grid.
 const PROGRESS_SMOOTH_MS = 260;
@@ -17,6 +18,7 @@ let readiness = 'loading';
 let dismissComplete = false;
 let restoredSilently = false;
 let revealPromise;
+let finalCheckerPromise = Promise.resolve();
 const dismissCompleteHandlers = [];
 
 function element(tag, className, text) {
@@ -34,10 +36,14 @@ function paintState() {
   root.classList.toggle('is-ready', readiness === 'ready' || readiness === 'degraded');
 }
 
-function paintChecker(value) {
+function paintChecker(value, { finalSnap = false } = {}) {
   if (!root) return;
   const filled = Math.floor(value * CHECKER_COLUMNS);
-  columns.forEach((column, i) => column.classList.toggle('is-filled', i < filled));
+  columns.forEach((column, i) => {
+    const isNewlyFilled = finalSnap && i < filled && !column.classList.contains('is-filled');
+    column.classList.toggle('is-final-fill', isNewlyFilled);
+    column.classList.toggle('is-filled', i < filled);
+  });
   progressValue.textContent = readiness === 'failed'
     ? 'Route unavailable. Reload the page to try again.'
     : `Preparing the grid ${String(Math.round(value * 100)).padStart(2, '0')}%`;
@@ -78,10 +84,15 @@ export function setLoadState(next) {
   const stillLoading = readiness === 'loading';
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (!stillLoading || reduce) {
-    // Completion snaps to full: the shutter must never open on a partial grid.
+    // The final cells get one short shared beat, then the shutter may part.
     stopProgressAnimation();
     displayedProgress = targetProgress;
-    paintChecker(displayedProgress);
+    const finalSnap = !reduce && readiness !== 'failed';
+    root.classList.toggle('is-completing', finalSnap);
+    paintChecker(displayedProgress, { finalSnap });
+    finalCheckerPromise = finalSnap
+      ? new Promise(resolve => window.setTimeout(resolve, FINAL_CHECKER_BEAT_MS))
+      : Promise.resolve();
     return;
   }
   if (!progressFrame) {
@@ -108,12 +119,14 @@ export function dismissStartScreen() {
 /** The cover parts automatically at readiness; dismissal-complete waits for the scroll control. */
 export function revealTour() {
   if (revealPromise) return revealPromise;
-  root.classList.add('is-leaving');
-  root.setAttribute('aria-hidden', 'true');
-  revealPromise = new Promise(resolve => setTimeout(() => {
-    root.hidden = true;
-    resolve();
-  }, COVER_PART_MS));
+  revealPromise = finalCheckerPromise.then(() => {
+    root.classList.add('is-leaving');
+    root.setAttribute('aria-hidden', 'true');
+    return new Promise(resolve => setTimeout(() => {
+      root.hidden = true;
+      resolve();
+    }, COVER_PART_MS));
+  });
   return revealPromise;
 }
 

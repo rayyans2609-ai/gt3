@@ -99,6 +99,13 @@
 .hub-start__word { display: block; }
 .hub-start__char-mask { padding: 0.06em 0.12em 0.04em 0; margin: -0.06em -0.12em -0.04em 0; }
 .hub-start__char { will-change: transform; }
+.hub-start__checker { display: flex; width: 100%; margin-top: .16em; overflow: hidden; transform-origin: 0 100%; }
+.hub-start__checker-column { display: flex; flex: 1 1 0; flex-direction: column; }
+.hub-start__checker-column i { display: block; aspect-ratio: 1; background: color-mix(in srgb, var(--hub-ink) 12%, transparent); transition: background-color 180ms var(--ease); }
+.hub-start__checker-column:nth-child(odd) i:last-child,
+.hub-start__checker-column:nth-child(even) i:first-child { background: transparent; }
+.hub-start__checker-column.is-filled:nth-child(odd) i:first-child,
+.hub-start__checker-column.is-filled:nth-child(even) i:last-child { background: var(--hub-ink); }
 .hub-start:disabled { cursor: progress; }
 .hub-start:disabled .hub-start__word { color: color-mix(in srgb, var(--hub-ink) 22%, transparent); transition: color 600ms var(--ease); }
 #hub[data-readiness='failed'] .hub-start:disabled { cursor: not-allowed; }
@@ -121,6 +128,7 @@
 #hub[data-direction='launch'] .hub-start:disabled .hub-start__word { color: inherit; }
 #hub[data-direction='launch'] .hub-start__char { color: color-mix(in srgb, var(--hub-ink) 14%, transparent); transition: color 500ms var(--ease); }
 #hub[data-direction='launch'] .hub-start__char.is-solid { color: var(--hub-ink); }
+#hub[data-direction='launch'] .hub-start__checker { margin-top: .13em; }
 #hub[data-direction='launch'] .hub-status { margin-left: .4vw; }
 
 /* ---- Cars ------------------------------------------------------------------------------------ */

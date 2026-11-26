@@ -87,11 +87,12 @@ try {
     assert(voice.index === -1 || voice.index === state.index, 'narration index differs from visible vehicle');
     report.samples.push({ switch: switchIndex, ...state, voice });
   }
-  for (const [early, late] of [[0, 10], [1, 11]]) {
-    const a = report.samples[early], b = report.samples[late];
-    assert.equal(a.index, b.index);
-    assert(b.memory.geometries <= a.memory.geometries + 4, 'geometry residency grew for the same cache window');
-    assert(b.memory.textures <= a.memory.textures + 4, 'texture residency grew for the same cache window');
+  // Plateau, not equality: the prefetch window at a given index varies with load timing, so compare
+  // the second half's peak with the first half's (an unbounded leak grows with every switch).
+  const peak = (list, key) => Math.max(...list.map(sample => sample.memory[key]));
+  const firstHalf = report.samples.slice(0, 6), secondHalf = report.samples.slice(6);
+  for (const key of ['geometries', 'textures']) {
+    assert(peak(secondHalf, key) <= peak(firstHalf, key) * 1.1, `${key} residency kept growing across switches`);
   }
   const last = report.samples.at(-1);
   assert(last.resources.evicted > 0 && last.resources.disposedGeometries > 0 && last.resources.disposedTextures > 0);

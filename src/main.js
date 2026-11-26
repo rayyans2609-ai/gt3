@@ -233,6 +233,16 @@ async function boot() {
   motion.installMotion(registerUpdate);
   hub.initHub({
     onStartRace: () => { void enterTour(); },
+    // This is intentionally an immediate edge, not an inverse of the Landing scroll shot.
+    // It keeps the visit's route/audio/theme state intact while resetting only the Landing view.
+    onLanding: () => {
+      if (state.experience !== 'hub' || state.transition || !landing) return;
+      if (!setExperience('landing')) return;
+      document.documentElement.dataset.world = 'landing';
+      landing.activateLanding();
+      landing.seekLanding(0);
+      hub.resetHub(0, false);
+    },
     // The Hub's circuit plan is drawn through the Tour camera's fixed orientation.
     camera: { yawDeg: aerialCamera.TUNE.yawDeg, pitchDeg: aerialCamera.TUNE.pitchDeg },
   });

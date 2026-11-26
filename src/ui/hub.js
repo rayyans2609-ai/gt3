@@ -48,6 +48,7 @@ let stagePieces = [];
 let ready = false;
 let progress = 0;
 let onStart = null;
+let onLanding = null;
 let presence = -1;
 let interactive = null;
 let revealed = false;
@@ -291,8 +292,9 @@ function build() {
   field.setAttribute('aria-hidden', 'true');
   frame = el('div', 'hub-plan-frame');
   frame.setAttribute('aria-hidden', 'true');
-  mark = el('span', 'hub-mark', 'GT3');
-  mark.setAttribute('aria-hidden', 'true');
+  mark = el('button', 'hub-mark', 'GT3');
+  mark.type = 'button';
+  mark.setAttribute('aria-label', 'GT3 — back to the Landing');
   const startWrap = el('div', 'hub-start-wrap');
   startButton = el('button', 'hub-start');
   startButton.type = 'button';
@@ -326,6 +328,7 @@ function build() {
   gsap.set(stagePieces, { autoAlpha: 0, y: 10 });
 
   startButton.addEventListener('click', () => { if (ready && interactive) onStart?.(); });
+  mark.addEventListener('click', () => { if (interactive) onLanding?.(); });
   startButton.addEventListener('pointerenter', () => {
     if (!revealed) return;
     if (DIRECTION === 'plan') { lean(true); plan.startLeader(true, leaderOrigin()); plan.lapLight(true); }
@@ -360,10 +363,11 @@ function build() {
 
 let planCamera = { yawDeg: 75, pitchDeg: 52 };
 
-export function initHub({ onStartRace, camera } = {}) {
+export function initHub({ onStartRace, onLanding: returnToLanding, camera } = {}) {
   root = document.getElementById('hub');
   if (!root) throw new Error('Expected #hub');
   onStart = onStartRace;
+  onLanding = returnToLanding;
   if (camera) planCamera = camera;
   build();
   root.inert = true;

@@ -25,6 +25,7 @@ export const HERO_INDEX = 6; // McLaren 720S GT3 (roster order unchanged; SPEC Â
 // the DOM field (--landing-field in landing.css) uses the same two values.
 const FIELD = { day: new THREE.Color('#ffffff'), night: new THREE.Color('#0c1930') };
 const THEME_SECONDS = 0.7; // matches the 700 ms CSS token transition
+const reducedMotionQuery = window.matchMedia?.('(prefers-reduced-motion: reduce)');
 
 // Native-resolution render while the Landing owns the screen: one car on a flat field is cheap,
 // and a small hero at DPR1 would read soft. The Tour's fixed DPR is restored on exit.
@@ -50,6 +51,13 @@ const TUNE = {
   pointerPitch: 0.045,
   pointerEnvYaw: 0.32,        // restrained lighting response to the pointer
   pointerDamping: 3.2,        // 1/s
+  dragYawPerPixel: THREE.MathUtils.degToRad(0.3),
+  dragPitchPerPixel: THREE.MathUtils.degToRad(0.035),
+  dragYawLimit: THREE.MathUtils.degToRad(35), // provisional (owner review): enough to turn the car, never a free orbit
+  dragPitchLimit: THREE.MathUtils.degToRad(4),
+  dragDamping: 15,            // 1/s: controlled rather than orbit-viewer directness
+  dragIdleReturnMs: 2500,
+  dragInertiaSeconds: 0.09,
   scrollDamping: 9,           // 1/s: smooths wheel steps; never runs on after input ends
   // Measured on the GLB's near front fender, canonical coordinates minus the 0.58 m
   // pivot offset. Both are EXT_Carpaint_Inst: white livery (255/255/255) beside blue paint
@@ -101,6 +109,11 @@ let lastInputAt = -Infinity;
 let idleYaw = THREE.MathUtils.degToRad(TUNE.openingYawDeg - TUNE.heroAzimuthDeg);
 let lastYawDelta = 0;
 const pointer = { x: 0, y: 0, tx: 0, ty: 0 };
+const drag = {
+  pointerId: null, touchCandidate: false, active: false, startX: 0, startY: 0,
+  lastX: 0, lastY: 0, lastAt: 0, yaw: 0, pitch: 0, targetYaw: 0, targetPitch: 0,
+  yawVelocity: 0, releasedAt: -Infinity,
+};
 const themeMix = { value: 0, target: 0 }; // 0 day, 1 night
 
 // DOM.
@@ -326,6 +339,7 @@ function onScroll() {
   if (!active) return;
   targetProgress = readScroll();
   lastInputAt = performance.now();
+  if (targetProgress > 0.0001) resetDrag(true);
 }
 
 function onPointer(event) {
@@ -336,6 +350,104 @@ function onPointer(event) {
 function onPointerLeave() {
   pointer.tx = 0;
   pointer.ty = 0;
+}
+
+function reducedMotion() {
+  return reducedMotionQuery?.matches;
+}
+
+/** A deliberately conservative screen-space proxy for the resting hero bounds. */
+function heroHit(event) {
+  const x = event.clientX / Math.max(1, window.innerWidth);
+  const y = event.clientY / Math.max(1, window.innerHeight);
+  return x > 0.34 && x < 0.66 && y > 0.49 && y < 0.80;
+}
+
+function canDrag() {
+  return active && heroReady && state.experience === 'landing' &&
+    progress < 0.001 && targetProgress < 0.001;
+}
+
+function resetDrag(snap = false) {
+  drag.pointerId = null;
+  drag.touchCandidate = false;
+  drag.active = false;
+  drag.yawVelocity = 0;
+  drag.targetYaw = 0;
+  drag.targetPitch = 0;
+  if (snap || reducedMotion()) {
+    drag.yaw = 0;
+    drag.pitch = 0;
+  }
+  renderer?.domElement && (renderer.domElement.style.cursor = '');
+}
+
+function beginDrag(event) {
+  if (!canDrag() || !heroHit(event)) return;
+  drag.pointerId = event.pointerId;
+  drag.touchCandidate = event.pointerType === 'touch';
+  drag.active = !drag.touchCandidate;
+  drag.startX = drag.lastX = event.clientX;
+  drag.startY = drag.lastY = event.clientY;
+  drag.lastAt = performance.now();
+  drag.yawVelocity = 0;
+  if (drag.active) {
+    renderer.domElement.setPointerCapture(event.pointerId);
+    renderer.domElement.style.cursor = 'grabbing';
+  }
+}
+
+function moveDrag(event) {
+  if (drag.pointerId !== event.pointerId) return;
+  const dx = event.clientX - drag.lastX;
+  const dy = event.clientY - drag.lastY;
+  if (drag.touchCandidate && !drag.active) {
+    const totalX = event.clientX - drag.startX;
+    const totalY = event.clientY - drag.startY;
+    if (Math.abs(totalX) < 5 && Math.abs(totalY) < 5) return;
+    if (Math.abs(totalX) <= Math.abs(totalY) * 1.25) {
+      resetDrag();
+      return;
+    }
+    drag.active = true;
+    renderer.domElement.setPointerCapture(event.pointerId);
+    renderer.domElement.style.cursor = 'grabbing';
+  }
+  if (!drag.active) return;
+  const now = performance.now();
+  const elapsed = Math.max(1, now - drag.lastAt) / 1000;
+  drag.targetYaw = THREE.MathUtils.clamp(drag.targetYaw + dx * TUNE.dragYawPerPixel,
+    -TUNE.dragYawLimit, TUNE.dragYawLimit);
+  drag.targetPitch = THREE.MathUtils.clamp(drag.targetPitch + dy * TUNE.dragPitchPerPixel,
+    -TUNE.dragPitchLimit, TUNE.dragPitchLimit);
+  drag.yawVelocity = THREE.MathUtils.clamp(dx * TUNE.dragYawPerPixel / elapsed,
+    -TUNE.dragYawLimit * 4, TUNE.dragYawLimit * 4);
+  drag.lastX = event.clientX;
+  drag.lastY = event.clientY;
+  drag.lastAt = now;
+}
+
+function endDrag(event) {
+  if (drag.pointerId !== event.pointerId) return;
+  if (drag.active && !reducedMotion()) {
+    drag.targetYaw = THREE.MathUtils.clamp(drag.targetYaw + drag.yawVelocity * TUNE.dragInertiaSeconds,
+      -TUNE.dragYawLimit, TUNE.dragYawLimit);
+    drag.targetPitch = 0;
+    drag.releasedAt = performance.now();
+  } else if (drag.active) {
+    drag.targetYaw = drag.targetPitch = 0;
+    drag.yaw = drag.pitch = 0;
+  }
+  if (renderer.domElement.hasPointerCapture?.(event.pointerId)) renderer.domElement.releasePointerCapture(event.pointerId);
+  drag.pointerId = null;
+  drag.touchCandidate = false;
+  drag.active = false;
+  renderer.domElement.style.cursor = canDrag() && heroHit(event) ? 'grab' : '';
+}
+
+function updateCursor(event) {
+  if (drag.active || !renderer || !canDrag()) return;
+  renderer.domElement.style.cursor = heroHit(event) ? 'grab' : '';
 }
 
 // ---------------------------------------------------------------------------
@@ -392,6 +504,14 @@ export function initLanding(sharedRenderer, { onHub, onLanding } = {}) {
   window.addEventListener('scroll', onScroll, { passive: true });
   window.addEventListener('pointermove', onPointer, { passive: true });
   document.documentElement.addEventListener('pointerleave', onPointerLeave, { passive: true });
+  // Vertical touch gestures retain their native scroll ownership; a touch drag only captures
+  // after it has proved horizontal-dominant in moveDrag().
+  renderer.domElement.style.touchAction = 'pan-y';
+  renderer.domElement.addEventListener('pointerdown', beginDrag);
+  renderer.domElement.addEventListener('pointermove', moveDrag);
+  renderer.domElement.addEventListener('pointermove', updateCursor);
+  renderer.domElement.addEventListener('pointerup', endDrag);
+  renderer.domElement.addEventListener('pointercancel', endDrag);
   subscribe('theme', (theme) => { themeMix.target = theme === 'night' ? 1 : 0; });
 
   void loadHero();
@@ -454,6 +574,7 @@ export function seekLanding(p) {
   const max = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
   window.scrollTo(0, Math.min(1, Math.max(0, p)) * max);
   progress = targetProgress = readScroll();
+  if (progress < 0.0001) resetDrag(true);
 }
 
 /** Per-frame update. Runs only while the Landing owns the screen. */
@@ -466,10 +587,18 @@ export function updateLanding(dt) {
   const k = 1 - Math.exp(-TUNE.scrollDamping * safeDt);
   progress += (targetProgress - progress) * k;
   if (Math.abs(targetProgress - progress) < 1e-4) progress = targetProgress;
+  if (progress > 0.0001 || targetProgress > 0.0001) resetDrag(true);
 
   const kp = 1 - Math.exp(-TUNE.pointerDamping * safeDt);
   pointer.x += (pointer.tx - pointer.x) * kp;
   pointer.y += (pointer.ty - pointer.y) * kp;
+
+  if (!drag.active && !reducedMotion() && performance.now() - drag.releasedAt >= TUNE.dragIdleReturnMs) {
+    drag.targetYaw = 0;
+  }
+  const dragK = 1 - Math.exp(-TUNE.dragDamping * safeDt);
+  drag.yaw += (drag.targetYaw - drag.yaw) * dragK;
+  drag.pitch += (drag.targetPitch - drag.pitch) * dragK;
 
   if (themeMix.value !== themeMix.target) {
     const step = safeDt / THEME_SECONDS;
@@ -494,8 +623,8 @@ export function updateLanding(dt) {
   if (Math.abs(delta - lastYawDelta) > Math.PI) delta += delta < lastYawDelta ? 2 * Math.PI : -2 * Math.PI;
   lastYawDelta = delta;
   const turn = THREE.MathUtils.smootherstep(settle, 0, 1);
-  pivot.rotation.y = idleYaw + delta * turn + pointer.x * TUNE.pointerYaw * rest;
-  pivot.rotation.x = pointer.y * TUNE.pointerPitch * rest;
+  pivot.rotation.y = idleYaw + delta * turn + (pointer.x * TUNE.pointerYaw + drag.yaw) * rest;
+  pivot.rotation.x = (pointer.y * TUNE.pointerPitch + drag.pitch) * rest;
   const bob = Math.sin(performance.now() / 1000 * 2 * Math.PI / TUNE.bobSeconds) * TUNE.bobAmplitude;
   pivot.position.y = TUNE.floatHeight + bob * rest;
 

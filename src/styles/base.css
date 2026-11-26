@@ -8,6 +8,8 @@
 @import './player.css';
 @import './landing.css';
 @import './hub.css';
+@import './hubPlayer.css';
+@import './drawer.css';
 @import './entry.css';
 
 :root {

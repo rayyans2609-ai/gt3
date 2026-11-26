@@ -48,14 +48,14 @@
 }
 
 /* Cap by height on wide desktops so the label clears the car; 1440×900 stays exact. */
-:root { --landing-type: clamp(201px, min(24.89vw, 39.824vh), 574px); }
+:root { --landing-type: clamp(201px, min(24.89vw, 39.824vh), 574px); --landing-type-top: 16.2vh; }
 
 /* Owner canvas: a centred vertical stack. Centre with the box, because the scroll recede
    writes transform every frame. The label follows the wordmark line box at every size. */
 .landing-wordmark {
   position: absolute;
   left: 0;
-  top: 21.11vh;
+  top: var(--landing-type-top);
   width: 100%;
   text-align: center;
   padding-right: 0.06em; /* balance the final negative tracking space optically */
@@ -71,7 +71,7 @@
 .landing-eyebrow {
   position: absolute;
   left: 0;
-  top: calc(21.11vh + var(--landing-type) * 0.74 + 32.8px);
+  top: calc(var(--landing-type-top) + var(--landing-type) * 0.74 + 32.8px);
   width: 100%;
   text-align: center;
   font-family: var(--font-ui);

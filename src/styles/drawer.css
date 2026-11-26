@@ -1,0 +1,168 @@
+/* Global right-edge music drawer — Landing / Hub / Showcase only. The shell owns the horizontal
+   GSAP translate; tab and panel are siblings so their shared edge can never detach mid-reversal. */
+
+:root { --drawer-w: 366px; }
+
+.edge-drawer {
+  position: fixed;
+  z-index: 82;
+  top: 52vh;
+  right: 0;
+  color: var(--fg);
+  font-family: var(--font-ui);
+}
+.edge-drawer[hidden] { display: none; }
+:root[data-experience='tour'] .edge-drawer,
+:root[data-experience='complete'] .edge-drawer { display: none; }
+.edge-drawer__shell {
+  display: flex;
+  align-items: center;
+  width: max-content;
+  transform: translateY(-50%);
+  will-change: transform;
+}
+.edge-drawer__tab {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 52px;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-right: 0;
+  border-radius: 14px 0 0 14px;
+  background: var(--surface-pill);
+  color: var(--fg);
+  cursor: pointer;
+  box-shadow: -5px 7px 20px color-mix(in srgb, var(--fg) 10%, transparent);
+  transition: color 180ms var(--ease), background-color 700ms var(--ease), border-color 700ms var(--ease), box-shadow 180ms var(--ease);
+}
+.edge-drawer__tab svg { width: 19px; height: 19px; }
+.edge-drawer__tab:hover { color: var(--accent); box-shadow: -7px 8px 22px color-mix(in srgb, var(--fg) 15%, transparent); }
+.edge-drawer__tab:focus-visible { outline: 2px solid var(--accent); outline-offset: -4px; }
+.edge-drawer__panel {
+  --hub-ink: var(--fg);
+  --hub-muted: var(--fg-muted);
+  --hub-hair: color-mix(in srgb, var(--fg) 16%, transparent);
+  --hub-faint: color-mix(in srgb, var(--fg) 8%, transparent);
+  --hub-accent: var(--accent);
+  width: min(320px, calc(100vw - 56px));
+  max-height: calc(100vh - 36px);
+  padding: 20px 20px 15px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-right: 0;
+  border-radius: 18px 0 0 18px;
+  background: var(--surface-pill);
+  box-shadow: none;
+  transition: color 700ms var(--ease), background-color 700ms var(--ease), border-color 700ms var(--ease), box-shadow 240ms var(--ease);
+}
+
+/* Shadow only while open, so nothing leaks past the edge at rest; the tab overlaps the panel's
+   border by a pixel so tab and panel read as one object. */
+:root[data-drawer='open'] .edge-drawer__panel { box-shadow: -14px 16px 40px color-mix(in srgb, var(--fg) 12%, transparent); }
+.edge-drawer__tab { position: relative; z-index: 1; margin-right: -1px; }
+:root[data-drawer='open'] .edge-drawer__tab { box-shadow: -8px 8px 18px color-mix(in srgb, var(--fg) 7%, transparent); }
+:root[data-drawer='open'] .edge-sound-notice { opacity: 0; pointer-events: none; }
+.edge-sound-notice { transition: opacity 220ms var(--ease); }
+
+/* The Hub player becomes a vertical drawer composition. Its original controls and cover
+   crossfade are untouched; only its named grid areas are remapped. */
+.edge-drawer .hub-player[data-shape='drawer'] {
+  display: grid;
+  width: 100%;
+  min-height: 0;
+  grid-template-columns: 1fr;
+  grid-template-rows: auto auto 20px 40px auto;
+  grid-template-areas: 'cover' 'meta' 'seek' 'transport' 'levels';
+  row-gap: 8px;
+}
+.edge-drawer .hub-player[data-shape='drawer'] .hub-player__cover {
+  width: min(100%, 34vh);
+  height: auto;
+  justify-self: start;
+  border-radius: 5px;
+}
+.edge-drawer .hub-player[data-shape='drawer'] .hub-player__meta { margin: 0; }
+.edge-drawer .hub-player[data-shape='drawer'] .hub-player__transport { margin: 0; }
+.edge-drawer .hub-player[data-shape='drawer'] .hub-player__levels {
+  margin-top: 3px;
+  padding-top: 8px;
+  border-top: 1px solid var(--hub-faint);
+}
+.edge-drawer .hub-player[data-shape='drawer'] .hub-player__list { min-height: 0; }
+.edge-drawer .hub-player[data-shape='drawer'].is-list-open {
+  grid-template-columns: 76px minmax(0, 1fr);
+  grid-template-rows: auto auto 20px 40px auto;
+  grid-template-areas: 'cover list' 'meta list' 'seek list' 'transport list' 'levels list';
+  column-gap: 14px;
+  row-gap: 8px;
+}
+.edge-drawer .hub-player[data-shape='drawer'].is-list-open .hub-player__cover {
+  width: 76px;
+  height: 76px;
+}
+.edge-drawer .hub-player[data-shape='drawer'].is-list-open .hub-player__list {
+  display: grid;
+  grid-template-rows: repeat(6, minmax(22px, 1fr));
+  margin: 0;
+}
+.edge-drawer .hub-player[data-shape='drawer'] .hub-player__label { font-size: 17px; }
+.edge-drawer .hub-player[data-shape='drawer'] .hub-player__track { min-height: 22px; }
+.edge-drawer .hub-player[data-shape='drawer'] .hub-level { height: 19px; }
+
+.edge-drawer__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--hub-faint);
+}
+.edge-drawer__footer .theme-segmented {
+  order: 1;
+  height: 38px;
+  box-shadow: none;
+}
+.edge-drawer__footer .theme-segmented__option { width: 44px; }
+.edge-drawer__footer .theme-segmented__thumb { border-radius: 17px; }
+.edge-drawer__speaker { order: 2; width: 38px; height: 34px; }
+
+/* The old bottom-right controls remain exactly the Tour controls. */
+:root[data-experience='landing'] #hud-bottomright,
+:root[data-experience='hub'] #hud-bottomright,
+:root[data-experience='showcase'] #hud-bottomright { display: none; }
+:root[data-experience='landing'] #audio-layer .audio-anchor,
+:root[data-experience='hub'] #audio-layer .audio-anchor,
+:root[data-experience='showcase'] #audio-layer .audio-anchor,
+:root[data-experience='landing'] #audio-layer .music-player,
+:root[data-experience='hub'] #audio-layer .music-player,
+:root[data-experience='showcase'] #audio-layer .music-player { display: none; }
+
+/* A quiet, session-dismissable first-gesture invitation; it is never a percentage or modal. */
+.edge-sound-notice {
+  position: fixed;
+  z-index: 83;
+  top: calc(52vh + 46px);
+  right: 0;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 10px 9px 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px 0 0 12px;
+  background: var(--surface-pill);
+  color: var(--fg-muted);
+  box-shadow: -5px 7px 18px color-mix(in srgb, var(--fg) 10%, transparent);
+  font-size: 11px;
+  letter-spacing: .02em;
+}
+.edge-sound-notice button { appearance: none; background: none; cursor: pointer; }
+.edge-sound-notice__enable { padding: 0; color: var(--accent); font: 600 11px var(--font-ui); }
+.edge-sound-notice__enable:disabled { opacity: .55; cursor: wait; }
+.edge-sound-notice__dismiss { width: 18px; height: 18px; padding: 0; color: var(--fg-muted); font-size: 17px; line-height: 1; }
+.edge-sound-notice button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .edge-drawer *, .edge-sound-notice * { transition-duration: 0ms !important; animation: none !important; }
+}

@@ -135,12 +135,14 @@ async function boot() {
   const hud = await import('./ui/hud.js');
   const themeToggle = await import('./ui/themeToggle.js');
   const soundControl = await import('./ui/soundControl.js');
+  const edgeDrawer = await import('./ui/edgeDrawer.js');
   const player = await import('./ui/player.js');
   const soundCue = await import('./ui/soundCue.js');
   const startScreen = await import('./ui/startScreen.js');
   const entrySequence = await import('./ui/entrySequence.js');
   const finishScreen = await import('./ui/finishScreen.js');
   const hub = await import('./ui/hub.js');
+  const hubCollection = await import('./ui/hubCollection.js');
   const motion = await import('./ui/motion.js');
   const trackCurve = await import('./scene/trackCurve.js');
   const trackProfile = await import('./scene/trackProfile.js');
@@ -241,6 +243,9 @@ async function boot() {
   motion.installMotion(registerUpdate);
   hub.initHub({
     onStartRace: () => { void enterTour(); },
+    // Collection → Showcase (owner brief 2026-11-26 §5–§6). Wired to the Showcase module below.
+    onShowcase: (request) => { void enterShowcase(request); },
+    renderer,
     // This is intentionally an immediate edge, not an inverse of the Landing scroll shot.
     // It keeps the visit's route/audio/theme state intact while resetting only the Landing view.
     onLanding: () => {
@@ -306,6 +311,8 @@ async function boot() {
     themeToggle.initThemeToggle();
     soundControl.initSoundControl();
     player.initPlayer();
+    // Global Landing / Hub / Showcase player home; Tour keeps its existing edge-row controls.
+    edgeDrawer.initEdgeDrawer();
   });
   timed('init-sound-cue-finish-screen', () => {
     soundCue.initSoundCue();
@@ -601,6 +608,11 @@ async function boot() {
   }
   window.__gt3.leaveTour = leaveTour;
 
+  // ---- Showcase (placeholder until the Showcase V1 module is integrated) --------------------
+  async function enterShowcase({ index, mode, origin }) {
+    console.info('[gt3] showcase requested', { index, mode, origin });
+  }
+
   // ---- wiring ------------------------------------------------------------
 
   // The studio (a second WebGL renderer, SPEC §27) is NOT created at boot: nothing in the Grand
@@ -668,6 +680,8 @@ async function boot() {
   registerUpdate(audio.updateAudio);
   registerUpdate(player.updatePlayer);
   registerUpdate(hub.updateHub);
+  // Edge drawer player status refresh stays in the single shared RAF.
+  registerUpdate(edgeDrawer.updateEdgeDrawer);
   registerUpdate(sceneSetup.updateScene);
 
   onResize((w, h) => {
@@ -697,8 +711,8 @@ async function boot() {
           }
           settle('gpu', 'ready');
         }
-        if (landingOwns) landing.renderLanding();
-      } else if (landingOwns) landing.renderLanding();
+        if (landingOwns) { landing.renderLanding(); hubCollection.renderCollection(); }
+      } else if (landingOwns) { landing.renderLanding(); hubCollection.renderCollection(); }
       else if (studio.isMontagePlaying()) studio.renderMontage();
       else {
         sceneSetup.render(dt);

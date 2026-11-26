@@ -32,6 +32,7 @@ let labels;
 let edgeL;
 let edgeR;
 let lap;
+let head;
 let ticks = [];
 let startMark;
 let here;
@@ -118,7 +119,7 @@ function writeView(v = view) {
   world.setAttribute('transform', `matrix(${c} ${s} ${-s} ${c} ${v.x} ${v.y})`);
   if (perspective?.mix > 0) {
     for (const shape of shapes) {
-      if (shape.el === lap) continue; // the hover lap has faded out before perspective starts
+      if (shape.el === lap || shape.el === head) continue; // overlays have faded out before perspective starts
       shape.el.setAttribute('d', perspectivePath(shape.projected, perspective.mix, pathScratch, shape.closed));
     }
     pathsDeformed = true;
@@ -197,10 +198,22 @@ function setDrawn(value) {
   drawn = value;
   const pct = `${(value * 100).toFixed(2)}%`;
   gsap.set([edgeL, edgeR], { drawSVG: `0% ${pct}` });
+  if (headOn) {
+    const p = value * 100;
+    gsap.set(head, { drawSVG: `${Math.max(0, p - 4.5).toFixed(2)}% ${p.toFixed(2)}%`, opacity: value > 0 && value < 1 ? 1 : 0 });
+  }
   renderTicks();
 }
 
-export function buildPlan(container, frame, { yawDeg = 75, pitchDeg = 52, onLockedCar } = {}) {
+let headOn = false;
+/** Circuit loader: a short travelling highlight rides the drawing front from the start line. */
+export function setLoadingHead(on) {
+  headOn = on;
+  if (!on) gsap.set(head, { opacity: 0 });
+  else setDrawn(drawn);
+}
+
+export function buildPlan(container, frame, { yawDeg = 75, pitchDeg = 52, onLockedCar, onCarSelect } = {}) {
   basis = makeBasis(yawDeg, pitchDeg);
   bounds = { minX: Infinity, maxX: -Infinity, minY: Infinity, maxY: -Infinity };
   frameEl = frame;
@@ -212,6 +225,7 @@ export function buildPlan(container, frame, { yawDeg = 75, pitchDeg = 52, onLock
   edgeL = addPath(-HALF_WIDTH_M, 'hub-plan__edge');
   edgeR = addPath(HALF_WIDTH_M, 'hub-plan__edge');
   lap = addPath(0, 'hub-plan__lap');
+  head = addPath(0, 'hub-plan__head');
 
   // Checkpoint ticks: car i+1 is discovered at CHECKPOINT_ROUTE_T[i] (Lexus starts the Tour).
   ticks = CHECKPOINT_ROUTE_T.map((t, i) => {
@@ -254,7 +268,9 @@ export function buildPlan(container, frame, { yawDeg = 75, pitchDeg = 52, onLock
       if (labelsOn && label.found) lapLight(true, { car: CARS[car], once: true });
     };
     const activate = () => {
-      if (labelsOn && !label.found) onLockedCar?.(car, el);
+      if (!labelsOn) return;
+      if (label.found) onCarSelect?.(car, el);
+      else onLockedCar?.(car, el);
     };
     el.addEventListener('pointerenter', pulse);
     el.addEventListener('focus', () => { if (el.matches(':focus-visible')) pulse(); });
@@ -284,7 +300,7 @@ export function buildPlan(container, frame, { yawDeg = 75, pitchDeg = 52, onLock
   container.append(svg);
   layout();
   setDrawn(0);
-  gsap.set(lap, { drawSVG: '0% 0%' });
+  gsap.set([lap, head], { drawSVG: '0% 0%' });
   reducedMotion.addEventListener?.('change', () => lapLight(false));
   return svg;
 }
@@ -467,7 +483,7 @@ export function zoom({ samples, projected, project, progress, direction = 1, dur
     const markerProjected = project(markerSamples);
     const depthOrigin = Math.max(1, markerProjected[2].depth);
     for (const shape of shapes) {
-      if (shape.el !== lap) shape.projected = preparePerspective(shape.points, project(shape.samples), target, depthOrigin);
+      if (shape.el !== lap && shape.el !== head) shape.projected = preparePerspective(shape.points, project(shape.samples), target, depthOrigin);
     }
     perspective = {
       mix: 0,
@@ -505,3 +521,59 @@ export function resetPlanView() {
   view = { ...rest };
   writeView();
 }
+
+
+// ---------------------------------------------------------------------------------------------
+// Hub redesign (2026-11-26): anchors for the Collection's emblems and the loaders.
+
+/** Screen-space centre of the circuit's own bounds: the plan's negative space (status, flag). */
+export function circuitCentre(v = view) {
+  if (!bounds) return { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+  return screenOf({ x: (bounds.minX + bounds.maxX) / 2, y: (bounds.minY + bounds.maxY) / 2 }, v);
+}
+
+/** Screen-space size of the drawn circuit at rest (px). */
+export function circuitSize(v = view) {
+  if (!bounds) return { w: 0, h: 0 };
+  return { w: (bounds.maxX - bounds.minX) * v.s, h: (bounds.maxY - bounds.minY) * v.s };
+}
+
+/**
+ * One anchor per car: the checkpoint (Lexus: the start line) and an outward direction away from
+ * the circuit's middle, so an emblem can float just outside the road. Screen space, current view.
+ */
+export function checkpointAnchors(offset = 0) {
+  const c = circuitCentre();
+  return carLabels.map((label) => {
+    const on = screenOf(planAt(label.t));
+    const out = screenOf(label.outer);
+    let dx = out.x - on.x;
+    let dy = out.y - on.y;
+    const len = Math.hypot(dx, dy) || 1;
+    dx /= len; dy /= len;
+    // Ticks are perpendicular to the road; flip so the direction points away from the middle.
+    if ((on.x - c.x) * dx + (on.y - c.y) * dy < 0) { dx = -dx; dy = -dy; }
+    return { car: label.car, x: on.x + dx * offset, y: on.y + dy * offset, on, nx: dx, ny: dy };
+  });
+}
+
+/** SHOWCASE hover: discovered checkpoints (and the start for Lexus) light in their car colours. */
+export function previewDiscoveries(on, unlocked) {
+  ticks.forEach((tick, index) => {
+    const lit = on && unlocked.has(tick.car);
+    if (lit) applyCarColor(tick.el, CARS[tick.car]);
+    tick.el.classList.toggle('is-preview', lit);
+    tick.el.style.transitionDelay = lit ? `${index * 45}ms` : '0ms';
+  });
+  startMark.el.classList.toggle('is-preview', on);
+}
+
+/** Colour one checkpoint while its emblem is hovered in the Collection. */
+export function highlightCheckpoint(car, on) {
+  const tick = ticks.find((item) => item.car === car);
+  const el = tick ? tick.el : startMark.el;
+  if (on && CARS[car]) applyCarColor(el, CARS[car]);
+  el.classList.toggle('is-highlight', on);
+}
+
+export function drawnFraction() { return drawn; }

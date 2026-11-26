@@ -5,7 +5,8 @@
  * track-list `+` can recompose the same object (SPEC §9 "recomposition, not growth"): the cover
  * recedes to a thumbnail, the six tracks take the space it frees, the outer bounds stay put.
  * GSAP Flip animates between the two layouts and reverses from wherever it is when toggled.
- * Two shapes serve the Hub directions: `row` (cover beside its controls) and `column`.
+ * The legacy Hub directions use `row` and `column`; the global right-edge drawer uses the
+ * same view with the vertical `drawer` shape. It remains a view over audioManager either way.
  *
  * Nothing here starts audio except play or a track choice, which already do in the compact
  * player (SPEC §10). Levels come from the shared audioLevels.js and never touch the context.

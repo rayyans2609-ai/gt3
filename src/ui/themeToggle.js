@@ -2,6 +2,7 @@ import { set, state, subscribe } from '../core/state.js';
 
 let group = null;
 let options = [];
+let home = null;
 
 // Inline SVG strokes (~1.5 px, round caps) matching the speaker icon's line language.
 const SUN_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.8v2.4m0 13.6v2.4M2.8 12h2.4m13.6 0h2.4M5.5 5.5l1.7 1.7m9.6 9.6 1.7 1.7m0-12.9-1.7 1.7m-9.6 9.6-1.7 1.7"/></svg>';
@@ -53,6 +54,7 @@ export function initThemeToggle() {
   if (group) return group;
   const host = document.getElementById('hud-bottomright');
   if (!host) throw new Error('Expected an existing #hud-bottomright');
+  home = host;
 
   group = document.createElement('div');
   group.className = 'theme-segmented';
@@ -115,4 +117,10 @@ export function initThemeToggle() {
   window.addEventListener('resize', syncPlayerWidth);
 
   return group;
+}
+
+/** Move the single global Day/Night control between the Tour edge row and edge drawer. */
+export function setThemeToggleHost(host = home) {
+  if (!group || !host || group.parentElement === host) return;
+  host.append(group);
 }

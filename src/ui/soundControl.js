@@ -6,7 +6,23 @@ let speaker;
 let launcher;
 let pending = false;
 
-const speakerIcon = `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 9h4l5-4v14l-5-4H4z"/><path class="speaker-wave" d="M16 9a4 4 0 0 1 0 6m2-9a8 8 0 0 1 0 12"/><path class="speaker-slash" d="M17 9l5 6m0-6l-5 6"/></svg>`;
+export const speakerIcon = `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 9h4l5-4v14l-5-4H4z"/><path class="speaker-wave" d="M16 9a4 4 0 0 1 0 6m2-9a8 8 0 0 1 0 12"/><path class="speaker-slash" d="M17 9l5 6m0-6l-5 6"/></svg>`;
+
+/** The one explicit-gesture master-sound path shared by the Tour anchor and drawer. */
+export async function toggleMasterSound() {
+  if (state.audioReady) {
+    setMasterMuted(!state.masterMuted);
+    return true;
+  }
+  setMasterMuted(false);
+  return startAudio();
+}
+
+/** Used by the drawer notification: it enables rather than toggles master sound. */
+export async function enableMasterSound() {
+  setMasterMuted(false);
+  return startAudio();
+}
 
 function render() {
   if (!speaker) return;
@@ -45,15 +61,11 @@ export function initSoundControl() {
 
   speaker.addEventListener('click', async () => {
     if (pending) return;
-    if (state.audioReady) {
-      setMasterMuted(!state.masterMuted);
-      return;
-    }
-    setMasterMuted(false);
+    if (state.audioReady) return toggleMasterSound();
     pending = true;
     render();
     try {
-      await startAudio();
+      await toggleMasterSound();
     } finally {
       pending = false;
       render();

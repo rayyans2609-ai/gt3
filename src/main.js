@@ -136,6 +136,7 @@ async function boot() {
   const hub = await import('./ui/hub.js');
   const motion = await import('./ui/motion.js');
   const trackCurve = await import('./scene/trackCurve.js');
+  const trackProfile = await import('./scene/trackProfile.js');
   const homeControl = await import('./ui/homeControl.js');
 
   perfMark('imports:end');
@@ -479,15 +480,21 @@ async function boot() {
    * unlocks once any momentum from the Hub has died away. No input crosses the handoff.
    */
   /**
-   * Screen points of route positions in the live Tour frame (Hub plan <-> road handoff). Uses
-   * the same route geometry the Hub's plan is drawn from (trackCurve.offsetPointAt).
+   * Screen points of route positions in the live Tour frame (Hub plan <-> road handoff).
+   * The resting plan uses nominal widths; its dive resolves to the actual asphalt edges.
+   * Camera-space depth lets the plan blend orthographic and perspective before division.
    */
   const projected = new THREE.Vector3();
   function projectRoute(samples) {
     camera.updateMatrixWorld();
-    return samples.map(({ t, lateral }) => {
-      trackCurve.offsetPointAt(t, lateral, 0, projected).project(camera);
-      return { x: (projected.x + 1) / 2 * window.innerWidth, y: (1 - projected.y) / 2 * window.innerHeight };
+    return samples.map(({ t, lateral, edge = 0, edgeOffset = 0 }) => {
+      const offset = edge ? trackProfile.asphaltEdgeAt(t, edge) + edge * edgeOffset : lateral;
+      const height = edge ? trackProfile.CROSS_SECTION.asphaltY : 0;
+      trackCurve.offsetPointAt(t, offset, height, projected).applyMatrix4(camera.matrixWorldInverse);
+      const depth = -projected.z;
+      projected.applyMatrix4(camera.projectionMatrix);
+      return { x: (projected.x + 1) / 2 * window.innerWidth,
+        y: (1 - projected.y) / 2 * window.innerHeight, depth };
     });
   }
 

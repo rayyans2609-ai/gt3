@@ -18,6 +18,7 @@
 import { CHECKPOINT_ROUTE_T, offsetPointAt, routeTAt } from '../scene/trackCurve.js';
 import { CARS } from '../data/cars.js';
 import { gsap, reducedMotion } from './motion.js';
+import { fitSimilarity, perspectiveMix, preparePerspective, perspectivePoint, perspectivePath } from './hubPlanProjection.js';
 
 const SVG = 'http://www.w3.org/2000/svg';
 const SAMPLES = 900;
@@ -47,6 +48,10 @@ let lapTween = null;
 let zoomTween = null;
 let labelsOn = false;
 let routeT = null;
+let shapes = [];
+let perspective = null;
+let pathsDeformed = false;
+const pathScratch = { x: 0, y: 0 };
 
 function node(tag, attrs = {}, parent) {
   const el = document.createElementNS(SVG, tag);
@@ -79,21 +84,44 @@ function planAt(t, lateral = 0) {
 
 function pathFor(lateral) {
   let d = '';
+  const points = [], samples = [];
   for (let i = 0; i <= SAMPLES; i++) {
     const p = planAt(i / SAMPLES, lateral);
+    points.push(p);
+    samples.push({ t: i / SAMPLES, lateral, edge: Math.sign(lateral) });
     d += `${i ? 'L' : 'M'}${p.x.toFixed(2)} ${p.y.toFixed(2)}`;
     if (bounds) {
       bounds.minX = Math.min(bounds.minX, p.x); bounds.maxX = Math.max(bounds.maxX, p.x);
       bounds.minY = Math.min(bounds.minY, p.y); bounds.maxY = Math.max(bounds.maxY, p.y);
     }
   }
-  return `${d}Z`;
+  return { d: `${d}Z`, points, samples, closed: true };
+}
+
+function addPath(lateral, className) {
+  const shape = pathFor(lateral);
+  shape.el = node('path', { class: className, d: shape.d }, world);
+  shapes.push(shape);
+  return shape.el;
+}
+
+function restorePaths() {
+  if (!pathsDeformed) return;
+  for (const shape of shapes) shape.el.setAttribute('d', shape.d);
+  pathsDeformed = false;
 }
 
 function writeView(v = view) {
   const c = Math.cos(v.r) * v.s;
   const s = Math.sin(v.r) * v.s;
   world.setAttribute('transform', `matrix(${c} ${s} ${-s} ${c} ${v.x} ${v.y})`);
+  if (perspective?.mix > 0) {
+    for (const shape of shapes) {
+      if (shape.el === lap) continue; // the hover lap has faded out before perspective starts
+      shape.el.setAttribute('d', perspectivePath(shape.projected, perspective.mix, pathScratch, shape.closed));
+    }
+    pathsDeformed = true;
+  } else restorePaths();
   placeLabels(v);
 }
 
@@ -115,10 +143,25 @@ function placeLabels(v = view) {
     label.el.setAttribute('y', (outer.y + dy / len * 10 + 4).toFixed(1));
     label.el.setAttribute('text-anchor', dx >= 0 ? 'start' : 'end');
   }
-  const s0 = screenOf(startMark.at, v);
-  startMark.el.setAttribute('transform', `translate(${s0.x.toFixed(1)} ${s0.y.toFixed(1)}) rotate(${startMark.deg.toFixed(2)})`);
+  let startAt = startMark.at, startAhead = startMark.ahead;
+  let startVisible = true;
+  if (perspective) {
+    startVisible = perspectivePoint(perspective.markers, 0, perspective.mix, perspective.start);
+    perspectivePoint(perspective.markers, 1, perspective.mix, perspective.ahead);
+    startAt = perspective.start; startAhead = perspective.ahead;
+  }
+  startMark.el.setAttribute('visibility', startVisible ? 'visible' : 'hidden');
+  const s0 = screenOf(startAt, v);
+  const s1 = screenOf(startAhead, v);
+  const deg = Math.atan2(s1.y - s0.y, s1.x - s0.x) * 180 / Math.PI;
+  startMark.el.setAttribute('transform', `translate(${s0.x.toFixed(1)} ${s0.y.toFixed(1)}) rotate(${deg.toFixed(2)})`);
   if (routeT !== null) {
-    const h = screenOf(planAt(routeT), v);
+    let at = planAt(routeT);
+    if (perspective) {
+      perspectivePoint(perspective.markers, 2, perspective.mix, perspective.here);
+      at = perspective.here;
+    }
+    const h = screenOf(at, v);
     here.setAttribute('cx', h.x.toFixed(1));
     here.setAttribute('cy', h.y.toFixed(1));
   }
@@ -163,15 +206,22 @@ export function buildPlan(container, frame, { yawDeg = 75, pitchDeg = 52 } = {})
   svg = node('svg', { class: 'hub-plan', 'aria-hidden': 'true', focusable: 'false' });
   world = node('g', { class: 'hub-plan__world' }, svg);
   labels = node('g', { class: 'hub-plan__labels' }, svg);
-  edgeL = node('path', { class: 'hub-plan__edge', d: pathFor(-HALF_WIDTH_M) }, world);
-  edgeR = node('path', { class: 'hub-plan__edge', d: pathFor(HALF_WIDTH_M) }, world);
-  lap = node('path', { class: 'hub-plan__lap', d: pathFor(0) }, world);
+  shapes = [];
+  pathsDeformed = false;
+  edgeL = addPath(-HALF_WIDTH_M, 'hub-plan__edge');
+  edgeR = addPath(HALF_WIDTH_M, 'hub-plan__edge');
+  lap = addPath(0, 'hub-plan__lap');
 
   // Checkpoint ticks: car i+1 is discovered at CHECKPOINT_ROUTE_T[i] (Lexus starts the Tour).
   ticks = CHECKPOINT_ROUTE_T.map((t, i) => {
     const a = planAt(t, -HALF_WIDTH_M - TICK_OUT_M);
     const b = planAt(t, HALF_WIDTH_M + TICK_OUT_M);
-    const el = node('path', { class: 'hub-plan__tick', d: `M${a.x} ${a.y}L${b.x} ${b.y}` }, world);
+    const d = `M${a.x} ${a.y}L${b.x} ${b.y}`;
+    const el = node('path', { class: 'hub-plan__tick', d }, world);
+    shapes.push({ el, d, points: [a, b], samples: [
+      { t, lateral: -HALF_WIDTH_M - TICK_OUT_M, edge: -1, edgeOffset: TICK_OUT_M },
+      { t, lateral: HALF_WIDTH_M + TICK_OUT_M, edge: 1, edgeOffset: TICK_OUT_M },
+    ] });
     return { t, el, car: i + 1, a, b };
   });
 
@@ -186,7 +236,7 @@ export function buildPlan(container, frame, { yawDeg = 75, pitchDeg = 52 } = {})
     }
   }
   node('rect', { class: 'hub-plan__start-frame', x: -3, y: -9, width: 6, height: 18 }, g);
-  startMark = { el: g, at: s0, deg: Math.atan2(s1.y - s0.y, s1.x - s0.x) * 180 / Math.PI };
+  startMark = { el: g, at: s0, ahead: s1 };
 
   // Car labels for the Cars view: Lexus at the start, the others at their checkpoints.
   const labelAt = (car, t) => {
@@ -236,16 +286,16 @@ export function eraseDrawing() {
 }
 
 /**
- * A hairline from the START RACE words to the start line: "it starts here". `from` is the
- * screen point at the end of the words; the line bends once and lands on the start mark.
+ * A hairline from START RACE to the saved route marker (or the grid for a fresh Tour).
+ * Resolve the endpoint on every hover, after setRoutePosition has restored persisted progress.
  */
 export function startLeader(on, from) {
   leaderTween?.kill();
   if (reducedMotion.matches || drawn < 1) { gsap.set(leader, { opacity: 0 }); return; }
   if (on && from) {
-    const s0 = screenOf(startMark.at);
+    const s0 = screenOf(routeT === null ? startMark.at : planAt(routeT));
     const elbowY = Math.max(s0.y + 24, from.y - 40);
-    leader.setAttribute('d', `M${from.x.toFixed(1)} ${from.y.toFixed(1)}L${from.x.toFixed(1)} ${elbowY.toFixed(1)}L${s0.x.toFixed(1)} ${(s0.y + 9).toFixed(1)}`);
+    leader.setAttribute('d', `M${from.x.toFixed(1)} ${from.y.toFixed(1)}L${from.x.toFixed(1)} ${elbowY.toFixed(1)}L${s0.x.toFixed(1)} ${s0.y.toFixed(1)}`);
     gsap.set(leader, { opacity: 1 });
     leaderTween = gsap.fromTo(leader, { drawSVG: '0% 0%' }, { drawSVG: '0% 100%', duration: 0.42, ease: 'gt3.out' });
   } else {
@@ -301,34 +351,14 @@ export function setRoutePosition(progress) {
   placeLabels();
 }
 
-/**
- * Least-squares similarity (scale, rotation, translation) taking plan points onto the
- * projected screen points of the same route positions. The plan already shares the camera's
- * orientation, so the rotation stays near zero; perspective is absorbed by the fit.
- */
-function fit(planPts, screenPts) {
-  const n = planPts.length;
-  let px = 0; let py = 0; let qx = 0; let qy = 0;
-  for (let i = 0; i < n; i++) { px += planPts[i].x; py += planPts[i].y; qx += screenPts[i].x; qy += screenPts[i].y; }
-  px /= n; py /= n; qx /= n; qy /= n;
-  let a = 0; let b = 0; let d = 0;
-  for (let i = 0; i < n; i++) {
-    const ux = planPts[i].x - px; const uy = planPts[i].y - py;
-    const vx = screenPts[i].x - qx; const vy = screenPts[i].y - qy;
-    a += ux * vx + uy * vy; b += ux * vy - uy * vx; d += ux * ux + uy * uy;
-  }
-  const s = Math.hypot(a, b) / d;
-  const r = Math.atan2(b, a);
-  const c = Math.cos(r) * s; const sn = Math.sin(r) * s;
-  return { s, r, x: qx - (c * px - sn * py), y: qy - (sn * px + c * py) };
-}
-
 /** Sample route positions around the visitor's place for the fit. */
 export function fitSamples(progress) {
   const t0 = routeTAt(progress);
   const out = [];
-  for (let k = -3; k <= 8; k++) out.push({ t: ((t0 + k * 0.004) % 1 + 1) % 1, lateral: 0 });
-  out.push({ t: t0, lateral: -HALF_WIDTH_M }, { t: t0, lateral: HALF_WIDTH_M });
+  for (let k = -20; k <= 20; k++) {
+    const t = ((t0 + k * 0.002) % 1 + 1) % 1;
+    for (const edge of [-1, 0, 1]) out.push({ t, lateral: edge * HALF_WIDTH_M, edge });
+  }
   return out;
 }
 
@@ -350,21 +380,52 @@ function zoomPose(from, to, focus, z) {
  * plan (direction -1). `samples` and `projected` are matching route positions and their
  * screen points in the live Tour frame. Returns the tween.
  */
-export function zoom({ samples, projected, progress, direction = 1, duration = 1.6, ease = 'gt3.launch' }) {
+export function zoom({ samples, projected, project, progress, direction = 1, duration = 1.6, ease = 'gt3.launch' }) {
   zoomTween?.kill();
   zoomTween = null;
+  perspective = null;
+  restorePaths();
   layout(); // the Hub is on screen now, so its resting slot can be measured
-  const planPts = samples.map(({ t, lateral }) => planAt(t, lateral));
-  const target = fit(planPts, projected);
+  drawTween?.kill();
+  setDrawn(1);
+  // DrawSVG's old dash lengths describe the resting path. The deformed road must stay whole.
+  gsap.set([edgeL, edgeR], { clearProps: 'strokeDasharray,strokeDashoffset' });
+  // Fit both edges across the visible road, avoiding behind-camera / far offscreen points.
+  const visible = projected.map((p, i) => ({ p, sample: samples[i] })).filter(({ p }) =>
+    (p.depth === undefined || p.depth > 0) && p.x > -window.innerWidth * 0.25 && p.x < window.innerWidth * 1.25
+      && p.y > -window.innerHeight * 0.25 && p.y < window.innerHeight * 1.25);
+  const fitted = visible.length >= 4 ? visible : projected.map((p, i) => ({ p, sample: samples[i] }));
+  const target = fitSimilarity(fitted.map(({ sample: { t, lateral } }) => planAt(t, lateral)), fitted.map(({ p }) => p));
   const focus = planAt(routeTAt(progress));
+  if (project) {
+    const markerSamples = [{ t: 0, lateral: 0 }, { t: 0.002, lateral: 0 }, { t: routeTAt(progress), lateral: 0 }];
+    const markerProjected = project(markerSamples);
+    const depthOrigin = Math.max(1, markerProjected[2].depth);
+    for (const shape of shapes) {
+      if (shape.el !== lap) shape.projected = preparePerspective(shape.points, project(shape.samples), target, depthOrigin);
+    }
+    perspective = {
+      mix: 0,
+      markers: preparePerspective([startMark.at, startMark.ahead, focus], markerProjected, target, depthOrigin),
+      start: { ...startMark.at }, ahead: { ...startMark.ahead }, here: { ...focus },
+    };
+  }
   const proxy = { z: direction > 0 ? 0 : 1 };
-  if (direction < 0) { view = { ...target }; writeView(); }
+  const render = () => {
+    if (perspective) perspective.mix = perspectiveMix(proxy.z);
+    view = zoomPose(rest, target, focus, proxy.z);
+    writeView();
+  };
+  render(); // reverse must already match the live frame during its initial fade-in
   zoomTween = gsap.to(proxy, {
     z: direction > 0 ? 1 : 0,
     duration,
     ease,
-    onUpdate: () => { view = zoomPose(rest, target, focus, proxy.z); writeView(); },
-    onComplete: () => { zoomTween = null; if (direction < 0) { view = { ...rest }; writeView(); } },
+    onUpdate: render,
+    onComplete: () => {
+      zoomTween = null;
+      if (direction < 0) { perspective = null; restorePaths(); view = { ...rest }; writeView(); }
+    },
   });
   return zoomTween;
 }
@@ -372,6 +433,8 @@ export function zoom({ samples, projected, progress, direction = 1, duration = 1
 export function resetPlanView() {
   zoomTween?.kill();
   zoomTween = null;
+  perspective = null;
+  restorePaths();
   layout();
   view = { ...rest };
   writeView();

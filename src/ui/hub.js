@@ -462,7 +462,7 @@ export function leaveHub(tour = {}) {
       const samples = plan.fitSamples(tour.progress ?? 0);
       const projected = tour.project(samples);
       tl.to(chars, { yPercent: -112, skewX: -10, duration: 0.5, ease: 'power3.in', stagger: 0.022 }, 0.02);
-      tl.add(plan.zoom({ samples, projected, progress: tour.progress ?? 0, direction: 1, duration: 1.55 }), 0.22);
+      tl.add(plan.zoom({ samples, projected, project: tour.project, progress: tour.progress ?? 0, direction: 1, duration: 1.55 }), 0.22);
       tl.to(field, { opacity: 0, duration: 0.5, ease: 'gt3' }, 1.32);
       tl.add(() => html.classList.remove('is-hub-covering'), 1.45);
       tl.to(planSvg, { opacity: 0, duration: 0.5, ease: 'gt3' }, 1.62);
@@ -511,7 +511,7 @@ export function coverHub(tour = {}) {
       gsap.set(planSvg, { opacity: 0 });
       tl.to(planSvg, { opacity: 1, duration: 0.3, ease: 'gt3' }, 0);
       tl.to(field, { opacity: 1, duration: 0.45, ease: 'gt3' }, 0.18);
-      tl.add(plan.zoom({ samples, projected, progress: tour.progress ?? 0, direction: -1, duration: 1.35, ease: 'gt3.out' }), 0.5);
+      tl.add(plan.zoom({ samples, projected, project: tour.project, progress: tour.progress ?? 0, direction: -1, duration: 1.35, ease: 'gt3.out' }), 0.5);
       return;
     }
     if (planSvg) gsap.set(planSvg, { opacity: 0 });

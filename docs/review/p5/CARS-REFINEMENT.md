@@ -1,5 +1,8 @@
 # Cars refinement — 2026-11-26, W3
 
+> **Owner edit after visual review (2026-11-26).** The table below is the sampled starting set. Six values were then set by the owner (directional references, solid colours): Nissan `#e568ac` pink, Audi `#f97316` burnt orange, BMW `#159fad` teal, Ferrari `#b51c28` darker racing red, Aston Martin `#94803b` muted brown-yellow, Porsche `#f5d900` bright yellow. Lexus, Mercedes, McLaren and Lamborghini are unchanged. Closest pair by ΔE2000 is now Aston/Lamborghini at 12.6. Contrast on the Day / Night Hub fields: Porsche 1.4 / 12.4 (faint on white), Ferrari 6.6 / 2.6 (dim on navy), the rest 2.8–6.3 on at least one side. `src/data/cars.js` `identityColor` is the single source.
+
+
 Candidate for owner review; no commit, push or merge performed.
 
 Cars becomes a medium-weight Neue Haas display heading at 36–52 px (32 px on narrow screens), with tighter editorial tracking and a 24 px separation from the larger ten-bar discovery glyph. The control keeps its upper-left position and the circuit keeps its frame and geometry. The result gives vehicle discovery a distinct, substantial entry point while retaining the Hub's negative space and START RACE hierarchy. One treatment is supplied; no alternative query mode.

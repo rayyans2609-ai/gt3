@@ -88,7 +88,7 @@ export const CARS = [
     year: '2018',
     displayName: 'Nissan GT-R NISMO GT3',
     modelFile: 'nissan_gtr_gt3.glb',
-    identityColor: '#bd3057', // Secondary NISMO red, tuned toward crimson for separation.
+    identityColor: '#e568ac', // Pink (owner, 2026-11-26).
     brandColor: '#293D52',
     brandColorSoft: '#394550',
     accentText: '#EDF0F2',
@@ -134,7 +134,7 @@ export const CARS = [
     year: '2020',
     displayName: 'Audi R8 LMS GT3 evo',
     modelFile: 'audi_r8_gt3.glb',
-    identityColor: '#cb2117', // Red exterior livery.
+    identityColor: '#f97316', // Burnt orange (owner, 2026-11-26).
     brandColor: '#3C4247',
     brandColorSoft: '#484C50',
     accentText: '#F0EEEA',
@@ -180,7 +180,7 @@ export const CARS = [
     year: '2016',
     displayName: 'BMW M6 GT3',
     modelFile: 'bmw_m6_gt3.glb',
-    identityColor: '#338dae', // Light M blue body stripe / badge.
+    identityColor: '#159fad', // Teal (owner, 2026-11-26): the M-blue stripe pushed toward teal.
     brandColor: '#173D5C',
     brandColorSoft: '#344956',
     accentText: '#ECF0F1',
@@ -272,7 +272,7 @@ export const CARS = [
     year: '2018',
     displayName: 'Ferrari 488 GT3',
     modelFile: 'ferrari_488_gt3.glb',
-    identityColor: '#d96165', // Coral-red exterior paint.
+    identityColor: '#b51c28', // Darker, richer racing red (owner, 2026-11-26).
     brandColor: '#6D1E24',
     brandColorSoft: '#553238',
     accentText: '#F3EAE5',
@@ -364,7 +364,7 @@ export const CARS = [
     year: '2019',
     displayName: 'Aston Martin Vantage GT3',
     modelFile: 'aston_vantage_gt3.glb',
-    identityColor: '#9d8207', // Bilstein yellow, darkened for Day text.
+    identityColor: '#94803b', // Muted dirty brown-yellow (owner, 2026-11-26).
     brandColor: '#173B31',
     brandColorSoft: '#30483F',
     accentText: '#EEF0EB',
@@ -456,7 +456,7 @@ export const CARS = [
     year: '2023',
     displayName: 'Porsche 911 GT3 R',
     modelFile: 'porsche_911_gt3r.glb',
-    identityColor: '#9757bd', // Purple secondary exterior livery, lifted for Night text.
+    identityColor: '#f5d900', // Bright saturated yellow (owner, 2026-11-26).
     brandColor: '#25211F',
     brandColorSoft: '#3C3733',
     accentText: '#F0EBE5',

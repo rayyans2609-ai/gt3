@@ -13,6 +13,8 @@
   --hub-accent: #597eb3;
   --m: clamp(56px, 6.6vw, 132px);
   --cover: clamp(112px, 9.2vw, 148px);
+  --cars-size: clamp(36px, 3.1vw, 52px); /* the Cars label (unchanged); the bars align to its glyphs */
+  --mark-size: clamp(52px, 4.3vw, 72px); /* the GT3 mark */
   position: fixed;
   inset: 0;
   color: var(--hub-ink);
@@ -34,13 +36,16 @@
 .hub-mark {
   position: absolute;
   left: var(--m);
-  top: 40px;
+  top: 24px;
+  /* Align the left ink edge of "G" to that of "C" in Cars: Neue Haas Display Medium left side
+     bearings are 0.027 em (G) and 0.024 em (C), so the larger mark is nudged out by the difference. */
+  margin-left: calc(var(--cars-size) * 0.024 - var(--mark-size) * 0.027);
   padding: 0;
   border: 0;
   background: transparent;
   color: inherit;
   font-family: var(--font-display);
-  font-size: 25px;
+  font-size: var(--mark-size);
   font-weight: 500;
   letter-spacing: -0.045em;
   line-height: 1;
@@ -89,6 +94,7 @@
 #hub.is-cars-open .hub-plan__car:not(.is-found) { cursor: not-allowed; }
 .hub-plan__car.is-found:hover,
 .hub-plan__car.is-found:focus-visible { fill: var(--car-ink); }
+.hub-plan__car:focus:not(:focus-visible) { outline: none; }
 .hub-plan__car:focus-visible { outline: 1px solid var(--hub-ink); outline-offset: 5px; }
 .hub-plan__car.is-resisted { fill: var(--hub-muted); }
 
@@ -158,7 +164,7 @@
   color: var(--hub-ink);
   cursor: pointer;
   font-family: var(--font-display);
-  font-size: clamp(36px, 3.1vw, 52px);
+  font-size: var(--cars-size);
   font-weight: 500;
   letter-spacing: -0.045em;
   line-height: 1;
@@ -169,11 +175,13 @@
 .hub-cars__toggle:focus-visible { outline: 2px solid var(--hub-accent); outline-offset: 4px; border-radius: 2px; }
 .hub-cars__name { display: block; }
 .hub-cars__name.is-resisted { color: var(--hub-muted); }
-.hub-cars__ticks { display: flex; align-items: center; }
-.hub-cars__bar { display: grid; place-items: center; width: 18px; height: 44px; padding: 0; border: 0; background: none; color: var(--hub-ink); cursor: not-allowed; }
-.hub-cars__bar i { display: block; width: 2px; height: 16px; border-radius: 1px; background: color-mix(in srgb, var(--hub-ink) 20%, transparent); transform-origin: 50% 100%; transition: background-color 180ms var(--ease), opacity 180ms var(--ease); }
+/* The ticks box matches the label's line box (same 6px padding, line-height 1), so a bar's bottom can sit
+   on the label's baseline: 0.818 em ascent / 0.182 em descent, x-height 0.513 em (Neue Haas Display Medium). */
+.hub-cars__ticks { display: flex; align-items: stretch; align-self: stretch; padding: 6px 0; box-sizing: border-box; }
+.hub-cars__bar { display: flex; align-items: flex-end; justify-content: center; width: 18px; padding: 0 0 calc(var(--cars-size) * 0.182); border: 0; background: none; color: var(--hub-ink); cursor: not-allowed; }
+.hub-cars__bar i { display: block; flex: none; width: 2px; height: calc(var(--cars-size) * 0.513); border-radius: 1px; background: color-mix(in srgb, var(--hub-ink) 20%, transparent); transform-origin: 50% 100%; transition: background-color 180ms var(--ease), opacity 180ms var(--ease); }
 .hub-cars__bar.is-found { cursor: pointer; }
-.hub-cars__bar.is-found i { width: 4px; height: 21px; background: var(--hub-ink); }
+.hub-cars__bar.is-found i { width: 4px; background: var(--hub-ink); }
 .hub-cars__bar.is-found:hover i,
 .hub-cars__bar.is-found:focus-visible i { background: var(--car-ink); }
 .hub-cars__bar:not(.is-found):hover i,
@@ -206,7 +214,7 @@
 
 @media (max-width: 700px) {
   .hub-cars { column-gap: 16px; }
-  .hub-cars__toggle { font-size: 32px; }
+  #hub { --cars-size: 32px; }
   .hub-cars__bar { width: 14px; }
 }
 

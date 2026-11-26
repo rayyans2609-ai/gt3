@@ -82,3 +82,13 @@ Browser runs on the Intel host were kept to the minimum by owner direction (2026
   - `verify-refine-smoke`, `verify-hud`, `verify-motion-ticker`.
   - `verify-preready-input`, if its timing assertion is worth confirming on calmer hardware.
 - **Owner-only:** pushing `p5-refine` (needed to review on the M4), merging into `main`, Phase 6.
+
+## Post-review refinements (2026-11-26, after your first visual pass)
+
+Direct edits, not independently verified (diff-inspected and syntax-checked only):
+- **GT3 mark** is substantially larger (`--mark-size`, 52–72 px, was 25 px) and its left ink edge is aligned to the Cars label using the font's own side-bearings.
+- **Cars bars** now rest at the Cars lowercase x-height, with their bottoms on the label's baseline. Widths, colours and the hover/resist animations are unchanged.
+- **Circuit pulse** now runs on **hover** (and keyboard focus) over a discovered car name, once per entry. **Clicking a discovered name does nothing yet** (reserved for its Showcase). Locked names still resist on click.
+- **Click outline** on names removed (a mouse press no longer focuses the name); keyboard focus still shows a ring.
+- **Colours:** Nissan, Audi, BMW, Ferrari, Aston Martin and Porsche changed as you specified (see `CARS-REFINEMENT.md`). Watch: Porsche yellow is faint on the white Day field, and Ferrari's red is dim on the Night navy.
+- To eyeball: the GT3 mark/Cars spacing at 1440 and 1920 widths, and baseline alignment of the bars in both themes.

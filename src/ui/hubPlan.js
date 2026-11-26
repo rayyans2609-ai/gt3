@@ -247,11 +247,19 @@ export function buildPlan(container, frame, { yawDeg = 75, pitchDeg = 52, onLock
     const el = node('text', { class: 'hub-plan__car', role: 'button', tabindex: -1, 'aria-hidden': 'true' }, carGroup);
     applyCarColor(el, CARS[car]);
     const label = { car, t, a, b, outer: a, el, found: false };
-    const activate = () => {
-      if (!labelsOn) return;
-      if (label.found) lapLight(true, { car: CARS[car], once: true });
-      else onLockedCar?.(car, el);
+    // Hovering a discovered name sends one pulse round the circuit in the car's colour; keyboard focus does
+    // the same. Clicking a discovered name is reserved for opening its Showcase (not built yet). A locked
+    // name resists instead.
+    const pulse = () => {
+      if (labelsOn && label.found) lapLight(true, { car: CARS[car], once: true });
     };
+    const activate = () => {
+      if (labelsOn && !label.found) onLockedCar?.(car, el);
+    };
+    el.addEventListener('pointerenter', pulse);
+    el.addEventListener('focus', () => { if (el.matches(':focus-visible')) pulse(); });
+    // A mouse press must not focus the name (that drew a button-like ring); the keyboard still can.
+    el.addEventListener('mousedown', (event) => event.preventDefault());
     el.addEventListener('click', activate);
     el.addEventListener('keydown', (event) => {
       if (event.key === 'Enter' || event.key === ' ') {

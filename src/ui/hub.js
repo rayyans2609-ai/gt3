@@ -89,7 +89,7 @@ function resistCar(index, target = ticks[index]) {
 
 function expandBar(tick, index, on) {
   gsap.to(tick.firstChild, {
-    scaleY: on && state.unlocked.has(index) && !reducedMotion.matches ? 1.45 : 1,
+    scaleX: on && state.unlocked.has(index) && !reducedMotion.matches ? 1.14 : 1,
     duration: reducedMotion.matches ? 0 : on ? 0.22 : 0.3,
     ease: 'gt3.out', overwrite: true,
   });
@@ -109,11 +109,18 @@ function buildCars() {
     tick.type = 'button';
     tick.append(el('i'));
     applyCarColor(tick, car);
-    tick.addEventListener('pointerenter', () => expandBar(tick, index, true));
-    tick.addEventListener('pointerleave', () => expandBar(tick, index, tick.matches(':focus-visible')));
-    tick.addEventListener('focus', () => expandBar(tick, index, true));
-    tick.addEventListener('blur', () => expandBar(tick, index, tick.matches(':hover')));
-    tick.addEventListener('click', () => state.unlocked.has(index) ? setCars(true) : resistCar(index));
+    // A discovered bar reveals only its own name and sends one coloured pulse round the circuit; the name
+    // stays highlighted while the bar is hovered/focused, then hides unless Cars is open (plan direction).
+    const engage = (on) => {
+      expandBar(tick, index, on);
+      if (DIRECTION === 'plan' && state.unlocked.has(index)) plan.peekCar(index, on);
+    };
+    tick.addEventListener('pointerenter', () => engage(true));
+    tick.addEventListener('pointerleave', () => engage(tick.matches(':focus-visible')));
+    tick.addEventListener('focus', () => { if (tick.matches(':focus-visible')) engage(true); });
+    tick.addEventListener('blur', () => engage(tick.matches(':hover')));
+    // Clicking a discovered bar is reserved for opening its Showcase (not built yet); a locked one resists.
+    tick.addEventListener('click', () => { if (!state.unlocked.has(index)) resistCar(index); });
     return glyph.appendChild(tick);
   });
   carsToggle.append(carsName);

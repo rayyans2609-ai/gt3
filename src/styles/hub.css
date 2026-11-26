@@ -50,7 +50,11 @@
   letter-spacing: -0.045em;
   line-height: 1;
   cursor: pointer;
+  transition: color 220ms var(--ease);
 }
+/* Interactive cue: it returns to the Landing. The theme accent (Day blue, Night gold) on hover and focus. */
+.hub-mark:hover,
+.hub-mark:focus-visible { color: var(--hub-accent); }
 .hub-mark:focus-visible { outline: 2px solid var(--hub-accent); outline-offset: 5px; }
 
 /* ---- the circuit plan (direction: plan) ------------------------------------------------------ */
@@ -93,7 +97,8 @@
 #hub.is-cars-open .hub-plan__car { pointer-events: all; cursor: pointer; }
 #hub.is-cars-open .hub-plan__car:not(.is-found) { cursor: not-allowed; }
 .hub-plan__car.is-found:hover,
-.hub-plan__car.is-found:focus-visible { fill: var(--car-ink); }
+.hub-plan__car.is-found:focus-visible,
+.hub-plan__car.is-peek { fill: var(--car-ink); }
 .hub-plan__car:focus:not(:focus-visible) { outline: none; }
 .hub-plan__car:focus-visible { outline: 1px solid var(--hub-ink); outline-offset: 5px; }
 .hub-plan__car.is-resisted { fill: var(--hub-muted); }
@@ -154,7 +159,7 @@
 
 /* ---- Cars ------------------------------------------------------------------------------------ */
 
-.hub-cars { position: absolute; left: var(--m); top: 92px; display: grid; grid-template-columns: max-content max-content; align-items: center; column-gap: 24px; }
+.hub-cars { position: absolute; left: var(--m); top: calc(var(--mark-size) + 88px); display: grid; grid-template-columns: max-content; row-gap: 8px; }
 .hub-cars__toggle {
   display: flex;
   align-items: center;
@@ -175,13 +180,13 @@
 .hub-cars__toggle:focus-visible { outline: 2px solid var(--hub-accent); outline-offset: 4px; border-radius: 2px; }
 .hub-cars__name { display: block; }
 .hub-cars__name.is-resisted { color: var(--hub-muted); }
-/* The ticks box matches the label's line box (same 6px padding, line-height 1), so a bar's bottom can sit
-   on the label's baseline: 0.818 em ascent / 0.182 em descent, x-height 0.513 em (Neue Haas Display Medium). */
-.hub-cars__ticks { display: flex; align-items: stretch; align-self: stretch; padding: 6px 0; box-sizing: border-box; }
-.hub-cars__bar { display: flex; align-items: flex-end; justify-content: center; width: 18px; padding: 0 0 calc(var(--cars-size) * 0.182); border: 0; background: none; color: var(--hub-ink); cursor: not-allowed; }
-.hub-cars__bar i { display: block; flex: none; width: 2px; height: calc(var(--cars-size) * 0.513); border-radius: 1px; background: color-mix(in srgb, var(--hub-ink) 20%, transparent); transform-origin: 50% 100%; transition: background-color 180ms var(--ease), opacity 180ms var(--ease); }
+/* The ten bars are a stack of horizontal rules directly beneath the label, each as wide as "Cars" at rest.
+   Hover/focus extends a discovered bar outwards from its centre (scaleX in hub.js). */
+.hub-cars__ticks { display: flex; flex-direction: column; align-items: stretch; width: 100%; }
+.hub-cars__bar { display: flex; align-items: center; justify-content: center; width: 100%; height: 12px; padding: 0; border: 0; background: none; color: var(--hub-ink); cursor: not-allowed; }
+.hub-cars__bar i { display: block; flex: none; width: 100%; height: 2px; border-radius: 1px; background: color-mix(in srgb, var(--hub-ink) 20%, transparent); transform-origin: 50% 50%; transition: background-color 180ms var(--ease), opacity 180ms var(--ease); }
 .hub-cars__bar.is-found { cursor: pointer; }
-.hub-cars__bar.is-found i { width: 4px; background: var(--hub-ink); }
+.hub-cars__bar.is-found i { height: 4px; background: var(--hub-ink); }
 .hub-cars__bar.is-found:hover i,
 .hub-cars__bar.is-found:focus-visible i { background: var(--car-ink); }
 .hub-cars__bar:not(.is-found):hover i,
@@ -213,9 +218,7 @@
 .hub-roster__name.is-resisted { color: var(--hub-muted); }
 
 @media (max-width: 700px) {
-  .hub-cars { column-gap: 16px; }
   #hub { --cars-size: 32px; }
-  .hub-cars__bar { width: 14px; }
 }
 
 /* ---- the player (SPEC §9): one object, two shapes, recomposed by Flip ------------------------- */

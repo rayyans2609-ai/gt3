@@ -92,3 +92,9 @@ Direct edits, not independently verified (diff-inspected and syntax-checked only
 - **Click outline** on names removed (a mouse press no longer focuses the name); keyboard focus still shows a ring.
 - **Colours:** Nissan, Audi, BMW, Ferrari, Aston Martin and Porsche changed as you specified (see `CARS-REFINEMENT.md`). Watch: Porsche yellow is faint on the white Day field, and Ferrari's red is dim on the Night navy.
 - To eyeball: the GT3 mark/Cars spacing at 1440 and 1920 widths, and baseline alignment of the bars in both themes.
+
+### Second refinement pass (2026-11-26)
+Direct edits, diff-inspected and syntax-checked only:
+- **Cars** sits lower (below the GT3 mark by about 90 px). The ten bars are now a stack of horizontal rules directly under the label, each as wide as "Cars" at rest. A discovered bar extends outwards from its centre on hover (scaleX 1.14); colour reaction and the locked resist (bar and label) are unchanged.
+- **Hovering a discovered bar** (or focusing it by keyboard) reveals only that car's name in its colour and sends its pulse once. The name hides when you leave unless the full Cars view is open. Clicking "Cars" still reveals every name. Clicking a discovered bar or name does nothing yet (reserved for its Showcase); locked bars still resist. The reveal is built for the plan direction; `?hub=launch` bars react and resist but do not reveal a single name.
+- **GT3 mark** turns the theme accent on hover and focus (Day blue, Night gold); navigation and typography are unchanged.

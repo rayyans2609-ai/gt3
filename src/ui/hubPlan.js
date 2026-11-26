@@ -388,6 +388,22 @@ export function showCarLabels(on) {
     : { opacity: 0, duration: 0.16, ease: 'gt3' });
 }
 
+/**
+ * Reveal one discovered car's name (and send its coloured pulse once) while its selector bar is
+ * hovered or focused. The name is highlighted in the car's colour; on leaving it hides again unless
+ * the full Cars view is open. Locked cars do nothing.
+ */
+export function peekCar(index, on) {
+  const label = carLabels.find((item) => item.car === index);
+  if (!label?.found) return;
+  label.el.classList.toggle('is-peek', on);
+  if (on) lapLight(true, { car: CARS[index], once: true });
+  if (labelsOn) return;
+  gsap.killTweensOf(label.el);
+  if (reducedMotion.matches) { gsap.set(label.el, { opacity: on ? 1 : 0 }); return; }
+  gsap.to(label.el, { opacity: on ? 1 : 0, duration: on ? 0.22 : 0.16, ease: 'gt3' });
+}
+
 export function carLabelsShown() { return labelsOn; }
 
 /** Where the visitor is on the route (progress 0..1), or null to hide the marker. */

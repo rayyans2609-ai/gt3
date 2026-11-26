@@ -77,9 +77,9 @@ Every delegator sends **the minimum sufficient context plus a small safety margi
 | Change | Default |
 |---|---|
 | Trivial cosmetic (a value, copy, spacing, colour, radius) | Implement and inspect the diff. No build, browser session, independent review or regression run is required. |
-| Ordinary UI and animation refinement | Source inspection and existing evidence. Browser verification is not the default. When the behaviour is easy to observe and reversible, the owner's visual review is the feedback loop. |
+| Ordinary UI refinement, visual experiments, aesthetic animation (reversible, non-consequential) | Implement quickly and put it in front of the owner. Source inspection and existing evidence only. Browser verification is not the default; the owner's visual review is the feedback loop. |
 | Functional change | Targeted verification only where hidden breakage is a meaningful risk. Prefer static checks, pure-logic/node tests and still-valid evidence over browser runs. |
-| High-risk engineering: rendering, shared state, asset lifecycles, persistence, complex transitions, performance, genuinely interconnected systems | Stronger verification: a direct runtime check of the affected path and the systems that genuinely depend on it, plus resource/perf checks if they are plausibly affected. Representative, not combinatorial. |
+| Consequential engineering: rendering, shared state, persistence, asset lifecycles, complex system interactions, performance, meaningful hidden regression risk | Appropriately sized technical verification before handoff where necessary: a direct runtime check of the affected path and the systems that genuinely depend on it, plus resource/perf checks if they are plausibly affected. Representative, not combinatorial. |
 
 These are judgments, not gates. A credible failure signal overrides them in either direction.
 
@@ -87,7 +87,16 @@ These are judgments, not gates. A credible failure signal overrides them in eith
 
 **Regression-driven escalation.** When the owner reports a defect or a credible regression signal appears: diagnose → fix → verify the affected behaviour and the dependencies it realistically endangers → stop. Don't automatically expand into a full regression suite. A real failure justifies extra budget; a theoretical possibility does not.
 
-**Phase closure.** First get a credible candidate into the owner's hands for visual review. Once the design is accepted, run the remaining consequential integration and regression checks before closing the phase. Cover integration seams, high-blast-radius shared systems and known historical regressions (`SPEC.md` §27, `BUILD_LOG.md` runtime traps), and reuse unaffected evidence. Even then, skip checks whose marginal value can't justify their cost.
+**Opportunity cost and acceptance sequencing.** Optimise for accepted product progress, not verified intermediate implementations. Verification of a design the owner then rejects has little lasting value: an hour of regression-testing an animation they may reject within five seconds of seeing it is wasted. So before verifying, weigh a few things:
+- Is the potential failure consequential?
+- Would it be obvious during normal owner review anyway?
+- How likely is the implementation to survive visual review unchanged?
+- Is verifying now worth more than verifying after acceptance?
+- What useful progress does the check displace?
+
+For reversible design work this usually means **implementation → owner visual acceptance → necessary residual technical verification → phase closure**. Consequential engineering keeps the verification its hidden risk needs before handoff. Neither is a checklist or an approval step.
+
+**Phase closure.** After design acceptance, run the remaining consequential integration and regression checks: integration seams, high-blast-radius shared systems and known historical regressions (`SPEC.md` §27, `BUILD_LOG.md` runtime traps). Reuse unaffected evidence, and skip checks whose marginal value can't justify their cost.
 
 **Host-aware economics.** Count the real cost: wall-clock, preflight refusals and retries, swap and contention, and manager attention. Browser verification on the Intel Mac is exceptionally expensive. Defer nonessential runtime checks to better hardware or to the owner's review instead of blocking product progress, and record them as deferred.
 

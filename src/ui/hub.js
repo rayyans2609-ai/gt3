@@ -491,6 +491,8 @@ function build() {
     },
   });
   root.insertBefore(planSvg, runway);
+  // Focus order: the names, then the selected car's way in, then the page controls.
+  root.insertBefore(pickCap, runway);
   stagePieces = [mark, start.cap, show.cap, status];
   gsap.set(stagePieces, { autoAlpha: 0, y: 10 });
   gsap.set(mark, { xPercent: -50 });

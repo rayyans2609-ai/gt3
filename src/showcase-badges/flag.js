@@ -26,7 +26,7 @@ export function createShowcaseFlag({ color = 0x8197aa, theme = 'day', onHover, o
   flag.add(new THREE.Mesh(geometry, cloth));
   const poleGeometry = new THREE.CylinderGeometry(0.012, 0.012, 0.79, 8);
   const poleMaterial = new THREE.MeshStandardMaterial({color: 0xbcc7cd, metalness: 0.8, roughness: 0.3});
-  const pole = new THREE.Mesh(poleGeometry, poleMaterial); pole.position.set(-0.48, -0.12, 0); flag.add(pole);
+  const pole = new THREE.Mesh(poleGeometry, poleMaterial); pole.position.set(-0.47, -0.12, 0); flag.add(pole);
   let accent = new THREE.Color(color), t = 0, px = 0, py = 0, x = 0, y = 0, hovered = false, disposed = false;
   function setTheme(value) { theme = value; cloth.emissive.copy(accent).multiplyScalar(value === 'night' ? 0.10 : 0.025); }
   setTheme(theme);
@@ -44,7 +44,7 @@ export function createShowcaseFlag({ color = 0x8197aa, theme = 'day', onHover, o
       const p = geometry.attributes.position;
       for (let i = 0; i < base.length / 2; i++) { const u = (base[i*2]+0.46)/0.92; p.setZ(i, Math.sin(u*5-t*2)*0.035*u); }
       p.needsUpdate = true; geometry.computeVertexNormals();
-      const s = THREE.MathUtils.lerp(root.scale.x, hovered ? 1.045 : 1, 1-Math.exp(-7*dt)); root.scale.setScalar(s);
+      const s = THREE.MathUtils.lerp(flag.scale.x, hovered ? 1.045 : 1, 1-Math.exp(-7*dt)); flag.scale.setScalar(s);
     },
     dispose() { if (disposed) return; disposed = true; geometry.dispose(); cloth.dispose(); poleGeometry.dispose(); poleMaterial.dispose(); root.removeFromParent(); },
   };

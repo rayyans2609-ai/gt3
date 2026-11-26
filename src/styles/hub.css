@@ -242,8 +242,9 @@
 }
 .hub-player[data-shape='column'].is-list-open { grid-template-areas: "cover list" "meta meta" "seek seek" "transport transport" "levels levels"; }
 
-.hub-player__cover { grid-area: cover; width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 2px; background: var(--hub-faint); user-select: none; transition: opacity 160ms var(--ease); }
-.hub-player__cover.is-swapping { opacity: 0; }
+/* Cover stays one grid cell; two stacked layers crossfade inside it so nothing reflows. */
+.hub-player__cover { grid-area: cover; position: relative; overflow: hidden; width: 100%; aspect-ratio: 1; border-radius: 2px; background: var(--hub-faint); user-select: none; }
+.hub-player__cover-layer { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; border-radius: inherit; opacity: 0; will-change: opacity, transform, filter; }
 .hub-player.is-list-open .hub-player__cover { width: 56px; height: 56px; }
 .hub-player__meta { grid-area: meta; display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
 .hub-player[data-shape='column'] .hub-player__meta { margin-top: 12px; }

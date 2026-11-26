@@ -35,6 +35,9 @@ let dragStartValue = null;
 let listOpen = false;
 let flip = null;
 let coverToken = 0;
+let visibleLayer;
+let coverEase;
+let coverAnimations = [];
 const shown = new Map();
 
 function show(key, value, write) {
@@ -62,26 +65,89 @@ function time(seconds) {
   return `${Math.floor(whole / 60)}:${String(whole % 60).padStart(2, '0')}`;
 }
 
-/** Swap the artwork without a hard cut: a short dip, the new image, a short rise. */
+/** The shared easing token, resolved once for WAAPI (which cannot read var(--ease) itself). */
+function coverEasing() {
+  if (!coverEase) {
+    coverEase = getComputedStyle(document.documentElement).getPropertyValue('--ease').trim() || 'ease';
+  }
+  return coverEase;
+}
+
+function settleLayer(layer, visible) {
+  layer.style.opacity = visible ? '1' : '0';
+  layer.style.transform = 'none';
+  layer.style.filter = 'none';
+}
+
+function cancelCoverAnimations() {
+  for (const animation of coverAnimations) animation.cancel();
+  coverAnimations = [];
+}
+
+/** Decode off-screen first so the crossfade never reveals an unloaded frame. */
+function preloadCover(src) {
+  const image = new Image();
+  image.decoding = 'async';
+  image.src = src;
+  if (typeof image.decode === 'function') return image.decode();
+  return new Promise((resolve, reject) => {
+    image.addEventListener('load', resolve, { once: true });
+    image.addEventListener('error', reject, { once: true });
+  });
+}
+
+/** Crossfade two stacked layers; the token guard drops superseded track changes. */
+function crossfadeCover(src, token) {
+  cancelCoverAnimations();
+  const outgoing = visibleLayer;
+  const incoming = outgoing === cover.firstElementChild ? cover.lastElementChild : cover.firstElementChild;
+  settleLayer(outgoing, true);
+  settleLayer(incoming, false);
+  incoming.src = src;
+
+  const reduce = reducedMotion.matches;
+  const easing = coverEasing();
+  const outFrames = reduce
+    ? [{ opacity: 1 }, { opacity: 0 }]
+    : [{ opacity: 1, transform: 'scale(1)' }, { opacity: 0, transform: 'scale(.985)' }];
+  const inFrames = reduce
+    ? [{ opacity: 0 }, { opacity: 1 }]
+    : [
+      { opacity: 0, transform: 'scale(1.035)', filter: 'blur(6px)' },
+      { opacity: 1, transform: 'scale(1)', filter: 'blur(0)' },
+    ];
+  const outAnim = outgoing.animate(outFrames, { duration: reduce ? 120 : 300, easing, fill: 'forwards' });
+  const inAnim = incoming.animate(inFrames, { duration: reduce ? 120 : 420, easing, fill: 'forwards' });
+  coverAnimations = [outAnim, inAnim];
+  visibleLayer = incoming;
+
+  void inAnim.finished.then(() => {
+    if (token !== coverToken) return;
+    outAnim.cancel();
+    inAnim.cancel();
+    settleLayer(outgoing, false);
+    settleLayer(incoming, true);
+    coverAnimations = [];
+  }).catch(() => {});
+}
+
+/** Swap the artwork after it is ready; the first cover appears without any transition. */
 function setCover(index) {
   const src = playlist[index]?.cover;
   if (!src || cover.dataset.src === src) return;
   const token = ++coverToken;
   const first = !cover.dataset.src;
   cover.dataset.src = src;
-  const swap = () => {
-    if (token !== coverToken) return;
-    cover.src = src;
-    const reveal = () => { if (token === coverToken) cover.classList.remove('is-swapping'); };
-    if (cover.complete) reveal();
-    else {
-      cover.addEventListener('load', reveal, { once: true });
-      cover.addEventListener('error', reveal, { once: true });
-    }
-  };
-  if (first || reducedMotion.matches) { swap(); return; }
-  cover.classList.add('is-swapping');
-  window.setTimeout(swap, 140);
+
+  if (first) {
+    settleLayer(visibleLayer, true);
+    visibleLayer.src = src;
+    return;
+  }
+
+  void preloadCover(src).catch(() => {}).then(() => {
+    if (token === coverToken) crossfadeCover(src, token);
+  });
 }
 
 function renderStatus() {
@@ -163,11 +229,17 @@ export function initHubPlayer(container, { shape = 'column' } = {}) {
   root.dataset.shape = shape;
   root.setAttribute('aria-label', 'Music');
 
-  cover = document.createElement('img');
+  cover = document.createElement('div');
   cover.className = 'hub-player__cover';
-  cover.alt = '';
-  cover.decoding = 'async';
-  cover.draggable = false;
+  for (let i = 0; i < 2; i += 1) {
+    const layer = document.createElement('img');
+    layer.className = 'hub-player__cover-layer';
+    layer.alt = '';
+    layer.decoding = 'async';
+    layer.draggable = false;
+    cover.append(layer);
+  }
+  visibleLayer = cover.firstElementChild;
 
   list = document.createElement('ol');
   list.className = 'hub-player__list';

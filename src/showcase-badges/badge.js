@@ -1,5 +1,7 @@
 import * as THREE from 'three';
 import { SVGLoader } from 'three/addons/loaders/SVGLoader.js';
+import { acquireBadgeModel, warnBadgeFallback } from './badgeModels.js';
+export { badgeModelStatus } from './badgeModels.js';
 import lexus from './lexus.svg?raw';
 import audi from './audi.svg?raw';
 import { makeAudiProfile } from './audiProfile.js';
@@ -64,8 +66,8 @@ export function createBadge({ manufacturer = 'lexus', color = 0x8fa6b6, theme = 
   root.add(motion);
   const accent = new THREE.Color(color);
   const owned = [];
-  let art, metal, neutral;
-  let hovered = false, px = 0, py = 0, x = 0, y = 0, elapsed = 0, disposed = false;
+  let art, metal, modelLease, modelArt;
+  let hovered = false, px = 0, py = 0, x = 0, y = 0, disposed = false;
 
   function own(resource) {
     owned.push(resource);
@@ -92,7 +94,11 @@ export function createBadge({ manufacturer = 'lexus', color = 0x8fa6b6, theme = 
     const source = design.crest ? crestOutlines[`${prefix}.outline.svg`] : design.source;
     const url = crestFaces[`${prefix}.face.svg`];
     if (design.crest && (!source || !url)) {
-      throw new Error(`Missing local ${manufacturer} crest. Run python3 src/showcase-badges/prepare-crests.py before starting Vite.`);
+      warnBadgeFallback(new Error(`Missing optional local ${manufacturer} crest artwork`));
+      const fallback = new THREE.Group();
+      metal = own(new THREE.MeshStandardMaterial({ color: design.faceColor, metalness: .8, roughness: .35 }));
+      fallback.add(new THREE.Mesh(own(makeDisc(.38, .02, .004)), metal));
+      return fallback;
     }
     const group = new THREE.Group();
     metal = own(new THREE.MeshStandardMaterial({ metalness: design.metalness, roughness: design.roughness }));
@@ -172,21 +178,37 @@ export function createBadge({ manufacturer = 'lexus', color = 0x8fa6b6, theme = 
     return group;
   }
 
+  function requestModel() {
+    // McLaren's existing procedural path belongs to the separate modelling task.
+    if (modelLease || manufacturer === 'mclaren' || disposed || locked) return;
+    modelLease = acquireBadgeModel(manufacturer);
+    modelLease.ready.then(object => {
+      if (!object || disposed) return;
+      modelArt = object;
+      art?.removeFromParent();
+      if (!locked) motion.add(modelArt);
+    }).catch(warnBadgeFallback);
+  }
+
   function setLocked(value) {
     if (disposed) return;
-    if (!value) art ??= makeArtwork();
     locked = !!value;
     if (locked) {
       art?.removeFromParent();
-      neutral ??= new THREE.Mesh(
-        own(makeDisc(0.30, 0.016, 0.004)),
-        own(new THREE.MeshStandardMaterial({ color: 0x899096, metalness: 0.60, roughness: 0.40 })),
-      );
-      if (neutral.parent !== motion) motion.add(neutral);
+      modelArt?.removeFromParent();
       px = py = x = y = 0;
     } else {
-      neutral?.removeFromParent();
-      if (art.parent !== motion) motion.add(art);
+      if (!modelArt) {
+        try { art ??= makeArtwork(); }
+        catch (error) {
+          warnBadgeFallback(error);
+          art ??= new THREE.Group();
+          art.add(new THREE.Mesh(own(makeDisc(.38, .02, .004)), own(new THREE.MeshStandardMaterial({ color: 0x9da6ae, metalness: 1, roughness: .35 }))));
+        }
+      }
+      const visible = modelArt ?? art;
+      if (visible.parent !== motion) motion.add(visible);
+      requestModel();
     }
   }
 
@@ -217,18 +239,14 @@ export function createBadge({ manufacturer = 'lexus', color = 0x8fa6b6, theme = 
     update(dt) {
       if (disposed || !Number.isFinite(dt) || dt <= 0) return;
       dt = Math.min(dt, 0.1);
-      elapsed += dt;
-      const damping = 1 - Math.exp(-3.2 * dt);
-      x += (px - x) * damping;
-      y += (py - y) * damping;
-      motion.rotation.y = Math.sin(elapsed * 0.55) * 0.025 + x * (design.pointerYaw ?? 0.055);
-      motion.rotation.x = Math.sin(elapsed * 0.43) * 0.012 - y * (design.pointerPitch ?? 0.025);
-      motion.position.y = Math.sin(elapsed * 0.8) * 0.012;
-      motion.scale.setScalar(THREE.MathUtils.lerp(motion.scale.x, hovered ? 1.035 : 1, 1 - Math.exp(-7 * dt)));
+      // Host owns spin, float and cursor tilt. Only a restrained hover response
+      // lives here, below the host transform.
+      motion.scale.setScalar(THREE.MathUtils.lerp(motion.scale.x, hovered && !locked ? 1.015 : 1, 1 - Math.exp(-7 * dt)));
     },
     dispose() {
       if (disposed) return;
       disposed = true;
+      modelLease?.release();
       root.removeFromParent();
       root.clear();
       motion.clear();

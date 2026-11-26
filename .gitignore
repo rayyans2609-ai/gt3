@@ -8,3 +8,7 @@ font/
 # Local-only GT3 workspace (see CLAUDE.md "Workspace boundary")
 local/
 .claude/worktrees/
+
+# Owner-supplied manufacturer meshes travel outside public Git.
+/public/badges/
+/models/

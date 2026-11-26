@@ -1,6 +1,6 @@
 # Reproduce Collection badge assets on either Mac
 
-Keep the owner's source folder at **`models/logo models/` in the actual checkout root**. Both `/models/` and `/public/badges/` are ignored by Git. Copy the whole folder, retaining the Porsche `scene.gltf`, `scene.bin` and `license.txt` together. The nine runtime manufacturers are Lexus, GT-R/Nissan, Audi, BMW, Mercedes, Ferrari, Aston Martin, Lamborghini and Porsche. McLaren belongs to a separate workflow.
+Keep the owner's source folder at **`models/logo models/` in the actual checkout root**. Both `/models/` and `/public/badges/` are ignored by Git. Copy the whole folder, retaining the Porsche `scene.gltf`, `scene.bin` and `license.txt` together. The nine runtime manufacturers are Lexus, GT-R/Nissan, Audi, BMW, Mercedes, Ferrari, Aston Martin, Lamborghini and Porsche. McLaren needs no asset: `src/showcase-badges/mclarenSpeedmark.js` builds it at runtime, so it works on both Macs from Git alone.
 
 From a checkout/worktree with dependencies and the licensed local `font/` directory available:
 

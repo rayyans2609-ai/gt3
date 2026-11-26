@@ -13,7 +13,7 @@ Owner-supplied credits, verbatim. Each of these downloaded meshes is supplied un
 
 `AM badge.stl` has **unknown author and unknown licence**. There was no accompanying credit or licence text. Its presence in an owner-supplied download does not establish redistribution permission. No credits have been inferred. Its pack alternative carries Kryox Shade's attribution above.
 
-Audi's standalone `audi-emblem.glb` is **GT3's own procedural export**. McLaren is **GT3's own model**, handled by the separate specialist; this preparation script neither processes nor distributes a McLaren mesh. The unchanged procedural McLaren fallback remains documented in the showcase-badges README.
+Audi's standalone `audi-emblem.glb` is **GT3's own procedural export**. McLaren is **GT3's own model**: `src/showcase-badges/mclarenSpeedmark.js` builds the sculpted Speedmark procedurally at runtime from the outline already used by GT3 (no downloaded mesh, nothing to transfer). The Speedmark is McLaren's trademark; GT3 is private and non-commercial. This preparation script neither processes nor distributes a McLaren mesh.
 
 The mesh licence (CC BY 4.0) permits adaptation subject to its attribution requirements; it does not grant manufacturer trademark rights, imply endorsement, or transfer rights in the depicted logos. GT3 is private and non-commercial. Manufacturer names, emblems and associated trademarks remain the property of their respective owners.
 

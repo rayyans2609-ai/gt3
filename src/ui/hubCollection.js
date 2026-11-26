@@ -99,7 +99,8 @@ function makeEmblem(index) {
 function buildItems() {
   disposeItems();
   items = CARS.map((_, index) => makeEmblem(index));
-  flag = createShowcaseFlag({ color: state.theme === 'night' ? 0xd8b94f : 0x597eb3, theme: state.theme });
+  // Neutral cloth: an accent tint muddies the dark cells (Night gold read olive).
+  flag = createShowcaseFlag({ color: 0x000000, theme: state.theme });
   flagWrap = new THREE.Group();
   flagWrap.add(flag.object);
   scene.add(flagWrap);
@@ -118,7 +119,17 @@ function refreshLocks() {
     const locked = !state.unlocked.has(item.car);
     if (locked === item.locked) continue;
     item.locked = locked;
-    item.badge.setLocked(locked);
+    try {
+      item.badge.setLocked(locked);
+    } catch (error) {
+      // A component that cannot build its emblem (e.g. private crest art not prepared in this
+      // checkout) falls back to the neutral placeholder rather than breaking discovery updates.
+      console.warn('[collection] emblem unavailable, using placeholder', error.message);
+      item.badge.dispose();
+      item.badge = createPlaceholder({ color: carColor(CARS[item.car]), theme: state.theme, locked });
+      item.holder.add(item.badge.object);
+      item.placeholder = true;
+    }
   }
 }
 
@@ -134,7 +145,6 @@ function applyTheme() {
     item.badge.setColor(carColor(CARS[item.car]));
   }
   flag?.setTheme(state.theme);
-  flag?.setColor(state.theme === 'night' ? 0xd8b94f : 0x597eb3);
 }
 
 export function initCollection(sharedRenderer) {

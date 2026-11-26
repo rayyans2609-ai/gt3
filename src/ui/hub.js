@@ -806,7 +806,6 @@ function exitCollection({ instant = false } = {}) {
     tl.fromTo(action.chars, { yPercent: 112 }, { yPercent: 0, duration: quick ? 0 : 0.8, ease: 'gt3.out', stagger: quick ? 0 : 0.03 }, quick ? 0 : 0.62);
   }
   tl.to([actions.start.cap, actions.show.cap, status], { autoAlpha: 1, y: 0, duration: quick ? 0 : 0.5, ease: 'gt3.out' }, quick ? 0 : 0.8);
-  tl.add(() => actions.show.button.focus({ preventScroll: true }), quick ? 0 : 0.9);
   return tl;
 }
 

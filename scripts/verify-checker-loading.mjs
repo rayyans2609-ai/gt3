@@ -32,10 +32,22 @@ async function makePage(context, reduced) {
     const snapshot = (reason) => {
       const root = document.getElementById('start-screen');
       if (!root?.querySelector('.start-cover__loading')) return null;
-      const cells = [...root.querySelectorAll('.start-cover__column.is-filled i')].map(cell => ({
-        animationName: getComputedStyle(cell).animationName,
-        running: cell.getAnimations().some(animation => animation.playState === 'running'),
-      }));
+      const cells = [...root.querySelectorAll('.start-cover__column.is-filled i')].map((cell, index) => {
+        const live = cell.getAnimations().filter(animation => animation.playState === 'running');
+        const value = { animationName: getComputedStyle(cell).animationName, running: live.length > 0 };
+        // Diagnostics only on a running cell (keeps the sample key stable otherwise).
+        if (live.length) {
+          value.index = index;
+          value.column = cell.parentElement.className;
+          value.live = live.map(animation => ({
+            type: animation.constructor.name,
+            name: animation.animationName ?? animation.transitionProperty ?? null,
+            currentTime: animation.currentTime,
+            duration: animation.effect?.getComputedTiming?.().endTime ?? null,
+          }));
+        }
+        return value;
+      });
       const value = {
         at: performance.now(), reason, readiness: root.dataset.readiness || 'none',
         completing: root.classList.contains('is-completing'), leaving: root.classList.contains('is-leaving'),
@@ -93,7 +105,10 @@ async function tourCover(page, reduced) {
   const readinessToLeavingMs = completion.at - observed.readinessAt;
   const completingToLeavingMs = observed.completingAt === null ? null : completion.at - observed.completingAt;
   assert(completion.filled === 40, `is-leaving began with ${completion.filled}/40 columns filled`);
-  assert(!completion.cells.some(cell => cell.running), 'checker animation was still running at is-leaving');
+  const stillRunning = completion.cells.filter(cell => cell.running);
+  assert(!stillRunning.length, `checker animation was still running at is-leaving: ${stillRunning.length} cells; `
+    + `first: ${JSON.stringify(stillRunning.slice(0, 3))}; completing->leaving `
+    + `${observed.completingAt === null ? 'n/a' : Math.round(completion.at - observed.completingAt)} ms`);
   assert(readinessToLeavingMs <= 400, `readiness to is-leaving took ${readinessToLeavingMs}ms (max 400ms)`);
   if (completingToLeavingMs !== null) {
     assert(completingToLeavingMs <= 400, `is-completing to is-leaving took ${completingToLeavingMs}ms (max 400ms)`);
